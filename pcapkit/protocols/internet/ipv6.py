@@ -207,6 +207,14 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             'dst': schema.dst,
         })  # type: Data_IPv6
 
+        # NOTE: Octets captured past the Payload Length are kept as captured,
+        # c.f. :meth:`IPv4.read <pcapkit.protocols.internet.ipv4.IPv4.read>`
+        # (:issue:`1209`).
+        if schema.trailer:
+            ipv6.__update__({
+                'trailer': schema.trailer,
+            })
+
         # update packet info
         if __packet__ is None:
             __packet__ = {}
@@ -229,6 +237,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
              dst: 'IPv6Address | str | bytes | int' = '::',
              payload_length: 'Optional[int]' = None,
              payload: 'bytes | ProtocolBase | Schema' = b'',
+             trailer: 'bytes' = b'',
              **kwargs: 'Any') -> 'Schema_IPv6':
         """Make (construct) packet data.
 
@@ -245,6 +254,8 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             payload_length: Length of the payload, extension headers included;
                 computed from the payload when omitted.
             payload: Payload data.
+            trailer: Octets after the packet, outside the Payload Length, such
+                as link-layer padding; written as is.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -274,6 +285,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             src=src,
             dst=dst,
             payload=payload,
+            trailer=trailer,
         )
 
     @classmethod
@@ -343,6 +355,8 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             # (:issue:`1155`).
             'payload_length': data.payload,
             'payload': payload,
+            # NOTE: And the octets captured past the Payload Length (:issue:`1209`).
+            'trailer': data.get('trailer', b''),
         }
 
     def _read_ip_hextet(self) -> 'tuple[int, int, int]':

@@ -63,9 +63,13 @@ class IPv6(Schema):
     dst: 'IPv6Address' = IPv6AddressField()
     #: Payload.
     payload: 'bytes' = PayloadField(length=lambda pkt: pkt['length'])
+    #: Octets captured past the Payload Length, such as Ethernet minimum-frame
+    #: padding, c.f. :attr:`IPv4.trailer <pcapkit.protocols.schema.internet.ipv4.IPv4.trailer>`.
+    trailer: 'bytes' = PayloadField(default=b'')
 
     if TYPE_CHECKING:
         def __init__(self, hextet: 'IPv6Hextet', length: 'int', next: 'Enum_TransType',
                      limit: 'int', src: 'IPv6Address | bytes | str | int',
                      dst: 'IPv6Address | bytes | str | int',
-                     payload: 'bytes | ProtocolBase | Schema') -> None: ...
+                     payload: 'bytes | ProtocolBase | Schema',
+                     trailer: 'bytes' = b'') -> None: ...

@@ -734,9 +734,15 @@ class IPv4(Schema):
     padding: 'bytes' = PaddingField(length=lambda pkt: pkt.get('__option_padding__', 0))
     #: Payload.
     payload: 'bytes' = PayloadField(length=lambda pkt: pkt['length'] - pkt['vihl']['ihl'] * 4)
+    #: Octets captured past the Total Length, such as Ethernet minimum-frame
+    #: padding. A :class:`~pcapkit.corekit.fields.misc.PayloadField` with no
+    #: length takes whatever the payload leaves on unpack and writes its value
+    #: verbatim on pack, so the octets survive whatever they hold.
+    trailer: 'bytes' = PayloadField(default=b'')
 
     if TYPE_CHECKING:
         def __init__(self, vihl: 'VerIHLField', tos: 'ToSField', length: 'int', id: 'int',
                      flags: 'Flags', ttl: 'int', proto: 'Enum_TransType', chksum: 'bytes',
                      src: 'IPv4Address | str | bytes | int', dst: 'IPv4Address | str | bytes | int',
-                     options: 'list[Option | bytes] | bytes', payload: 'bytes | ProtocolBase | Schema') -> 'None': ...
+                     options: 'list[Option | bytes] | bytes', payload: 'bytes | ProtocolBase | Schema',
+                     trailer: 'bytes' = b'') -> 'None': ...

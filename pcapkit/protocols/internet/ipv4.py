@@ -338,6 +338,15 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                 ('padding', self._data[20 + _used:ipv4.hdr_len]),
             ])
 
+        # NOTE: Octets captured past the Total Length belong to this layer,
+        # since its own length field is what leaves them out of the payload: an
+        # Ethernet carrier hands the whole rest of its frame here, padding
+        # included, and the rebuild keeps them as captured (:issue:`1209`).
+        if schema.trailer:
+            ipv4.__update__([
+                ('trailer', schema.trailer),
+            ])
+
         # update packet info
         if __packet__ is None:
             __packet__ = {}
@@ -395,6 +404,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
              total_length: 'Optional[int]' = None,
              padding: 'Optional[bytes]' = None,
              payload: 'bytes | ProtocolBase | Schema' = b'',
+             trailer: 'bytes' = b'',
              **kwargs: 'Any') -> 'Schema_IPv4':
         """Make (construct) packet data.
 
@@ -439,6 +449,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                 ``options`` is a container that carries an ``EOOL``, c.f.
                 :meth:`_make_ipv4_options`.
             payload: Payload of the packet.
+            trailer: Octets after the packet, outside the Total Length, such as
+                link-layer padding; written as is.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -502,6 +514,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             dst=dst,
             options=options_value,
             payload=payload,
+            trailer=trailer,
         )
 
     @classmethod
@@ -605,6 +618,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             # options and these octets, so edited options recompute it.
             'padding': getattr(data, 'padding', None),
             'payload': cls._make_payload(data),
+            # NOTE: And the octets captured past the Total Length (:issue:`1209`).
+            'trailer': data.get('trailer', b''),
         }
 
     def _read_ipv4_addr(self) -> 'IPv4Address':
