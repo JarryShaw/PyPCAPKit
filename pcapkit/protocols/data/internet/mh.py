@@ -181,6 +181,9 @@ class BindingRefreshRequestMessage(MH):
 class HomeTestInitMessage(MH):
     """Data model for MH Home Test Init (HoTI) message type."""
 
+    #: The two reserved octets of the message body, as captured. Named apart
+    #: from :attr:`MH.reserved`, the reserved octet of the fixed header.
+    msg_reserved: 'bytes'
     #: Home init cookie.
     cookie: 'bytes'
     #: Mobility options.
@@ -188,13 +191,17 @@ class HomeTestInitMessage(MH):
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
-                     cookie: 'bytes', options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
+                     msg_reserved: 'bytes', cookie: 'bytes',
+                     options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
 
 @info_final
 class CareofTestInitMessage(MH):
     """Data model for MH Care-of Test Init (CoTI) message type."""
 
+    #: The two reserved octets of the message body, as captured. Named apart
+    #: from :attr:`MH.reserved`, the reserved octet of the fixed header.
+    msg_reserved: 'bytes'
     #: Care-of init cookie.
     cookie: 'bytes'
     #: Mobility options.
@@ -202,7 +209,8 @@ class CareofTestInitMessage(MH):
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
-                     cookie: 'bytes', options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
+                     msg_reserved: 'bytes', cookie: 'bytes',
+                     options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
 
 @info_final
@@ -332,6 +340,9 @@ class BindingErrorMessage(MH):
 
     #: Status.
     status: 'Enum_BindingError'
+    #: The reserved octet of the message body, as captured. Named apart
+    #: from :attr:`MH.reserved`, the reserved octet of the fixed header.
+    msg_reserved: 'bytes'
     #: Home address.
     home: 'IPv6Address'
     #: Mobility options.
@@ -339,7 +350,7 @@ class BindingErrorMessage(MH):
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
-                     status: 'Enum_BindingError', home: 'IPv6Address',
+                     status: 'Enum_BindingError', msg_reserved: 'bytes', home: 'IPv6Address',
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
 
@@ -406,12 +417,15 @@ class FastBindingAcknowledgmentMessage(MH):
 class FastNeighborAdvertisementMessage(MH):
     """Data model for MH Fast Neighbor Advertisement (FNA) message type."""
 
+    #: The two reserved octets of the message body, as captured. Named apart
+    #: from :attr:`MH.reserved`, the reserved octet of the fixed header.
+    msg_reserved: 'bytes'
     #: Mobility options.
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
-                     options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
+                     msg_reserved: 'bytes', options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
 
 @info_final
@@ -507,6 +521,9 @@ class HeartbeatMessage(MH):
 class HomeAgentSwitchMessage(MH):
     """Data model for MH Home Agent Switch message type."""
 
+    #: The reserved octet of the message body, as captured. Named apart
+    #: from :attr:`MH.reserved`, the reserved octet of the fixed header.
+    msg_reserved: 'bytes'
     #: Alternate home agent addresses. An empty tuple asks the mobile node to
     #: run home agent discovery instead.
     addresses: 'tuple[IPv6Address, ...]'
@@ -515,7 +532,7 @@ class HomeAgentSwitchMessage(MH):
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
-                     addresses: 'tuple[IPv6Address, ...]',
+                     msg_reserved: 'bytes', addresses: 'tuple[IPv6Address, ...]',
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
 
@@ -562,6 +579,9 @@ class LocalizedRoutingInitiationMessage(MH):
 
     #: Sequence number.
     seq: 'int'
+    #: The two reserved octets of the message body, as captured. Named apart
+    #: from :attr:`MH.reserved`, the reserved octet of the fixed header.
+    msg_reserved: 'bytes'
     #: Lifetime. :rfc:`6705#section-10.1` counts this in seconds rather than in
     #: the units of 4 seconds the binding messages use.
     lifetime: 'timedelta'
@@ -570,7 +590,7 @@ class LocalizedRoutingInitiationMessage(MH):
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
-                     seq: 'int', lifetime: 'timedelta',
+                     seq: 'int', msg_reserved: 'bytes', lifetime: 'timedelta',
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
 
@@ -633,13 +653,16 @@ class UpdateNotificationAcknowledgementMessage(MH):
     seq: 'int'
     #: Status.
     status: 'Enum_UpdateNotificationACKStatus'
+    #: The three reserved octets of the message body, as captured. Named apart
+    #: from :attr:`MH.reserved`, the reserved octet of the fixed header.
+    msg_reserved: 'bytes'
     #: Mobility options.
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
                      seq: 'int', status: 'Enum_UpdateNotificationACKStatus',
-                     options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
+                     msg_reserved: 'bytes', options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
 
 @info_final
@@ -680,13 +703,16 @@ class SubscriptionQueryMessage(MH):
 
     #: Sequence number, counted modulo 256.
     seq: 'int'
+    #: The reserved octet of the message body, as captured. Named apart
+    #: from :attr:`MH.reserved`, the reserved octet of the fixed header.
+    msg_reserved: 'bytes'
     #: Mobility options.
     options: 'OrderedMultiDict[Enum_Option, Option]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
                      seq: 'int',
-                     options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
+                     msg_reserved: 'bytes', options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
 
 @info_final
@@ -795,11 +821,13 @@ class AuthorizationDataOption(Option):
 class MobileNetworkPrefixOption(Option):
     """Data model for Mobile Network Prefix option."""
 
+    #: The reserved octet, as captured.
+    reserved: 'bytes'
     #: Mobile Network Prefix.
     prefix: 'IPv6Network'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', prefix: 'IPv6Network') -> 'None': ...
+        def __init__(self, type: 'Enum_Option', length: 'int', reserved: 'bytes', prefix: 'IPv6Network') -> 'None': ...
 
 
 @info_final
@@ -1038,6 +1066,8 @@ class IPv6AddressPrefixOption(Option):
 class HomeNetworkPrefixOption(Option):
     """Data model for MH Home Network Prefix option."""
 
+    #: The reserved octet, as captured.
+    reserved: 'bytes'
     #: Prefix length.
     prefix_length: 'int'
     #: Home network prefix. Kept apart from :attr:`prefix_length` rather than
@@ -1049,7 +1079,7 @@ class HomeNetworkPrefixOption(Option):
     prefix: 'IPv6Address'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', prefix_length: 'int',
+        def __init__(self, type: 'Enum_Option', length: 'int', reserved: 'bytes', prefix_length: 'int',
                      prefix: 'IPv6Address') -> 'None': ...
 
 
@@ -1070,22 +1100,26 @@ class HandoffIndicatorOption(Option):
 class AccessTechnologyTypeOption(Option):
     """Data model for MH Access Technology Type option."""
 
+    #: The reserved octet, as captured.
+    reserved: 'bytes'
     #: Access technology type.
     att: 'Enum_AccessType'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', att: 'Enum_AccessType') -> 'None': ...
+        def __init__(self, type: 'Enum_Option', length: 'int', reserved: 'bytes', att: 'Enum_AccessType') -> 'None': ...
 
 
 @info_final
 class MNLLIdentifierOption(Option):
     """Data model for MH Mobile Node Link-layer Identifier option."""
 
+    #: The two reserved octets, as captured.
+    reserved: 'bytes'
     #: Link-layer identifier.
     lli: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', lli: 'bytes') -> 'None': ...
+        def __init__(self, type: 'Enum_Option', length: 'int', reserved: 'bytes', lli: 'bytes') -> 'None': ...
 
 
 @info_final
@@ -1238,24 +1272,28 @@ class NATDetectionOption(Option):
 class IPv4CareofAddressOption(Option):
     """Data model for MH IPv4 Care-of Address option."""
 
+    #: The two reserved octets, as captured.
+    reserved: 'bytes'
     #: IPv4 care-of address.
     address: 'IPv4Address'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', address: 'IPv4Address') -> 'None': ...
+        def __init__(self, type: 'Enum_Option', length: 'int', reserved: 'bytes', address: 'IPv4Address') -> 'None': ...
 
 
 @info_final
 class GREKeyOption(Option):
     """Data model for MH GRE Key option."""
 
+    #: The two reserved octets, as captured.
+    reserved: 'bytes'
     #: GRE key identifier, or :obj:`None` when the option carries none -- which
     #: :rfc:`5845#section-6.1` signals by an option length of 2 rather than 6.
     key: 'Optional[int]'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int',
-                     key: 'Optional[int]') -> 'None': ...
+                     reserved: 'bytes', key: 'Optional[int]') -> 'None': ...
 
 
 @info_final
@@ -1320,11 +1358,13 @@ class IPv4HomeAddressReplyOption(Option):
 class IPv4DefaultRouterAddressOption(Option):
     """Data model for MH IPv4 Default-Router Address option."""
 
+    #: The two reserved octets, as captured.
+    reserved: 'bytes'
     #: IPv4 default-router address.
     address: 'IPv4Address'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', address: 'IPv4Address') -> 'None': ...
+        def __init__(self, type: 'Enum_Option', length: 'int', reserved: 'bytes', address: 'IPv4Address') -> 'None': ...
 
 
 @info_final
@@ -1361,12 +1401,14 @@ class ContextRequest(Data):
 class ContextRequestOption(Option):
     """Data model for MH Context Request option."""
 
+    #: The two reserved octets, as captured.
+    reserved: 'bytes'
     #: Requested contexts.
     requests: 'tuple[ContextRequest, ...]'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int',
-                     requests: 'tuple[ContextRequest, ...]') -> 'None': ...
+                     reserved: 'bytes', requests: 'tuple[ContextRequest, ...]') -> 'None': ...
 
 
 @info_final
@@ -1377,23 +1419,27 @@ class LMAAddressOption(Option):
     #: by the RFC with no IANA registry behind them, so this field carries the
     #: module-local :class:`~pcapkit.protocols.internet.mh.LMAAddressCode`.
     code: 'LMAAddressCode'
+    #: The reserved octet, as captured.
+    reserved: 'bytes'
     #: Local mobility anchor address.
     address: 'IPv4Address | IPv6Address | bytes'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', code: 'LMAAddressCode',
-                     address: 'IPv4Address | IPv6Address | bytes') -> 'None': ...
+                     reserved: 'bytes', address: 'IPv4Address | IPv6Address | bytes') -> 'None': ...
 
 
 @info_final
 class MNLLAIIDOption(Option):
     """Data model for MH Mobile Node Link-local Address Interface Identifier option."""
 
+    #: The two reserved octets, as captured.
+    reserved: 'bytes'
     #: Interface identifier.
     iid: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', iid: 'bytes') -> 'None': ...
+        def __init__(self, type: 'Enum_Option', length: 'int', reserved: 'bytes', iid: 'bytes') -> 'None': ...
 
 
 @info_final
@@ -1476,37 +1522,43 @@ class TrafficSelectorSuboption(FlowIdentificationSuboption):
 
     #: Traffic selector format.
     ts_format: 'Enum_TrafficSelector'
+    #: The reserved octet, as captured.
+    reserved: 'bytes'
     #: Traffic selector. Its interior is :rfc:`6088` territory and belongs to the
     #: separate traffic selector format registry, so it is kept opaque.
     selector: 'bytes'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_FlowIDSuboption', length: 'int',
-                     ts_format: 'Enum_TrafficSelector', selector: 'bytes') -> 'None': ...
+                     ts_format: 'Enum_TrafficSelector', reserved: 'bytes', selector: 'bytes') -> 'None': ...
 
 
 @info_final
 class FlowBindingActionSuboption(FlowIdentificationSuboption):
     """Data model for MH Flow Identification Flow Binding Action sub-option."""
 
+    #: The reserved octet, as captured.
+    reserved: 'bytes'
     #: Flow binding action.
     action: 'Enum_FlowBindingAction'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_FlowIDSuboption', length: 'int',
-                     action: 'Enum_FlowBindingAction') -> 'None': ...
+                     reserved: 'bytes', action: 'Enum_FlowBindingAction') -> 'None': ...
 
 
 @info_final
 class TargetCareofAddressSuboption(FlowIdentificationSuboption):
     """Data model for MH Flow Identification Target Care-of Address sub-option."""
 
+    #: The two reserved octets, as captured.
+    reserved: 'bytes'
     #: Target care-of address.
     address: 'IPv4Address | IPv6Address | bytes'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_FlowIDSuboption', length: 'int',
-                     address: 'IPv4Address | IPv6Address | bytes') -> 'None': ...
+                     reserved: 'bytes', address: 'IPv4Address | IPv6Address | bytes') -> 'None': ...
 
 
 @info_final
@@ -1517,6 +1569,8 @@ class FlowIdentificationOption(Option):
     fid: 'int'
     #: Flow priority.
     fid_pri: 'int'
+    #: The reserved octet, as captured.
+    reserved: 'bytes'
     #: Status.
     status: 'Enum_FlowIDStatus'
     #: Sub-options.
@@ -1524,7 +1578,7 @@ class FlowIdentificationOption(Option):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', fid: 'int', fid_pri: 'int',
-                     status: 'Enum_FlowIDStatus',
+                     reserved: 'bytes', status: 'Enum_FlowIDStatus',
                      suboptions: 'OrderedMultiDict[Enum_FlowIDSuboption, FlowIdentificationSuboption]') -> 'None': ...
 
 
@@ -1532,8 +1586,11 @@ class FlowIdentificationOption(Option):
 class RedirectCapabilityOption(Option):
     """Data model for MH Redirect-Capability mobility option."""
 
+    #: The two reserved octets, as captured.
+    reserved: 'bytes'
+
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int') -> 'None': ...
+        def __init__(self, type: 'Enum_Option', length: 'int', reserved: 'bytes') -> 'None': ...
 
 
 @info_final
@@ -1590,25 +1647,29 @@ class MNGroupIdentifierOption(Option):
 
     #: Sub-type.
     subtype: 'Enum_MNGroupID'
+    #: The reserved octet, as captured.
+    reserved: 'bytes'
     #: Mobile node group identifier. ``1`` is the default "all sessions" group.
     group_id: 'int'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', subtype: 'Enum_MNGroupID',
-                     group_id: 'int') -> 'None': ...
+                     reserved: 'bytes', group_id: 'int') -> 'None': ...
 
 
 @info_final
 class MAGIPv6AddressOption(Option):
     """Data model for MH MAG IPv6 Address option."""
 
+    #: The reserved octet, as captured.
+    reserved: 'bytes'
     #: Address length, in bits; always 128.
     address_length: 'int'
     #: MAG IPv6 address.
     address: 'IPv6Address'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', address_length: 'int',
+        def __init__(self, type: 'Enum_Option', length: 'int', reserved: 'bytes', address_length: 'int',
                      address: 'IPv6Address') -> 'None': ...
 
 
@@ -1691,12 +1752,14 @@ class ANICivicLocationSuboption(ANISuboption):
     #: Encoding format; only ``0``, the binary encoding of
     #: :rfc:`4776#section-3.1`, is defined.
     format: 'int'
+    #: The reserved octet, as captured.
+    reserved: 'bytes'
     #: Civic location.
     location: 'bytes'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_ANISuboption', length: 'int', format: 'int',
-                     location: 'bytes') -> 'None': ...
+                     reserved: 'bytes', location: 'bytes') -> 'None': ...
 
 
 @info_final
@@ -1847,11 +1910,13 @@ class UnassignedQoSAttribute(QoSAttribute):
 class BitRateAttribute(QoSAttribute):
     """Data model for the MH Quality-of-Service attributes carrying a bare bit rate."""
 
+    #: The two reserved octets, as captured.
+    reserved: 'bytes'
     #: Bit rate, in **bits** per second.
     rate: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_QoSAttribute', length: 'int', rate: 'int') -> 'None': ...
+        def __init__(self, type: 'Enum_QoSAttribute', length: 'int', reserved: 'bytes', rate: 'int') -> 'None': ...
 
 
 @info_final
@@ -1876,6 +1941,8 @@ class PerSessionBitRateAttribute(QoSAttribute):
 class AllocationRetentionPriorityAttribute(QoSAttribute):
     """Data model for the MH Allocation-Retention-Priority attribute."""
 
+    #: The reserved octet, as captured.
+    reserved: 'bytes'
     #: Priority level, 1 through 15, where 1 is the highest.
     priority_level: 'int'
     #: Pre-emption capability; ``0`` enabled, ``1`` disabled.
@@ -1884,7 +1951,7 @@ class AllocationRetentionPriorityAttribute(QoSAttribute):
     preemption_vulnerability: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_QoSAttribute', length: 'int', priority_level: 'int',
+        def __init__(self, type: 'Enum_QoSAttribute', length: 'int', reserved: 'bytes', priority_level: 'int',
                      preemption_capability: 'int',
                      preemption_vulnerability: 'int') -> 'None': ...
 
@@ -1893,6 +1960,8 @@ class AllocationRetentionPriorityAttribute(QoSAttribute):
 class QoSTrafficSelectorAttribute(QoSAttribute):
     """Data model for the MH QoS-Traffic-Selector attribute."""
 
+    #: The reserved octet, as captured.
+    reserved: 'bytes'
     #: Traffic selector format.
     ts_format: 'Enum_TrafficSelector'
     #: Traffic selector, kept opaque as for
@@ -1901,13 +1970,15 @@ class QoSTrafficSelectorAttribute(QoSAttribute):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_QoSAttribute', length: 'int',
-                     ts_format: 'Enum_TrafficSelector', selector: 'bytes') -> 'None': ...
+                     reserved: 'bytes', ts_format: 'Enum_TrafficSelector', selector: 'bytes') -> 'None': ...
 
 
 @info_final
 class QoSVendorSpecificAttribute(QoSAttribute):
     """Data model for the MH QoS-Vendor-Specific attribute."""
 
+    #: The two reserved octets, as captured.
+    reserved: 'bytes'
     #: Vendor ID, an SMI Network Management Private Enterprise Number.
     vendor: 'int'
     #: Vendor-administered sub-type.
@@ -1916,7 +1987,7 @@ class QoSVendorSpecificAttribute(QoSAttribute):
     data: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_QoSAttribute', length: 'int', vendor: 'int',
+        def __init__(self, type: 'Enum_QoSAttribute', length: 'int', reserved: 'bytes', vendor: 'int',
                      subtype: 'int', data: 'bytes') -> 'None': ...
 
 
@@ -1932,19 +2003,23 @@ class QualityOfServiceOption(Option):
     #: Operational code: ``0`` response, ``1`` allocate, ``2`` de-allocate,
     #: ``3`` modify, ``4`` query, ``5`` negotiate.
     oc: 'int'
+    #: The three reserved octets, as captured.
+    reserved: 'bytes'
     #: Quality-of-service attributes.
     attributes: 'OrderedMultiDict[Enum_QoSAttribute, QoSAttribute]'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', sr_id: 'int', dscp: 'int',
                      oc: 'int',
-                     attributes: 'OrderedMultiDict[Enum_QoSAttribute, QoSAttribute]') -> 'None': ...
+                     reserved: 'bytes', attributes: 'OrderedMultiDict[Enum_QoSAttribute, QoSAttribute]') -> 'None': ...
 
 
 @info_final
 class LMAUserPlaneAddressOption(Option):
     """Data model for MH LMA User-Plane Address option."""
 
+    #: The two reserved octets, as captured.
+    reserved: 'bytes'
     #: LMA user-plane address, or :obj:`None` when the option carries none --
     #: which is how a mobile access gateway asks for a transport without naming
     #: an address.
@@ -1952,7 +2027,7 @@ class LMAUserPlaneAddressOption(Option):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int',
-                     address: 'Optional[IPv4Address | IPv6Address]') -> 'None': ...
+                     reserved: 'bytes', address: 'Optional[IPv4Address | IPv6Address]') -> 'None': ...
 
 
 @info_final
@@ -1962,12 +2037,14 @@ class MulticastMobilityOption(Option):
     #: Option code: ``1`` IGMPv3, ``2`` MLDv2, ``3`` IGMPv3 in IGMPv2
     #: compatibility mode, ``4`` MLDv2 in MLDv1 compatibility mode.
     code: 'int'
+    #: The reserved octet, as captured.
+    reserved: 'bytes'
     #: MLD or IGMP report payload, kept opaque.
     data: 'bytes'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', code: 'int',
-                     data: 'bytes') -> 'None': ...
+                     reserved: 'bytes', data: 'bytes') -> 'None': ...
 
 
 @info_final
@@ -2084,18 +2161,22 @@ class MAGIdentifierOption(Option):
 
     #: Sub-type, drawn from the mobile node identifier subtype registry.
     subtype: 'Enum_MNIDSubtype'
+    #: The reserved octet, as captured.
+    reserved: 'bytes'
     #: Identifier, in the form named by :attr:`subtype`.
     identifier: 'bytes'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', subtype: 'Enum_MNIDSubtype',
-                     identifier: 'bytes') -> 'None': ...
+                     reserved: 'bytes', identifier: 'bytes') -> 'None': ...
 
 
 @info_final
 class AnchoredPrefixOption(Option):
     """Data model for MH Anchored Prefix option."""
 
+    #: The reserved octet, as captured.
+    reserved: 'bytes'
     #: Prefix length.
     prefix_length: 'int'
     #: Anchored prefix. Kept apart from :attr:`prefix_length` so that the bits
@@ -2104,7 +2185,7 @@ class AnchoredPrefixOption(Option):
     prefix: 'IPv6Address'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', prefix_length: 'int',
+        def __init__(self, type: 'Enum_Option', length: 'int', reserved: 'bytes', prefix_length: 'int',
                      prefix: 'IPv6Address') -> 'None': ...
 
 
@@ -2112,13 +2193,15 @@ class AnchoredPrefixOption(Option):
 class LocalPrefixOption(Option):
     """Data model for MH Local Prefix option."""
 
+    #: The reserved octet, as captured.
+    reserved: 'bytes'
     #: Prefix length.
     prefix_length: 'int'
     #: Local prefix.
     prefix: 'IPv6Address'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', prefix_length: 'int',
+        def __init__(self, type: 'Enum_Option', length: 'int', reserved: 'bytes', prefix_length: 'int',
                      prefix: 'IPv6Address') -> 'None': ...
 
 
@@ -2126,6 +2209,8 @@ class LocalPrefixOption(Option):
 class PreviousMAAROption(Option):
     """Data model for MH Previous MAAR option."""
 
+    #: The reserved octet, as captured.
+    reserved: 'bytes'
     #: Prefix length of :attr:`prefix`.
     prefix_length: 'int'
     #: Previous MAAR's global address. A full address rather than a prefix, so
@@ -2135,7 +2220,7 @@ class PreviousMAAROption(Option):
     prefix: 'IPv6Address'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', prefix_length: 'int',
+        def __init__(self, type: 'Enum_Option', length: 'int', reserved: 'bytes', prefix_length: 'int',
                      maar: 'IPv6Address', prefix: 'IPv6Address') -> 'None': ...
 
 
@@ -2165,11 +2250,13 @@ class DLIFLinkLocalAddressOption(Option):
 class DLIFLinkLayerAddressOption(Option):
     """Data model for MH DLIF Link-Layer Address option."""
 
+    #: The two reserved octets, as captured.
+    reserved: 'bytes'
     #: Distributed logical interface's link-layer address.
     lla: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', lla: 'bytes') -> 'None': ...
+        def __init__(self, type: 'Enum_Option', length: 'int', reserved: 'bytes', lla: 'bytes') -> 'None': ...
 
 
 # TODO: Implement other options.

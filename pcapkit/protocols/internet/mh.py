@@ -1752,6 +1752,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=header.type,
             reserved=header.reserved,
             chksum=header.chksum,
+            msg_reserved=schema.reserved,
             cookie=schema.cookie,
             options=self._read_mh_options(schema.options)
         )
@@ -1793,6 +1794,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=header.type,
             reserved=header.reserved,
             chksum=header.chksum,
+            msg_reserved=schema.reserved,
             cookie=schema.cookie,
             options=self._read_mh_options(schema.options)
         )
@@ -2042,6 +2044,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             reserved=header.reserved,
             chksum=header.chksum,
             status=schema.status,
+            msg_reserved=schema.reserved,
             home=schema.home,
             options=self._read_mh_options(schema.options),
         )
@@ -2195,6 +2198,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=header.type,
             reserved=header.reserved,
             chksum=header.chksum,
+            msg_reserved=schema.reserved,
             options=self._read_mh_options(schema.options),
         )
         return data
@@ -2397,6 +2401,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=header.type,
             reserved=header.reserved,
             chksum=header.chksum,
+            msg_reserved=schema.reserved,
             addresses=tuple(schema.addresses),
             options=self._read_mh_options(schema.options),
         )
@@ -2563,6 +2568,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             reserved=header.reserved,
             chksum=header.chksum,
             seq=schema.seq,
+            msg_reserved=schema.reserved,
             lifetime=datetime.timedelta(seconds=schema.lifetime),
             options=self._read_mh_options(schema.options),
         )
@@ -2702,6 +2708,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             chksum=header.chksum,
             seq=schema.seq,
             status=schema.status,
+            msg_reserved=schema.reserved,
             options=self._read_mh_options(schema.options),
         )
         return data
@@ -2810,6 +2817,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             reserved=header.reserved,
             chksum=header.chksum,
             seq=schema.seq,
+            msg_reserved=schema.reserved,
             options=self._read_mh_options(schema.options),
         )
         return data
@@ -3208,6 +3216,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         data = Data_MobileNetworkPrefixOption(
             type=schema.type,
             length=self._mh_option_length(schema.length),
+            reserved=schema.reserved,
             prefix=prefix,
         )
         return data
@@ -3877,6 +3886,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         data = Data_HomeNetworkPrefixOption(
             type=schema.type,
             length=self._mh_option_length(schema.length),
+            reserved=schema.reserved,
             prefix_length=schema.prefix_length,
             prefix=schema.prefix,
         )
@@ -3949,6 +3959,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         data = Data_AccessTechnologyTypeOption(
             type=schema.type,
             length=self._mh_option_length(schema.length),
+            reserved=schema.reserved,
             att=schema.att,
         )
         return data
@@ -3994,6 +4005,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         data = Data_MNLLIdentifierOption(
             type=schema.type,
             length=self._mh_option_length(schema.length),
+            reserved=schema.reserved,
             lli=schema.lli,
         )
         return data
@@ -4304,6 +4316,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         data = Data_IPv4CareofAddressOption(
             type=schema.type,
             length=self._mh_option_length(schema.length),
+            reserved=schema.reserved,
             address=schema.address,
         )
         return data
@@ -4344,6 +4357,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         data = Data_GREKeyOption(
             type=schema.type,
             length=self._mh_option_length(schema.length),
+            reserved=schema.reserved,
             key=schema.key if schema.length == 6 else None,
         )
         return data
@@ -4518,6 +4532,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         data = Data_IPv4DefaultRouterAddressOption(
             type=schema.type,
             length=self._mh_option_length(schema.length),
+            reserved=schema.reserved,
             address=schema.address,
         )
         return data
@@ -4620,6 +4635,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         data = Data_ContextRequestOption(
             type=schema.type,
             length=self._mh_option_length(schema.length),
+            reserved=schema.reserved,
             requests=tuple(requests),
         )
         return data
@@ -4661,6 +4677,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=schema.type,
             length=self._mh_option_length(schema.length),
             code=LMAAddressCode(schema.code),
+            reserved=schema.reserved,
             address=schema.address,
         )
         return data
@@ -4698,6 +4715,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         data = Data_MNLLAIIDOption(
             type=schema.type,
             length=self._mh_option_length(schema.length),
+            reserved=schema.reserved,
             iid=schema.iid,
         )
         return data
@@ -4868,6 +4886,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                     type=code,
                     length=self._mh_option_length(selector.length),
                     ts_format=selector.ts_format,
+                    reserved=selector.reserved,
                     selector=selector.selector,
                 )
             elif code == Enum_FlowIDSuboption.Flow_Binding_Action:
@@ -4875,6 +4894,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 data = Data_FlowBindingActionSuboption(
                     type=code,
                     length=self._mh_option_length(action.length),
+                    reserved=action.reserved,
                     action=action.action,
                 )
             elif code == Enum_FlowIDSuboption.Target_Care_of_Address:
@@ -4882,6 +4902,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 data = Data_TargetCareofAddressSuboption(
                     type=code,
                     length=self._mh_option_length(target.length),
+                    reserved=target.reserved,
                     address=target.address,
                 )
             else:
@@ -4937,6 +4958,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             length=self._mh_option_length(schema.length),
             fid=schema.fid,
             fid_pri=schema.fid_pri,
+            reserved=schema.reserved,
             status=schema.status,
             suboptions=self._read_fid_suboptions(schema.suboptions),
         )
@@ -4971,6 +4993,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         data = Data_RedirectCapabilityOption(
             type=schema.type,
             length=self._mh_option_length(schema.length),
+            reserved=schema.reserved,
         )
         return data
 
@@ -5142,6 +5165,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=schema.type,
             length=self._mh_option_length(schema.length),
             subtype=schema.subtype,
+            reserved=schema.reserved,
             group_id=schema.group_id,
         )
         return data
@@ -5187,6 +5211,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         data = Data_MAGIPv6AddressOption(
             type=schema.type,
             length=self._mh_option_length(schema.length),
+            reserved=schema.reserved,
             address_length=schema.address_length,
             address=schema.address,
         )
@@ -5268,6 +5293,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                     type=code,
                     length=self._mh_option_length(civic.length),
                     format=civic.format,
+                    reserved=civic.reserved,
                     location=civic.location,
                 )
             elif code == Enum_ANISuboption.MAG_Group_Identifier:
@@ -5663,6 +5689,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 data = Data_BitRateAttribute(
                     type=code,
                     length=self._mh_option_length(rate.length),
+                    reserved=rate.reserved,
                     rate=rate.rate,
                 )
             elif code == Enum_QoSAttribute.Allocation_Retention_Priority:
@@ -5670,6 +5697,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 data = Data_AllocationRetentionPriorityAttribute(
                     type=code,
                     length=self._mh_option_length(arp.length),
+                    reserved=arp.reserved,
                     priority_level=arp.priority['PL'],
                     preemption_capability=arp.priority['PC'],
                     preemption_vulnerability=arp.priority['PV'],
@@ -5679,6 +5707,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 data = Data_QoSTrafficSelectorAttribute(
                     type=code,
                     length=self._mh_option_length(selector.length),
+                    reserved=selector.reserved,
                     ts_format=selector.ts_format,
                     selector=selector.selector,
                 )
@@ -5687,6 +5716,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 data = Data_QoSVendorSpecificAttribute(
                     type=code,
                     length=self._mh_option_length(vendor.length),
+                    reserved=vendor.reserved,
                     vendor=vendor.vendor,
                     subtype=vendor.subtype,
                     data=vendor.data,
@@ -5743,6 +5773,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             sr_id=schema.sr_id,
             dscp=schema.tc >> 2,
             oc=schema.oc,
+            reserved=schema.reserved,
             attributes=self._read_qos_attributes(schema.attributes),
         )
         return data
@@ -5790,6 +5821,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         data = Data_LMAUserPlaneAddressOption(
             type=schema.type,
             length=self._mh_option_length(schema.length),
+            reserved=schema.reserved,
             address=cast('Optional[IPv4Address | IPv6Address]',
                          schema.address if schema.length != 2 else None),
         )
@@ -5838,6 +5870,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=schema.type,
             length=schema.length * 4 + 4,
             code=schema.code,
+            reserved=schema.reserved,
             data=schema.data,
         )
         return data
@@ -6079,6 +6112,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=schema.type,
             length=self._mh_option_length(schema.length),
             subtype=schema.subtype,
+            reserved=schema.reserved,
             identifier=schema.identifier,
         )
         return data
@@ -6121,6 +6155,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         data = Data_AnchoredPrefixOption(
             type=schema.type,
             length=self._mh_option_length(schema.length),
+            reserved=schema.reserved,
             prefix_length=schema.prefix_length,
             prefix=schema.prefix,
         )
@@ -6164,6 +6199,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         data = Data_LocalPrefixOption(
             type=schema.type,
             length=self._mh_option_length(schema.length),
+            reserved=schema.reserved,
             prefix_length=schema.prefix_length,
             prefix=schema.prefix,
         )
@@ -6220,6 +6256,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         data = Data_PreviousMAAROption(
             type=schema.type,
             length=self._mh_option_length(schema.length),
+            reserved=schema.reserved,
             prefix_length=schema.prefix_length,
             maar=schema.maar,
             prefix=schema.prefix,
@@ -6350,6 +6387,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         data = Data_DLIFLinkLayerAddressOption(
             type=schema.type,
             length=self._mh_option_length(schema.length),
+            reserved=schema.reserved,
             lla=schema.lla,
         )
         return data
@@ -6593,6 +6631,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
     def _make_msg_hoti(self, message: 'Optional[Data_HomeTestInitMessage]' = None, *,
                        cookie: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00',
                        options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                       msg_reserved: 'bytes' = b'\x00\x00',
                        **kwargs: 'Any') -> 'Schema_HomeTestInitMessage':
         """Make MH home test init (HoTI) message type.
 
@@ -6600,6 +6639,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             message: Message data model.
             cookie: Home test cookie.
             options: Mobility options.
+            msg_reserved: The two reserved octets of the message body as captured,
+                truncated or zero-filled to 2 octets.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -6607,12 +6648,14 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if message is not None:
+            msg_reserved = getattr(message, 'msg_reserved', b'\x00\x00')
             cookie = message.cookie
             options = message.options
         else:
             options = options or []
 
         return Schema_HomeTestInitMessage(
+            reserved=msg_reserved,
             cookie=cookie,
             options=self._make_mh_options(options),
         )
@@ -6620,6 +6663,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
     def _make_msg_coti(self, message: 'Optional[Data_CareofTestInitMessage]' = None, *,
                        cookie: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00',
                        options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                       msg_reserved: 'bytes' = b'\x00\x00',
                        **kwargs: 'Any') -> 'Schema_CareofTestInitMessage':
         """Make MH care-of test init (CoTI) message type.
 
@@ -6627,6 +6671,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             message: Message data model.
             cookie: Care-of test cookie.
             options: Mobility options.
+            msg_reserved: The two reserved octets of the message body as captured,
+                truncated or zero-filled to 2 octets.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -6634,12 +6680,14 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if message is not None:
+            msg_reserved = getattr(message, 'msg_reserved', b'\x00\x00')
             cookie = message.cookie
             options = message.options
         else:
             options = options or []
 
         return Schema_CareofTestInitMessage(
+            reserved=msg_reserved,
             cookie=cookie,
             options=self._make_mh_options(options),
         )
@@ -6887,6 +6935,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                      status_reversed: 'bool' = False,
                      home: 'IPv6Address | int | str | bytes' = '::',
                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                     msg_reserved: 'bytes' = b'\x00',
                      **kwargs: 'Any') -> 'Schema_BindingErrorMessage':
         """Make MH binding error (BE) message type.
 
@@ -6898,6 +6947,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             status_reversed: Reverse status code namespace.
             home: Home address.
             options: Mobility options.
+            msg_reserved: The reserved octet of the message body as captured,
+                truncated or zero-filled to 1 octet.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -6905,6 +6956,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if message is not None:
+            msg_reserved = getattr(message, 'msg_reserved', b'\x00')
             status_val = message.status
             home = message.home
             options = message.options
@@ -6915,6 +6967,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_BindingErrorMessage(
             status=status_val,
+            reserved=msg_reserved,
             home=home,
             options=self._make_mh_options(options),
         )
@@ -7036,12 +7089,15 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
     def _make_msg_fna(self, message: 'Optional[Data_FastNeighborAdvertisementMessage]' = None, *,
                       options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                      msg_reserved: 'bytes' = b'\x00\x00',
                       **kwargs: 'Any') -> 'Schema_FastNeighborAdvertisementMessage':
         """Make MH fast neighbor advertisement (FNA) message type.
 
         Args:
             message: Message data model.
             options: Mobility options.
+            msg_reserved: The two reserved octets of the message body as captured,
+                truncated or zero-filled to 2 octets.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -7049,11 +7105,13 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if message is not None:
+            msg_reserved = getattr(message, 'msg_reserved', b'\x00\x00')
             options = message.options
         else:
             options = options or []
 
         return Schema_FastNeighborAdvertisementMessage(
+            reserved=msg_reserved,
             options=self._make_mh_options(options),
         )
 
@@ -7199,6 +7257,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
     def _make_msg_has(self, message: 'Optional[Data_HomeAgentSwitchMessage]' = None, *,
                       addresses: 'Optional[list[IPv6Address | bytes | str | int]]' = None,
                       options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                      msg_reserved: 'bytes' = b'\x00',
                       **kwargs: 'Any') -> 'Schema_HomeAgentSwitchMessage':
         """Make MH home agent switch (HAS) message type.
 
@@ -7207,6 +7266,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             addresses: Alternate home agent addresses. An empty list is valid and
                 asks the mobile node to run home agent discovery.
             options: Mobility options.
+            msg_reserved: The reserved octet of the message body as captured,
+                truncated or zero-filled to 1 octet.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -7214,6 +7275,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if message is not None:
+            msg_reserved = getattr(message, 'msg_reserved', b'\x00')
             addresses = cast('list[IPv6Address | bytes | str | int]', list(message.addresses))
             options = message.options
         else:
@@ -7222,6 +7284,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_HomeAgentSwitchMessage(
             count=len(addresses),
+            reserved=msg_reserved,
             addresses=addresses,
             options=self._make_mh_options(options),
         )
@@ -7342,6 +7405,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                       seq: 'int' = 0,
                       lifetime: 'int | timedelta' = 0,
                       options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                      msg_reserved: 'bytes' = b'\x00\x00',
                       **kwargs: 'Any') -> 'Schema_LocalizedRoutingInitiationMessage':
         """Make MH localized routing initiation (LRI) message type.
 
@@ -7353,6 +7417,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 one counts seconds rather than units of 4 seconds, so the value is
                 not scaled.
             options: Mobility options.
+            msg_reserved: The two reserved octets of the message body as captured,
+                truncated or zero-filled to 2 octets.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -7360,6 +7426,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if message is not None:
+            msg_reserved = getattr(message, 'msg_reserved', b'\x00\x00')
             seq = message.seq
             lifetime_val = math.ceil(message.lifetime.total_seconds())
             options = message.options
@@ -7369,6 +7436,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_LocalizedRoutingInitiationMessage(
             seq=seq,
+            reserved=msg_reserved,
             lifetime=lifetime_val,
             options=self._make_mh_options(options),
         )
@@ -7489,6 +7557,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                       status_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
                       status_reversed: 'bool' = False,
                       options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                      msg_reserved: 'bytes' = b'\x00\x00\x00',
                       **kwargs: 'Any') -> 'Schema_UpdateNotificationAcknowledgementMessage':
         """Make MH update notification acknowledgement (UPA) message type.
 
@@ -7500,6 +7569,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             status_namespace: Status namespace.
             status_reversed: Reverse status namespace.
             options: Mobility options.
+            msg_reserved: The three reserved octets of the message body as captured,
+                truncated or zero-filled to 3 octets.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -7507,6 +7578,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if message is not None:
+            msg_reserved = getattr(message, 'msg_reserved', b'\x00\x00\x00')
             seq = message.seq
             status_val = message.status  # type: Enum_UpdateNotificationACKStatus
             options = message.options
@@ -7518,6 +7590,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_UpdateNotificationAcknowledgementMessage(
             seq=seq,
             status=status_val,
+            reserved=msg_reserved,
             options=self._make_mh_options(options),
         )
 
@@ -7587,6 +7660,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
     def _make_msg_sq(self, message: 'Optional[Data_SubscriptionQueryMessage]' = None, *,
                      seq: 'int' = 0,
                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                     msg_reserved: 'bytes' = b'\x00',
                      **kwargs: 'Any') -> 'Schema_SubscriptionQueryMessage':
         """Make MH subscription query (SQ) message type.
 
@@ -7594,6 +7668,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             message: Message data model.
             seq: Sequence number, counted modulo 256.
             options: Mobility options.
+            msg_reserved: The reserved octet of the message body as captured,
+                truncated or zero-filled to 1 octet.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -7601,6 +7677,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if message is not None:
+            msg_reserved = getattr(message, 'msg_reserved', b'\x00')
             seq = message.seq
             options = message.options
         else:
@@ -7608,6 +7685,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         return Schema_SubscriptionQueryMessage(
             seq=seq,
+            reserved=msg_reserved,
             options=self._make_mh_options(options),
         )
 
@@ -7979,6 +8057,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
     def _make_opt_mnp(self, type: 'Enum_Option', option: 'Optional[Data_MobileNetworkPrefixOption]' = None, *,
                       prefix: 'bytes | str | IPv6Network' = '::/0',
+                      reserved: 'bytes' = b'\x00',
                       **kwargs: 'Any') -> 'Schema_MobileNetworkPrefixOption':
         """Make MH mobile network prefix option.
 
@@ -7986,6 +8065,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type: Option type.
             option: Option data model.
             prefix: Mobile network prefix.
+            reserved: The reserved octet as captured, truncated or zero-filled to 1
+                octet.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -7993,6 +8074,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if option is not None:
+            reserved = getattr(option, 'reserved', b'\x00')
             prefix = option.prefix
 
         prefix_val = ipaddress.ip_network(prefix)
@@ -8004,6 +8086,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_MobileNetworkPrefixOption(
             type=type,
             length=18,
+            reserved=reserved,
             prefix_length=prefix_length,
             prefix=prefix_addr,
         )
@@ -8719,6 +8802,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
     def _make_opt_hnp(self, type: 'Enum_Option', option: 'Optional[Data_HomeNetworkPrefixOption]' = None, *,
                       prefix_length: 'int' = 64,
                       prefix: 'bytes | str | int | IPv6Address' = '::',
+                      reserved: 'bytes' = b'\x00',
                       **kwargs: 'Any') -> 'Schema_HomeNetworkPrefixOption':
         """Make MH home network prefix option.
 
@@ -8727,6 +8811,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             option: Option data model.
             prefix_length: Prefix length.
             prefix: Home network prefix.
+            reserved: The reserved octet as captured, truncated or zero-filled to 1
+                octet.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -8734,6 +8820,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if option is not None:
+            reserved = getattr(option, 'reserved', b'\x00')
             prefix_length = option.prefix_length
             prefix = option.prefix
 
@@ -8743,6 +8830,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_HomeNetworkPrefixOption(
             type=type,
             length=18,
+            reserved=reserved,
             prefix_length=prefix_length,
             prefix=prefix,
         )
@@ -8789,6 +8877,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                       att_default: 'Optional[int]' = None,
                       att_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
                       att_reversed: 'bool' = False,
+                      reserved: 'bytes' = b'\x00',
                       **kwargs: 'Any') -> 'Schema_AccessTechnologyTypeOption':
         """Make MH access technology type option.
 
@@ -8799,6 +8888,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             att_default: Default access technology type.
             att_namespace: Access technology type namespace.
             att_reversed: Reverse access technology type namespace.
+            reserved: The reserved octet as captured, truncated or zero-filled to 1
+                octet.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -8806,6 +8897,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if option is not None:
+            reserved = getattr(option, 'reserved', b'\x00')
             att_val = option.att  # type: Enum_AccessType
         else:
             att_val = self._make_index(att, att_default, namespace=att_namespace,  # type: ignore[assignment]
@@ -8814,11 +8906,13 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_AccessTechnologyTypeOption(
             type=type,
             length=2,
+            reserved=reserved,
             att=att_val,
         )
 
     def _make_opt_mn_lli(self, type: 'Enum_Option', option: 'Optional[Data_MNLLIdentifierOption]' = None, *,
                          lli: 'bytes' = b'',
+                         reserved: 'bytes' = b'\x00\x00',
                          **kwargs: 'Any') -> 'Schema_MNLLIdentifierOption':
         """Make MH mobile node link-layer identifier option.
 
@@ -8826,6 +8920,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type: Option type.
             option: Option data model.
             lli: Link-layer identifier.
+            reserved: The two reserved octets as captured, truncated or zero-filled
+                to 2 octets.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -8833,11 +8929,13 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if option is not None:
+            reserved = getattr(option, 'reserved', b'\x00\x00')
             lli = option.lli
 
         return Schema_MNLLIdentifierOption(
             type=type,
             length=2 + len(lli),
+            reserved=reserved,
             lli=lli,
         )
 
@@ -9056,6 +9154,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
     def _make_opt_ipv4_coa(self, type: 'Enum_Option', option: 'Optional[Data_IPv4CareofAddressOption]' = None, *,
                            address: 'bytes | str | int | IPv4Address' = '0.0.0.0',
+                           reserved: 'bytes' = b'\x00\x00',
                            **kwargs: 'Any') -> 'Schema_IPv4CareofAddressOption':
         """Make MH IPv4 care-of address option.
 
@@ -9063,6 +9162,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type: Option type.
             option: Option data model.
             address: IPv4 care-of address.
+            reserved: The two reserved octets as captured, truncated or zero-filled
+                to 2 octets.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -9070,16 +9171,19 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if option is not None:
+            reserved = getattr(option, 'reserved', b'\x00\x00')
             address = option.address
 
         return Schema_IPv4CareofAddressOption(
             type=type,
             length=6,
+            reserved=reserved,
             address=address,
         )
 
     def _make_opt_gre(self, type: 'Enum_Option', option: 'Optional[Data_GREKeyOption]' = None, *,
                       key: 'Optional[int]' = None,
+                      reserved: 'bytes' = b'\x00\x00',
                       **kwargs: 'Any') -> 'Schema_GREKeyOption':
         """Make MH GRE key option.
 
@@ -9088,6 +9192,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             option: Option data model.
             key: GRE key identifier, or :obj:`None` to omit it -- which is what an
                 option length of 2 means on the wire.
+            reserved: The two reserved octets as captured, truncated or zero-filled
+                to 2 octets.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -9095,11 +9201,13 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if option is not None:
+            reserved = getattr(option, 'reserved', b'\x00\x00')
             key = option.key
 
         return Schema_GREKeyOption(
             type=type,
             length=2 if key is None else 6,
+            reserved=reserved,
             key=key,
         )
 
@@ -9263,6 +9371,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
     def _make_opt_ipv4_router(self, type: 'Enum_Option',
                                                          option: 'Optional[Data_IPv4DefaultRouterAddressOption]' = None, *,
                               address: 'bytes | str | int | IPv4Address' = '0.0.0.0',
+                              reserved: 'bytes' = b'\x00\x00',
                               **kwargs: 'Any') -> 'Schema_IPv4DefaultRouterAddressOption':
         """Make MH IPv4 default-router address option.
 
@@ -9270,6 +9379,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type: Option type.
             option: Option data model.
             address: IPv4 default-router address.
+            reserved: The two reserved octets as captured, truncated or zero-filled
+                to 2 octets.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -9277,11 +9388,13 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if option is not None:
+            reserved = getattr(option, 'reserved', b'\x00\x00')
             address = option.address
 
         return Schema_IPv4DefaultRouterAddressOption(
             type=type,
             length=6,
+            reserved=reserved,
             address=address,
         )
 
@@ -9326,6 +9439,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
     def _make_opt_cr(self, type: 'Enum_Option', option: 'Optional[Data_ContextRequestOption]' = None, *,
                      requests: 'Optional[list[Data_ContextRequest | tuple[Enum_Option | int, bytes]]]' = None,
+                     reserved: 'bytes' = b'\x00\x00',
                      **kwargs: 'Any') -> 'Schema_ContextRequestOption':
         """Make MH context request option.
 
@@ -9334,6 +9448,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             option: Option data model.
             requests: Requested contexts, each either a data model or a
                 ``(mobility option type, extra data)`` pair.
+            reserved: The two reserved octets as captured, truncated or zero-filled
+                to 2 octets.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -9341,6 +9457,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if option is not None:
+            reserved = getattr(option, 'reserved', b'\x00\x00')
             requests = cast('list[Data_ContextRequest | tuple[Enum_Option | int, bytes]]',
                             list(option.requests))
         else:
@@ -9365,6 +9482,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_ContextRequestOption(
             type=type,
             length=2 + len(buffer),
+            reserved=reserved,
             requests=bytes(buffer),
         )
 
@@ -9374,6 +9492,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                        code_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
                        code_reversed: 'bool' = False,
                        address: 'bytes | str | int | IPv4Address | IPv6Address' = '::',
+                       reserved: 'bytes' = b'\x00',
                        **kwargs: 'Any') -> 'Schema_LMAAddressOption':
         """Make MH local mobility anchor address option.
 
@@ -9386,6 +9505,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             code_namespace: Option code namespace.
             code_reversed: Reverse option code namespace.
             address: Local mobility anchor address.
+            reserved: The reserved octet as captured, truncated or zero-filled to 1
+                octet.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -9397,6 +9518,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if option is not None:
+            reserved = getattr(option, 'reserved', b'\x00')
             code_val = int(option.code)
             address = option.address
         else:
@@ -9421,11 +9543,13 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=type,
             length=6 if addr.version == 4 else 18,
             code=code_val,
+            reserved=reserved,
             address=addr,
         )
 
     def _make_opt_mn_lla_iid(self, type: 'Enum_Option', option: 'Optional[Data_MNLLAIIDOption]' = None, *,
                              iid: 'bytes' = b'\x00' * 8,
+                             reserved: 'bytes' = b'\x00\x00',
                              **kwargs: 'Any') -> 'Schema_MNLLAIIDOption':
         """Make MH mobile node link-local address interface identifier option.
 
@@ -9433,6 +9557,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type: Option type.
             option: Option data model.
             iid: Interface identifier; exactly 8 octets.
+            reserved: The two reserved octets as captured, truncated or zero-filled
+                to 2 octets.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -9440,6 +9566,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if option is not None:
+            reserved = getattr(option, 'reserved', b'\x00\x00')
             iid = option.iid
 
         if len(iid) != 8:
@@ -9448,6 +9575,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_MNLLAIIDOption(
             type=type,
             length=10,
+            reserved=reserved,
             iid=iid,
         )
 
@@ -9594,30 +9722,38 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 selector_opt = cast('Data_TrafficSelectorSuboption', option)
                 ts_format = selector_opt.ts_format  # type: Enum_TrafficSelector | int
                 selector = selector_opt.selector
+                reserved = getattr(selector_opt, 'reserved', b'\x00')
             else:
                 ts_format = cast('Enum_TrafficSelector | int',
                                  kwargs.get('ts_format',
                                             Enum_TrafficSelector.IPv6_Binary_Traffic_Selector))
                 selector = cast('bytes', kwargs.get('selector', b''))
+                reserved = cast('bytes', kwargs.get('reserved', b'\x00'))
             return Schema_TrafficSelectorSuboption(
                 type=code, length=2 + len(selector),
-                ts_format=cast('Enum_TrafficSelector', ts_format), selector=selector)
+                ts_format=cast('Enum_TrafficSelector', ts_format), reserved=reserved,
+                selector=selector)
 
         if code == Enum_FlowIDSuboption.Flow_Binding_Action:
             if option is not None:
                 action = cast('Data_FlowBindingActionSuboption',
                               option).action  # type: Enum_FlowBindingAction | int
+                reserved = getattr(option, 'reserved', b'\x00')
             else:
                 action = cast('Enum_FlowBindingAction | int',
                               kwargs.get('action', Enum_FlowBindingAction.Add))
+                reserved = cast('bytes', kwargs.get('reserved', b'\x00'))
             return Schema_FlowBindingActionSuboption(
-                type=code, length=2, action=cast('Enum_FlowBindingAction', action))
+                type=code, length=2, reserved=reserved,
+                action=cast('Enum_FlowBindingAction', action))
 
         if code == Enum_FlowIDSuboption.Target_Care_of_Address:
             if option is not None:
                 address = cast('Data_TargetCareofAddressSuboption', option).address  # type: Any
+                reserved = getattr(option, 'reserved', b'\x00\x00')
             else:
                 address = kwargs.get('address', '::')
+                reserved = cast('bytes', kwargs.get('reserved', b'\x00\x00'))
             # NOTE: Through ``parse_ip_address`` because the sub-option length
             # below is derived from the family here, ahead of the schema, so a
             # bare ``ipaddress.ip_address`` would launder a ``bool`` past the
@@ -9625,7 +9761,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             addr = parse_ip_address(
                 address, f'{self.alias}: [OptNo {code}] invalid target care-of address')
             return Schema_TargetCareofAddressSuboption(
-                type=code, length=6 if addr.version == 4 else 18, address=addr)
+                type=code, length=6 if addr.version == 4 else 18, reserved=reserved,
+                address=addr)
 
         if option is not None:
             payload = cast('Data_UnassignedFlowIdentificationSuboption', option).data
@@ -9642,6 +9779,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                       status_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
                       status_reversed: 'bool' = False,
                       suboptions: 'Optional[FlowIDSuboption | list[Schema_FlowIdentificationSuboption | tuple[Enum_FlowIDSuboption, dict[str, Any]] | bytes]]' = None,
+                      reserved: 'bytes' = b'\x00',
                       **kwargs: 'Any') -> 'Schema_FlowIdentificationOption':
         """Make MH flow identification mobility option.
 
@@ -9655,6 +9793,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             status_namespace: Status namespace.
             status_reversed: Reverse status namespace.
             suboptions: Sub-options.
+            reserved: The reserved octet as captured, truncated or zero-filled to 1
+                octet.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -9662,6 +9802,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if option is not None:
+            reserved = getattr(option, 'reserved', b'\x00')
             fid = option.fid
             fid_pri = option.fid_pri
             status_val = option.status  # type: Enum_FlowIDStatus
@@ -9680,26 +9821,34 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             length=length,
             fid=fid,
             fid_pri=fid_pri,
+            reserved=reserved,
             status=status_val,
             suboptions=entries,
         )
 
-    def _make_opt_rc(self, type: 'Enum_Option', option: 'Optional[Data_RedirectCapabilityOption]' = None,
+    def _make_opt_rc(self, type: 'Enum_Option', option: 'Optional[Data_RedirectCapabilityOption]' = None, *,
+                     reserved: 'bytes' = b'\x00\x00',
                      **kwargs: 'Any') -> 'Schema_RedirectCapabilityOption':
         """Make MH redirect-capability mobility option.
 
         Args:
             type: Option type.
             option: Option data model.
+            reserved: The two reserved octets as captured, truncated or zero-filled
+                to 2 octets.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed option schema.
 
         """
+        if option is not None:
+            reserved = getattr(option, 'reserved', b'\x00\x00')
+
         return Schema_RedirectCapabilityOption(
             type=type,
             length=2,
+            reserved=reserved,
         )
 
     def _make_opt_redirect(self, type: 'Enum_Option', option: 'Optional[Data_RedirectOption]' = None, *,
@@ -9817,6 +9966,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                            subtype_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
                            subtype_reversed: 'bool' = False,
                            group_id: 'int' = 1,
+                           reserved: 'bytes' = b'\x00',
                            **kwargs: 'Any') -> 'Schema_MNGroupIdentifierOption':
         """Make MH mobile node group identifier option.
 
@@ -9828,6 +9978,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             subtype_namespace: Sub-type namespace.
             subtype_reversed: Reverse sub-type namespace.
             group_id: Mobile node group identifier.
+            reserved: The reserved octet as captured, truncated or zero-filled to 1
+                octet.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -9835,6 +9987,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if option is not None:
+            reserved = getattr(option, 'reserved', b'\x00')
             subtype_val = option.subtype  # type: Enum_MNGroupID
             group_id = option.group_id
         else:
@@ -9845,12 +9998,14 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=type,
             length=6,
             subtype=subtype_val,
+            reserved=reserved,
             group_id=group_id,
         )
 
     def _make_opt_mag_addr(self, type: 'Enum_Option', option: 'Optional[Data_MAGIPv6AddressOption]' = None, *,
                            address_length: 'int' = 128,
                            address: 'bytes | str | int | IPv6Address' = '::',
+                           reserved: 'bytes' = b'\x00',
                            **kwargs: 'Any') -> 'Schema_MAGIPv6AddressOption':
         """Make MH MAG IPv6 address option.
 
@@ -9860,6 +10015,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             address_length: Address length, in bits; :rfc:`6705#section-11.1`
                 requires 128.
             address: MAG IPv6 address.
+            reserved: The reserved octet as captured, truncated or zero-filled to 1
+                octet.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -9867,12 +10024,14 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if option is not None:
+            reserved = getattr(option, 'reserved', b'\x00')
             address_length = option.address_length
             address = option.address
 
         return Schema_MAGIPv6AddressOption(
             type=type,
             length=18,
+            reserved=reserved,
             address_length=address_length,
             address=address,
         )
@@ -9974,11 +10133,14 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             if option is not None:
                 civic = cast('Data_ANICivicLocationSuboption', option)
                 fmt, location = civic.format, civic.location
+                octets = getattr(civic, 'reserved', b'\x00')
             else:
                 fmt = cast('int', kwargs.get('format', 0))
                 location = cast('bytes', kwargs.get('location', b''))
+                octets = cast('bytes', kwargs.get('reserved', b'\x00'))
             return Schema_ANICivicLocationSuboption(
-                type=code, length=2 + len(location), format=fmt, location=location)
+                type=code, length=2 + len(location), format=fmt, reserved=octets,
+                location=location)
 
         if code == Enum_ANISuboption.MAG_Group_Identifier:
             if option is not None:
@@ -10299,9 +10461,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                     Enum_QoSAttribute.Guaranteed_UL_Bit_Rate):
             if option is not None:
                 rate = cast('Data_BitRateAttribute', option).rate
+                octets = getattr(option, 'reserved', b'\x00\x00')
             else:
                 rate = cast('int', kwargs.get('rate', 0))
-            return Schema_BitRateAttribute(type=code, length=6, rate=rate)
+                octets = cast('bytes', kwargs.get('reserved', b'\x00\x00'))
+            return Schema_BitRateAttribute(type=code, length=6, reserved=octets, rate=rate)
 
         if code == Enum_QoSAttribute.Allocation_Retention_Priority:
             if option is not None:
@@ -10309,12 +10473,14 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 level = arp.priority_level
                 capability = arp.preemption_capability
                 vulnerability = arp.preemption_vulnerability
+                octets = getattr(arp, 'reserved', b'\x00')
             else:
                 level = cast('int', kwargs.get('priority_level', 1))
                 capability = cast('int', kwargs.get('preemption_capability', 0))
                 vulnerability = cast('int', kwargs.get('preemption_vulnerability', 0))
+                octets = cast('bytes', kwargs.get('reserved', b'\x00'))
             return Schema_AllocationRetentionPriorityAttribute(
-                type=code, length=2,
+                type=code, length=2, reserved=octets,
                 priority={'PL': level, 'PC': capability, 'PV': vulnerability})
 
         if code == Enum_QoSAttribute.QoS_Traffic_Selector:
@@ -10322,13 +10488,15 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 ts_attr = cast('Data_QoSTrafficSelectorAttribute', option)
                 ts_format = ts_attr.ts_format  # type: Enum_TrafficSelector | int
                 selector = ts_attr.selector
+                octets = getattr(ts_attr, 'reserved', b'\x00')
             else:
                 ts_format = cast('Enum_TrafficSelector | int',
                                  kwargs.get('ts_format',
                                             Enum_TrafficSelector.IPv6_Binary_Traffic_Selector))
                 selector = cast('bytes', kwargs.get('selector', b''))
+                octets = cast('bytes', kwargs.get('reserved', b'\x00'))
             return Schema_QoSTrafficSelectorAttribute(
-                type=code, length=2 + len(selector),
+                type=code, length=2 + len(selector), reserved=octets,
                 ts_format=cast('Enum_TrafficSelector', ts_format), selector=selector)
 
         if code == Enum_QoSAttribute.QoS_Vendor_Specific_Attribute:
@@ -10336,13 +10504,15 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 vendor_attr = cast('Data_QoSVendorSpecificAttribute', option)
                 vendor, subtype, payload = (vendor_attr.vendor, vendor_attr.subtype,
                                             vendor_attr.data)
+                octets = getattr(vendor_attr, 'reserved', b'\x00\x00')
             else:
                 vendor = cast('int', kwargs.get('vendor', 0))
                 subtype = cast('int', kwargs.get('subtype', 0))
                 payload = cast('bytes', kwargs.get('data', b''))
+                octets = cast('bytes', kwargs.get('reserved', b'\x00\x00'))
             return Schema_QoSVendorSpecificAttribute(
-                type=code, length=7 + len(payload), vendor=vendor, subtype=subtype,
-                data=payload)
+                type=code, length=7 + len(payload), reserved=octets, vendor=vendor,
+                subtype=subtype, data=payload)
 
         if option is not None:
             payload = cast('Data_UnassignedQoSAttribute', option).data
@@ -10355,6 +10525,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                       dscp: 'int' = 0,
                       oc: 'int' = 0,
                       attributes: 'Optional[QoSAttribute | list[Schema_QoSAttribute | tuple[Enum_QoSAttribute, dict[str, Any]] | bytes]]' = None,
+                      reserved: 'bytes' = b'\x00\x00\x00',
                       **kwargs: 'Any') -> 'Schema_QualityOfServiceOption':
         """Make MH quality-of-service option.
 
@@ -10365,6 +10536,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             dscp: Differentiated services code point, 6 bits.
             oc: Operational code.
             attributes: Quality-of-service attributes.
+            reserved: The three reserved octets as captured, truncated or zero-
+                filled to 3 octets.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -10372,6 +10545,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if option is not None:
+            reserved = getattr(option, 'reserved', b'\x00\x00\x00')
             sr_id = option.sr_id
             dscp = option.dscp
             oc = option.oc
@@ -10392,11 +10566,13 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             sr_id=sr_id,
             tc=dscp << 2,
             oc=oc,
+            reserved=reserved,
             attributes=entries,
         )
 
     def _make_opt_lma_up(self, type: 'Enum_Option', option: 'Optional[Data_LMAUserPlaneAddressOption]' = None, *,
                          address: 'Optional[bytes | str | int | IPv4Address | IPv6Address]' = None,
+                         reserved: 'bytes' = b'\x00\x00',
                          **kwargs: 'Any') -> 'Schema_LMAUserPlaneAddressOption':
         """Make MH LMA user-plane address option.
 
@@ -10406,6 +10582,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             address: LMA user-plane address, or :obj:`None` to omit it -- which is
                 how a mobile access gateway asks for a transport without naming an
                 address.
+            reserved: The two reserved octets as captured, truncated or zero-filled
+                to 2 octets.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -10413,10 +10591,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if option is not None:
+            reserved = getattr(option, 'reserved', b'\x00\x00')
             address = option.address
 
         if address is None:
-            return Schema_LMAUserPlaneAddressOption(type=type, length=2, address=b'')
+            return Schema_LMAUserPlaneAddressOption(type=type, length=2, reserved=reserved, address=b'')
 
         # NOTE: Through ``parse_ip_address`` because the option length below is
         # derived from the family here, ahead of the schema, so a bare
@@ -10430,12 +10609,14 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_LMAUserPlaneAddressOption(
             type=type,
             length=6 if addr.version == 4 else 18,
+            reserved=reserved,
             address=addr,
         )
 
     def _make_opt_mcast(self, type: 'Enum_Option', option: 'Optional[Data_MulticastMobilityOption]' = None, *,
                         code: 'int' = 2,
                         data: 'bytes' = b'',
+                        reserved: 'bytes' = b'\x00',
                         **kwargs: 'Any') -> 'Schema_MulticastMobilityOption':
         """Make MH multicast mobility option.
 
@@ -10444,6 +10625,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             option: Option data model.
             code: Option code.
             data: MLD or IGMP report payload, opaque to this module.
+            reserved: The reserved octet as captured, truncated or zero-filled to 1
+                octet.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -10457,6 +10640,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if option is not None:
+            reserved = getattr(option, 'reserved', b'\x00')
             code = option.code
             data = option.data
 
@@ -10468,6 +10652,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=type,
             length=len(data) // 4,
             code=code,
+            reserved=reserved,
             data=data,
         )
 
@@ -10714,6 +10899,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                          subtype_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
                          subtype_reversed: 'bool' = False,
                          identifier: 'bytes' = b'',
+                         reserved: 'bytes' = b'\x00',
                          **kwargs: 'Any') -> 'Schema_MAGIdentifierOption':
         """Make MH MAG identifier option.
 
@@ -10725,6 +10911,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             subtype_namespace: Sub-type namespace.
             subtype_reversed: Reverse sub-type namespace.
             identifier: Identifier.
+            reserved: The reserved octet as captured, truncated or zero-filled to 1
+                octet.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -10732,6 +10920,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if option is not None:
+            reserved = getattr(option, 'reserved', b'\x00')
             subtype_val = option.subtype  # type: Enum_MNIDSubtype
             identifier = option.identifier
         else:
@@ -10742,12 +10931,14 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=type,
             length=2 + len(identifier),
             subtype=subtype_val,
+            reserved=reserved,
             identifier=identifier,
         )
 
     def _make_opt_anchored(self, type: 'Enum_Option', option: 'Optional[Data_AnchoredPrefixOption]' = None, *,
                            prefix_length: 'int' = 64,
                            prefix: 'bytes | str | int | IPv6Address' = '::',
+                           reserved: 'bytes' = b'\x00',
                            **kwargs: 'Any') -> 'Schema_AnchoredPrefixOption':
         """Make MH anchored prefix option.
 
@@ -10756,6 +10947,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             option: Option data model.
             prefix_length: Prefix length.
             prefix: Anchored prefix.
+            reserved: The reserved octet as captured, truncated or zero-filled to 1
+                octet.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -10763,6 +10956,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if option is not None:
+            reserved = getattr(option, 'reserved', b'\x00')
             prefix_length = option.prefix_length
             prefix = option.prefix
 
@@ -10772,6 +10966,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_AnchoredPrefixOption(
             type=type,
             length=18,
+            reserved=reserved,
             prefix_length=prefix_length,
             prefix=prefix,
         )
@@ -10779,6 +10974,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
     def _make_opt_local_prefix(self, type: 'Enum_Option', option: 'Optional[Data_LocalPrefixOption]' = None, *,
                                prefix_length: 'int' = 64,
                                prefix: 'bytes | str | int | IPv6Address' = '::',
+                               reserved: 'bytes' = b'\x00',
                                **kwargs: 'Any') -> 'Schema_LocalPrefixOption':
         """Make MH local prefix option.
 
@@ -10787,6 +10983,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             option: Option data model.
             prefix_length: Prefix length.
             prefix: Local prefix.
+            reserved: The reserved octet as captured, truncated or zero-filled to 1
+                octet.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -10794,6 +10992,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if option is not None:
+            reserved = getattr(option, 'reserved', b'\x00')
             prefix_length = option.prefix_length
             prefix = option.prefix
 
@@ -10803,6 +11002,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_LocalPrefixOption(
             type=type,
             length=18,
+            reserved=reserved,
             prefix_length=prefix_length,
             prefix=prefix,
         )
@@ -10811,6 +11011,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                             prefix_length: 'int' = 64,
                             maar: 'bytes | str | int | IPv6Address' = '::',
                             prefix: 'bytes | str | int | IPv6Address' = '::',
+                            reserved: 'bytes' = b'\x00',
                             **kwargs: 'Any') -> 'Schema_PreviousMAAROption':
         """Make MH previous MAAR option.
 
@@ -10820,6 +11021,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             prefix_length: Prefix length of ``prefix``.
             maar: Previous MAAR's global address.
             prefix: Mobile node's home network prefix.
+            reserved: The reserved octet as captured, truncated or zero-filled to 1
+                octet.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -10827,6 +11030,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if option is not None:
+            reserved = getattr(option, 'reserved', b'\x00')
             prefix_length = option.prefix_length
             maar = option.maar
             prefix = option.prefix
@@ -10837,6 +11041,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_PreviousMAAROption(
             type=type,
             length=34,
+            reserved=reserved,
             prefix_length=prefix_length,
             maar=maar,
             prefix=prefix,
@@ -10892,6 +11097,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
     def _make_opt_dlif_lladdr(self, type: 'Enum_Option', option: 'Optional[Data_DLIFLinkLayerAddressOption]' = None, *,
                               lla: 'bytes' = b'',
+                              reserved: 'bytes' = b'\x00\x00',
                               **kwargs: 'Any') -> 'Schema_DLIFLinkLayerAddressOption':
         """Make MH DLIF link-layer address option.
 
@@ -10899,6 +11105,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type: Option type.
             option: Option data model.
             lla: Distributed logical interface's link-layer address.
+            reserved: The two reserved octets as captured, truncated or zero-filled
+                to 2 octets.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -10906,11 +11114,13 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if option is not None:
+            reserved = getattr(option, 'reserved', b'\x00\x00')
             lla = option.lla
 
         return Schema_DLIFLinkLayerAddressOption(
             type=type,
             length=2 + len(lla),
+            reserved=reserved,
             lla=lla,
         )
 

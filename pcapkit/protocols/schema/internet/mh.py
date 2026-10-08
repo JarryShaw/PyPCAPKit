@@ -736,7 +736,7 @@ class MobileNetworkPrefixOption(Option, code=Enum_Option.Mobile_Network_Prefix_O
     prefix: 'IPv6Address' = IPv6AddressField()
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', prefix_length: 'int', prefix: 'IPv6Address | int | bytes | str') -> 'None': ...
+        def __init__(self, type: 'Enum_Option', length: 'int', reserved: 'bytes', prefix_length: 'int', prefix: 'IPv6Address | int | bytes | str') -> 'None': ...
 
 
 @schema_final
@@ -1117,7 +1117,7 @@ class HomeNetworkPrefixOption(Option, code=Enum_Option.Home_Network_Prefix_Optio
     prefix: 'IPv6Address' = IPv6AddressField()
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', prefix_length: 'int',
+        def __init__(self, type: 'Enum_Option', length: 'int', reserved: 'bytes', prefix_length: 'int',
                      prefix: 'IPv6Address | int | bytes | str') -> 'None': ...
 
 
@@ -1144,7 +1144,7 @@ class AccessTechnologyTypeOption(Option, code=Enum_Option.Access_Technology_Type
     att: 'Enum_AccessType' = EnumField(length=1, namespace=Enum_AccessType)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', att: 'Enum_AccessType') -> 'None': ...
+        def __init__(self, type: 'Enum_Option', length: 'int', reserved: 'bytes', att: 'Enum_AccessType') -> 'None': ...
 
 
 @schema_final
@@ -1157,7 +1157,7 @@ class MNLLIdentifierOption(Option, code=Enum_Option.Mobile_Node_Link_layer_Ident
     lli: 'bytes' = BytesField(length=lambda pkt: pkt['length'] - 2)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', lli: 'bytes') -> 'None': ...
+        def __init__(self, type: 'Enum_Option', length: 'int', reserved: 'bytes', lli: 'bytes') -> 'None': ...
 
 
 @schema_final
@@ -1279,7 +1279,7 @@ class IPv4CareofAddressOption(Option, code=Enum_Option.IPv4_Care_of_Address):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int',
-                     address: 'IPv4Address | int | bytes | str') -> 'None': ...
+                     reserved: 'bytes', address: 'IPv4Address | int | bytes | str') -> 'None': ...
 
 
 @schema_final
@@ -1304,7 +1304,7 @@ class GREKeyOption(Option, code=Enum_Option.GRE_Key_Option):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int',
-                     key: 'Optional[int]') -> 'None': ...
+                     reserved: 'bytes', key: 'Optional[int]') -> 'None': ...
 
 
 @schema_final
@@ -1392,7 +1392,7 @@ class IPv4DefaultRouterAddressOption(Option, code=Enum_Option.IPv4_Default_Route
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int',
-                     address: 'IPv4Address | int | bytes | str') -> 'None': ...
+                     reserved: 'bytes', address: 'IPv4Address | int | bytes | str') -> 'None': ...
 
 
 @schema_final
@@ -1439,7 +1439,7 @@ class ContextRequestOption(Option, code=Enum_Option.Context_Request_Option):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int',
-                     requests: 'bytes') -> 'None': ...
+                     reserved: 'bytes', requests: 'bytes') -> 'None': ...
 
 
 @schema_final
@@ -1467,7 +1467,7 @@ class LMAAddressOption(Option, code=Enum_Option.Local_Mobility_Anchor_Address_Op
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', code: 'int',
-                     address: 'IPv4Address | IPv6Address | bytes | int | str') -> 'None': ...
+                     reserved: 'bytes', address: 'IPv4Address | IPv6Address | bytes | int | str') -> 'None': ...
 
 
 @schema_final
@@ -1481,7 +1481,7 @@ class MNLLAIIDOption(Option,
     iid: 'bytes' = BytesField(length=8)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', iid: 'bytes') -> 'None': ...
+        def __init__(self, type: 'Enum_Option', length: 'int', reserved: 'bytes', iid: 'bytes') -> 'None': ...
 
 
 @schema_final
@@ -1613,7 +1613,7 @@ class TrafficSelectorSuboption(FlowIdentificationSuboption,
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_FlowIDSuboption', length: 'int',
-                     ts_format: 'Enum_TrafficSelector', selector: 'bytes') -> 'None': ...
+                     ts_format: 'Enum_TrafficSelector', reserved: 'bytes', selector: 'bytes') -> 'None': ...
 
 
 @schema_final
@@ -1628,7 +1628,7 @@ class FlowBindingActionSuboption(FlowIdentificationSuboption,
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_FlowIDSuboption', length: 'int',
-                     action: 'Enum_FlowBindingAction') -> 'None': ...
+                     reserved: 'bytes', action: 'Enum_FlowBindingAction') -> 'None': ...
 
 
 @schema_final
@@ -1651,7 +1651,7 @@ class TargetCareofAddressSuboption(FlowIdentificationSuboption,
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_FlowIDSuboption', length: 'int',
-                     address: 'IPv4Address | IPv6Address | bytes | int | str') -> 'None': ...
+                     reserved: 'bytes', address: 'IPv4Address | IPv6Address | bytes | int | str') -> 'None': ...
 
 
 @schema_final
@@ -1677,7 +1677,7 @@ class FlowIdentificationOption(Option, code=Enum_Option.Flow_Identification_Mobi
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', fid: 'int', fid_pri: 'int',
-                     status: 'Enum_FlowIDStatus',
+                     reserved: 'bytes', status: 'Enum_FlowIDStatus',
                      suboptions: 'list[FlowIdentificationSuboption | bytes]') -> 'None': ...
 
 
@@ -1689,7 +1689,7 @@ class RedirectCapabilityOption(Option, code=Enum_Option.Redirect_Capability_Mobi
     reserved: 'bytes' = PaddingField(length=2)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int') -> 'None': ...
+        def __init__(self, type: 'Enum_Option', length: 'int', reserved: 'bytes') -> 'None': ...
 
 
 @schema_final
@@ -1773,7 +1773,7 @@ class MNGroupIdentifierOption(Option, code=Enum_Option.Mobile_Node_Group_Identif
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', subtype: 'Enum_MNGroupID',
-                     group_id: 'int') -> 'None': ...
+                     reserved: 'bytes', group_id: 'int') -> 'None': ...
 
 
 @schema_final
@@ -1788,7 +1788,7 @@ class MAGIPv6AddressOption(Option, code=Enum_Option.MAG_IPv6_Address):
     address: 'IPv6Address' = IPv6AddressField()
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', address_length: 'int',
+        def __init__(self, type: 'Enum_Option', length: 'int', reserved: 'bytes', address_length: 'int',
                      address: 'IPv6Address | int | bytes | str') -> 'None': ...
 
 
@@ -1893,7 +1893,7 @@ class ANICivicLocationSuboption(ANISuboption, code=Enum_ANISuboption.Civic_Locat
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_ANISuboption', length: 'int', format: 'int',
-                     location: 'bytes') -> 'None': ...
+                     reserved: 'bytes', location: 'bytes') -> 'None': ...
 
 
 @schema_final
@@ -2129,7 +2129,7 @@ class BitRateAttribute(QoSAttribute, code=[Enum_QoSAttribute.Per_MN_Agg_Max_DL_B
     rate: 'int' = UInt32Field()
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_QoSAttribute', length: 'int', rate: 'int') -> 'None': ...
+        def __init__(self, type: 'Enum_QoSAttribute', length: 'int', reserved: 'bytes', rate: 'int') -> 'None': ...
 
 
 @schema_final
@@ -2171,7 +2171,7 @@ class AllocationRetentionPriorityAttribute(
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_QoSAttribute', length: 'int',
-                     priority: 'AllocationRetentionPriorityFields') -> 'None': ...
+                     reserved: 'bytes', priority: 'AllocationRetentionPriorityFields') -> 'None': ...
 
 
 @schema_final
@@ -2195,7 +2195,7 @@ class QoSTrafficSelectorAttribute(QoSAttribute, code=Enum_QoSAttribute.QoS_Traff
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_QoSAttribute', length: 'int',
-                     ts_format: 'Enum_TrafficSelector', selector: 'bytes') -> 'None': ...
+                     reserved: 'bytes', ts_format: 'Enum_TrafficSelector', selector: 'bytes') -> 'None': ...
 
 
 @schema_final
@@ -2214,7 +2214,7 @@ class QoSVendorSpecificAttribute(
     data: 'bytes' = BytesField(length=lambda pkt: pkt['length'] - 7)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_QoSAttribute', length: 'int', vendor: 'int',
+        def __init__(self, type: 'Enum_QoSAttribute', length: 'int', reserved: 'bytes', vendor: 'int',
                      subtype: 'int', data: 'bytes') -> 'None': ...
 
 
@@ -2241,7 +2241,7 @@ class QualityOfServiceOption(Option, code=Enum_Option.Quality_of_Service):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', sr_id: 'int', tc: 'int',
-                     oc: 'int', attributes: 'list[QoSAttribute | bytes]') -> 'None': ...
+                     oc: 'int', reserved: 'bytes', attributes: 'list[QoSAttribute | bytes]') -> 'None': ...
 
 
 @schema_final
@@ -2255,7 +2255,7 @@ class LMAUserPlaneAddressOption(Option, code=Enum_Option.LMA_User_Plane_Address)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int',
-                     address: 'IPv4Address | IPv6Address | bytes | int | str') -> 'None': ...
+                     reserved: 'bytes', address: 'IPv4Address | IPv6Address | bytes | int | str') -> 'None': ...
 
 
 @schema_final
@@ -2282,7 +2282,7 @@ class MulticastMobilityOption(Option, code=Enum_Option.Multicast_Mobility_Option
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', code: 'int',
-                     data: 'bytes') -> 'None': ...
+                     reserved: 'bytes', data: 'bytes') -> 'None': ...
 
 
 @schema_final
@@ -2434,7 +2434,7 @@ class MAGIdentifierOption(Option, code=Enum_Option.MAG_Identifier):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', subtype: 'Enum_MNIDSubtype',
-                     identifier: 'bytes') -> 'None': ...
+                     reserved: 'bytes', identifier: 'bytes') -> 'None': ...
 
 
 @schema_final
@@ -2449,7 +2449,7 @@ class AnchoredPrefixOption(Option, code=Enum_Option.Anchored_Prefix):
     prefix: 'IPv6Address' = IPv6AddressField()
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', prefix_length: 'int',
+        def __init__(self, type: 'Enum_Option', length: 'int', reserved: 'bytes', prefix_length: 'int',
                      prefix: 'IPv6Address | int | bytes | str') -> 'None': ...
 
 
@@ -2465,7 +2465,7 @@ class LocalPrefixOption(Option, code=Enum_Option.Local_Prefix):
     prefix: 'IPv6Address' = IPv6AddressField()
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', prefix_length: 'int',
+        def __init__(self, type: 'Enum_Option', length: 'int', reserved: 'bytes', prefix_length: 'int',
                      prefix: 'IPv6Address | int | bytes | str') -> 'None': ...
 
 
@@ -2483,7 +2483,7 @@ class PreviousMAAROption(Option, code=Enum_Option.Previous_MAAR):
     prefix: 'IPv6Address' = IPv6AddressField()
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', prefix_length: 'int',
+        def __init__(self, type: 'Enum_Option', length: 'int', reserved: 'bytes', prefix_length: 'int',
                      maar: 'IPv6Address | int | bytes | str',
                      prefix: 'IPv6Address | int | bytes | str') -> 'None': ...
 
@@ -2523,7 +2523,7 @@ class DLIFLinkLayerAddressOption(Option, code=Enum_Option.DLIF_Link_Layer_Addres
     lla: 'bytes' = BytesField(length=lambda pkt: pkt['length'] - 2)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', lla: 'bytes') -> 'None': ...
+        def __init__(self, type: 'Enum_Option', length: 'int', reserved: 'bytes', lla: 'bytes') -> 'None': ...
 
 
 # TODO: Implement other options.
@@ -2583,7 +2583,7 @@ class HomeTestInitMessage(Packet, code=Enum_Packet.Home_Test_Init):
     )
 
     if TYPE_CHECKING:
-        def __init__(self, cookie: 'bytes', options: 'list[Option | bytes]') -> 'None': ...
+        def __init__(self, reserved: 'bytes', cookie: 'bytes', options: 'list[Option | bytes]') -> 'None': ...
 
 
 @schema_final
@@ -2604,7 +2604,7 @@ class CareofTestInitMessage(Packet, code=Enum_Packet.Care_of_Test_Init):
     )
 
     if TYPE_CHECKING:
-        def __init__(self, cookie: 'bytes', options: 'list[Option | bytes]') -> 'None': ...
+        def __init__(self, reserved: 'bytes', cookie: 'bytes', options: 'list[Option | bytes]') -> 'None': ...
 
 
 @schema_final
@@ -2750,7 +2750,7 @@ class BindingErrorMessage(Packet, code=Enum_Packet.Binding_Error):
     )
 
     if TYPE_CHECKING:
-        def __init__(self, status: 'Enum_BindingError', home: 'IPv6Address | str | int | bytes',
+        def __init__(self, status: 'Enum_BindingError', reserved: 'bytes', home: 'IPv6Address | str | int | bytes',
                      options: 'list[Option | bytes]') -> 'None': ...
 
 
@@ -2843,7 +2843,7 @@ class FastNeighborAdvertisementMessage(Packet, code=Enum_Packet.Fast_Neighbor_Ad
     )
 
     if TYPE_CHECKING:
-        def __init__(self, options: 'list[Option | bytes]') -> 'None': ...
+        def __init__(self, reserved: 'bytes', options: 'list[Option | bytes]') -> 'None': ...
 
 
 @schema_final
@@ -2965,7 +2965,7 @@ class HomeAgentSwitchMessage(Packet, code=Enum_Packet.Home_Agent_Switch_Message)
     )
 
     if TYPE_CHECKING:
-        def __init__(self, count: 'int', addresses: 'list[IPv6Address | int | bytes | str]',
+        def __init__(self, count: 'int', reserved: 'bytes', addresses: 'list[IPv6Address | int | bytes | str]',
                      options: 'list[Option | bytes]') -> 'None': ...
 
 
@@ -3035,7 +3035,7 @@ class LocalizedRoutingInitiationMessage(Packet, code=Enum_Packet.Localized_Routi
     )
 
     if TYPE_CHECKING:
-        def __init__(self, seq: 'int', lifetime: 'int',
+        def __init__(self, seq: 'int', reserved: 'bytes', lifetime: 'int',
                      options: 'list[Option | bytes]') -> 'None': ...
 
 
@@ -3136,7 +3136,7 @@ class UpdateNotificationAcknowledgementMessage(
 
     if TYPE_CHECKING:
         def __init__(self, seq: 'int', status: 'Enum_UpdateNotificationACKStatus',
-                     options: 'list[Option | bytes]') -> 'None': ...
+                     reserved: 'bytes', options: 'list[Option | bytes]') -> 'None': ...
 
 
 @schema_final
@@ -3208,7 +3208,7 @@ class SubscriptionQueryMessage(Packet, code=Enum_Packet.Subscription_Query):
     )
 
     if TYPE_CHECKING:
-        def __init__(self, seq: 'int', options: 'list[Option | bytes]') -> 'None': ...
+        def __init__(self, seq: 'int', reserved: 'bytes', options: 'list[Option | bytes]') -> 'None': ...
 
 
 @schema_final
