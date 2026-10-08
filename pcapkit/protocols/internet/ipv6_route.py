@@ -549,6 +549,7 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             length=ipv6_route_header_length(header.length),
             type=header.type,
             seg_left=header.seg_left,
+            reserved=schema.reserved,
             ip=tuple(schema.ip),
         )
         return ipv6_route
@@ -597,6 +598,7 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             length=ipv6_route_header_length(header.length),
             type=header.type,
             seg_left=header.seg_left,
+            reserved=schema.reserved,
             ip=schema.ip,
         )
         return ipv6_route
@@ -666,6 +668,7 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             pad=pad_len,
             reserved=schema.pad['reserved'],
             ip=tuple(schema.ip),
+            padding=schema.padding,
         )
         return ipv6_route
 
@@ -700,6 +703,7 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
     def _make_data_type_src(self, type: 'Enum_Routing', route: 'Optional[Data_SourceRoute]' = None, *,
                             dst: 'Optional[IPv6Address]' = None,
                             ip: 'Optional[list[IPv6Address | str | bytes | int]]' = None,
+                            reserved: 'bytes' = b'\x00\x00\x00\x00',
                             **kwargs: 'Any') -> 'Schema_SourceRoute':
         """Make IPv6-Route Source Route data.
 
@@ -708,6 +712,8 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             route: route data
             dst: destination IPv6 address
             ip: list of IPv6 addresses
+            reserved: the four reserved octets, truncated or zero-filled to
+                four octets
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -716,16 +722,19 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
         """
         if route is not None:
             ip = cast('list[IPv6Address | str | bytes | int]', route.ip)
+            reserved = getattr(route, 'reserved', b'\x00\x00\x00\x00')
         else:
             ip = [] if ip is None else ip
 
         return Schema_SourceRoute(
+            reserved=reserved,
             ip=ip,
         )
 
     def _make_data_type_2(self, type: 'Enum_Routing', route: 'Optional[Data_Type2]' = None, *,
                           dst: 'Optional[IPv6Address]' = None,
                           ip: 'IPv6Address | str | bytes | int' = '::',
+                          reserved: 'bytes' = b'\x00\x00\x00\x00',
                           **kwargs: 'Any') -> 'Schema_Type2':
         """Make IPv6-Route Type 2 data.
 
@@ -734,6 +743,8 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             route: route data
             dst: destination IPv6 address
             ip: home address
+            reserved: the four reserved octets, truncated or zero-filled to
+                four octets
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -742,8 +753,10 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
         """
         if route is not None:
             ip = cast('IPv6Address | str | bytes | int', route.ip)
+            reserved = getattr(route, 'reserved', b'\x00\x00\x00\x00')
 
         return Schema_Type2(
+            reserved=reserved,
             ip=ip,
         )
 
@@ -751,6 +764,7 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
                             dst: 'Optional[IPv6Address]' = None,
                             ip: 'Optional[list[IPv6Address | str | bytes | int]]' = None,
                             reserved: 'int' = 0,
+                            padding: 'bytes' = b'',
                             **kwargs: 'Any') -> 'Schema_RPL':
         """Make IPv6-Route RPL Source data.
 
@@ -760,6 +774,8 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             dst: destination IPv6 address
             ip: list of IPv6 addresses
             reserved: reserved bits after ``Pad``
+            padding: the ``Pad`` octets after the addresses, truncated or
+                zero-filled to ``Pad`` octets
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -775,6 +791,7 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             cmpr_e = route.cmpr_e
             pad = route.pad
             reserved = route.reserved
+            padding = getattr(route, 'padding', b'')
             ip_val = [
                 addr if isinstance(addr, bytes) else addr.packed for addr in route.ip
             ]
@@ -844,4 +861,5 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
                 'reserved': reserved,
             },
             addresses=ip_val,
+            padding=padding,
         )

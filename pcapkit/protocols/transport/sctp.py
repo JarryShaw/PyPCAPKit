@@ -161,12 +161,13 @@ from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
-    from typing import Any, Callable, DefaultDict, Optional, Sequence, Type
+    from typing import Any, Callable, DefaultDict, Optional, Sequence, Type, TypeVar
 
     from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
 
     from pcapkit.const.reg.apptype import AppType as Enum_AppType
+    from pcapkit.protocols.data.data import Data
     from pcapkit.protocols.data.transport.sctp import Chunk as Data_Chunk
     from pcapkit.protocols.data.transport.sctp import ErrorCause as Data_ErrorCause
     from pcapkit.protocols.data.transport.sctp import Parameter as Data_Parameter
@@ -178,6 +179,9 @@ if TYPE_CHECKING:
     Chunks = OrderedMultiDict[Enum_Chunk, Data_Chunk]
     Parameters = OrderedMultiDict[Enum_Parameter, Data_Parameter]
     Causes = OrderedMultiDict[Enum_CauseCode, Data_ErrorCause]
+
+    Data_T = TypeVar('Data_T', bound=Data)
+    Schema_T = TypeVar('Schema_T', bound=Schema)
 
     ChunkParser = Callable[[Schema_Chunk, NamedArg(Chunks, 'chunks')], Data_Chunk]
     ChunkConstructor = Callable[[Enum_Chunk, DefaultArg(Optional[Data_Chunk]),
@@ -203,6 +207,42 @@ for _index in range(256):
         _crc = (_crc >> 1) ^ (0x82F63B78 if _crc & 1 else 0)
     CRC32C_TABLE.append(_crc)
 del _index, _crc
+
+
+def _keep_padding(schema: 'Schema', data: 'Data_T') -> 'Data_T':
+    """Keep a chunk's, parameter's or cause's non-zero trailing padding.
+
+    Args:
+        schema: Parsed schema.
+        data: Data model read from ``schema``.
+
+    Returns:
+        ``data``, with a ``padding`` attribute holding the trailing padding as
+        captured if it is not all zeros -- the form a fresh build writes
+        (:issue:`1223`). :func:`_restore_padding` writes it back.
+
+    """
+    padding = schema.__dict__.get('padding')
+    if isinstance(padding, bytes) and any(padding):
+        data.__update__([('padding', padding)])
+    return data
+
+
+def _restore_padding(data: 'Optional[Data]', schema: 'Schema_T') -> 'Schema_T':
+    """Write back the trailing padding :func:`_keep_padding` kept, if any.
+
+    Args:
+        data: Data model the schema was made from, if any.
+        schema: Constructed schema.
+
+    Returns:
+        ``schema``, with its padding set from ``data``.
+
+    """
+    padding = getattr(data, 'padding', None)
+    if isinstance(padding, bytes) and 'padding' in schema.__fields__:
+        schema.padding = padding
+    return schema
 
 
 class SCTP(Transport[Data_SCTP, Schema_SCTP],
@@ -891,7 +931,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
                             getattr(self, meth_name, self._read_chunk_donone))
             else:
                 meth = name[0]
-            chunks.add(code, meth(schema, chunks=chunks))
+            chunks.add(code, _keep_padding(schema, meth(schema, chunks=chunks)))
         return chunks
 
     def _make_sctp_chunks(self, chunks: 'list[Schema_Chunk | tuple[Enum_Chunk, dict[str, Any]] | bytes] | Chunks') -> 'list[Schema_Chunk | bytes]':  # pylint: disable=line-too-long
@@ -950,7 +990,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
                         getattr(self, meth_name, self._make_chunk_donone))
         else:
             meth = name[1]
-        return meth(code, chunk, **kwargs)
+        return _restore_padding(chunk, meth(code, chunk, **kwargs))
 
     def _read_sctp_parameters(self, schemas: 'list[Schema_Parameter]') -> 'Parameters':
         """Read SCTP chunk parameter list.
@@ -974,7 +1014,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
                             getattr(self, meth_name, self._read_param_donone))
             else:
                 meth = name[0]
-            parameters.add(code, meth(schema, parameters=parameters))
+            parameters.add(code, _keep_padding(schema, meth(schema, parameters=parameters)))
         return parameters
 
     def _make_sctp_parameters(self, parameters: 'list[Schema_Parameter | tuple[Enum_Parameter, dict[str, Any]] | bytes] | Parameters') -> 'list[Schema_Parameter | bytes]':  # pylint: disable=line-too-long
@@ -1022,7 +1062,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
                         getattr(self, meth_name, self._make_param_donone))
         else:
             meth = name[1]
-        return meth(code, parameter, **kwargs)
+        return _restore_padding(parameter, meth(code, parameter, **kwargs))
 
     def _read_sctp_causes(self, schemas: 'list[Schema_ErrorCause]') -> 'Causes':
         """Read SCTP error cause list.
@@ -1046,7 +1086,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
                             getattr(self, meth_name, self._read_cause_donone))
             else:
                 meth = name[0]
-            causes.add(code, meth(schema, causes=causes))
+            causes.add(code, _keep_padding(schema, meth(schema, causes=causes)))
         return causes
 
     def _make_sctp_causes(self, causes: 'list[Schema_ErrorCause | tuple[Enum_CauseCode, dict[str, Any]] | bytes] | Causes') -> 'list[Schema_ErrorCause | bytes]':  # pylint: disable=line-too-long
@@ -1094,7 +1134,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
                         getattr(self, meth_name, self._make_cause_donone))
         else:
             meth = name[1]
-        return meth(code, cause, **kwargs)
+        return _restore_padding(cause, meth(code, cause, **kwargs))
 
     def _make_nested_length(self, base: 'int', items: 'Sequence[Schema_Parameter | Schema_ErrorCause | bytes]',  # pylint: disable=line-too-long
                             declared: 'Optional[int]' = None) -> 'int':

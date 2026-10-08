@@ -768,7 +768,7 @@ class MHUnitTests(unittest.TestCase):
             # asserting the two-octet overshoot.
             remade = proto._make_opt_pad(
                 Option.Pad1,
-                data.PadOption(type=Option.PadN, length=4),
+                data.PadOption(type=Option.PadN, length=4, data=b'\x00\x00'),
             )
             self.assertEqual(remade.length, 2)
             self.assertEqual(len(remade.pack()), 4)
@@ -2029,7 +2029,8 @@ class MHUnitTests(unittest.TestCase):
         proto = object.__new__(MH)
         for code, total in ((Option.Pad1, 1), (Option.PadN, 3), (Option.PadN, 6)):
             with self.subTest(option=code.name, length=total):
-                made = proto._make_opt_pad(code, PadOption(type=code, length=total))
+                made = proto._make_opt_pad(code, PadOption(type=code, length=total,
+                                                           data=bytes(max(total - 2, 0))))
                 self.assertEqual(made.type, code)
                 self.assertEqual(len(made.pack()), total)
 

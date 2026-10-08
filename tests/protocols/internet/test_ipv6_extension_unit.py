@@ -165,6 +165,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         data = DummyDict(
             next=TransType.TCP,
             offset=16,
+            reserved_octet=b'\x00',
             reserved=0,
             mf=True,
             id=99,
@@ -348,7 +349,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         self.assertEqual(str(proto._make_data_type_src(
             Routing.Source_Route,
             route_data.SourceRoute(next=TransType.TCP, length=24, type=Routing.Source_Route,
-                                   seg_left=1, ip=(ip_address('2001:db8::5'),)),
+                                   seg_left=1, reserved=bytes(4), ip=(ip_address('2001:db8::5'),)),
         ).ip[0]), '2001:db8::5')
         self.assertEqual(str(proto._make_data_type_2(
             Routing.Type_2_Routing_Header,
@@ -357,7 +358,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         self.assertEqual(str(proto._make_data_type_2(
             Routing.Type_2_Routing_Header,
             route_data.Type2(next=TransType.TCP, length=24, type=Routing.Type_2_Routing_Header,
-                             seg_left=1, ip=ip_address('2001:db8::7')),
+                             seg_left=1, reserved=bytes(4), ip=ip_address('2001:db8::7')),
         ).ip), '2001:db8::7')
 
         rpl_plain = proto._make_data_type_rpl(
@@ -375,7 +376,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
             Routing.RPL_Source_Route_Header,
             route_data.RPL(next=TransType.TCP, length=16, type=Routing.RPL_Source_Route_Header,
                            seg_left=1, cmpr_i=1, cmpr_e=2, pad=0, reserved=0,
-                           ip=(ip_address('2001:db8::9'),)),
+                           ip=(ip_address('2001:db8::9'),), padding=b''),
         )
         self.assertEqual(rpl_from_data.cmpr['cmpr_i'], 1)
 
@@ -561,7 +562,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
             type=Routing.Type_2_Routing_Header,
             data=route_data.Type2(next=TransType.TCP, length=24,
                                   type=Routing.Type_2_Routing_Header,
-                                  seg_left=1,
+                                  seg_left=1, reserved=bytes(4),
                                   ip=ip_address('2001:db8::3')),
         )
         self.assertEqual(made_model.type, Routing.Type_2_Routing_Header)
@@ -852,6 +853,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
                                         rate=80,
                                         nonce=4,
                                         reserved=0,
+                                        unused=b'\x00',
                                         **base),
         ).nonce['nonce'], 4)
         with self.assertRaises(ProtocolError):
@@ -1087,7 +1089,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         self.assertEqual(no_pad_options, [bytes([Option.CALIPSO]) + b'12345'])
 
         dict_options, dict_length = make_options(OrderedMultiDict([
-            (Option.Pad1, data.PadOption(type=Option.Pad1, length=1, **base)),
+            (Option.Pad1, data.PadOption(type=Option.Pad1, length=1, pad=b'', **base)),
             (Option.Tunnel_Encapsulation_Limit,
              data.TunnelEncapsulationLimitOption(type=Option.Tunnel_Encapsulation_Limit,
                                                  length=3, limit=3, **base)),

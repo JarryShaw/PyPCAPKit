@@ -583,7 +583,7 @@ class R1CounterParameter(Parameter, code=[Enum_Parameter.R1_Counter,
     padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', len: 'int', counter: 'int') -> 'None': ...
+        def __init__(self, type: 'Enum_Parameter', len: 'int', reserved: 'bytes', counter: 'int') -> 'None': ...
 
 
 @schema_final
@@ -832,7 +832,7 @@ class NATTraversalModeParameter(Parameter, code=Enum_Parameter.NAT_TRAVERSAL_MOD
     padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', len: 'int', modes: 'list[Enum_NATTraversal]') -> 'None': ...
+        def __init__(self, type: 'Enum_Parameter', len: 'int', reserved: 'bytes', modes: 'list[Enum_NATTraversal]') -> 'None': ...
 
 
 @schema_final
@@ -941,7 +941,7 @@ class EncryptedParameter(Parameter, code=Enum_Parameter.ENCRYPTED):
         #: ``__init__``.
         cipher: 'Enum_Cipher'
 
-        def __init__(self, type: 'Enum_Parameter', len: 'int',
+        def __init__(self, type: 'Enum_Parameter', len: 'int', reserved: 'bytes',
                      iv: 'Optional[bytes]', data: 'bytes') -> 'None': ...
 
 
@@ -1069,7 +1069,7 @@ class NotificationParameter(Parameter, code=Enum_Parameter.NOTIFICATION):
     padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', len: 'int', msg_type: 'Enum_NotifyMessage', msg: 'bytes') -> 'None': ...
+        def __init__(self, type: 'Enum_Parameter', len: 'int', reserved: 'bytes', msg_type: 'Enum_NotifyMessage', msg: 'bytes') -> 'None': ...
 
 
 @schema_final
@@ -1174,7 +1174,7 @@ class RegFromParameter(Parameter, code=Enum_Parameter.REG_FROM):
     address: 'IPv6Address' = IPv6AddressField()
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', len: 'int', port: 'int', protocol: 'Enum_TransType', address: 'IPv6Address | bytes | int | str') -> 'None': ...
+        def __init__(self, type: 'Enum_Parameter', len: 'int', reserved: 'bytes', port: 'int', protocol: 'Enum_TransType', address: 'IPv6Address | bytes | int | str') -> 'None': ...
 
 
 @schema_final
@@ -1221,7 +1221,7 @@ class ESPTransformParameter(Parameter, code=Enum_Parameter.ESP_TRANSFORM):
     padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', len: 'int', suites: 'list[Enum_ESPTransformSuite]') -> 'None': ...
+        def __init__(self, type: 'Enum_Parameter', len: 'int', reserved: 'bytes', suites: 'list[Enum_ESPTransformSuite]') -> 'None': ...
 
 
 @schema_final
@@ -1269,7 +1269,7 @@ class PayloadMICParameter(Parameter, code=Enum_Parameter.PAYLOAD_MIC):
     padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', len: 'int', next: 'Enum_TransType', payload: 'bytes', mic: 'bytes') -> 'None': ...
+        def __init__(self, type: 'Enum_Parameter', len: 'int', reserved: 'bytes', next: 'Enum_TransType', payload: 'bytes', mic: 'bytes') -> 'None': ...
 
 
 @schema_final
@@ -1319,7 +1319,7 @@ class RouteDstParameter(Parameter, code=Enum_Parameter.ROUTE_DST):
     padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', len: 'int', flags: 'RouteFlags', hit: 'list[str | int | bytes | IPv6Address]') -> 'None': ...
+        def __init__(self, type: 'Enum_Parameter', len: 'int', reserved: 'bytes', flags: 'RouteFlags', hit: 'list[str | int | bytes | IPv6Address]') -> 'None': ...
 
 
 @schema_final
@@ -1436,7 +1436,7 @@ class RelayFromParameter(Parameter, code=Enum_Parameter.RELAY_FROM):
     address: 'IPv6Address' = IPv6AddressField()
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', len: 'int', port: 'int', protocol: 'Enum_TransType', address: 'str | bytes | int | IPv6Address') -> 'None': ...
+        def __init__(self, type: 'Enum_Parameter', len: 'int', reserved: 'bytes', port: 'int', protocol: 'Enum_TransType', address: 'str | bytes | int | IPv6Address') -> 'None': ...
 
 
 @schema_final
@@ -1453,7 +1453,7 @@ class RelayToParameter(Parameter, code=Enum_Parameter.RELAY_TO):
     address: 'IPv6Address' = IPv6AddressField()
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', len: 'int', port: 'int', protocol: 'Enum_TransType', address: 'str | bytes | int | IPv6Address') -> 'None': ...
+        def __init__(self, type: 'Enum_Parameter', len: 'int', reserved: 'bytes', port: 'int', protocol: 'Enum_TransType', address: 'str | bytes | int | IPv6Address') -> 'None': ...
 
 
 @schema_final
@@ -1468,7 +1468,7 @@ class OverlayTTLParameter(Parameter, code=Enum_Parameter.OVERLAY_TTL):
     padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', len: 'int', ttl: 'int') -> 'None': ...
+        def __init__(self, type: 'Enum_Parameter', len: 'int', reserved: 'bytes', ttl: 'int') -> 'None': ...
 
 
 @schema_final
@@ -1492,7 +1492,7 @@ class RouteViaParameter(Parameter, code=Enum_Parameter.ROUTE_VIA):
     padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', len: 'int', flags: 'RouteFlags', hit: 'list[str | bytes | int | IPv6Address]') -> 'None': ...
+        def __init__(self, type: 'Enum_Parameter', len: 'int', reserved: 'bytes', flags: 'RouteFlags', hit: 'list[str | bytes | int | IPv6Address]') -> 'None': ...
 
 
 @schema_final

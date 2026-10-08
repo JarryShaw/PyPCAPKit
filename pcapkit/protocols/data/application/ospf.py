@@ -20,6 +20,8 @@ __all__ = ['OSPF', 'CryptographicAuthentication']
 class CryptographicAuthentication(Data):
     """Data model for OSPF cryptographic authentication."""
 
+    #: The two reserved octets, as captured.
+    reserved: 'bytes'
     #: Key ID.
     key_id: 'int'
     #: Authentication data length.
@@ -28,7 +30,7 @@ class CryptographicAuthentication(Data):
     seq: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, key_id: 'int', len: 'int', seq: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin
+        def __init__(self, reserved: 'bytes', key_id: 'int', len: 'int', seq: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin
 
 
 @info_final

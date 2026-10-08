@@ -167,7 +167,7 @@ class SourceRoute(RoutingType, code=Enum_Routing.Source_Route):
     )
 
     if TYPE_CHECKING:
-        def __init__(self, ip: 'list[IPv6Address | str | int | bytes]') -> 'None': ...
+        def __init__(self, reserved: 'bytes', ip: 'list[IPv6Address | str | int | bytes]') -> 'None': ...
 
 
 @schema_final
@@ -180,7 +180,7 @@ class Type2(RoutingType, code=Enum_Routing.Type_2_Routing_Header):
     ip: 'IPv6Address' = IPv6AddressField()
 
     if TYPE_CHECKING:
-        def __init__(self, ip: 'IPv6Address | str | int | bytes') -> 'None': ...
+        def __init__(self, reserved: 'bytes', ip: 'IPv6Address | str | int | bytes') -> 'None': ...
 
 
 @schema_final
@@ -312,4 +312,4 @@ class RPL(RoutingType, code=Enum_Routing.RPL_Source_Route_Header):
         ip: 'list[IPv6Address | bytes]'
 
         def __init__(self, cmpr: 'CmprInfo', pad: 'PadInfo',
-                     addresses: 'list[bytes]') -> 'None': ...
+                     addresses: 'list[bytes]', padding: 'bytes') -> 'None': ...

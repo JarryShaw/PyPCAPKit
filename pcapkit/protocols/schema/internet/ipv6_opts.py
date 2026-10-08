@@ -427,7 +427,7 @@ class PadOption(Option, code=[Enum_Option.Pad1,
     pad: 'bytes' = PaddingField(length=pad_opt_data_len)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', len: 'int') -> 'None': ...
+        def __init__(self, type: 'Enum_Option', len: 'int', pad: 'bytes') -> 'None': ...
 
 
 @schema_final
@@ -699,7 +699,7 @@ class QuickStartReportOption(QuickStartOption, code=Enum_QSFunction.Report_of_Ap
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', len: 'int', flags: 'QuickStartFlags',
-                     nonce: 'QSNonce') -> 'None': ...
+                     reserved: 'bytes', nonce: 'QSNonce') -> 'None': ...
 
 
 @schema_final

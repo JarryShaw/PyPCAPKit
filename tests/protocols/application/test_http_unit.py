@@ -1925,13 +1925,14 @@ class HTTPUnitTests(unittest.TestCase):
         warn.assert_not_called()
 
         data = proto._read_http_data(
-            http2_schema(pad_len=2, data=b'data', __flags__=0x09),
+            http2_schema(pad_len=2, data=b'data', padding=b'\xee\xff', __flags__=0x09),
             header=http2_header(7, Frame.DATA, flags=0x09, sid=1),
         )
         self.assertTrue(data.flags.to_dict()['END_STREAM'])
         self.assertTrue(data.flags.to_dict()['PADDED'])
         self.assertEqual(data.to_dict()['pad_len'], 2)
         self.assertEqual(data.to_dict()['data'], b'data')
+        self.assertEqual(data.to_dict()['padding'], b'\xee\xff')
 
         headers = proto._read_http_headers(
             http2_schema(
@@ -1939,6 +1940,7 @@ class HTTPUnitTests(unittest.TestCase):
                 stream_dep={'exclusive': 1, 'sid': 7},
                 weight=4,
                 fragment=b'headers',
+                padding=b'\x00',
                 __flags__=0x2D,
             ),
             header=http2_header(14, Frame.HEADERS, flags=0x2D, sid=1),
@@ -1977,7 +1979,8 @@ class HTTPUnitTests(unittest.TestCase):
         self.assertEqual(settings.settings[Setting.ENABLE_PUSH], 0)
 
         push = proto._read_http_push_promise(
-            http2_schema(pad_len=1, stream={'reserved': 0, 'sid': 11}, fragment=b'push', __flags__=0x0C),
+            http2_schema(pad_len=1, stream={'reserved': 0, 'sid': 11}, fragment=b'push', padding=b'\x00',
+                         __flags__=0x0C),
             header=http2_header(10, Frame.PUSH_PROMISE, flags=0x0C, sid=1),
         )
         self.assertTrue(push.flags.to_dict()['END_HEADERS'])

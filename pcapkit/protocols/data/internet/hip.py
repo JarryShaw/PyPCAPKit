@@ -84,6 +84,11 @@ class Parameter(Data):
     #: Content length.
     length: 'int'
 
+    if TYPE_CHECKING:
+        #: Trailing padding octets, as captured; present only when they are
+        #: not all zeros.
+        padding: 'bytes'
+
 
 @info_final
 class HIP(Protocol):
@@ -148,11 +153,13 @@ class ESPInfoParameter(Parameter):
 class R1CounterParameter(Parameter):
     """Data model for HIP ``R1_COUNTER`` parameter."""
 
+    #: The four reserved octets, as captured.
+    reserved: 'bytes'
     #: R1 counter.
     counter: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', counter: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', reserved: 'bytes', counter: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 @info_final
@@ -341,11 +348,13 @@ class HIPCipherParameter(Parameter):
 class NATTraversalModeParameter(Parameter):
     """Data model for HIP ``NAT_TRAVERSAL_MODE`` parameter."""
 
+    #: The two reserved octets, as captured.
+    reserved: 'bytes'
     #: Mode IDs
     mode_id: 'tuple[NATTraversal, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', mode_id: 'tuple[NATTraversal, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', reserved: 'bytes', mode_id: 'tuple[NATTraversal, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 @info_final
@@ -363,6 +372,8 @@ class TransactionPacingParameter(Parameter):
 class EncryptedParameter(Parameter):
     """Data model for HIP ``ENCRYPTED`` parameter."""
 
+    #: The four reserved octets, as captured.
+    reserved: 'bytes'
     #: Cipher ID.
     cipher: 'Cipher'
     #: Initialization vector.
@@ -371,7 +382,7 @@ class EncryptedParameter(Parameter):
     data: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int',
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', reserved: 'bytes',
                      cipher: 'Cipher', iv: 'Optional[bytes]', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
@@ -444,13 +455,15 @@ class CertParameter(Parameter):
 class NotificationParameter(Parameter):
     """Data model for HIP ``NOTIFICATION`` parameter."""
 
+    #: The two reserved octets, as captured.
+    reserved: 'bytes'
     #: Notify message type.
     msg_type: 'NotifyMessage'
     #: Notification data.
     msg: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', msg_type: 'NotifyMessage', msg: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', reserved: 'bytes', msg_type: 'NotifyMessage', msg: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 @info_final
@@ -533,6 +546,8 @@ class RegFailedParameter(Parameter):
 class RegFromParameter(Parameter):
     """Data model for HIP ``REG_FROM`` parameter."""
 
+    #: The reserved octet, as captured.
+    reserved: 'bytes'
     #: Port.
     port: 'int'
     #: Protocol.
@@ -541,7 +556,7 @@ class RegFromParameter(Parameter):
     address: 'IPv6Address'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', port: 'int', protocol: 'TransType', address: 'IPv6Address') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', reserved: 'bytes', port: 'int', protocol: 'TransType', address: 'IPv6Address') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 @info_final
@@ -570,11 +585,13 @@ class TransportFormatListParameter(Parameter):
 class ESPTransformParameter(Parameter):
     """Data model for HIP ``ESP_TRANSFORM`` parameter."""
 
+    #: The two reserved octets, as captured.
+    reserved: 'bytes'
     #: ESP transform.
     suite_id: 'tuple[ESPTransformSuite, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', suite_id: 'tuple[ESPTransformSuite, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', reserved: 'bytes', suite_id: 'tuple[ESPTransformSuite, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 @info_final
@@ -603,6 +620,8 @@ class AckDataParameter(Parameter):
 class PayloadMICParameter(Parameter):
     """Data model for HIP ``PAYLOAD_MIC`` parameter."""
 
+    #: The three reserved octets, as captured.
+    reserved: 'bytes'
     #: Next header
     next: 'TransType'
     #: Payload data.
@@ -611,7 +630,7 @@ class PayloadMICParameter(Parameter):
     mic: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', next: 'TransType', payload: 'bytes', mic: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', reserved: 'bytes', next: 'TransType', payload: 'bytes', mic: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 @info_final
@@ -656,13 +675,15 @@ class Flags(Data):
 class RouteDstParameter(Parameter):
     """Data model for HIP ``ROUTE_DST`` parameter."""
 
+    #: The two reserved octets, as captured.
+    reserved: 'bytes'
     #: Flags.
     flags: 'Flags'
     #: Destination address.
     hit: 'tuple[IPv6Address, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', flags: 'Flags', hit: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', reserved: 'bytes', flags: 'Flags', hit: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 @info_final
@@ -752,6 +773,8 @@ class EchoResponseUnsignedParameter(Parameter):
 class RelayFromParameter(Parameter):
     """Data model for HIP ``RELAY_FROM`` parameter."""
 
+    #: The reserved octet, as captured.
+    reserved: 'bytes'
     #: Port.
     port: 'int'
     #: Protocol.
@@ -760,13 +783,15 @@ class RelayFromParameter(Parameter):
     address: 'IPv6Address'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', port: 'int', protocol: 'TransType', address: 'IPv6Address') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', reserved: 'bytes', port: 'int', protocol: 'TransType', address: 'IPv6Address') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 @info_final
 class RelayToParameter(Parameter):
     """Data model for HIP ``RELAY_TO`` parameter."""
 
+    #: The reserved octet, as captured.
+    reserved: 'bytes'
     #: Port.
     port: 'int'
     #: Protocol.
@@ -775,31 +800,35 @@ class RelayToParameter(Parameter):
     address: 'IPv6Address'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', port: 'int', protocol: 'TransType', address: 'IPv6Address') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', reserved: 'bytes', port: 'int', protocol: 'TransType', address: 'IPv6Address') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 @info_final
 class OverlayTTLParameter(Parameter):
     """Data model for HIP ``OVERLAY_TTL`` parameter."""
 
+    #: The two reserved octets, as captured.
+    reserved: 'bytes'
     #: TTL value.
     ttl: 'timedelta'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', ttl: 'timedelta') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', reserved: 'bytes', ttl: 'timedelta') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 @info_final
 class RouteViaParameter(Parameter):
     """Data model for HIP ``ROUTE_VIA`` parameter."""
 
+    #: The two reserved octets, as captured.
+    reserved: 'bytes'
     #: Flags.
     flags: 'Flags'
     #: HIT addresses.
     hit: 'tuple[IPv6Address, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', flags: 'Flags', hit: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', reserved: 'bytes', flags: 'Flags', hit: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 @info_final

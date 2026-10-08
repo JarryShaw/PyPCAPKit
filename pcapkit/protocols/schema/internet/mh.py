@@ -675,7 +675,7 @@ class PadOption(Option, code=[Enum_Option.Pad1,
     data: 'bytes' = PaddingField(length=pad_opt_data_len)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int') -> 'None': ...
+        def __init__(self, type: 'Enum_Option', length: 'int', data: 'bytes') -> 'None': ...
 
 
 @schema_final
@@ -1571,7 +1571,7 @@ class PadFlowIdentificationSuboption(FlowIdentificationSuboption,
     data: 'bytes' = PaddingField(length=pad_subopt_data_len)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_FlowIDSuboption', length: 'int') -> 'None': ...
+        def __init__(self, type: 'Enum_FlowIDSuboption', length: 'int', data: 'bytes') -> 'None': ...
 
 
 @schema_final

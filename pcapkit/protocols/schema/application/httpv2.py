@@ -242,7 +242,7 @@ class DataFrame(FrameType, code=Enum_Frame.DATA):
     )
 
     if TYPE_CHECKING:
-        def __init__(self, pad_len: 'Optional[int]', data: 'bytes') -> 'None': ...
+        def __init__(self, pad_len: 'Optional[int]', data: 'bytes', padding: 'Optional[bytes]') -> 'None': ...
 
 
 @schema_final
@@ -291,7 +291,7 @@ class HeadersFrame(FrameType, code=Enum_Frame.HEADERS):
     )
 
     if TYPE_CHECKING:
-        def __init__(self, pad_len: 'Optional[int]', stream_dep: 'Optional[StreamDependency]', weight: 'Optional[int]', fragment: 'bytes') -> 'None': ...
+        def __init__(self, pad_len: 'Optional[int]', stream_dep: 'Optional[StreamDependency]', weight: 'Optional[int]', fragment: 'bytes', padding: 'Optional[bytes]') -> 'None': ...
 
 
 @schema_final
@@ -389,7 +389,7 @@ class PushPromiseFrame(FrameType, code=Enum_Frame.PUSH_PROMISE):
     )
 
     if TYPE_CHECKING:
-        def __init__(self, pad_len: 'Optional[int]', stream: 'StreamID', fragment: 'bytes') -> 'None': ...
+        def __init__(self, pad_len: 'Optional[int]', stream: 'StreamID', fragment: 'bytes', padding: 'Optional[bytes]') -> 'None': ...
 
 
 @schema_final

@@ -611,6 +611,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             reserved=header.stream['reserved'],
             sid=header.stream['sid'],
             data=schema.data,
+            padding=schema.padding if flag.PADDED else b'',
         )
         return data
 
@@ -669,6 +670,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             stream_dependency=schema.stream_dep['sid'] if flag.PRIORITY else 0,
             weight=(schema.weight + 1) if flag.PRIORITY else 0,
             fragment=schema.fragment,
+            padding=schema.padding if flag.PADDED else b'',
         )
         return data
 
@@ -878,6 +880,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             promised_reserved=schema.stream['reserved'],
             promised_sid=schema.stream['sid'],
             fragment=schema.fragment,
+            padding=schema.padding if flag.PADDED else b'',
         )
 
         return data
@@ -1088,6 +1091,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
                         padded: 'bool' = False,
                         pad_len: 'int' = 0,
                         data: 'bytes' = b'',
+                        padding: 'bytes' = b'',
                         **kwargs: 'Any') -> 'tuple[Schema_DataFrame, Flags]':
         """Make HTTP/2 ``DATA`` frame.
 
@@ -1097,6 +1101,8 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             padded: Padded flag, implied by a non-zero ``pad_len``.
             pad_len: Padding length.
             data: Frame data.
+            padding: Padding octets, truncated or zero-filled to ``pad_len``
+                octets.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -1109,6 +1115,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
             pad_len = frame.pad_len
             data = frame.data
+            padding = getattr(frame, 'padding', b'')
 
         flags = Schema_DataFrame.Flags(0)
         if end_stream:
@@ -1119,6 +1126,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         return Schema_DataFrame(
             pad_len=pad_len,
             data=data,
+            padding=padding,
         ), flags
 
     def _make_http_headers(self, frame: 'Optional[Data_HeadersFrame]' = None, *,
@@ -1130,6 +1138,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
                            sid_dep: 'Optional[int]' = None,
                            weight: 'int' = 0,
                            fragment: 'bytes' = b'',
+                           padding: 'bytes' = b'',
                            **kwargs: 'Any') -> 'tuple[Schema_HeadersFrame, Flags]':
         """Make HTTP/2 ``HEADERS`` frame.
 
@@ -1143,6 +1152,8 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             sid_dep: Dependency stream identifier.
             weight: Priority weight value.
             fragment: Header block fragment.
+            padding: Padding octets, truncated or zero-filled to ``pad_len``
+                octets.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -1160,6 +1171,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             sid_dep = frame.stream_dependency
             weight = frame.weight
             fragment = frame.fragment
+            padding = getattr(frame, 'padding', b'')
         else:
             priority = sid_dep is not None
             sid_dep = sid_dep or 0
@@ -1182,6 +1194,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             },
             weight=weight - 1 if weight else 0,
             fragment=fragment,
+            padding=padding,
         ), flags
 
     def _make_http_priority(self, frame: 'Optional[Data_PriorityFrame]' = None, *,
@@ -1304,6 +1317,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
                                 promised_reserved: 'int' = 0,
                                 promised_sid: 'int' = 0,
                                 fragment: 'bytes' = b'',
+                                padding: 'bytes' = b'',
                                 **kwargs: 'Any') -> 'tuple[Schema_PushPromiseFrame, Flags]':
         """Make HTTP/2 ``PUSH_PROMISE`` frame.
 
@@ -1315,6 +1329,8 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             promised_reserved: Reserved bit of the promised stream identifier.
             promised_sid: Promised stream identifier.
             fragment: Header block fragment.
+            padding: Padding octets, truncated or zero-filled to ``pad_len``
+                octets.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -1328,6 +1344,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             promised_reserved = frame.promised_reserved
             promised_sid = frame.promised_sid
             fragment = frame.fragment
+            padding = getattr(frame, 'padding', b'')
 
         flags = Schema_PushPromiseFrame.Flags(0)
         if end_headers:
@@ -1342,6 +1359,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
                 'sid': promised_sid,
             },
             fragment=fragment,
+            padding=padding,
         ), flags
 
     def _make_http_ping(self, frame: 'Optional[Data_PingFrame]' = None, *,

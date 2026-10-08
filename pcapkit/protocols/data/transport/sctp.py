@@ -102,6 +102,11 @@ class ErrorCause(Data):
     #: Cause length.
     length: 'int'
 
+    if TYPE_CHECKING:
+        #: Trailing padding octets, as captured; present only when they are
+        #: not all zeros.
+        padding: 'bytes'
+
 
 @info_final
 class UnknownCause(ErrorCause):
@@ -260,6 +265,11 @@ class Parameter(Data):
     #: Parameter length.
     length: 'int'
 
+    if TYPE_CHECKING:
+        #: Trailing padding octets, as captured; present only when they are
+        #: not all zeros.
+        padding: 'bytes'
+
 
 @info_final
 class UnknownParameter(Parameter):
@@ -367,6 +377,11 @@ class Chunk(Data):
     type: 'ChunkType'
     #: Chunk length, excluding any trailing padding.
     length: 'int'
+
+    if TYPE_CHECKING:
+        #: Trailing padding octets, as captured; present only when they are
+        #: not all zeros.
+        padding: 'bytes'
 
 
 @info_final

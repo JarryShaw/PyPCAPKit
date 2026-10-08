@@ -1394,7 +1394,7 @@ class HIPUnitTests(unittest.TestCase):
             Parameter.R1_COUNTER,
             hip_data.R1CounterParameter(type=Parameter.R1_COUNTER,
                                         critical=False, length=16,
-                                        counter=2),
+                                        reserved=bytes(4), counter=2),
             version=2,
         ).counter, 2)
 
@@ -1505,7 +1505,7 @@ class HIPUnitTests(unittest.TestCase):
         self.assertEqual(proto._make_param_nat_traversal_mode(
             Parameter.NAT_TRAVERSAL_MODE,
             hip_data.NATTraversalModeParameter(type=Parameter.NAT_TRAVERSAL_MODE,
-                                               critical=False, length=8,
+                                               critical=False, reserved=bytes(2), length=8,
                                                mode_id=(NATTraversal.UDP_ENCAPSULATION,)),
             version=2,
         ).modes, (NATTraversal.UDP_ENCAPSULATION,))
@@ -1523,7 +1523,7 @@ class HIPUnitTests(unittest.TestCase):
         self.assertEqual(proto._make_param_encrypted(
             Parameter.ENCRYPTED,
             hip_data.EncryptedParameter(type=Parameter.ENCRYPTED,
-                                        critical=False, length=8,
+                                        critical=False, reserved=bytes(4), length=8,
                                         cipher=Cipher.NULL_ENCRYPT,
                                         iv=b'iv', data=b'data'),
             version=2,
@@ -1580,7 +1580,7 @@ class HIPUnitTests(unittest.TestCase):
         self.assertEqual(proto._make_param_notification(
             Parameter.NOTIFICATION,
             hip_data.NotificationParameter(type=Parameter.NOTIFICATION,
-                                           critical=False, length=8,
+                                           critical=False, reserved=bytes(2), length=8,
                                            msg_type=NotifyMessage.INVALID_SYNTAX,
                                            msg=b'bad'),
             version=2,
@@ -1635,7 +1635,7 @@ class HIPUnitTests(unittest.TestCase):
                                                       version=2).reg_failed, [])
         self.assertEqual(proto._make_param_reg_from(
             Parameter.REG_FROM,
-            hip_data.RegFromParameter(type=Parameter.REG_FROM, critical=False,
+            hip_data.RegFromParameter(type=Parameter.REG_FROM, critical=False, reserved=bytes(1),
                                       length=24, port=10500,
                                       protocol=TransType.UDP,
                                       address=ip_address('2001:db8::10')),
@@ -1662,7 +1662,7 @@ class HIPUnitTests(unittest.TestCase):
         self.assertEqual(proto._make_param_esp_transform(
             Parameter.ESP_TRANSFORM,
             hip_data.ESPTransformParameter(type=Parameter.ESP_TRANSFORM,
-                                           critical=False, length=8,
+                                           critical=False, reserved=bytes(2), length=8,
                                            suite_id=(ESPTransformSuite.AES_128_CBC_with_HMAC_SHA1,)),
             version=2,
         ).suites, (ESPTransformSuite.AES_128_CBC_with_HMAC_SHA1,))
@@ -1687,7 +1687,7 @@ class HIPUnitTests(unittest.TestCase):
         self.assertEqual(proto._make_param_payload_mic(
             Parameter.PAYLOAD_MIC,
             hip_data.PayloadMICParameter(type=Parameter.PAYLOAD_MIC,
-                                         critical=False, length=16,
+                                         critical=False, reserved=bytes(3), length=16,
                                          next=TransType.TCP,
                                          payload=b'payload', mic=b'mic'),
             version=2,
@@ -1708,7 +1708,7 @@ class HIPUnitTests(unittest.TestCase):
         self.assertTrue(proto._make_param_route_dst(
             Parameter.ROUTE_DST,
             hip_data.RouteDstParameter(type=Parameter.ROUTE_DST,
-                                       critical=False, length=24,
+                                       critical=False, reserved=bytes(2), length=24,
                                        flags=flags,
                                        hit=(ip_address('2001:db8::20'),)),
             version=2,
@@ -1770,7 +1770,7 @@ class HIPUnitTests(unittest.TestCase):
         self.assertEqual(proto._make_param_relay_from(
             Parameter.RELAY_FROM,
             hip_data.RelayFromParameter(type=Parameter.RELAY_FROM,
-                                        critical=False, length=24,
+                                        critical=False, reserved=bytes(1), length=24,
                                         port=10501, protocol=TransType.UDP,
                                         address=ip_address('2001:db8::30')),
             version=2,
@@ -1778,7 +1778,7 @@ class HIPUnitTests(unittest.TestCase):
         self.assertEqual(proto._make_param_relay_to(
             Parameter.RELAY_TO,
             hip_data.RelayToParameter(type=Parameter.RELAY_TO,
-                                      critical=False, length=24,
+                                      critical=False, reserved=bytes(1), length=24,
                                       port=10502, protocol=TransType.UDP,
                                       address=ip_address('2001:db8::31')),
             version=2,
@@ -1786,13 +1786,13 @@ class HIPUnitTests(unittest.TestCase):
         self.assertEqual(proto._make_param_overlay_ttl(
             Parameter.OVERLAY_TTL,
             hip_data.OverlayTTLParameter(type=Parameter.OVERLAY_TTL,
-                                         critical=False, length=8, ttl=dt1),
+                                         critical=False, reserved=bytes(2), length=8, ttl=dt1),
             version=2,
         ).ttl, 1)
         self.assertTrue(proto._make_param_route_via(
             Parameter.ROUTE_VIA,
             hip_data.RouteViaParameter(type=Parameter.ROUTE_VIA,
-                                       critical=False, length=24,
+                                       critical=False, reserved=bytes(2), length=24,
                                        flags=flags,
                                        hit=(ip_address('2001:db8::40'),)),
             version=2,

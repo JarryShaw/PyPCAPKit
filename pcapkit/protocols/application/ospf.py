@@ -392,6 +392,7 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
 
         """
         auth = Data_CryptographicAuthentication(
+            reserved=schema.reserved,
             key_id=schema.key_id,
             len=schema.len,
             seq=schema.seq,
@@ -422,6 +423,7 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
             return Schema_CryptographicAuthentication.unpack(auth_data)  # type: ignore[call-arg,misc]
         if isinstance(auth_data, Data_CryptographicAuthentication):
             return Schema_CryptographicAuthentication(
+                reserved=getattr(auth_data, 'reserved', b'\x00\x00'),
                 key_id=auth_data.key_id,
                 len=auth_data.len,
                 seq=auth_data.seq,

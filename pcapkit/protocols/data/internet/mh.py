@@ -736,8 +736,12 @@ class UnassignedOption(Option):
 class PadOption(Option):
     """Data model for Pad option."""
 
+    #: Padding octets, i.e. the ``PadN`` option data as captured (empty for a
+    #: ``Pad1``).
+    data: 'bytes'
+
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int') -> 'None': ...
+        def __init__(self, type: 'Enum_Option', length: 'int', data: 'bytes') -> 'None': ...
 
 
 @info_final
@@ -1446,8 +1450,12 @@ class UnassignedFlowIdentificationSuboption(FlowIdentificationSuboption):
 class PadFlowIdentificationSuboption(FlowIdentificationSuboption):
     """Data model for MH Flow Identification padding sub-options."""
 
+    #: Padding octets, i.e. the ``PadN`` sub-option data as captured (empty for
+    #: a ``Pad``).
+    data: 'bytes'
+
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_FlowIDSuboption', length: 'int') -> 'None': ...
+        def __init__(self, type: 'Enum_FlowIDSuboption', length: 'int', data: 'bytes') -> 'None': ...
 
 
 @info_final
