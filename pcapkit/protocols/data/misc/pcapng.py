@@ -353,9 +353,14 @@ class EPB_FlagsOption(Option):
     reception: 'PacketReception'
     #: FCS length.
     fcs_len: 'int'
-    #: Bits 9 to 23 of the flags word, kept verbatim (checksum and
-    #: segmentation offload flags, reserved bits and unnamed
-    #: link-layer-dependent errors).
+    #: Checksum not ready (bit 9).
+    checksum_not_ready: 'bool'
+    #: Checksum valid (bit 10).
+    checksum_valid: 'bool'
+    #: TCP segmentation offloaded (bit 11).
+    tcp_segmentation_offloaded: 'bool'
+    #: Bits 12 to 23 of the flags word, kept verbatim (reserved bits and
+    #: unnamed link-layer-dependent errors).
     reserved: 'int'
     #: Link-layer-dependent error - CRC error (bit 24).
     crc_error: 'bool'
@@ -376,7 +381,8 @@ class EPB_FlagsOption(Option):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int', direction: 'PacketDirection',
-                     reception: 'PacketReception', fcs_len: 'int', reserved: 'int', crc_error: 'bool',
+                     reception: 'PacketReception', fcs_len: 'int', checksum_not_ready: 'bool',
+                     checksum_valid: 'bool', tcp_segmentation_offloaded: 'bool', reserved: 'int', crc_error: 'bool',
                      too_long: 'bool', too_short: 'bool', gap_error: 'bool', unaligned_error: 'bool',
                      delimiter_error: 'bool', preamble_error: 'bool', symbol_error: 'bool') -> 'None': ...
 
@@ -865,9 +871,14 @@ class PACK_FlagsOption(Option):
     reception: 'PacketReception'
     #: FCS length.
     fcs_len: 'int'
-    #: Bits 9 to 23 of the flags word, kept verbatim (checksum and
-    #: segmentation offload flags, reserved bits and unnamed
-    #: link-layer-dependent errors).
+    #: Checksum not ready (bit 9).
+    checksum_not_ready: 'bool'
+    #: Checksum valid (bit 10).
+    checksum_valid: 'bool'
+    #: TCP segmentation offloaded (bit 11).
+    tcp_segmentation_offloaded: 'bool'
+    #: Bits 12 to 23 of the flags word, kept verbatim (reserved bits and
+    #: unnamed link-layer-dependent errors).
     reserved: 'int'
     #: Link-layer-dependent error - CRC error (bit 24).
     crc_error: 'bool'
@@ -888,7 +899,8 @@ class PACK_FlagsOption(Option):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int', direction: 'PacketDirection',
-                     reception: 'PacketReception', fcs_len: 'int', reserved: 'int', crc_error: 'bool',
+                     reception: 'PacketReception', fcs_len: 'int', checksum_not_ready: 'bool',
+                     checksum_valid: 'bool', tcp_segmentation_offloaded: 'bool', reserved: 'int', crc_error: 'bool',
                      too_long: 'bool', too_short: 'bool', gap_error: 'bool', unaligned_error: 'bool',
                      delimiter_error: 'bool', preamble_error: 'bool', symbol_error: 'bool') -> 'None': ...
 

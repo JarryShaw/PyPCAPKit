@@ -101,8 +101,14 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         #: Block, and is used with those link layers (e.g. PPP) where the length of
         #: the FCS can change during time.
         fcs_len: int
-        #: Bits 9 to 23, kept verbatim (checksum and segmentation offload
-        #: flags, reserved bits and unnamed link-layer-dependent errors).
+        #: Checksum not ready (bit 9).
+        checksum_not_ready: int
+        #: Checksum valid (bit 10).
+        checksum_valid: int
+        #: TCP segmentation offloaded (bit 11).
+        tcp_segmentation_offloaded: int
+        #: Bits 12 to 23, kept verbatim (reserved bits and unnamed
+        #: link-layer-dependent errors).
         reserved: int
         #: Link-layer-dependent error - CRC error (bit 24).
         crc_error: int
@@ -135,8 +141,14 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         #: Block, and is used with those link layers (e.g. PPP) where the length of
         #: the FCS can change during time.
         fcs_len: int
-        #: Bits 9 to 23, kept verbatim (checksum and segmentation offload
-        #: flags, reserved bits and unnamed link-layer-dependent errors).
+        #: Checksum not ready (bit 9).
+        checksum_not_ready: int
+        #: Checksum valid (bit 10).
+        checksum_valid: int
+        #: TCP segmentation offloaded (bit 11).
+        tcp_segmentation_offloaded: int
+        #: Bits 12 to 23, kept verbatim (reserved bits and unnamed
+        #: link-layer-dependent errors).
         reserved: int
         #: Link-layer-dependent error - CRC error (bit 24).
         crc_error: int
@@ -443,6 +455,30 @@ def bounded_area(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[s
     return callback
 
 
+def captured_area(name: 'str') -> 'Callable[[dict[str, Any]], int]':
+    """Bound a packet block's Packet Data to the octets the block holds.
+
+    Args:
+        name: Name of the block's captured length field, ``captured_len`` or
+            ``captured_length``.
+
+    Returns:
+        A callback returning the captured length, never past the block's
+        Block Total Length less its 32 framing octets, and never below zero.
+
+    A captured length running past the block would otherwise read the trailing
+    Block Total Length, and whatever follows the block, as packet data, so the
+    rebuild could not be byte-exact. Bounded, the block keeps its declared
+    captured length and exactly the octets it holds, and the padding and option
+    area are sized from those octets rather than from the declared length
+    (:issue:`1405`).
+
+    """
+    def callback(pkt: 'dict[str, Any]') -> 'int':
+        return max(0, min(pkt[name], pkt['length'] - 32))
+    return callback
+
+
 def pcapng_block_selector(packet: 'dict[str, Any]') -> 'Field':
     """Selector function for :attr:`PCAPNG.block` field.
 
@@ -568,14 +604,16 @@ class FlagsField(UInt32Field):
 
 
 #: Sub-fields of the ``epb_flags`` and ``pack_flags`` words. ``reserved`` keeps
-#: bits 9 to 23 verbatim -- the checksum and segmentation offload bits 9-11, the
-#: reserved bits 12-15 and the link-layer-dependent error bits 16-23 that the
-#: data model does not name.
+#: bits 12 to 23 verbatim -- the reserved bits 12-15 and the link-layer-dependent
+#: error bits 16-23 that the data model does not name.
 PACKET_FLAGS = {
     'direction': (0, 2),
     'reception': (2, 3),
     'fcs_len': (5, 4),
-    'reserved': (9, 15),
+    'checksum_not_ready': (9, 1),
+    'checksum_valid': (10, 1),
+    'tcp_segmentation_offloaded': (11, 1),
+    'reserved': (12, 12),
     'crc_error': (24, 1),
     'too_long': (25, 1),
     'too_short': (26, 1),
@@ -1441,18 +1479,18 @@ class EnhancedPacketBlock(BlockType, code=Enum_BlockType.Enhanced_Packet_Block):
     captured_len: 'int' = UInt32Field(callback=byteorder_callback)
     #: Original packet length.
     original_len: 'int' = UInt32Field(callback=byteorder_callback)
-    #: Packet data.
-    packet_data: 'bytes' = PayloadField(length=lambda pkt: pkt['captured_len'])
+    #: Packet data, bounded by the block (see :func:`captured_area`).
+    packet_data: 'bytes' = PayloadField(length=captured_area('captured_len'))
     #: Padding.
-    padding_data: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['captured_len'] % 4) % 4)
+    padding_data: 'bytes' = PaddingField(length=lambda pkt: (4 - captured_area('captured_len')(pkt) % 4) % 4)
     #: Options.
     options: 'list[Option]' = OptionAreaField(
         # NOTE: The padding is recomputed here rather than read back from
         # ``padding_data``: a PaddingField is written straight into the schema
         # buffer while packing and never lands in the packet data, so its name
         # is not a key here on the packing path.
-        length=bounded_area(lambda pkt: pkt['length'] - 32 - pkt['captured_len']
-                                        - (4 - pkt['captured_len'] % 4) % 4),
+        length=bounded_area(lambda pkt: pkt['length'] - 32
+                                        - (captured_area('captured_len')(pkt) + 3) // 4 * 4),
         base_schema=_EPB_Option,
         type_name='type',
         registry=Option.registry['epb'],
@@ -1471,6 +1509,29 @@ class EnhancedPacketBlock(BlockType, code=Enum_BlockType.Enhanced_Packet_Block):
                      options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
 
 
+def _spb_data_length(packet: 'dict[str, Any]') -> 'int':
+    """Length of a Simple Packet Block's packet data.
+
+    Args:
+        packet: Unpacked data so far, with ``length``, ``original_len`` and,
+            when interface 0 sets one, ``snaplen``.
+
+    Returns:
+        ``min(original_len, snaplen)``, bounded by the octets the block holds
+        less its 16 framing octets. A block that holds more than the snaplen
+        and its padding keeps the excess as packet data instead, so no octet
+        is dropped and the trailing Block Total Length is read where it sits
+        (:issue:`1384`).
+
+    """
+    area = max(0, packet['length'] - 16)
+    size = min(packet['original_len'], area)
+    snaplen = packet.get('snaplen')
+    if snaplen is not None and snaplen < size and area <= (snaplen + 3) // 4 * 4:
+        size = snaplen
+    return size
+
+
 @schema_final
 class SimplePacketBlock(BlockType, code=Enum_BlockType.Simple_Packet_Block):
     """Header schema for PCAP-NG Simple Packet Block (SPB)."""
@@ -1481,11 +1542,9 @@ class SimplePacketBlock(BlockType, code=Enum_BlockType.Simple_Packet_Block):
     length: 'int' = UInt32Field(callback=byteorder_callback)
     #: Original packet length.
     original_len: 'int' = UInt32Field(callback=byteorder_callback)
-    #: Packet data, ``min(original_len, snaplen)`` octets; a packet cut by the
-    #: snaplen is bounded by what the block holds, less its 16 framing octets.
-    packet_data: 'bytes' = PayloadField(length=lambda pkt: max(0, min(pkt.get('snaplen', 0xFFFFFFFFFFFFFFFF),
-                                                                      pkt['original_len'],
-                                                                      pkt['length'] - 16)))
+    #: Packet data, ``min(original_len, snaplen)`` octets, bounded by what the
+    #: block holds; see :func:`_spb_data_length`.
+    packet_data: 'bytes' = PayloadField(length=_spb_data_length)
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - len(pkt['packet_data']) % 4) % 4)
     #: Block total length.
@@ -1505,16 +1564,25 @@ def _split_names(resol: 'str') -> 'list[str]':
             :class:`~pcapkit.corekit.fields.strings.StringField` decodes it.
 
     Returns:
-        The names. They are split from the *octets* the data was decoded from,
-        so that a name that is not valid UTF-8 comes back as a
+        The names, one per terminator, so an empty name is kept as ``''`` and
+        joining them back yields the data exactly (:issue:`1383`). They are
+        split from the *octets* the data was decoded from, so that a name that
+        is not valid UTF-8 comes back as a
         :class:`~pcapkit.corekit.fields.strings.DecodedString` carrying its own
         octets; splitting the decoded text would return plain strings and lose
         them.
 
+    Raises:
+        ProtocolError: If the data is empty or does not end in a zero
+            terminator. The record area is then kept as the octets captured
+            (see :class:`OptionAreaField`).
+
     """
     raw = resol.raw if isinstance(resol, DecodedString) else resol.encode('utf-8')
+    if not raw.endswith(b'\x00'):
+        raise ProtocolError(f'PCAP-NG: [NRB] name resolution data is not zero-terminated: {raw!r}')
     names = []  # type: list[str]
-    for octets in raw.rstrip(b'\x00').split(b'\x00'):
+    for octets in raw[:-1].split(b'\x00'):
         text = octets.decode('utf-8', 'replace')
         names.append(text if text.encode('utf-8') == octets else DecodedString(text, octets))
     return names
@@ -1890,9 +1958,14 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
             :exc:`OverflowError` (``cannot fit 'int' into an index-sized
             integer``), and below that it silently returns whatever is there, so
             the same malformed prefix would be either fatal or invisible
-            depending only on its magnitude. It is clamped to the octets the
-            entry has left and reported, which is :func:`nonnegative`'s rule at
-            the other end of the same range.
+            depending only on its magnitude. A length past the octets the entry
+            has left raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`
+            instead, and the whole entry is then kept as the octets captured, as
+            the one :obj:`bytes` item of :attr:`data`, which the block's ``make``
+            writes back verbatim. Clamping the field would rebuild a different
+            length prefix and a terminator that was never there (:issue:`1406`,
+            the #1325 ruling that :class:`OptionAreaField` applies to option
+            areas).
 
             Field names, keys and values are decoded with ``errors='replace'``
             rather than strictly. A non-UTF-8 octet in any of the three would
@@ -1960,6 +2033,25 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
         """
         self = cast('Self', super().post_process(packet))
 
+        try:
+            self.data = self._read_entries()
+        except ProtocolError as error:
+            warn(f'{error}; journal entry of {len(self.entry)} octet(s) kept as captured',
+                 ProtocolWarning, stacklevel=stacklevel())
+            self.data = [self.entry]
+        return self
+
+    def _read_entries(self) -> 'list[OrderedMultiDict[str, str | bytes]]':
+        """Walk :attr:`entry` into its journal entries, as :meth:`post_process` describes.
+
+        Returns:
+            The journal entries.
+
+        Raises:
+            ProtocolError: If a binary field declares a length past the octets
+                left in the entry.
+
+        """
         data = []  # type: list[OrderedMultiDict[str, str | bytes]]
         total = len(self.entry)
         entry_data = io.BytesIO(self.entry)
@@ -2037,39 +2129,30 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
 
                     length = struct.unpack('<Q', prefix)[0]  # type: int
                     available = total - entry_data.tell()
-                    clamped = length > available
-                    if clamped:
-                        warn(f'PCAP-NG: [systemd Journal Export] binary field {line!r} '
-                             f'declares {length} octet(s) with {available} left in its '
-                             f'entry; reading {available}', SchemaWarning,
-                             stacklevel=stacklevel())
-                        length = available
+                    if length > available:
+                        raise ProtocolError(f'PCAP-NG: [systemd Journal Export] binary field {line!r} '
+                                            f'declares {length} octet(s) with {available} left in its entry')
 
                     entry.add(self._decode_text(line), entry_data.read(length))
 
-                    if not clamped:
-                        # the one octet the format puts here to terminate the
-                        # field; a value already clamped to the entry's own end
-                        # left nothing behind to check, and was reported above.
-                        # the reader's position is well defined either way --
-                        # exactly length + 1 octets past where the field name
-                        # started -- so a bad octet here ends only this
-                        # entry's field collection: it does not abort the
-                        # walk, which keeps looking for the next entry's
-                        # separator from here.
-                        terminator = entry_data.read(1)
-                        if terminator != b'\n':
-                            warn(f'PCAP-NG: [systemd Journal Export] binary field '
-                                 f'{line!r} is not followed by the newline that '
-                                 f'terminates it; ending the entry', SchemaWarning,
-                                 stacklevel=stacklevel())
-                            break
+                    # the one octet the format puts here to terminate the
+                    # field. the reader's position is well defined -- exactly
+                    # length + 1 octets past where the field name started --
+                    # so a bad octet here ends only this entry's field
+                    # collection: it does not abort the walk, which keeps
+                    # looking for the next entry's separator from here.
+                    terminator = entry_data.read(1)
+                    if terminator != b'\n':
+                        warn(f'PCAP-NG: [systemd Journal Export] binary field '
+                             f'{line!r} is not followed by the newline that '
+                             f'terminates it; ending the entry', SchemaWarning,
+                             stacklevel=stacklevel())
+                        break
 
             data.append(entry)
             if entry_data.tell() >= total and not separator:
                 break
-        self.data = data
-        return self
+        return data
 
     @staticmethod
     def _decode_text(octets: 'bytes') -> 'str':
@@ -2093,8 +2176,9 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
             return octets.decode('utf-8', errors='replace')
 
     if TYPE_CHECKING:
-        #: Journal entry (decoded).
-        data: 'list[OrderedMultiDict[str, str | bytes]]'
+        #: Journal entry (decoded), or the entry as captured, as one
+        #: :obj:`bytes` item, if it is malformed.
+        data: 'list[OrderedMultiDict[str, str | bytes] | bytes]'
 
         def __init__(self, length: 'int', entry: 'bytes', length2: 'int') -> 'None': ...
 
@@ -2365,16 +2449,16 @@ class PacketBlock(BlockType, code=Enum_BlockType.Packet_Block):
     captured_length: 'int' = UInt32Field(callback=byteorder_callback)
     #: Original packet length.
     original_length: 'int' = UInt32Field(callback=byteorder_callback)
-    #: Packet data.
-    packet_data: 'bytes' = PayloadField(length=lambda pkt: pkt['captured_length'])
+    #: Packet data, bounded by the block (see :func:`captured_area`).
+    packet_data: 'bytes' = PayloadField(length=captured_area('captured_length'))
     #: Padding.
-    padding_data: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['captured_length'] % 4) % 4)
+    padding_data: 'bytes' = PaddingField(length=lambda pkt: (4 - captured_area('captured_length')(pkt) % 4) % 4)
     #: Options.
     options: 'list[Option]' = OptionAreaField(
         # NOTE: see EnhancedPacketBlock.options on why the padding is recomputed
         # here instead of being read back from ``padding_data``.
-        length=bounded_area(lambda pkt: pkt['length'] - 32 - pkt['captured_length']
-                                        - (4 - pkt['captured_length'] % 4) % 4),
+        length=bounded_area(lambda pkt: pkt['length'] - 32
+                                        - (captured_area('captured_length')(pkt) + 3) // 4 * 4),
         base_schema=_PACK_Option,
         type_name='type',
         registry=Option.registry['pack'],
