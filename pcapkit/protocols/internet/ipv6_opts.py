@@ -746,6 +746,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             cmpt_len=schema.cmpt_len * 4,
             level=schema.level,
             checksum=schema.checksum,
+            pad=schema.pad,
         )
 
         if schema.cmpt_len > 0:
@@ -1552,6 +1553,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
                           level: 'int' = 0,
                           checksum: 'bytes' = b'\x00\x00',
                           bitmap: 'Optional[bytes | tuple[int, ...]]' = None,
+                          pad: 'bytes' = b'',
                           **kwargs: 'Any') -> 'Schema_CALIPSOOption':
         """Make IPv6-Opts calipso option.
 
@@ -1564,6 +1566,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             bitmap: compartment bitmap, as :obj:`bytes` or as the
                 :obj:`tuple` of octets the reader stores; its length must be a
                 multiple of 4 octets
+            pad: octets after the compartment bitmap, counted in ``Opt Data Len``
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -1582,6 +1585,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             level = opt.level
             checksum = opt.checksum
             bitmap = opt.cmpt_bitmap if hasattr(opt, 'cmpt_bitmap') else None
+            pad = opt.pad
         bitmap_bytes = bytes(bitmap) if bitmap is not None else b''
         if len(bitmap_bytes) % 4 != 0:
             raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid CALIPSO bitmap length: '
@@ -1589,12 +1593,13 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         return Schema_CALIPSOOption(
             type=code,
-            len=8 + len(bitmap_bytes),
+            len=8 + len(bitmap_bytes) + len(pad),
             domain=domain,
             cmpt_len=len(bitmap_bytes) // 4,
             level=level,
             checksum=checksum,
             bitmap=bitmap_bytes if bitmap_bytes else None,
+            pad=pad,
         )
 
     def _make_opt_smf_dpd(self, code: 'Enum_Option', opt: 'Optional[Data_SMFIdentificationBasedDPDOption | Data_SMFHashBasedDPDOption]' = None, *,

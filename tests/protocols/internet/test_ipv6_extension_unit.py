@@ -791,7 +791,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
         calipso = data.CALIPSOOption(type=Option.CALIPSO, length=10, domain=7,
                                      cmpt_len=4, level=3, checksum=b'\x01\x02',
-                                     **base)
+                                     pad=b'', **base)
         calipso.__update__([('cmpt_bitmap', b'\xaa\xbb\xcc\xdd')])
         self.assertEqual(proto._make_opt_calipso(Option.CALIPSO, calipso).bitmap, b'\xaa\xbb\xcc\xdd')
 
