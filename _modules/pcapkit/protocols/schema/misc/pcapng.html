@@ -579,8 +579,14 @@
         <span class="c1">#: Block, and is used with those link layers (e.g. PPP) where the length of</span>
         <span class="c1">#: the FCS can change during time.</span>
         <span class="n">fcs_len</span><span class="p">:</span> <span class="nb">int</span>
-        <span class="c1">#: Bits 9 to 23, kept verbatim (checksum and segmentation offload</span>
-        <span class="c1">#: flags, reserved bits and unnamed link-layer-dependent errors).</span>
+        <span class="c1">#: Checksum not ready (bit 9).</span>
+        <span class="n">checksum_not_ready</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Checksum valid (bit 10).</span>
+        <span class="n">checksum_valid</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: TCP segmentation offloaded (bit 11).</span>
+        <span class="n">tcp_segmentation_offloaded</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Bits 12 to 23, kept verbatim (reserved bits and unnamed</span>
+        <span class="c1">#: link-layer-dependent errors).</span>
         <span class="n">reserved</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: Link-layer-dependent error - CRC error (bit 24).</span>
         <span class="n">crc_error</span><span class="p">:</span> <span class="nb">int</span>
@@ -616,8 +622,14 @@
         <span class="c1">#: Block, and is used with those link layers (e.g. PPP) where the length of</span>
         <span class="c1">#: the FCS can change during time.</span>
         <span class="n">fcs_len</span><span class="p">:</span> <span class="nb">int</span>
-        <span class="c1">#: Bits 9 to 23, kept verbatim (checksum and segmentation offload</span>
-        <span class="c1">#: flags, reserved bits and unnamed link-layer-dependent errors).</span>
+        <span class="c1">#: Checksum not ready (bit 9).</span>
+        <span class="n">checksum_not_ready</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Checksum valid (bit 10).</span>
+        <span class="n">checksum_valid</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: TCP segmentation offloaded (bit 11).</span>
+        <span class="n">tcp_segmentation_offloaded</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Bits 12 to 23, kept verbatim (reserved bits and unnamed</span>
+        <span class="c1">#: link-layer-dependent errors).</span>
         <span class="n">reserved</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: Link-layer-dependent error - CRC error (bit 24).</span>
         <span class="n">crc_error</span><span class="p">:</span> <span class="nb">int</span>
@@ -931,6 +943,30 @@
     <span class="k">return</span> <span class="n">callback</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">captured_area</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Callable[[dict[str, Any]], int]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Bound a packet block's Packet Data to the octets the block holds.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        name: Name of the block's captured length field, ``captured_len`` or</span>
+<span class="sd">            ``captured_length``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A callback returning the captured length, never past the block's</span>
+<span class="sd">        Block Total Length less its 32 framing octets, and never below zero.</span>
+
+<span class="sd">    A captured length running past the block would otherwise read the trailing</span>
+<span class="sd">    Block Total Length, and whatever follows the block, as packet data, so the</span>
+<span class="sd">    rebuild could not be byte-exact. Bounded, the block keeps its declared</span>
+<span class="sd">    captured length and exactly the octets it holds, and the padding and option</span>
+<span class="sd">    area are sized from those octets rather than from the declared length</span>
+<span class="sd">    (:issue:`1405`).</span>
+
+<span class="sd">    """</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">callback</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">32</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">callback</span>
+
+
 <div class="viewcode-block" id="pcapng_block_selector">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.pcapng_block_selector">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">pcapng_block_selector</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Field'</span><span class="p">:</span>
@@ -1062,14 +1098,16 @@
 
 
 <span class="c1">#: Sub-fields of the ``epb_flags`` and ``pack_flags`` words. ``reserved`` keeps</span>
-<span class="c1">#: bits 9 to 23 verbatim -- the checksum and segmentation offload bits 9-11, the</span>
-<span class="c1">#: reserved bits 12-15 and the link-layer-dependent error bits 16-23 that the</span>
-<span class="c1">#: data model does not name.</span>
+<span class="c1">#: bits 12 to 23 verbatim -- the reserved bits 12-15 and the link-layer-dependent</span>
+<span class="c1">#: error bits 16-23 that the data model does not name.</span>
 <span class="n">PACKET_FLAGS</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">'direction'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
     <span class="s1">'reception'</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
     <span class="s1">'fcs_len'</span><span class="p">:</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
-    <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
+    <span class="s1">'checksum_not_ready'</span><span class="p">:</span> <span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="s1">'checksum_valid'</span><span class="p">:</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="s1">'tcp_segmentation_offloaded'</span><span class="p">:</span> <span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="s1">'reserved'</span><span class="p">:</span> <span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span>
     <span class="s1">'crc_error'</span><span class="p">:</span> <span class="p">(</span><span class="mi">24</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
     <span class="s1">'too_long'</span><span class="p">:</span> <span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
     <span class="s1">'too_short'</span><span class="p">:</span> <span class="p">(</span><span class="mi">26</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
@@ -2060,18 +2098,18 @@
     <span class="n">captured_len</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
     <span class="c1">#: Original packet length.</span>
     <span class="n">original_len</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
-    <span class="c1">#: Packet data.</span>
-    <span class="n">packet_data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'captured_len'</span><span class="p">])</span>
+    <span class="c1">#: Packet data, bounded by the block (see :func:`captured_area`).</span>
+    <span class="n">packet_data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">captured_area</span><span class="p">(</span><span class="s1">'captured_len'</span><span class="p">))</span>
     <span class="c1">#: Padding.</span>
-    <span class="n">padding_data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'captured_len'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">padding_data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">captured_area</span><span class="p">(</span><span class="s1">'captured_len'</span><span class="p">)(</span><span class="n">pkt</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
     <span class="c1">#: Options.</span>
     <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionAreaField</span><span class="p">(</span>
         <span class="c1"># NOTE: The padding is recomputed here rather than read back from</span>
         <span class="c1"># ``padding_data``: a PaddingField is written straight into the schema</span>
         <span class="c1"># buffer while packing and never lands in the packet data, so its name</span>
         <span class="c1"># is not a key here on the packing path.</span>
-        <span class="n">length</span><span class="o">=</span><span class="n">bounded_area</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">32</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'captured_len'</span><span class="p">]</span>
-                                        <span class="o">-</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'captured_len'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="n">length</span><span class="o">=</span><span class="n">bounded_area</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">32</span>
+                                        <span class="o">-</span> <span class="p">(</span><span class="n">captured_area</span><span class="p">(</span><span class="s1">'captured_len'</span><span class="p">)(</span><span class="n">pkt</span><span class="p">)</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">4</span><span class="p">),</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">_EPB_Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
         <span class="n">registry</span><span class="o">=</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">'epb'</span><span class="p">],</span>
@@ -2091,6 +2129,29 @@
 
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_spb_data_length</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Length of a Simple Packet Block's packet data.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: Unpacked data so far, with ``length``, ``original_len`` and,</span>
+<span class="sd">            when interface 0 sets one, ``snaplen``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ``min(original_len, snaplen)``, bounded by the octets the block holds</span>
+<span class="sd">        less its 16 framing octets. A block that holds more than the snaplen</span>
+<span class="sd">        and its padding keeps the excess as packet data instead, so no octet</span>
+<span class="sd">        is dropped and the trailing Block Total Length is read where it sits</span>
+<span class="sd">        (:issue:`1384`).</span>
+
+<span class="sd">    """</span>
+    <span class="n">area</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">16</span><span class="p">)</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">packet</span><span class="p">[</span><span class="s1">'original_len'</span><span class="p">],</span> <span class="n">area</span><span class="p">)</span>
+    <span class="n">snaplen</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'snaplen'</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">snaplen</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">snaplen</span> <span class="o">&lt;</span> <span class="n">size</span> <span class="ow">and</span> <span class="n">area</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">snaplen</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="n">snaplen</span>
+    <span class="k">return</span> <span class="n">size</span>
+
+
 <div class="viewcode-block" id="SimplePacketBlock">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.SimplePacketBlock">[docs]</a>
 <span class="nd">@schema_final</span>
@@ -2103,11 +2164,9 @@
     <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
     <span class="c1">#: Original packet length.</span>
     <span class="n">original_len</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
-    <span class="c1">#: Packet data, ``min(original_len, snaplen)`` octets; a packet cut by the</span>
-    <span class="c1">#: snaplen is bounded by what the block holds, less its 16 framing octets.</span>
-    <span class="n">packet_data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'snaplen'</span><span class="p">,</span> <span class="mh">0xFFFFFFFFFFFFFFFF</span><span class="p">),</span>
-                                                                      <span class="n">pkt</span><span class="p">[</span><span class="s1">'original_len'</span><span class="p">],</span>
-                                                                      <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">16</span><span class="p">)))</span>
+    <span class="c1">#: Packet data, ``min(original_len, snaplen)`` octets, bounded by what the</span>
+    <span class="c1">#: block holds; see :func:`_spb_data_length`.</span>
+    <span class="n">packet_data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">_spb_data_length</span><span class="p">)</span>
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'packet_data'</span><span class="p">])</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
     <span class="c1">#: Block total length.</span>
@@ -2128,16 +2187,25 @@
 <span class="sd">            :class:`~pcapkit.corekit.fields.strings.StringField` decodes it.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        The names. They are split from the *octets* the data was decoded from,</span>
-<span class="sd">        so that a name that is not valid UTF-8 comes back as a</span>
+<span class="sd">        The names, one per terminator, so an empty name is kept as ``''`` and</span>
+<span class="sd">        joining them back yields the data exactly (:issue:`1383`). They are</span>
+<span class="sd">        split from the *octets* the data was decoded from, so that a name that</span>
+<span class="sd">        is not valid UTF-8 comes back as a</span>
 <span class="sd">        :class:`~pcapkit.corekit.fields.strings.DecodedString` carrying its own</span>
 <span class="sd">        octets; splitting the decoded text would return plain strings and lose</span>
 <span class="sd">        them.</span>
 
+<span class="sd">    Raises:</span>
+<span class="sd">        ProtocolError: If the data is empty or does not end in a zero</span>
+<span class="sd">            terminator. The record area is then kept as the octets captured</span>
+<span class="sd">            (see :class:`OptionAreaField`).</span>
+
 <span class="sd">    """</span>
     <span class="n">raw</span> <span class="o">=</span> <span class="n">resol</span><span class="o">.</span><span class="n">raw</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">resol</span><span class="p">,</span> <span class="n">DecodedString</span><span class="p">)</span> <span class="k">else</span> <span class="n">resol</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">'utf-8'</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">raw</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [NRB] name resolution data is not zero-terminated: </span><span class="si">{</span><span class="n">raw</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
     <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
-    <span class="k">for</span> <span class="n">octets</span> <span class="ow">in</span> <span class="n">raw</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">octets</span> <span class="ow">in</span> <span class="n">raw</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">):</span>
         <span class="n">text</span> <span class="o">=</span> <span class="n">octets</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">'utf-8'</span><span class="p">,</span> <span class="s1">'replace'</span><span class="p">)</span>
         <span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">text</span> <span class="k">if</span> <span class="n">text</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">'utf-8'</span><span class="p">)</span> <span class="o">==</span> <span class="n">octets</span> <span class="k">else</span> <span class="n">DecodedString</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">octets</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">names</span>
@@ -2583,9 +2651,14 @@
 <span class="sd">            :exc:`OverflowError` (``cannot fit 'int' into an index-sized</span>
 <span class="sd">            integer``), and below that it silently returns whatever is there, so</span>
 <span class="sd">            the same malformed prefix would be either fatal or invisible</span>
-<span class="sd">            depending only on its magnitude. It is clamped to the octets the</span>
-<span class="sd">            entry has left and reported, which is :func:`nonnegative`'s rule at</span>
-<span class="sd">            the other end of the same range.</span>
+<span class="sd">            depending only on its magnitude. A length past the octets the entry</span>
+<span class="sd">            has left raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`</span>
+<span class="sd">            instead, and the whole entry is then kept as the octets captured, as</span>
+<span class="sd">            the one :obj:`bytes` item of :attr:`data`, which the block's ``make``</span>
+<span class="sd">            writes back verbatim. Clamping the field would rebuild a different</span>
+<span class="sd">            length prefix and a terminator that was never there (:issue:`1406`,</span>
+<span class="sd">            the #1325 ruling that :class:`OptionAreaField` applies to option</span>
+<span class="sd">            areas).</span>
 
 <span class="sd">            Field names, keys and values are decoded with ``errors='replace'``</span>
 <span class="sd">            rather than strictly. A non-UTF-8 octet in any of the three would</span>
@@ -2653,6 +2726,28 @@
 <span class="sd">        """</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Self'</span><span class="p">,</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">))</span>
 
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_entries</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">ProtocolError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s1">; journal entry of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">entry</span><span class="p">)</span><span class="si">}</span><span class="s1"> octet(s) kept as captured'</span><span class="p">,</span>
+                 <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">entry</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="SystemdJournalExportBlock._read_entries">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.SystemdJournalExportBlock._read_entries">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_entries</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[OrderedMultiDict[str, str | bytes]]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Walk :attr:`entry` into its journal entries, as :meth:`post_process` describes.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The journal entries.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If a binary field declares a length past the octets</span>
+<span class="sd">                left in the entry.</span>
+
+<span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[OrderedMultiDict[str, str | bytes]]</span>
         <span class="n">total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">entry</span><span class="p">)</span>
         <span class="n">entry_data</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">entry</span><span class="p">)</span>
@@ -2730,39 +2825,30 @@
 
                     <span class="n">length</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">'&lt;Q'</span><span class="p">,</span> <span class="n">prefix</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># type: int</span>
                     <span class="n">available</span> <span class="o">=</span> <span class="n">total</span> <span class="o">-</span> <span class="n">entry_data</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
-                    <span class="n">clamped</span> <span class="o">=</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="n">available</span>
-                    <span class="k">if</span> <span class="n">clamped</span><span class="p">:</span>
-                        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [systemd Journal Export] binary field </span><span class="si">{</span><span class="n">line</span><span class="si">!r}</span><span class="s1"> '</span>
-                             <span class="sa">f</span><span class="s1">'declares </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1"> octet(s) with </span><span class="si">{</span><span class="n">available</span><span class="si">}</span><span class="s1"> left in its '</span>
-                             <span class="sa">f</span><span class="s1">'entry; reading </span><span class="si">{</span><span class="n">available</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">SchemaWarning</span><span class="p">,</span>
-                             <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
-                        <span class="n">length</span> <span class="o">=</span> <span class="n">available</span>
+                    <span class="k">if</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="n">available</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [systemd Journal Export] binary field </span><span class="si">{</span><span class="n">line</span><span class="si">!r}</span><span class="s1"> '</span>
+                                            <span class="sa">f</span><span class="s1">'declares </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1"> octet(s) with </span><span class="si">{</span><span class="n">available</span><span class="si">}</span><span class="s1"> left in its entry'</span><span class="p">)</span>
 
                     <span class="n">entry</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_decode_text</span><span class="p">(</span><span class="n">line</span><span class="p">),</span> <span class="n">entry_data</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">))</span>
 
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">clamped</span><span class="p">:</span>
-                        <span class="c1"># the one octet the format puts here to terminate the</span>
-                        <span class="c1"># field; a value already clamped to the entry's own end</span>
-                        <span class="c1"># left nothing behind to check, and was reported above.</span>
-                        <span class="c1"># the reader's position is well defined either way --</span>
-                        <span class="c1"># exactly length + 1 octets past where the field name</span>
-                        <span class="c1"># started -- so a bad octet here ends only this</span>
-                        <span class="c1"># entry's field collection: it does not abort the</span>
-                        <span class="c1"># walk, which keeps looking for the next entry's</span>
-                        <span class="c1"># separator from here.</span>
-                        <span class="n">terminator</span> <span class="o">=</span> <span class="n">entry_data</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-                        <span class="k">if</span> <span class="n">terminator</span> <span class="o">!=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">:</span>
-                            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [systemd Journal Export] binary field '</span>
-                                 <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">line</span><span class="si">!r}</span><span class="s1"> is not followed by the newline that '</span>
-                                 <span class="sa">f</span><span class="s1">'terminates it; ending the entry'</span><span class="p">,</span> <span class="n">SchemaWarning</span><span class="p">,</span>
-                                 <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
-                            <span class="k">break</span>
+                    <span class="c1"># the one octet the format puts here to terminate the</span>
+                    <span class="c1"># field. the reader's position is well defined -- exactly</span>
+                    <span class="c1"># length + 1 octets past where the field name started --</span>
+                    <span class="c1"># so a bad octet here ends only this entry's field</span>
+                    <span class="c1"># collection: it does not abort the walk, which keeps</span>
+                    <span class="c1"># looking for the next entry's separator from here.</span>
+                    <span class="n">terminator</span> <span class="o">=</span> <span class="n">entry_data</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">terminator</span> <span class="o">!=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">:</span>
+                        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [systemd Journal Export] binary field '</span>
+                             <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">line</span><span class="si">!r}</span><span class="s1"> is not followed by the newline that '</span>
+                             <span class="sa">f</span><span class="s1">'terminates it; ending the entry'</span><span class="p">,</span> <span class="n">SchemaWarning</span><span class="p">,</span>
+                             <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+                        <span class="k">break</span>
 
             <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">entry_data</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">total</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">separator</span><span class="p">:</span>
                 <span class="k">break</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
-        <span class="k">return</span> <span class="bp">self</span></div>
+        <span class="k">return</span> <span class="n">data</span></div>
 
 
 <div class="viewcode-block" id="SystemdJournalExportBlock._decode_text">
@@ -2790,8 +2876,9 @@
 
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="c1">#: Journal entry (decoded).</span>
-        <span class="n">data</span><span class="p">:</span> <span class="s1">'list[OrderedMultiDict[str, str | bytes]]'</span>
+        <span class="c1">#: Journal entry (decoded), or the entry as captured, as one</span>
+        <span class="c1">#: :obj:`bytes` item, if it is malformed.</span>
+        <span class="n">data</span><span class="p">:</span> <span class="s1">'list[OrderedMultiDict[str, str | bytes] | bytes]'</span>
 
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">entry</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">length2</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
@@ -3104,16 +3191,16 @@
     <span class="n">captured_length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
     <span class="c1">#: Original packet length.</span>
     <span class="n">original_length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
-    <span class="c1">#: Packet data.</span>
-    <span class="n">packet_data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'captured_length'</span><span class="p">])</span>
+    <span class="c1">#: Packet data, bounded by the block (see :func:`captured_area`).</span>
+    <span class="n">packet_data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">captured_area</span><span class="p">(</span><span class="s1">'captured_length'</span><span class="p">))</span>
     <span class="c1">#: Padding.</span>
-    <span class="n">padding_data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'captured_length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">padding_data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">captured_area</span><span class="p">(</span><span class="s1">'captured_length'</span><span class="p">)(</span><span class="n">pkt</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
     <span class="c1">#: Options.</span>
     <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionAreaField</span><span class="p">(</span>
         <span class="c1"># NOTE: see EnhancedPacketBlock.options on why the padding is recomputed</span>
         <span class="c1"># here instead of being read back from ``padding_data``.</span>
-        <span class="n">length</span><span class="o">=</span><span class="n">bounded_area</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">32</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'captured_length'</span><span class="p">]</span>
-                                        <span class="o">-</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'captured_length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="n">length</span><span class="o">=</span><span class="n">bounded_area</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">32</span>
+                                        <span class="o">-</span> <span class="p">(</span><span class="n">captured_area</span><span class="p">(</span><span class="s1">'captured_length'</span><span class="p">)(</span><span class="n">pkt</span><span class="p">)</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">4</span><span class="p">),</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">_PACK_Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
         <span class="n">registry</span><span class="o">=</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">'pack'</span><span class="p">],</span>

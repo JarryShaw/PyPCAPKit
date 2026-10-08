@@ -526,6 +526,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv4.tos_thr</span><span class="w"> </span><span class="kn">import</span> <span class="n">ToSThroughput</span> <span class="k">as</span> <span class="n">Enum_ToSThroughput</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv4.ts_flag</span><span class="w"> </span><span class="kn">import</span> <span class="n">TSFlag</span> <span class="k">as</span> <span class="n">Enum_TSFlag</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_ip_address</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.ipv4</span><span class="w"> </span><span class="kn">import</span> <span class="n">EOOLOption</span> <span class="k">as</span> <span class="n">Data_EOOLOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.ipv4</span><span class="w"> </span><span class="kn">import</span> <span class="n">ESECOption</span> <span class="k">as</span> <span class="n">Data_ESECOption</span>
@@ -757,6 +758,10 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed packet data.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the version is not 4, or if ``ihl`` declares</span>
+<span class="sd">                more header than the data holds.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -789,6 +794,13 @@
             <span class="n">src</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">src</span><span class="p">,</span>
             <span class="n">dst</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span>
         <span class="p">)</span>
+
+        <span class="c1"># NOTE: An ``ihl`` declaring more header than was captured leaves the</span>
+        <span class="c1"># missing octets to read as zeros, which ``from_data`` then rebuilds;</span>
+        <span class="c1"># rejecting it keeps the octets as captured inside the parent (:issue:`1404`).</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: header length </span><span class="si">{</span><span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span><span class="si">}</span><span class="s1"> runs past the end of '</span>
+                                <span class="sa">f</span><span class="s1">'the data (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s1"> octets)'</span><span class="p">)</span>
 
         <span class="n">_optl</span> <span class="o">=</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span> <span class="o">-</span> <span class="mi">20</span>
         <span class="k">if</span> <span class="n">_optl</span><span class="p">:</span>
@@ -2164,7 +2176,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_ts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'Enum_OptionNumber'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_TSOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                      <span class="n">counts</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
                      <span class="n">overflow</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                     <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'Optional[list[int | timedelta] | dict[IPv4Address, int | timedelta]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'Optional[list[int | timedelta] | dict[IPv4Address | str | int, int | timedelta]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                      <span class="n">remaining</span><span class="p">:</span> <span class="s1">'Optional[list[int]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                      <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_TSOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make IPv4 Timestamp (``TS``) option.</span>
@@ -2173,13 +2185,20 @@
 <span class="sd">            kind: option type code</span>
 <span class="sd">            option: option data</span>
 <span class="sd">            counts: maximum number of timestamps to record</span>
-<span class="sd">            timestamp: list of timestamps, i.e. the slots before the pointer</span>
+<span class="sd">            timestamp: list of timestamps, i.e. the slots before the pointer, or</span>
+<span class="sd">                a mapping of the addresses to their timestamps; an address may</span>
+<span class="sd">                be anything :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`</span>
+<span class="sd">                accepts for IPv4</span>
 <span class="sd">            remaining: raw 32-bit words for the slots at or beyond the pointer;</span>
 <span class="sd">                the slots left over up to ``counts`` are zero</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed option schema.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            FieldValueError: If an address is a :obj:`bool` or is not a valid</span>
+<span class="sd">                IPv4 address.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2196,7 +2215,8 @@
                     <span class="n">ts_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">ip</span><span class="p">,</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">option</span><span class="o">.</span><span class="n">timestamp</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="kc">True</span><span class="p">):</span>
-                    <span class="n">ts_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">ip</span><span class="p">))</span>
+                    <span class="n">ts_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">parse_ip_address</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] timestamp address'</span><span class="p">,</span>
+                                                        <span class="n">version</span><span class="o">=</span><span class="mi">4</span><span class="p">)))</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
                         <span class="n">ts</span> <span class="o">=</span> <span class="n">ts</span> <span class="o">//</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">milliseconds</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">ts</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">31</span><span class="p">:</span>
@@ -2234,12 +2254,13 @@
                 <span class="n">counts</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">counts</span><span class="p">)</span>  <span class="c1"># 4 is the maximum number of timestamps</span>
                 <span class="n">length</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">+</span> <span class="n">counts</span> <span class="o">*</span> <span class="mi">8</span>
 
-                <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="n">ts</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">timestamp</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+                <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="n">ts</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">timestamp</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
                     <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;=</span> <span class="n">counts</span><span class="p">:</span>
                         <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] too many timestamps: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
                         <span class="k">break</span>
 
-                    <span class="n">ts_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">ip</span><span class="p">))</span>
+                    <span class="n">ts_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">parse_ip_address</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] timestamp address'</span><span class="p">,</span>
+                                                          <span class="n">version</span><span class="o">=</span><span class="mi">4</span><span class="p">)))</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
                         <span class="n">ts</span> <span class="o">=</span> <span class="n">ts</span> <span class="o">//</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">milliseconds</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">ts</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">31</span><span class="p">:</span>

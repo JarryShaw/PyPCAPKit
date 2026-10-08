@@ -900,9 +900,14 @@
     <span class="n">reception</span><span class="p">:</span> <span class="s1">'PacketReception'</span>
     <span class="c1">#: FCS length.</span>
     <span class="n">fcs_len</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Bits 9 to 23 of the flags word, kept verbatim (checksum and</span>
-    <span class="c1">#: segmentation offload flags, reserved bits and unnamed</span>
-    <span class="c1">#: link-layer-dependent errors).</span>
+    <span class="c1">#: Checksum not ready (bit 9).</span>
+    <span class="n">checksum_not_ready</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Checksum valid (bit 10).</span>
+    <span class="n">checksum_valid</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: TCP segmentation offloaded (bit 11).</span>
+    <span class="n">tcp_segmentation_offloaded</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Bits 12 to 23 of the flags word, kept verbatim (reserved bits and</span>
+    <span class="c1">#: unnamed link-layer-dependent errors).</span>
     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Link-layer-dependent error - CRC error (bit 24).</span>
     <span class="n">crc_error</span><span class="p">:</span> <span class="s1">'bool'</span>
@@ -923,7 +928,8 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_OptionType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">direction</span><span class="p">:</span> <span class="s1">'PacketDirection'</span><span class="p">,</span>
-                     <span class="n">reception</span><span class="p">:</span> <span class="s1">'PacketReception'</span><span class="p">,</span> <span class="n">fcs_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">crc_error</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span>
+                     <span class="n">reception</span><span class="p">:</span> <span class="s1">'PacketReception'</span><span class="p">,</span> <span class="n">fcs_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">checksum_not_ready</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span>
+                     <span class="n">checksum_valid</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">tcp_segmentation_offloaded</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">crc_error</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span>
                      <span class="n">too_long</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">too_short</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">gap_error</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">unaligned_error</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span>
                      <span class="n">delimiter_error</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">preamble_error</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">symbol_error</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
@@ -1520,9 +1526,14 @@
     <span class="n">reception</span><span class="p">:</span> <span class="s1">'PacketReception'</span>
     <span class="c1">#: FCS length.</span>
     <span class="n">fcs_len</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Bits 9 to 23 of the flags word, kept verbatim (checksum and</span>
-    <span class="c1">#: segmentation offload flags, reserved bits and unnamed</span>
-    <span class="c1">#: link-layer-dependent errors).</span>
+    <span class="c1">#: Checksum not ready (bit 9).</span>
+    <span class="n">checksum_not_ready</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Checksum valid (bit 10).</span>
+    <span class="n">checksum_valid</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: TCP segmentation offloaded (bit 11).</span>
+    <span class="n">tcp_segmentation_offloaded</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Bits 12 to 23 of the flags word, kept verbatim (reserved bits and</span>
+    <span class="c1">#: unnamed link-layer-dependent errors).</span>
     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Link-layer-dependent error - CRC error (bit 24).</span>
     <span class="n">crc_error</span><span class="p">:</span> <span class="s1">'bool'</span>
@@ -1543,7 +1554,8 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_OptionType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">direction</span><span class="p">:</span> <span class="s1">'PacketDirection'</span><span class="p">,</span>
-                     <span class="n">reception</span><span class="p">:</span> <span class="s1">'PacketReception'</span><span class="p">,</span> <span class="n">fcs_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">crc_error</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span>
+                     <span class="n">reception</span><span class="p">:</span> <span class="s1">'PacketReception'</span><span class="p">,</span> <span class="n">fcs_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">checksum_not_ready</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span>
+                     <span class="n">checksum_valid</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">tcp_segmentation_offloaded</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">crc_error</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span>
                      <span class="n">too_long</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">too_short</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">gap_error</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">unaligned_error</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span>
                      <span class="n">delimiter_error</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">preamble_error</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">symbol_error</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 

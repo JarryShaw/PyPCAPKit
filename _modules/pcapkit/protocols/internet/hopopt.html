@@ -1262,7 +1262,9 @@
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">&lt;</span> <span class="mi">8</span> <span class="ow">and</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">cmpt_len</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># ``Cmpt Length`` counts 32-bit words and may be odd [:rfc:`5570#section-5.2`];</span>
+        <span class="c1"># it only has to fit inside ``Opt Data Len``</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">&lt;</span> <span class="mi">8</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">cmpt_len</span> <span class="o">*</span> <span class="mi">4</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">opt</span> <span class="o">=</span> <span class="n">Data_CALIPSOOption</span><span class="p">(</span>
@@ -2139,9 +2141,9 @@
 <span class="sd">            domain: CALIPSO domain of interpretation</span>
 <span class="sd">            level: sensitivity level</span>
 <span class="sd">            checksum: checksum of the option</span>
-<span class="sd">            bitmap: compartment bitmap, as :obj:`bytes` or as the</span>
-<span class="sd">                :obj:`tuple` of octets the reader stores; its length must be a</span>
-<span class="sd">                multiple of 4 octets</span>
+<span class="sd">            bitmap: compartment bitmap, as a bytes-like object or as an</span>
+<span class="sd">                iterable of octets, such as the :obj:`tuple` the reader stores;</span>
+<span class="sd">                its length must be a multiple of 4 octets</span>
 <span class="sd">            pad: octets after the compartment bitmap, counted in ``Opt Data Len``</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
@@ -2149,7 +2151,10 @@
 <span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If the bitmap is not a whole number of 32-bit words.</span>
+<span class="sd">            ProtocolError: If the bitmap is not bytes-like or an iterable of</span>
+<span class="sd">                octets, or is not a whole number of 32-bit words, if ``pad`` is not :obj:`bytes`,</span>
+<span class="sd">                or if the option data would exceed the 255 octets</span>
+<span class="sd">                ``Opt Data Len`` can count.</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            ``Cmpt Length`` on the wire counts 32-bit words [:rfc:`5570#section-5.1`],</span>
@@ -2162,10 +2167,34 @@
             <span class="n">checksum</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">checksum</span>
             <span class="n">bitmap</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">cmpt_bitmap</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="s1">'cmpt_bitmap'</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
             <span class="n">pad</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">pad</span>
-        <span class="n">bitmap_bytes</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">bitmap</span><span class="p">)</span> <span class="k">if</span> <span class="n">bitmap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="sa">b</span><span class="s1">''</span>
+        <span class="k">if</span> <span class="n">bitmap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">bitmap_bytes</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bitmap</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid CALIPSO bitmap type: '</span>
+                                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">bitmap</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>  <span class="c1"># bytes-like object</span>
+                <span class="n">bitmap_bytes</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="nb">memoryview</span><span class="p">(</span><span class="n">bitmap</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>  <span class="c1"># iterable of octets</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">octets</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">bitmap</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid CALIPSO bitmap type: '</span>
+                                        <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">bitmap</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+                <span class="k">for</span> <span class="n">octet</span> <span class="ow">in</span> <span class="n">octets</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">octet</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">octet</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">octet</span> <span class="o">&lt;=</span> <span class="mi">255</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid CALIPSO bitmap '</span>
+                                            <span class="sa">f</span><span class="s1">'octet: </span><span class="si">{</span><span class="n">octet</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+                <span class="n">bitmap_bytes</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">octets</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bitmap_bytes</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid CALIPSO bitmap length: '</span>
                                 <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bitmap_bytes</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid CALIPSO pad type: '</span>
+                                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">pad</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">8</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">bitmap_bytes</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">pad</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">255</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] too long CALIPSO option data: '</span>
+                                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="mi">8</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">bitmap_bytes</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">pad</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_CALIPSOOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>

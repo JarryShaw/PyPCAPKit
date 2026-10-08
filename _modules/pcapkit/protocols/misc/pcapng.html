@@ -648,8 +648,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">ZigBeeNWKKey</span> <span class="k">as</span> <span class="n">Schema_ZigBeeNWKKey</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrEnum</span><span class="p">,</span> <span class="n">localcontext</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">FormatError</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">RegistryError</span><span class="p">,</span> <span class="n">StreamEOFError</span><span class="p">,</span>
-                                          <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">EnumValueError</span><span class="p">,</span> <span class="n">FormatError</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">RegistryError</span><span class="p">,</span>
+                                          <span class="n">StreamEOFError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">DeprecatedFormatWarning</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">,</span>
                                         <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span><span class="p">)</span>
 
@@ -661,7 +661,8 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">decimal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Decimal</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">StdlibEnum</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv4Interface</span><span class="p">,</span> <span class="n">IPv6Address</span><span class="p">,</span> <span class="n">IPv6Interface</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Counter</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Counter</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span>
+                        <span class="n">Union</span><span class="p">)</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">AenumEnum</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">mypy_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultArg</span><span class="p">,</span> <span class="n">KwArg</span><span class="p">,</span> <span class="n">NamedArg</span>
@@ -690,6 +691,8 @@
     <span class="n">SecretsParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Schema_DSBSecrets</span><span class="p">,</span> <span class="n">NamedArg</span><span class="p">(</span><span class="n">Schema_DecryptionSecretsBlock</span><span class="p">,</span> <span class="s1">'block'</span><span class="p">)],</span> <span class="n">Data_DSBSecrets</span><span class="p">]</span>
     <span class="n">SecretsConstructor</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Enum_SecretsType</span><span class="p">,</span> <span class="n">DefaultArg</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="n">Data_DSBSecrets</span><span class="p">]),</span>
                                    <span class="n">KwArg</span><span class="p">(</span><span class="n">Any</span><span class="p">)],</span> <span class="n">Schema_DSBSecrets</span><span class="p">]</span>
+
+    <span class="n">_FlagsEnum</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_FlagsEnum'</span><span class="p">,</span> <span class="s1">'PacketDirection'</span><span class="p">,</span> <span class="s1">'PacketReception'</span><span class="p">)</span>
 
 <span class="c1"># check Python version</span>
 <span class="n">py37</span> <span class="o">=</span> <span class="p">((</span><span class="n">version_info</span> <span class="o">:=</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">)</span><span class="o">.</span><span class="n">major</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">version_info</span><span class="o">.</span><span class="n">minor</span> <span class="o">&gt;=</span> <span class="mi">7</span><span class="p">)</span>
@@ -754,14 +757,33 @@
     <span class="k">return</span> <span class="n">DecodedString</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">raw</span><span class="p">)</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_unassigned_member</span><span class="p">(</span><span class="n">enum_cls</span><span class="p">:</span> <span class="s1">'Type[_FlagsEnum]'</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_FlagsEnum'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Build an unassigned ``epb_flags`` sub-field member, absent from the lookup tables.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        enum_cls: :class:`PacketDirection` or :class:`PacketReception`.</span>
+<span class="sd">        value: The member's value.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The unassigned member.</span>
+
+<span class="sd">    """</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">enum_cls</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="n">obj</span><span class="o">.</span><span class="n">_name_</span> <span class="o">=</span> <span class="s1">'Unassigned'</span>  <span class="c1"># pylint: disable=protected-access</span>
+    <span class="n">obj</span><span class="o">.</span><span class="n">_value_</span> <span class="o">=</span> <span class="n">value</span>  <span class="c1"># pylint: disable=protected-access</span>
+    <span class="k">return</span> <span class="n">obj</span>
+
+
 <div class="viewcode-block" id="PacketDirection">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PacketDirection">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PacketDirection</span><span class="p">(</span><span class="n">EnumLookup</span><span class="p">,</span> <span class="n">enum</span><span class="o">.</span><span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Packet direction for ``epb_flags`` options.</span>
 
 <span class="sd">    Shares the :class:`~pcapkit.corekit.enum.EnumLookup` lookup contract that</span>
-<span class="sd">    every non-registry enumeration follows (GitHub issue :issue:`877`); it</span>
-<span class="sd">    defines neither ``get`` nor ``_missing_`` of its own.</span>
+<span class="sd">    every non-registry enumeration follows (GitHub issue :issue:`877`). Its</span>
+<span class="sd">    ``_missing_`` resolves the one value the specification leaves undefined,</span>
+<span class="sd">    ``0b11``, to an unassigned member, so a capture carrying it still parses</span>
+<span class="sd">    and rebuilds (:issue:`1382`).</span>
 
 <span class="sd">    """</span>
 
@@ -770,7 +792,28 @@
     <span class="c1">#: Inbound packet.</span>
     <span class="n">INBOUND</span> <span class="o">=</span> <span class="mb">0b01</span>
     <span class="c1">#: Outbound packet.</span>
-    <span class="n">OUTBOUND</span> <span class="o">=</span> <span class="mb">0b10</span></div>
+    <span class="n">OUTBOUND</span> <span class="o">=</span> <span class="mb">0b10</span>
+
+<div class="viewcode-block" id="PacketDirection._missing_">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PacketDirection._missing_">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'object'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'PacketDirection'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Lookup function used when value is not found.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value: Value to get enum item.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            An unassigned member, absent from the lookup tables.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            EnumValueError: If ``value`` does not fit the 2-bit sub-field.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mb">0b00</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mb">0b11</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">EnumValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1"> is not a valid </span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_unassigned_member</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+</div>
 
 
 
@@ -780,8 +823,10 @@
 <span class="w">    </span><span class="sd">"""Reception type for ``epb_flags`` options.</span>
 
 <span class="sd">    Shares the :class:`~pcapkit.corekit.enum.EnumLookup` lookup contract that</span>
-<span class="sd">    every non-registry enumeration follows (GitHub issue :issue:`877`); it</span>
-<span class="sd">    defines neither ``get`` nor ``_missing_`` of its own.</span>
+<span class="sd">    every non-registry enumeration follows (GitHub issue :issue:`877`). Its</span>
+<span class="sd">    ``_missing_`` resolves the values the specification leaves undefined,</span>
+<span class="sd">    ``0b101`` to ``0b111``, to an unassigned member, so a capture carrying one</span>
+<span class="sd">    still parses and rebuilds (:issue:`1382`).</span>
 
 <span class="sd">    """</span>
 
@@ -794,7 +839,28 @@
     <span class="c1">#: Broadcast.</span>
     <span class="n">BROADCAST</span> <span class="o">=</span> <span class="mb">0b011</span>
     <span class="c1">#: Promiscuous.</span>
-    <span class="n">PROMISCUOUS</span> <span class="o">=</span> <span class="mb">0b100</span></div>
+    <span class="n">PROMISCUOUS</span> <span class="o">=</span> <span class="mb">0b100</span>
+
+<div class="viewcode-block" id="PacketReception._missing_">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PacketReception._missing_">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'object'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'PacketReception'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Lookup function used when value is not found.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value: Value to get enum item.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            An unassigned member, absent from the lookup tables.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            EnumValueError: If ``value`` does not fit the 3-bit sub-field.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mb">0b000</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mb">0b111</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">EnumValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1"> is not a valid </span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_unassigned_member</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+</div>
 
 
 
@@ -1447,8 +1513,18 @@
 <span class="sd">            code: PCAP-NG block type code.</span>
 <span class="sd">            meth: Method name or callable to parse and/or construct the block.</span>
 
+<span class="sd">        Warns:</span>
+<span class="sd">            RegistryWarning: If a different entry is already registered for</span>
+<span class="sd">                ``code``; it is overwritten. Handing back the entry already</span>
+<span class="sd">                stored, or one equal to it, is a silent no-op. The entry</span>
+<span class="sd">                ``code`` shipped with is accepted like any other, so an</span>
+<span class="sd">                override can be undone (:issue:`1362`, :issue:`1363`).</span>
+
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__block__</span><span class="p">:</span>
+        <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__block__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">incumbent</span> <span class="o">==</span> <span class="n">meth</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Type </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] block already registered'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__block__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">meth</span></div>
 
@@ -1463,9 +1539,19 @@
 <span class="sd">            code: PCAP-NG option type code.</span>
 <span class="sd">            meth: Method name or callable to parse and/or construct the option.</span>
 
+<span class="sd">        Warns:</span>
+<span class="sd">            RegistryWarning: If a different entry is already registered for</span>
+<span class="sd">                ``code``; it is overwritten. Handing back the entry already</span>
+<span class="sd">                stored, or one equal to it, is a silent no-op. The entry</span>
+<span class="sd">                ``code`` shipped with is accepted like any other, so an</span>
+<span class="sd">                override can be undone (:issue:`1362`, :issue:`1363`).</span>
+
 <span class="sd">        """</span>
         <span class="n">code_key</span> <span class="o">=</span> <span class="n">_option_key</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">code_key</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__option__</span><span class="p">:</span>
+        <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__option__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code_key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">incumbent</span> <span class="o">==</span> <span class="n">meth</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Option </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] option already registered'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__option__</span><span class="p">[</span><span class="n">code_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">meth</span></div>
 
@@ -1480,8 +1566,18 @@
 <span class="sd">            code: PCAP-NG name resolution record type code.</span>
 <span class="sd">            meth: Method name or callable to parse and/or construct the name resolution record.</span>
 
+<span class="sd">        Warns:</span>
+<span class="sd">            RegistryWarning: If a different entry is already registered for</span>
+<span class="sd">                ``code``; it is overwritten. Handing back the entry already</span>
+<span class="sd">                stored, or one equal to it, is a silent no-op. The entry</span>
+<span class="sd">                ``code`` shipped with is accepted like any other, so an</span>
+<span class="sd">                override can be undone (:issue:`1362`, :issue:`1363`).</span>
+
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__record__</span><span class="p">:</span>
+        <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__record__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">incumbent</span> <span class="o">==</span> <span class="n">meth</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Type </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] name resolution record already registered'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__record__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">meth</span></div>
 
@@ -1496,8 +1592,18 @@
 <span class="sd">            code: PCAP-NG decryption secrets type code.</span>
 <span class="sd">            meth: Method name or callable to parse and/or construct the decryption secrets.</span>
 
+<span class="sd">        Warns:</span>
+<span class="sd">            RegistryWarning: If a different entry is already registered for</span>
+<span class="sd">                ``code``; it is overwritten. Handing back the entry already</span>
+<span class="sd">                stored, or one equal to it, is a silent no-op. The entry</span>
+<span class="sd">                ``code`` shipped with is accepted like any other, so an</span>
+<span class="sd">                override can be undone (:issue:`1362`, :issue:`1363`).</span>
+
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__secrets__</span><span class="p">:</span>
+        <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__secrets__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">incumbent</span> <span class="o">==</span> <span class="n">meth</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Secrets </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] decryption secrets already registered'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__secrets__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">meth</span></div>
 
@@ -2175,28 +2281,6 @@
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">_raw'</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
 
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_flags_enum</span><span class="p">(</span><span class="n">enum</span><span class="p">:</span> <span class="s1">'Type[PacketDirection] | Type[PacketReception]'</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                    <span class="n">option</span><span class="p">:</span> <span class="s1">'Enum_OptionType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Look a flags word sub-field up in its enumeration.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            enum: :class:`PacketDirection` or :class:`PacketReception`.</span>
-<span class="sd">            value: Sub-field value.</span>
-<span class="sd">            option: Option type, for the error message.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            The enumeration member.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If the specification assigns ``value`` no meaning.</span>
-
-<span class="sd">        """</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">enum</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [</span><span class="si">{</span><span class="n">option</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">] invalid </span><span class="si">{</span><span class="n">enum</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">value</span><span class="si">:</span><span class="s1">#b</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
-
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_packet_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">block</span><span class="p">:</span> <span class="s1">'Data_PCAPNG'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes | ProtocolBase'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Create the packet data of an EPB, SPB or PB from its data model.</span>
@@ -2562,6 +2646,13 @@
             <span class="n">original_len</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">original_len</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_pcapng_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span>
+
+        <span class="c1"># NOTE: A captured length running past the block is kept as declared,</span>
+        <span class="c1"># and the packet data is the octets the block holds (:issue:`1405`).</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">captured_len</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">packet_data</span><span class="p">):</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Block </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] captured length </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">captured_len</span><span class="si">}</span><span class="s1"> runs past '</span>
+                 <span class="sa">f</span><span class="s1">'the block, which holds </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">packet_data</span><span class="p">)</span><span class="si">}</span><span class="s1"> octet(s); kept as captured'</span><span class="p">,</span>
+                 <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_linktype</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">interface_id</span><span class="p">),</span>
                                        <span class="n">schema</span><span class="o">.</span><span class="n">captured_len</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div>
 
@@ -2609,6 +2700,15 @@
             <span class="n">captured_len</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">packet_data</span><span class="p">),</span>
             <span class="n">original_len</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">original_len</span><span class="p">,</span>
         <span class="p">)</span>
+
+        <span class="c1"># NOTE: A block holding more packet data than the snaplen of interface 0</span>
+        <span class="c1"># allows keeps the excess (:issue:`1384`); the specification says the</span>
+        <span class="c1"># snaplen determines the length, so the excess is reported.</span>
+        <span class="n">snaplen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">snaplen</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">snaplen</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">captured_len</span> <span class="o">&gt;</span> <span class="n">snaplen</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Block </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] packet data of </span><span class="si">{</span><span class="n">data</span><span class="o">.</span><span class="n">captured_len</span><span class="si">}</span><span class="s1"> octet(s) '</span>
+                 <span class="sa">f</span><span class="s1">'exceeds the snaplen of </span><span class="si">{</span><span class="n">snaplen</span><span class="si">}</span><span class="s1">; kept as captured'</span><span class="p">,</span>
+                 <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_linktype</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">data</span><span class="o">.</span><span class="n">captured_len</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div>
 
 
@@ -2750,11 +2850,19 @@
 <span class="sd">            Parsed packet data.</span>
 
 <span class="sd">        """</span>
+        <span class="n">entries</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">data</span>
+        <span class="c1"># NOTE: A malformed entry is kept as the octets captured, as one</span>
+        <span class="c1"># :obj:`bytes` item, and parses as no entries. The octets are kept on</span>
+        <span class="c1"># the block as ``entry_raw``, which the block's ``make`` writes back</span>
+        <span class="c1"># verbatim (:issue:`1406`).</span>
+        <span class="n">kept</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">entries</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entries</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">bytes</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_SystemdJournalExportBlock</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-            <span class="n">data</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">),</span>
+            <span class="n">data</span><span class="o">=</span><span class="p">()</span> <span class="k">if</span> <span class="n">kept</span> <span class="k">else</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">entries</span><span class="p">),</span>  <span class="c1"># type: ignore[arg-type]</span>
         <span class="p">)</span>
+        <span class="k">if</span> <span class="n">kept</span><span class="p">:</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">__update__</span><span class="p">([(</span><span class="s1">'entry_raw'</span><span class="p">,</span> <span class="n">entries</span><span class="p">[</span><span class="mi">0</span><span class="p">])])</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
 
@@ -2933,6 +3041,13 @@
             <span class="n">original_len</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">original_length</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_pcapng_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span>
+
+        <span class="c1"># NOTE: A captured length running past the block is kept as declared,</span>
+        <span class="c1"># and the packet data is the octets the block holds (:issue:`1405`).</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">captured_length</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">packet_data</span><span class="p">):</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Block </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] captured length </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">captured_length</span><span class="si">}</span><span class="s1"> runs past '</span>
+                 <span class="sa">f</span><span class="s1">'the block, which holds </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">packet_data</span><span class="p">)</span><span class="si">}</span><span class="s1"> octet(s); kept as captured'</span><span class="p">,</span>
+                 <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_linktype</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">interface_id</span><span class="p">),</span>
                                        <span class="n">schema</span><span class="o">.</span><span class="n">captured_length</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div>
 
@@ -3622,9 +3737,12 @@
         <span class="n">option</span> <span class="o">=</span> <span class="n">Data_EPB_FlagsOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-            <span class="n">direction</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_flags_enum</span><span class="p">(</span><span class="n">PacketDirection</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'direction'</span><span class="p">],</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">),</span>
-            <span class="n">reception</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_flags_enum</span><span class="p">(</span><span class="n">PacketReception</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'reception'</span><span class="p">],</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">),</span>
+            <span class="n">direction</span><span class="o">=</span><span class="n">PacketDirection</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'direction'</span><span class="p">]),</span>
+            <span class="n">reception</span><span class="o">=</span><span class="n">PacketReception</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'reception'</span><span class="p">]),</span>
             <span class="n">fcs_len</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'fcs_len'</span><span class="p">],</span>
+            <span class="n">checksum_not_ready</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'checksum_not_ready'</span><span class="p">]),</span>
+            <span class="n">checksum_valid</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'checksum_valid'</span><span class="p">]),</span>
+            <span class="n">tcp_segmentation_offloaded</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'tcp_segmentation_offloaded'</span><span class="p">]),</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
             <span class="n">crc_error</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'crc_error'</span><span class="p">]),</span>
             <span class="n">too_long</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'too_long'</span><span class="p">]),</span>
@@ -4129,9 +4247,12 @@
         <span class="n">option</span> <span class="o">=</span> <span class="n">Data_PACK_FlagsOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-            <span class="n">direction</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_flags_enum</span><span class="p">(</span><span class="n">PacketDirection</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'direction'</span><span class="p">],</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">),</span>
-            <span class="n">reception</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_flags_enum</span><span class="p">(</span><span class="n">PacketReception</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'reception'</span><span class="p">],</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">),</span>
+            <span class="n">direction</span><span class="o">=</span><span class="n">PacketDirection</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'direction'</span><span class="p">]),</span>
+            <span class="n">reception</span><span class="o">=</span><span class="n">PacketReception</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'reception'</span><span class="p">]),</span>
             <span class="n">fcs_len</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'fcs_len'</span><span class="p">],</span>
+            <span class="n">checksum_not_ready</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'checksum_not_ready'</span><span class="p">]),</span>
+            <span class="n">checksum_valid</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'checksum_valid'</span><span class="p">]),</span>
+            <span class="n">tcp_segmentation_offloaded</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'tcp_segmentation_offloaded'</span><span class="p">]),</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
             <span class="n">crc_error</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'crc_error'</span><span class="p">]),</span>
             <span class="n">too_long</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'too_long'</span><span class="p">]),</span>
@@ -4695,17 +4816,20 @@
         <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">original_len</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">original_len</span>
             <span class="n">packet_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_packet_data</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">original_len</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">original_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet_data</span><span class="p">)</span>
-        <span class="c1"># NOTE: An SPB always belongs to interface 0, and its Packet Data is</span>
-        <span class="c1"># ``min(original_len, snaplen)`` octets long -- the length the parser</span>
-        <span class="c1"># reads back -- so a longer packet is cut to it.</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">:</span>
-            <span class="n">snaplen</span> <span class="o">=</span> <span class="mh">0xFFFF_FFFF_FFFF_FFFF</span>
+            <span class="c1"># NOTE: The data model's ``captured_len`` already bounds the data,</span>
+            <span class="c1"># including a block that kept octets past the snaplen (:issue:`1384`).</span>
+            <span class="n">captured_len</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">captured_len</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">snaplen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">snaplen</span> <span class="ow">or</span> <span class="mh">0xFFFF_FFFF_FFFF_FFFF</span>
-        <span class="n">captured_len</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">original_len</span><span class="p">,</span> <span class="n">snaplen</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">original_len</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">original_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet_data</span><span class="p">)</span>
+            <span class="c1"># NOTE: An SPB always belongs to interface 0, and its Packet Data is</span>
+            <span class="c1"># ``min(original_len, snaplen)`` octets long -- the length the parser</span>
+            <span class="c1"># reads back -- so a longer packet is cut to it.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">:</span>
+                <span class="n">snaplen</span> <span class="o">=</span> <span class="mh">0xFFFF_FFFF_FFFF_FFFF</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">snaplen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">snaplen</span> <span class="ow">or</span> <span class="mh">0xFFFF_FFFF_FFFF_FFFF</span>
+            <span class="n">captured_len</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">original_len</span><span class="p">,</span> <span class="n">snaplen</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet_data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">captured_len</span><span class="p">:</span>
             <span class="n">packet_data</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">packet_data</span><span class="p">)[:</span><span class="n">captured_len</span><span class="p">]</span>
         <span class="n">packet_len</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">packet_data</span><span class="p">)</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span>
@@ -4822,7 +4946,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_byte</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span>
 
         <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">entries</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'list[OrderedMultiDict[str, str | bytes]]'</span><span class="p">,</span> <span class="n">block</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+            <span class="n">entries</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'list[OrderedMultiDict[str, str | bytes]] | bytes'</span><span class="p">,</span>
+                           <span class="nb">getattr</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s1">'entry_raw'</span><span class="p">,</span> <span class="n">block</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="n">entries</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
@@ -5857,6 +5982,9 @@
                                <span class="n">reception_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
                                <span class="n">reception_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                                <span class="n">fcs_len</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                               <span class="n">checksum_not_ready</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                               <span class="n">checksum_valid</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                               <span class="n">tcp_segmentation_offloaded</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                                <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                                <span class="n">crc_error</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                                <span class="n">too_long</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -5881,7 +6009,10 @@
 <span class="sd">            reception_namespace: Namespace of packet reception.</span>
 <span class="sd">            reception_reversed: Whether to reverse packet reception namespace.</span>
 <span class="sd">            fcs_len: Length of FCS field, in bytes.</span>
-<span class="sd">            reserved: Bits 9 to 23 of the flags word, verbatim.</span>
+<span class="sd">            checksum_not_ready: Whether the checksum is not ready.</span>
+<span class="sd">            checksum_valid: Whether the checksum is valid.</span>
+<span class="sd">            tcp_segmentation_offloaded: Whether TCP segmentation was offloaded.</span>
+<span class="sd">            reserved: Bits 12 to 23 of the flags word, verbatim.</span>
 <span class="sd">            crc_error: Whether CRC error occurred.</span>
 <span class="sd">            too_long: Whether packet is too long.</span>
 <span class="sd">            too_short: Whether packet is too short.</span>
@@ -5907,6 +6038,9 @@
             <span class="n">direction_val</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">direction</span>
             <span class="n">reception_val</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">reception</span>
             <span class="n">fcs_len</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">fcs_len</span>
+            <span class="n">checksum_not_ready</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">checksum_not_ready</span>
+            <span class="n">checksum_valid</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">checksum_valid</span>
+            <span class="n">tcp_segmentation_offloaded</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">tcp_segmentation_offloaded</span>
             <span class="n">reserved</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">reserved</span>
             <span class="n">crc_error</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">crc_error</span>
             <span class="n">too_long</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">too_long</span>
@@ -5929,6 +6063,9 @@
                 <span class="s1">'direction'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">direction_val</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">,</span> <span class="n">direction_val</span><span class="p">),</span>
                 <span class="s1">'reception'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">reception_val</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">,</span> <span class="n">reception_val</span><span class="p">),</span>
                 <span class="s1">'fcs_len'</span><span class="p">:</span> <span class="n">fcs_len</span><span class="p">,</span>
+                <span class="s1">'checksum_not_ready'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">checksum_not_ready</span><span class="p">),</span>
+                <span class="s1">'checksum_valid'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">checksum_valid</span><span class="p">),</span>
+                <span class="s1">'tcp_segmentation_offloaded'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">tcp_segmentation_offloaded</span><span class="p">),</span>
                 <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">,</span>
                 <span class="s1">'crc_error'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">crc_error</span><span class="p">),</span>
                 <span class="s1">'too_long'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">too_long</span><span class="p">),</span>
@@ -6490,6 +6627,9 @@
                                 <span class="n">reception_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
                                 <span class="n">reception_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                                 <span class="n">fcs_len</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                                <span class="n">checksum_not_ready</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                                <span class="n">checksum_valid</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                                <span class="n">tcp_segmentation_offloaded</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                                 <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                                 <span class="n">crc_error</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                                 <span class="n">too_long</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -6514,7 +6654,10 @@
 <span class="sd">            reception_namespace: Namespace of packet reception.</span>
 <span class="sd">            reception_reversed: Whether to reverse packet reception namespace.</span>
 <span class="sd">            fcs_len: Length of FCS field, in bytes.</span>
-<span class="sd">            reserved: Bits 9 to 23 of the flags word, verbatim.</span>
+<span class="sd">            checksum_not_ready: Whether the checksum is not ready.</span>
+<span class="sd">            checksum_valid: Whether the checksum is valid.</span>
+<span class="sd">            tcp_segmentation_offloaded: Whether TCP segmentation was offloaded.</span>
+<span class="sd">            reserved: Bits 12 to 23 of the flags word, verbatim.</span>
 <span class="sd">            crc_error: Whether CRC error occurred.</span>
 <span class="sd">            too_long: Whether packet is too long.</span>
 <span class="sd">            too_short: Whether packet is too short.</span>
@@ -6540,6 +6683,9 @@
             <span class="n">direction_val</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">direction</span>
             <span class="n">reception_val</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">reception</span>
             <span class="n">fcs_len</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">fcs_len</span>
+            <span class="n">checksum_not_ready</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">checksum_not_ready</span>
+            <span class="n">checksum_valid</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">checksum_valid</span>
+            <span class="n">tcp_segmentation_offloaded</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">tcp_segmentation_offloaded</span>
             <span class="n">reserved</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">reserved</span>
             <span class="n">crc_error</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">crc_error</span>
             <span class="n">too_long</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">too_long</span>
@@ -6562,6 +6708,9 @@
                 <span class="s1">'direction'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">direction_val</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">,</span> <span class="n">direction_val</span><span class="p">),</span>
                 <span class="s1">'reception'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">reception_val</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">,</span> <span class="n">reception_val</span><span class="p">),</span>
                 <span class="s1">'fcs_len'</span><span class="p">:</span> <span class="n">fcs_len</span><span class="p">,</span>
+                <span class="s1">'checksum_not_ready'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">checksum_not_ready</span><span class="p">),</span>
+                <span class="s1">'checksum_valid'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">checksum_valid</span><span class="p">),</span>
+                <span class="s1">'tcp_segmentation_offloaded'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">tcp_segmentation_offloaded</span><span class="p">),</span>
                 <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">reserved</span><span class="p">,</span>
                 <span class="s1">'crc_error'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">crc_error</span><span class="p">),</span>
                 <span class="s1">'too_long'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">too_long</span><span class="p">),</span>
