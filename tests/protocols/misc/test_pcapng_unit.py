@@ -922,6 +922,7 @@ class PCAPNGUnitTests(unittest.TestCase):
             'direction': PacketDirection.INBOUND.value,
             'reception': PacketReception.UNICAST.value,
             'fcs_len': 4,
+            'reserved': 0,  # bits 9-23, kept since #1273
             'crc_error': 1,
             'too_long': 0,
             'too_short': 1,
@@ -1896,7 +1897,8 @@ class PCAPNGUnitTests(unittest.TestCase):
             short_address=0x12345678,
         ).addr_high, 0x1234)
 
-        self.assertEqual(pcapng._make_block_unknown(data=b'abc').body, b'abc')
+        # the body is padded to 32 bits (#1278)
+        self.assertEqual(pcapng._make_block_unknown(data=b'abc').body, b'abc\x00')
         shb = pcapng._make_block_shb(version=(1, 0), section_length=-1)
         self.assertEqual(shb.major, 1)
         idb = pcapng._make_block_idb(linktype=LinkType.ETHERNET, snaplen=65535)
@@ -1927,7 +1929,7 @@ class PCAPNGUnitTests(unittest.TestCase):
 
         reset(BlockType.Reserved_0x00000000)
         unknown_data = DataUnknownBlock(type=BlockType.Reserved_0x00000000, length=3, body=b'raw')
-        self.assertEqual(pcapng._make_block_unknown(unknown_data).body, b'raw')
+        self.assertEqual(pcapng._make_block_unknown(unknown_data).body, b'raw\x00')  # padded (#1278)
 
         reset(BlockType.Section_Header_Block)
         shb_data = DataSectionHeaderBlock(
@@ -2286,6 +2288,7 @@ class PCAPNGUnitTests(unittest.TestCase):
             direction=PacketDirection.INBOUND,
             reception=PacketReception.MULTICAST,
             fcs_len=3,
+            reserved=0,  # bits 9-23, kept since #1273
             crc_error=True,
             too_long=True,
             too_short=False,
@@ -2326,7 +2329,7 @@ class PCAPNGUnitTests(unittest.TestCase):
             ('_make_option_epb_flags', OptionType.epb_flags),
             ('_make_option_epb_dropcount', OptionType.epb_dropcount),
             ('_make_option_epb_packetid', OptionType.epb_packetid),
-            ('_make_option_epb_verdict', OptionType.epb_verdict),
+            # epb_verdict may repeat (#1281), so it has no duplicate guard
         ]:
             assert_duplicate(method, code, BlockType.Enhanced_Packet_Block)
 
@@ -2373,6 +2376,7 @@ class PCAPNGUnitTests(unittest.TestCase):
             direction=PacketDirection.OUTBOUND,
             reception=PacketReception.BROADCAST,
             fcs_len=1,
+            reserved=0,  # bits 9-23, kept since #1273
             crc_error=True,
             too_long=False,
             too_short=True,

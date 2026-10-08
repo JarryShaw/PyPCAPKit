@@ -149,5 +149,152 @@ class TestPCAPNGLengths(PCAPNGTestCase):
             self._parse(octets)
 
 
+#: A big-endian section header with no options -- the repro of #1272.
+SHB_BE = H('0a0d0d0a 0000001c 1a2b3c4d 0001 0000 ffffffffffffffff 0000001c')
+
+
+def _epb_with_options(options: 'bytes', order: 'str' = 'little') -> 'bytes':
+    """An EPB on interface 0 carrying ``abcd`` and ``options`` (``opt_endofopt`` appended)."""
+    def u32(value: 'int') -> 'bytes':
+        return value.to_bytes(4, order)  # type: ignore[arg-type]
+
+    body = u32(0) + u32(0) + u32(0) + u32(4) + u32(4) + b'abcd' + options + bytes(4)
+    length = len(body) + 12
+    return u32(6) + u32(length) + body + u32(length)
+
+
+class TestPCAPNGModelling(PCAPNGTestCase):
+    """Pin how PCAP-NG blocks and options are modelled."""
+
+    def _big_endian_context(self) -> 'Any':
+        """A one-section big-endian context with one Ethernet interface."""
+        from pcapkit.const.pcapng.block_type import BlockType
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.foundation.engines.pcapng import Context
+        from pcapkit.protocols.misc.pcapng import PCAPNG
+
+        context = Context(PCAPNG(SHB_BE, len(SHB_BE), num=0, sct=1, ctx=None).info)  # type: Any
+        interface = PCAPNG(num=1, sct=1, ctx=context, type=BlockType.Interface_Description_Block,
+                           block={'linktype': LinkType.ETHERNET, 'snaplen': 0x40000})
+        context.interfaces.append(interface.info)
+        return context
+
+    def test_big_endian_section_header_rebuilds(self) -> None:
+        """#1272: a big-endian SHB keeps its byte order, with or without a context."""
+        from pcapkit.const.pcapng.block_type import BlockType
+        from pcapkit.protocols.misc.pcapng import PCAPNG
+
+        self.assertEqual(self._parse(SHB_BE).info.byteorder, 'big')
+        self.assertRebuilds(SHB_BE)
+        built = PCAPNG(num=0, sct=1, ctx=None, type=BlockType.Section_Header_Block,
+                       block={'byteorder': 'big'})
+        self.assertEqual(built.data, SHB_BE)
+
+    def test_flags_are_numbered_from_the_least_significant_bit(self) -> None:
+        """#1273: direction is bits 0-1 and the FCS length bits 5-8 of the word."""
+        from pcapkit.const.pcapng.block_type import BlockType
+        from pcapkit.const.pcapng.option_type import OptionType
+        from pcapkit.protocols.misc.pcapng import PCAPNG, PacketDirection
+
+        context = self._context()
+        for kwargs, word in (({'direction': PacketDirection.INBOUND}, '01000000'),
+                             ({'fcs_len': 4}, '80000000')):
+            with self.subTest(**kwargs):
+                block = PCAPNG(num=2, sct=1, ctx=context, type=BlockType.Enhanced_Packet_Block,
+                               block={'packet_data': b'abcd', 'timestamp': 0,
+                                      'options': [(OptionType.epb_flags, kwargs)]})
+                self.assertIn(H('0200 0400' + word), block.data)
+
+        flags = self._parse(_epb_with_options(H('0200 0400 01000000'))).info.options[OptionType.epb_flags]
+        self.assertEqual(flags.direction, PacketDirection.INBOUND)
+        self.assertEqual(flags.fcs_len, 0)
+
+        flags = self._parse(_epb_with_options(H('0200 0400 e5010000'))).info.options[OptionType.epb_flags]
+        self.assertEqual((flags.direction, flags.reception, flags.fcs_len), (1, 1, 15))
+
+    def test_flags_rebuild_in_either_byte_order(self) -> None:
+        """#1273: every bit of the word survives, little- and big-endian."""
+        octets = _epb_with_options(H('0200 0400 e5fdffff'))
+        self.assertRebuilds(octets)
+        octets = _epb_with_options(H('0002 0004 fffffde5'), order='big')
+        self.assertRebuilds(octets, self._big_endian_context())
+
+    def test_pack_flags_are_numbered_from_the_least_significant_bit(self) -> None:
+        """#1273: ``pack_flags`` shares the numbering."""
+        import warnings
+
+        from pcapkit.const.pcapng.option_type import OptionType
+        from pcapkit.protocols.misc.pcapng import PacketDirection
+
+        octets = H('02000000 30000000 0000 0000 00000000 00000000 04000000 04000000 61626364'
+                   '0200 0400 02000000 00000000 30000000')
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')  # the Packet Block is obsolete
+            flags = self._parse(octets).info.options[OptionType.pack_flags]
+            self.assertEqual(flags.direction, PacketDirection.OUTBOUND)
+            self.assertRebuilds(octets)
+
+    def test_undefined_direction_is_rejected(self) -> None:
+        """#1273: direction ``0b11`` raises an in-library error."""
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        with self.assertRaisesRegex(ProtocolError, r'invalid PacketDirection'):
+            self._parse(_epb_with_options(H('0200 0400 03000000')))
+
+    def test_nrb_names_decode_as_utf8(self) -> None:
+        """#1277: record names are UTF-8, not a guessed charset."""
+        octets = H('04000000 2c000000 01001800 0a000001 612e6578616d706c6500 622e6578616d706c6500'
+                   '00000000 2c000000')
+        records = self._parse(octets).info.records
+        self.assertEqual(records[1].records, ('a.example', 'b.example'))
+        self.assertRebuilds(octets)
+
+    def test_non_utf8_nrb_name_rebuilds(self) -> None:
+        """#1277: a name that is not UTF-8 keeps its octets through the split."""
+        octets = H('04000000 24000000 01000e00 0a000001 ff2e6578616d706c6500 0000'
+                   '00000000 24000000')
+        self.assertRebuilds(octets)
+
+    def test_ns_dnsname_decodes_as_utf8(self) -> None:
+        """#1277: ``ns_dnsname`` is UTF-8, never a guessed charset.
+
+        ``caf\\xe9`` is Latin-1, not UTF-8: a guessing decoder reads it as
+        ``café``, a UTF-8 one as ``caf\\ufffd`` that still packs back exactly.
+        """
+        from pcapkit.const.pcapng.option_type import OptionType
+
+        for name, text in ((b'caf\xe9.example', 'caf\ufffd.example'),
+                           ('mañana.example'.encode('utf-8'), 'mañana.example')):
+            with self.subTest(name=name):
+                option = H('0200') + len(name).to_bytes(2, 'little') + name + bytes(-len(name) % 4)
+                body = H('00000000') + option + H('00000000')
+                size = (len(body) + 12).to_bytes(4, 'little')
+                octets = H('04000000') + size + body + size
+                self.assertEqual(self._parse(octets).info.options[OptionType.ns_dnsname].name, text)
+                self.assertRebuilds(octets)
+
+    def test_unknown_block_rebuilds(self) -> None:
+        """#1278: Block Total Length counts the 12 framing octets."""
+        self.assertRebuilds(H('77070000 14000000 0102030405060708 14000000'))
+
+    def test_repeated_epb_verdict_rebuilds(self) -> None:
+        """#1281: ``epb_verdict`` may appear more than once."""
+        verdict = H('0700 0800 0001020304050607')
+        self.assertRebuilds(_epb_with_options(verdict + verdict))
+
+    def test_wireguard_error_names_the_line(self) -> None:
+        """#1286: the error message carries the offending line."""
+        from pcapkit.utilities.exceptions import FieldValueError
+
+        body = b'a b c\n\x00\x00'
+        octets = b''.join((
+            (10).to_bytes(4, 'little'), (28).to_bytes(4, 'little'),
+            (0x57474b4c).to_bytes(4, 'little'), (6).to_bytes(4, 'little'),
+            body, (28).to_bytes(4, 'little'),
+        ))
+        with self.assertRaisesRegex(FieldValueError, r"format: 'a b c'"):
+            self._parse(octets)
+
+
 if __name__ == '__main__':
     unittest.main()
