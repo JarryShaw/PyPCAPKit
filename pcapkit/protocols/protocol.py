@@ -26,6 +26,7 @@ import shutil
 import string
 import struct
 import textwrap
+import types
 import urllib.parse
 from typing import TYPE_CHECKING, Any, Generic, Optional, Type, TypeVar, cast, overload
 
@@ -455,6 +456,13 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     __proto__: 'DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]' = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
     )
+
+    #: Read-only copy of :attr:`__proto__` as the class defining it shipped it,
+    #: taken by :meth:`__init_subclass__` before anything can register into it.
+    #: :meth:`_next_layer_entry` reads it to tell a descriptor handed back from
+    #: a new one without resolving it (:issue:`1504`).
+    _shipped_proto: 'types.MappingProxyType[Any, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]' = \
+        types.MappingProxyType({})
 
     #: Construction keywords this protocol consumes out of ``**kwargs`` instead
     #: of declaring as a parameter, e.g. with ``kwargs.get('spam')`` in
@@ -914,22 +922,73 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             deferred, and an incumbent left as an unresolved descriptor still
             reports as different from the class it names.
 
+            A descriptor equal to the one ``code`` shipped with restores that
+            shipped object, unresolved, so undoing an override leaves the entry
+            as shipped (:issue:`1504`); see :meth:`_next_layer_entry`, which
+            every layer's ``register`` shares.
+
+        """
+        incumbent = cls.__proto__.get(code)
+        entry = cls._next_layer_entry(code, protocol)
+        if entry is None:
+            return
+        if incumbent is not None and incumbent is not entry:
+            warn(f'protocol {code} already registered, overwriting '
+                 f'{incumbent!r} with {entry!r}', RegistryWarning)
+        cls.__proto__[code] = entry
+
+    @classmethod
+    def _next_layer_entry(cls, code: 'Any', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'
+                          ) -> 'Optional[ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]':
+        """Work out what a next-layer ``register`` stores under ``code``.
+
+        :meth:`register` and the :class:`~pcapkit.protocols.link.link.Link`,
+        :class:`~pcapkit.protocols.internet.internet.Internet`,
+        :class:`~pcapkit.protocols.transport.transport.Transport`,
+        :class:`~pcapkit.protocols.transport.sctp.SCTP` and
+        :class:`~pcapkit.protocols.misc.pcap.frame.Frame` overrides share this;
+        each still warns and stores for itself.
+
+        Arguments:
+            code: registry key
+            protocol: module descriptor or a :class:`ProtocolBase` subclass
+
+        Returns:
+            :obj:`None` if ``protocol`` is the entry stored under ``code``
+            already -- the same object, or a descriptor equal to a stored one
+            (:issue:`1364`). Otherwise the entry to store: if ``protocol`` is a
+            descriptor equal to the one ``code`` shipped with, per
+            :attr:`_shipped_proto`, the shipped object itself, unresolved;
+            else ``protocol`` resolved to its class.
+
+        Raises:
+            pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a
+                class, or not a :class:`ProtocolBase` subclass.
+
+        Note:
+            The shipped descriptor is matched before it is resolved, so an
+            override undone by handing back the shipped entry leaves the
+            registry as it shipped: the entry is still a descriptor, nothing is
+            imported, and the class is looked up when a frame dispatches to it
+            (:issue:`1504`).
+
         """
         incumbent = cls.__proto__.get(code)
         if incumbent is not None and (incumbent is protocol or (
                 isinstance(incumbent, ModuleDescriptor) and isinstance(protocol, ModuleDescriptor)
                 and incumbent == protocol)):
-            return
+            return None
+        shipped = cls._shipped_proto.get(code)
+        if (isinstance(protocol, ModuleDescriptor) and isinstance(shipped, ModuleDescriptor)
+                and protocol == shipped):
+            return shipped
         if isinstance(protocol, ModuleDescriptor):
             protocol = protocol.klass
         if not isinstance(protocol, type):
             raise RegistryError(f'protocol must be a class, not {protocol!r}')
         if not issubclass(protocol, ProtocolBase):
             raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
-        if incumbent is not None and incumbent is not protocol:
-            warn(f'protocol {code} already registered, overwriting '
-                 f'{incumbent!r} with {protocol!r}', RegistryWarning)
-        cls.__proto__[code] = protocol
+        return protocol
 
     @classmethod
     def from_schema(cls, schema: '_ST | dict[str, Any]') -> 'Self':
@@ -1303,6 +1362,16 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         cls.__schema__ = schema
         cls.__data__ = data
+
+        # NOTE: a class defining its own ``__proto__`` ships what its body put
+        # there; copy it now, before anything can register into it, so that
+        # ``_next_layer_entry`` can restore a shipped descriptor without
+        # resolving it (:issue:`1504`). A class that inherits ``__proto__``
+        # inherits this copy with it.
+        if '__proto__' in cls.__dict__:
+            table = cls.__dict__['__proto__']
+            cls._shipped_proto = types.MappingProxyType(
+                dict(table) if isinstance(table, collections.abc.Mapping) else {})
 
         if code is not None:
             from pcapkit.foundation.registry.protocols import \

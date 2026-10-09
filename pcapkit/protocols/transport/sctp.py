@@ -156,7 +156,7 @@ from pcapkit.protocols.schema.transport.sctp import \
 from pcapkit.protocols.schema.transport.sctp import \
     UserInitiatedAbortCause as Schema_UserInitiatedAbortCause
 from pcapkit.protocols.transport.transport import Transport
-from pcapkit.utilities.exceptions import ProtocolError, RegistryError
+from pcapkit.utilities.exceptions import ProtocolError
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
@@ -736,24 +736,18 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
                 :class:`~pcapkit.corekit.module.ModuleDescriptor` incumbent
                 counts as different from the class it names; handing back the
                 stored entry, or a descriptor equal to it, is a silent no-op
-                that keeps it.
+                that keeps it, and handing back the descriptor a PPID shipped
+                with restores that object, unresolved (:issue:`1504`).
 
         """
         incumbent = cls.__proto__.get(code)
-        if incumbent is not None and (incumbent is protocol or (
-                isinstance(incumbent, ModuleDescriptor) and isinstance(protocol, ModuleDescriptor)
-                and incumbent == protocol)):
+        entry = cls._next_layer_entry(code, protocol)
+        if entry is None:
             return
-        if isinstance(protocol, ModuleDescriptor):
-            protocol = protocol.klass
-        if not isinstance(protocol, type):
-            raise RegistryError(f'protocol must be a class, not {protocol!r}')
-        if not issubclass(protocol, ProtocolBase):
-            raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
-        if incumbent is not None and incumbent is not protocol:
+        if incumbent is not None and incumbent is not entry:
             warn(f'payload protocol identifier {code} already registered, overwriting '
-                 f'{incumbent!r} with {protocol!r}', RegistryWarning)
-        cls.__proto__[code] = protocol
+                 f'{incumbent!r} with {entry!r}', RegistryWarning)
+        cls.__proto__[code] = entry
 
     @classmethod
     def register_chunk(cls, code: 'Enum_Chunk', meth: 'str | tuple[ChunkParser, ChunkConstructor]') -> 'None':

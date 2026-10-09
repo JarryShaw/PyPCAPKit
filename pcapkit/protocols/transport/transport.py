@@ -19,7 +19,7 @@ from pcapkit.const.reg.apptype import AppType as Enum_AppType
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase
 from pcapkit.protocols.schema.schema import keep_short_read, replay_short_read
-from pcapkit.utilities.exceptions import RegistryError, StructError, UnsupportedCall, stacklevel
+from pcapkit.utilities.exceptions import StructError, UnsupportedCall, stacklevel
 from pcapkit.utilities.logging import DEVMODE, get_logger
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
@@ -100,7 +100,8 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
                 different from the class it names. See
                 :meth:`ProtocolBase.register
                 <pcapkit.protocols.protocol.ProtocolBase.register>` for the
-                guard this shares with ``register_protocol``.
+                guard this shares with ``register_protocol``, and for the
+                shipped descriptor a restore puts back (:issue:`1504`).
 
         Note:
             :class:`~pcapkit.protocols.transport.tcp.TCP` and
@@ -114,20 +115,13 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
             raise UnsupportedCall(f'{cls.__name__} is an abstract class')
 
         incumbent = cls.__proto__.get(code)
-        if incumbent is not None and (incumbent is protocol or (
-                isinstance(incumbent, ModuleDescriptor) and isinstance(protocol, ModuleDescriptor)
-                and incumbent == protocol)):
+        entry = cls._next_layer_entry(code, protocol)
+        if entry is None:
             return
-        if isinstance(protocol, ModuleDescriptor):
-            protocol = protocol.klass
-        if not isinstance(protocol, type):
-            raise RegistryError(f'protocol must be a class, not {protocol!r}')
-        if not issubclass(protocol, ProtocolBase):
-            raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
-        if incumbent is not None and incumbent is not protocol:
+        if incumbent is not None and incumbent is not entry:
             warn(f'port {code} already registered, overwriting '
-                 f'{incumbent!r} with {protocol!r}', RegistryWarning)
-        cls.__proto__[code] = protocol
+                 f'{incumbent!r} with {entry!r}', RegistryWarning)
+        cls.__proto__[code] = entry
 
     @classmethod
     def analyze(cls, ports: 'tuple[int, int]', payload: 'bytes', **kwargs: 'Any') -> 'ProtocolBase':  # type: ignore[override] # pylint: disable=arguments-renamed

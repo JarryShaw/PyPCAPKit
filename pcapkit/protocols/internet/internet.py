@@ -21,7 +21,6 @@ from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase
 from pcapkit.protocols.schema.schema import keep_short_read, replay_short_read
 from pcapkit.utilities.decorators import beholder
-from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
@@ -156,24 +155,18 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
                 replacement so a caller can tell *what* was lost. Fires only
                 when the incumbent differs from the replacement; see :meth:`ProtocolBase.register
                 <pcapkit.protocols.protocol.ProtocolBase.register>` for the
-                guard this shares with ``register_protocol``.
+                guard this shares with ``register_protocol``, and for the
+                shipped descriptor a restore puts back (:issue:`1504`).
 
         """
         incumbent = cls.__proto__.get(code)
-        if incumbent is not None and (incumbent is protocol or (
-                isinstance(incumbent, ModuleDescriptor) and isinstance(protocol, ModuleDescriptor)
-                and incumbent == protocol)):
+        entry = cls._next_layer_entry(code, protocol)
+        if entry is None:
             return
-        if isinstance(protocol, ModuleDescriptor):
-            protocol = protocol.klass
-        if not isinstance(protocol, type):
-            raise RegistryError(f'protocol must be a class, not {protocol!r}')
-        if not issubclass(protocol, ProtocolBase):
-            raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
-        if incumbent is not None and incumbent is not protocol:
+        if incumbent is not None and incumbent is not entry:
             warn(f'protocol {code} already registered, overwriting '
-                 f'{incumbent!r} with {protocol!r}', RegistryWarning)
-        cls.__proto__[code] = protocol
+                 f'{incumbent!r} with {entry!r}', RegistryWarning)
+        cls.__proto__[code] = entry
 
     @classmethod
     def from_data(cls, data: '_PT | dict[str, Any]', **kwargs: 'Any') -> 'Self':

@@ -405,17 +405,14 @@ class TestRegistrySymmetry(harness.RoundTripBase):
 
     STATUSES = ('RAISED', 'CHANGED')
     KNOWN_FAILURES = (
-        Gap(1504, 'restoring a shipped dispatch entry over an override stores the class it names, '
-               'not the shipped ModuleDescriptor: each register resolves a descriptor unequal '
-               'to the incumbent (pcapkit/protocols/protocol.py:924, link/link.py:148, '
-               'internet/internet.py:168, transport/transport.py:122, misc/pcap/frame.py:155, '
-               'misc/pcapng.py:1027, transport/sctp.py:748), where the foundation registrars '
-               'keep the shipped object (#1363, #1364)',
-            'CHANGED', ("ModuleDescriptor(module='pcapkit.protocols.",),
+        Gap(1504, 'restoring a shipped PCAPNG.__proto__ entry over an override stores the class '
+               'it names, not the shipped ModuleDescriptor: PCAPNG.register resolves a '
+               'descriptor unequal to the incumbent (pcapkit/protocols/misc/pcapng.py:1027) '
+               'instead of sharing ProtocolBase._next_layer_entry, as the other layers do',
+            'CHANGED', ("PCAPNG.__proto__[<LinkType.ETHERNET: 1>] "
+                        "ModuleDescriptor(module='pcapkit.protocols.",),
             tuple(f'{name}/{variant}/dispatch'
-                  for name in ('register_linktype', 'register_pcap', 'register_pcapng',
-                               'register_ethertype', 'register_transtype', 'register_tcp',
-                               'register_udp', 'register_apptype', 'register_sctp')
+                  for name in ('register_linktype', 'register_pcapng')
                   for variant in ('override', 'override-same-name', 'restore-by-name'))),
         Gap(1505, 'a protocol registrar adds the class it registers to pcapkit.protocols.__proto__ '
                'by name (pcapkit/foundation/registry/protocols.py:235, reached from e.g. :416), '
