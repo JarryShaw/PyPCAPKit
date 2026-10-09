@@ -349,11 +349,6 @@ class TestEngineAgreement(harness.RoundTripBase):
             tuple(f'{capture}/pypcapfile/{aspect}'
                   for capture in ('http6.cap', 'stream.pcap', 'tcp.pcap', 'test.pcap')
                   for aspect in ('tcp', 'trace', 'datagrams', 'flows'))),
-        Gap(1515, 'the pyshark engine counts a Systemd Journal Export Block as a frame: tshark '
-               'numbers it as one, and read_frame takes every tshark frame '
-               '(pcapkit/foundation/engines/pyshark.py:245-248)',
-            ('FRAMES', 'RECORDS'), ('6 frames != 5', 'frame 5: timestamp '),
-            ('test.pcapng/pyshark/frames', 'test.pcapng/pyshark/timestamps')),
         Gap(1501, 'the dpkt engine hands reassembly the Decimal timestamp dpkt reads from a '
                'nanosecond PCAP (pcapkit/foundation/engines/dpkt.py:309), where every other '
                'engine hands it a float (pcapkit/toolkit/pcap.py:73)',

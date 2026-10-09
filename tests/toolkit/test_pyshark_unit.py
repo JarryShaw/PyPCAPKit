@@ -617,9 +617,8 @@ class PySharkTraceFieldTests(unittest.TestCase):
 
     def test_the_engine_passes_its_frame_count(self) -> None:
         """:meth:`PyShark.read_frame` hands :func:`tcp_traceflow` its own frame
-        count. Without #1531 that count is still tshark's number, so the journal
-        block shifts it here (2 and 3); with #1531 it is 1 and 2. Either way the
-        traced index is the engine's count, never ``packet.number`` read again.
+        count. The journal block is skipped and not counted (#1515), so the two
+        packets trace as 1 and 2, never as tshark's ``packet.number``.
 
         """
         import types
@@ -651,7 +650,7 @@ class PySharkTraceFieldTests(unittest.TestCase):
             if packet is not journal:
                 counts.append(extractor._frnum)
         self.assertEqual(traced, counts)
-        self.assertIn(traced, ([2, 3], [1, 2]))
+        self.assertEqual(traced, [1, 2])
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')

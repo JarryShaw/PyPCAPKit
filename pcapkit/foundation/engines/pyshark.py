@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     from typing import Optional
 
     from pyshark.capture.file_capture import FileCapture
+    from pyshark.packet.layers.base import BaseLayer
     from pyshark.packet.packet import Packet as PySharkPacket
 
     from pcapkit.foundation.extraction import Extractor
@@ -32,6 +33,45 @@ if TYPE_CHECKING:
 #: logging.Logger: Module-level logger, a child of the package-wide
 #: :data:`pcapkit.utilities.logging.logger`.
 logger = get_logger(__name__)
+
+
+def _frame_layer(packet: 'PySharkPacket') -> 'Optional[BaseLayer]':
+    """The ``frame`` layer of a `PyShark`_ packet, or :data:`None` when the record has none.
+
+    Looked up by name, because `PyShark`_ takes the second PDML ``<proto>`` as
+    ``frame_info``. On a packet with a comment, that is ``pkt_comment``, which has
+    no ``protocols``, and the frame layer is ``layers[0]``. By its source,
+    :program:`tshark` 4.2.2 roots a Sysdig event at ``syscall`` and a Netflix
+    custom block at ``bblog``, so those records have no ``frame`` layer.
+
+    .. _PyShark: https://kiminewt.github.io/pyshark
+
+    """
+    for layer in (packet.frame_info, *packet.layers):
+        if layer.layer_name == 'frame':
+            return layer
+    return None
+
+
+def _is_packet(packet: 'PySharkPacket') -> 'bool':
+    """Whether a `PyShark`_ packet is a packet record, rather than another kind of tshark record.
+
+    :program:`tshark` numbers every record it reads, not only packets: a PCAP-NG
+    systemd Journal Export Block, Custom Block or Sysdig Event Block is a frame
+    to it, measured with :program:`tshark` 4.6.9. The default engine counts
+    Enhanced, Simple and obsolete Packet Blocks only.
+
+    The marker is ``frame.encap_type`` on the record's :func:`_frame_layer`.
+    Wireshark adds it for ``REC_TYPE_PACKET`` records only:
+    :file:`epan/dissectors/packet-frame.c` lines 1001-1002 in 4.2.2, and 828-890
+    in 4.6.9. The summary line is not used, because it differs between those
+    versions. A record with no ``frame`` layer is not a packet either.
+
+    .. _PyShark: https://kiminewt.github.io/pyshark
+
+    """
+    frame = _frame_layer(packet)
+    return frame is not None and 'encap_type' in frame.field_names
 
 
 class PyShark(EngineBase['PySharkPacket']):
@@ -214,10 +254,12 @@ class PyShark(EngineBase['PySharkPacket']):
                  f"so 'ipv4={ext._ipv4}', 'ipv6={ext._ipv6}' and 'tcp={ext._tcp}' will be ignored",
                  AttributeWarning, stacklevel=stacklevel())
 
-        # setup verbose handler
+        # setup verbose handler; a packet always has a frame layer, since
+        # read_frame skips every record that does not (#1515)
         if ext._flag_v:
             ext._vfunc = lambda e, f: print(
-                f'Frame {e._frnum:>3d}: {f.frame_info.protocols}'  # pylint: disable=protected-access
+                f'Frame {e._frnum:>3d}: '  # pylint: disable=protected-access
+                f'{cast("BaseLayer", _frame_layer(f)).protocols}'
             )
 
         # extract global header
@@ -230,6 +272,10 @@ class PyShark(EngineBase['PySharkPacket']):
     def read_frame(self) -> 'PySharkPacket':
         """Read frames with PyShark engine.
 
+        A tshark record that is not a packet, such as a PCAP-NG systemd Journal
+        Export Block, is skipped. Frames are numbered by count, as the default
+        engine numbers them, not by tshark's frame number.
+
         Returns:
             Parsed frame instance.
 
@@ -241,11 +287,15 @@ class PyShark(EngineBase['PySharkPacket']):
         from pcapkit.toolkit.pyshark import packet2dict, tcp_traceflow
         ext = self._extractor
 
-        # fetch PyShark packet
-        packet = cast('PySharkPacket', self._extmp.next())
+        # fetch the next PyShark packet that is a packet record
+        while True:
+            packet = cast('PySharkPacket', self._extmp.next())
+            if _is_packet(packet):
+                break
+            logger.debug('pyshark: skipping tshark frame %s, not a packet record', packet.number)
 
         # verbose output
-        ext._frnum = int(packet.number)
+        ext._frnum += 1
         ext._vfunc(ext, packet)
 
         # write plist
