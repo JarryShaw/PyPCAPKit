@@ -96,16 +96,43 @@ def padding_length(pkt: 'dict[str, Any]') -> 'int':
     Returns:
         Number of padding bytes, clamped to the number of bytes left in the
         enclosing structure, since :rfc:`9260#section-3.2` allows the final
-        padding of a packet to be omitted.
+        padding of a packet to be omitted. When packing, it is clamped as well
+        to the ``__padding__`` width :func:`pre_pack_padding` hands over, so a
+        final chunk captured without (all of) its padding rebuilds without it
+        (:issue:`1474`).
 
     """
     length = pkt.get('length') or 0
     padding = -length % 4
 
+    width = pkt.get('__padding__')
+    if isinstance(width, int) and width >= 0:
+        padding = min(padding, width)
+
     remaining = pkt.get('__length__')
     if not isinstance(remaining, int) or remaining < 0:
         return padding
     return min(padding, remaining)
+
+
+def pre_pack_padding(schema: 'Schema', packet: 'dict[str, Any]') -> 'None':
+    """Hand a schema's recorded padding width to :func:`padding_length`.
+
+    Args:
+        schema: Chunk, parameter or error cause being packed.
+        packet: Packet data, shared with the enclosing and sibling schemas.
+
+    A schema whose padding was captured short -- only the last chunk of a
+    packet can be -- carries the width as captured under ``__padding__`` in its
+    ``__dict__``, set by :func:`~pcapkit.protocols.transport.sctp._restore_padding`
+    from the chunk's ``padding`` as parsed (:issue:`1474`). The key is written to
+    ``packet`` for *every* schema, ``None`` when there is no record, since
+    :meth:`Schema.pack <pcapkit.protocols.schema.schema.Schema.pack>` shares one
+    ``packet`` mapping across siblings and a record left behind by one would
+    otherwise shorten the padding of the next.
+
+    """
+    packet['__padding__'] = schema.__dict__.get('__padding__')
 
 
 def bounded(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[str, Any]], int]':
@@ -260,6 +287,10 @@ class ErrorCause(EnumSchema[Enum_CauseCode]):
     code: 'Enum_CauseCode' = EnumField(length=2, namespace=Enum_CauseCode)
     #: Cause length.
     length: 'int' = UInt16Field()
+
+    def pre_pack(self, packet: 'dict[str, Any]') -> 'None':
+        """Prepare ``packet`` data for packing process; see :func:`pre_pack_padding`."""
+        pre_pack_padding(self, packet)
 
 
 @schema_final
@@ -457,6 +488,10 @@ class Parameter(EnumSchema[Enum_Parameter]):
     #: Parameter length.
     length: 'int' = UInt16Field()
 
+    def pre_pack(self, packet: 'dict[str, Any]') -> 'None':
+        """Prepare ``packet`` data for packing process; see :func:`pre_pack_padding`."""
+        pre_pack_padding(self, packet)
+
 
 @schema_final
 class UnknownParameter(Parameter):
@@ -605,6 +640,10 @@ class Chunk(EnumSchema[Enum_Chunk]):
     flags: 'bytes' = BytesField(length=1)
     #: Chunk length, excluding any trailing padding.
     length: 'int' = UInt16Field()
+
+    def pre_pack(self, packet: 'dict[str, Any]') -> 'None':
+        """Prepare ``packet`` data for packing process; see :func:`pre_pack_padding`."""
+        pre_pack_padding(self, packet)
 
 
 @schema_final
