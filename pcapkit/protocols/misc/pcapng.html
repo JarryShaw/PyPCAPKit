@@ -6886,6 +6886,13 @@ subclass instance.</p></li>
 <dd><p>Options.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.SectionHeaderBlock.padding_opts">
+<span class="sig-name descname"><span class="pre">padding_opts</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.SectionHeaderBlock.padding_opts" title="Link to this definition">¶</a></dt>
+<dd><p>Octets after <code class="docutils literal notranslate"><span class="pre">opt_endofopt</span></code>, as captured; present only when the
+option area holds any (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1437">#1437</a>).</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -6909,6 +6916,20 @@ subclass instance.</p></li>
 <dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.InterfaceDescriptionBlock.options">
 <span class="sig-name descname"><span class="pre">options</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><span class="pre">OrderedMultiDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><span class="pre">OptionType</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.Option" title="pcapkit.protocols.data.misc.pcapng.Option"><span class="pre">Option</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.InterfaceDescriptionBlock.options" title="Link to this definition">¶</a></dt>
 <dd><p>Options.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.InterfaceDescriptionBlock.reserved">
+<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.InterfaceDescriptionBlock.reserved" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved octets, as captured; present only when they are not all
+zeros (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1437">#1437</a>).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.InterfaceDescriptionBlock.padding_opts">
+<span class="sig-name descname"><span class="pre">padding_opts</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.InterfaceDescriptionBlock.padding_opts" title="Link to this definition">¶</a></dt>
+<dd><p>Octets after <code class="docutils literal notranslate"><span class="pre">opt_endofopt</span></code>, as captured; present only when the
+option area holds any (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1437">#1437</a>).</p>
 </dd></dl>
 
 </dd></dl>
@@ -6967,6 +6988,20 @@ subclass instance.</p></li>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.EnhancedPacketBlock.padding_data">
+<span class="sig-name descname"><span class="pre">padding_data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.EnhancedPacketBlock.padding_data" title="Link to this definition">¶</a></dt>
+<dd><p>Padding of the packet data to 32 bits, as captured; present only when
+it is not all zeros (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1437">#1437</a>).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.EnhancedPacketBlock.padding_opts">
+<span class="sig-name descname"><span class="pre">padding_opts</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.EnhancedPacketBlock.padding_opts" title="Link to this definition">¶</a></dt>
+<dd><p>Octets after <code class="docutils literal notranslate"><span class="pre">opt_endofopt</span></code>, as captured; present only when the
+option area holds any (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1437">#1437</a>).</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.EnhancedPacketBlock.protocols">
 <span class="sig-name descname"><span class="pre">protocols</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.EnhancedPacketBlock.protocols" title="Link to this definition">¶</a></dt>
 <dd><p>Protocol chain.</p>
@@ -7007,6 +7042,13 @@ subclass instance.</p></li>
 <dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.SimplePacketBlock.__post_init__">
 <span class="sig-name descname"><span class="pre">__post_init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/misc/pcapng.html#SimplePacketBlock.__post_init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.SimplePacketBlock.__post_init__" title="Link to this definition">¶</a></dt>
 <dd><p>Post-initialization handling.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.SimplePacketBlock.padding_data">
+<span class="sig-name descname"><span class="pre">padding_data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.SimplePacketBlock.padding_data" title="Link to this definition">¶</a></dt>
+<dd><p>Padding of the packet data to 32 bits, as captured; present only when
+it is not all zeros (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1437">#1437</a>).</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -7059,6 +7101,13 @@ subclass instance.</p></li>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.NameResolutionBlock.padding_opts">
+<span class="sig-name descname"><span class="pre">padding_opts</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.NameResolutionBlock.padding_opts" title="Link to this definition">¶</a></dt>
+<dd><p>Octets after <code class="docutils literal notranslate"><span class="pre">opt_endofopt</span></code>, as captured; present only when the
+option area holds any (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1437">#1437</a>).</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.NameResolutionBlock.mapping">
 <span class="sig-name descname"><span class="pre">mapping</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.MultiDict" title="pcapkit.corekit.multidict.MultiDict"><span class="pre">MultiDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.14)"><span class="pre">IPv4Address</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.14)"><span class="pre">IPv6Address</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.NameResolutionBlock.mapping" title="Link to this definition">¶</a></dt>
 <dd><p>Name resolution mapping (IP address -&gt; name).</p>
@@ -7099,6 +7148,13 @@ subclass instance.</p></li>
 <dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.InterfaceStatisticsBlock.options">
 <span class="sig-name descname"><span class="pre">options</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><span class="pre">OrderedMultiDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><span class="pre">OptionType</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.Option" title="pcapkit.protocols.data.misc.pcapng.Option"><span class="pre">Option</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.InterfaceStatisticsBlock.options" title="Link to this definition">¶</a></dt>
 <dd><p>Options.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.InterfaceStatisticsBlock.padding_opts">
+<span class="sig-name descname"><span class="pre">padding_opts</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.InterfaceStatisticsBlock.padding_opts" title="Link to this definition">¶</a></dt>
+<dd><p>Octets after <code class="docutils literal notranslate"><span class="pre">opt_endofopt</span></code>, as captured; present only when the
+option area holds any (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1437">#1437</a>).</p>
 </dd></dl>
 
 </dd></dl>
@@ -7143,6 +7199,20 @@ subclass instance.</p></li>
 <dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.DecryptionSecretsBlock.options">
 <span class="sig-name descname"><span class="pre">options</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><span class="pre">OrderedMultiDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><span class="pre">OptionType</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.Option" title="pcapkit.protocols.data.misc.pcapng.Option"><span class="pre">Option</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.DecryptionSecretsBlock.options" title="Link to this definition">¶</a></dt>
 <dd><p>Options.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.DecryptionSecretsBlock.padding_data">
+<span class="sig-name descname"><span class="pre">padding_data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.DecryptionSecretsBlock.padding_data" title="Link to this definition">¶</a></dt>
+<dd><p>Padding of the secrets data to 32 bits, as captured; present only when
+it is not all zeros (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1437">#1437</a>).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.DecryptionSecretsBlock.padding_opts">
+<span class="sig-name descname"><span class="pre">padding_opts</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.DecryptionSecretsBlock.padding_opts" title="Link to this definition">¶</a></dt>
+<dd><p>Octets after <code class="docutils literal notranslate"><span class="pre">opt_endofopt</span></code>, as captured; present only when the
+option area holds any (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1437">#1437</a>).</p>
 </dd></dl>
 
 </dd></dl>
@@ -7226,6 +7296,20 @@ subclass instance.</p></li>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.PacketBlock.padding_data">
+<span class="sig-name descname"><span class="pre">padding_data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.PacketBlock.padding_data" title="Link to this definition">¶</a></dt>
+<dd><p>Padding of the packet data to 32 bits, as captured; present only when
+it is not all zeros (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1437">#1437</a>).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.PacketBlock.padding_opts">
+<span class="sig-name descname"><span class="pre">padding_opts</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.PacketBlock.padding_opts" title="Link to this definition">¶</a></dt>
+<dd><p>Octets after <code class="docutils literal notranslate"><span class="pre">opt_endofopt</span></code>, as captured; present only when the
+option area holds any (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1437">#1437</a>).</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.PacketBlock.protocols">
 <span class="sig-name descname"><span class="pre">protocols</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.PacketBlock.protocols" title="Link to this definition">¶</a></dt>
 <dd><p>Protocol chain.</p>
@@ -7248,6 +7332,13 @@ subclass instance.</p></li>
 <dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.Option.length">
 <span class="sig-name descname"><span class="pre">length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.Option.length" title="Link to this definition">¶</a></dt>
 <dd><p>Option data length.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.Option.padding">
+<span class="sig-name descname"><span class="pre">padding</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.Option.padding" title="Link to this definition">¶</a></dt>
+<dd><p>Padding of the option value to 32 bits, as captured; present only
+when it is not all zeros (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1437">#1437</a>).</p>
 </dd></dl>
 
 </dd></dl>
@@ -7969,6 +8060,13 @@ unnamed link-layer-dependent errors).</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.NameResolutionRecord.length">
 <span class="sig-name descname"><span class="pre">length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.NameResolutionRecord.length" title="Link to this definition">¶</a></dt>
 <dd><p>Record value length.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.NameResolutionRecord.padding">
+<span class="sig-name descname"><span class="pre">padding</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.NameResolutionRecord.padding" title="Link to this definition">¶</a></dt>
+<dd><p>Padding of the record value to 32 bits, as captured; present only
+when it is not all zeros (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1437">#1437</a>).</p>
 </dd></dl>
 
 </dd></dl>

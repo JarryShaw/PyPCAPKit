@@ -565,7 +565,12 @@
     <span class="c1">#: Option type.</span>
     <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_OptionType'</span>
     <span class="c1">#: Option data length.</span>
-    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span></div>
+    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Padding of the option value to 32 bits, as captured; present only</span>
+        <span class="c1">#: when it is not all zeros (:issue:`1437`).</span>
+        <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span></div>
 
 
 
@@ -640,6 +645,10 @@
     <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_OptionType, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Octets after ``opt_endofopt``, as captured; present only when the</span>
+        <span class="c1">#: option area holds any (:issue:`1437`).</span>
+        <span class="n">padding_opts</span><span class="p">:</span> <span class="s1">'bytes'</span>
+
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_BlockType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">byteorder</span><span class="p">:</span> <span class="s1">'Literal["big", "little"]'</span><span class="p">,</span>
                      <span class="n">version</span><span class="p">:</span> <span class="s1">'VersionInfo'</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                      <span class="n">section_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_OptionType, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
@@ -887,6 +896,13 @@
     <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_OptionType, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Reserved octets, as captured; present only when they are not all</span>
+        <span class="c1">#: zeros (:issue:`1437`).</span>
+        <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
+        <span class="c1">#: Octets after ``opt_endofopt``, as captured; present only when the</span>
+        <span class="c1">#: option area holds any (:issue:`1437`).</span>
+        <span class="n">padding_opts</span><span class="p">:</span> <span class="s1">'bytes'</span>
+
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_BlockType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">linktype</span><span class="p">:</span> <span class="s1">'Enum_LinkType'</span><span class="p">,</span>
                      <span class="n">snaplen</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_OptionType, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span></div>
 
@@ -1040,6 +1056,12 @@
     <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_OptionType, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Padding of the packet data to 32 bits, as captured; present only when</span>
+        <span class="c1">#: it is not all zeros (:issue:`1437`).</span>
+        <span class="n">padding_data</span><span class="p">:</span> <span class="s1">'bytes'</span>
+        <span class="c1">#: Octets after ``opt_endofopt``, as captured; present only when the</span>
+        <span class="c1">#: option area holds any (:issue:`1437`).</span>
+        <span class="n">padding_opts</span><span class="p">:</span> <span class="s1">'bytes'</span>
         <span class="c1">#: Protocol chain.</span>
         <span class="n">protocols</span><span class="p">:</span> <span class="s1">'str'</span>
 
@@ -1079,6 +1101,9 @@
 
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Padding of the packet data to 32 bits, as captured; present only when</span>
+        <span class="c1">#: it is not all zeros (:issue:`1437`).</span>
+        <span class="n">padding_data</span><span class="p">:</span> <span class="s1">'bytes'</span>
         <span class="c1">#: Protocol chain.</span>
         <span class="n">protocols</span><span class="p">:</span> <span class="s1">'str'</span>
 
@@ -1102,7 +1127,12 @@
     <span class="c1">#: Record type.</span>
     <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_RecordType'</span>
     <span class="c1">#: Record value length.</span>
-    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span></div>
+    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Padding of the record value to 32 bits, as captured; present only</span>
+        <span class="c1">#: when it is not all zeros (:issue:`1437`).</span>
+        <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span></div>
 
 
 
@@ -1238,6 +1268,9 @@
 
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Octets after ``opt_endofopt``, as captured; present only when the</span>
+        <span class="c1">#: option area holds any (:issue:`1437`).</span>
+        <span class="n">padding_opts</span><span class="p">:</span> <span class="s1">'bytes'</span>
         <span class="c1">#: Name resolution mapping (IP address -&gt; name).</span>
         <span class="n">mapping</span><span class="p">:</span> <span class="s1">'MultiDict[IPv4Address | IPv6Address, str]'</span>
         <span class="c1">#: Name resolution mapping (name -&gt; IP address).</span>
@@ -1369,6 +1402,10 @@
     <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_OptionType, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Octets after ``opt_endofopt``, as captured; present only when the</span>
+        <span class="c1">#: option area holds any (:issue:`1437`).</span>
+        <span class="n">padding_opts</span><span class="p">:</span> <span class="s1">'bytes'</span>
+
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_BlockType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">interface_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'dt_type'</span><span class="p">,</span>
                      <span class="n">timestamp_epoch</span><span class="p">:</span> <span class="s1">'Decimal'</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_OptionType, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
@@ -1496,6 +1533,13 @@
     <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_OptionType, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Padding of the secrets data to 32 bits, as captured; present only when</span>
+        <span class="c1">#: it is not all zeros (:issue:`1437`).</span>
+        <span class="n">padding_data</span><span class="p">:</span> <span class="s1">'bytes'</span>
+        <span class="c1">#: Octets after ``opt_endofopt``, as captured; present only when the</span>
+        <span class="c1">#: option area holds any (:issue:`1437`).</span>
+        <span class="n">padding_opts</span><span class="p">:</span> <span class="s1">'bytes'</span>
+
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_BlockType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">secrets_type</span><span class="p">:</span> <span class="s1">'Enum_SecretsType'</span><span class="p">,</span>
                      <span class="n">secrets_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">secrets_data</span><span class="p">:</span> <span class="s1">'DSBSecrets'</span><span class="p">,</span>
                      <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_OptionType, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
@@ -1609,6 +1653,12 @@
     <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_OptionType, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Padding of the packet data to 32 bits, as captured; present only when</span>
+        <span class="c1">#: it is not all zeros (:issue:`1437`).</span>
+        <span class="n">padding_data</span><span class="p">:</span> <span class="s1">'bytes'</span>
+        <span class="c1">#: Octets after ``opt_endofopt``, as captured; present only when the</span>
+        <span class="c1">#: option area holds any (:issue:`1437`).</span>
+        <span class="n">padding_opts</span><span class="p">:</span> <span class="s1">'bytes'</span>
         <span class="c1">#: Protocol chain.</span>
         <span class="n">protocols</span><span class="p">:</span> <span class="s1">'str'</span>
 

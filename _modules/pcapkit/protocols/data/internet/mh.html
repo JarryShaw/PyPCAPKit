@@ -662,6 +662,9 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">HomeTestInitMessage</span><span class="p">(</span><span class="n">MH</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for MH Home Test Init (HoTI) message type."""</span>
 
+    <span class="c1">#: The two reserved octets of the message body, as captured. Named apart</span>
+    <span class="c1">#: from :attr:`MH.reserved`, the reserved octet of the fixed header.</span>
+    <span class="n">msg_reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Home init cookie.</span>
     <span class="n">cookie</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Mobility options.</span>
@@ -669,7 +672,8 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
-                     <span class="n">cookie</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">msg_reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">cookie</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
+                     <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -679,6 +683,9 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">CareofTestInitMessage</span><span class="p">(</span><span class="n">MH</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for MH Care-of Test Init (CoTI) message type."""</span>
 
+    <span class="c1">#: The two reserved octets of the message body, as captured. Named apart</span>
+    <span class="c1">#: from :attr:`MH.reserved`, the reserved octet of the fixed header.</span>
+    <span class="n">msg_reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Care-of init cookie.</span>
     <span class="n">cookie</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Mobility options.</span>
@@ -686,7 +693,8 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
-                     <span class="n">cookie</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">msg_reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">cookie</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
+                     <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -831,6 +839,9 @@
 
     <span class="c1">#: Status.</span>
     <span class="n">status</span><span class="p">:</span> <span class="s1">'Enum_BindingError'</span>
+    <span class="c1">#: The reserved octet of the message body, as captured. Named apart</span>
+    <span class="c1">#: from :attr:`MH.reserved`, the reserved octet of the fixed header.</span>
+    <span class="n">msg_reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Home address.</span>
     <span class="n">home</span><span class="p">:</span> <span class="s1">'IPv6Address'</span>
     <span class="c1">#: Mobility options.</span>
@@ -838,7 +849,7 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
-                     <span class="n">status</span><span class="p">:</span> <span class="s1">'Enum_BindingError'</span><span class="p">,</span> <span class="n">home</span><span class="p">:</span> <span class="s1">'IPv6Address'</span><span class="p">,</span>
+                     <span class="n">status</span><span class="p">:</span> <span class="s1">'Enum_BindingError'</span><span class="p">,</span> <span class="n">msg_reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">home</span><span class="p">:</span> <span class="s1">'IPv6Address'</span><span class="p">,</span>
                      <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -914,12 +925,15 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">FastNeighborAdvertisementMessage</span><span class="p">(</span><span class="n">MH</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for MH Fast Neighbor Advertisement (FNA) message type."""</span>
 
+    <span class="c1">#: The two reserved octets of the message body, as captured. Named apart</span>
+    <span class="c1">#: from :attr:`MH.reserved`, the reserved octet of the fixed header.</span>
+    <span class="n">msg_reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Mobility options.</span>
     <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
-                     <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">msg_reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -1030,6 +1044,9 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">HomeAgentSwitchMessage</span><span class="p">(</span><span class="n">MH</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for MH Home Agent Switch message type."""</span>
 
+    <span class="c1">#: The reserved octet of the message body, as captured. Named apart</span>
+    <span class="c1">#: from :attr:`MH.reserved`, the reserved octet of the fixed header.</span>
+    <span class="n">msg_reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Alternate home agent addresses. An empty tuple asks the mobile node to</span>
     <span class="c1">#: run home agent discovery instead.</span>
     <span class="n">addresses</span><span class="p">:</span> <span class="s1">'tuple[IPv6Address, ...]'</span>
@@ -1038,7 +1055,7 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
-                     <span class="n">addresses</span><span class="p">:</span> <span class="s1">'tuple[IPv6Address, ...]'</span><span class="p">,</span>
+                     <span class="n">msg_reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">addresses</span><span class="p">:</span> <span class="s1">'tuple[IPv6Address, ...]'</span><span class="p">,</span>
                      <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -1091,6 +1108,9 @@
 
     <span class="c1">#: Sequence number.</span>
     <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: The two reserved octets of the message body, as captured. Named apart</span>
+    <span class="c1">#: from :attr:`MH.reserved`, the reserved octet of the fixed header.</span>
+    <span class="n">msg_reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Lifetime. :rfc:`6705#section-10.1` counts this in seconds rather than in</span>
     <span class="c1">#: the units of 4 seconds the binding messages use.</span>
     <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span>
@@ -1099,7 +1119,7 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
-                     <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">,</span>
+                     <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">msg_reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">,</span>
                      <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -1171,13 +1191,16 @@
     <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Status.</span>
     <span class="n">status</span><span class="p">:</span> <span class="s1">'Enum_UpdateNotificationACKStatus'</span>
+    <span class="c1">#: The three reserved octets of the message body, as captured. Named apart</span>
+    <span class="c1">#: from :attr:`MH.reserved`, the reserved octet of the fixed header.</span>
+    <span class="n">msg_reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Mobility options.</span>
     <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
                      <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="s1">'Enum_UpdateNotificationACKStatus'</span><span class="p">,</span>
-                     <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">msg_reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -1224,13 +1247,16 @@
 
     <span class="c1">#: Sequence number, counted modulo 256.</span>
     <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: The reserved octet of the message body, as captured. Named apart</span>
+    <span class="c1">#: from :attr:`MH.reserved`, the reserved octet of the fixed header.</span>
+    <span class="n">msg_reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Mobility options.</span>
     <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
                      <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">msg_reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -1366,11 +1392,13 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">MobileNetworkPrefixOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for Mobile Network Prefix option."""</span>
 
+    <span class="c1">#: The reserved octet, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Mobile Network Prefix.</span>
     <span class="n">prefix</span><span class="p">:</span> <span class="s1">'IPv6Network'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="s1">'IPv6Network'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="s1">'IPv6Network'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -1666,6 +1694,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">HomeNetworkPrefixOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for MH Home Network Prefix option."""</span>
 
+    <span class="c1">#: The reserved octet, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Prefix length.</span>
     <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Home network prefix. Kept apart from :attr:`prefix_length` rather than</span>
@@ -1677,7 +1707,7 @@
     <span class="n">prefix</span><span class="p">:</span> <span class="s1">'IPv6Address'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">prefix</span><span class="p">:</span> <span class="s1">'IPv6Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -1704,11 +1734,13 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">AccessTechnologyTypeOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for MH Access Technology Type option."""</span>
 
+    <span class="c1">#: The reserved octet, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Access technology type.</span>
     <span class="n">att</span><span class="p">:</span> <span class="s1">'Enum_AccessType'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">att</span><span class="p">:</span> <span class="s1">'Enum_AccessType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">att</span><span class="p">:</span> <span class="s1">'Enum_AccessType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -1718,11 +1750,13 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">MNLLIdentifierOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for MH Mobile Node Link-layer Identifier option."""</span>
 
+    <span class="c1">#: The two reserved octets, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Link-layer identifier.</span>
     <span class="n">lli</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">lli</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">lli</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -1905,11 +1939,13 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">IPv4CareofAddressOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for MH IPv4 Care-of Address option."""</span>
 
+    <span class="c1">#: The two reserved octets, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: IPv4 care-of address.</span>
     <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv4Address'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv4Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv4Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -1919,13 +1955,15 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">GREKeyOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for MH GRE Key option."""</span>
 
+    <span class="c1">#: The two reserved octets, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: GRE key identifier, or :obj:`None` when the option carries none -- which</span>
     <span class="c1">#: :rfc:`5845#section-6.1` signals by an option length of 2 rather than 6.</span>
     <span class="n">key</span><span class="p">:</span> <span class="s1">'Optional[int]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">key</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -2002,11 +2040,13 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">IPv4DefaultRouterAddressOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for MH IPv4 Default-Router Address option."""</span>
 
+    <span class="c1">#: The two reserved octets, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: IPv4 default-router address.</span>
     <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv4Address'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv4Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv4Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -2052,12 +2092,14 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">ContextRequestOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for MH Context Request option."""</span>
 
+    <span class="c1">#: The two reserved octets, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Requested contexts.</span>
     <span class="n">requests</span><span class="p">:</span> <span class="s1">'tuple[ContextRequest, ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">requests</span><span class="p">:</span> <span class="s1">'tuple[ContextRequest, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">requests</span><span class="p">:</span> <span class="s1">'tuple[ContextRequest, ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -2071,12 +2113,14 @@
     <span class="c1">#: by the RFC with no IANA registry behind them, so this field carries the</span>
     <span class="c1">#: module-local :class:`~pcapkit.protocols.internet.mh.LMAAddressCode`.</span>
     <span class="n">code</span><span class="p">:</span> <span class="s1">'LMAAddressCode'</span>
+    <span class="c1">#: The reserved octet, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Local mobility anchor address.</span>
     <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv4Address | IPv6Address | bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'LMAAddressCode'</span><span class="p">,</span>
-                     <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv4Address | IPv6Address | bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv4Address | IPv6Address | bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -2086,11 +2130,13 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">MNLLAIIDOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for MH Mobile Node Link-local Address Interface Identifier option."""</span>
 
+    <span class="c1">#: The two reserved octets, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Interface identifier.</span>
     <span class="n">iid</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">iid</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">iid</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -2194,13 +2240,15 @@
 
     <span class="c1">#: Traffic selector format.</span>
     <span class="n">ts_format</span><span class="p">:</span> <span class="s1">'Enum_TrafficSelector'</span>
+    <span class="c1">#: The reserved octet, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Traffic selector. Its interior is :rfc:`6088` territory and belongs to the</span>
     <span class="c1">#: separate traffic selector format registry, so it is kept opaque.</span>
     <span class="n">selector</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_FlowIDSuboption'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">ts_format</span><span class="p">:</span> <span class="s1">'Enum_TrafficSelector'</span><span class="p">,</span> <span class="n">selector</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">ts_format</span><span class="p">:</span> <span class="s1">'Enum_TrafficSelector'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">selector</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -2210,12 +2258,14 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">FlowBindingActionSuboption</span><span class="p">(</span><span class="n">FlowIdentificationSuboption</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for MH Flow Identification Flow Binding Action sub-option."""</span>
 
+    <span class="c1">#: The reserved octet, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Flow binding action.</span>
     <span class="n">action</span><span class="p">:</span> <span class="s1">'Enum_FlowBindingAction'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_FlowIDSuboption'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">action</span><span class="p">:</span> <span class="s1">'Enum_FlowBindingAction'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="s1">'Enum_FlowBindingAction'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -2225,12 +2275,14 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">TargetCareofAddressSuboption</span><span class="p">(</span><span class="n">FlowIdentificationSuboption</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for MH Flow Identification Target Care-of Address sub-option."""</span>
 
+    <span class="c1">#: The two reserved octets, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Target care-of address.</span>
     <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv4Address | IPv6Address | bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_FlowIDSuboption'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv4Address | IPv6Address | bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv4Address | IPv6Address | bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -2244,6 +2296,8 @@
     <span class="n">fid</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Flow priority.</span>
     <span class="n">fid_pri</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: The reserved octet, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Status.</span>
     <span class="n">status</span><span class="p">:</span> <span class="s1">'Enum_FlowIDStatus'</span>
     <span class="c1">#: Sub-options.</span>
@@ -2251,7 +2305,7 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">fid</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">fid_pri</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">status</span><span class="p">:</span> <span class="s1">'Enum_FlowIDStatus'</span><span class="p">,</span>
+                     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="s1">'Enum_FlowIDStatus'</span><span class="p">,</span>
                      <span class="n">suboptions</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_FlowIDSuboption, FlowIdentificationSuboption]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -2262,8 +2316,11 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">RedirectCapabilityOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for MH Redirect-Capability mobility option."""</span>
 
+    <span class="c1">#: The two reserved octets, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
+
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -2332,12 +2389,14 @@
 
     <span class="c1">#: Sub-type.</span>
     <span class="n">subtype</span><span class="p">:</span> <span class="s1">'Enum_MNGroupID'</span>
+    <span class="c1">#: The reserved octet, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Mobile node group identifier. ``1`` is the default "all sessions" group.</span>
     <span class="n">group_id</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'Enum_MNGroupID'</span><span class="p">,</span>
-                     <span class="n">group_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">group_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -2347,13 +2406,15 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">MAGIPv6AddressOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for MH MAG IPv6 Address option."""</span>
 
+    <span class="c1">#: The reserved octet, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Address length, in bits; always 128.</span>
     <span class="n">address_length</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: MAG IPv6 address.</span>
     <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv6Address'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">address_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">address_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv6Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -2454,12 +2515,14 @@
     <span class="c1">#: Encoding format; only ``0``, the binary encoding of</span>
     <span class="c1">#: :rfc:`4776#section-3.1`, is defined.</span>
     <span class="nb">format</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: The reserved octet, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Civic location.</span>
     <span class="n">location</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_ANISuboption'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">location</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">location</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -2643,11 +2706,13 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">BitRateAttribute</span><span class="p">(</span><span class="n">QoSAttribute</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for the MH Quality-of-Service attributes carrying a bare bit rate."""</span>
 
+    <span class="c1">#: The two reserved octets, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Bit rate, in **bits** per second.</span>
     <span class="n">rate</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_QoSAttribute'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">rate</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_QoSAttribute'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">rate</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -2678,6 +2743,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">AllocationRetentionPriorityAttribute</span><span class="p">(</span><span class="n">QoSAttribute</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for the MH Allocation-Retention-Priority attribute."""</span>
 
+    <span class="c1">#: The reserved octet, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Priority level, 1 through 15, where 1 is the highest.</span>
     <span class="n">priority_level</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Pre-emption capability; ``0`` enabled, ``1`` disabled.</span>
@@ -2686,7 +2753,7 @@
     <span class="n">preemption_vulnerability</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_QoSAttribute'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">priority_level</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_QoSAttribute'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">priority_level</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">preemption_capability</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">preemption_vulnerability</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
@@ -2698,6 +2765,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">QoSTrafficSelectorAttribute</span><span class="p">(</span><span class="n">QoSAttribute</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for the MH QoS-Traffic-Selector attribute."""</span>
 
+    <span class="c1">#: The reserved octet, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Traffic selector format.</span>
     <span class="n">ts_format</span><span class="p">:</span> <span class="s1">'Enum_TrafficSelector'</span>
     <span class="c1">#: Traffic selector, kept opaque as for</span>
@@ -2706,7 +2775,7 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_QoSAttribute'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">ts_format</span><span class="p">:</span> <span class="s1">'Enum_TrafficSelector'</span><span class="p">,</span> <span class="n">selector</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">ts_format</span><span class="p">:</span> <span class="s1">'Enum_TrafficSelector'</span><span class="p">,</span> <span class="n">selector</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -2716,6 +2785,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">QoSVendorSpecificAttribute</span><span class="p">(</span><span class="n">QoSAttribute</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for the MH QoS-Vendor-Specific attribute."""</span>
 
+    <span class="c1">#: The two reserved octets, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Vendor ID, an SMI Network Management Private Enterprise Number.</span>
     <span class="n">vendor</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Vendor-administered sub-type.</span>
@@ -2724,7 +2795,7 @@
     <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_QoSAttribute'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">vendor</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_QoSAttribute'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">vendor</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">subtype</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -2743,13 +2814,15 @@
     <span class="c1">#: Operational code: ``0`` response, ``1`` allocate, ``2`` de-allocate,</span>
     <span class="c1">#: ``3`` modify, ``4`` query, ``5`` negotiate.</span>
     <span class="n">oc</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: The three reserved octets, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Quality-of-service attributes.</span>
     <span class="n">attributes</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_QoSAttribute, QoSAttribute]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">sr_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">dscp</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">oc</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">attributes</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_QoSAttribute, QoSAttribute]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">attributes</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_QoSAttribute, QoSAttribute]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -2759,6 +2832,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">LMAUserPlaneAddressOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for MH LMA User-Plane Address option."""</span>
 
+    <span class="c1">#: The two reserved octets, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: LMA user-plane address, or :obj:`None` when the option carries none --</span>
     <span class="c1">#: which is how a mobile access gateway asks for a transport without naming</span>
     <span class="c1">#: an address.</span>
@@ -2766,7 +2841,7 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">address</span><span class="p">:</span> <span class="s1">'Optional[IPv4Address | IPv6Address]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">'Optional[IPv4Address | IPv6Address]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -2779,12 +2854,14 @@
     <span class="c1">#: Option code: ``1`` IGMPv3, ``2`` MLDv2, ``3`` IGMPv3 in IGMPv2</span>
     <span class="c1">#: compatibility mode, ``4`` MLDv2 in MLDv1 compatibility mode.</span>
     <span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: The reserved octet, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: MLD or IGMP report payload, kept opaque.</span>
     <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -2925,12 +3002,14 @@
 
     <span class="c1">#: Sub-type, drawn from the mobile node identifier subtype registry.</span>
     <span class="n">subtype</span><span class="p">:</span> <span class="s1">'Enum_MNIDSubtype'</span>
+    <span class="c1">#: The reserved octet, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Identifier, in the form named by :attr:`subtype`.</span>
     <span class="n">identifier</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'Enum_MNIDSubtype'</span><span class="p">,</span>
-                     <span class="n">identifier</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">identifier</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -2940,6 +3019,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">AnchoredPrefixOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for MH Anchored Prefix option."""</span>
 
+    <span class="c1">#: The reserved octet, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Prefix length.</span>
     <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Anchored prefix. Kept apart from :attr:`prefix_length` so that the bits</span>
@@ -2948,7 +3029,7 @@
     <span class="n">prefix</span><span class="p">:</span> <span class="s1">'IPv6Address'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">prefix</span><span class="p">:</span> <span class="s1">'IPv6Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -2959,13 +3040,15 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">LocalPrefixOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for MH Local Prefix option."""</span>
 
+    <span class="c1">#: The reserved octet, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Prefix length.</span>
     <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Local prefix.</span>
     <span class="n">prefix</span><span class="p">:</span> <span class="s1">'IPv6Address'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">prefix</span><span class="p">:</span> <span class="s1">'IPv6Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -2976,6 +3059,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">PreviousMAAROption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for MH Previous MAAR option."""</span>
 
+    <span class="c1">#: The reserved octet, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Prefix length of :attr:`prefix`.</span>
     <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Previous MAAR's global address. A full address rather than a prefix, so</span>
@@ -2985,7 +3070,7 @@
     <span class="n">prefix</span><span class="p">:</span> <span class="s1">'IPv6Address'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">maar</span><span class="p">:</span> <span class="s1">'IPv6Address'</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="s1">'IPv6Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -3024,11 +3109,13 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">DLIFLinkLayerAddressOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for MH DLIF Link-Layer Address option."""</span>
 
+    <span class="c1">#: The two reserved octets, as captured.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Distributed logical interface's link-layer address.</span>
     <span class="n">lla</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">lla</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">lla</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 

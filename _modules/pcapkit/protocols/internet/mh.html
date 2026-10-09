@@ -2286,6 +2286,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
+            <span class="n">msg_reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">cookie</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">cookie</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">)</span>
         <span class="p">)</span>
@@ -2330,6 +2331,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
+            <span class="n">msg_reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">cookie</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">cookie</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">)</span>
         <span class="p">)</span>
@@ -2594,6 +2596,7 @@
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">status</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
+            <span class="n">msg_reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">home</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">home</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span>
@@ -2756,6 +2759,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
+            <span class="n">msg_reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -2970,6 +2974,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
+            <span class="n">msg_reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">addresses</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">addresses</span><span class="p">),</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span>
@@ -3145,6 +3150,7 @@
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
+            <span class="n">msg_reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">lifetime</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">lifetime</span><span class="p">),</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span>
@@ -3293,6 +3299,7 @@
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
             <span class="n">status</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
+            <span class="n">msg_reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -3407,6 +3414,7 @@
             <span class="n">reserved</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
+            <span class="n">msg_reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -3832,6 +3840,7 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MobileNetworkPrefixOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -4552,6 +4561,7 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_HomeNetworkPrefixOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">prefix_length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">prefix_length</span><span class="p">,</span>
             <span class="n">prefix</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span>
         <span class="p">)</span>
@@ -4630,6 +4640,7 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_AccessTechnologyTypeOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">att</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">att</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -4678,6 +4689,7 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MNLLIdentifierOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">lli</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">lli</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -5009,6 +5021,7 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_IPv4CareofAddressOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">address</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -5052,6 +5065,7 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_GREKeyOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">key</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">key</span> <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="mi">6</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -5238,6 +5252,7 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_IPv4DefaultRouterAddressOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">address</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -5346,6 +5361,7 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_ContextRequestOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">requests</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">requests</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -5390,6 +5406,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">code</span><span class="o">=</span><span class="n">LMAAddressCode</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">address</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -5430,6 +5447,7 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MNLLAIIDOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">iid</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">iid</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -5609,6 +5627,7 @@
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
                     <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">selector</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
                     <span class="n">ts_format</span><span class="o">=</span><span class="n">selector</span><span class="o">.</span><span class="n">ts_format</span><span class="p">,</span>
+                    <span class="n">reserved</span><span class="o">=</span><span class="n">selector</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
                     <span class="n">selector</span><span class="o">=</span><span class="n">selector</span><span class="o">.</span><span class="n">selector</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_FlowIDSuboption</span><span class="o">.</span><span class="n">Flow_Binding_Action</span><span class="p">:</span>
@@ -5616,6 +5635,7 @@
                 <span class="n">data</span> <span class="o">=</span> <span class="n">Data_FlowBindingActionSuboption</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
                     <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">action</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+                    <span class="n">reserved</span><span class="o">=</span><span class="n">action</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
                     <span class="n">action</span><span class="o">=</span><span class="n">action</span><span class="o">.</span><span class="n">action</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_FlowIDSuboption</span><span class="o">.</span><span class="n">Target_Care_of_Address</span><span class="p">:</span>
@@ -5623,6 +5643,7 @@
                 <span class="n">data</span> <span class="o">=</span> <span class="n">Data_TargetCareofAddressSuboption</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
                     <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+                    <span class="n">reserved</span><span class="o">=</span><span class="n">target</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
                     <span class="n">address</span><span class="o">=</span><span class="n">target</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -5681,6 +5702,7 @@
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">fid</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">fid</span><span class="p">,</span>
             <span class="n">fid_pri</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">fid_pri</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">status</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
             <span class="n">suboptions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_fid_suboptions</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">suboptions</span><span class="p">),</span>
         <span class="p">)</span>
@@ -5718,6 +5740,7 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_RedirectCapabilityOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
@@ -5901,6 +5924,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">subtype</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">subtype</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">group_id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">group_id</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -5949,6 +5973,7 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MAGIPv6AddressOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">address_length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address_length</span><span class="p">,</span>
             <span class="n">address</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
         <span class="p">)</span>
@@ -6033,6 +6058,7 @@
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
                     <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">civic</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
                     <span class="nb">format</span><span class="o">=</span><span class="n">civic</span><span class="o">.</span><span class="n">format</span><span class="p">,</span>
+                    <span class="n">reserved</span><span class="o">=</span><span class="n">civic</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
                     <span class="n">location</span><span class="o">=</span><span class="n">civic</span><span class="o">.</span><span class="n">location</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_ANISuboption</span><span class="o">.</span><span class="n">MAG_Group_Identifier</span><span class="p">:</span>
@@ -6452,6 +6478,7 @@
                 <span class="n">data</span> <span class="o">=</span> <span class="n">Data_BitRateAttribute</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
                     <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">rate</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+                    <span class="n">reserved</span><span class="o">=</span><span class="n">rate</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
                     <span class="n">rate</span><span class="o">=</span><span class="n">rate</span><span class="o">.</span><span class="n">rate</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_QoSAttribute</span><span class="o">.</span><span class="n">Allocation_Retention_Priority</span><span class="p">:</span>
@@ -6459,6 +6486,7 @@
                 <span class="n">data</span> <span class="o">=</span> <span class="n">Data_AllocationRetentionPriorityAttribute</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
                     <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">arp</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+                    <span class="n">reserved</span><span class="o">=</span><span class="n">arp</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
                     <span class="n">priority_level</span><span class="o">=</span><span class="n">arp</span><span class="o">.</span><span class="n">priority</span><span class="p">[</span><span class="s1">'PL'</span><span class="p">],</span>
                     <span class="n">preemption_capability</span><span class="o">=</span><span class="n">arp</span><span class="o">.</span><span class="n">priority</span><span class="p">[</span><span class="s1">'PC'</span><span class="p">],</span>
                     <span class="n">preemption_vulnerability</span><span class="o">=</span><span class="n">arp</span><span class="o">.</span><span class="n">priority</span><span class="p">[</span><span class="s1">'PV'</span><span class="p">],</span>
@@ -6468,6 +6496,7 @@
                 <span class="n">data</span> <span class="o">=</span> <span class="n">Data_QoSTrafficSelectorAttribute</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
                     <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">selector</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+                    <span class="n">reserved</span><span class="o">=</span><span class="n">selector</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
                     <span class="n">ts_format</span><span class="o">=</span><span class="n">selector</span><span class="o">.</span><span class="n">ts_format</span><span class="p">,</span>
                     <span class="n">selector</span><span class="o">=</span><span class="n">selector</span><span class="o">.</span><span class="n">selector</span><span class="p">,</span>
                 <span class="p">)</span>
@@ -6476,6 +6505,7 @@
                 <span class="n">data</span> <span class="o">=</span> <span class="n">Data_QoSVendorSpecificAttribute</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
                     <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">vendor</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+                    <span class="n">reserved</span><span class="o">=</span><span class="n">vendor</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
                     <span class="n">vendor</span><span class="o">=</span><span class="n">vendor</span><span class="o">.</span><span class="n">vendor</span><span class="p">,</span>
                     <span class="n">subtype</span><span class="o">=</span><span class="n">vendor</span><span class="o">.</span><span class="n">subtype</span><span class="p">,</span>
                     <span class="n">data</span><span class="o">=</span><span class="n">vendor</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
@@ -6535,6 +6565,7 @@
             <span class="n">sr_id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">sr_id</span><span class="p">,</span>
             <span class="n">dscp</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">tc</span> <span class="o">&gt;&gt;</span> <span class="mi">2</span><span class="p">,</span>
             <span class="n">oc</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">oc</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">attributes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_qos_attributes</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">attributes</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -6585,6 +6616,7 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_LMAUserPlaneAddressOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">address</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[IPv4Address | IPv6Address]'</span><span class="p">,</span>
                          <span class="n">schema</span><span class="o">.</span><span class="n">address</span> <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">2</span> <span class="k">else</span> <span class="kc">None</span><span class="p">),</span>
         <span class="p">)</span>
@@ -6636,6 +6668,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span>
             <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -6892,6 +6925,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">subtype</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">subtype</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">identifier</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -6937,6 +6971,7 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_AnchoredPrefixOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">prefix_length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">prefix_length</span><span class="p">,</span>
             <span class="n">prefix</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span>
         <span class="p">)</span>
@@ -6983,6 +7018,7 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_LocalPrefixOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">prefix_length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">prefix_length</span><span class="p">,</span>
             <span class="n">prefix</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span>
         <span class="p">)</span>
@@ -7042,6 +7078,7 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_PreviousMAAROption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">prefix_length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">prefix_length</span><span class="p">,</span>
             <span class="n">maar</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">maar</span><span class="p">,</span>
             <span class="n">prefix</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span>
@@ -7181,6 +7218,7 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_DLIFLinkLayerAddressOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">lla</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">lla</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -7445,6 +7483,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_hoti</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_HomeTestInitMessage]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                        <span class="n">cookie</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00\x00\x00\x00\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                        <span class="n">options</span><span class="p">:</span> <span class="s1">'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                       <span class="n">msg_reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_HomeTestInitMessage'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH home test init (HoTI) message type.</span>
 
@@ -7452,6 +7491,8 @@
 <span class="sd">            message: Message data model.</span>
 <span class="sd">            cookie: Home test cookie.</span>
 <span class="sd">            options: Mobility options.</span>
+<span class="sd">            msg_reserved: The two reserved octets of the message body as captured,</span>
+<span class="sd">                truncated or zero-filled to 2 octets.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -7459,12 +7500,14 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msg_reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="s1">'msg_reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">cookie</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">cookie</span>
             <span class="n">options</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">options</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">options</span> <span class="o">=</span> <span class="n">options</span> <span class="ow">or</span> <span class="p">[]</span>
 
         <span class="k">return</span> <span class="n">Schema_HomeTestInitMessage</span><span class="p">(</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">msg_reserved</span><span class="p">,</span>
             <span class="n">cookie</span><span class="o">=</span><span class="n">cookie</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_mh_options</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span></div>
@@ -7475,6 +7518,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_coti</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_CareofTestInitMessage]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                        <span class="n">cookie</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00\x00\x00\x00\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                        <span class="n">options</span><span class="p">:</span> <span class="s1">'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                       <span class="n">msg_reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_CareofTestInitMessage'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH care-of test init (CoTI) message type.</span>
 
@@ -7482,6 +7526,8 @@
 <span class="sd">            message: Message data model.</span>
 <span class="sd">            cookie: Care-of test cookie.</span>
 <span class="sd">            options: Mobility options.</span>
+<span class="sd">            msg_reserved: The two reserved octets of the message body as captured,</span>
+<span class="sd">                truncated or zero-filled to 2 octets.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -7489,12 +7535,14 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msg_reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="s1">'msg_reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">cookie</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">cookie</span>
             <span class="n">options</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">options</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">options</span> <span class="o">=</span> <span class="n">options</span> <span class="ow">or</span> <span class="p">[]</span>
 
         <span class="k">return</span> <span class="n">Schema_CareofTestInitMessage</span><span class="p">(</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">msg_reserved</span><span class="p">,</span>
             <span class="n">cookie</span><span class="o">=</span><span class="n">cookie</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_mh_options</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span></div>
@@ -7757,6 +7805,7 @@
                      <span class="n">status_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                      <span class="n">home</span><span class="p">:</span> <span class="s1">'IPv6Address | int | str | bytes'</span> <span class="o">=</span> <span class="s1">'::'</span><span class="p">,</span>
                      <span class="n">options</span><span class="p">:</span> <span class="s1">'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">msg_reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
                      <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_BindingErrorMessage'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH binding error (BE) message type.</span>
 
@@ -7768,6 +7817,8 @@
 <span class="sd">            status_reversed: Reverse status code namespace.</span>
 <span class="sd">            home: Home address.</span>
 <span class="sd">            options: Mobility options.</span>
+<span class="sd">            msg_reserved: The reserved octet of the message body as captured,</span>
+<span class="sd">                truncated or zero-filled to 1 octet.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -7775,6 +7826,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msg_reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="s1">'msg_reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">status_val</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">status</span>
             <span class="n">home</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">home</span>
             <span class="n">options</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">options</span>
@@ -7785,6 +7837,7 @@
 
         <span class="k">return</span> <span class="n">Schema_BindingErrorMessage</span><span class="p">(</span>
             <span class="n">status</span><span class="o">=</span><span class="n">status_val</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">msg_reserved</span><span class="p">,</span>
             <span class="n">home</span><span class="o">=</span><span class="n">home</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_mh_options</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span></div>
@@ -7915,12 +7968,15 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_msg_fna">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_fna</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_FastNeighborAdvertisementMessage]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                       <span class="n">options</span><span class="p">:</span> <span class="s1">'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">msg_reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_FastNeighborAdvertisementMessage'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH fast neighbor advertisement (FNA) message type.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            message: Message data model.</span>
 <span class="sd">            options: Mobility options.</span>
+<span class="sd">            msg_reserved: The two reserved octets of the message body as captured,</span>
+<span class="sd">                truncated or zero-filled to 2 octets.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -7928,11 +7984,13 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msg_reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="s1">'msg_reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">options</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">options</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">options</span> <span class="o">=</span> <span class="n">options</span> <span class="ow">or</span> <span class="p">[]</span>
 
         <span class="k">return</span> <span class="n">Schema_FastNeighborAdvertisementMessage</span><span class="p">(</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">msg_reserved</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_mh_options</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span></div>
 
@@ -8090,6 +8148,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_has</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_HomeAgentSwitchMessage]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                       <span class="n">addresses</span><span class="p">:</span> <span class="s1">'Optional[list[IPv6Address | bytes | str | int]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                       <span class="n">options</span><span class="p">:</span> <span class="s1">'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">msg_reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_HomeAgentSwitchMessage'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH home agent switch (HAS) message type.</span>
 
@@ -8098,6 +8157,8 @@
 <span class="sd">            addresses: Alternate home agent addresses. An empty list is valid and</span>
 <span class="sd">                asks the mobile node to run home agent discovery.</span>
 <span class="sd">            options: Mobility options.</span>
+<span class="sd">            msg_reserved: The reserved octet of the message body as captured,</span>
+<span class="sd">                truncated or zero-filled to 1 octet.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -8105,6 +8166,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msg_reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="s1">'msg_reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">addresses</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'list[IPv6Address | bytes | str | int]'</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">addresses</span><span class="p">))</span>
             <span class="n">options</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">options</span>
         <span class="k">else</span><span class="p">:</span>
@@ -8113,6 +8175,7 @@
 
         <span class="k">return</span> <span class="n">Schema_HomeAgentSwitchMessage</span><span class="p">(</span>
             <span class="n">count</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">addresses</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">msg_reserved</span><span class="p">,</span>
             <span class="n">addresses</span><span class="o">=</span><span class="n">addresses</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_mh_options</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span></div>
@@ -8242,6 +8305,7 @@
                       <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                       <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'int | timedelta'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                       <span class="n">options</span><span class="p">:</span> <span class="s1">'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">msg_reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_LocalizedRoutingInitiationMessage'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH localized routing initiation (LRI) message type.</span>
 
@@ -8253,6 +8317,8 @@
 <span class="sd">                one counts seconds rather than units of 4 seconds, so the value is</span>
 <span class="sd">                not scaled.</span>
 <span class="sd">            options: Mobility options.</span>
+<span class="sd">            msg_reserved: The two reserved octets of the message body as captured,</span>
+<span class="sd">                truncated or zero-filled to 2 octets.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -8260,6 +8326,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msg_reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="s1">'msg_reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">seq</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">seq</span>
             <span class="n">lifetime_val</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">lifetime</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
             <span class="n">options</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">options</span>
@@ -8269,6 +8336,7 @@
 
         <span class="k">return</span> <span class="n">Schema_LocalizedRoutingInitiationMessage</span><span class="p">(</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">seq</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">msg_reserved</span><span class="p">,</span>
             <span class="n">lifetime</span><span class="o">=</span><span class="n">lifetime_val</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_mh_options</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span></div>
@@ -8398,6 +8466,7 @@
                       <span class="n">status_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
                       <span class="n">status_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                       <span class="n">options</span><span class="p">:</span> <span class="s1">'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">msg_reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_UpdateNotificationAcknowledgementMessage'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH update notification acknowledgement (UPA) message type.</span>
 
@@ -8409,6 +8478,8 @@
 <span class="sd">            status_namespace: Status namespace.</span>
 <span class="sd">            status_reversed: Reverse status namespace.</span>
 <span class="sd">            options: Mobility options.</span>
+<span class="sd">            msg_reserved: The three reserved octets of the message body as captured,</span>
+<span class="sd">                truncated or zero-filled to 3 octets.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -8416,6 +8487,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msg_reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="s1">'msg_reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">seq</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">seq</span>
             <span class="n">status_val</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">status</span>  <span class="c1"># type: Enum_UpdateNotificationACKStatus</span>
             <span class="n">options</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">options</span>
@@ -8427,6 +8499,7 @@
         <span class="k">return</span> <span class="n">Schema_UpdateNotificationAcknowledgementMessage</span><span class="p">(</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">seq</span><span class="p">,</span>
             <span class="n">status</span><span class="o">=</span><span class="n">status_val</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">msg_reserved</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_mh_options</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span></div>
 
@@ -8502,6 +8575,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_sq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_SubscriptionQueryMessage]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                      <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                      <span class="n">options</span><span class="p">:</span> <span class="s1">'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">msg_reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
                      <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_SubscriptionQueryMessage'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH subscription query (SQ) message type.</span>
 
@@ -8509,6 +8583,8 @@
 <span class="sd">            message: Message data model.</span>
 <span class="sd">            seq: Sequence number, counted modulo 256.</span>
 <span class="sd">            options: Mobility options.</span>
+<span class="sd">            msg_reserved: The reserved octet of the message body as captured,</span>
+<span class="sd">                truncated or zero-filled to 1 octet.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -8516,6 +8592,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msg_reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="s1">'msg_reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">seq</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">seq</span>
             <span class="n">options</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">options</span>
         <span class="k">else</span><span class="p">:</span>
@@ -8523,6 +8600,7 @@
 
         <span class="k">return</span> <span class="n">Schema_SubscriptionQueryMessage</span><span class="p">(</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">seq</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">msg_reserved</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_mh_options</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span></div>
 
@@ -8921,6 +8999,7 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_mnp">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_mnp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_MobileNetworkPrefixOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                       <span class="n">prefix</span><span class="p">:</span> <span class="s1">'bytes | str | IPv6Network'</span> <span class="o">=</span> <span class="s1">'::/0'</span><span class="p">,</span>
+                      <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_MobileNetworkPrefixOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH mobile network prefix option.</span>
 
@@ -8928,6 +9007,8 @@
 <span class="sd">            type: Option type.</span>
 <span class="sd">            option: Option data model.</span>
 <span class="sd">            prefix: Mobile network prefix.</span>
+<span class="sd">            reserved: The reserved octet as captured, truncated or zero-filled to 1</span>
+<span class="sd">                octet.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -8935,6 +9016,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">prefix</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">prefix</span>
 
         <span class="n">prefix_val</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_network</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span>
@@ -8946,6 +9028,7 @@
         <span class="k">return</span> <span class="n">Schema_MobileNetworkPrefixOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">prefix_length</span><span class="o">=</span><span class="n">prefix_length</span><span class="p">,</span>
             <span class="n">prefix</span><span class="o">=</span><span class="n">prefix_addr</span><span class="p">,</span>
         <span class="p">)</span></div>
@@ -9712,6 +9795,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_hnp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_HomeNetworkPrefixOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                       <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span>
                       <span class="n">prefix</span><span class="p">:</span> <span class="s1">'bytes | str | int | IPv6Address'</span> <span class="o">=</span> <span class="s1">'::'</span><span class="p">,</span>
+                      <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_HomeNetworkPrefixOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH home network prefix option.</span>
 
@@ -9720,6 +9804,8 @@
 <span class="sd">            option: Option data model.</span>
 <span class="sd">            prefix_length: Prefix length.</span>
 <span class="sd">            prefix: Home network prefix.</span>
+<span class="sd">            reserved: The reserved octet as captured, truncated or zero-filled to 1</span>
+<span class="sd">                octet.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -9727,6 +9813,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">prefix_length</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">prefix_length</span>
             <span class="n">prefix</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">prefix</span>
 
@@ -9736,6 +9823,7 @@
         <span class="k">return</span> <span class="n">Schema_HomeNetworkPrefixOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">prefix_length</span><span class="o">=</span><span class="n">prefix_length</span><span class="p">,</span>
             <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
         <span class="p">)</span></div>
@@ -9788,6 +9876,7 @@
                       <span class="n">att_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                       <span class="n">att_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
                       <span class="n">att_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                      <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_AccessTechnologyTypeOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH access technology type option.</span>
 
@@ -9798,6 +9887,8 @@
 <span class="sd">            att_default: Default access technology type.</span>
 <span class="sd">            att_namespace: Access technology type namespace.</span>
 <span class="sd">            att_reversed: Reverse access technology type namespace.</span>
+<span class="sd">            reserved: The reserved octet as captured, truncated or zero-filled to 1</span>
+<span class="sd">                octet.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -9805,6 +9896,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">att_val</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">att</span>  <span class="c1"># type: Enum_AccessType</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">att_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">att</span><span class="p">,</span> <span class="n">att_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">att_namespace</span><span class="p">,</span>  <span class="c1"># type: ignore[assignment]</span>
@@ -9813,6 +9905,7 @@
         <span class="k">return</span> <span class="n">Schema_AccessTechnologyTypeOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">att</span><span class="o">=</span><span class="n">att_val</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -9821,6 +9914,7 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_mn_lli">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_mn_lli</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_MNLLIdentifierOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                          <span class="n">lli</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+                         <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                          <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_MNLLIdentifierOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH mobile node link-layer identifier option.</span>
 
@@ -9828,6 +9922,8 @@
 <span class="sd">            type: Option type.</span>
 <span class="sd">            option: Option data model.</span>
 <span class="sd">            lli: Link-layer identifier.</span>
+<span class="sd">            reserved: The two reserved octets as captured, truncated or zero-filled</span>
+<span class="sd">                to 2 octets.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -9835,11 +9931,13 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">lli</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">lli</span>
 
         <span class="k">return</span> <span class="n">Schema_MNLLIdentifierOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">2</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">lli</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">lli</span><span class="o">=</span><span class="n">lli</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -10079,6 +10177,7 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_ipv4_coa">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_ipv4_coa</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_IPv4CareofAddressOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                            <span class="n">address</span><span class="p">:</span> <span class="s1">'bytes | str | int | IPv4Address'</span> <span class="o">=</span> <span class="s1">'0.0.0.0'</span><span class="p">,</span>
+                           <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                            <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_IPv4CareofAddressOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH IPv4 care-of address option.</span>
 
@@ -10086,6 +10185,8 @@
 <span class="sd">            type: Option type.</span>
 <span class="sd">            option: Option data model.</span>
 <span class="sd">            address: IPv4 care-of address.</span>
+<span class="sd">            reserved: The two reserved octets as captured, truncated or zero-filled</span>
+<span class="sd">                to 2 octets.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -10093,11 +10194,13 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">address</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">address</span>
 
         <span class="k">return</span> <span class="n">Schema_IPv4CareofAddressOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">address</span><span class="o">=</span><span class="n">address</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -10106,6 +10209,7 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_gre">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_gre</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_GREKeyOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                       <span class="n">key</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_GREKeyOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH GRE key option.</span>
 
@@ -10114,6 +10218,8 @@
 <span class="sd">            option: Option data model.</span>
 <span class="sd">            key: GRE key identifier, or :obj:`None` to omit it -- which is what an</span>
 <span class="sd">                option length of 2 means on the wire.</span>
+<span class="sd">            reserved: The two reserved octets as captured, truncated or zero-filled</span>
+<span class="sd">                to 2 octets.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -10121,11 +10227,13 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">key</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">key</span>
 
         <span class="k">return</span> <span class="n">Schema_GREKeyOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">2</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">6</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -10301,6 +10409,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_ipv4_router</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span>
                                                          <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_IPv4DefaultRouterAddressOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                               <span class="n">address</span><span class="p">:</span> <span class="s1">'bytes | str | int | IPv4Address'</span> <span class="o">=</span> <span class="s1">'0.0.0.0'</span><span class="p">,</span>
+                              <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                               <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_IPv4DefaultRouterAddressOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH IPv4 default-router address option.</span>
 
@@ -10308,6 +10417,8 @@
 <span class="sd">            type: Option type.</span>
 <span class="sd">            option: Option data model.</span>
 <span class="sd">            address: IPv4 default-router address.</span>
+<span class="sd">            reserved: The two reserved octets as captured, truncated or zero-filled</span>
+<span class="sd">                to 2 octets.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -10315,11 +10426,13 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">address</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">address</span>
 
         <span class="k">return</span> <span class="n">Schema_IPv4DefaultRouterAddressOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">address</span><span class="o">=</span><span class="n">address</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -10370,6 +10483,7 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_cr">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_cr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_ContextRequestOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                      <span class="n">requests</span><span class="p">:</span> <span class="s1">'Optional[list[Data_ContextRequest | tuple[Enum_Option | int, bytes]]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                      <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_ContextRequestOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH context request option.</span>
 
@@ -10378,6 +10492,8 @@
 <span class="sd">            option: Option data model.</span>
 <span class="sd">            requests: Requested contexts, each either a data model or a</span>
 <span class="sd">                ``(mobility option type, extra data)`` pair.</span>
+<span class="sd">            reserved: The two reserved octets as captured, truncated or zero-filled</span>
+<span class="sd">                to 2 octets.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -10385,6 +10501,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">requests</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'list[Data_ContextRequest | tuple[Enum_Option | int, bytes]]'</span><span class="p">,</span>
                             <span class="nb">list</span><span class="p">(</span><span class="n">option</span><span class="o">.</span><span class="n">requests</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
@@ -10409,6 +10526,7 @@
         <span class="k">return</span> <span class="n">Schema_ContextRequestOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">2</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">requests</span><span class="o">=</span><span class="nb">bytes</span><span class="p">(</span><span class="n">buffer</span><span class="p">),</span>
         <span class="p">)</span></div>
 
@@ -10421,6 +10539,7 @@
                        <span class="n">code_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
                        <span class="n">code_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                        <span class="n">address</span><span class="p">:</span> <span class="s1">'bytes | str | int | IPv4Address | IPv6Address'</span> <span class="o">=</span> <span class="s1">'::'</span><span class="p">,</span>
+                       <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
                        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_LMAAddressOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH local mobility anchor address option.</span>
 
@@ -10433,6 +10552,8 @@
 <span class="sd">            code_namespace: Option code namespace.</span>
 <span class="sd">            code_reversed: Reverse option code namespace.</span>
 <span class="sd">            address: Local mobility anchor address.</span>
+<span class="sd">            reserved: The reserved octet as captured, truncated or zero-filled to 1</span>
+<span class="sd">                octet.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -10444,6 +10565,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">code_val</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">option</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
             <span class="n">address</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">address</span>
         <span class="k">else</span><span class="p">:</span>
@@ -10468,6 +10590,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">6</span> <span class="k">if</span> <span class="n">addr</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="mi">4</span> <span class="k">else</span> <span class="mi">18</span><span class="p">,</span>
             <span class="n">code</span><span class="o">=</span><span class="n">code_val</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">address</span><span class="o">=</span><span class="n">addr</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -10476,6 +10599,7 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_mn_lla_iid">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_mn_lla_iid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_MNLLAIIDOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                              <span class="n">iid</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+                             <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_MNLLAIIDOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH mobile node link-local address interface identifier option.</span>
 
@@ -10483,6 +10607,8 @@
 <span class="sd">            type: Option type.</span>
 <span class="sd">            option: Option data model.</span>
 <span class="sd">            iid: Interface identifier; exactly 8 octets.</span>
+<span class="sd">            reserved: The two reserved octets as captured, truncated or zero-filled</span>
+<span class="sd">                to 2 octets.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -10490,6 +10616,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">iid</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">iid</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">iid</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">8</span><span class="p">:</span>
@@ -10498,6 +10625,7 @@
         <span class="k">return</span> <span class="n">Schema_MNLLAIIDOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">iid</span><span class="o">=</span><span class="n">iid</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -10656,30 +10784,38 @@
                 <span class="n">selector_opt</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Data_TrafficSelectorSuboption'</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
                 <span class="n">ts_format</span> <span class="o">=</span> <span class="n">selector_opt</span><span class="o">.</span><span class="n">ts_format</span>  <span class="c1"># type: Enum_TrafficSelector | int</span>
                 <span class="n">selector</span> <span class="o">=</span> <span class="n">selector_opt</span><span class="o">.</span><span class="n">selector</span>
+                <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">selector_opt</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">ts_format</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_TrafficSelector | int'</span><span class="p">,</span>
                                  <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'ts_format'</span><span class="p">,</span>
                                             <span class="n">Enum_TrafficSelector</span><span class="o">.</span><span class="n">IPv6_Binary_Traffic_Selector</span><span class="p">))</span>
                 <span class="n">selector</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'selector'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">))</span>
+                <span class="n">reserved</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">))</span>
             <span class="k">return</span> <span class="n">Schema_TrafficSelectorSuboption</span><span class="p">(</span>
                 <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">2</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">selector</span><span class="p">),</span>
-                <span class="n">ts_format</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_TrafficSelector'</span><span class="p">,</span> <span class="n">ts_format</span><span class="p">),</span> <span class="n">selector</span><span class="o">=</span><span class="n">selector</span><span class="p">)</span>
+                <span class="n">ts_format</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_TrafficSelector'</span><span class="p">,</span> <span class="n">ts_format</span><span class="p">),</span> <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
+                <span class="n">selector</span><span class="o">=</span><span class="n">selector</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_FlowIDSuboption</span><span class="o">.</span><span class="n">Flow_Binding_Action</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">action</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Data_FlowBindingActionSuboption'</span><span class="p">,</span>
                               <span class="n">option</span><span class="p">)</span><span class="o">.</span><span class="n">action</span>  <span class="c1"># type: Enum_FlowBindingAction | int</span>
+                <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">action</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_FlowBindingAction | int'</span><span class="p">,</span>
                               <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'action'</span><span class="p">,</span> <span class="n">Enum_FlowBindingAction</span><span class="o">.</span><span class="n">Add</span><span class="p">))</span>
+                <span class="n">reserved</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">))</span>
             <span class="k">return</span> <span class="n">Schema_FlowBindingActionSuboption</span><span class="p">(</span>
-                <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_FlowBindingAction'</span><span class="p">,</span> <span class="n">action</span><span class="p">))</span>
+                <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
+                <span class="n">action</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_FlowBindingAction'</span><span class="p">,</span> <span class="n">action</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_FlowIDSuboption</span><span class="o">.</span><span class="n">Target_Care_of_Address</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">address</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Data_TargetCareofAddressSuboption'</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span><span class="o">.</span><span class="n">address</span>  <span class="c1"># type: Any</span>
+                <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">address</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'address'</span><span class="p">,</span> <span class="s1">'::'</span><span class="p">)</span>
+                <span class="n">reserved</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">))</span>
             <span class="c1"># NOTE: Through ``parse_ip_address`` because the sub-option length</span>
             <span class="c1"># below is derived from the family here, ahead of the schema, so a</span>
             <span class="c1"># bare ``ipaddress.ip_address`` would launder a ``bool`` past the</span>
@@ -10687,7 +10823,8 @@
             <span class="n">addr</span> <span class="o">=</span> <span class="n">parse_ip_address</span><span class="p">(</span>
                 <span class="n">address</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid target care-of address'</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">Schema_TargetCareofAddressSuboption</span><span class="p">(</span>
-                <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">6</span> <span class="k">if</span> <span class="n">addr</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="mi">4</span> <span class="k">else</span> <span class="mi">18</span><span class="p">,</span> <span class="n">address</span><span class="o">=</span><span class="n">addr</span><span class="p">)</span>
+                <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">6</span> <span class="k">if</span> <span class="n">addr</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="mi">4</span> <span class="k">else</span> <span class="mi">18</span><span class="p">,</span> <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
+                <span class="n">address</span><span class="o">=</span><span class="n">addr</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">payload</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Data_UnassignedFlowIdentificationSuboption'</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span><span class="o">.</span><span class="n">data</span>
@@ -10707,6 +10844,7 @@
                       <span class="n">status_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
                       <span class="n">status_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                       <span class="n">suboptions</span><span class="p">:</span> <span class="s1">'Optional[FlowIDSuboption | list[Schema_FlowIdentificationSuboption | tuple[Enum_FlowIDSuboption, dict[str, Any]] | bytes]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_FlowIdentificationOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH flow identification mobility option.</span>
 
@@ -10720,6 +10858,8 @@
 <span class="sd">            status_namespace: Status namespace.</span>
 <span class="sd">            status_reversed: Reverse status namespace.</span>
 <span class="sd">            suboptions: Sub-options.</span>
+<span class="sd">            reserved: The reserved octet as captured, truncated or zero-filled to 1</span>
+<span class="sd">                octet.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -10727,6 +10867,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">fid</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">fid</span>
             <span class="n">fid_pri</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">fid_pri</span>
             <span class="n">status_val</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">status</span>  <span class="c1"># type: Enum_FlowIDStatus</span>
@@ -10745,6 +10886,7 @@
             <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
             <span class="n">fid</span><span class="o">=</span><span class="n">fid</span><span class="p">,</span>
             <span class="n">fid_pri</span><span class="o">=</span><span class="n">fid_pri</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">status</span><span class="o">=</span><span class="n">status_val</span><span class="p">,</span>
             <span class="n">suboptions</span><span class="o">=</span><span class="n">entries</span><span class="p">,</span>
         <span class="p">)</span></div>
@@ -10752,22 +10894,29 @@
 
 <div class="viewcode-block" id="MH._make_opt_rc">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_rc">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_rc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_RedirectCapabilityOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_rc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_RedirectCapabilityOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                      <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_RedirectCapabilityOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH redirect-capability mobility option.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            type: Option type.</span>
 <span class="sd">            option: Option data model.</span>
+<span class="sd">            reserved: The two reserved octets as captured, truncated or zero-filled</span>
+<span class="sd">                to 2 octets.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">Schema_RedirectCapabilityOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -10897,6 +11046,7 @@
                            <span class="n">subtype_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
                            <span class="n">subtype_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                            <span class="n">group_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                           <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
                            <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_MNGroupIdentifierOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH mobile node group identifier option.</span>
 
@@ -10908,6 +11058,8 @@
 <span class="sd">            subtype_namespace: Sub-type namespace.</span>
 <span class="sd">            subtype_reversed: Reverse sub-type namespace.</span>
 <span class="sd">            group_id: Mobile node group identifier.</span>
+<span class="sd">            reserved: The reserved octet as captured, truncated or zero-filled to 1</span>
+<span class="sd">                octet.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -10915,6 +11067,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">subtype_val</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">subtype</span>  <span class="c1"># type: Enum_MNGroupID</span>
             <span class="n">group_id</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">group_id</span>
         <span class="k">else</span><span class="p">:</span>
@@ -10925,6 +11078,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
             <span class="n">subtype</span><span class="o">=</span><span class="n">subtype_val</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">group_id</span><span class="o">=</span><span class="n">group_id</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -10934,6 +11088,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_mag_addr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_MAGIPv6AddressOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                            <span class="n">address_length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">128</span><span class="p">,</span>
                            <span class="n">address</span><span class="p">:</span> <span class="s1">'bytes | str | int | IPv6Address'</span> <span class="o">=</span> <span class="s1">'::'</span><span class="p">,</span>
+                           <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
                            <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_MAGIPv6AddressOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH MAG IPv6 address option.</span>
 
@@ -10943,6 +11098,8 @@
 <span class="sd">            address_length: Address length, in bits; :rfc:`6705#section-11.1`</span>
 <span class="sd">                requires 128.</span>
 <span class="sd">            address: MAG IPv6 address.</span>
+<span class="sd">            reserved: The reserved octet as captured, truncated or zero-filled to 1</span>
+<span class="sd">                octet.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -10950,12 +11107,14 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">address_length</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">address_length</span>
             <span class="n">address</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">address</span>
 
         <span class="k">return</span> <span class="n">Schema_MAGIPv6AddressOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">address_length</span><span class="o">=</span><span class="n">address_length</span><span class="p">,</span>
             <span class="n">address</span><span class="o">=</span><span class="n">address</span><span class="p">,</span>
         <span class="p">)</span></div>
@@ -11063,11 +11222,14 @@
             <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">civic</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Data_ANICivicLocationSuboption'</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
                 <span class="n">fmt</span><span class="p">,</span> <span class="n">location</span> <span class="o">=</span> <span class="n">civic</span><span class="o">.</span><span class="n">format</span><span class="p">,</span> <span class="n">civic</span><span class="o">.</span><span class="n">location</span>
+                <span class="n">octets</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">civic</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">fmt</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'format'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
                 <span class="n">location</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'location'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">))</span>
+                <span class="n">octets</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">))</span>
             <span class="k">return</span> <span class="n">Schema_ANICivicLocationSuboption</span><span class="p">(</span>
-                <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">2</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">location</span><span class="p">),</span> <span class="nb">format</span><span class="o">=</span><span class="n">fmt</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="n">location</span><span class="p">)</span>
+                <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">2</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">location</span><span class="p">),</span> <span class="nb">format</span><span class="o">=</span><span class="n">fmt</span><span class="p">,</span> <span class="n">reserved</span><span class="o">=</span><span class="n">octets</span><span class="p">,</span>
+                <span class="n">location</span><span class="o">=</span><span class="n">location</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_ANISuboption</span><span class="o">.</span><span class="n">MAG_Group_Identifier</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -11412,9 +11574,11 @@
                     <span class="n">Enum_QoSAttribute</span><span class="o">.</span><span class="n">Guaranteed_UL_Bit_Rate</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">rate</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Data_BitRateAttribute'</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span><span class="o">.</span><span class="n">rate</span>
+                <span class="n">octets</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">rate</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'rate'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-            <span class="k">return</span> <span class="n">Schema_BitRateAttribute</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="n">rate</span><span class="p">)</span>
+                <span class="n">octets</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">Schema_BitRateAttribute</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">reserved</span><span class="o">=</span><span class="n">octets</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="n">rate</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_QoSAttribute</span><span class="o">.</span><span class="n">Allocation_Retention_Priority</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -11422,12 +11586,14 @@
                 <span class="n">level</span> <span class="o">=</span> <span class="n">arp</span><span class="o">.</span><span class="n">priority_level</span>
                 <span class="n">capability</span> <span class="o">=</span> <span class="n">arp</span><span class="o">.</span><span class="n">preemption_capability</span>
                 <span class="n">vulnerability</span> <span class="o">=</span> <span class="n">arp</span><span class="o">.</span><span class="n">preemption_vulnerability</span>
+                <span class="n">octets</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">arp</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">level</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'priority_level'</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
                 <span class="n">capability</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'preemption_capability'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
                 <span class="n">vulnerability</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'preemption_vulnerability'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+                <span class="n">octets</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">))</span>
             <span class="k">return</span> <span class="n">Schema_AllocationRetentionPriorityAttribute</span><span class="p">(</span>
-                <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">reserved</span><span class="o">=</span><span class="n">octets</span><span class="p">,</span>
                 <span class="n">priority</span><span class="o">=</span><span class="p">{</span><span class="s1">'PL'</span><span class="p">:</span> <span class="n">level</span><span class="p">,</span> <span class="s1">'PC'</span><span class="p">:</span> <span class="n">capability</span><span class="p">,</span> <span class="s1">'PV'</span><span class="p">:</span> <span class="n">vulnerability</span><span class="p">})</span>
 
         <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_QoSAttribute</span><span class="o">.</span><span class="n">QoS_Traffic_Selector</span><span class="p">:</span>
@@ -11435,13 +11601,15 @@
                 <span class="n">ts_attr</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Data_QoSTrafficSelectorAttribute'</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
                 <span class="n">ts_format</span> <span class="o">=</span> <span class="n">ts_attr</span><span class="o">.</span><span class="n">ts_format</span>  <span class="c1"># type: Enum_TrafficSelector | int</span>
                 <span class="n">selector</span> <span class="o">=</span> <span class="n">ts_attr</span><span class="o">.</span><span class="n">selector</span>
+                <span class="n">octets</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ts_attr</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">ts_format</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_TrafficSelector | int'</span><span class="p">,</span>
                                  <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'ts_format'</span><span class="p">,</span>
                                             <span class="n">Enum_TrafficSelector</span><span class="o">.</span><span class="n">IPv6_Binary_Traffic_Selector</span><span class="p">))</span>
                 <span class="n">selector</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'selector'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">))</span>
+                <span class="n">octets</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">))</span>
             <span class="k">return</span> <span class="n">Schema_QoSTrafficSelectorAttribute</span><span class="p">(</span>
-                <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">2</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">selector</span><span class="p">),</span>
+                <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">2</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">selector</span><span class="p">),</span> <span class="n">reserved</span><span class="o">=</span><span class="n">octets</span><span class="p">,</span>
                 <span class="n">ts_format</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_TrafficSelector'</span><span class="p">,</span> <span class="n">ts_format</span><span class="p">),</span> <span class="n">selector</span><span class="o">=</span><span class="n">selector</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_QoSAttribute</span><span class="o">.</span><span class="n">QoS_Vendor_Specific_Attribute</span><span class="p">:</span>
@@ -11449,13 +11617,15 @@
                 <span class="n">vendor_attr</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Data_QoSVendorSpecificAttribute'</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
                 <span class="n">vendor</span><span class="p">,</span> <span class="n">subtype</span><span class="p">,</span> <span class="n">payload</span> <span class="o">=</span> <span class="p">(</span><span class="n">vendor_attr</span><span class="o">.</span><span class="n">vendor</span><span class="p">,</span> <span class="n">vendor_attr</span><span class="o">.</span><span class="n">subtype</span><span class="p">,</span>
                                             <span class="n">vendor_attr</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+                <span class="n">octets</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">vendor_attr</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">vendor</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'vendor'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
                 <span class="n">subtype</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'subtype'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
                 <span class="n">payload</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'data'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">))</span>
+                <span class="n">octets</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">))</span>
             <span class="k">return</span> <span class="n">Schema_QoSVendorSpecificAttribute</span><span class="p">(</span>
-                <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">7</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span> <span class="n">vendor</span><span class="o">=</span><span class="n">vendor</span><span class="p">,</span> <span class="n">subtype</span><span class="o">=</span><span class="n">subtype</span><span class="p">,</span>
-                <span class="n">data</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+                <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">7</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span> <span class="n">reserved</span><span class="o">=</span><span class="n">octets</span><span class="p">,</span> <span class="n">vendor</span><span class="o">=</span><span class="n">vendor</span><span class="p">,</span>
+                <span class="n">subtype</span><span class="o">=</span><span class="n">subtype</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">payload</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Data_UnassignedQoSAttribute'</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span><span class="o">.</span><span class="n">data</span>
@@ -11471,6 +11641,7 @@
                       <span class="n">dscp</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                       <span class="n">oc</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                       <span class="n">attributes</span><span class="p">:</span> <span class="s1">'Optional[QoSAttribute | list[Schema_QoSAttribute | tuple[Enum_QoSAttribute, dict[str, Any]] | bytes]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_QualityOfServiceOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH quality-of-service option.</span>
 
@@ -11481,6 +11652,8 @@
 <span class="sd">            dscp: Differentiated services code point, 6 bits.</span>
 <span class="sd">            oc: Operational code.</span>
 <span class="sd">            attributes: Quality-of-service attributes.</span>
+<span class="sd">            reserved: The three reserved octets as captured, truncated or zero-</span>
+<span class="sd">                filled to 3 octets.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -11488,6 +11661,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">sr_id</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">sr_id</span>
             <span class="n">dscp</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">dscp</span>
             <span class="n">oc</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">oc</span>
@@ -11508,6 +11682,7 @@
             <span class="n">sr_id</span><span class="o">=</span><span class="n">sr_id</span><span class="p">,</span>
             <span class="n">tc</span><span class="o">=</span><span class="n">dscp</span> <span class="o">&lt;&lt;</span> <span class="mi">2</span><span class="p">,</span>
             <span class="n">oc</span><span class="o">=</span><span class="n">oc</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">attributes</span><span class="o">=</span><span class="n">entries</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -11516,6 +11691,7 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_lma_up">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_lma_up</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_LMAUserPlaneAddressOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                          <span class="n">address</span><span class="p">:</span> <span class="s1">'Optional[bytes | str | int | IPv4Address | IPv6Address]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                          <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_LMAUserPlaneAddressOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH LMA user-plane address option.</span>
 
@@ -11525,6 +11701,8 @@
 <span class="sd">            address: LMA user-plane address, or :obj:`None` to omit it -- which is</span>
 <span class="sd">                how a mobile access gateway asks for a transport without naming an</span>
 <span class="sd">                address.</span>
+<span class="sd">            reserved: The two reserved octets as captured, truncated or zero-filled</span>
+<span class="sd">                to 2 octets.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -11532,10 +11710,11 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">address</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">address</span>
 
         <span class="k">if</span> <span class="n">address</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">Schema_LMAUserPlaneAddressOption</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">address</span><span class="o">=</span><span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">Schema_LMAUserPlaneAddressOption</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span> <span class="n">address</span><span class="o">=</span><span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
 
         <span class="c1"># NOTE: Through ``parse_ip_address`` because the option length below is</span>
         <span class="c1"># derived from the family here, ahead of the schema, so a bare</span>
@@ -11549,6 +11728,7 @@
         <span class="k">return</span> <span class="n">Schema_LMAUserPlaneAddressOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">6</span> <span class="k">if</span> <span class="n">addr</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="mi">4</span> <span class="k">else</span> <span class="mi">18</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">address</span><span class="o">=</span><span class="n">addr</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -11558,6 +11738,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_mcast</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_MulticastMobilityOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                         <span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
                         <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+                        <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
                         <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_MulticastMobilityOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH multicast mobility option.</span>
 
@@ -11566,6 +11747,8 @@
 <span class="sd">            option: Option data model.</span>
 <span class="sd">            code: Option code.</span>
 <span class="sd">            data: MLD or IGMP report payload, opaque to this module.</span>
+<span class="sd">            reserved: The reserved octet as captured, truncated or zero-filled to 1</span>
+<span class="sd">                octet.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -11579,6 +11762,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">code</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">code</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">data</span>
 
@@ -11590,6 +11774,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span><span class="p">,</span>
             <span class="n">code</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -11857,6 +12042,7 @@
                          <span class="n">subtype_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
                          <span class="n">subtype_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                          <span class="n">identifier</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+                         <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
                          <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_MAGIdentifierOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH MAG identifier option.</span>
 
@@ -11868,6 +12054,8 @@
 <span class="sd">            subtype_namespace: Sub-type namespace.</span>
 <span class="sd">            subtype_reversed: Reverse sub-type namespace.</span>
 <span class="sd">            identifier: Identifier.</span>
+<span class="sd">            reserved: The reserved octet as captured, truncated or zero-filled to 1</span>
+<span class="sd">                octet.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -11875,6 +12063,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">subtype_val</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">subtype</span>  <span class="c1"># type: Enum_MNIDSubtype</span>
             <span class="n">identifier</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">identifier</span>
         <span class="k">else</span><span class="p">:</span>
@@ -11885,6 +12074,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">2</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">identifier</span><span class="p">),</span>
             <span class="n">subtype</span><span class="o">=</span><span class="n">subtype_val</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">identifier</span><span class="o">=</span><span class="n">identifier</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -11894,6 +12084,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_anchored</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_AnchoredPrefixOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                            <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span>
                            <span class="n">prefix</span><span class="p">:</span> <span class="s1">'bytes | str | int | IPv6Address'</span> <span class="o">=</span> <span class="s1">'::'</span><span class="p">,</span>
+                           <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
                            <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_AnchoredPrefixOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH anchored prefix option.</span>
 
@@ -11902,6 +12093,8 @@
 <span class="sd">            option: Option data model.</span>
 <span class="sd">            prefix_length: Prefix length.</span>
 <span class="sd">            prefix: Anchored prefix.</span>
+<span class="sd">            reserved: The reserved octet as captured, truncated or zero-filled to 1</span>
+<span class="sd">                octet.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -11909,6 +12102,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">prefix_length</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">prefix_length</span>
             <span class="n">prefix</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">prefix</span>
 
@@ -11918,6 +12112,7 @@
         <span class="k">return</span> <span class="n">Schema_AnchoredPrefixOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">prefix_length</span><span class="o">=</span><span class="n">prefix_length</span><span class="p">,</span>
             <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
         <span class="p">)</span></div>
@@ -11928,6 +12123,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_local_prefix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_LocalPrefixOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                                <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span>
                                <span class="n">prefix</span><span class="p">:</span> <span class="s1">'bytes | str | int | IPv6Address'</span> <span class="o">=</span> <span class="s1">'::'</span><span class="p">,</span>
+                               <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
                                <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_LocalPrefixOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH local prefix option.</span>
 
@@ -11936,6 +12132,8 @@
 <span class="sd">            option: Option data model.</span>
 <span class="sd">            prefix_length: Prefix length.</span>
 <span class="sd">            prefix: Local prefix.</span>
+<span class="sd">            reserved: The reserved octet as captured, truncated or zero-filled to 1</span>
+<span class="sd">                octet.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -11943,6 +12141,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">prefix_length</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">prefix_length</span>
             <span class="n">prefix</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">prefix</span>
 
@@ -11952,6 +12151,7 @@
         <span class="k">return</span> <span class="n">Schema_LocalPrefixOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">prefix_length</span><span class="o">=</span><span class="n">prefix_length</span><span class="p">,</span>
             <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
         <span class="p">)</span></div>
@@ -11963,6 +12163,7 @@
                             <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span>
                             <span class="n">maar</span><span class="p">:</span> <span class="s1">'bytes | str | int | IPv6Address'</span> <span class="o">=</span> <span class="s1">'::'</span><span class="p">,</span>
                             <span class="n">prefix</span><span class="p">:</span> <span class="s1">'bytes | str | int | IPv6Address'</span> <span class="o">=</span> <span class="s1">'::'</span><span class="p">,</span>
+                            <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">,</span>
                             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_PreviousMAAROption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH previous MAAR option.</span>
 
@@ -11972,6 +12173,8 @@
 <span class="sd">            prefix_length: Prefix length of ``prefix``.</span>
 <span class="sd">            maar: Previous MAAR's global address.</span>
 <span class="sd">            prefix: Mobile node's home network prefix.</span>
+<span class="sd">            reserved: The reserved octet as captured, truncated or zero-filled to 1</span>
+<span class="sd">                octet.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -11979,6 +12182,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">prefix_length</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">prefix_length</span>
             <span class="n">maar</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">maar</span>
             <span class="n">prefix</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">prefix</span>
@@ -11989,6 +12193,7 @@
         <span class="k">return</span> <span class="n">Schema_PreviousMAAROption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">34</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">prefix_length</span><span class="o">=</span><span class="n">prefix_length</span><span class="p">,</span>
             <span class="n">maar</span><span class="o">=</span><span class="n">maar</span><span class="p">,</span>
             <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
@@ -12053,6 +12258,7 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_dlif_lladdr">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_dlif_lladdr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_DLIFLinkLayerAddressOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                               <span class="n">lla</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+                              <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>
                               <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_DLIFLinkLayerAddressOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH DLIF link-layer address option.</span>
 
@@ -12060,6 +12266,8 @@
 <span class="sd">            type: Option type.</span>
 <span class="sd">            option: Option data model.</span>
 <span class="sd">            lla: Distributed logical interface's link-layer address.</span>
+<span class="sd">            reserved: The two reserved octets as captured, truncated or zero-filled</span>
+<span class="sd">                to 2 octets.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -12067,11 +12275,13 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">lla</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">lla</span>
 
         <span class="k">return</span> <span class="n">Schema_DLIFLinkLayerAddressOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">2</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">lla</span><span class="p">),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">lla</span><span class="o">=</span><span class="n">lla</span><span class="p">,</span>
         <span class="p">)</span></div>
 
