@@ -578,11 +578,19 @@
     <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Packet type.</span>
     <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span>
+    <span class="c1">#: Fixed bit -- the leading bit of the ``Packet Type`` octet, sent as ``0``</span>
+    <span class="c1">#: and ignored on receipt (:rfc:`7401#section-5.1`), carried verbatim so</span>
+    <span class="c1">#: that re-serialising reproduces it.</span>
+    <span class="n">packet_fixed</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Version.</span>
     <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Reserved bits -- the three bits between ``Version`` and the fixed</span>
     <span class="c1">#: low-order bit, carried verbatim so that re-serialising reproduces them.</span>
     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Fixed bit -- the low-order bit of the ``Version`` octet, sent as ``1``</span>
+    <span class="c1">#: and ignored on receipt (:rfc:`7401#section-5.1`), carried verbatim so</span>
+    <span class="c1">#: that re-serialising reproduces it.</span>
+    <span class="n">version_fixed</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Checksum.</span>
     <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Control</span>
@@ -596,7 +604,7 @@
         <span class="c1">#: HIP parameters.</span>
         <span class="n">parameters</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Parameter, Parameter]'</span>
 
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">control</span><span class="p">:</span> <span class="s1">'Control'</span><span class="p">,</span> <span class="n">shit</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">rhit</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">packet_fixed</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">version_fixed</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">control</span><span class="p">:</span> <span class="s1">'Control'</span><span class="p">,</span> <span class="n">shit</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">rhit</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
 
 
 

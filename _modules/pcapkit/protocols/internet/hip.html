@@ -1045,10 +1045,9 @@
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
 
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'bit_0'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HIP: invalid format'</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">ver</span><span class="p">[</span><span class="s1">'bit_1'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HIP: invalid format'</span><span class="p">)</span>
+        <span class="c1"># NOTE: The two fixed bits are reserved for SHIM6 compatibility and</span>
+        <span class="c1"># "MUST be ignored when receiving" (:rfc:`7401#section-5.1`), so they</span>
+        <span class="c1"># are kept as read rather than validated.</span>
         <span class="c1"># Header Length below 4 cannot cover the two HITs, and would leave a</span>
         <span class="c1"># negative parameter length below.</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
@@ -1058,8 +1057,10 @@
             <span class="nb">next</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">+</span> <span class="mi">8</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">Enum_Packet</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'type'</span><span class="p">]),</span>
+            <span class="n">packet_fixed</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'bit_0'</span><span class="p">],</span>
             <span class="n">version</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">ver</span><span class="p">[</span><span class="s1">'version'</span><span class="p">],</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">ver</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
+            <span class="n">version_fixed</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">ver</span><span class="p">[</span><span class="s1">'bit_1'</span><span class="p">],</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">checksum</span><span class="p">,</span>
             <span class="n">control</span><span class="o">=</span><span class="n">Data_Control</span><span class="p">(</span>
                 <span class="n">anonymous</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">control</span><span class="p">[</span><span class="s1">'anonymous'</span><span class="p">]),</span>
@@ -1096,8 +1097,10 @@
              <span class="n">packet_default</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">packet_namespace</span><span class="p">:</span> <span class="s1">'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
              <span class="n">packet_reversed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+             <span class="n">packet_fixed</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
              <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
              <span class="n">version_reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+             <span class="n">version_fixed</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
              <span class="n">checksum</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>
              <span class="n">controls_anonymous</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
              <span class="n">controls_reserved</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
@@ -1117,9 +1120,13 @@
 <span class="sd">            packet_default: Default value for HIP packet type.</span>
 <span class="sd">            packet_namespace: Namespace for HIP packet type.</span>
 <span class="sd">            packet_reversed: If the HIP packet type is reversed.</span>
+<span class="sd">            packet_fixed: The fixed leading bit of the ``Packet Type`` octet;</span>
+<span class="sd">                :rfc:`7401#section-5.1` prescribes ``0`` when sending.</span>
 <span class="sd">            version: HIP version.</span>
 <span class="sd">            version_reserved: The 3 reserved bits between ``Version`` and the</span>
 <span class="sd">                fixed low-order bit.</span>
+<span class="sd">            version_fixed: The fixed low-order bit of the ``Version`` octet;</span>
+<span class="sd">                :rfc:`7401#section-5.1` prescribes ``1`` when sending.</span>
 <span class="sd">            checksum: Checksum.</span>
 <span class="sd">            controls_anonymous: If the sender is anonymous.</span>
 <span class="sd">            controls_reserved: The 15 reserved high-order bits of ``Controls``.</span>
@@ -1152,11 +1159,11 @@
             <span class="nb">next</span><span class="o">=</span><span class="n">next_value</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
             <span class="nb">len</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
             <span class="n">pkt</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s1">'bit_0'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="s1">'bit_0'</span><span class="p">:</span> <span class="n">packet_fixed</span><span class="p">,</span>
                 <span class="s1">'type'</span><span class="p">:</span> <span class="n">packet_value</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">ver</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s1">'bit_1'</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="s1">'bit_1'</span><span class="p">:</span> <span class="n">version_fixed</span><span class="p">,</span>
                 <span class="s1">'version'</span><span class="p">:</span> <span class="n">version</span><span class="p">,</span>
                 <span class="s1">'reserved'</span><span class="p">:</span> <span class="n">version_reserved</span><span class="p">,</span>
             <span class="p">},</span>
@@ -1271,8 +1278,10 @@
         <span class="k">return</span> <span class="p">{</span>
             <span class="s1">'next'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="s1">'packet'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="s1">'packet_fixed'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">packet_fixed</span><span class="p">,</span>
             <span class="s1">'version'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
             <span class="s1">'version_reserved'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
+            <span class="s1">'version_fixed'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">version_fixed</span><span class="p">,</span>
             <span class="s1">'checksum'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="s1">'controls_anonymous'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">control</span><span class="o">.</span><span class="n">anonymous</span><span class="p">,</span>
             <span class="s1">'controls_reserved'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">control</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>

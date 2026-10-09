@@ -483,7 +483,7 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'L2TP'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 
@@ -514,6 +514,24 @@
         <span class="c1">#: Version of L2TP packet.</span>
         <span class="n">version</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span></div>
 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">l2tp_payload_length</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Length of the :attr:`L2TP.payload` field.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pkt: Packet data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The Length field less the header, when the ``L`` flag is set; otherwise</span>
+<span class="sd">        ``-1``, so that the payload takes the rest of the datagram.</span>
+
+<span class="sd">    """</span>
+    <span class="n">flags</span> <span class="o">=</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">flags</span><span class="p">[</span><span class="s1">'len'</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'offset'</span><span class="p">]</span> <span class="k">if</span> <span class="n">flags</span><span class="p">[</span><span class="s1">'offset'</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="mi">6</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">flags</span><span class="p">[</span><span class="s1">'seq'</span><span class="p">]</span> <span class="o">+</span> <span class="n">flags</span><span class="p">[</span><span class="s1">'offset'</span><span class="p">])</span> <span class="o">+</span> <span class="n">size</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="L2TP">
@@ -564,13 +582,19 @@
         <span class="k">lambda</span> <span class="n">packet</span><span class="p">:</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'offset'</span><span class="p">],</span>
     <span class="p">)</span>
     <span class="c1">#: Payload of L2TP packet.</span>
-    <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">()</span>
+    <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">l2tp_payload_length</span><span class="p">)</span>
+    <span class="c1">#: Octets captured past the Length field, c.f.</span>
+    <span class="c1">#: :attr:`IPv4.trailer &lt;pcapkit.protocols.schema.internet.ipv4.IPv4.trailer&gt;`.</span>
+    <span class="c1">#: Always empty when the ``L`` flag is clear, since the payload then takes</span>
+    <span class="c1">#: the rest of the datagram.</span>
+    <span class="n">trailer</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'FlagsType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">tunnel_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">session_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ns</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">nr</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span>
                      <span class="n">offset</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
-                     <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase | Schema'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase | Schema'</span><span class="p">,</span>
+                     <span class="n">trailer</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 </pre></div>
         </article>

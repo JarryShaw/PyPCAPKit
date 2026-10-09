@@ -530,6 +530,9 @@
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Authentication.</span>
         <span class="n">auth</span><span class="p">:</span> <span class="s1">'bytes | CryptographicAuthentication'</span>
+        <span class="c1">#: Octets captured past the Packet Length, present only when there are</span>
+        <span class="c1">#: any.</span>
+        <span class="n">trailer</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">router_id</span><span class="p">:</span> <span class="s1">'IPv4Address'</span><span class="p">,</span>
                      <span class="n">area_id</span><span class="p">:</span> <span class="s1">'IPv4Address'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">autype</span><span class="p">:</span> <span class="s1">'Authentication'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=super-init-not-called,unused-argument,line-too-long,multiple-statements,redefined-builtin</span></div>

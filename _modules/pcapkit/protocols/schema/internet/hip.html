@@ -537,15 +537,15 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 
 <span class="k">if</span> <span class="n">SPHINX_TYPE_CHECKING</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">TypedDict</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypedDict</span>
 
 <div class="viewcode-block" id="PacketType">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.PacketType">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">PacketType</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Packet type."""</span>
 
-        <span class="c1">#: Reversed bit.</span>
-        <span class="n">bit_0</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1">#: Fixed bit, ``0`` when sent and ignored on receipt.</span>
+        <span class="n">bit_0</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: Packet type.</span>
         <span class="nb">type</span><span class="p">:</span> <span class="nb">int</span></div>
 
@@ -559,8 +559,8 @@
         <span class="n">version</span><span class="p">:</span> <span class="nb">int</span>
         <span class="c1">#: Reserved bits.</span>
         <span class="n">reserved</span><span class="p">:</span> <span class="nb">int</span>
-        <span class="c1">#: Reversed bit.</span>
-        <span class="n">bit_1</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span></div>
+        <span class="c1">#: Fixed bit, ``1`` when sent and ignored on receipt.</span>
+        <span class="n">bit_1</span><span class="p">:</span> <span class="nb">int</span></div>
 
 
 <div class="viewcode-block" id="ControlsType">

@@ -704,6 +704,14 @@
         <span class="k">if</span> <span class="n">_size</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">_size</span><span class="p">)</span>
 
+        <span class="c1"># NOTE: Octets captured past the Length field belong to this layer,</span>
+        <span class="c1"># since its own length field is what leaves them out of the payload,</span>
+        <span class="c1"># and the rebuild keeps them as captured (:issue:`1455`).</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">:</span>
+            <span class="n">l2tp</span><span class="o">.</span><span class="n">__update__</span><span class="p">([</span>
+                <span class="p">(</span><span class="s1">'trailer'</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">),</span>
+            <span class="p">])</span>
+
         <span class="n">length</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="k">if</span> <span class="n">flags</span><span class="o">.</span><span class="n">len</span> <span class="k">else</span> <span class="p">(</span><span class="n">length</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
         <span class="c1"># L2TP carries no next-protocol field -- the payload is a PPP frame,</span>
         <span class="c1"># which pcapkit does not dissect -- so dispatch on the -1 sentinel, as</span>
@@ -733,6 +741,7 @@
              <span class="n">offset</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">padding</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase | Schema'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+             <span class="n">trailer</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_L2TP'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
 
@@ -760,6 +769,8 @@
 <span class="sd">            padding: Offset pad, zero-filled or truncated to ``offset`` octets;</span>
 <span class="sd">                all zeros when :data:`None`.</span>
 <span class="sd">            payload: Payload data.</span>
+<span class="sd">            trailer: Octets after the datagram, outside the Length field;</span>
+<span class="sd">                written as is.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -815,6 +826,7 @@
             <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span>
             <span class="n">padding</span><span class="o">=</span><span class="sa">b</span><span class="s1">''</span> <span class="k">if</span> <span class="n">padding</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">padding</span><span class="p">,</span>
             <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>
+            <span class="n">trailer</span><span class="o">=</span><span class="n">trailer</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -911,6 +923,8 @@
             <span class="s1">'offset'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">offset</span><span class="p">,</span>
             <span class="s1">'padding'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'padding'</span><span class="p">),</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+            <span class="c1"># NOTE: And the octets captured past the Length field (:issue:`1455`).</span>
+            <span class="s1">'trailer'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'trailer'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">),</span>
         <span class="p">}</span></div>
 </div>
 
