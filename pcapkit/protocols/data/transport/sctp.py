@@ -614,4 +614,8 @@ class SCTP(Protocol):
     chunks: 'OrderedMultiDict[ChunkType, Chunk]'
 
     if TYPE_CHECKING:
+        #: Octets captured after the last whole chunk, present only when there
+        #: are any.
+        trailer: 'bytes'
+
         def __init__(self, srcport: 'AppType', dstport: 'AppType', vtag: 'int', chksum: 'bytes', chunks: 'OrderedMultiDict[ChunkType, Chunk]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin

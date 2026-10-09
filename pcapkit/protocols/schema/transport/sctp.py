@@ -2,6 +2,7 @@
 # mypy: disable-error-code=assignment
 """header schema for stream control transmission protocol"""
 
+import io
 from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.apptype import AppType as Enum_AppType
@@ -13,7 +14,7 @@ from pcapkit.const.sctp.payload_protocol_identifier import \
     PayloadProtocolIdentifier as Enum_PayloadProtocolIdentifier
 from pcapkit.corekit.fields.collections import ListField, OptionField
 from pcapkit.corekit.fields.ipaddress import IPv4AddressField, IPv6AddressField
-from pcapkit.corekit.fields.misc import SchemaField
+from pcapkit.corekit.fields.misc import PayloadField, SchemaField
 from pcapkit.corekit.fields.numbers import EnumField, UInt16Field, UInt32Field
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
 from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
@@ -49,7 +50,7 @@ __all__ = [
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
-    from typing import Any, Callable
+    from typing import IO, Any, Callable
 
     from pcapkit.protocols.protocol import ProtocolBase
 
@@ -890,6 +891,70 @@ class ShutdownCompleteChunk(Chunk, code=Enum_Chunk.Shutdown_Complete):
         def __init__(self, type: 'Enum_Chunk', flags: 'TBitFlags', length: 'int') -> 'None': ...
 
 
+def whole_chunks_length(data: 'bytes') -> 'int':
+    """Length of the run of whole chunks at the front of ``data``.
+
+    Args:
+        data: Chunk area of an SCTP packet.
+
+    Returns:
+        Number of octets up to the end of the last chunk whose declared
+        ``length`` octets are all present, with as much of its padding as there
+        is, c.f. :func:`padding_length`. A ``length`` below the four-octet chunk
+        header (:rfc:`9260#section-3.2`) delimits nothing, so the run stops
+        there too; four zero octets would otherwise read as a DATA chunk.
+
+    """
+    end, size = 0, len(data)
+    while size - end >= 4:
+        length = int.from_bytes(data[end + 2:end + 4], 'big')
+        stop = end + length
+        if length < 4 or stop > size:
+            break
+        end = min(stop + (-length % 4), size)
+    return end
+
+
+class ChunkListField(OptionField):
+    """Chunk list that stops at the last whole chunk.
+
+    SCTP has no packet length field, so octets after the last whole chunk --
+    fewer than a chunk header, or a chunk whose ``length`` runs past the data --
+    cannot be told apart from a chunk cut short. They are not parsed but
+    reported as option padding, which :meth:`Schema.unpack
+    <pcapkit.protocols.schema.schema.Schema.unpack>` hands back to the stream for
+    :attr:`SCTP.trailer` to keep as captured (:issue:`1468`).
+
+    """
+
+    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> 'list[Chunk]':
+        """Unpack field value from :obj:`bytes`.
+
+        Args:
+            buffer: Field buffer.
+            packet: Packet data.
+
+        Returns:
+            Unpacked whole chunks.
+
+        """
+        if isinstance(buffer, bytes):
+            data = buffer
+        else:
+            start = buffer.tell()
+            data = buffer.read(max(self._length, 0))
+            buffer.seek(start, io.SEEK_SET)
+
+        area, whole = self._length, whole_chunks_length(data)
+        self._length = whole
+        try:
+            chunks = super().unpack(data[:whole], packet)
+        finally:
+            self._length = area
+        self._option_padding += len(data) - whole
+        return chunks
+
+
 @schema_final
 class SCTP(Schema):
     """Header schema for SCTP packets.
@@ -913,14 +978,18 @@ class SCTP(Schema):
     #: Checksum, as a CRC32c over the whole packet with this field zeroed.
     chksum: 'bytes' = BytesField(length=4)
     #: Chunks.
-    chunks: 'list[Chunk]' = OptionField(
+    chunks: 'list[Chunk]' = ChunkListField(
         length=lambda pkt: max(pkt['__length__'], 0),
         base_schema=Chunk,
         type_name='type',
         registry=Chunk.registry,
     )
+    #: Octets captured after the last whole chunk, c.f. :class:`ChunkListField`
+    #: and :attr:`IPv4.trailer <pcapkit.protocols.schema.internet.ipv4.IPv4.trailer>`.
+    trailer: 'bytes' = PayloadField(default=b'')
 
     if TYPE_CHECKING:
         def __init__(self, srcport: 'Enum_AppType | int', dstport: 'Enum_AppType | int',
                      vtag: 'int', chksum: 'bytes',
-                     chunks: 'list[Chunk | bytes] | bytes') -> 'None': ...
+                     chunks: 'list[Chunk | bytes] | bytes',
+                     trailer: 'bytes' = b'') -> 'None': ...
