@@ -79,7 +79,11 @@ class OSPF(Schema):
         selector=ospf_auth_data_selector,
     )
     #: Payload.
-    payload: 'bytes' = PayloadField()
+    payload: 'bytes' = PayloadField(length=lambda pkt: pkt['length'] - 24)
+    #: Octets captured past the Packet Length, such as the message digest
+    #: that cryptographic authentication appends (:rfc:`2328#appendix-D.4.3`),
+    #: c.f. :attr:`IPv4.trailer <pcapkit.protocols.schema.internet.ipv4.IPv4.trailer>`.
+    trailer: 'bytes' = PayloadField(default=b'')
 
     if TYPE_CHECKING:
         def __init__(self, version: 'int', type: 'Enum_Packet', length: 'int',
@@ -87,4 +91,5 @@ class OSPF(Schema):
                      area_id: 'IPv4Address | bytes | str | int',
                      checksum: 'bytes', auth_type: 'Enum_Authentication',
                      auth_data: 'bytes | CryptographicAuthentication',
-                     payload: 'bytes | ProtocolBase | Schema') -> 'None': ...
+                     payload: 'bytes | ProtocolBase | Schema',
+                     trailer: 'bytes' = b'') -> 'None': ...

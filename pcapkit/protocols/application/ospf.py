@@ -185,6 +185,15 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
             ospf.__update__([
                 ('auth', cast('bytes', schema.auth_data)),
             ])
+
+        # NOTE: Octets captured past the Packet Length belong to this layer,
+        # since its own length field is what leaves them out of the payload --
+        # the message digest of cryptographic authentication among them -- and
+        # the rebuild keeps them as captured (:issue:`1455`).
+        if schema.trailer:
+            ospf.__update__([
+                ('trailer', schema.trailer),
+            ])
         # OSPF carries no next-protocol field -- the body is LSAs and packet-type
         # specific fields, which pcapkit does not dissect -- so dispatch on the
         # -1 sentinel, as ARP does, rather than on a code read off the wire;
@@ -207,6 +216,7 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
              auth_type_reversed: 'bool' = False,
              auth_data: 'bytes | Schema_CryptographicAuthentication | Data_CryptographicAuthentication' = b'\x00\x00\x00\x00\x00\x00\x00\x00',
              payload: 'bytes | ProtocolBase | Schema' = b'',
+             trailer: 'bytes' = b'',
              **kwargs: 'Any') -> 'Schema_OSPF':
         """Make (construct) packet data.
 
@@ -219,9 +229,7 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
             packet_length: Packet length (header included). If not given, it is
                 computed as 24 plus the length of ``payload``. Give it
                 explicitly when ``payload`` carries octets outside the OSPF
-                packet, such as the message digest appended under
-                cryptographic authentication (:rfc:`2328#appendix-D.4.3`),
-                which Packet Length does not count.
+                packet, or pass those as ``trailer`` instead.
             router_id: Router ID.
             area_id: Area ID.
             checksum: Checksum.
@@ -231,6 +239,9 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
             auth_type_reversed: Reverse namespace for ``auth_type``.
             auth_data: Authentication data.
             payload: Payload data.
+            trailer: Octets after the packet, outside the Packet Length, such
+                as the message digest appended under cryptographic
+                authentication (:rfc:`2328#appendix-D.4.3`); written as is.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -273,6 +284,7 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
             auth_type=auth_type_,  # type: ignore[arg-type]
             auth_data=data,
             payload=payload,
+            trailer=trailer,
         )
 
     ##########################################################################
@@ -319,7 +331,9 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
             'checksum': data.chksum,
             'auth_type': data.autype,
             'auth_data': data.auth,
-            'payload': cls._make_payload(data)
+            'payload': cls._make_payload(data),
+            # NOTE: And the octets captured past the Packet Length (:issue:`1455`).
+            'trailer': data.get('trailer', b''),
         }
 
     def _read_id_numbers(self, id: 'bytes') -> 'IPv4Address':

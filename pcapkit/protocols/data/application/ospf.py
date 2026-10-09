@@ -55,6 +55,9 @@ class OSPF(Protocol):
     if TYPE_CHECKING:
         #: Authentication.
         auth: 'bytes | CryptographicAuthentication'
+        #: Octets captured past the Packet Length, present only when there are
+        #: any.
+        trailer: 'bytes'
 
         def __init__(self, version: 'int', type: 'Packet', len: 'int', router_id: 'IPv4Address',
                      area_id: 'IPv4Address', chksum: 'bytes', autype: 'Authentication') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,line-too-long,multiple-statements,redefined-builtin

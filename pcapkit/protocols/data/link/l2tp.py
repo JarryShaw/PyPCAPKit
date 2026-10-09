@@ -65,6 +65,9 @@ class L2TP(Protocol):
         hdr_len: 'int'
         #: Offset pad (:data:`None` unless ``flags.offset`` is set).
         padding: 'Optional[bytes]'
+        #: Octets captured past the Length field, present only when there are
+        #: any.
+        trailer: 'bytes'
 
         def __init__(self, flags: 'Flags', version: 'int', length: 'Optional[int]', tunnelid: 'int', sessionid: 'int',
                      ns: 'Optional[int]', nr: 'Optional[int]', offset: 'Optional[int]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,redefined-builtin,multiple-statements,line-too-long
