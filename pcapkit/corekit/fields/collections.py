@@ -135,9 +135,15 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
         Returns:
             Packed field value.
 
+        Without an ``item_type``, :meth:`unpack` returns the field's octets as
+        a single :obj:`bytes`, so such a value is written as-is rather than
+        iterated item by item.
+
         """
         if value is None:
             return b''
+        if self._item_type is None and isinstance(value, bytes):
+            return value
 
         from pcapkit.protocols.schema.schema import \
             Schema  # pylint: disable=import-outside-top-level

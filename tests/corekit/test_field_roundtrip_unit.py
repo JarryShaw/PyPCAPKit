@@ -563,13 +563,6 @@ class FieldRoundTripTests(KnownFailureTable, unittest.TestCase):
                '(pcapkit/protocols/schema/link/vlan.py:47-51), which no protocol parses with',
             'WIRE', '', ('NumberField/bit-length-12/wire/ffff', 'NumberField/bit-length-12/wire/f000',
                          'EnumField/bit-length-3/wire/ff')),
-        Gap(1489, 'ListField without an item_type unpacks to bytes '
-               '(pcapkit/corekit/fields/collections.py:179), but ListField.pack iterates its '
-               'value item by item and refuses each int of those bytes '
-               '(pcapkit/corekit/fields/collections.py:146, :154). Not reachable through '
-               'Schema.pack, which writes a bytes value itself '
-               '(pcapkit/protocols/schema/schema.py:846)',
-            'PACK', 'has invalid value', ('ListField/bytes/*',)),
     )
 
     def setUp(self) -> None:
