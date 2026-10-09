@@ -539,7 +539,13 @@
     <span class="c1">#: Block type.</span>
     <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_BlockType'</span>
     <span class="c1">#: Block total length.</span>
-    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span></div>
+    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: The block's octets as captured, when the capture ended inside it;</span>
+        <span class="c1">#: present only then. A rebuild parses them again rather than writing</span>
+        <span class="c1">#: the block at its declared length (:issue:`1470`).</span>
+        <span class="n">__truncated_raw__</span><span class="p">:</span> <span class="s1">'bytes'</span></div>
 
 
 

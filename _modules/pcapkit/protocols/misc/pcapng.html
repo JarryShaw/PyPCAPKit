@@ -485,6 +485,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">base64</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">builtins</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">collections.abc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">decimal</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
@@ -648,8 +649,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">ZigBeeNWKKey</span> <span class="k">as</span> <span class="n">Schema_ZigBeeNWKKey</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrEnum</span><span class="p">,</span> <span class="n">localcontext</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">EnumValueError</span><span class="p">,</span> <span class="n">FormatError</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">RegistryError</span><span class="p">,</span>
-                                          <span class="n">StreamEOFError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="n">EnumValueError</span><span class="p">,</span> <span class="n">FormatError</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">,</span>
+                                          <span class="n">RegistryError</span><span class="p">,</span> <span class="n">StreamEOFError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span>
+                                          <span class="n">stacklevel</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">DeprecatedFormatWarning</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">,</span>
                                         <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span><span class="p">)</span>
 
@@ -1777,7 +1779,15 @@
                         <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_block_unknown</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">block</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">block</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">BaseError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="c1"># NOTE: Fields past the end of a block the capture ended inside are</span>
+            <span class="c1"># read as zeros, and a value its parser refuses is an artefact of</span>
+            <span class="c1"># that, not of the block; it is kept as captured instead.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">_read</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_captured</span><span class="p">(</span><span class="n">_seek_set</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
+                <span class="k">raise</span>
+            <span class="n">block</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_block_cut</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">_seek_set</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
 
         <span class="c1"># NOTE: An option or record area holding a malformed entry is kept as</span>
         <span class="c1"># the octets captured, as one :obj:`bytes` item (see</span>
@@ -1826,6 +1836,14 @@
                      <span class="sa">f</span><span class="s1">'the file; block truncated'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">,</span>
                      <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
                 <span class="n">seek_cur</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">seek_cur</span><span class="p">,</span> <span class="n">_seek_set</span> <span class="o">+</span> <span class="n">read</span><span class="p">)</span>
+
+                <span class="c1"># NOTE: The fields read past the end of the capture are zeros,</span>
+                <span class="c1"># and an option, record or packet the end cut through is only</span>
+                <span class="c1"># its first octets, so the block cannot be rebuilt from them at</span>
+                <span class="c1"># the length it declares. The octets captured are kept as</span>
+                <span class="c1"># ``__truncated_raw__`` instead, which :meth:`__post_init__` parses</span>
+                <span class="c1"># again in place of building the block (:issue:`1470`).</span>
+                <span class="n">block</span><span class="o">.</span><span class="n">__update__</span><span class="p">([(</span><span class="s1">'__truncated_raw__'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)])</span>
 
             <span class="c1"># move backward to the beginning of next block</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">seek_cur</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
@@ -1931,6 +1949,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="o">=</span> <span class="n">ctx</span>
         <span class="c1">#: collections.Counter: Counter for option types.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_opt</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">()</span>  <span class="c1"># type: Counter[Enum_OptionType]</span>
+
+        <span class="c1"># NOTE: A block the capture ended inside rebuilds as the octets that</span>
+        <span class="c1"># were captured, parsed again as they were the first time (see</span>
+        <span class="c1"># :meth:`read`), rather than at the length it declares (:issue:`1470`).</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'block'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">file</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">'__truncated_raw__'</span> <span class="ow">in</span> <span class="n">block</span><span class="p">:</span>
+            <span class="n">file</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">block</span><span class="p">[</span><span class="s1">'__truncated_raw__'</span><span class="p">])</span>
 
         <span class="k">if</span> <span class="n">file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">_read</span> <span class="o">=</span> <span class="kc">False</span>
@@ -2043,6 +2068,52 @@
         <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">12</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">StreamEOFError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: block truncated: </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1"> octet(s) left, '</span>
                                  <span class="s1">'fewer than the 12 a block needs'</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_captured</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Count the octets left in the stream from ``offset`` on.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            offset: File offset of the block.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Octets from ``offset`` to the end of</span>
+<span class="sd">            :attr:`self._file &lt;pcapkit.protocols.protocol.Protocol._file&gt;`.</span>
+
+<span class="sd">        """</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_END</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">end</span> <span class="o">-</span> <span class="n">offset</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_block_cut</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'Schema_PCAPNG'</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                        <span class="n">error</span><span class="p">:</span> <span class="s1">'BaseError'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_UnknownBlock'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read a PCAP-NG block the capture ended inside, whose parser refused it.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            header: Parsed PCAP-NG header schema.</span>
+<span class="sd">            offset: File offset of the block.</span>
+<span class="sd">            error: What the block's parser raised.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed packet data, with the octets captured after the Block Total</span>
+<span class="sd">            Length as its body. :meth:`read` keeps the block's octets as</span>
+<span class="sd">            ``__truncated_raw__`` too, which a rebuild parses again, so that it</span>
+<span class="sd">            rebuilds as captured (:issue:`1470`).</span>
+
+<span class="sd">        """</span>
+        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Block </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] block truncated; kept as captured: </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span>
+             <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+
+        <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="mi">8</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">12</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Data_UnknownBlock</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">,</span>
+        <span class="p">)</span>
 
 <div class="viewcode-block" id="PCAPNG._get_payload">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._get_payload">[docs]</a>

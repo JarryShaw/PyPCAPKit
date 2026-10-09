@@ -535,6 +535,12 @@ of PCAP, whose structure is described as below:</p>
 <p class="admonition-title">See also</p>
 <p>For construction argument, please refer to <a class="reference internal" href="#pcapkit.protocols.misc.pcap.header.Header.make" title="pcapkit.protocols.misc.pcap.header.Header.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a>.</p>
 </div>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>A header the data ends inside keeps that in its <code class="xref py py-attr docutils literal notranslate"><span class="pre">info</span></code>, so
+that <code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code> rebuilds only what was captured
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1470">#1470</a>).</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -714,6 +720,12 @@ of PCAP, whose structure is described as below:</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>For construction argument, please refer to <a class="reference internal" href="#pcapkit.protocols.misc.pcap.header.Header.make" title="pcapkit.protocols.misc.pcap.header.Header.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a>.</p>
+</div>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>A header the data ends inside keeps that in its <code class="xref py py-attr docutils literal notranslate"><span class="pre">info</span></code>, so
+that <code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code> rebuilds only what was captured
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1470">#1470</a>).</p>
 </div>
 </dd></dl>
 

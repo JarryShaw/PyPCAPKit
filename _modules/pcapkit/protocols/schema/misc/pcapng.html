@@ -1013,6 +1013,25 @@
 
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_cut_last_line</span><span class="p">(</span><span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">lines</span><span class="p">:</span> <span class="s1">'list[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Tell whether a key log line that did not parse is one the capture cut.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        schema: Key log secrets schema, just unpacked.</span>
+<span class="sd">        index: Index of the line in ``lines``.</span>
+<span class="sd">        lines: Lines of the key log.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Whether ``lines[index]`` is the last line of a key log the data ended</span>
+<span class="sd">        inside, which :meth:`Schema.unpack</span>
+<span class="sd">        &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;` records as</span>
+<span class="sd">        ``__short_read__``. Such a line is only the first octets of an entry,</span>
+<span class="sd">        and the log text, kept verbatim, still rebuilds it (:issue:`1470`).</span>
+
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">index</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="ow">and</span> <span class="s1">'__short_read__'</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="vm">__dict__</span>
+
+
 <div class="viewcode-block" id="dsb_secrets_selector">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.dsb_secrets_selector">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">dsb_secrets_selector</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Field'</span><span class="p">:</span>
@@ -2914,14 +2933,20 @@
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">TLSKeyLabel</span>
 
         <span class="n">entries</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="n">OrderedMultiDict</span><span class="p">)</span>  <span class="c1"># type: dict[TLSKeyLabel, OrderedMultiDict[bytes, bytes]]</span>
-        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span> <span class="ow">or</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'#'</span><span class="p">):</span>
                 <span class="k">continue</span>
 
-            <span class="n">label</span><span class="p">,</span> <span class="n">random</span><span class="p">,</span> <span class="n">secret</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
-            <span class="n">label_enum</span> <span class="o">=</span> <span class="n">TLSKeyLabel</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
-            <span class="n">entries</span><span class="p">[</span><span class="n">label_enum</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">random</span><span class="p">),</span>
-                                    <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">secret</span><span class="p">))</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">label</span><span class="p">,</span> <span class="n">random</span><span class="p">,</span> <span class="n">secret</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                <span class="n">label_enum</span> <span class="o">=</span> <span class="n">TLSKeyLabel</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+                <span class="n">entries</span><span class="p">[</span><span class="n">label_enum</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">random</span><span class="p">),</span>
+                                        <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">secret</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">_cut_last_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">lines</span><span class="p">):</span>
+                    <span class="k">break</span>
+                <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid TLS key log format: </span><span class="si">{</span><span class="n">line</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">entries</span> <span class="o">=</span> <span class="n">entries</span>
         <span class="k">return</span> <span class="bp">self</span></div>
@@ -2959,16 +2984,24 @@
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">WireGuardKeyLabel</span>
 
         <span class="n">entries</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: OrderedMultiDict[WireGuardKeyLabel, bytes]</span>
-        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span> <span class="ow">or</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'#'</span><span class="p">):</span>
                 <span class="k">continue</span>
 
             <span class="n">fields</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span> <span class="ow">or</span> <span class="n">fields</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">'='</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid WireGuard key log format: </span><span class="si">{</span><span class="n">line</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
-            <span class="n">label</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">secret</span> <span class="o">=</span> <span class="n">fields</span>
-            <span class="n">label_enum</span> <span class="o">=</span> <span class="n">WireGuardKeyLabel</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
-            <span class="n">entries</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">label_enum</span><span class="p">,</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">secret</span><span class="p">))</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span> <span class="ow">or</span> <span class="n">fields</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">'='</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid WireGuard key log format: </span><span class="si">{</span><span class="n">line</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+                <span class="n">label</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">secret</span> <span class="o">=</span> <span class="n">fields</span>
+                <span class="n">label_enum</span> <span class="o">=</span> <span class="n">WireGuardKeyLabel</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+                <span class="n">entries</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">label_enum</span><span class="p">,</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">secret</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">_cut_last_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">lines</span><span class="p">):</span>
+                    <span class="k">break</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">FieldValueError</span><span class="p">):</span>
+                    <span class="k">raise</span>
+                <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid WireGuard key log format: </span><span class="si">{</span><span class="n">line</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">entries</span> <span class="o">=</span> <span class="n">entries</span>
         <span class="k">return</span> <span class="bp">self</span></div>
