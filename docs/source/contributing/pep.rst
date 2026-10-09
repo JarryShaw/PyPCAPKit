@@ -594,16 +594,19 @@ Anyone wanting to run the tests wants the repository, which is where they are.
 
 .. note::
 
-   One test is skipped on an upstream defect rather than a pcapkit one.
+   ``dictdumper``'s ``PLIST`` writer formats every :class:`~datetime.datetime` as
+   ``'%Y-%m-%dT%H:%M:%S.%fZ'``, always with six fractional digits, and
+   :mod:`plistlib`'s ``<date>`` pattern admits none, so :func:`plistlib.load`
+   failed on every ``format='plist'`` report with ``AttributeError: 'NoneType'
+   object has no attribute 'groupdict'``. The upstream defect is
+   `JarryShaw/DictDumper#122 <https://github.com/JarryShaw/DictDumper/issues/122>`__.
+   :func:`pcapkit.dumpkit.common.make_dumper` works around it (:issue:`1448`): it
+   writes each date in UTC to whole seconds, as :func:`plistlib.dump` does. The
+   exact value stays in the sibling field every timestamp already has, such as
+   ``time_epoch``.
    ``PlistRoundTripTests.test_plist_report_round_trips_through_plistlib``, in
-   ``tests/integration/test_output_formats.py``, reads a ``format='plist'`` report
-   back with :func:`plistlib.load`, which fails with ``AttributeError: 'NoneType'
-   object has no attribute 'groupdict'``. ``dictdumper``'s ``PLIST`` writer formats
-   every :class:`~datetime.datetime` as ``'%Y-%m-%dT%H:%M:%S.%fZ'``, always with six
-   fractional digits, and :mod:`plistlib`'s ``<date>`` pattern admits none, so its
-   match returns ``None``. The fix belongs upstream, as `JarryShaw/DictDumper#122
-   <https://github.com/JarryShaw/DictDumper/issues/122>`__; the test asserts what a
-   fixed writer should produce, so un-skipping it is the whole of pcapkit's side.
+   ``tests/integration/test_output_formats.py``, now runs rather than being
+   skipped.
 
 Reassembly Beyond IP and TCP
 ----------------------------
