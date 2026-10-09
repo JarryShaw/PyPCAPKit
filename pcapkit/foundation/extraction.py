@@ -182,6 +182,49 @@ def _restore_shipped_dumper(registry: 'dict[str, Any]', format: 'str',  # pylint
     registry[format] = shipped if ext == shipped[1] else (shipped[0], ext)
 
 
+#: Engines whose library opens the input by *path*, ``Extractor._ifnm``, rather
+#: than reading ``Extractor._ifile``, so they cannot take an unnamed stream.
+_PATH_ENGINES = frozenset({'scapy', 'pyshark', 'pypcap', 'pcap_ct'})
+
+
+class _PeekableStream:
+    """Give a seekable binary stream without ``peek`` one.
+
+    :class:`Extractor` and the PCAP-NG engine read ahead with ``peek``, which
+    :class:`io.BufferedReader` has and a plain :class:`typing.IO` such as
+    :class:`io.BytesIO` does not (#1506). The read-ahead is a read and a seek
+    back, and every other attribute is the stream's own. It is not an
+    :class:`io.IOBase`, so it has no finaliser that could close the caller's
+    stream behind their back (#610).
+
+    Arguments:
+        stream: seekable binary stream
+
+    """
+
+    def __init__(self, stream: 'IO[bytes]') -> 'None':
+        self._stream = stream
+
+    def peek(self, size: 'int' = 0) -> 'bytes':
+        """Return up to ``size`` octets, at least one if any remain, without consuming them.
+
+        Arguments:
+            size: number of octets wanted
+
+        Returns:
+            The octets at the current position.
+
+        """
+        pos = self._stream.tell()
+        try:
+            return self._stream.read(max(size, 1))
+        finally:
+            self._stream.seek(pos, io.SEEK_SET)
+
+    def __getattr__(self, name: 'str') -> 'Any':
+        return getattr(self._stream, name)
+
+
 class Extractor(Generic[_P]):
     """Extractor for PCAP files.
 
@@ -388,7 +431,12 @@ class Extractor(Generic[_P]):
 
     @property
     def input(self) -> 'str':
-        """Name of input PCAP file."""
+        """Name of input PCAP file.
+
+        For a binary IO object without a :obj:`str` ``name``, a placeholder
+        naming its type, e.g. ``<BytesIO>``.
+
+        """
         return self._ifnm
 
     @property
@@ -931,7 +979,8 @@ class Extractor(Generic[_P]):
 
         1. sanitise ``fin`` as the input PCAP filename; ``in.pcap`` as default value and
            append ``.pcap`` extension if needed and ``extension`` is :data:`True`; as well
-           as test if the file exists; for a binary IO object, use its ``name``;
+           as test if the file exists; for a binary IO object, use its ``name``,
+           or a placeholder such as ``<BytesIO>`` if it has no :obj:`str` one;
         2. if ``nofile`` is :data:`True`, skips following processing;
         3. look up the output file extension registered for ``fmt``; should none be
            registered, then it raises :exc:`~pcapkit.utilities.exceptions.FormatError`;
@@ -977,7 +1026,13 @@ class Extractor(Generic[_P]):
             if not os.path.isfile(ifnm):
                 raise FileNotFound(2, 'No such file or directory', ifnm)
         else:
-            ifnm = fin.name
+            # NOTE: a binary IO object need not have a ``name`` -- an
+            # :class:`io.BytesIO` has none, and one wrapping a descriptor has an
+            # :obj:`int` (#1506). The name is only a label here: the stream is
+            # read as given, and the output name comes from ``fout`` alone. So
+            # fall back to ``<BytesIO>``-style, after Python's own ``<stdin>``.
+            name = getattr(fin, 'name', None)
+            ifnm = name if isinstance(name, str) else f'<{type(fin).__name__}>'
 
         if nofile:
             ofnm = None
@@ -1234,6 +1289,11 @@ class Extractor(Generic[_P]):
             pcapkit.utilities.warnings.AttributeWarning: If ``trace_analyse`` is
                 requested while the extraction engine is PyShark.
 
+        Raises:
+            UnsupportedCall: If ``fin`` is a stream without a :obj:`str` ``name``
+                and the engine that will run -- Scapy, PyShark, PyPCAP or
+                pcap-ct -- opens its input by path.
+
         """
         if fin is None:
             fin = 'in.pcap'
@@ -1258,6 +1318,19 @@ class Extractor(Generic[_P]):
             warn(f"'Extractor(engine={self._exnam})' does not support 'format={format}'; "
                  "using 'format=\"json\"' instead", FormatWarning, stacklevel=stacklevel())
             format = 'json'
+
+        # NOTE: these engines hand ``_ifnm`` to their library as a *path*, so a
+        # stream without a ``str`` name -- labelled ``<BytesIO>`` by
+        # :meth:`make_name` -- would be opened as a file of that name (#1506).
+        # Refuse before anything runs, rather than relying on no such file
+        # existing. ``dpkt``, ``pypcapfile`` and the default engine read
+        # ``_ifile`` and take a stream as it is.
+        if (self._exnam in _PATH_ENGINES and not isinstance(fin, str)
+                and not isinstance(getattr(fin, 'name', None), str)):
+            raise UnsupportedCall(f"'Extractor(engine={self._exnam})' requires a file on disk, "
+                                  f'but the {type(fin).__name__} given as fin has no name; '
+                                  'the engine opens savefiles by name and cannot read an '
+                                  'in-memory stream')
 
         ifnm, ofnm, fmt, oext, files = self.make_name(fin, fout, format, extension, files=files, nofile=nofile)
 
@@ -1413,6 +1486,9 @@ class Extractor(Generic[_P]):
             # same one ``_cleanup`` uses (#610).
             self._ifile = SeekableReader(self._ifile, buffer_size, buffer_save, buffer_path,
                                          stream_closing=self._flag_s)
+        elif not hasattr(self._ifile, 'peek'):
+            logger.debug('input stream has no peek(), wrapping it in _PeekableStream')
+            self._ifile = cast('BufferedReader', _PeekableStream(self._ifile))
 
         if not self._flag_q:
             output, ext = self.__output__[fmt]
