@@ -550,13 +550,6 @@ class FieldRoundTripTests(KnownFailureTable, unittest.TestCase):
     STATUSES = ('OK', 'PACK', 'UNPACK', 'VALUE', 'REPACK', 'WIRE', 'DICT', 'REJECTED', 'TIMEOUT')
 
     KNOWN_FAILURES = (
-        Gap(1487, 'BitField.post_process reads only the bits its namespace names, and '
-               'pre_process seeds the rest as zeros, so octets with a bit outside every '
-               'subfield set pack back with it cleared '
-               '(pcapkit/corekit/fields/strings.py:311, :334). Not reachable from a shipped '
-               'schema: all 102 BitFields cover every bit '
-               '(test_every_schema_bitfield_covers_every_bit)',
-            'WIRE', '', ('BitField/partial/wire/ffff', 'BitField/partial/wire/0100')),
         Gap(1488, 'NumberField with bit_length narrower than its octets masks the unpacked value '
                'to bit_length bits, so set high bits are dropped and pack writes them as '
                'zeros (pcapkit/corekit/fields/numbers.py:318, :322). Shipped use: vlan.TCI '
