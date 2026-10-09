@@ -14,10 +14,11 @@ both) -- even though the very same value already resolved correctly through
 the constructor (:meth:`~pcapkit.const.http.method.Method._missing_`, which
 this override never touched).
 
-**Why a capture reaches it.** ``pcapkit/protocols/application/httpv1.py``'s
-``_RE_METHOD = re.compile(rb"(?P<method>[A-Z][A-Z-]*)\\Z")`` admits a hyphen,
-so a request line carrying ``BASELINE-CONTROL`` matches, reaches
-``Enum_Method.get(...)`` at ``httpv1.py:434``, parses successfully, and is
+**Why a capture reaches it.** ``pcapkit/protocols/application/http.py``'s
+``_RE_METHOD = re.compile(rb"(?P<method>[A-Z][A-Z-]*)\\Z")``, which
+``httpv1.py`` imports, admits a hyphen, so a request line carrying
+``BASELINE-CONTROL`` matches, reaches ``Enum_Method.get(...)`` in
+``httpv1.HTTP._read_start_line``, parses successfully, and is
 reported with the wrong ``idempotent`` -- the harder kind of defect to
 notice, since the parse itself never fails.
 :class:`HTTPv1EndToEndTests` below pins that whole path, not just the direct
@@ -191,7 +192,7 @@ class HTTPv1EndToEndTests(unittest.TestCase):
     def test_a_baseline_control_request_line_reports_the_registrys_idempotent_flag(
             self) -> None:
         """``_RE_METHOD`` admits the hyphen, so this request line reaches
-        ``Enum_Method.get(...)`` at ``httpv1.py:434`` and used to come back
+        ``Enum_Method.get(...)`` in ``httpv1.HTTP._read_start_line`` and used to come back
         with ``idempotent=False`` -- the wrong answer for a parse that
         otherwise succeeds silently. Pins the whole path, not only the
         direct ``Method.get`` call above."""
@@ -269,9 +270,9 @@ class NonStrKeyTests(unittest.TestCase):
 
         Before #908 this handed back a member whose ``name`` and ``value``
         were both ``b'GET'``. ``bytes`` is the plausible mistake here, since
-        :attr:`~pcapkit.protocols.application.httpv1.HTTP._RE_METHOD` is a
-        bytes pattern and ``httpv1`` is bytes throughout -- the live call at
-        ``httpv1.py:434`` is safe only because it wraps the match in
+        ``_RE_METHOD`` (in ``pcapkit/protocols/application/http.py``) is a
+        bytes pattern and ``httpv1`` is bytes throughout -- the live call in
+        ``httpv1.HTTP._read_start_line`` is safe only because it wraps the match in
         ``self.decode(...)``.
         """
         from pcapkit.const.http.method import Method
