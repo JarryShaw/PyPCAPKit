@@ -359,12 +359,18 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             Key-value pairs for protocol construction.
 
         """
-        upper = cls._make_payload(data)
+        exthdr = data.get('__exthdr__')  # type: Optional[tuple[tuple[Type[ProtocolBase], Any], ...]] # pylint: disable=line-too-long
+        exclude = ()  # type: tuple[str, ...]
+        if exthdr is None:
+            # NOTE: ``data`` was rebuilt from :meth:`Info.to_dict`, which leaves
+            # ``__exthdr__`` out, so the chain is recovered from the keys the
+            # extension headers were written under; those are no payload.
+            exclude, exthdr = cls._lookup_exthdr(data)
+        upper = cls._make_payload(data, exclude=exclude)
         payload = upper  # type: bytes | ProtocolBase
 
         # NOTE: The extension headers sit between this header and the upper
         # layer payload, so they are rebuilt in wire order ahead of it.
-        exthdr = data.get('__exthdr__')
         if exthdr:
             payload = b''.join(proto.from_data(info).data for proto, info in exthdr) + upper.data
 
@@ -384,6 +390,49 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             # NOTE: And the octets captured past the Payload Length (:issue:`1209`).
             'trailer': data.get('trailer', b''),
         }
+
+    @classmethod
+    def _lookup_exthdr(cls, data: 'Data_IPv6') -> 'tuple[tuple[str, ...], tuple[tuple[Type[ProtocolBase], Any], ...]]':  # pylint: disable=line-too-long
+        """Recover the extension header chain of ``data`` without ``__exthdr__``.
+
+        :meth:`_decode_next_layer` writes each extension header's info under a
+        key of its own, in wire order, ahead of the upper layer. Walking the
+        ``next`` field from :attr:`data.next <Data_IPv6.next>` names the parser
+        of each in turn, exactly as the walk that parsed them did.
+
+        Args:
+            data: protocol data, without ``__exthdr__``
+
+        Returns:
+            The keys the extension headers are under, and the chain in the
+            shape of ``__exthdr__``, i.e. the parser class and info of each.
+
+        Note:
+            A header repeated in the chain is written under the key of its
+            predecessor, so only the last of them is left in ``data``.
+
+        """
+        names = []  # type: list[str]
+        chain = []  # type: list[tuple[Type[ProtocolBase], Any]]
+        proto = data.get('next')
+        for key in cls._lookup_nested(data):
+            try:
+                ex_proto = Enum_ExtensionHeader(proto)
+            except ValueError:
+                break
+
+            # NOTE: As in :meth:`_decode_next_layer`, a code with no parser
+            # carrying ``next`` ends the chain, and so does a fragment header.
+            info = data[key]
+            if 'next' not in info:
+                break
+            names.append(key)
+            chain.append((cls._lookup_next_layer(cls.__proto__, int(ex_proto)), info))
+
+            proto = info['next']
+            if ex_proto == Enum_ExtensionHeader.IPv6_Frag:
+                break
+        return tuple(names), tuple(chain)
 
     def _read_ip_hextet(self) -> 'tuple[int, int, int]':
         """Read the first four octets of IPv6.
