@@ -382,19 +382,14 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
                 :func:`info_final`, i.e. it carries ``__final__`` in its own
                 ``__dict__`` without :attr:`FinalisedState.FINAL`.
 
-        Warning:
-            Out of scope, deliberately: a ``@final`` class descending from a
-            :attr:`FinalisedState.BASE` ancestor is not caught. ``__finalised__``
-            inherits, and a ``BASE`` ancestor means some earlier bare
-            construction already walked this branch for the chain -- so the
-            subclass's own ``cls.__finalised__`` reads ``BASE`` too, the branch
-            below is skipped entirely, and the marker on ``cls`` itself is never
-            inspected. Closing this means re-finalising every descendant of a
-            ``BASE`` class on each subclassing, which is the auto-finalisation
-            behaviour ``test_an_unfinalised_descendant_is_not_mistaken_for_a_
-            mismarked_class`` deliberately leaves alone. In the tree today no
-            ``BASE``-state class is ever marked ``@final`` by hand, so the escape
-            is theoretical rather than live.
+        Note:
+            Whether ``cls`` still needs finalising is read from its *own*
+            ``__dict__``, never inherited (GitHub issue :issue:`1490`). Each
+            class is finalised on its first construction, whatever its
+            ancestors' state, so a subclass of a :attr:`FinalisedState.BASE` or
+            :attr:`FinalisedState.FINAL` ancestor still gets its own
+            ``__builtin__``, ``__excluded__`` and generated ``__init__``, and a
+            ``@final`` class under a ``BASE`` ancestor is refused like any other.
 
         """
         # NOTE: ``final`` is applied *after* the class object exists, so
@@ -407,32 +402,26 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
         # ``TypeError: 'int' object is not iterable``, naming neither the class
         # nor the mistake.
         #
-        # It is nested inside the NONE branch rather than run ahead of it, and
-        # that placement is what makes it free on the hot path: a finalised class
-        # never enters the branch at all, so it never evaluates the nested
-        # ``cls.__dict__.get('__final__')`` either -- ``dis.dis(Info.__new__)``
-        # shows the ``FinalisedState.NONE`` comparison compiles to a single
-        # ``POP_JUMP_IF_FALSE`` that, for a ``FINAL`` class, jumps straight past
-        # this whole block to ``super().__new__``: zero of the added bytecode
-        # executes, which is a property of the compiled branch rather than of
-        # any particular timing run, and is the reason to trust here rather than
-        # a timer. The raise also leaves ``__finalised__`` at NONE, so a second
-        # attempt re-enters and fails again rather than the error firing once.
+        # It is nested inside the NONE branch rather than run ahead of it, so a
+        # finalised class never evaluates it: the outer test is false for it and
+        # jumps straight to ``super().__new__``. The raise also leaves
+        # ``__finalised__`` unset, so a second attempt re-enters and fails again
+        # rather than the error firing once.
         #
-        # ``cls.__dict__`` rather than ``getattr``: not because a class that
-        # inherits ``__final__`` from a *finalised* ancestor would be misread --
-        # such a class also inherits ``__finalised__ == FINAL``, so the outer
-        # ``if`` above already excludes it before this line is ever reached,
-        # regardless of which lookup is used here. The case ``getattr`` gets
-        # wrong is an ancestor hand-marked bare ``@final`` and *never finalised*:
-        # its own ``__finalised__`` stays ``NONE`` and so, inherited, does every
-        # subclass declared before the marker landed -- so such a subclass still
-        # reaches this line, and ``getattr`` would read the marker it merely
-        # inherits and blame it for a mismarking that is its ancestor's, not its
-        # own. ``OwnDictRuleTests.test_a_subclass_that_predates_an_unfinalised_
-        # ancestors_bare_final_is_not_blamed_for_it`` pins exactly this shape --
-        # mutating this line to ``getattr`` fails it.
-        if cls.__finalised__ == FinalisedState.NONE:
+        # Both lookups read ``cls.__dict__`` rather than ``getattr``, because
+        # both markers are ordinary, inherited class attributes. The outer one:
+        # ``info_final`` writes ``BASE`` or ``FINAL`` onto the class it
+        # finalises, and a subclass reading that state through inheritance was
+        # never finalised itself -- it would keep the ``__excluded__`` it copied
+        # at declaration, without the names ``info_final`` adds, and leak
+        # ``__map__``, ``__map_reverse__`` and ``__multi__`` from ``to_dict()``
+        # (GitHub issue #1490). The inner one: an ancestor hand-marked bare
+        # ``@final`` passes its marker to every subclass declared before it
+        # landed, and ``getattr`` would blame such a subclass for a mismarking
+        # that is its ancestor's. ``OwnDictRuleTests.test_a_subclass_that_
+        # predates_an_unfinalised_ancestors_bare_final_is_not_blamed_for_it``
+        # pins that shape.
+        if cls.__dict__.get('__finalised__', FinalisedState.NONE) == FinalisedState.NONE:
             if cls.__dict__.get('__final__'):
                 raise InfoError(f'{cls.__name__}: marked final but never finalised, so it has no generated '
                                 '__init__; apply info_final, which applies final itself, not final alone')
