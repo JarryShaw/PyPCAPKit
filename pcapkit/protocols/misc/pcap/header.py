@@ -35,6 +35,7 @@ from pcapkit.protocols.data.misc.pcap.header import Header as Data_Header
 from pcapkit.protocols.data.misc.pcap.header import MagicNumber as Data_MagicNumber
 from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.protocols.schema.misc.pcap.header import Header as Schema_Header
+from pcapkit.protocols.schema.schema import keep_short_read, replay_short_read
 from pcapkit.utilities.exceptions import EndianError, FileError, UnsupportedCall
 
 if TYPE_CHECKING:
@@ -42,7 +43,7 @@ if TYPE_CHECKING:
     from typing import IO, Any, NoReturn, Optional, Type
 
     from aenum import IntEnum as AenumEnum
-    from typing_extensions import Literal
+    from typing_extensions import Literal, Self
 
 __all__ = ['Header']
 
@@ -256,6 +257,11 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
         See Also:
             For construction argument, please refer to :meth:`make`.
 
+        Notes:
+            A header the data ends inside keeps that in its :attr:`info`, so
+            that :meth:`from_data` rebuilds only what was captured
+            (:issue:`1470`).
+
         """
         if file is None:
             _data = self.pack(**kwargs)
@@ -270,6 +276,7 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
             self._file.name = file.name
         #: pcapkit.corekit.infoclass.Info: Parsed packet data.
         self._info = self.unpack(length, **kwargs)
+        keep_short_read(self)
 
     def __len__(self) -> 'Literal[24]':
         """Total length of corresponding protocol."""
@@ -278,6 +285,22 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
     def __length_hint__(self) -> 'Literal[24]':
         """Return an estimated length for the object."""
         return 24
+
+    @classmethod
+    def from_data(cls, data: 'Data_Header | dict[str, Any]', **kwargs: 'Any') -> 'Self':
+        """Create protocol instance from data.
+
+        Args:
+            data: Protocol data.
+            **kwargs: Construction keywords, as for :meth:`ProtocolBase.from_data
+                <pcapkit.protocols.protocol.ProtocolBase.from_data>`.
+
+        Returns:
+            Protocol instance, cut back to what was captured when the header
+            it was parsed from was cut short (:issue:`1470`).
+
+        """
+        return replay_short_read(super().from_data(data, **kwargs), data)
 
     @classmethod
     def __index__(cls) -> 'NoReturn':

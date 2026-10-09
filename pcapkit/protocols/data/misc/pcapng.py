@@ -69,6 +69,12 @@ class PCAPNG(Protocol):
     #: Block total length.
     length: 'int'
 
+    if TYPE_CHECKING:
+        #: The block's octets as captured, when the capture ended inside it;
+        #: present only then. A rebuild parses them again rather than writing
+        #: the block at its declared length (:issue:`1470`).
+        __truncated_raw__: 'bytes'
+
 
 @info_final
 class UnknownBlock(PCAPNG):

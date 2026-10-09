@@ -15,6 +15,7 @@ which implements extractor for PCAP-NG file format [*]_.
 import base64
 import builtins
 import collections
+import collections.abc
 import datetime
 import decimal
 import enum
@@ -178,8 +179,9 @@ from pcapkit.protocols.schema.misc.pcapng import ZigBeeAPSKey as Schema_ZigBeeAP
 from pcapkit.protocols.schema.misc.pcapng import ZigBeeNWKKey as Schema_ZigBeeNWKKey
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.compat import StrEnum, localcontext
-from pcapkit.utilities.exceptions import (EnumValueError, FormatError, ProtocolError, RegistryError,
-                                          StreamEOFError, UnsupportedCall, stacklevel)
+from pcapkit.utilities.exceptions import (BaseError, EnumValueError, FormatError, ProtocolError,
+                                          RegistryError, StreamEOFError, UnsupportedCall,
+                                          stacklevel)
 from pcapkit.utilities.warnings import (AttributeWarning, DeprecatedFormatWarning, ProtocolWarning,
                                         RegistryWarning, warn)
 
@@ -1264,7 +1266,15 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                         getattr(self, meth_name, self._read_block_unknown))
         else:
             meth = name[0]
-        block = meth(schema.block, header=schema)
+        try:
+            block = meth(schema.block, header=schema)
+        except BaseError as error:
+            # NOTE: Fields past the end of a block the capture ended inside are
+            # read as zeros, and a value its parser refuses is an artefact of
+            # that, not of the block; it is kept as captured instead.
+            if not _read or self._captured(_seek_set) >= schema.block.length:
+                raise
+            block = self._read_block_cut(schema, _seek_set, error)
 
         # NOTE: An option or record area holding a malformed entry is kept as
         # the octets captured, as one :obj:`bytes` item (see
@@ -1313,6 +1323,14 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                      f'the file; block truncated', ProtocolWarning,
                      stacklevel=stacklevel())
                 seek_cur = min(seek_cur, _seek_set + read)
+
+                # NOTE: The fields read past the end of the capture are zeros,
+                # and an option, record or packet the end cut through is only
+                # its first octets, so the block cannot be rebuilt from them at
+                # the length it declares. The octets captured are kept as
+                # ``__truncated_raw__`` instead, which :meth:`__post_init__` parses
+                # again in place of building the block (:issue:`1470`).
+                block.__update__([('__truncated_raw__', self._data)])
 
             # move backward to the beginning of next block
             self._file.seek(seek_cur, io.SEEK_SET)
@@ -1412,6 +1430,13 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         self._ctx = ctx
         #: collections.Counter: Counter for option types.
         self._opt = collections.Counter()  # type: Counter[Enum_OptionType]
+
+        # NOTE: A block the capture ended inside rebuilds as the octets that
+        # were captured, parsed again as they were the first time (see
+        # :meth:`read`), rather than at the length it declares (:issue:`1470`).
+        block = kwargs.get('block')
+        if file is None and isinstance(block, collections.abc.Mapping) and '__truncated_raw__' in block:
+            file = bytes(block['__truncated_raw__'])
 
         if file is None:
             _read = False
@@ -1520,6 +1545,52 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         if length < 12:
             raise StreamEOFError(f'PCAP-NG: block truncated: {length} octet(s) left, '
                                  'fewer than the 12 a block needs', quiet=True)
+
+    def _captured(self, offset: 'int') -> 'int':
+        """Count the octets left in the stream from ``offset`` on.
+
+        Args:
+            offset: File offset of the block.
+
+        Returns:
+            Octets from ``offset`` to the end of
+            :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>`.
+
+        """
+        current = self._file.tell()
+        end = self._file.seek(0, io.SEEK_END)
+        self._file.seek(current, io.SEEK_SET)
+        return end - offset
+
+    def _read_block_cut(self, header: 'Schema_PCAPNG', offset: 'int',
+                        error: 'BaseError') -> 'Data_UnknownBlock':
+        """Read a PCAP-NG block the capture ended inside, whose parser refused it.
+
+        Args:
+            header: Parsed PCAP-NG header schema.
+            offset: File offset of the block.
+            error: What the block's parser raised.
+
+        Returns:
+            Parsed packet data, with the octets captured after the Block Total
+            Length as its body. :meth:`read` keeps the block's octets as
+            ``__truncated_raw__`` too, which a rebuild parses again, so that it
+            rebuilds as captured (:issue:`1470`).
+
+        """
+        warn(f'PCAP-NG: [Block {header.type}] block truncated; kept as captured: {error}',
+             ProtocolWarning, stacklevel=stacklevel())
+
+        current = self._file.tell()
+        self._file.seek(offset + 8, io.SEEK_SET)
+        body = self._read_fileng(header.block.length - 12)
+        self._file.seek(current, io.SEEK_SET)
+
+        return Data_UnknownBlock(
+            type=header.type,
+            length=header.block.length,
+            body=body,
+        )
 
     def _get_payload(self) -> 'bytes':
         """Get payload of :attr:`self.__header__ <pcapkit.protocols.protocol.Protocol.__header__>`.
