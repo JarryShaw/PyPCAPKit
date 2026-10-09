@@ -87,6 +87,16 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         Arguments:
             info: info dict of packets to be reassembled
 
+        Note:
+            A completed datagram's buffer is freed, as in the
+            :rfc:`791#section-3.2` reassembly procedure, so a fragment of it
+            that arrives afterwards -- a late duplicate, say -- opens a new
+            buffer. The caller sees that buffer as a separate incomplete
+            datagram, ``PARTIAL`` at the end of the capture or ``TIMEOUT`` if
+            it expires first. This is intended, is permitted by
+            :rfc:`8200#section-4.5`, and matches Linux, Zeek and Wireshark
+            (:issue:`1507`).
+
         """
         # clear cache
         self._flag_n = False
