@@ -1152,7 +1152,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">HostNameAddressParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">Host_Name_Address</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Header schema for SCTP host name address parameter."""</span>
 
-    <span class="c1">#: Host name, including at least one null terminator.</span>
+    <span class="c1">#: Host name as captured. :rfc:`9260#section-3.3.2.1.4` asks for at least one</span>
+    <span class="c1">#: null terminator, but a parsed name may lack it.</span>
     <span class="n">name</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">padding_length</span><span class="p">)</span>

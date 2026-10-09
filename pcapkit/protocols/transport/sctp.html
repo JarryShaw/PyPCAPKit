@@ -4125,7 +4125,8 @@ see <a class="reference internal" href="#pcapkit.protocols.schema.transport.sctp
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.sctp.HostNameAddressParameter.name">
 <span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BytesField</span> <span class="pre">name&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.sctp.HostNameAddressParameter.name" title="Link to this definition">¶</a></dt>
-<dd><p>Host name, including at least one null terminator.</p>
+<dd><p>Host name as captured. <span class="target" id="index-48"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3.3.2.1.4"><strong>RFC 9260 Section 3.3.2.1.4</strong></a> asks for at least one
+null terminator, but a parsed name may lack it.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -4507,7 +4508,7 @@ SHUTDOWN COMPLETE chunks.</p>
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.transport.sctp.</span></span><span class="sig-name descname"><span class="pre">padding_length</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pkt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/transport/sctp.html#padding_length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.transport.sctp.padding_length" title="Link to this definition">¶</a></dt>
 <dd><p>Length of the trailing padding of an SCTP type-length-value structure.</p>
 <p>Chunks, chunk parameters and error causes are all padded with all-zero
-bytes to a multiple of four bytes, and per <span class="target" id="index-48"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3.2"><strong>RFC 9260 Section 3.2</strong></a> that
+bytes to a multiple of four bytes, and per <span class="target" id="index-49"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3.2"><strong>RFC 9260 Section 3.2</strong></a> that
 padding is <strong>not</strong> counted in the <code class="docutils literal notranslate"><span class="pre">length</span></code> field. The padding is still
 on the wire, though, so it has to be consumed for the enclosing list to
 stay aligned.</p>
@@ -4520,7 +4521,7 @@ stay aligned.</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Number of padding bytes, clamped to the number of bytes left in the
-enclosing structure, since <span class="target" id="index-49"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3.2"><strong>RFC 9260 Section 3.2</strong></a> allows the final
+enclosing structure, since <span class="target" id="index-50"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3.2"><strong>RFC 9260 Section 3.2</strong></a> allows the final
 padding of a packet to be omitted. When packing, it is clamped as well
 to the <code class="docutils literal notranslate"><span class="pre">__padding__</span></code> width <code class="xref py py-func docutils literal notranslate"><span class="pre">pre_pack_padding()</span></code> hands over, so a
 final chunk captured without (all of) its padding rebuilds without it
@@ -4552,7 +4553,7 @@ HEARTBEAT ACK, ABORT and ERROR – deliberately have no separate
 trailing padding into the nested list’s own span instead. There are two
 reasons, and both matter:</p>
 <ul class="simple">
-<li><p>On parsing, a sender is allowed by <span class="target" id="index-50"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3.2"><strong>RFC 9260 Section 3.2</strong></a> to leave the
+<li><p>On parsing, a sender is allowed by <span class="target" id="index-51"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3.2"><strong>RFC 9260 Section 3.2</strong></a> to leave the
 final parameter’s padding out of the chunk length, so the padding has to
 be consumed whether or not the length accounts for it. Folding it into the
 list’s span does that, and leaves it visible as the field’s
@@ -5217,7 +5218,7 @@ anywhere else. <code class="docutils literal notranslate"><span class="pre">make
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.sctp.HostNameAddressParameter.name">
 <span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.transport.sctp.HostNameAddressParameter.name" title="Link to this definition">¶</a></dt>
-<dd><p>Host name as captured, null terminator included; a parsed name may lack one.</p>
+<dd><p>Host name as captured, with any null terminator; a parsed name may lack one.</p>
 </dd></dl>
 
 </dd></dl>
