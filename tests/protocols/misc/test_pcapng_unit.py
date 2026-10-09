@@ -20,7 +20,7 @@ import unittest
 import warnings
 from unittest import mock
 
-from tests._support import ROOT, reimport_once_per_class, sample_path
+from tests._support import ROOT, reimport_once_per_class, sample_path, skip_if_stand_in
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -3339,6 +3339,9 @@ class PCAPNGUnitTests(unittest.TestCase):
         section = extractor.engine._ctx_list[0].section
 
         self.assertEqual(section.byteorder, 'big')
+        # The option layout below is upstream's; the stand-in written when the
+        # download fails is big-endian too, but carries its own options (#1478).
+        skip_if_stand_in(self, path)
         self.assertEqual([option.length for _, option in section.options.items(multi=True)],
                          [9, 12, 15, 7, 0])
         self.assertEqual(section.options[OptionType.opt_comment].comment, 'test001')

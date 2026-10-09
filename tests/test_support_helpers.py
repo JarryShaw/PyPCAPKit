@@ -53,21 +53,28 @@ extractors, so it reads no sample capture and needs no engine installed.
 """
 from __future__ import annotations
 
+import hashlib
 import importlib
+import importlib.util
 import os
 import pathlib
+import shutil
 import signal
 import sys
+import tempfile
 import threading
 import time
 import types
 import unittest
+import urllib.error
 from unittest import mock
 
-from tests._support import (MAX_TIMEOUT, TIMEOUT_SCALE_ENV, bootstrap_core_modules, close_extractor,
-                            ensure_package, install_fake_protocol_module, isolate_modules,
-                            purge_modules, restore_modules, restore_modules_after, scale_timeout,
-                            snapshot_modules, time_limit)
+from tests._support import (MAX_TIMEOUT, PCAPNG_GENERATOR, TIMEOUT_SCALE_ENV,
+                            bootstrap_core_modules, close_extractor, ensure_package,
+                            install_fake_protocol_module, isolate_modules, purge_modules,
+                            restore_modules, restore_modules_after, scale_timeout,
+                            skip_if_stand_in, snapshot_modules, stand_in_reason, time_limit,
+                            upstream_digests)
 
 
 class Closeable:
@@ -860,6 +867,77 @@ def _method_names(case_class: type) -> 'list[str]':
     """
     return [name for name in dir(case_class)
             if name.startswith('test') and callable(getattr(case_class, name))]
+
+
+class StandInReasonTests(unittest.TestCase):
+    """:func:`~tests._support.stand_in_reason` tells upstream bytes from a stand-in.
+
+    Issue #1478: when the download of ``many_interfaces.pcapng`` failed, the
+    generator wrote a 24-frame stand-in and three integration assertions pinned
+    to upstream's 64 frames went red. The digest the generator already pins is
+    what tells the two apart, so that is what is tested here -- with the real
+    generator and a simulated failed download, not only with a fake table.
+
+    """
+
+    def setUp(self) -> None:
+        self.tmp = pathlib.Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.tmp, True)
+
+    def write(self, name: str, data: bytes) -> str:
+        path = self.tmp / name
+        path.write_bytes(data)
+        return str(path)
+
+    def test_digest_table_covers_both_downloads_and_leaves_sys_path_alone(self) -> None:
+        upstream_digests.cache_clear()
+        before = list(sys.path)
+        digests = upstream_digests()
+        self.assertEqual(sys.path, before)
+        self.assertEqual(sorted(digests), ['dhcp_big_endian.pcapng', 'many_interfaces.pcapng'])
+        for digest in digests.values():
+            self.assertRegex(digest, r'^[0-9a-f]{64}$')
+
+    def test_pinned_bytes_are_upstream(self) -> None:
+        path = self.write('many_interfaces.pcapng', b'upstream')
+        table = {'many_interfaces.pcapng': hashlib.sha256(b'upstream').hexdigest()}
+        with mock.patch('tests._support.upstream_digests', return_value=table):
+            self.assertIsNone(stand_in_reason(path))
+            skip_if_stand_in(self, path)  # does not skip
+
+    def test_other_bytes_are_a_stand_in(self) -> None:
+        path = self.write('many_interfaces.pcapng', b'synthesised')
+        table = {'many_interfaces.pcapng': hashlib.sha256(b'upstream').hexdigest()}
+        with mock.patch('tests._support.upstream_digests', return_value=table):
+            reason = stand_in_reason(path)
+            self.assertIsNotNone(reason)
+            self.assertIn('many_interfaces.pcapng is a synthesised stand-in', reason)
+            with self.assertRaises(unittest.SkipTest):
+                skip_if_stand_in(self, path)
+
+    def test_a_capture_that_is_never_downloaded_is_never_a_stand_in(self) -> None:
+        path = self.write('profile.pcapng', b'anything')
+        self.assertIsNone(stand_in_reason(path))
+
+    def test_failed_download_writes_a_capture_reported_as_a_stand_in(self) -> None:
+        spec = importlib.util.spec_from_file_location('_pcapng_generator_1478', PCAPNG_GENERATOR)
+        assert spec is not None and spec.loader is not None
+        generator = importlib.util.module_from_spec(spec)
+        before = list(sys.path)
+        self.addCleanup(sys.path.__setitem__, slice(None), before)
+        spec.loader.exec_module(generator)
+
+        fixtures = {fixture.name: fixture for fixture in generator.FIXTURES}
+        unreachable = urllib.error.URLError('simulated outage (#1478)')
+        for name in upstream_digests():
+            with self.subTest(name=name):
+                path = self.tmp / name
+                with mock.patch.object(generator, '_download', side_effect=unreachable), \
+                        mock.patch('builtins.print'):
+                    data, origin = generator._materialise(fixtures[name], path)
+                self.assertEqual(origin, 'synthesised (download unavailable)')
+                path.write_bytes(data)
+                self.assertIsNotNone(stand_in_reason(str(path)))
 
 
 if __name__ == '__main__':
