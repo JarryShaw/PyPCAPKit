@@ -218,9 +218,9 @@ class MHUnitTests(unittest.TestCase):
         self.assertEqual(unknown.data, b'raw')
         self.assertEqual(proto._read_msg_brr(SimpleNamespace(reserved=0, options=[]),
                                              header=header(Packet.Binding_Refresh_Request)).options, 'opts')
-        self.assertEqual(proto._read_msg_hoti(SimpleNamespace(cookie=b'12345678', options=[]),
+        self.assertEqual(proto._read_msg_hoti(SimpleNamespace(reserved=b'\x00\x00', cookie=b'12345678', options=[]),
                                               header=header(Packet.Home_Test_Init)).cookie, b'12345678')
-        self.assertEqual(proto._read_msg_coti(SimpleNamespace(cookie=b'abcdefgh', options=[]),
+        self.assertEqual(proto._read_msg_coti(SimpleNamespace(reserved=b'\x00\x00', cookie=b'abcdefgh', options=[]),
                                               header=header(Packet.Care_of_Test_Init)).cookie, b'abcdefgh')
         hot = proto._read_msg_hot(SimpleNamespace(nonce_index=1, cookie=b'12345678',
                                                   token=b'abcdefgh', options=[]),
@@ -246,6 +246,7 @@ class MHUnitTests(unittest.TestCase):
         self.assertTrue(ba.key_mngt)
         self.assertEqual(ba.lifetime, datetime.timedelta(seconds=20))
         be = proto._read_msg_be(SimpleNamespace(status=BindingError.Unrecognized_MH_Type_value,
+                                                reserved=b'\x00',
                                                 home=ip_address('2001:db8::1'),
                                                 options=[]),
                                 header=header(Packet.Binding_Error))
@@ -791,7 +792,7 @@ class MHUnitTests(unittest.TestCase):
             self.assertEqual(proto._make_opt_mnp(
                 Option.Mobile_Network_Prefix_Option,
                 data.MobileNetworkPrefixOption(type=Option.Mobile_Network_Prefix_Option,
-                                               length=18,
+                                               length=18, reserved=b'\x00',
                                                prefix=ip_network('2001:db8:1::/64')),
             ).prefix_length, 64)
             self.assertEqual(proto._make_opt_lla(
@@ -956,7 +957,7 @@ class MHUnitTests(unittest.TestCase):
         self.assertEqual(fback.lifetime, datetime.timedelta(seconds=10))
 
         # RFC 4068, section 6.3.3 -- two reserved octets, then mobility options.
-        fna = proto._read_msg_fna(SimpleNamespace(options=[]),
+        fna = proto._read_msg_fna(SimpleNamespace(reserved=b'\x00\x00', options=[]),
                                   header=header(Packet.Fast_Neighbor_Advertisement))
         self.assertEqual(fna.options, 'opts')
         self.assertEqual(fna.type, Packet.Fast_Neighbor_Advertisement)
