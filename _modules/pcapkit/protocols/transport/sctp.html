@@ -3368,8 +3368,9 @@
 <span class="sd">            The usage of this parameter is deprecated by</span>
 <span class="sd">            :rfc:`9260#section-3.3.2.1.4`; it is parsed so that a packet</span>
 <span class="sd">            carrying one can still be inspected. The host name is kept as raw</span>
-<span class="sd">            :obj:`bytes`, including its null terminator, since the encoding is</span>
-<span class="sd">            not specified on the wire.</span>
+<span class="sd">            :obj:`bytes`, including any null terminator, since the encoding is</span>
+<span class="sd">            not specified on the wire. A name captured without a terminator is</span>
+<span class="sd">            kept as read and rebuilds as read (:issue:`1482`).</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
@@ -3629,14 +3630,18 @@
 <span class="sd">            Constructed parameter schema.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``name`` is not null-terminated, as required by</span>
-<span class="sd">                :rfc:`9260#section-3.3.2.1.4`.</span>
+<span class="sd">            ProtocolError: If a user-supplied ``name`` is not null-terminated,</span>
+<span class="sd">                as required by :rfc:`9260#section-3.3.2.1.4`.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            A parsed ``param`` carries its name as captured, so a name the</span>
+<span class="sd">            reader accepted without a terminator rebuilds as read</span>
+<span class="sd">            (:issue:`1482`). The terminator check applies to ``name`` only.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">name</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">name</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Param </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_HostNameAddressParameter</span><span class="p">(</span>

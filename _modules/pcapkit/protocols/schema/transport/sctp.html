@@ -669,7 +669,10 @@
 <span class="sd">      final parameter's padding out of the chunk length, so the padding has to</span>
 <span class="sd">      be consumed whether or not the length accounts for it. Folding it into the</span>
 <span class="sd">      list's span does that, and leaves it visible as the field's</span>
-<span class="sd">      ``__option_padding__``.</span>
+<span class="sd">      ``__option_padding__``. The last chunk of a packet may omit that padding</span>
+<span class="sd">      altogether, so the chunks wrap this callback in :func:`bounded`: the span</span>
+<span class="sd">      then ends with the data, and the final parameter or cause reads only the</span>
+<span class="sd">      padding that is there (:issue:`1479`).</span>
 <span class="sd">    * On construction, a separate padding field could not compute its own size:</span>
 <span class="sd">      :meth:`Schema.pack &lt;pcapkit.protocols.schema.schema.Schema.pack&gt;` passes</span>
 <span class="sd">      one shared ``packet`` mapping down into the nested schemas, and each</span>
@@ -1289,7 +1292,7 @@
     <span class="c1">#: Optional and variable-length parameters, including the chunk's own</span>
     <span class="c1">#: trailing padding; see :func:`nested_length`.</span>
     <span class="n">parameters</span><span class="p">:</span> <span class="s1">'list[Parameter]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="n">nested_length</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span>
+        <span class="n">length</span><span class="o">=</span><span class="n">bounded</span><span class="p">(</span><span class="n">nested_length</span><span class="p">(</span><span class="mi">20</span><span class="p">)),</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">Parameter</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
         <span class="n">registry</span><span class="o">=</span><span class="n">Parameter</span><span class="o">.</span><span class="n">registry</span><span class="p">,</span>
@@ -1322,7 +1325,7 @@
     <span class="c1">#: Optional and variable-length parameters, including the chunk's own</span>
     <span class="c1">#: trailing padding; see :func:`nested_length`.</span>
     <span class="n">parameters</span><span class="p">:</span> <span class="s1">'list[Parameter]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="n">nested_length</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span>
+        <span class="n">length</span><span class="o">=</span><span class="n">bounded</span><span class="p">(</span><span class="n">nested_length</span><span class="p">(</span><span class="mi">20</span><span class="p">)),</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">Parameter</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
         <span class="n">registry</span><span class="o">=</span><span class="n">Parameter</span><span class="o">.</span><span class="n">registry</span><span class="p">,</span>
@@ -1383,7 +1386,7 @@
     <span class="c1">#: Heartbeat information parameters, including the chunk's own trailing</span>
     <span class="c1">#: padding; see :func:`nested_length`.</span>
     <span class="n">parameters</span><span class="p">:</span> <span class="s1">'list[Parameter]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="n">nested_length</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span>
+        <span class="n">length</span><span class="o">=</span><span class="n">bounded</span><span class="p">(</span><span class="n">nested_length</span><span class="p">(</span><span class="mi">4</span><span class="p">)),</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">Parameter</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
         <span class="n">registry</span><span class="o">=</span><span class="n">Parameter</span><span class="o">.</span><span class="n">registry</span><span class="p">,</span>
@@ -1404,7 +1407,7 @@
     <span class="c1">#: Heartbeat information parameters, including the chunk's own trailing</span>
     <span class="c1">#: padding; see :func:`nested_length`.</span>
     <span class="n">parameters</span><span class="p">:</span> <span class="s1">'list[Parameter]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="n">nested_length</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span>
+        <span class="n">length</span><span class="o">=</span><span class="n">bounded</span><span class="p">(</span><span class="n">nested_length</span><span class="p">(</span><span class="mi">4</span><span class="p">)),</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">Parameter</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
         <span class="n">registry</span><span class="o">=</span><span class="n">Parameter</span><span class="o">.</span><span class="n">registry</span><span class="p">,</span>
@@ -1430,7 +1433,7 @@
     <span class="c1">#: Zero or more error causes, including the chunk's own trailing padding;</span>
     <span class="c1">#: see :func:`nested_length`.</span>
     <span class="n">error</span><span class="p">:</span> <span class="s1">'list[ErrorCause]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="n">nested_length</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span>
+        <span class="n">length</span><span class="o">=</span><span class="n">bounded</span><span class="p">(</span><span class="n">nested_length</span><span class="p">(</span><span class="mi">4</span><span class="p">)),</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">ErrorCause</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">'code'</span><span class="p">,</span>
         <span class="n">registry</span><span class="o">=</span><span class="n">ErrorCause</span><span class="o">.</span><span class="n">registry</span><span class="p">,</span>
@@ -1482,7 +1485,7 @@
     <span class="c1">#: One or more error causes, including the chunk's own trailing padding;</span>
     <span class="c1">#: see :func:`nested_length`.</span>
     <span class="n">error</span><span class="p">:</span> <span class="s1">'list[ErrorCause]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="n">nested_length</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span>
+        <span class="n">length</span><span class="o">=</span><span class="n">bounded</span><span class="p">(</span><span class="n">nested_length</span><span class="p">(</span><span class="mi">4</span><span class="p">)),</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">ErrorCause</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">'code'</span><span class="p">,</span>
         <span class="n">registry</span><span class="o">=</span><span class="n">ErrorCause</span><span class="o">.</span><span class="n">registry</span><span class="p">,</span>

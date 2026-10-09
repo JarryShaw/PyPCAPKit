@@ -2401,8 +2401,9 @@ interpretation nor validation of its contents would be meaningful.</p>
 <p>The usage of this parameter is deprecated by
 <span class="target" id="index-32"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3.3.2.1.4"><strong>RFC 9260 Section 3.3.2.1.4</strong></a>; it is parsed so that a packet
 carrying one can still be inspected. The host name is kept as raw
-<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>, including its null terminator, since the encoding is
-not specified on the wire.</p>
+<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>, including any null terminator, since the encoding is
+not specified on the wire. A name captured without a terminator is
+kept as read and rebuilds as read (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1482">#1482</a>).</p>
 </div>
 </dd></dl>
 
@@ -2616,10 +2617,16 @@ not specified on the wire.</p>
 <dd class="field-odd"><p>Constructed parameter schema.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">name</span></code> is not null-terminated, as required by
-    <span class="target" id="index-34"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3.3.2.1.4"><strong>RFC 9260 Section 3.3.2.1.4</strong></a>.</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If a user-supplied <code class="docutils literal notranslate"><span class="pre">name</span></code> is not null-terminated,
+    as required by <span class="target" id="index-34"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9260.html#section-3.3.2.1.4"><strong>RFC 9260 Section 3.3.2.1.4</strong></a>.</p>
 </dd>
 </dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A parsed <code class="docutils literal notranslate"><span class="pre">param</span></code> carries its name as captured, so a name the
+reader accepted without a terminator rebuilds as read
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1482">#1482</a>). The terminator check applies to <code class="docutils literal notranslate"><span class="pre">name</span></code> only.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -4549,7 +4556,10 @@ reasons, and both matter:</p>
 final parameter’s padding out of the chunk length, so the padding has to
 be consumed whether or not the length accounts for it. Folding it into the
 list’s span does that, and leaves it visible as the field’s
-<code class="docutils literal notranslate"><span class="pre">__option_padding__</span></code>.</p></li>
+<code class="docutils literal notranslate"><span class="pre">__option_padding__</span></code>. The last chunk of a packet may omit that padding
+altogether, so the chunks wrap this callback in <code class="xref py py-func docutils literal notranslate"><span class="pre">bounded()</span></code>: the span
+then ends with the data, and the final parameter or cause reads only the
+padding that is there (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1479">#1479</a>).</p></li>
 <li><p>On construction, a separate padding field could not compute its own size:
 <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema.pack" title="pcapkit.protocols.schema.schema.Schema.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.pack</span></code></a> passes
 one shared <code class="docutils literal notranslate"><span class="pre">packet</span></code> mapping down into the nested schemas, and each
@@ -5207,7 +5217,7 @@ anywhere else. <code class="docutils literal notranslate"><span class="pre">make
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.sctp.HostNameAddressParameter.name">
 <span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.transport.sctp.HostNameAddressParameter.name" title="Link to this definition">¶</a></dt>
-<dd><p>Host name, including at least one null terminator.</p>
+<dd><p>Host name as captured, null terminator included; a parsed name may lack one.</p>
 </dd></dl>
 
 </dd></dl>

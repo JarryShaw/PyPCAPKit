@@ -910,7 +910,7 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">HostNameAddressParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for SCTP host name address parameter."""</span>
 
-    <span class="c1">#: Host name, including at least one null terminator.</span>
+    <span class="c1">#: Host name as captured, null terminator included; a parsed name may lack one.</span>
     <span class="n">name</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
