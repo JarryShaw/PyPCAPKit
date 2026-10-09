@@ -19,6 +19,7 @@ from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase
+from pcapkit.protocols.schema.schema import keep_short_read, replay_short_read
 from pcapkit.utilities.decorators import beholder
 from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.warnings import RegistryWarning, warn
@@ -26,7 +27,7 @@ from pcapkit.utilities.warnings import RegistryWarning, warn
 if TYPE_CHECKING:
     from typing import IO, Any, Optional, Type
 
-    from typing_extensions import Literal
+    from typing_extensions import Literal, Self
 
 __all__ = ['Internet']
 
@@ -174,6 +175,22 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
                  f'{incumbent!r} with {protocol!r}', RegistryWarning)
         cls.__proto__[code] = protocol
 
+    @classmethod
+    def from_data(cls, data: '_PT | dict[str, Any]', **kwargs: 'Any') -> 'Self':
+        """Create protocol instance from data.
+
+        Args:
+            data: Protocol data.
+            **kwargs: Construction keywords, as for :meth:`ProtocolBase.from_data
+                <pcapkit.protocols.protocol.ProtocolBase.from_data>`.
+
+        Returns:
+            Protocol instance, cut back to what was captured when the header
+            it was parsed from was cut short (:issue:`1458`).
+
+        """
+        return replay_short_read(super().from_data(data, **kwargs), data)
+
     ##########################################################################
     # Data models.
     ##########################################################################
@@ -196,8 +213,13 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             So :attr:`data` is cut down to the header's own :attr:`length`, and
             ``from_data(info).data`` rebuilds it exactly (:issue:`1446`).
 
+            A header the data ends inside keeps that in its :attr:`info`, so
+            that :meth:`from_data` rebuilds only what was captured
+            (:issue:`1458`).
+
         """
         super().__post_init__(file, length, extension=extension, **kwargs)  # type: ignore[arg-type]
+        keep_short_read(self)
 
         if extension and file is not None and len(self._data) > self.length:
             self._data = self._data[:self.length]

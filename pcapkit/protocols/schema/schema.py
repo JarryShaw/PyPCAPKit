@@ -26,6 +26,10 @@ if TYPE_CHECKING:
 
     from typing_extensions import Self
 
+    from pcapkit.protocols.protocol import ProtocolBase
+
+    _PB = TypeVar('_PB', bound=ProtocolBase)
+
 __all__ = ['Schema', 'EnumSchema', 'schema_final']
 
 _VT = TypeVar('_VT')
@@ -99,7 +103,8 @@ def schema_final(cls: '_ST', *, _finalised: 'bool' = True) -> '_ST':
 
     temp = ['__map__', '__map_reverse__', '__builtin__',
             '__fields__', '__buffer__', '__updated__',
-            '__payload__', '__finalised__', '__remainder__', '__remainder_offset__']
+            '__payload__', '__finalised__', '__remainder__', '__remainder_offset__',
+            '__short_read__']
     temp.extend(cls.__additional__)
     for obj in cls.mro():
         temp.extend(el for el in dir(obj) if el not in cls.__fields__)
@@ -562,7 +567,8 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             # NOTE: Not a field, but what :meth:`to_dict` emits for the octets an
             # enclosing ``SchemaField`` span held beyond this schema, and where,
             # so that a rebuilt schema still re-emits them (:issue:`1380`).
-            if key in ('__remainder__', '__remainder_offset__'):
+            # NOTE: Nor is the short read :meth:`unpack` records (:issue:`1458`).
+            if key in ('__remainder__', '__remainder_offset__', '__short_read__'):
                 self.__dict__[key] = value
                 continue
 
@@ -712,6 +718,10 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             that the rebuilt field still packs them (:issue:`1380`). The keys
             are absent otherwise.
 
+            A schema whose data ended inside one of its fields carries the
+            ``__short_read__`` that :meth:`unpack` recorded, and
+            :meth:`from_dict` accepts it back, likewise.
+
         """
         dict_ = {}  # type: dict[str, Any]
         for (key, value) in self.__dict__.items():
@@ -724,7 +734,7 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             else:
                 dict_[out_key] = value
 
-        for key in ('__remainder__', '__remainder_offset__'):
+        for key in ('__remainder__', '__remainder_offset__', '__short_read__'):
             if key in self.__dict__:
                 dict_[key] = self.__dict__[key]
         return dict_
@@ -919,8 +929,46 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             self.__buffer__[field.name] = temp
 
         self.post_process(packet)
+        self._cut_short_read()
         self.__updated__ = False
         return self.__bytes__()
+
+    def _note_short_read(self, name: 'str', length: 'int', byte: 'bytes') -> 'None':
+        """Record the first field the data ends inside, for :meth:`_cut_short_read`.
+
+        Args:
+            name: Field name.
+            length: Octets the field declares.
+            byte: Octets actually read for it.
+
+        """
+        if len(byte) < length and '__short_read__' not in self.__dict__:
+            self.__dict__['__short_read__'] = (name, len(byte))
+
+    def _cut_short_read(self) -> 'None':
+        """Cut the packed buffers back to the octets a short read consumed.
+
+        A schema whose data ended inside one of its fields records, as
+        ``__short_read__``, that field's name and how many of its octets were
+        there (see :meth:`unpack`). Its value is read as though the missing
+        octets were zeros, so packing it writes the field at full width and
+        every field after it besides, none of which was captured. Only the
+        octets read are kept here, so a truncated header packs back to exactly
+        what was captured (:issue:`1458`).
+
+        """
+        record = self.__dict__.get('__short_read__')
+        if record is None:
+            return
+
+        name, count = record
+        cut = False
+        for key in self.__fields__:
+            if cut:
+                self.__buffer__[key] = b''
+            elif key == name:
+                self.__buffer__[key] = self.__buffer__[key][:count]
+                cut = True
 
     def pre_pack(self, packet: 'dict[str, Any]') -> 'None':
         """Prepare ``packet`` data for packing process.
@@ -1017,6 +1065,7 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
 
                 byte = data.read(length)
                 self.__buffer__[field.name] = byte
+                self._note_short_read(field.name, length, byte)
 
                 packet[field.name] = byte
                 packet['__length__'] -= length
@@ -1036,6 +1085,8 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
 
             byte = data.read(length)
             self.__buffer__[field.name] = byte
+            if not isinstance(field, ForwardMatchField):
+                self._note_short_read(field.name, length, byte)
 
             value = field.unpack(byte, packet.copy())
             if isinstance(field, SchemaField) and isinstance(value, Schema):
@@ -1380,3 +1431,69 @@ class EnumSchema(Schema, Generic[_ET], metaclass=EnumMeta):
                  f'{incumbent!r} with {schema!r}', RegistryWarning)
 
         cls.__enum__[code] = schema  # type: ignore[index]
+
+
+def keep_short_read(protocol: 'ProtocolBase') -> 'None':
+    """Carry a parsed header's short read into the protocol's info.
+
+    Args:
+        protocol: Protocol instance, just parsed.
+
+    Called by the layer base classes once a parse is done. When the data ended
+    inside one of the header's fields, ``info`` gains the ``__short_read__``
+    record :meth:`Schema.unpack` made, so that :func:`replay_short_read` can
+    cut the rebuild back to what was captured (:issue:`1458`). The key is an
+    ordinary one, so :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>`
+    carries it and ``from_data(info.to_dict())`` replays it too; it is absent
+    for a header that was captured whole.
+
+    """
+    header = cast('Optional[Schema]', getattr(protocol, '__header__', None))
+    if header is None:
+        return
+    record = header.__dict__.get('__short_read__')
+    if record is not None:
+        protocol._info.__update__({'__short_read__': record})  # pylint: disable=protected-access
+
+
+def replay_short_read(protocol: '_PB', data: 'Any') -> '_PB':
+    """Cut a protocol rebuilt by ``from_data`` back to the octets its header had.
+
+    Args:
+        protocol: Protocol instance, just built by ``from_data``.
+        data: The info it was built from.
+
+    Returns:
+        ``protocol`` itself.
+
+    The rebuild packs every field at full width, the missing octets as the
+    zeros they were read as. The ``__short_read__`` record that
+    :func:`keep_short_read` left in ``data`` names the field the capture ended
+    inside and how much of it there was, so everything from that point on is
+    dropped (:issue:`1458`). A header cut short has no payload past it.
+
+    """
+    record = data.get('__short_read__') if isinstance(data, collections.abc.Mapping) else None
+    header = cast('Optional[Schema]', getattr(protocol, '__header__', None))
+    if record is None or header is None:
+        return protocol
+
+    name, count = record
+    offset = 0
+    for key in header.__fields__:
+        if key == name:
+            offset += min(count, len(header.__buffer__[key]))
+            break
+        offset += len(header.__buffer__[key])
+    else:
+        return protocol
+
+    header.__dict__['__short_read__'] = record
+    header._cut_short_read()  # pylint: disable=protected-access
+
+    # pylint: disable=protected-access
+    protocol._data = protocol._data[:offset]
+    protocol._file = io.BytesIO(protocol._data)
+    protocol.__cached__.pop('__len__', None)
+    protocol._info.__update__({'__short_read__': record})
+    return protocol

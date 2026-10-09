@@ -18,7 +18,7 @@ import struct
 import unittest
 
 from tests.protocols import _edge_roundtrip as edge
-from tests.protocols._edge_roundtrip import Case, Gap, MakeCase, Reject
+from tests.protocols._edge_roundtrip import Case, MakeCase, Reject
 
 IPV4 = 'pcapkit.protocols.internet.ipv4:IPv4'
 IPX = 'pcapkit.protocols.internet.ipx:IPX'
@@ -250,68 +250,7 @@ REJECTED = {
     'ipv4/ihl-4': Reject('ProtocolError', 'resolved to a negative length'),
 }
 
-KNOWN_FAILURES = (
-    Gap(1451, edge.ZERO_FILLED_EXTENSION_HEADER, 'PADDED', '',
-        ('ipv6-route/unassigned-type/cut*', 'ipv6-route/unassigned-type-24-octets/cut*',
-         'ipv6-route/type0-no-address/cut*', 'ipv6-route/type0-reserved-set/cut*',
-         'ipv6-route/type2-reserved-set/cut*', 'ipv6-route/rpl-cmpr-0-15-pad7/cut*',
-         'ipv6-route/rpl-cmpr-12-13-pad1/cut*', 'ipv6-route/unassigned-type/extension/cut*',
-         'ipv6-route/unassigned-type-24-octets/extension/cut*',
-         'ipv6-route/type0-no-address/extension/cut*',
-         'ipv6-route/type0-reserved-set/extension/cut*',
-         'ipv6-route/type2-reserved-set/extension/cut*',
-         'ipv6-route/rpl-cmpr-0-15-pad7/extension/cut*',
-         'ipv6-route/rpl-cmpr-12-13-pad1/extension/cut*', 'ipv6-frag/reserved-octet-set/cut*',
-         'ipv6-frag/every-bit-set/cut*', 'ipv6-frag/atomic/cut*',
-         'ipv6-frag/reserved-octet-set/extension/cut*', 'ipv6-frag/every-bit-set/extension/cut*',
-         'ipv6-frag/atomic/extension/cut*', 'ah/icv-empty/cut*', 'ah/reserved-set/cut*',
-         'ah/icv-12/cut*', 'ah/max-length-1028/cut*', 'ah/icv-empty/extension/cut*',
-         'ah/reserved-set/extension/cut*', 'ah/icv-12/extension/cut*',
-         'ah/max-length-1028/extension/cut*', 'mh/hoti-reserved-set/cut*',
-         'mh/be-unassigned-status/cut*', 'mh/unassigned-type/cut*',
-         'mh/unassigned-type-16-octets/cut*', 'mh/unassigned-type-max-length/cut*',
-         'mh/hoti-reserved-set/extension/cut*', 'mh/be-unassigned-status/extension/cut*',
-         'mh/unassigned-type/extension/cut*', 'mh/unassigned-type-16-octets/extension/cut*',
-         'mh/unassigned-type-max-length/extension/cut*', 'esp/spi-seq-only/cut*',
-         'hip/no-parameters/cut*', 'hip/packet-type-0-reserved/cut*',
-         'hip/packet-type-127-unassigned/cut*', 'hip/version-1/cut*', 'hip/version-15/cut*',
-         'hip/every-control-bit/cut*', 'hip/next-tcp-no-payload/cut*',
-         'hip/no-parameters/not-extension/cut*',
-         'hip/fixed-bit-clear/cut*', 'hip/leading-bit-set/cut*')),
-    Gap(1458, edge.ZERO_FILLED_SHORT_READ, 'PADDED', '',
-        ('ipv6-route/rpl-cmpr-0-15-pad7/in-ipv6/cut55', 'ipv6-route/rpl-cmpr-12-13-pad1/in-ipv6/cut55',
-         'ipx/min-header/cut*', 'ipx/transport-control-255/cut*',
-         'ipx/unassigned-packet-type/cut16', 'ipx/length-short-of-the-data/cut15',
-         'ipx/checksum-not-ffff/cut*', 'ipx/length-past-the-data/cut16',
-         'ipv6/no-next-header-empty/cut*', 'ipv6/no-next-header-with-octets/cut22',
-         'ipv6/class-and-label-max/cut*', 'ipv6/hop-limit-0/cut*', 'ipv6/next-200-unassigned/cut21',
-         'ipv6/payload-length-short-of-the-data/cut21', 'ipv6/payload-length-0-with-octets/cut21',
-         'ipv6/payload-length-past-the-data/cut21', 'ipv6/hopopt-dstopts-route-frag/cut36',
-         'ipv6/ah-then-frag/cut30', 'ipv6/hopopt-then-trailer/cut25', 'ipv6/esp/cut28',
-         'ipv6-route/unassigned-type/in-ipv6/cut24',
-         'ipv6-route/unassigned-type-24-octets/in-ipv6/cut*',
-         'ipv6-route/type0-no-address/in-ipv6/cut24', 'ipv6-route/type0-reserved-set/in-ipv6/cut*',
-         'ipv6-route/type2-reserved-set/in-ipv6/cut*', 'ipv6-route/rpl-uncompressed/in-ipv6/cut32',
-         'ipv6-route/rpl-cmpr-15-15-x8/in-ipv6/cut28', 'ipv6-route/rpl-cmpr-8-8-x2/in-ipv6/cut32',
-         'ipv6-route/rpl-cmpr-15-0-x1/in-ipv6/cut32', 'ipv6-route/rpl-cmpr-0-15-pad7/in-ipv6/cut28',
-         'ipv6-route/rpl-cmpr-12-13-pad1/in-ipv6/cut28',
-         'ipv6-frag/reserved-octet-set/in-ipv6/cut24', 'ipv6-frag/every-bit-set/in-ipv6/cut24',
-         'ipv6-frag/atomic/in-ipv6/cut24', 'ah/icv-empty/in-ipv6/cut26',
-         'ah/reserved-set/in-ipv6/cut26', 'ah/icv-12/in-ipv6/cut*',
-         'ah/max-length-1028/in-ipv6/cut*', 'mh/brr-reserved-set/in-ipv6/cut28',
-         'mh/hoti-reserved-set/in-ipv6/cut*', 'mh/bu-every-flag/in-ipv6/cut28',
-         'mh/bu-unassigned-option/in-ipv6/cut28', 'mh/bu-zero-length-option/in-ipv6/cut28',
-         'mh/bu-padn-nonzero-contents/in-ipv6/cut28', 'mh/bu-pad1-x4/in-ipv6/cut28',
-         'mh/ba-unassigned-status/in-ipv6/cut28', 'mh/be-unassigned-status/in-ipv6/cut*',
-         'mh/unassigned-type/in-ipv6/cut24', 'mh/unassigned-type-16-octets/in-ipv6/cut*',
-         'mh/unassigned-type-max-length/in-ipv6/cut*', 'hopopt/pad1-x6/in-ipv6/cut24',
-         'hopopt/padn-nonzero-contents/in-ipv6/cut24', 'hopopt/padn-0-then-pad1s/in-ipv6/cut24',
-         'hopopt/unassigned-skip/in-ipv6/cut24', 'hopopt/unassigned-discard/in-ipv6/cut24',
-         'hopopt/unassigned-zero-length/in-ipv6/cut24',
-         'hopopt/router-alert-unassigned-value/in-ipv6/cut24',
-         'hopopt/jumbo-payload-0/in-ipv6/cut24', 'ipv6-opts/pad1-x6/in-ipv6/cut24',
-         'ipv6-opts/padn-nonzero-contents/in-ipv6/cut24', 'ipv6-opts/unassigned/in-ipv6/cut24')),
-)
+KNOWN_FAILURES = ()  # type: tuple[edge.Gap, ...]
 
 
 @unittest.skipUnless(edge.HAS_RUNTIME, 'runtime dependencies not installed')

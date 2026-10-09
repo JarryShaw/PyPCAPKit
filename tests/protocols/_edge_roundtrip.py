@@ -51,22 +51,9 @@ CASE_TIMEOUT = 30
 #: Statuses a check can report. ``REJECTED`` is an in-library exception raised
 #: while parsing; it is a pass for a cut and for a ``REJECTED`` entry only.
 #: ``PADDED`` is a ``MISMATCH`` whose rebuild is the input followed by zero
-#: octets, the signature of a short read zero-filled on parse.
+#: octets, the signature of octets the parse never read being written back.
 STATUSES = ('OK', 'REJECTED', 'PARSE', 'SELF', 'REBUILD', 'MISMATCH', 'PADDED',
             'MAKE', 'REPARSE', 'REMAKE', 'TIMEOUT')
-
-#: The defect behind every ``PADDED`` cut, shared by all the family modules.
-ZERO_FILLED_SHORT_READ = (
-    'A header cut short inside a fixed-width field parses, because '
-    '``FieldBase.unpack`` zero-fills a short read (pcapkit/corekit/fields/field.py:586), '
-    'and nothing records the shortfall, so ``from_data`` rebuilds the field at full width.'
-)
-
-#: The same read, where it is an IPv6 extension header rebuilding itself.
-ZERO_FILLED_EXTENSION_HEADER = (
-    'A truncated IPv6 extension header rebuilds from its own ``info`` padded to its '
-    'declared length: the IPv6 extension-header instance of #1458.'
-)
 
 
 class Case(NamedTuple):

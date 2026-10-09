@@ -122,17 +122,15 @@ REJECTED = {
 
 KNOWN_FAILURES = (
     # ``sctp/last-chunk-unpadded`` is uncut: a final chunk sent without its pad
-    # octets reads the pad short, and the rebuild writes three zero octets.
-    Gap(1458, edge.ZERO_FILLED_SHORT_READ, 'PADDED', '',
-        ('sctp/last-chunk-unpadded', 'sctp/last-chunk-unpadded/cut8',
-         'sctp/common-header-only/cut*', 'sctp/data-1-octet-3-pad/cut31',
-         'sctp/data-nonzero-pad/cut31', 'sctp/unassigned-type-action-00/cut*',
-         'sctp/unassigned-type-action-01/cut8', 'sctp/unassigned-type-action-10/cut23',
-         'sctp/shutdown-ack-every-flag/cut8', 'sctp/cookie-ack/cut8', 'sctp/abort-t-bit/cut8',
-         'sctp/two-empty-chunks/cut10', 'sctp/heartbeat-empty-info/cut10', 'udp/min-header/cut*',
-         'udp/length-0/cut5', 'udp/length-short-of-the-data/cut6', 'udp/length-past-the-data/cut5',
-         'udp/length-short-of-the-header/cut5', 'udp/checksum-ffff/cut5', 'udp/ports-0/cut5',
-         'udp/ports-65535/cut5')),
+    # octets rebuilds with three zero octets. The four cuts end inside the last
+    # chunk's pad the same way.
+    Gap(1474, 'A last SCTP chunk whose padding is absent rebuilds with it zero-filled: '
+              '``padding_length`` (pcapkit/protocols/schema/transport/sctp.py:83), which '
+              'chunks, parameters and causes share, always writes the full padding.',
+        'PADDED', '',
+        ('sctp/last-chunk-unpadded', 'sctp/data-1-octet-3-pad/cut31',
+         'sctp/data-nonzero-pad/cut31', 'sctp/unassigned-type-action-00/cut19',
+         'sctp/unassigned-type-action-10/cut23')),
 )
 
 

@@ -16,7 +16,7 @@ import struct
 import unittest
 
 from tests.protocols import _edge_roundtrip as edge
-from tests.protocols._edge_roundtrip import Case, Gap, MakeCase, Reject
+from tests.protocols._edge_roundtrip import Case, MakeCase, Reject
 
 ETHERNET = 'pcapkit.protocols.link.ethernet:Ethernet'
 C_TAG = 'pcapkit.protocols.link.c_tag:C_Tag'
@@ -119,24 +119,7 @@ REJECTED = {
     'l2tpv2/version-3': Reject('ProtocolError', 'L2TPv2: invalid version: 3'),
 }
 
-KNOWN_FAILURES = (
-    Gap(1458, edge.ZERO_FILLED_SHORT_READ, 'PADDED', '',
-        ('ethernet/header-only-*/cut*', 'ethernet/length-field-0/cut7',
-         'ethernet/length-field-1500/cut9', 'ethernet/unassigned-type-ffff/cut8',
-         'c-tag/pcp7-dei-vid4095/cut3', 'c-tag/vid0-no-payload/cut*',
-         'c-tag/header-only-ipv4-type/cut*', 'arp/hlen0-plen0/cut*', 'arp/reply/cut*',
-         'arp/oper-*-unassigned/cut*', 'arp/htype-fffe-unassigned/cut*',
-         'arp/ptype-unknown-plen3/cut*', 'arp/ipv6-plen16/cut*', 'arp/hlen255/cut*',
-         'arp/18-octet-trailer/cut23', 'rarp/*/cut*', 'l2tpv2/offset-past-the-data',
-         'l2tpv2/offset-past-the-data/cut*', 'l2tpv2/minimal/cut*',
-         'l2tpv2/control-every-field/cut*', 'l2tpv2/offset-0/cut5',
-         'l2tpv2/offset-3-nonzero-pad/cut6', 'l2tpv2/reserved-bits/cut4', 'l2tpv2/priority/cut4',
-         'l2tpv2/every-flag-and-reserved/cut*', 'l2tpv2/length-*/cut5',
-         'ospf/hello-header-only/cut*', 'ospf/type-*-unassigned/cut*',
-         'ospf/auth-simple-password/cut*', 'ospf/auth-ffff-unassigned/cut*',
-         'ospf/auth-cryptographic-digest/cut22', 'ospf/packet-length-short-of-the-data/cut13',
-         'ospf/packet-length-past-the-data/cut*', 'ospf/version-3/cut*', 'ospf/lsu-body/cut22')),
-)
+KNOWN_FAILURES = ()  # type: tuple[edge.Gap, ...]
 
 
 @unittest.skipUnless(edge.HAS_RUNTIME, 'runtime dependencies not installed')
