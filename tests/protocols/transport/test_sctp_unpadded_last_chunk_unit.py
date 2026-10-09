@@ -138,6 +138,40 @@ class SCTPUnpaddedLastChunkUnitTests(unittest.TestCase):
             item.__update__({'padding': b''})
         self.assertEqual(SCTP.from_data(info).data.hex(), raw.hex())
 
+    def test_short_last_parameter_in_a_non_last_chunk_rebuilds_aligned(self) -> None:
+        """#1474: a non-last chunk drops its last parameter's short record too."""
+        from pcapkit.protocols.transport.sctp import SCTP
+
+        # The INIT length excludes the last parameter's padding (RFC 9260 Sec. 3.2).
+        value = INIT_HEAD + struct.pack('!HH', 0xbfff, 5) + b'q'
+        raw = COMMON + struct.pack('!BBH', 1, 0, 4 + len(value)) + value + bytes(3) \
+            + chunk(8, 0, b'')
+        info = SCTP(raw).info
+        init = list(info.chunks.items(multi=True))[0][1]
+        last = list(init.parameters.items(multi=True))[-1][1]
+        last.__update__({'padding': b''})
+
+        data = SCTP.from_data(info).data
+        self.assertEqual(len(data), 44)
+        self.assertEqual(data.hex(), raw.hex())
+
+    def test_short_last_cause_in_a_non_last_chunk_rebuilds_aligned(self) -> None:
+        """#1474: a non-last ABORT drops its last error cause's short record too."""
+        from pcapkit.protocols.transport.sctp import SCTP
+
+        # The ABORT length excludes the last cause's padding (RFC 9260 Sec. 3.2).
+        value = struct.pack('!HH', 0xffff, 5) + b'q'
+        raw = COMMON + struct.pack('!BBH', 6, 0, 4 + len(value)) + value + bytes(3) \
+            + chunk(8, 0, b'')
+        info = SCTP(raw).info
+        abort = list(info.chunks.items(multi=True))[0][1]
+        last = list(abort.error.items(multi=True))[-1][1]
+        last.__update__({'padding': b''})
+
+        data = SCTP.from_data(info).data
+        self.assertEqual(len(data), 28)
+        self.assertEqual(data.hex(), raw.hex())
+
     def test_make_still_pads_the_last_chunk(self) -> None:
         """#1474: a chunk built from keywords is padded in full, last or not."""
         from pcapkit.const.sctp.chunk import Chunk
