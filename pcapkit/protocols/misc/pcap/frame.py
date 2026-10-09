@@ -37,7 +37,7 @@ from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
 from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.protocols.schema.misc.pcap.frame import Frame as Schema_Frame
 from pcapkit.utilities.compat import localcontext
-from pcapkit.utilities.exceptions import RegistryError, StreamEOFError, UnsupportedCall, stacklevel
+from pcapkit.utilities.exceptions import StreamEOFError, UnsupportedCall, stacklevel
 from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
 if TYPE_CHECKING:
@@ -143,24 +143,18 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
                 Fires only when the incumbent differs from the replacement --
                 see :meth:`ProtocolBase.register
                 <pcapkit.protocols.protocol.ProtocolBase.register>` for the
-                guard this shares with ``register_protocol``.
+                guard this shares with ``register_protocol``, and for the
+                shipped descriptor a restore puts back (:issue:`1504`).
 
         """
         incumbent = cls.__proto__.get(code)
-        if incumbent is not None and (incumbent is protocol or (
-                isinstance(incumbent, ModuleDescriptor) and isinstance(protocol, ModuleDescriptor)
-                and incumbent == protocol)):
+        entry = cls._next_layer_entry(code, protocol)
+        if entry is None:
             return
-        if isinstance(protocol, ModuleDescriptor):
-            protocol = protocol.klass
-        if not isinstance(protocol, type):
-            raise RegistryError(f'protocol must be a class, not {protocol!r}')
-        if not issubclass(protocol, ProtocolBase):
-            raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
-        if incumbent is not None and incumbent is not protocol:
+        if incumbent is not None and incumbent is not entry:
             warn(f'protocol {code} already registered, overwriting '
-                 f'{incumbent!r} with {protocol!r}', RegistryWarning)
-        cls.__proto__[code] = protocol
+                 f'{incumbent!r} with {entry!r}', RegistryWarning)
+        cls.__proto__[code] = entry
 
     def index(self, name: 'str | ProtocolBase | Type[ProtocolBase]') -> 'int':
         """Call :meth:`ProtoChain.index <pcapkit.corekit.protochain.ProtoChain.index>`.
