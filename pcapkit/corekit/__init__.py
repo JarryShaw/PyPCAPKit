@@ -19,7 +19,7 @@ etc.
 from pcapkit.corekit.io import SeekableReader
 from pcapkit.corekit.enum import EnumRegistry
 from pcapkit.corekit.fields import *
-from pcapkit.corekit.infoclass import Info, info_final
+from pcapkit.corekit.infoclass import Info, MultiInfo, OrderedMultiInfo, info_final
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
 from pcapkit.corekit.protochain import ProtoChain
@@ -29,6 +29,7 @@ __all__ = [
     'EnumRegistry',
 
     'Info', 'info_final',
+    'MultiInfo', 'OrderedMultiInfo',
 
     'ProtoChain',
 

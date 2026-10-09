@@ -188,17 +188,20 @@ class TestIPv4RoundTrip(unittest.TestCase):
 
         rtralt = self.parse(header('94040000')).info.options[OptionNumber.RTRALT]
 
+        # NOTE: a parsed header's options are an immutable OrderedMultiInfo
+        # (#1484), so they are edited in the mutable copy ``to_dict()`` makes.
+
         # one option added to a parsed header grows it
-        parsed = self.parse(header('88040001'))
-        parsed.info.options.add(OptionNumber.RTRALT, rtralt)
-        data = IPv4.from_data(parsed.info).data
+        edited = self.parse(header('88040001')).info.to_dict()
+        edited['options'].add(OptionNumber.RTRALT, rtralt)
+        data = IPv4.from_data(edited).data
         self.assertEqual(data[0], 0x47)
         self.assertEqual(data[20:].hex(), '88040001' '94040000')
 
         # one option removed shrinks it, rather than zero-filling the old length
-        parsed = self.parse(header('88040001' '94040000'))
-        parsed.info.options.pop(OptionNumber.RTRALT)
-        data = IPv4.from_data(parsed.info).data
+        edited = self.parse(header('88040001' '94040000')).info.to_dict()
+        edited['options'].pop(OptionNumber.RTRALT)
+        data = IPv4.from_data(edited).data
         self.assertEqual(data[0], 0x46)
         self.assertEqual(data[20:].hex(), '88040001')
 

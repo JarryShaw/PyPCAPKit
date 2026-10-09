@@ -145,7 +145,7 @@ class InfoFinalEnforcementTests(unittest.TestCase):
         self.assertIn('has been finalised', str(emitted[0].message))
 
         self.assertIs(again, Sealed)
-        self.assertEqual(again(1).to_dict(), {'x': 1})
+        self.assertEqual(list(again(1).to_dict().items(multi=True)), [('x', 1)])
 
     def test_a_base_state_info_class_is_still_subclassable(self) -> None:
         """The line the check must not cross.
@@ -171,7 +171,7 @@ class InfoFinalEnforcementTests(unittest.TestCase):
             y: int
 
         self.assertIs(info_final(Extended), Extended)
-        self.assertEqual(Extended(1, 2).to_dict(), {'x': 1, 'y': 2})
+        self.assertEqual(list(Extended(1, 2).to_dict().items(multi=True)), [('x', 1), ('y', 2)])
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -363,7 +363,7 @@ class OwnDictRuleTests(unittest.TestCase):
 
         self.assertEqual([str(record.message) for record in caught], [])
         self.assertIn('__final__', Child.__dict__)
-        self.assertEqual(Child(1, 2).to_dict(), {'x': 1, 'y': 2})
+        self.assertEqual(list(Child(1, 2).to_dict().items(multi=True)), [('x', 1), ('y', 2)])
 
     def test_an_unfinalised_descendant_is_not_mistaken_for_a_mismarked_class(self) -> None:
         """:meth:`Info.__new__`'s guard must not fire on an inherited marker.
@@ -389,7 +389,7 @@ class OwnDictRuleTests(unittest.TestCase):
         self.assertNotIn('__final__', Child.__dict__)
 
         # No InfoError: the marker is inherited, not owned by this class.
-        self.assertEqual(Child(1, 2).to_dict(), {'x': 1, 'y': 2})
+        self.assertEqual(list(Child(1, 2).to_dict().items(multi=True)), [('x', 1), ('y', 2)])
 
     def test_a_subclass_that_predates_an_unfinalised_ancestors_bare_final_is_not_blamed_for_it(self) -> None:
         """The one shape that actually tells ``__dict__`` and ``getattr`` apart
@@ -434,7 +434,7 @@ class OwnDictRuleTests(unittest.TestCase):
 
         # No InfoError: ``Child`` itself was never marked final, only inherits
         # the marker from ``Parent``, which is not the class this constructs.
-        self.assertEqual(Child(1, 2).to_dict(), {'x': 1, 'y': 2})
+        self.assertEqual(list(Child(1, 2).to_dict().items(multi=True)), [('x', 1), ('y', 2)])
 
     def test_a_final_class_descending_from_a_base_state_ancestor_is_refused(self) -> None:
         """``__finalised__`` is read from each class's own ``__dict__`` (#1490).
@@ -635,7 +635,7 @@ class DecoratorCombinationTests(unittest.TestCase):
                 x: int
 
         self.assertEqual([str(record.message) for record in caught], [])
-        self.assert_silently_finalised(Sealed, lambda cls: cls(1).to_dict(), {'x': 1})
+        self.assert_silently_finalised(Sealed, lambda cls: list(cls(1).to_dict().items(multi=True)), [('x', 1)])
 
     def test_schema_final_alone_finalises_silently(self) -> None:
         """The schema-side baseline.
@@ -693,7 +693,7 @@ class DecoratorCombinationTests(unittest.TestCase):
         self.assertEqual([str(record.message) for record in caught], [])
         for cls in (BottomUp, TopDown):
             with self.subTest(cls=cls.__name__):
-                self.assert_silently_finalised(cls, lambda c: c(1).to_dict(), {'x': 1})
+                self.assert_silently_finalised(cls, lambda c: list(c(1).to_dict().items(multi=True)), [('x', 1)])
 
     def test_schema_final_and_final_agree_in_either_order(self) -> None:
         """The schema-side half, where the old failure was *silent*.

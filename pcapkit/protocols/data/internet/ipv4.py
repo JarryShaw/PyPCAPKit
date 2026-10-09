@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from pcapkit.const.ipv4.tos_thr import ToSThroughput
     from pcapkit.const.ipv4.ts_flag import TSFlag
     from pcapkit.const.reg.transtype import TransType
+    from pcapkit.corekit.infoclass import OrderedMultiInfo
     from pcapkit.corekit.multidict import OrderedMultiDict
 
 __all__ = [
@@ -121,7 +122,7 @@ class IPv4(Protocol):
 
     if TYPE_CHECKING:
         #: Options, present only when the header carries any.
-        options: 'OrderedMultiDict[OptionNumber, Option]'
+        options: 'OrderedMultiInfo[OptionNumber, Option]'
         #: Octets after the End of Option List, present along with ``options``.
         padding: 'bytes'
         #: Octets captured past the Total Length, present only when there are any.
@@ -231,7 +232,7 @@ class TSOption(Option):
     #: Flag.
     flag: 'TSFlag'
     #: Timestamp data, i.e. the slots before the pointer.
-    timestamp: 'tuple[timedelta | int, ...] | OrderedMultiDict[IPv4Address, timedelta | int]'
+    timestamp: 'tuple[timedelta | int, ...] | OrderedMultiInfo[IPv4Address, timedelta | int]'
     #: Slots at or beyond the pointer, as raw 32-bit words.
     remaining: 'tuple[int, ...]'
     #: Trailing octets that do not make up a whole 32-bit slot.

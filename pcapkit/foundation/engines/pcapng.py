@@ -350,9 +350,9 @@ class PCAPNG(EngineBase[P_PCAPNG]):
 
         if ext._flag_f:
             ofile = ext._ofile(f'{ext._ofnm}/{name}.{ext._fext}')
-            ofile(block.to_dict(), name=name)
+            ofile(block, name=name)
         else:
-            ext._ofile(block.to_dict(), name=name)
+            ext._ofile(block, name=name)
             ofile = ext._ofile
         ext._offmt = ofile.kind
 

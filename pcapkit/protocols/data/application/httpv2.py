@@ -3,8 +3,7 @@
 
 from typing import TYPE_CHECKING
 
-from pcapkit.corekit.infoclass import info_final
-from pcapkit.corekit.multidict import OrderedMultiDict
+from pcapkit.corekit.infoclass import OrderedMultiInfo, info_final
 from pcapkit.protocols.data.data import Data
 from pcapkit.protocols.data.protocol import Protocol
 
@@ -166,27 +165,32 @@ class RSTStreamFrame(HTTP):
         def __init__(self, length: 'int', type: 'Frame', flags: 'Flags', reserved: 'int', sid: 'int', error: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
-class Settings(OrderedMultiDict['Setting', int]):
+class Settings(OrderedMultiInfo['Setting', int]):
     """Settings of an HTTP/2 ``SETTINGS`` frame.
 
     An identifier may repeat, and the values apply in order, so the last one
     wins (:rfc:`9113#section-6.5`). Every entry is kept in wire order, as
     :meth:`getlist` and ``items(multi=True)`` show and the rebuild writes, but
-    indexing, :meth:`get`, :meth:`values`, ``items()`` and :meth:`to_dict`
+    indexing, :meth:`get`, :meth:`values`, ``items()`` and ``to_dict(flat=True)``
     answer with the *last* value of each identifier rather than the first.
+
+    It is immutable, as an
+    :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` is, so it is built
+    from the ``(identifier, value)`` pairs in one go, and ``to_dict()`` exports
+    every pair as a plain :class:`~pcapkit.corekit.multidict.OrderedMultiDict`.
 
     """
 
-    def __getitem__(self, key: 'Setting') -> 'int':
+    def __getitem__(self, key: 'Setting') -> 'int':  # type: ignore[override]
         if key in self:
             return self.getlist(key)[-1]
-        return super().__getitem__(key)
+        return super().__getitem__(key)  # pylint: disable=no-value-for-parameter
 
     def items(self, multi: 'bool' = False) -> 'Iterator[tuple[Setting, int]]':  # type: ignore[override]
         if multi:
-            yield from super().items(multi=True)
+            yield from super().items(multi=True)  # pylint: disable=no-value-for-parameter
             return
-        for key, _ in super().items():
+        for key, _ in super().items():  # pylint: disable=no-value-for-parameter
             yield key, self[key]
 
 

@@ -133,7 +133,7 @@ class PCAP(EngineBase[Frame]):
             ofile = ext._ofile
         # NOTE: a PCAP writer has already written the global header on creation.
         if ofile.kind != 'pcap':
-            ofile(self._gbhdr.info.to_dict(), name='Global Header')
+            ofile(self._gbhdr.info, name='Global Header')
         ext._offmt = ofile.kind
 
     def read_frame(self) -> 'Frame':
@@ -168,9 +168,11 @@ class PCAP(EngineBase[Frame]):
         # write plist
         frnum = f'Frame {ext._frnum}'
         if not ext._flag_q:
-            # NOTE: a PCAP writer takes the frame itself, for its octets and
-            # record header; the other writers take its fields.
-            info = frame.info if ext._offmt == 'pcap' else frame.info.to_dict()
+            # NOTE: every writer takes the frame's info: a PCAP writer for its
+            # octets and record header, the others for its fields, which only
+            # the info itself tells apart from the option lists it holds
+            # (GitHub issue #1484).
+            info = frame.info
             if ext._flag_f:
                 ofile = ext._ofile(f'{ext._ofnm}/{frnum}.{ext._fext}')
                 ofile(info, name=frnum)

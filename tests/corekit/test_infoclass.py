@@ -43,7 +43,7 @@ class InfoClassTests(unittest.TestCase):
             name: str
 
         named = NamedPoint(3, 'three')
-        self.assertEqual(named.to_dict(), {'x': 3, 'name': 'three'})
+        self.assertEqual(list(named.to_dict().items(multi=True)), [('x', 3), ('name', 'three')])
 
         version = VersionInfo(1, 2)
         self.assertEqual(version.version, '1.2')
@@ -65,7 +65,7 @@ class InfoClassTests(unittest.TestCase):
         self.assertEqual(len(bag), 3)
         self.assertEqual(str(bag), 'Bag(items=conflict, visible=1, extra=3)')
         self.assertIn('items=', repr(bag))
-        self.assertEqual(bag.to_dict(), {'items': 'conflict', 'visible': 1, 'extra': 3})
+        self.assertEqual(list(bag.to_dict().items(multi=True)), [('items', 'conflict'), ('visible', 1), ('extra', 3)])
 
         with self.assertRaises(UnsupportedCall):
             bag.visible = 9
@@ -94,13 +94,13 @@ class InfoClassTests(unittest.TestCase):
         self.assertEqual(outer['inner'], inner)
         self.assertIn('inner=Info(...)', repr(outer))
         converted = outer.to_dict()
-        self.assertEqual(converted['inner'], {'answer': 42})
+        self.assertEqual(list(converted['inner'].items(multi=True)), [('answer', 42)])
         self.assertEqual(converted['kept'], 'yes')
         self.assertNotIn('base_hidden', converted)
         self.assertNotIn('child_hidden', converted)
 
-        self.assertEqual(Info.from_dict({'a': 1}, b=2).to_dict(), {'a': 1, 'b': 2})
-        self.assertEqual(Info.from_dict(c=3).to_dict(), {'c': 3})
+        self.assertEqual(Info.from_dict({'a': 1}, b=2).to_dict().to_dict(), {'a': 1, 'b': 2})
+        self.assertEqual(Info.from_dict(c=3).to_dict().to_dict(), {'c': 3})
 
 
 if __name__ == '__main__':

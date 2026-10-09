@@ -120,7 +120,9 @@ class TestHTTP2RoundTrip(unittest.TestCase):
         self.assertEqual(settings[Setting.HEADER_TABLE_SIZE], 3)
         self.assertEqual(settings.get(Setting.HEADER_TABLE_SIZE), 3)
         self.assertEqual(dict(settings), {Setting.HEADER_TABLE_SIZE: 3, Setting.ENABLE_PUSH: 0})
-        self.assertEqual(settings.to_dict(), {Setting.HEADER_TABLE_SIZE: 3, Setting.ENABLE_PUSH: 0})
+        self.assertEqual(settings.to_dict(flat=True), {Setting.HEADER_TABLE_SIZE: 3, Setting.ENABLE_PUSH: 0})
+        # The Info export keeps every entry, in wire order (#1484).
+        self.assertEqual(list(settings.to_dict().items(multi=True)), list(settings.items(multi=True)))
         self.assertEqual(settings.getlist(Setting.HEADER_TABLE_SIZE), [1, 3])
         self.assertEqual(bytes(HTTP.from_data(info)).hex(), wire.hex())
 

@@ -120,7 +120,9 @@ class TestInfoFromDictRoundTrip(unittest.TestCase):
         self.assertIsInstance(rebuilt.inner, In)
         self.assertIsInstance(rebuilt.maybe, In)
         self.assertEqual((rebuilt.inner.x, rebuilt.maybe.x, rebuilt.y), (1, 2, 3))
-        self.assertEqual(rebuilt.to_dict(), info.to_dict())
+        # NOTE: the pairs rather than the two exports: an OrderedMultiDict compares
+        # its values with ``!=``, which for a nested one compares its buckets.
+        self.assertEqual(list(rebuilt.to_dict().items(multi=True)), list(info.to_dict().items(multi=True)))
 
     def test_string_annotation_in_a_data_module_is_resolved(self) -> None:
         from pcapkit.protocols.data.application.httpv2 import DataFrame, DataFrameFlags

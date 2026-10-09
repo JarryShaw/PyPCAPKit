@@ -71,12 +71,15 @@ class TestOSPFAuthDictRoundTrip(unittest.TestCase):
                 self.assertEqual(OSPF.from_data(parsed.info).data, raw)
 
     def test_to_dict_flattens_cryptographic_authentication(self) -> None:
-        # The premise of the fix: the dict form really does carry a plain dict.
+        # The premise of the fix: the dict form really does carry a plain
+        # mapping -- the OrderedMultiDict ``to_dict()`` writes (#1484).
+        from pcapkit.corekit.multidict import OrderedMultiDict
         from pcapkit.protocols.application.ospf import OSPF
 
         raw = PACKETS['autype-2-nonzero-reserved']
         auth = OSPF(raw, len(raw)).info.to_dict()['auth']
-        self.assertEqual(auth, {'reserved': b'\xbe\xef', 'key_id': 255, 'len': 16, 'seq': 0xffffffff})
+        self.assertIsInstance(auth, OrderedMultiDict)
+        self.assertEqual(auth.to_dict(), {'reserved': b'\xbe\xef', 'key_id': 255, 'len': 16, 'seq': 0xffffffff})
 
     def test_make_accepts_dict_auth_data(self) -> None:
         from pcapkit.protocols.application.ospf import OSPF

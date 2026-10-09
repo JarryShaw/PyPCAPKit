@@ -5,7 +5,10 @@ Info Class
 
 :mod:`pcapkit.corekit.infoclass` contains the :obj:`dict`-like class
 :class:`~pcapkit.corekit.infoclass.Info`, modelled on
-:func:`dataclasses.dataclass` (:pep:`557`).
+:func:`dataclasses.dataclass` (:pep:`557`), and the immutable multi-mapping
+classes :class:`~pcapkit.corekit.infoclass.MultiInfo` and
+:class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` that a finalised
+:class:`~pcapkit.corekit.infoclass.Info` holds its option lists in.
 
 .. autoclass:: pcapkit.corekit.infoclass.Info
    :members:
@@ -24,6 +27,14 @@ Info Class
 
 .. autodecorator:: pcapkit.corekit.infoclass.info_final
 
+.. autoclass:: pcapkit.corekit.infoclass.MultiInfo
+   :no-members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.corekit.infoclass.OrderedMultiInfo
+   :no-members:
+   :show-inheritance:
+
 Internal Definitions
 --------------------
 
@@ -31,8 +42,19 @@ Internal Definitions
    :no-members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.corekit.infoclass._MultiInfo
+   :no-members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.corekit.infoclass._OrderedMultiDict
+   :no-members:
+   :show-inheritance:
+
 Type Variables
 --------------
+
+.. data:: pcapkit.corekit.infoclass.KT
+   :type: typing.Any
 
 .. data:: pcapkit.corekit.infoclass.VT
    :type: typing.Any

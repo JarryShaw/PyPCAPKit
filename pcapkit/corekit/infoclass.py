@@ -5,13 +5,17 @@
 .. module:: pcapkit.corekit.infoclass
 
 :mod:`pcapkit.corekit.infoclass` contains :obj:`dict` like class
-:class:`~pcapkit.corekit.infoclass.Info` only, which is originally
+:class:`~pcapkit.corekit.infoclass.Info`, which is originally
 designed to work alike :func:`dataclasses.dataclass` as introduced
-in :pep:`557`.
+in :pep:`557`, and the immutable multi-mapping classes
+:class:`~pcapkit.corekit.infoclass.MultiInfo` and
+:class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` that a finalised
+:class:`~pcapkit.corekit.infoclass.Info` holds its option lists in.
 
 """
 import abc
 import collections.abc
+import contextlib
 import enum
 import itertools
 import sys
@@ -20,7 +24,7 @@ import typing
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from pcapkit.corekit.enum import EnumLookup
-from pcapkit.corekit.multidict import InfoDict, MultiDict
+from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict, iter_multi_items
 from pcapkit.utilities.compat import Mapping, final
 from pcapkit.utilities.exceptions import InfoError, UnsupportedCall, stacklevel
 from pcapkit.utilities.warnings import InfoWarning, warn
@@ -30,8 +34,9 @@ if TYPE_CHECKING:
 
     from typing_extensions import Self
 
-__all__ = ['Info', 'info_final']
+__all__ = ['Info', 'info_final', 'MultiInfo', 'OrderedMultiInfo']
 
+KT = TypeVar('KT')
 VT = TypeVar('VT')
 ST = TypeVar('ST', bound='Type[Info]')
 
@@ -147,8 +152,10 @@ def info_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
 
     # NOTE: We only generate ``__init__`` method for subclasses of the
     # ``Info`` class, rather than itself, plus that such class does not
-    # override the ``__init__`` method of the meta class.
-    if '__init__' not in cls.__dict__ and cls is not Info:
+    # override the ``__init__`` method of the meta class. A multi-mapping
+    # :class:`Info` (:class:`_MultiInfo`) declares no fields and keeps the
+    # mapping constructor it inherits (:issue:`1484`).
+    if '__init__' not in cls.__dict__ and cls is not Info and not issubclass(cls, _MultiInfo):
         args_ = []  # type: list[str]
         dict_ = []  # type: list[str]
 
@@ -462,6 +469,11 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
         # value and records the new one in :attr:`__multi__`. Anything else
         # replaces the values held.
 
+        # NOTE: A :class:`MultiDict` or :class:`OrderedMultiDict` held as a
+        # *value* -- the option lists the parsers build -- is stored as a
+        # :class:`MultiInfo` or :class:`OrderedMultiInfo`, so that a finalised
+        # instance holds no mutable mapping (:issue:`1484`).
+
         __name__ = type(self).__name__  # pylint: disable=redefined-builtin
 
         multi_iter = ()  # type: Iterable[tuple[str, Any]]
@@ -479,7 +491,7 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
             new_key = f'_{__name__}{key}' if key in self.__builtin__ else key
             if new_key in self.__dict__ and new_key not in self.__excluded__:
                 anchor = next(reversed(self.__dict__))
-                self.__multi__.setdefault(anchor, []).append((new_key, value))
+                self.__multi__.setdefault(anchor, []).append((new_key, _freeze(value)))
             else:
                 self.__update__({key: value})
 
@@ -508,7 +520,7 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
 
             # if isinstance(key, str):
             #     key = re.sub(r'\W', '_', key)
-            self.__dict__[key] = value
+            self.__dict__[key] = _freeze(value)
 
     __init__ = __update__
 
@@ -530,7 +542,9 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
                 continue
 
             out_key = self.__map_reverse__.get(key, key)
-            if isinstance(value, Info):
+            # NOTE: a multi-mapping :class:`Info`, i.e. an option list, is
+            # written out in full, as the multi-mapping it is.
+            if isinstance(value, Info) and not isinstance(value, _MultiInfo):
                 temp.append(f'{out_key}={type(value).__name__}(...)')
             else:
                 temp.append(f'{out_key}={value!r}')
@@ -601,6 +615,12 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
         such nested values. A key without such an annotation keeps the mapping
         as is -- see :meth:`to_dict`.
 
+        Every :class:`~pcapkit.corekit.multidict.MultiDict` or
+        :class:`~pcapkit.corekit.multidict.OrderedMultiDict` value is stored
+        as a :class:`MultiInfo` or :class:`OrderedMultiInfo` respectively, or
+        as the subclass of either that the key's annotation names, such as
+        :class:`~pcapkit.protocols.data.application.httpv2.Settings`.
+
         The rebuild is as unchecked as the rest of this method: a mapping whose
         keys are not the nested class's own is accepted and becomes an instance
         carrying those keys, exactly as a direct call to the nested class's own
@@ -616,25 +636,41 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
         self = cls.__new__(cls)
         self.__update__(dict_, **kwargs)
 
-        for (name, info_cls) in _nested_info_types(cls).items():
+        for (name, info_cls) in _nested_types(cls).items():
             key = self.__map__.get(name, name)
-            value = self.__dict__.get(key)
-            if isinstance(value, Mapping) and not isinstance(value, Info):
-                self.__dict__[key] = info_cls.from_dict(value)
+            if key in self.__dict__:
+                self.__dict__[key] = _rebuild(info_cls, self.__dict__[key])
             for values in self.__multi__.values():
                 for (index, (rkey, rvalue)) in enumerate(values):
-                    if rkey == key and isinstance(rvalue, Mapping) and not isinstance(rvalue, Info):
-                        values[index] = (rkey, info_cls.from_dict(rvalue))
+                    if rkey == key:
+                        values[index] = (rkey, _rebuild(info_cls, rvalue))
         return self
 
-    def to_dict(self) -> 'InfoDict[str, VT]':
+    def to_dict(self) -> 'OrderedMultiDict[str, VT]':
         """Convert :class:`Info` into :obj:`dict`.
 
-        The :obj:`dict` is an :class:`~pcapkit.corekit.multidict.InfoDict`. A key
-        held more than once -- as given by a
+        The :obj:`dict` is an
+        :class:`~pcapkit.corekit.multidict.OrderedMultiDict` of the fields, in
+        order -- a :class:`_OrderedMultiDict`, i.e. one whose ``!=`` is the
+        negation of its ``==``, so two equal exports compare ``!=``
+        :data:`False`. A key held more than once -- as given by a
         :class:`~pcapkit.corekit.multidict.MultiDict` to :meth:`from_dict`, e.g.
-        a repeated IPv6 extension header -- keeps every value for
-        ``items(multi=True)``, while the :obj:`dict` interface sees the first.
+        a repeated IPv6 extension header -- keeps every value, in place, for
+        ``items(multi=True)`` and :meth:`~pcapkit.corekit.multidict.MultiDict.getlist`,
+        while indexing sees the first. A nested :class:`Info` becomes its own
+        :meth:`to_dict`: an :class:`~pcapkit.corekit.multidict.OrderedMultiDict`
+        for a field model or an :class:`OrderedMultiInfo`, and a
+        :class:`~pcapkit.corekit.multidict.MultiDict` for a :class:`MultiInfo`;
+        the values those two hold are not converted.
+
+        Note:
+            ``dict(result)``, ``{**result}`` and :func:`json.dumps` see the
+            *first* value of each key only, and silently drop the rest of a
+            repeated key; read every value with ``items(multi=True)`` or
+            :meth:`~pcapkit.corekit.multidict.MultiDict.getlist`. The result
+            compares equal to another
+            :class:`~pcapkit.corekit.multidict.MultiDict` only, never to a
+            plain :obj:`dict`.
 
         Important:
             We only convert nested :class:`Info` objects into :obj:`dict` if
@@ -649,10 +685,12 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
             any other key -- every key of a bare :class:`Info`, and annotations
             naming a type imported only under :data:`~typing.TYPE_CHECKING` --
             the conversion is one-way, and the nested value comes back as the
-            :class:`~pcapkit.corekit.multidict.InfoDict` it was written as.
+            :class:`OrderedMultiInfo` that :meth:`from_dict` stores the
+            :class:`~pcapkit.corekit.multidict.OrderedMultiDict` it was
+            written as in.
 
         """
-        dict_ = InfoDict()  # type: InfoDict[str, Any]
+        dict_ = _OrderedMultiDict()  # type: OrderedMultiDict[str, Any]
         for (key, value) in self.__items_multi():
             out_key = self.__map_reverse__.get(key, key)
             if isinstance(value, Info):
@@ -672,8 +710,325 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
         return dict_
 
 
+def _ne(self: 'OrderedMultiDict[Any, Any]', other: 'object') -> 'bool':
+    """``self != other``, as the negation of ``self == other``.
+
+    The ``__ne__`` that :class:`_OrderedMultiDict` and :class:`OrderedMultiInfo`
+    add to Werkzeug's :class:`~pcapkit.corekit.multidict.OrderedMultiDict`. A
+    :data:`NotImplemented` from ``__eq__`` is passed on, so that Python asks
+    ``other`` in turn, exactly as it does for ``==``.
+
+    """
+    result = self.__eq__(other)
+    if result is NotImplemented:
+        return result
+    return not result
+
+
+class _OrderedMultiDict(OrderedMultiDict[KT, VT]):
+    """The :class:`~pcapkit.corekit.multidict.OrderedMultiDict` that :meth:`Info.to_dict` returns.
+
+    It adds one method, :meth:`__ne__` (:func:`_ne`). The
+    :mod:`~pcapkit.corekit.multidict` classes are Werkzeug's, kept verbatim,
+    and Werkzeug's :class:`~pcapkit.corekit.multidict.OrderedMultiDict`
+    defines ``__eq__`` but no ``__ne__``: ``!=`` falls back to :obj:`dict`'s,
+    which compares the internal buckets, so two equal exports compared
+    ``!=`` as well as ``==`` -- and, since ``__eq__`` compares the values with
+    ``!=``, two exports holding a nested export compared unequal
+    (:issue:`1484`). Its copies, deep copies and pickles stay of this class, as
+    Werkzeug's build them from ``type(self)``, and :meth:`__repr__` writes it as
+    the :class:`~pcapkit.corekit.multidict.OrderedMultiDict` it is.
+
+    """
+
+    __ne__ = _ne
+
+    def __repr__(self) -> 'str':
+        return f'{OrderedMultiDict.__name__}({list(self.items(multi=True))!r})'
+
+
+class _MultiInfo(Info[VT], Generic[KT, VT]):
+    """An :class:`Info` that holds its values as a multi-mapping.
+
+    The common base of :class:`MultiInfo` and :class:`OrderedMultiInfo`. Each
+    of those also derives from the :mod:`~pcapkit.corekit.multidict` class it
+    is named after, *after* :class:`Info`, so it is an :class:`Info` --
+    :func:`isinstance` holds, and it inherits :meth:`Info.__new__`'s
+    finalisation, :meth:`Info.from_dict`, :meth:`Info.__init_subclass__` and
+    :attr:`Info.__additional__`/:attr:`Info.__excluded__` -- while its values
+    live in the multi-mapping rather than in :attr:`~object.__dict__`.
+
+    That is the whole carve-out from :class:`Info`, and it is confined to this
+    class and the two below it:
+
+    * :meth:`__new__` gives the multi-mapping its empty storage, and
+      :meth:`__update__` *adds* every pair to it, so that the inherited
+      :meth:`Info.from_dict` builds one; :func:`info_final` generates no
+      ``__init__`` for such a class (it has no declared fields);
+    * :meth:`__setattr__` admits the multi-mapping's own bookkeeping, and
+      only while one of those two is writing;
+    * every mutator of the multi-mapping raises
+      :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`, as assignment to
+      an :class:`Info` does;
+    * :meth:`to_dict` exports the plain multi-mapping, so that
+      ``cls.from_dict(info.to_dict()) == info``;
+    * :class:`MultiInfo` and :class:`OrderedMultiInfo` bind the mapping
+      protocol back to their multi-mapping class, which :class:`Info` and
+      :class:`~collections.abc.Mapping` precede in the MRO.
+
+    A key also reads as an attribute, giving its first value: a :obj:`str` key
+    by its name, an :class:`~enum.Enum` key by its member name. A name the
+    class itself defines, such as ``items``, is a method and not a key.
+
+    """
+
+    def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'Self':  # pylint: disable=unused-argument
+        self = super().__new__(cls)
+        # NOTE: the multi-mapping class's own ``__init__``, which follows Info
+        # and Mapping in the MRO, gives the empty storage -- including
+        # OrderedMultiDict's bucket chain -- for ``__update__`` to add to.
+        with self.__writing():  # pylint: disable=protected-access
+            super(Info, self).__init__()  # pylint: disable=bad-super-call
+        return self
+
+    def __init__(self, mapping: 'Optional[Mapping[Any, Any] | Iterable[tuple[Any, Any]]]' = None) -> 'None':  # pylint: disable=line-too-long,super-init-not-called
+        self.__update__(mapping)
+        self.__post_init__()
+
+    def __update__(self, dict_: 'Optional[Mapping[Any, Any] | Iterable[tuple[Any, Any]]]' = None,
+                   **kwargs: 'Any') -> 'None':
+        # NOTE: every pair is *added*, as the multi-mapping's own constructor
+        # and ``update`` do: a mapping's list values count as one pair each,
+        # and a MultiDict gives every value of each key.
+        pairs = () if dict_ is None else iter_multi_items(dict_)  # type: Iterable[tuple[Any, Any]]
+        with self.__writing():
+            for (key, value) in itertools.chain(pairs, kwargs.items()):
+                super(Info, self).add(key, value)  # type: ignore[misc] # pylint: disable=bad-super-call,no-member
+
+    @contextlib.contextmanager
+    def __writing(self) -> 'Iterator[None]':
+        """Admit attribute writes, for the multi-mapping's own bookkeeping."""
+        object.__setattr__(self, '_MultiInfo__open', True)
+        try:
+            yield
+        finally:
+            object.__setattr__(self, '_MultiInfo__open', False)
+
+    def __getattr__(self, name: 'str') -> 'Any':
+        # NOTE: only reached for a name that is not a real attribute, so a key
+        # named like a method is read by indexing instead, as for :class:`Info`.
+        if not (name.startswith('__') and name.endswith('__')):
+            if dict.__contains__(self, name):
+                return self[name]
+            for key in dict.keys(self):  # type: ignore[arg-type,var-annotated]
+                if isinstance(key, enum.Enum) and key.name == name:
+                    return self[key]  # type: ignore[index]
+        raise UnsupportedCall(f'{type(self).__name__!r} object has no attribute {name!r}',
+                              quiet=True)
+
+    def __setattr__(self, name: 'str', value: 'Any') -> 'None':  # type: ignore[override]
+        if not self.__dict__.get('_MultiInfo__open'):
+            raise UnsupportedCall("can't set attribute")
+        object.__setattr__(self, name, value)
+
+    def _immutable(self, *args: 'Any', **kwargs: 'Any') -> 'NoReturn':
+        raise UnsupportedCall(f'{type(self).__name__!r} object is immutable')
+
+    __setitem__ = __delitem__ = __ior__ = _immutable
+    add = setlist = setdefault = setlistdefault = update = _immutable
+    pop = popitem = poplist = popitemlist = clear = _immutable
+    __setstate__ = _immutable
+
+
+class MultiInfo(_MultiInfo[KT, VT], MultiDict[KT, VT]):
+    """An immutable :class:`~pcapkit.corekit.multidict.MultiDict` that is an :class:`Info`.
+
+    It holds every value of a key, as a
+    :class:`~pcapkit.corekit.multidict.MultiDict` does, but refuses every
+    mutation, as :class:`Info` does, with
+    :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` (see
+    :class:`_MultiInfo` for how it is both).
+
+    A finalised :class:`Info` holds every
+    :class:`~pcapkit.corekit.multidict.MultiDict` value as one of these, and
+    :meth:`to_dict` -- its own and its holder's -- turns it back into a
+    :class:`~pcapkit.corekit.multidict.MultiDict`.
+
+    Args:
+        mapping: The initial value, as for
+            :class:`~pcapkit.corekit.multidict.MultiDict`.
+
+    """
+
+    # NOTE: :class:`Info` and :class:`~collections.abc.Mapping` precede
+    # MultiDict in the MRO, so the mapping protocol is bound back to MultiDict's
+    # own (``__len__``, ``__contains__`` and ``__str__`` are those of
+    # :obj:`dict` and :obj:`object`). ``__eq__`` and ``__ne__`` are defined
+    # below instead.
+    __getitem__ = MultiDict.__getitem__  # type: ignore[assignment]
+    __iter__ = MultiDict.__iter__  # type: ignore[assignment]
+    __len__ = MultiDict.__len__
+    __contains__ = MultiDict.__contains__
+    if hasattr(dict, '__reversed__'):  # pragma: no branch -- Python 3.8 and up
+        __reversed__ = MultiDict.__reversed__
+    __hash__ = None  # type: ignore[assignment]
+    __repr__ = MultiDict.__repr__
+    __str__ = MultiDict.__str__
+    __copy__ = MultiDict.__copy__  # type: ignore[assignment]
+    keys = MultiDict.keys
+    values = MultiDict.values
+    items = MultiDict.items  # type: ignore[assignment]
+    get = MultiDict.get
+
+    def __eq__(self, other: 'object') -> 'bool':
+        # NOTE: MultiDict's ``__eq__`` is :obj:`dict`'s, which compares the
+        # internal storage, so against an OrderedMultiDict -- whose values sit
+        # in buckets -- it answered False where the OrderedMultiDict, asked the
+        # other way round, answered True. The ordered side decides, as it does
+        # for a bare MultiDict, which Python asks it first for being its
+        # subclass (:issue:`1484`).
+        if isinstance(other, OrderedMultiDict):
+            return NotImplemented
+        return MultiDict.__eq__(self, other)
+
+    def __ne__(self, other: 'object') -> 'bool':
+        # NOTE: the inverse of :meth:`__eq__`, with the ordered side's
+        # ``__eq__`` asked directly rather than its ``__ne__``: Werkzeug's
+        # OrderedMultiDict has none, and dict's compares the internal storage.
+        if isinstance(other, OrderedMultiDict):
+            result = other.__eq__(self)
+        else:
+            result = MultiDict.__eq__(self, other)
+        if result is NotImplemented:
+            return result
+        return not result
+
+    def to_dict(self, flat: 'Optional[bool]' = None) -> 'Any':
+        """Return the contents as a plain mapping.
+
+        Args:
+            flat: If omitted, a plain :class:`~pcapkit.corekit.multidict.MultiDict`
+                of every value, as :meth:`Info.to_dict` writes this object.
+                Otherwise :meth:`MultiDict.to_dict
+                <pcapkit.corekit.multidict.MultiDict.to_dict>`'s :obj:`dict`, of
+                the first value of each key if :obj:`True`, or of the
+                :obj:`list` of them if :obj:`False`.
+
+        """
+        if flat is None:
+            return MultiDict(self)
+        return MultiDict.to_dict(self, flat)  # type: ignore[call-overload]
+
+    def listvalues(self) -> 'Iterator[list[VT]]':
+        """Return an iterator of the :obj:`list` of all values of each key.
+
+        Each :obj:`list` is a copy: :meth:`MultiDict.listvalues
+        <pcapkit.corekit.multidict.MultiDict.listvalues>` hands out the lists it
+        keeps the values in, through which they could be changed.
+
+        """
+        return (values for (_, values) in self.lists())
+
+    def __reduce_ex__(self, protocol: 'Any') -> 'tuple[type, tuple[list[tuple[KT, VT]]]]':
+        return type(self), (list(self.items(multi=True)),)
+
+
+class OrderedMultiInfo(_MultiInfo[KT, VT], OrderedMultiDict[KT, VT]):
+    """An immutable :class:`~pcapkit.corekit.multidict.OrderedMultiDict` that is an :class:`Info`.
+
+    As :class:`MultiInfo`, but keeping the order of every value across keys, as
+    an :class:`~pcapkit.corekit.multidict.OrderedMultiDict` does -- i.e. wire
+    order for an option list.
+
+    A finalised :class:`Info` holds every
+    :class:`~pcapkit.corekit.multidict.OrderedMultiDict` value as one of these,
+    and :meth:`to_dict` -- its own and its holder's -- turns it back into an
+    :class:`~pcapkit.corekit.multidict.OrderedMultiDict`.
+
+    Args:
+        mapping: The initial value, as for
+            :class:`~pcapkit.corekit.multidict.OrderedMultiDict`.
+
+    """
+
+    # NOTE: as for :class:`MultiInfo`, the mapping protocol is bound back to
+    # OrderedMultiDict's own. ``__ne__`` is not: OrderedMultiDict has none, and
+    # dict's compares the internal buckets, so two equal option lists compared
+    # ``!=`` as well as ``==``. It is :func:`_ne`, as for the exports
+    # (:issue:`1484`).
+    __getitem__ = OrderedMultiDict.__getitem__  # type: ignore[assignment]
+    __iter__ = OrderedMultiDict.__iter__  # type: ignore[assignment]
+    __len__ = OrderedMultiDict.__len__
+    __contains__ = OrderedMultiDict.__contains__
+    if hasattr(dict, '__reversed__'):  # pragma: no branch -- Python 3.8 and up
+        __reversed__ = OrderedMultiDict.__reversed__
+    __eq__ = OrderedMultiDict.__eq__
+    __ne__ = _ne
+    __hash__ = None
+    __repr__ = OrderedMultiDict.__repr__
+    __str__ = OrderedMultiDict.__str__
+    __copy__ = OrderedMultiDict.__copy__  # type: ignore[assignment]
+    keys = OrderedMultiDict.keys
+    values = OrderedMultiDict.values
+    items = OrderedMultiDict.items  # type: ignore[assignment]
+    get = OrderedMultiDict.get  # type: ignore[assignment]
+
+    def to_dict(self, flat: 'Optional[bool]' = None) -> 'Any':
+        """Return the contents as a plain mapping.
+
+        Args:
+            flat: If omitted, a plain
+                :class:`~pcapkit.corekit.multidict.OrderedMultiDict` of every
+                value, in order, as :meth:`Info.to_dict` writes this object --
+                the same :class:`_OrderedMultiDict` it returns.
+                Otherwise :meth:`MultiDict.to_dict
+                <pcapkit.corekit.multidict.MultiDict.to_dict>`'s :obj:`dict`, of
+                the first value of each key if :obj:`True`, or of the
+                :obj:`list` of them if :obj:`False`.
+
+        """
+        if flat is None:
+            return _OrderedMultiDict(self)
+        return OrderedMultiDict.to_dict(self, flat)  # type: ignore[call-overload]
+
+
+def _freeze(value: 'Any') -> 'Any':
+    """Return ``value`` as stored in a finalised :class:`Info`.
+
+    A :class:`~pcapkit.corekit.multidict.OrderedMultiDict` becomes an
+    :class:`OrderedMultiInfo`, and any other
+    :class:`~pcapkit.corekit.multidict.MultiDict` a :class:`MultiInfo`. Either
+    already immutable, and every other value, is returned as it is.
+
+    """
+    if isinstance(value, _MultiInfo) or not isinstance(value, MultiDict):
+        return value
+    if isinstance(value, OrderedMultiDict):
+        return OrderedMultiInfo(value)
+    return MultiInfo(value)
+
+
+def _rebuild(info_cls: 'Type[Info]', value: 'Any') -> 'Any':
+    """Rebuild ``value`` into ``info_cls``, the class annotated for its key, unless it is one.
+
+    A multi-mapping counts as a plain mapping here, even as the
+    :class:`OrderedMultiInfo` that :meth:`Info.__update__` stored an exported
+    :class:`Info` as.
+
+    """
+    if issubclass(info_cls, _MultiInfo):
+        if isinstance(value, MultiDict) and type(value) is not info_cls:  # type: ignore[comparison-overlap,unreachable] # pylint: disable=unidiomatic-typecheck
+            return info_cls(value)
+    elif isinstance(value, Mapping) and (not isinstance(value, Info) or isinstance(value, _MultiInfo)):
+        return info_cls.from_dict(value)
+    return value
+
+
 #: Name of the per-class attribute :func:`_nested_info_types` caches its answer in.
 _NESTED_INFO_CACHE = '__nested_info_types__'
+
+#: Name of the per-class attribute :func:`_nested_types` caches its answer in.
+_NESTED_CACHE = '__nested_types__'
 
 #: :pep:`604` union type, i.e. the origin of ``int | None``. It is absent below
 #: Python 3.10, where only :data:`typing.Optional` spells a union, and is the
@@ -690,13 +1045,17 @@ def _as_info_type(hint: 'Any') -> 'Optional[Type[Info]]':
     :data:`~typing.Optional` of a single :class:`Info` subclass counts as that
     subclass. A parametrised generic such as ``list[Packet]`` does not: the
     value it describes is a container, and :meth:`Info.from_dict` has nothing
-    to rebuild it from.
+    to rebuild it from. A :class:`MultiInfo` or :class:`OrderedMultiInfo`
+    subclass is an :class:`Info` subclass too, so that :meth:`Info.from_dict`
+    restores e.g. :class:`~pcapkit.protocols.data.application.httpv2.Settings`
+    from the :class:`~pcapkit.corekit.multidict.OrderedMultiDict` that
+    :meth:`Info.to_dict` writes it as.
 
     Args:
         hint: Resolved type annotation.
 
     Returns:
-        The :class:`Info` subclass the annotation names, or :data:`None`.
+        The class the annotation names, or :data:`None`.
 
     Note:
         Both guards below are load-bearing on Python 3.9 and 3.10, where a
@@ -731,6 +1090,32 @@ def _as_info_type(hint: 'Any') -> 'Optional[Type[Info]]':
 def _nested_info_types(cls: 'Type[Info]') -> 'dict[str, Type[Info]]':
     """Map the keys of ``cls`` annotated with an :class:`Info` subclass to it.
 
+    It is :func:`_nested_types` less the multi-mapping classes
+    (:class:`_MultiInfo`), and cached alongside.
+
+    Args:
+        cls: Info class.
+
+    Returns:
+        Mapping of key names to the :class:`Info` subclass annotated for them.
+
+    """
+    cached = cls.__dict__.get(_NESTED_INFO_CACHE)
+    if cached is not None:
+        return cached
+
+    nested = {key: value for (key, value) in _nested_types(cls).items()
+              if not issubclass(value, _MultiInfo)}  # type: dict[str, Type[Info]]
+    setattr(cls, _NESTED_INFO_CACHE, nested)
+    return nested
+
+
+def _nested_types(cls: 'Type[Info]') -> 'dict[str, Type[Info]]':
+    """Map the keys of ``cls`` annotated with a class :meth:`Info.from_dict` rebuilds to it.
+
+    Such a class is an :class:`Info`, :class:`MultiInfo` or
+    :class:`OrderedMultiInfo` subclass, as :func:`_as_info_type` reads it.
+
     Each annotation is resolved on its own, in the namespace of the module and
     the class that declared it, so one that cannot be resolved at runtime (e.g.
     a name imported only under :data:`~typing.TYPE_CHECKING`) is skipped rather
@@ -740,7 +1125,7 @@ def _nested_info_types(cls: 'Type[Info]') -> 'dict[str, Type[Info]]':
         cls: Info class.
 
     Returns:
-        Mapping of key names to the :class:`Info` subclass annotated for them.
+        Mapping of key names to the class annotated for them.
 
     Note:
         The answer is cached in ``cls``'s own ``__dict__``, read back from
@@ -761,7 +1146,7 @@ def _nested_info_types(cls: 'Type[Info]') -> 'dict[str, Type[Info]]':
         not arise in this package costs far more than it saves.
 
     """
-    cached = cls.__dict__.get(_NESTED_INFO_CACHE)
+    cached = cls.__dict__.get(_NESTED_CACHE)
     if cached is not None:
         return cached
 
@@ -791,5 +1176,5 @@ def _nested_info_types(cls: 'Type[Info]') -> 'dict[str, Type[Info]]':
             if info_cls is not None:
                 nested[key] = info_cls
 
-    setattr(cls, _NESTED_INFO_CACHE, nested)
+    setattr(cls, _NESTED_CACHE, nested)
     return nested

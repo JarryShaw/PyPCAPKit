@@ -64,6 +64,7 @@ if TYPE_CHECKING:
     from pcapkit.const.mh.upn_reason import \
         UpdateNotificationReason as Enum_UpdateNotificationReason
     from pcapkit.const.reg.transtype import TransType
+    from pcapkit.corekit.infoclass import OrderedMultiInfo
     from pcapkit.corekit.multidict import OrderedMultiDict
     from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
                                                IPv6AddressPrefixCode, LMAAddressCode,
@@ -170,7 +171,7 @@ class BindingRefreshRequestMessage(MH):
     #: apart from :attr:`MH.reserved`, the reserved octet of the fixed header.
     msg_reserved: 'int'
     #: Mobility options.
-    options: 'OrderedMultiDict[Enum_Option, Option]'
+    options: 'OrderedMultiInfo[Enum_Option, Option]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
@@ -187,7 +188,7 @@ class HomeTestInitMessage(MH):
     #: Home init cookie.
     cookie: 'bytes'
     #: Mobility options.
-    options: 'OrderedMultiDict[Enum_Option, Option]'
+    options: 'OrderedMultiInfo[Enum_Option, Option]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
@@ -205,7 +206,7 @@ class CareofTestInitMessage(MH):
     #: Care-of init cookie.
     cookie: 'bytes'
     #: Mobility options.
-    options: 'OrderedMultiDict[Enum_Option, Option]'
+    options: 'OrderedMultiInfo[Enum_Option, Option]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
@@ -224,7 +225,7 @@ class HomeTestMessage(MH):
     #: Home keygen token.
     token: 'bytes'
     #: Mobility options.
-    options: 'OrderedMultiDict[Enum_Option, Option]'
+    options: 'OrderedMultiInfo[Enum_Option, Option]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
@@ -243,7 +244,7 @@ class CareofTestMessage(MH):
     #: Care-of keygen token.
     token: 'bytes'
     #: Mobility options.
-    options: 'OrderedMultiDict[Enum_Option, Option]'
+    options: 'OrderedMultiInfo[Enum_Option, Option]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
@@ -286,7 +287,7 @@ class BindingUpdateMessage(MH):
     #: Lifetime.
     lifetime: 'timedelta'
     #: Mobility options.
-    options: 'OrderedMultiDict[Enum_Option, Option]'
+    options: 'OrderedMultiInfo[Enum_Option, Option]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
@@ -324,7 +325,7 @@ class BindingAcknowledgementMessage(MH):
     #: Lifetime.
     lifetime: 'timedelta'
     #: Mobility options.
-    options: 'OrderedMultiDict[Enum_Option, Option]'
+    options: 'OrderedMultiInfo[Enum_Option, Option]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
@@ -346,7 +347,7 @@ class BindingErrorMessage(MH):
     #: Home address.
     home: 'IPv6Address'
     #: Mobility options.
-    options: 'OrderedMultiDict[Enum_Option, Option]'
+    options: 'OrderedMultiInfo[Enum_Option, Option]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
@@ -374,7 +375,7 @@ class FastBindingUpdateMessage(MH):
     #: the units of 4 seconds the binding messages use.
     lifetime: 'timedelta'
     #: Mobility options.
-    options: 'OrderedMultiDict[Enum_Option, Option]'
+    options: 'OrderedMultiInfo[Enum_Option, Option]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
@@ -403,7 +404,7 @@ class FastBindingAcknowledgmentMessage(MH):
     #: the units of 4 seconds the binding messages use.
     lifetime: 'timedelta'
     #: Mobility options.
-    options: 'OrderedMultiDict[Enum_Option, Option]'
+    options: 'OrderedMultiInfo[Enum_Option, Option]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
@@ -421,7 +422,7 @@ class FastNeighborAdvertisementMessage(MH):
     #: from :attr:`MH.reserved`, the reserved octet of the fixed header.
     msg_reserved: 'bytes'
     #: Mobility options.
-    options: 'OrderedMultiDict[Enum_Option, Option]'
+    options: 'OrderedMultiInfo[Enum_Option, Option]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
@@ -459,7 +460,7 @@ class HandoverInitiateMessage(MH):
     #: Code.
     code: 'Enum_HandoverInitiateStatus'
     #: Mobility options.
-    options: 'OrderedMultiDict[Enum_Option, Option]'
+    options: 'OrderedMultiInfo[Enum_Option, Option]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
@@ -486,7 +487,7 @@ class HandoverAcknowledgeMessage(MH):
     #: Code.
     code: 'Enum_HandoverACKStatus'
     #: Mobility options.
-    options: 'OrderedMultiDict[Enum_Option, Option]'
+    options: 'OrderedMultiInfo[Enum_Option, Option]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
@@ -509,7 +510,7 @@ class HeartbeatMessage(MH):
     #: Sequence number.
     seq: 'int'
     #: Mobility options.
-    options: 'OrderedMultiDict[Enum_Option, Option]'
+    options: 'OrderedMultiInfo[Enum_Option, Option]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
@@ -528,7 +529,7 @@ class HomeAgentSwitchMessage(MH):
     #: run home agent discovery instead.
     addresses: 'tuple[IPv6Address, ...]'
     #: Mobility options.
-    options: 'OrderedMultiDict[Enum_Option, Option]'
+    options: 'OrderedMultiInfo[Enum_Option, Option]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
@@ -563,7 +564,7 @@ class BindingRevocationMessage(MH):
     #: Reserved bits, i.e. the 13 bits after the ``G`` flag.
     flags_reserved: 'int'
     #: Mobility options.
-    options: 'OrderedMultiDict[Enum_Option, Option]'
+    options: 'OrderedMultiInfo[Enum_Option, Option]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
@@ -586,7 +587,7 @@ class LocalizedRoutingInitiationMessage(MH):
     #: the units of 4 seconds the binding messages use.
     lifetime: 'timedelta'
     #: Mobility options.
-    options: 'OrderedMultiDict[Enum_Option, Option]'
+    options: 'OrderedMultiInfo[Enum_Option, Option]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
@@ -612,7 +613,7 @@ class LocalizedRoutingAcknowledgmentMessage(MH):
     #: Lifetime, in seconds.
     lifetime: 'timedelta'
     #: Mobility options.
-    options: 'OrderedMultiDict[Enum_Option, Option]'
+    options: 'OrderedMultiInfo[Enum_Option, Option]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
@@ -636,7 +637,7 @@ class UpdateNotificationMessage(MH):
     #: Reserved bits, i.e. the 14 bits after the ``D`` flag.
     flags_reserved: 'int'
     #: Mobility options.
-    options: 'OrderedMultiDict[Enum_Option, Option]'
+    options: 'OrderedMultiInfo[Enum_Option, Option]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
@@ -657,7 +658,7 @@ class UpdateNotificationAcknowledgementMessage(MH):
     #: from :attr:`MH.reserved`, the reserved octet of the fixed header.
     msg_reserved: 'bytes'
     #: Mobility options.
-    options: 'OrderedMultiDict[Enum_Option, Option]'
+    options: 'OrderedMultiInfo[Enum_Option, Option]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
@@ -687,7 +688,7 @@ class FlowBindingMessage(MH):
     #: Reserved bits, i.e. the seven bits after the ``A`` flag.
     flags_reserved: 'int'
     #: Mobility options.
-    options: 'OrderedMultiDict[Enum_Option, Option]'
+    options: 'OrderedMultiInfo[Enum_Option, Option]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
@@ -707,7 +708,7 @@ class SubscriptionQueryMessage(MH):
     #: from :attr:`MH.reserved`, the reserved octet of the fixed header.
     msg_reserved: 'bytes'
     #: Mobility options.
-    options: 'OrderedMultiDict[Enum_Option, Option]'
+    options: 'OrderedMultiInfo[Enum_Option, Option]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
@@ -727,7 +728,7 @@ class SubscriptionResponseMessage(MH):
     #: Reserved bits, i.e. the seven bits after the ``I`` flag.
     flags_reserved: 'int'
     #: Mobility options.
-    options: 'OrderedMultiDict[Enum_Option, Option]'
+    options: 'OrderedMultiInfo[Enum_Option, Option]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', reserved: 'int', chksum: 'bytes',
@@ -958,7 +959,7 @@ class CGAParameter(Data):
     #: Public key (ASN.1 encoded).
     public_key: 'bytes'
     #: Extension fields.
-    extensions: 'OrderedMultiDict[Enum_CGAExtension, CGAExtension]'
+    extensions: 'OrderedMultiInfo[Enum_CGAExtension, CGAExtension]'
 
     if TYPE_CHECKING:
         def __init__(self, modifier: 'Enum_CGAType', prefix: 'int', collision_count: 'int', public_key: 'bytes',
@@ -1574,7 +1575,7 @@ class FlowIdentificationOption(Option):
     #: Status.
     status: 'Enum_FlowIDStatus'
     #: Sub-options.
-    suboptions: 'OrderedMultiDict[Enum_FlowIDSuboption, FlowIdentificationSuboption]'
+    suboptions: 'OrderedMultiInfo[Enum_FlowIDSuboption, FlowIdentificationSuboption]'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', fid: 'int', fid_pri: 'int',
@@ -1792,7 +1793,7 @@ class AccessNetworkIdentifierOption(Option):
     """Data model for MH Access Network Identifier option."""
 
     #: Sub-options.
-    suboptions: 'OrderedMultiDict[Enum_ANISuboption, ANISuboption]'
+    suboptions: 'OrderedMultiInfo[Enum_ANISuboption, ANISuboption]'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int',
@@ -1809,7 +1810,7 @@ class IPv4TrafficOffloadSelectorOption(Option):
     #: Reserved bits, i.e. the 31 bits after the ``M`` flag.
     reserved: 'int'
     #: Traffic selector sub-options.
-    selector: 'OrderedMultiDict[Enum_FlowIDSuboption, FlowIdentificationSuboption]'
+    selector: 'OrderedMultiInfo[Enum_FlowIDSuboption, FlowIdentificationSuboption]'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', mode: 'bool', reserved: 'int',
@@ -2006,7 +2007,7 @@ class QualityOfServiceOption(Option):
     #: The three reserved octets, as captured.
     reserved: 'bytes'
     #: Quality-of-service attributes.
-    attributes: 'OrderedMultiDict[Enum_QoSAttribute, QoSAttribute]'
+    attributes: 'OrderedMultiInfo[Enum_QoSAttribute, QoSAttribute]'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', sr_id: 'int', dscp: 'int',
@@ -2125,7 +2126,7 @@ class LMAControlledMAGParametersOption(Option):
     """Data model for MH LMA-Controlled MAG Parameters option."""
 
     #: Sub-options.
-    suboptions: 'OrderedMultiDict[Enum_LMAControlledMAGSuboption, LMAControlledMAGSuboption]'
+    suboptions: 'OrderedMultiInfo[Enum_LMAControlledMAGSuboption, LMAControlledMAGSuboption]'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int',

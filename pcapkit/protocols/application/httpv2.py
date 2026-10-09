@@ -807,12 +807,10 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         if flag.ACK and header.length != 0:
             raise ProtocolError(f'HTTP/2: [Type {header.type}] invalid format')
 
-        sets = Data_Settings()
-        # ``add`` rather than item assignment: an identifier may repeat, and
+        # NOTE: every pair rather than a mapping: an identifier may repeat, and
         # the values apply in order (:rfc:`9113#section-6.5.3`). ``Settings``
         # keeps every entry, and answers an index with the last value.
-        for setting in schema.settings:
-            sets.add(setting.id, setting.value)
+        sets = Data_Settings([(setting.id, setting.value) for setting in schema.settings])
 
         data = Data_SettingsFrame(
             length=header.length,

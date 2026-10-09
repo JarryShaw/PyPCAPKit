@@ -53,6 +53,7 @@ __all__ = [
     # pcapkit.corekit
     'EnumRegistry',                                         # Enum Registry
     'Info', 'info_final',                                   # Info Class
+    'MultiInfo', 'OrderedMultiInfo',
     'ProtoChain',                                           # ProtoChain
     'VersionInfo',                                          # Version
     'NumberField', 'Int32Field', 'UInt32Field',             # numeric protocol fields

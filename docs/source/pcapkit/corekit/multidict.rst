@@ -35,15 +35,6 @@ values per key, based on the `Werkzeug`_ project.
    :no-special-members: __init__
    :show-inheritance:
 
-.. autoclass:: pcapkit.corekit.multidict.InfoDict
-   :no-members:
-   :no-special-members: __init__
-   :show-inheritance:
-
-   .. automethod:: keys
-   .. automethod:: values
-   .. automethod:: items
-
 Type Variables
 --------------
 

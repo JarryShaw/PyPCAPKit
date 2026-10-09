@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from pcapkit.const.ipv6.smf_dpd_mode import SMFDPDMode
     from pcapkit.const.ipv6.tagger_id import TaggerID
     from pcapkit.const.reg.transtype import TransType
+    from pcapkit.corekit.infoclass import OrderedMultiInfo
     from pcapkit.corekit.multidict import OrderedMultiDict
 
 __all__ = [
@@ -59,7 +60,7 @@ class IPv6_Opts(Protocol):
     #: Header extension length.
     length: 'int'
     #: IPv6-Opts options.
-    options: 'OrderedMultiDict[Enum_Option, Option]'
+    options: 'OrderedMultiInfo[Enum_Option, Option]'
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int',
