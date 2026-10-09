@@ -188,7 +188,10 @@ def nested_length(base: 'int') -> 'Callable[[dict[str, Any]], int]':
       final parameter's padding out of the chunk length, so the padding has to
       be consumed whether or not the length accounts for it. Folding it into the
       list's span does that, and leaves it visible as the field's
-      ``__option_padding__``.
+      ``__option_padding__``. The last chunk of a packet may omit that padding
+      altogether, so the chunks wrap this callback in :func:`bounded`: the span
+      then ends with the data, and the final parameter or cause reads only the
+      padding that is there (:issue:`1479`).
     * On construction, a separate padding field could not compute its own size:
       :meth:`Schema.pack <pcapkit.protocols.schema.schema.Schema.pack>` passes
       one shared ``packet`` mapping down into the nested schemas, and each
@@ -709,7 +712,7 @@ class INITChunk(Chunk, code=Enum_Chunk.Initiation):
     #: Optional and variable-length parameters, including the chunk's own
     #: trailing padding; see :func:`nested_length`.
     parameters: 'list[Parameter]' = OptionField(
-        length=nested_length(20),
+        length=bounded(nested_length(20)),
         base_schema=Parameter,
         type_name='type',
         registry=Parameter.registry,
@@ -739,7 +742,7 @@ class INITACKChunk(Chunk, code=Enum_Chunk.Initiation_Acknowledgement):
     #: Optional and variable-length parameters, including the chunk's own
     #: trailing padding; see :func:`nested_length`.
     parameters: 'list[Parameter]' = OptionField(
-        length=nested_length(20),
+        length=bounded(nested_length(20)),
         base_schema=Parameter,
         type_name='type',
         registry=Parameter.registry,
@@ -794,7 +797,7 @@ class HeartbeatChunk(Chunk, code=Enum_Chunk.Heartbeat_Request):
     #: Heartbeat information parameters, including the chunk's own trailing
     #: padding; see :func:`nested_length`.
     parameters: 'list[Parameter]' = OptionField(
-        length=nested_length(4),
+        length=bounded(nested_length(4)),
         base_schema=Parameter,
         type_name='type',
         registry=Parameter.registry,
@@ -812,7 +815,7 @@ class HeartbeatACKChunk(Chunk, code=Enum_Chunk.Heartbeat_Acknowledgement):
     #: Heartbeat information parameters, including the chunk's own trailing
     #: padding; see :func:`nested_length`.
     parameters: 'list[Parameter]' = OptionField(
-        length=nested_length(4),
+        length=bounded(nested_length(4)),
         base_schema=Parameter,
         type_name='type',
         registry=Parameter.registry,
@@ -835,7 +838,7 @@ class AbortChunk(Chunk, code=Enum_Chunk.Abort):
     #: Zero or more error causes, including the chunk's own trailing padding;
     #: see :func:`nested_length`.
     error: 'list[ErrorCause]' = OptionField(
-        length=nested_length(4),
+        length=bounded(nested_length(4)),
         base_schema=ErrorCause,
         type_name='code',
         registry=ErrorCause.registry,
@@ -878,7 +881,7 @@ class ErrorChunk(Chunk, code=Enum_Chunk.Operation_Error):
     #: One or more error causes, including the chunk's own trailing padding;
     #: see :func:`nested_length`.
     error: 'list[ErrorCause]' = OptionField(
-        length=nested_length(4),
+        length=bounded(nested_length(4)),
         base_schema=ErrorCause,
         type_name='code',
         registry=ErrorCause.registry,
