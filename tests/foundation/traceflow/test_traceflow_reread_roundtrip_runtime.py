@@ -101,13 +101,7 @@ class TestTraceFlowRereadRuntime(harness.RoundTripBase):
     """Every sample capture's flows read back as exactly their frames."""
 
     STATUSES = ('ERROR', 'HEADER', 'COUNT', 'RECORD')
-    KNOWN_FAILURES = (
-        Gap(1500, 'a microsecond PCAP-NG interface traced to a nanosecond PCAP keeps its '
-               'microsecond fraction under the nanosecond magic: PCAPIO._append_value writes '
-               'frame_info.ts_usec unscaled (pcapkit/dumpkit/pcap.py:206-207) and tcp_traceflow '
-               "converts at the block's own resolution (pcapkit/foundation/engines/pcapng.py:304)",
-            'RECORD', 'timestamp ', ('many_interfaces.pcapng',)),
-    )
+    KNOWN_FAILURES = ()  # type: tuple[Gap, ...]
 
     def setUp(self) -> None:
         super().setUp()

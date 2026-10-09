@@ -9,6 +9,7 @@ specifically for PCAP format, which is alike those described in
 :mod:`dictdumper`.
 
 """
+import decimal
 import struct
 import sys
 from typing import TYPE_CHECKING
@@ -27,6 +28,7 @@ if TYPE_CHECKING:
     from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
     from pcapkit.corekit.version import VersionInfo
     from pcapkit.protocols.data.misc.pcap.frame import Frame as Data_Frame
+    from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
 
 __all__ = [
     'PCAPIO',
@@ -49,6 +51,28 @@ _RECORD_HEADER = {
 #: the two spellings writing the same octets for every input.
 _UINT32_MASK = 0xFFFF_FFFF
 
+#: Units per second of a record's ``ts_usec`` field, keyed by the global header's
+#: nanosecond flag.
+_RESOLUTION = {
+    False: 1_000_000,
+    True: 1_000_000_000,
+}
+
+
+def _truncates_to(scaled: 'int', den: 'int', fraction: 'int') -> 'bool':
+    """Whether ``fraction`` is ``scaled / den`` truncated to a whole unit.
+
+    Args:
+        scaled: numerator of a frame's offset into its second, in units
+        den: denominator of that offset
+        fraction: a record header's ``ts_usec`` field
+
+    Returns:
+        :data:`True` if ``fraction <= scaled / den < fraction + 1``.
+
+    """
+    return fraction * den <= scaled < (fraction + 1) * den
+
 
 class PCAPIO(DumperBase):
     """PCAP file dumper.
@@ -67,6 +91,10 @@ class PCAPIO(DumperBase):
         _ghdr: 'Data_Header'
         #: Record header packer, in the global header's byte order.
         _rechdr: 'struct.Struct'
+        #: Units per second of a record's fraction, in this file's resolution.
+        _tsres: 'int'
+        #: Units per second of a record's fraction, in the other resolution.
+        _tsalt: 'int'
 
     ##########################################################################
     # Properties.
@@ -168,6 +196,12 @@ class PCAPIO(DumperBase):
         #: validates and normalises it.
         self._rechdr = _RECORD_HEADER[self._ghdr.magic_number.byteorder]
 
+        #: int: Units per second of the fraction this file's records carry, and
+        #: of the one the other resolution would, taken from :attr:`self._ghdr
+        #: <_ghdr>` for the same reason as :attr:`self._rechdr <_rechdr>`.
+        self._tsres = _RESOLUTION[self._ghdr.magic_number.nanosecond]
+        self._tsalt = _RESOLUTION[not self._ghdr.magic_number.nanosecond]
+
     def _append_value(self, value: 'Data_Frame', file: 'IO[bytes]', name: 'str') -> 'None':  # pylint: disable=unused-argument
         """Call this function to write contents.
 
@@ -178,9 +212,11 @@ class PCAPIO(DumperBase):
 
         Notes:
             A PCAP record is a 16-octet header followed by the packet octets, and
-            both are already in hand: the header fields are exactly
-            ``value.frame_info`` and the octets are exactly ``value.packet``. So
-            this writes them directly, rather than handing them to
+            both are already in hand: the header fields are ``value.frame_info``,
+            with the fraction in this file's resolution (see
+            :meth:`self._make_timestamp <_make_timestamp>`), and the octets are
+            exactly ``value.packet``. So this writes them directly, rather than
+            handing them to
             :class:`~pcapkit.protocols.misc.pcap.frame.Frame`, whose constructor
             packs the record and then **dissects it again** through the whole
             protocol stack to arrive at bytes it was given. That round trip
@@ -202,9 +238,60 @@ class PCAPIO(DumperBase):
         # dict-capable trace format on the strength of that error.
         packet = value.packet
         frame_info = value.frame_info
+        ts_sec, ts_frac = self._make_timestamp(frame_info, value.time_epoch)
 
-        file.write(self._rechdr.pack(frame_info.ts_sec & _UINT32_MASK,
-                                     frame_info.ts_usec & _UINT32_MASK,
+        file.write(self._rechdr.pack(ts_sec & _UINT32_MASK,
+                                     ts_frac & _UINT32_MASK,
                                      frame_info.incl_len & _UINT32_MASK,
                                      frame_info.orig_len & _UINT32_MASK) + packet)
         self._fnum += 1
+
+    def _make_timestamp(self, frame_info: 'Data_FrameInfo',
+                        time_epoch: 'decimal.Decimal | float | int') -> 'tuple[int, int]':
+        """Record header seconds and fraction, in this file's resolution.
+
+        Args:
+            frame_info: the frame's record header fields
+            time_epoch: the frame's UNIX timestamp
+
+        Returns:
+            The ``ts_sec`` and ``ts_usec`` fields to write.
+
+        Notes:
+            ``frame_info`` does not say which resolution its ``ts_usec`` is in.
+            A PCAP frame carries its file's, and one converted from PCAP-NG
+            carries its interface's (c.f. :func:`~pcapkit.toolkit.pcapng.block2frame`),
+            either of which may differ from this file's (:issue:`1500`).
+            ``time_epoch`` settles it: the fraction is in whichever resolution
+            truncates the frame's offset into its second to exactly that value.
+
+            The fraction is written as is when that is this file's resolution,
+            so a record traced at its own resolution keeps its octets, and also
+            when neither resolution fits, as for a frame built by hand. When it
+            is the other resolution, the fraction is recomputed from
+            ``time_epoch`` at this file's -- microseconds times 1000, or
+            nanoseconds divided by 1000 and **truncated** rather than rounded.
+            That is how :func:`~pcapkit.toolkit.pcapng.block2frame` and
+            :meth:`Frame.make <pcapkit.protocols.misc.pcap.frame.Frame.make>`
+            reduce a timestamp to a fraction, and how libpcap scales a
+            nanosecond file down (``sf-pcap.c``). It also keeps the second:
+            999,999,999 ns truncates to 999,999 us, where rounding would reach
+            a whole second. A recomputed fraction of a second or more is carried
+            into ``ts_sec``, so that multiplying by 1000 cannot overflow the
+            field.
+
+        """
+        ts_sec = frame_info.ts_sec
+        ts_usec = frame_info.ts_usec
+
+        # NOTE: In integers rather than in :class:`decimal.Decimal`, whose
+        # context precision would round a long fraction, e.g. from an interface
+        # with a binary ``if_tsresol``.
+        num, den = decimal.Decimal(time_epoch).as_integer_ratio()
+        offset = num - ts_sec * den  # ``time_epoch - ts_sec``, over ``den``
+        if (_truncates_to(offset * self._tsres, den, ts_usec)
+                or not _truncates_to(offset * self._tsalt, den, ts_usec)):
+            return ts_sec, ts_usec
+
+        carry, ts_frac = divmod(offset * self._tsres // den, self._tsres)
+        return ts_sec + carry, ts_frac
