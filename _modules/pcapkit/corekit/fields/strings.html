@@ -761,7 +761,16 @@
 <span class="sd">        callback: Callback function to be called upon</span>
 <span class="sd">            :meth:`self.__call__ &lt;pcapkit.corekit.fields.field.FieldBase.__call__&gt;`.</span>
 
+<span class="sd">    Bits that no subfield names are kept as captured: where any of them is</span>
+<span class="sd">    set, the unpacked value carries them under an ``__unnamed__`` key, as an</span>
+<span class="sd">    integer over the whole field with every named bit cleared, and packing</span>
+<span class="sd">    writes them back (:issue:`1487`). The key is absent when they are all</span>
+<span class="sd">    zero, so a value built without it packs them as zeros.</span>
+
 <span class="sd">    """</span>
+
+    <span class="c1">#: Key of the unpacked value that carries the unnamed bits.</span>
+    <span class="n">UNNAMED</span> <span class="o">=</span> <span class="s1">'__unnamed__'</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                  <span class="n">default</span><span class="p">:</span> <span class="s1">'dict[str, Any] | NoValueType'</span> <span class="o">=</span> <span class="n">NO_VALUE</span><span class="p">,</span>
@@ -784,6 +793,11 @@
                     <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">start</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">start</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1"> of a </span><span class="si">{</span><span class="n">width</span><span class="si">}</span><span class="s1">-bit field'</span>
                 <span class="p">)</span>
 
+        <span class="c1">#: Mask of the bits no subfield names, most significant bit first.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_unnamed</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">width</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="n">size</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_namespace</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_unnamed</span> <span class="o">&amp;=</span> <span class="o">~</span><span class="p">(((</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">size</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">width</span> <span class="o">-</span> <span class="n">start</span> <span class="o">-</span> <span class="n">size</span><span class="p">))</span>
+
 <div class="viewcode-block" id="BitField.pre_process">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/strings.html#pcapkit.corekit.fields.strings.BitField.pre_process">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">pre_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
@@ -798,7 +812,8 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            FieldValueError: If a subfield value does not fit the bits it was</span>
-<span class="sd">                declared to occupy.</span>
+<span class="sd">                declared to occupy, or the ``__unnamed__`` value is not an</span>
+<span class="sd">                integer.</span>
 
 <span class="sd">        """</span>
         <span class="c1"># NOTE: The buffer holds one ASCII digit per bit, so it must be seeded with</span>
@@ -806,7 +821,15 @@
         <span class="c1"># is the *character* ``b'0'``, which is itself non-zero, so a truthiness test</span>
         <span class="c1"># over the buffer cannot tell a cleared bit from a set one and would report</span>
         <span class="c1"># every named bit as set.</span>
-        <span class="n">buffer</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="sa">b</span><span class="s1">'0'</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">*</span> <span class="mi">8</span><span class="p">))</span>
+        <span class="c1">#</span>
+        <span class="c1"># The unnamed bits seed it, so that they come back as captured; masking</span>
+        <span class="c1"># them keeps a stray named bit in the record from overriding a subfield.</span>
+        <span class="n">unnamed</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">UNNAMED</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">unnamed</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">unnamed</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">UNNAMED</span><span class="si">}</span><span class="s1"> must be an int, not </span><span class="si">{</span><span class="n">unnamed</span><span class="si">!r}</span><span class="s1">'</span>
+            <span class="p">)</span>
+        <span class="n">buffer</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">unnamed</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">_unnamed</span><span class="si">:</span><span class="s1">0</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">8</span><span class="si">}</span><span class="s1">b</span><span class="si">}</span><span class="s1">'</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_namespace</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">bits</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">value</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="si">:</span><span class="s1">0</span><span class="si">{</span><span class="n">size</span><span class="si">}</span><span class="s1">b</span><span class="si">}</span><span class="s1">'</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bits</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">size</span><span class="p">:</span>
@@ -836,6 +859,9 @@
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="nb">len</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_namespace</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">end</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="nb">len</span>
             <span class="n">buffer</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">binary</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">],</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">unnamed</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unnamed</span>
+        <span class="k">if</span> <span class="n">unnamed</span><span class="p">:</span>
+            <span class="n">buffer</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">UNNAMED</span><span class="p">]</span> <span class="o">=</span> <span class="n">unnamed</span>
         <span class="k">return</span> <span class="n">buffer</span></div>
 </div>
 

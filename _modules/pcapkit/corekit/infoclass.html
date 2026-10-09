@@ -865,19 +865,14 @@
 <span class="sd">                :func:`info_final`, i.e. it carries ``__final__`` in its own</span>
 <span class="sd">                ``__dict__`` without :attr:`FinalisedState.FINAL`.</span>
 
-<span class="sd">        Warning:</span>
-<span class="sd">            Out of scope, deliberately: a ``@final`` class descending from a</span>
-<span class="sd">            :attr:`FinalisedState.BASE` ancestor is not caught. ``__finalised__``</span>
-<span class="sd">            inherits, and a ``BASE`` ancestor means some earlier bare</span>
-<span class="sd">            construction already walked this branch for the chain -- so the</span>
-<span class="sd">            subclass's own ``cls.__finalised__`` reads ``BASE`` too, the branch</span>
-<span class="sd">            below is skipped entirely, and the marker on ``cls`` itself is never</span>
-<span class="sd">            inspected. Closing this means re-finalising every descendant of a</span>
-<span class="sd">            ``BASE`` class on each subclassing, which is the auto-finalisation</span>
-<span class="sd">            behaviour ``test_an_unfinalised_descendant_is_not_mistaken_for_a_</span>
-<span class="sd">            mismarked_class`` deliberately leaves alone. In the tree today no</span>
-<span class="sd">            ``BASE``-state class is ever marked ``@final`` by hand, so the escape</span>
-<span class="sd">            is theoretical rather than live.</span>
+<span class="sd">        Note:</span>
+<span class="sd">            Whether ``cls`` still needs finalising is read from its *own*</span>
+<span class="sd">            ``__dict__``, never inherited (GitHub issue :issue:`1490`). Each</span>
+<span class="sd">            class is finalised on its first construction, whatever its</span>
+<span class="sd">            ancestors' state, so a subclass of a :attr:`FinalisedState.BASE` or</span>
+<span class="sd">            :attr:`FinalisedState.FINAL` ancestor still gets its own</span>
+<span class="sd">            ``__builtin__``, ``__excluded__`` and generated ``__init__``, and a</span>
+<span class="sd">            ``@final`` class under a ``BASE`` ancestor is refused like any other.</span>
 
 <span class="sd">        """</span>
         <span class="c1"># NOTE: ``final`` is applied *after* the class object exists, so</span>
@@ -890,32 +885,26 @@
         <span class="c1"># ``TypeError: 'int' object is not iterable``, naming neither the class</span>
         <span class="c1"># nor the mistake.</span>
         <span class="c1">#</span>
-        <span class="c1"># It is nested inside the NONE branch rather than run ahead of it, and</span>
-        <span class="c1"># that placement is what makes it free on the hot path: a finalised class</span>
-        <span class="c1"># never enters the branch at all, so it never evaluates the nested</span>
-        <span class="c1"># ``cls.__dict__.get('__final__')`` either -- ``dis.dis(Info.__new__)``</span>
-        <span class="c1"># shows the ``FinalisedState.NONE`` comparison compiles to a single</span>
-        <span class="c1"># ``POP_JUMP_IF_FALSE`` that, for a ``FINAL`` class, jumps straight past</span>
-        <span class="c1"># this whole block to ``super().__new__``: zero of the added bytecode</span>
-        <span class="c1"># executes, which is a property of the compiled branch rather than of</span>
-        <span class="c1"># any particular timing run, and is the reason to trust here rather than</span>
-        <span class="c1"># a timer. The raise also leaves ``__finalised__`` at NONE, so a second</span>
-        <span class="c1"># attempt re-enters and fails again rather than the error firing once.</span>
+        <span class="c1"># It is nested inside the NONE branch rather than run ahead of it, so a</span>
+        <span class="c1"># finalised class never evaluates it: the outer test is false for it and</span>
+        <span class="c1"># jumps straight to ``super().__new__``. The raise also leaves</span>
+        <span class="c1"># ``__finalised__`` unset, so a second attempt re-enters and fails again</span>
+        <span class="c1"># rather than the error firing once.</span>
         <span class="c1">#</span>
-        <span class="c1"># ``cls.__dict__`` rather than ``getattr``: not because a class that</span>
-        <span class="c1"># inherits ``__final__`` from a *finalised* ancestor would be misread --</span>
-        <span class="c1"># such a class also inherits ``__finalised__ == FINAL``, so the outer</span>
-        <span class="c1"># ``if`` above already excludes it before this line is ever reached,</span>
-        <span class="c1"># regardless of which lookup is used here. The case ``getattr`` gets</span>
-        <span class="c1"># wrong is an ancestor hand-marked bare ``@final`` and *never finalised*:</span>
-        <span class="c1"># its own ``__finalised__`` stays ``NONE`` and so, inherited, does every</span>
-        <span class="c1"># subclass declared before the marker landed -- so such a subclass still</span>
-        <span class="c1"># reaches this line, and ``getattr`` would read the marker it merely</span>
-        <span class="c1"># inherits and blame it for a mismarking that is its ancestor's, not its</span>
-        <span class="c1"># own. ``OwnDictRuleTests.test_a_subclass_that_predates_an_unfinalised_</span>
-        <span class="c1"># ancestors_bare_final_is_not_blamed_for_it`` pins exactly this shape --</span>
-        <span class="c1"># mutating this line to ``getattr`` fails it.</span>
-        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__finalised__</span> <span class="o">==</span> <span class="n">FinalisedState</span><span class="o">.</span><span class="n">NONE</span><span class="p">:</span>
+        <span class="c1"># Both lookups read ``cls.__dict__`` rather than ``getattr``, because</span>
+        <span class="c1"># both markers are ordinary, inherited class attributes. The outer one:</span>
+        <span class="c1"># ``info_final`` writes ``BASE`` or ``FINAL`` onto the class it</span>
+        <span class="c1"># finalises, and a subclass reading that state through inheritance was</span>
+        <span class="c1"># never finalised itself -- it would keep the ``__excluded__`` it copied</span>
+        <span class="c1"># at declaration, without the names ``info_final`` adds, and leak</span>
+        <span class="c1"># ``__map__``, ``__map_reverse__`` and ``__multi__`` from ``to_dict()``</span>
+        <span class="c1"># (GitHub issue #1490). The inner one: an ancestor hand-marked bare</span>
+        <span class="c1"># ``@final`` passes its marker to every subclass declared before it</span>
+        <span class="c1"># landed, and ``getattr`` would blame such a subclass for a mismarking</span>
+        <span class="c1"># that is its ancestor's. ``OwnDictRuleTests.test_a_subclass_that_</span>
+        <span class="c1"># predates_an_unfinalised_ancestors_bare_final_is_not_blamed_for_it``</span>
+        <span class="c1"># pins that shape.</span>
+        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__finalised__'</span><span class="p">,</span> <span class="n">FinalisedState</span><span class="o">.</span><span class="n">NONE</span><span class="p">)</span> <span class="o">==</span> <span class="n">FinalisedState</span><span class="o">.</span><span class="n">NONE</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__final__'</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="n">InfoError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: marked final but never finalised, so it has no generated '</span>
                                 <span class="s1">'__init__; apply info_final, which applies final itself, not final alone'</span><span class="p">)</span>

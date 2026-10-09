@@ -691,6 +691,17 @@ and length of the subfield).</p></li>
 </ul>
 </dd>
 </dl>
+<p>Bits that no subfield names are kept as captured: where any of them is
+set, the unpacked value carries them under an <code class="docutils literal notranslate"><span class="pre">__unnamed__</span></code> key, as an
+integer over the whole field with every named bit cleared, and packing
+writes them back (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1487">#1487</a>). The key is absent when they are all
+zero, so a value built without it packs them as zeros.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.strings.BitField.UNNAMED">
+<span class="sig-name descname"><span class="pre">UNNAMED</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'__unnamed__'</span></span><a class="headerlink" href="#pcapkit.corekit.fields.strings.BitField.UNNAMED" title="Link to this definition">¶</a></dt>
+<dd><p>Key of the unpacked value that carries the unnamed bits.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.fields.strings.BitField.pre_process">
 <span class="sig-name descname"><span class="pre">pre_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/strings.html#BitField.pre_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.strings.BitField.pre_process" title="Link to this definition">¶</a></dt>
@@ -710,7 +721,8 @@ and length of the subfield).</p></li>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If a subfield value does not fit the bits it was
-    declared to occupy.</p>
+    declared to occupy, or the <code class="docutils literal notranslate"><span class="pre">__unnamed__</span></code> value is not an
+    integer.</p>
 </dd>
 </dl>
 </dd></dl>

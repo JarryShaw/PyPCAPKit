@@ -933,15 +933,15 @@
 <span class="sd">                ``__dict__`` without</span>
 <span class="sd">                :attr:`~pcapkit.corekit.infoclass.FinalisedState.FINAL`.</span>
 
-<span class="sd">        Warning:</span>
-<span class="sd">            Out of scope, deliberately -- see</span>
-<span class="sd">            :meth:`pcapkit.corekit.infoclass.Info.__new__`, which documents the</span>
-<span class="sd">            identical gap: a ``@final`` class descending from a</span>
+<span class="sd">        Note:</span>
+<span class="sd">            Whether ``cls`` still needs finalising is read from its *own*</span>
+<span class="sd">            ``__dict__``, never inherited (GitHub issue :issue:`1498`). Each</span>
+<span class="sd">            class is finalised on its first construction, whatever its</span>
+<span class="sd">            ancestors' state, so a subclass of a</span>
 <span class="sd">            :attr:`~pcapkit.corekit.infoclass.FinalisedState.BASE` ancestor</span>
-<span class="sd">            inherits ``BASE`` rather than ``NONE`` and so never reaches the</span>
-<span class="sd">            branch below at all, regardless of its own marker. No ``BASE``-state</span>
-<span class="sd">            schema in the tree is marked ``@final`` by hand, so the escape is</span>
-<span class="sd">            theoretical.</span>
+<span class="sd">            still gets its own ``__builtin__``, ``__excluded__`` and generated</span>
+<span class="sd">            ``__init__``, and a ``@final`` class under a ``BASE`` ancestor is</span>
+<span class="sd">            refused like any other.</span>
 
 <span class="sd">        """</span>
         <span class="c1"># NOTE: first instantiation is the earliest point a bare ``@final`` can</span>
@@ -949,10 +949,21 @@
         <span class="c1"># :meth:`__init_subclass__` has already returned. Nested inside the NONE</span>
         <span class="c1"># branch, which is already one-shot per class, so a finalised schema pays</span>
         <span class="c1"># nothing for it. See :meth:`pcapkit.corekit.infoclass.Info.__new__`,</span>
-        <span class="c1"># which carries the full reasoning and the measurement; on this side the</span>
-        <span class="c1"># missing generated ``__init__`` is the one built from</span>
-        <span class="c1"># :attr:`__fields__`.</span>
-        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__finalised__</span> <span class="o">==</span> <span class="n">FinalisedState</span><span class="o">.</span><span class="n">NONE</span><span class="p">:</span>
+        <span class="c1"># which carries the full reasoning; on this side the missing generated</span>
+        <span class="c1"># ``__init__`` is the one built from :attr:`__fields__`.</span>
+        <span class="c1">#</span>
+        <span class="c1"># Both lookups read ``cls.__dict__`` rather than ``getattr``, because</span>
+        <span class="c1"># both markers are ordinary, inherited class attributes. The outer one:</span>
+        <span class="c1"># :func:`schema_final` writes ``BASE`` onto the class it finalises, and a</span>
+        <span class="c1"># subclass reading that state through inheritance was never finalised</span>
+        <span class="c1"># itself -- it would keep the ``__excluded__`` it copied at declaration,</span>
+        <span class="c1"># without the names :func:`schema_final` adds, and leak ``__map__``,</span>
+        <span class="c1"># ``__map_reverse__``, ``__buffer__`` and ``__updated__`` from</span>
+        <span class="c1"># :meth:`to_dict` (GitHub issue #1498). The inner one: an ancestor</span>
+        <span class="c1"># hand-marked bare ``@final`` passes its marker to every subclass</span>
+        <span class="c1"># declared before it landed, and ``getattr`` would blame such a subclass</span>
+        <span class="c1"># for a mismarking that is its ancestor's.</span>
+        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__finalised__'</span><span class="p">,</span> <span class="n">FinalisedState</span><span class="o">.</span><span class="n">NONE</span><span class="p">)</span> <span class="o">==</span> <span class="n">FinalisedState</span><span class="o">.</span><span class="n">NONE</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__final__'</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="n">SchemaError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: marked final but never finalised, so it has no generated '</span>
                                   <span class="s1">'__init__; apply schema_final, which applies final itself, not final alone'</span><span class="p">)</span>

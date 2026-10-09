@@ -780,14 +780,14 @@ which is inspired by <span class="target" id="index-1"></span><a class="pep refe
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code></span>
-Out of scope, deliberately – see
-<a class="reference internal" href="../corekit/infoclass.html#pcapkit.corekit.infoclass.Info.__new__" title="pcapkit.corekit.infoclass.Info.__new__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.corekit.infoclass.Info.__new__()</span></code></a>, which documents the
-identical gap: a <code class="docutils literal notranslate"><span class="pre">&#64;final</span></code> class descending from a
+Whether <code class="docutils literal notranslate"><span class="pre">cls</span></code> still needs finalising is read from its <em>own</em>
+<code class="docutils literal notranslate"><span class="pre">__dict__</span></code>, never inherited (GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1498">#1498</a>). Each
+class is finalised on its first construction, whatever its
+ancestors’ state, so a subclass of a
 <code class="xref py py-attr docutils literal notranslate"><span class="pre">BASE</span></code> ancestor
-inherits <code class="docutils literal notranslate"><span class="pre">BASE</span></code> rather than <code class="docutils literal notranslate"><span class="pre">NONE</span></code> and so never reaches the
-branch below at all, regardless of its own marker. No <code class="docutils literal notranslate"><span class="pre">BASE</span></code>-state
-schema in the tree is marked <code class="docutils literal notranslate"><span class="pre">&#64;final</span></code> by hand, so the escape is
-theoretical.</p>
+still gets its own <code class="docutils literal notranslate"><span class="pre">__builtin__</span></code>, <code class="docutils literal notranslate"><span class="pre">__excluded__</span></code> and generated
+<code class="docutils literal notranslate"><span class="pre">__init__</span></code>, and a <code class="docutils literal notranslate"><span class="pre">&#64;final</span></code> class under a <code class="docutils literal notranslate"><span class="pre">BASE</span></code> ancestor is
+refused like any other.</p>
 </dd>
 </dl>
 </dd></dl>
