@@ -215,6 +215,24 @@ class RPL(RoutingType, code=Enum_Routing.RPL_Source_Route_Header):
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: pkt['pad']['pad_len'])
 
+    @classmethod
+    def pre_unpack(cls, packet: 'dict[str, Any]') -> 'None':
+        """Prepare ``packet`` data for unpacking process.
+
+        Args:
+            packet: packet data
+
+        """
+        # NOTE: The declared span -- ``4 + Hdr Ext Len * 8`` octets inside
+        # IPv6-Route -- is kept for :meth:`post_process`, which splits
+        # ``Addresses[1..n]`` by it. By then ``__length__`` has been counted
+        # down to zero, and the octets actually read are fewer than declared
+        # whenever the capture ends inside the address list. :meth:`pack` calls
+        # this too, before it has set ``__length__``; the packing path does not
+        # need the span, so nothing is kept there.
+        if '__length__' in packet:
+            packet['__rpl_length__'] = packet['__length__']
+
     def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
@@ -270,39 +288,43 @@ class RPL(RoutingType, code=Enum_Routing.RPL_Source_Route_Header):
 
         ilen = 16 - cmpr_i
         elen = 16 - cmpr_e
+
+        # NOTE: The address list is split by the span ``Hdr Ext Len`` declares,
+        # not by the octets actually read: once a capture ends inside the list
+        # the two differ, and splitting by the latter decodes the octets of
+        # ``Addresses[1]`` as ``Addresses[n]`` (or a short run as an IPv4
+        # address). The declared span is what :attr:`addresses`'s own
+        # ``length`` callback asked for -- ``pad_len`` already subtracted, the
+        # trailing padding octets being read by :attr:`padding` -- and a
+        # malformed one (no whole number of addresses) is rejected by
+        # :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_rpl`,
+        # so it is only clamped here.
+        declared = packet.get('__rpl_length__', len(buffer) + 4 + self.pad['pad_len'])
+        area = max(declared - 4 - self.pad['pad_len'], 0)
+        widths = [ilen] * (max(area - elen, 0) // ilen) + [elen]
+
+        # NOTE: Only an item read at its full width is decoded. One the capture
+        # cut short stays the raw :obj:`bytes` that were read -- not prefixed
+        # with ``dst``, so a rebuild writes back exactly those octets -- and
+        # one cut off entirely is not listed at all.
         addr = []  # type: list[IPv6Address | bytes]
         counter = 0
+        for index, width in enumerate(widths):
+            buf = buffer[counter:counter + width]
+            counter += width
+            if not buf:
+                break
+            if len(buf) < width:
+                addr.append(buf)
+                break
 
-        # Addresses[1..n-1]
-        #
-        # NOTE: ``buffer`` is ``self.addresses``, whose own ``length`` callback
-        # above already subtracted ``pad_len`` -- the trailing padding octets
-        # are read by :attr:`padding`, not by this field. Subtracting
-        # ``pad_len`` a *second* time here would drop one address for every
-        # ``ilen`` octets of padding, so a padded (i.e. compressed) header
-        # would parse one address short.
-        for _ in range((len(buffer) - elen) // ilen):
-            buf = buffer[counter:counter + ilen]
-            if dst is None:
-                if cmpr_i == 0:
-                    addr.append(cast('IPv6Address', ipaddress.ip_address(buf)))
-                else:
-                    addr.append(buf)
-            else:
-                buf = dst[:cmpr_i] + buf
-                addr.append(cast('IPv6Address', ipaddress.ip_address(buf)))
-            counter += ilen
-
-        # Addresses[n]
-        buf = buffer[counter:counter + elen]
-        if dst is None:
-            if cmpr_e == 0:
+            cmpr = cmpr_e if index == len(widths) - 1 else cmpr_i
+            if dst is not None:
+                addr.append(cast('IPv6Address', ipaddress.ip_address(dst[:cmpr] + buf)))
+            elif cmpr == 0:
                 addr.append(cast('IPv6Address', ipaddress.ip_address(buf)))
             else:
                 addr.append(buf)
-        else:
-            buf = dst[:cmpr_e] + buf
-            addr.append(cast('IPv6Address', ipaddress.ip_address(buf)))
 
         self.ip = addr
         return self
