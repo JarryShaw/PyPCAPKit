@@ -119,7 +119,7 @@ class PlistRoundTripTests(EndToEndTestCase):
     """
 
     @unittest.skip('blocked on dictdumper writing <date> values with fractional seconds, '
-                   'which plistlib rejects (dictdumper/plist.py:278)')
+                   'which plistlib rejects (dictdumper/plist.py:278, #1448)')
     def test_plist_report_round_trips_through_plistlib(self) -> None:
         """A ``plist`` report should be readable by :func:`plistlib.load`.
 
