@@ -19,6 +19,17 @@ cannot be used for it.
    instead of quietly returning :data:`None`, which would be indistinguishable
    from "this frame carries no IPv6 fragment".
 
+   For the same reason :func:`tcp_reassembly` and :func:`tcp_traceflow` see TCP
+   over IPv4 only, and decline a frame carrying TCP over IPv6. That loss is not
+   silent: it is reported with one
+   :exc:`~pcapkit.utilities.warnings.AttributeWarning` per capture, on its first
+   such frame, rather than one per frame.
+
+   That warning covers IPv6 straight over Ethernet only. `PyPCAPFile`_ decodes
+   no VLAN tag (802.1Q), no QinQ (802.1ad) and no tunnel (e.g. IPv6 in IPv4, or
+   GRE), so TCP inside any of them is left out without a warning, over IPv6 and
+   IPv4 alike.
+
    Note also that `PyPCAPFile`_ decoders *replace* the payload bytes of the layer
    they decode. :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile` therefore
    stops at the network layer, which keeps the transport segment verbatim so that
@@ -29,19 +40,25 @@ cannot be used for it.
 
 """
 import binascii
+import collections
+import ctypes
 import ipaddress
 import struct
 import sys
 import textwrap
 from typing import TYPE_CHECKING
 
+from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
+from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
-from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
+from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall, stacklevel
+from pcapkit.utilities.warnings import AttributeWarning, warn
 
 if TYPE_CHECKING:
+    from collections import OrderedDict
     from ipaddress import IPv4Address, IPv6Address
     from typing import Any, Optional
 
@@ -68,6 +85,32 @@ IPV4_FLAG_DF = 0b010
 
 #: IPv4 **MF** (more fragments) bit, within the three-bit flags field.
 IPV4_FLAG_MF = 0b001
+
+#: Length of the fixed IPv6 header, :rfc:`8200#section-3`.
+IPV6_HEADER_LEN = 40
+
+#: IPv6 extension headers that :func:`_ipv6_carries_tcp` steps over on its way
+#: to the upper-layer protocol, as the default engine does: the ones
+#: :rfc:`8200#section-4.1` orders before it, less ESP, whose payload is
+#: encrypted, plus the Mobility, HIP and Shim6 headers. Those three are sized in
+#: 8-octet units like most of the rest, and the default engine dissects whatever
+#: protocol their next header field names. The experimental 253 and 254 are left
+#: out, because the default engine dissects nothing after them.
+IPV6_EXTENSION_HEADERS = frozenset((
+    Enum_ExtensionHeader.HOPOPT, Enum_ExtensionHeader.IPv6_Opts, Enum_ExtensionHeader.IPv6_Route,
+    Enum_ExtensionHeader.IPv6_Frag, Enum_ExtensionHeader.AH, Enum_ExtensionHeader.Mobility_Header,
+    Enum_ExtensionHeader.HIP, Enum_ExtensionHeader.Shim6,
+))
+
+#: How many captures :func:`_decline_ipv6_tcp` remembers having warned about.
+#: Each one pins a packet of its own in memory (see :func:`_capture_of`), so the
+#: memory is bounded and the oldest is forgotten first. Up to this many captures
+#: read at the same time warn exactly once each.
+IPV6_TCP_WARNED_LIMIT = 32
+
+#: The captures :func:`_decline_ipv6_tcp` has warned about, oldest first. Each
+#: key :func:`_capture_of` gives maps to the anchor that keeps that key unique.
+_ipv6_tcp_warned = collections.OrderedDict()  # type: OrderedDict[int, Any]
 
 
 def packet2timestamp(packet: 'Packet') -> 'float':
@@ -282,6 +325,124 @@ def _network(packet: 'Packet') -> 'Optional[IP]':
     if type(payload).__name__ != 'IP':
         return None
     return payload
+
+
+def _ipv6_carries_tcp(packet: 'Packet') -> 'bool':
+    """Test if a PyPCAPFile frame is an IPv6 packet carrying TCP.
+
+    Args:
+        packet: PyPCAPFile packet.
+
+    Returns:
+        :data:`True` if the frame is IPv6 straight over Ethernet and its
+        upper-layer protocol is TCP, whether directly or behind the extension
+        headers in :data:`IPV6_EXTENSION_HEADERS`. A VLAN-tagged, QinQ or
+        tunnelled frame is not looked into, so it never counts.
+        A first fragment is read past its Fragment header as if that header
+        were not there. A later fragment never counts, since from its offset on
+        it carries a slice of the payload and no header (:rfc:`8200#section-4.5`).
+        An ESP payload cannot be seen into, so it does not count, and nor does a
+        truncated header chain or, as for IPv4 (see :func:`_transport`), a TCP
+        segment too short to hold a header.
+
+    Note:
+        `PyPCAPFile`_ leaves an IPv6 frame's payload undecoded and hex-encoded
+        (see :func:`_maybe_unhex`), so this reads the raw header chain. It
+        reads only as far as the upper-layer protocol number and decodes
+        nothing.
+
+        Each of these rules is the default engine's own, so that the warning
+        fires on the frames the default engine finds TCP in.
+
+    .. _PyPCAPFile: https://github.com/kisom/pypcapfile
+
+    """
+    link = packet.packet
+    if _is_raw(link) or getattr(link, 'type', None) != Enum_EtherType.Internet_Protocol_version_6:
+        return False
+
+    payload = getattr(link, 'payload', None)  # type: Any
+    if not _is_raw(payload):
+        return False
+
+    data = _maybe_unhex(bytes(payload))
+    if len(data) < IPV6_HEADER_LEN:
+        return False
+
+    nxt, offset = data[6], IPV6_HEADER_LEN
+    while nxt in IPV6_EXTENSION_HEADERS:
+        if len(data) < offset + 8:
+            return False
+        if nxt == Enum_ExtensionHeader.IPv6_Frag:  # fixed length, second octet reserved
+            if struct.unpack_from('!H', data, offset + 2)[0] >> 3:  # a later fragment
+                return False
+            length = 8
+        elif nxt == Enum_ExtensionHeader.AH:  # length in 4-octet units, less two
+            length = (data[offset + 1] + 2) * 4
+        else:  # length in 8-octet units, less one
+            length = (data[offset + 1] + 1) * 8
+        nxt, offset = data[offset], offset + length
+    return nxt == Enum_TransType.TCP and len(data) >= offset + TCP_MIN_HEADER_LEN
+
+
+def _capture_of(packet: 'Packet') -> 'tuple[int, Any]':
+    """Identify the capture a PyPCAPFile packet was read from.
+
+    Args:
+        packet: PyPCAPFile packet.
+
+    Returns:
+        A key, equal for every packet of one capture, and an anchor: while the
+        anchor is alive, no packet of another capture has the same key.
+
+    Note:
+        :attr:`pcap_packet.header <pcapfile.structs.pcap_packet.header>` is a
+        :mod:`ctypes` pointer to the savefile header. Each read of the field
+        builds a new pointer object, but every one of them points at the same
+        header, so the header's address is the key. The pointer object read
+        here is the anchor: it keeps its packet alive and, through that packet,
+        the header itself, so no other capture's header can be allocated at
+        that address while it is held. A header that is not a :mod:`ctypes`
+        pointer is keyed by its identity instead, and anchors itself.
+
+    """
+    anchor = packet.header
+    try:
+        return ctypes.addressof(anchor.contents), anchor
+    except (AttributeError, TypeError, ValueError):
+        return id(anchor), anchor
+
+
+def _decline_ipv6_tcp(packet: 'Packet', count: 'int') -> 'None':
+    """Warn that a frame carrying TCP over IPv6 is left out, once per capture.
+
+    Args:
+        packet: PyPCAPFile packet, which :func:`_network` found no IPv4 layer in.
+        count: Packet index.
+
+    Warns:
+        AttributeWarning: If ``packet`` carries TCP over IPv6 and is the first
+            such frame of its capture to reach :func:`tcp_reassembly` or
+            :func:`tcp_traceflow`. Later frames of the same capture are left out
+            without another warning, and every other capture warns once of its
+            own, however their frames interleave. Only the
+            :data:`IPV6_TCP_WARNED_LIMIT` captures warned about most recently
+            are remembered, so with more than that read at once a forgotten one
+            warns again: the warning can repeat, but is never omitted.
+
+    """
+    key, anchor = _capture_of(packet)
+    if key in _ipv6_tcp_warned:
+        return
+    if not _ipv6_carries_tcp(packet):
+        return
+
+    _ipv6_tcp_warned[key] = anchor
+    while len(_ipv6_tcp_warned) > IPV6_TCP_WARNED_LIMIT:
+        _ipv6_tcp_warned.popitem(last=False)
+    warn(f"Frame {count}: TCP over IPv6 is left out of TCP reassembly and flow tracing, as "
+         "'pypcapfile' has no IPv6 decoder; later such frames of this capture are left out "
+         'without another warning', AttributeWarning, stacklevel=stacklevel())
 
 
 def _transport(ipv4: 'IP') -> 'Optional[bytes]':
@@ -525,7 +686,8 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
         Data for TCP reassembly.
 
         * If the ``packet`` can be used for TCP reassembly. A packet can be reassembled
-          if it contains an IPv4 layer carrying a TCP segment.
+          if it contains an IPv4 layer carrying a TCP segment; TCP over IPv6 cannot
+          be, as `PyPCAPFile`_ has no IPv6 decoder.
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
           reassembly (:term:`reasm.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
@@ -533,12 +695,21 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
         ProtocolError: If ``ipv4.src`` or ``ipv4.dst`` cannot be parsed as an
             IPv4 address.
 
+    Warns:
+        AttributeWarning: If ``packet`` carries TCP over IPv6, which is left out,
+            and is the first such frame of its capture to reach either
+            :func:`tcp_reassembly` or :func:`tcp_traceflow`. The rest of that
+            capture's such frames are left out without another warning.
+
     See Also:
         :class:`pcapkit.foundation.reassembly.tcp.TCP`
+
+    .. _PyPCAPFile: https://github.com/kisom/pypcapfile
 
     """
     ipv4 = _network(packet)
     if ipv4 is None:
+        _decline_ipv6_tcp(packet, count)
         return None
 
     segment = _transport(ipv4)
@@ -588,7 +759,8 @@ def tcp_traceflow(packet: 'Packet', *, data_link: 'Enum_LinkType',
         Data for TCP flow tracing.
 
         * If the ``packet`` can be used for TCP flow tracing. A packet can be traced
-          if it contains an IPv4 layer carrying a TCP segment.
+          if it contains an IPv4 layer carrying a TCP segment; TCP over IPv6 cannot
+          be, as `PyPCAPFile`_ has no IPv6 decoder.
         * If the ``packet`` can be traced, then the :obj:`dict` mapping of data for TCP
           flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
@@ -596,12 +768,21 @@ def tcp_traceflow(packet: 'Packet', *, data_link: 'Enum_LinkType',
         ProtocolError: If ``ipv4.src`` or ``ipv4.dst`` cannot be parsed as an
             IPv4 address.
 
+    Warns:
+        AttributeWarning: If ``packet`` carries TCP over IPv6, which is left out,
+            and is the first such frame of its capture to reach either
+            :func:`tcp_reassembly` or :func:`tcp_traceflow`. The rest of that
+            capture's such frames are left out without another warning.
+
     See Also:
         :class:`pcapkit.foundation.traceflow.tcp.TCP`
+
+    .. _PyPCAPFile: https://github.com/kisom/pypcapfile
 
     """
     ipv4 = _network(packet)
     if ipv4 is None:
+        _decline_ipv6_tcp(packet, count)
         return None
 
     segment = _transport(ipv4)
