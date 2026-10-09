@@ -21,13 +21,14 @@ from typing import TYPE_CHECKING, Generic
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase
+from pcapkit.protocols.schema.schema import keep_short_read, replay_short_read
 from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
-    from typing import DefaultDict, Type
+    from typing import IO, Any, DefaultDict, Optional, Type
 
-    from typing_extensions import Literal
+    from typing_extensions import Literal, Self
 
 __all__ = ['Link']
 
@@ -153,6 +154,44 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
             warn(f'protocol {code} already registered, overwriting '
                  f'{incumbent!r} with {protocol!r}', RegistryWarning)
         cls.__proto__[code] = protocol
+
+    @classmethod
+    def from_data(cls, data: '_PT | dict[str, Any]', **kwargs: 'Any') -> 'Self':
+        """Create protocol instance from data.
+
+        Args:
+            data: Protocol data.
+            **kwargs: Construction keywords, as for :meth:`ProtocolBase.from_data
+                <pcapkit.protocols.protocol.ProtocolBase.from_data>`.
+
+        Returns:
+            Protocol instance, cut back to what was captured when the header
+            it was parsed from was cut short (:issue:`1458`).
+
+        """
+        return replay_short_read(super().from_data(data, **kwargs), data)
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    def __post_init__(self, file: 'Optional[IO[bytes] | bytes]' = None,
+                      length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
+        """Post initialisation hook.
+
+        Args:
+            file: Source packet stream.
+            length: Length of packet data.
+            **kwargs: Arbitrary keyword arguments.
+
+        Notes:
+            A header the data ends inside keeps that in its :attr:`info`, so
+            that :meth:`from_data` rebuilds only what was captured
+            (:issue:`1458`).
+
+        """
+        super().__post_init__(file, length, **kwargs)  # type: ignore[arg-type]
+        keep_short_read(self)
 
     ##########################################################################
     # Utilities.

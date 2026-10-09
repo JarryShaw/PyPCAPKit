@@ -16,12 +16,13 @@ from typing import TYPE_CHECKING, Generic, overload
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.misc.null import NoPayload
 from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase
+from pcapkit.protocols.schema.schema import keep_short_read, replay_short_read
 from pcapkit.utilities.exceptions import IntError, UnsupportedCall
 
 if TYPE_CHECKING:
     from typing import IO, Any, NoReturn, Optional
 
-    from typing_extensions import Literal
+    from typing_extensions import Literal, Self
 
 __all__ = ['Application']
 
@@ -82,6 +83,10 @@ class Application(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable
         # call super post-init
         super().__post_init__(file, length, **kwargs)  # type: ignore[arg-type]
 
+        # NOTE: A header the data ends inside keeps that in its ``info``, so
+        # that :meth:`from_data` rebuilds only what was captured (:issue:`1458`).
+        keep_short_read(self)
+
         # ``read`` may have dispatched the undissected remainder through
         # ``_decode_next_layer``, which already set the payload and the chain
         # (basis included); only a protocol that did not gets the empty default
@@ -100,6 +105,22 @@ class Application(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable
 
         """
         raise IntError(f'{cls.__name__!r} object cannot be interpreted as an integer')
+
+    @classmethod
+    def from_data(cls, data: '_PT | dict[str, Any]', **kwargs: 'Any') -> 'Self':
+        """Create protocol instance from data.
+
+        Args:
+            data: Protocol data.
+            **kwargs: Construction keywords, as for :meth:`ProtocolBase.from_data
+                <pcapkit.protocols.protocol.ProtocolBase.from_data>`.
+
+        Returns:
+            Protocol instance, cut back to what was captured when the header
+            it was parsed from was cut short (:issue:`1458`).
+
+        """
+        return replay_short_read(super().from_data(data, **kwargs), data)
 
     ##########################################################################
     # Utilities.
