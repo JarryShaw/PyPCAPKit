@@ -58,21 +58,10 @@ class Gap(NamedTuple):
     defect: 'str'
 
 
-_FRAG = Gap(
-    1446, 'TRUNCATED',
-    'An IPv6 extension header parsed with extension=True keeps the rest of the '
-    'datagram in .data, but its .info holds the header alone, so from_data '
-    'rebuilds 8 of 442 octets for ipv6.pcap frame 16. Repro: ex = '
-    'next(iter(frame[IPv6]._exthdr.values())); '
-    'type(ex).from_data(ex.info).data != ex.data. Any extension header followed '
-    'by upper-layer octets does the same (HOPOPT + UDP: 8 of 20).',
-)
-
 #: Every (capture, frame, layer path) whose object-form rebuild does not close.
-#: Frame numbers are one-based, as in the dumps.
-LAYER_GAPS = {
-    f'ipv6.pcap#{frame}:Frame/Ethernet/IPv6/IPv6_Frag': _FRAG for frame in (13, 14, 15, 16)
-}
+#: Frame numbers are one-based, as in the dumps. Empty since #1449 fixed the
+#: IPv6 extension-header rebuild (#1446).
+LAYER_GAPS: 'dict[str, Gap]' = {}
 
 _DICT_DROPS_PAYLOAD = (
     'from_data(info.to_dict()) rebuilds the header only: to_dict() leaves out the '
@@ -110,8 +99,6 @@ DICT_GAPS = {
         'HTTP._make_data does not accept. Repro: the first HTTP layer of '
         'http.pcap.',
     ),
-    # The object-form gap, which the dict form inherits unchanged.
-    'IPv6_Frag': DictGap(_FRAG.issue, _FRAG.status, 'always', _FRAG.defect),
 }
 
 
