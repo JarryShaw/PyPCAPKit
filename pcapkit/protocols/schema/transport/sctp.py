@@ -593,7 +593,8 @@ class CookiePreservativeParameter(Parameter, code=Enum_Parameter.Cookie_Preserva
 class HostNameAddressParameter(Parameter, code=Enum_Parameter.Host_Name_Address):
     """Header schema for SCTP host name address parameter."""
 
-    #: Host name, including at least one null terminator.
+    #: Host name as captured. :rfc:`9260#section-3.3.2.1.4` asks for at least one
+    #: null terminator, but a parsed name may lack it.
     name: 'bytes' = BytesField(length=lambda pkt: max(pkt['length'] - 4, 0))
     #: Padding.
     padding: 'bytes' = PaddingField(length=padding_length)
