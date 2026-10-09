@@ -845,12 +845,18 @@
 <span class="sd">            Key-value pairs for protocol construction.</span>
 
 <span class="sd">        """</span>
-        <span class="n">upper</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">exthdr</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__exthdr__'</span><span class="p">)</span>  <span class="c1"># type: Optional[tuple[tuple[Type[ProtocolBase], Any], ...]] # pylint: disable=line-too-long</span>
+        <span class="n">exclude</span> <span class="o">=</span> <span class="p">()</span>  <span class="c1"># type: tuple[str, ...]</span>
+        <span class="k">if</span> <span class="n">exthdr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># NOTE: ``data`` was rebuilt from :meth:`Info.to_dict`, which leaves</span>
+            <span class="c1"># ``__exthdr__`` out, so the chain is recovered from the keys the</span>
+            <span class="c1"># extension headers were written under; those are no payload.</span>
+            <span class="n">exclude</span><span class="p">,</span> <span class="n">exthdr</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_lookup_exthdr</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">upper</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="n">exclude</span><span class="p">)</span>
         <span class="n">payload</span> <span class="o">=</span> <span class="n">upper</span>  <span class="c1"># type: bytes | ProtocolBase</span>
 
         <span class="c1"># NOTE: The extension headers sit between this header and the upper</span>
         <span class="c1"># layer payload, so they are rebuilt in wire order ahead of it.</span>
-        <span class="n">exthdr</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__exthdr__'</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">exthdr</span><span class="p">:</span>
             <span class="n">payload</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">proto</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">info</span><span class="p">)</span><span class="o">.</span><span class="n">data</span> <span class="k">for</span> <span class="n">proto</span><span class="p">,</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">exthdr</span><span class="p">)</span> <span class="o">+</span> <span class="n">upper</span><span class="o">.</span><span class="n">data</span>
 
@@ -871,6 +877,49 @@
             <span class="s1">'trailer'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'trailer'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">),</span>
         <span class="p">}</span></div>
 
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_lookup_exthdr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Data_IPv6'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[tuple[str, ...], tuple[tuple[Type[ProtocolBase], Any], ...]]'</span><span class="p">:</span>  <span class="c1"># pylint: disable=line-too-long</span>
+<span class="w">        </span><span class="sd">"""Recover the extension header chain of ``data`` without ``__exthdr__``.</span>
+
+<span class="sd">        :meth:`_decode_next_layer` writes each extension header's info under a</span>
+<span class="sd">        key of its own, in wire order, ahead of the upper layer. Walking the</span>
+<span class="sd">        ``next`` field from :attr:`data.next &lt;Data_IPv6.next&gt;` names the parser</span>
+<span class="sd">        of each in turn, exactly as the walk that parsed them did.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: protocol data, without ``__exthdr__``</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The keys the extension headers are under, and the chain in the</span>
+<span class="sd">            shape of ``__exthdr__``, i.e. the parser class and info of each.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            A header repeated in the chain is written under the key of its</span>
+<span class="sd">            predecessor, so only the last of them is left in ``data``.</span>
+
+<span class="sd">        """</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
+        <span class="n">chain</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[tuple[Type[ProtocolBase], Any]]</span>
+        <span class="n">proto</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'next'</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_lookup_nested</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">ex_proto</span> <span class="o">=</span> <span class="n">Enum_ExtensionHeader</span><span class="p">(</span><span class="n">proto</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="c1"># NOTE: As in :meth:`_decode_next_layer`, a code with no parser</span>
+            <span class="c1"># carrying ``next`` ends the chain, and so does a fragment header.</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s1">'next'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="n">chain</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="bp">cls</span><span class="o">.</span><span class="n">_lookup_next_layer</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">ex_proto</span><span class="p">)),</span> <span class="n">info</span><span class="p">))</span>
+
+            <span class="n">proto</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">'next'</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">ex_proto</span> <span class="o">==</span> <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">IPv6_Frag</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">names</span><span class="p">),</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">chain</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_ip_hextet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[int, int, int]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Read the first four octets of IPv6.</span>

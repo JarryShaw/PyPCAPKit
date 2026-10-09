@@ -486,10 +486,11 @@
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">struct</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.protochain</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoChain</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.application</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Data</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.null</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span>
@@ -497,7 +498,7 @@
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Self</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'HTTP'</span><span class="p">]</span>
 
@@ -776,6 +777,33 @@
     <span class="c1">##########################################################################</span>
     <span class="c1"># Utilities.</span>
     <span class="c1">##########################################################################</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'_PT | dict[str, Any]'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Create protocol instance from data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Protocol data. A :obj:`dict`, as :meth:`Info.to_dict</span>
+<span class="sd">                &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;` returns it, is rebuilt</span>
+<span class="sd">                into the versioned data model its keys belong to -- ``receipt``</span>
+<span class="sd">                is HTTP/1.*'s and ``sid`` HTTP/2's -- since this class's own data</span>
+<span class="sd">                model carries no version.</span>
+<span class="sd">            **kwargs: As :meth:`ProtocolBase.from_data</span>
+<span class="sd">                &lt;pcapkit.protocols.protocol.ProtocolBase.from_data&gt;`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Protocol instance.</span>
+
+<span class="sd">        """</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv1</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">Data_HTTPv1</span>  <span class="c1"># isort: skip # pylint: disable=line-too-long,import-outside-toplevel</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">Data_HTTPv2</span>  <span class="c1"># isort: skip # pylint: disable=line-too-long,import-outside-toplevel</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Data</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__data__</span><span class="p">,</span> <span class="p">(</span><span class="n">Data_HTTPv1</span><span class="p">,</span> <span class="n">Data_HTTPv2</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="s1">'receipt'</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'_PT'</span><span class="p">,</span> <span class="n">Data_HTTPv1</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="s1">'sid'</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'_PT'</span><span class="p">,</span> <span class="n">Data_HTTPv2</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 <div class="viewcode-block" id="HTTP._make_data">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.HTTP._make_data">[docs]</a>

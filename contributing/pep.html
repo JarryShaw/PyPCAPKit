@@ -1025,15 +1025,19 @@ resolves paths from a repository root that an installed package does not have.
 Anyone wanting to run the tests wants the repository, which is where they are.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>One test is skipped on an upstream defect rather than a pcapkit one.
+<p><code class="docutils literal notranslate"><span class="pre">dictdumper</span></code>’s <code class="docutils literal notranslate"><span class="pre">PLIST</span></code> writer formats every <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a> as
+<code class="docutils literal notranslate"><span class="pre">'%Y-%m-%dT%H:%M:%S.%fZ'</span></code>, always with six fractional digits, and
+<a class="reference external" href="https://docs.python.org/3/library/plistlib.html#module-plistlib" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">plistlib</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">&lt;date&gt;</span></code> pattern admits none, so <a class="reference external" href="https://docs.python.org/3/library/plistlib.html#plistlib.load" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">plistlib.load()</span></code></a>
+failed on every <code class="docutils literal notranslate"><span class="pre">format='plist'</span></code> report with <code class="docutils literal notranslate"><span class="pre">AttributeError:</span> <span class="pre">'NoneType'</span>
+<span class="pre">object</span> <span class="pre">has</span> <span class="pre">no</span> <span class="pre">attribute</span> <span class="pre">'groupdict'</span></code>. The upstream defect is
+<a class="reference external" href="https://github.com/JarryShaw/DictDumper/issues/122">JarryShaw/DictDumper#122</a>.
+<a class="reference internal" href="../pcapkit/dumpkit/common.html#pcapkit.dumpkit.common.make_dumper" title="pcapkit.dumpkit.common.make_dumper"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.dumpkit.common.make_dumper()</span></code></a> works around it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1448">#1448</a>): it
+writes each date in UTC to whole seconds, as <a class="reference external" href="https://docs.python.org/3/library/plistlib.html#plistlib.dump" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">plistlib.dump()</span></code></a> does. The
+exact value stays in the sibling field every timestamp already has, such as
+<code class="docutils literal notranslate"><span class="pre">time_epoch</span></code>.
 <code class="docutils literal notranslate"><span class="pre">PlistRoundTripTests.test_plist_report_round_trips_through_plistlib</span></code>, in
-<code class="docutils literal notranslate"><span class="pre">tests/integration/test_output_formats.py</span></code>, reads a <code class="docutils literal notranslate"><span class="pre">format='plist'</span></code> report
-back with <a class="reference external" href="https://docs.python.org/3/library/plistlib.html#plistlib.load" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">plistlib.load()</span></code></a>, which fails with <code class="docutils literal notranslate"><span class="pre">AttributeError:</span> <span class="pre">'NoneType'</span>
-<span class="pre">object</span> <span class="pre">has</span> <span class="pre">no</span> <span class="pre">attribute</span> <span class="pre">'groupdict'</span></code>. <code class="docutils literal notranslate"><span class="pre">dictdumper</span></code>’s <code class="docutils literal notranslate"><span class="pre">PLIST</span></code> writer formats
-every <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a> as <code class="docutils literal notranslate"><span class="pre">'%Y-%m-%dT%H:%M:%S.%fZ'</span></code>, always with six
-fractional digits, and <a class="reference external" href="https://docs.python.org/3/library/plistlib.html#module-plistlib" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">plistlib</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">&lt;date&gt;</span></code> pattern admits none, so its
-match returns <code class="docutils literal notranslate"><span class="pre">None</span></code>. The fix belongs upstream, as <a class="reference external" href="https://github.com/JarryShaw/DictDumper/issues/122">JarryShaw/DictDumper#122</a>; the test asserts what a
-fixed writer should produce, so un-skipping it is the whole of pcapkit’s side.</p>
+<code class="docutils literal notranslate"><span class="pre">tests/integration/test_output_formats.py</span></code>, now runs rather than being
+skipped.</p>
 </div>
 </section>
 <section id="reassembly-beyond-ip-and-tcp">

@@ -819,6 +819,11 @@
     <span class="c1"># report has (GitHub issue #1257). The defect is :mod:`dictdumper`'s, so it</span>
     <span class="c1"># is worked around here.</span>
     <span class="n">keep_none</span> <span class="o">=</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">dictdumper</span><span class="o">.</span><span class="n">plist</span><span class="o">.</span><span class="n">PLIST</span><span class="p">)</span>
+    <span class="c1"># NOTE: :meth:`~dictdumper.plist.PLIST._append_date` writes every date with</span>
+    <span class="c1"># six fractional digits, which the property list ``&lt;date&gt;`` grammar does not</span>
+    <span class="c1"># admit, so :func:`plistlib.load` rejects every report (GitHub issue #1448).</span>
+    <span class="c1"># The defect is :mod:`dictdumper`'s, so it is worked around here.</span>
+    <span class="n">plist_dates</span> <span class="o">=</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">dictdumper</span><span class="o">.</span><span class="n">plist</span><span class="o">.</span><span class="n">PLIST</span><span class="p">)</span>
     <span class="c1"># NOTE: :meth:`~dictdumper.tree.Tree._append_number` hands every number to</span>
     <span class="c1"># :func:`math.isnan`, which raises :exc:`TypeError` for a :class:`complex`</span>
     <span class="c1"># one, although :class:`~dictdumper.tree.Tree` routes :class:`complex` there</span>
@@ -1007,6 +1012,41 @@
 <span class="sd">                """</span>
                 <span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_encode_value</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
                 <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_append_array</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">plist_dates</span><span class="p">:</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">_append_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'datetime.date'</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'TextIO'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">                </span><span class="sd">"""Call this function to write date contents.</span>
+
+<span class="sd">                Args:</span>
+<span class="sd">                    self: Dumper instance.</span>
+<span class="sd">                    value: Content to be dumped.</span>
+<span class="sd">                    file: Output file.</span>
+
+<span class="sd">                Notes:</span>
+<span class="sd">                    The date is written in UTC to whole seconds, as</span>
+<span class="sd">                    :func:`plistlib.dump` writes one: an aware value is</span>
+<span class="sd">                    converted to UTC first, a naive one is taken as UTC already,</span>
+<span class="sd">                    and the sub-second part of the :class:`~datetime.datetime`</span>
+<span class="sd">                    is truncated. That value is already rounded to the</span>
+<span class="sd">                    microsecond where it is parsed, so within half a microsecond</span>
+<span class="sd">                    of a second boundary the date is one second past the floor</span>
+<span class="sd">                    of a finer ``*_epoch``. The exact value is not</span>
+<span class="sd">                    lost: every timestamp pcapkit reports sits next to a field</span>
+<span class="sd">                    that carries it exactly -- a :class:`~decimal.Decimal`</span>
+<span class="sd">                    ``*_epoch`` for frames and PCAP-NG blocks and options, e.g.</span>
+<span class="sd">                    ``time_epoch``, and the raw ``ntp_timestamp`` or</span>
+<span class="sd">                    ``pmip_timestamp`` for the two MH options.</span>
+
+<span class="sd">                """</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="n">tzinfo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">astimezone</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+                <span class="c1"># NOTE: not :meth:`~datetime.date.strftime`, whose ``%Y`` does not</span>
+                <span class="c1"># zero-pad a year below 1000 on every platform.</span>
+                <span class="n">hour</span><span class="p">,</span> <span class="n">minute</span><span class="p">,</span> <span class="n">second</span> <span class="o">=</span> <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                                        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'hour'</span><span class="p">,</span> <span class="s1">'minute'</span><span class="p">,</span> <span class="s1">'second'</span><span class="p">))</span>
+                <span class="n">tabs</span> <span class="o">=</span> <span class="s1">'</span><span class="se">\t</span><span class="s1">'</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tctr</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">tabs</span><span class="si">}</span><span class="s1">&lt;date&gt;</span><span class="si">{</span><span class="n">value</span><span class="o">.</span><span class="n">year</span><span class="si">:</span><span class="s1">04d</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">value</span><span class="o">.</span><span class="n">month</span><span class="si">:</span><span class="s1">02d</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">value</span><span class="o">.</span><span class="n">day</span><span class="si">:</span><span class="s1">02d</span><span class="si">}</span><span class="s1">'</span>
+                           <span class="sa">f</span><span class="s1">'T</span><span class="si">{</span><span class="n">hour</span><span class="si">:</span><span class="s1">02d</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="n">minute</span><span class="si">:</span><span class="s1">02d</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="n">second</span><span class="si">:</span><span class="s1">02d</span><span class="si">}</span><span class="s1">Z&lt;/date&gt;</span><span class="se">\n</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">escape_json_keys</span><span class="p">:</span>
             <span class="k">def</span><span class="w"> </span><span class="nf">_append_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'TextIO'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>

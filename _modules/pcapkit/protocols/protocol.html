@@ -484,6 +484,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">abc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ast</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">collections.abc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">difflib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
@@ -2382,7 +2383,7 @@
         <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_payload</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Data'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ProtocolBase'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_payload</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Data'</span><span class="p">,</span> <span class="n">exclude</span><span class="p">:</span> <span class="s1">'tuple[str, ...]'</span> <span class="o">=</span> <span class="p">())</span> <span class="o">-&gt;</span> <span class="s1">'ProtocolBase'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Create payload from ``data`` for protocol construction.</span>
 
 <span class="sd">        This method uses ``__next_type__`` and ``__next_name__`` to</span>
@@ -2391,13 +2392,28 @@
 <span class="sd">        instance will be returned. Otherwise, the payload will be</span>
 <span class="sd">        constructed by :meth:`Protocol.from_data &lt;pcapkit.protocols.protocol.Protocol.from_data&gt;`.</span>
 
+<span class="sd">        :meth:`Info.to_dict &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;` leaves</span>
+<span class="sd">        both keys out, so ``data`` rebuilt from such a :obj:`dict` carries</span>
+<span class="sd">        neither. The payload is then found from the structure of ``data``</span>
+<span class="sd">        instead, by :meth:`_lookup_payload`.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            data: protocol data</span>
+<span class="sd">            exclude: keys of ``data`` that are not the payload, though they may</span>
+<span class="sd">                look like it, passed on to :meth:`_lookup_payload`</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Payload for protocol construction.</span>
 
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="s1">'__next_type__'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span> <span class="ow">and</span> <span class="s1">'__next_name__'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">proto</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_lookup_payload</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">exclude</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">proto</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.null</span><span class="w"> </span><span class="kn">import</span> \
+                    <span class="n">NoPayload</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+                <span class="k">return</span> <span class="n">NoPayload</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">proto</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+
         <span class="n">proto</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[Type[Protocol]]'</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__next_type__'</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">proto</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">)):</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.null</span><span class="w"> </span><span class="kn">import</span> \
@@ -2411,6 +2427,82 @@
             <span class="k">return</span> <span class="n">NoPayload</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">proto</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_lookup_payload</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Data'</span><span class="p">,</span> <span class="n">exclude</span><span class="p">:</span> <span class="s1">'tuple[str, ...]'</span> <span class="o">=</span> <span class="p">())</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Optional[Type[ProtocolBase]], Optional[str]]'</span><span class="p">:</span>  <span class="c1"># pylint: disable=line-too-long</span>
+<span class="w">        </span><span class="sd">"""Find the payload of ``data`` that carries no ``__next_type__``.</span>
+
+<span class="sd">        :meth:`_decode_next_layer` writes the payload's info under the payload's</span>
+<span class="sd">        :attr:`info_name`, after every field of the data model, so the payload is</span>
+<span class="sd">        the *last* key that the data model does not declare and whose value is a</span>
+<span class="sd">        mapping. Its protocol is the one of :attr:`__proto__` -- or its fallback</span>
+<span class="sd">        -- whose :attr:`info_name` the key is. That is the lowercased class name</span>
+<span class="sd">        by default, but a protocol may override it: every version of</span>
+<span class="sd">        :class:`~pcapkit.protocols.link.l2tp.L2TP` is ``l2tp``.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: protocol data</span>
+<span class="sd">            exclude: keys of ``data`` to pass over, such as the IPv6 extension</span>
+<span class="sd">                headers, which are written like a payload but are not one</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The payload protocol and the key of its info in ``data``, or</span>
+<span class="sd">            :data:`None` for both if ``data`` has no payload this protocol can</span>
+<span class="sd">            dispatch to.</span>
+
+<span class="sd">        """</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_lookup_nested</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exclude</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">keys</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">keys</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">registry</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span>
+        <span class="n">candidates</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">registry</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">registry</span><span class="o">.</span><span class="n">default_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">registry</span><span class="o">.</span><span class="n">default_factory</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">:</span>
+            <span class="n">proto</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">klass</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">)</span> <span class="k">else</span> <span class="n">entry</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">)):</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># NOTE: :attr:`info_name` is an instance property, so it is read off</span>
+            <span class="c1"># a bare instance; ``__new__`` only sets up the per-instance caches.</span>
+            <span class="c1"># An abstract class cannot be instantiated, and is never a payload.</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">label</span> <span class="o">=</span> <span class="n">proto</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">proto</span><span class="p">)</span><span class="o">.</span><span class="n">info_name</span>
+            <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">label</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">proto</span><span class="p">,</span> <span class="n">name</span>
+        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_lookup_nested</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="s1">'Data'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[str]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Keys of ``data`` that its data model does not declare and that hold a mapping.</span>
+
+<span class="sd">        These are where the next layer protocols wrote their info, in the order</span>
+<span class="sd">        they wrote it -- the payload, and the IPv6 extension headers.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: protocol data</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The keys, in the order of ``data``.</span>
+
+<span class="sd">        """</span>
+        <span class="c1"># NOTE: :func:`inspect.get_annotations` is new in Python 3.10; below it</span>
+        <span class="c1"># a class's own annotations are in its ``__dict__``, where from 3.14 on</span>
+        <span class="c1"># they are evaluated lazily and may not be.</span>
+        <span class="n">get_annotations</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">inspect</span><span class="p">,</span> <span class="s1">'get_annotations'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="n">declared</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>  <span class="c1"># type: set[str]</span>
+        <span class="k">for</span> <span class="n">klass</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">mro</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">get_annotations</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">declared</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">klass</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__annotations__'</span><span class="p">,</span> <span class="p">{}))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">declared</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">get_annotations</span><span class="p">(</span><span class="n">klass</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">data</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">declared</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">)]</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_lookup_registry</span><span class="p">(</span><span class="n">registry</span><span class="p">:</span> <span class="s1">'DefaultDict[Any, _VT]'</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_VT'</span><span class="p">:</span>
@@ -2516,7 +2608,8 @@
 <span class="sd">            We added a new key ``__next_type__`` to ``dict_`` to store the</span>
 <span class="sd">            next layer protocol type, and a new key ``__next_name__`` to</span>
 <span class="sd">            store the next layer protocol name. These two keys will **NOT**</span>
-<span class="sd">            be included when :meth:`Info.to_dict &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;` is called.</span>
+<span class="sd">            be included when :meth:`Info.to_dict &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;` is called;</span>
+<span class="sd">            :meth:`_lookup_payload` finds the payload of such a :obj:`dict` instead.</span>
 
 <span class="sd">        """</span>
         <span class="n">next_</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ProtocolBase'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_import_next_layer</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">))</span>  <span class="c1"># type: ignore[misc,call-arg,redundant-cast]</span>
