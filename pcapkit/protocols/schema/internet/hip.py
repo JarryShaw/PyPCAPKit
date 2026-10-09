@@ -67,13 +67,13 @@ if TYPE_CHECKING:
     from pcapkit.protocols.protocol import ProtocolBase
 
 if SPHINX_TYPE_CHECKING:  # pragma: no cover
-    from typing_extensions import Literal, TypedDict
+    from typing_extensions import TypedDict
 
     class PacketType(TypedDict):
         """Packet type."""
 
-        #: Reversed bit.
-        bit_0: Literal[0]
+        #: Fixed bit, ``0`` when sent and ignored on receipt.
+        bit_0: int
         #: Packet type.
         type: int
 
@@ -84,8 +84,8 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         version: int
         #: Reserved bits.
         reserved: int
-        #: Reversed bit.
-        bit_1: Literal[1]
+        #: Fixed bit, ``1`` when sent and ignored on receipt.
+        bit_1: int
 
     class ControlsType(TypedDict):
         """Controls type."""

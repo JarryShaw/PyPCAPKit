@@ -568,10 +568,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             length = len(self)
         schema = self.__header__
 
-        if schema.pkt['bit_0'] != 0:
-            raise ProtocolError('HIP: invalid format')
-        if schema.ver['bit_1'] != 1:
-            raise ProtocolError('HIP: invalid format')
+        # NOTE: The two fixed bits are reserved for SHIM6 compatibility and
+        # "MUST be ignored when receiving" (:rfc:`7401#section-5.1`), so they
+        # are kept as read rather than validated.
         # Header Length below 4 cannot cover the two HITs, and would leave a
         # negative parameter length below.
         if schema.len < 4:
@@ -581,8 +580,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             next=schema.next,
             length=schema.len * 8 + 8,
             type=Enum_Packet(schema.pkt['type']),
+            packet_fixed=schema.pkt['bit_0'],
             version=schema.ver['version'],
             reserved=schema.ver['reserved'],
+            version_fixed=schema.ver['bit_1'],
             chksum=schema.checksum,
             control=Data_Control(
                 anonymous=bool(schema.control['anonymous']),
@@ -616,8 +617,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
              packet_default: 'Optional[int]' = None,
              packet_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
              packet_reversed: 'bool' = False,
+             packet_fixed: 'int' = 0,
              version: 'int' = 2,
              version_reserved: 'int' = 0,
+             version_fixed: 'int' = 1,
              checksum: 'bytes' = b'\x00\x00',
              controls_anonymous: 'bool' = False,
              controls_reserved: 'int' = 0,
@@ -637,9 +640,13 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             packet_default: Default value for HIP packet type.
             packet_namespace: Namespace for HIP packet type.
             packet_reversed: If the HIP packet type is reversed.
+            packet_fixed: The fixed leading bit of the ``Packet Type`` octet;
+                :rfc:`7401#section-5.1` prescribes ``0`` when sending.
             version: HIP version.
             version_reserved: The 3 reserved bits between ``Version`` and the
                 fixed low-order bit.
+            version_fixed: The fixed low-order bit of the ``Version`` octet;
+                :rfc:`7401#section-5.1` prescribes ``1`` when sending.
             checksum: Checksum.
             controls_anonymous: If the sender is anonymous.
             controls_reserved: The 15 reserved high-order bits of ``Controls``.
@@ -672,11 +679,11 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             next=next_value,  # type: ignore[arg-type]
             len=length,
             pkt = {
-                'bit_0': 0,
+                'bit_0': packet_fixed,
                 'type': packet_value,
             },
             ver = {
-                'bit_1': 1,
+                'bit_1': version_fixed,
                 'version': version,
                 'reserved': version_reserved,
             },
@@ -779,8 +786,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         return {
             'next': data.next,
             'packet': data.type,
+            'packet_fixed': data.packet_fixed,
             'version': data.version,
             'version_reserved': data.reserved,
+            'version_fixed': data.version_fixed,
             'checksum': data.chksum,
             'controls_anonymous': data.control.anonymous,
             'controls_reserved': data.control.reserved,

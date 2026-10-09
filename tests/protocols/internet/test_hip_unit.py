@@ -30,8 +30,10 @@ class HIPUnitTests(unittest.TestCase):
         data = DummyDict(
             next=TransType.TCP,
             type=Packet.I1,
+            packet_fixed=0,
             version=2,
             reserved=0,
+            version_fixed=1,
             chksum=b'\x12\x34',
             control=DummyDict(anonymous=True, reserved=0),
             shit=b'source-hit',
@@ -59,6 +61,8 @@ class HIPUnitTests(unittest.TestCase):
         self.assertEqual(values['packet'], Packet.I1)
         self.assertEqual(values['version'], 2)
         self.assertEqual(values['version_reserved'], 0)
+        self.assertEqual(values['packet_fixed'], 0)
+        self.assertEqual(values['version_fixed'], 1)
         self.assertEqual(values['checksum'], b'\x12\x34')
         self.assertEqual(values['controls_anonymous'], True)
         self.assertEqual(values['shit'], b'source-hit')
@@ -107,35 +111,24 @@ class HIPUnitTests(unittest.TestCase):
             self.assertEqual(proto.read(length=40), 'decoded')
         decode.assert_called_once()
 
-        with self.assertRaises(ProtocolError):
+        # The fixed bits are ignored on receipt (RFC 7401 section 5.1) and
+        # kept as read (#1459).
+        for bit_0, bit_1 in ((1, 1), (0, 0)):
             proto.__header__ = hip_schema.HIP(
                 next=TransType.UDP,
                 len=4,
-                pkt={'bit_0': 1, 'type': Packet.I1},
-                ver={'bit_1': 1, 'version': 2, 'reserved': 0},
+                pkt={'bit_0': bit_0, 'type': Packet.I1},
+                ver={'bit_1': bit_1, 'version': 2, 'reserved': 0},
                 checksum=b'\x00\x00',
-                control={'anonymous': 0},
+                control={'anonymous': 0, 'reserved': 0},
                 shit=0,
                 rhit=0,
                 param=[],
                 payload=b'',
             )
-            proto.read(length=40, extension=True)
-
-        with self.assertRaises(ProtocolError):
-            proto.__header__ = hip_schema.HIP(
-                next=TransType.UDP,
-                len=4,
-                pkt={'bit_0': 0, 'type': Packet.I1},
-                ver={'bit_1': 0, 'version': 2, 'reserved': 0},
-                checksum=b'\x00\x00',
-                control={'anonymous': 0},
-                shit=0,
-                rhit=0,
-                param=[],
-                payload=b'',
-            )
-            proto.read(length=40, extension=True)
+            parsed = proto.read(length=40, extension=True)
+            self.assertEqual(parsed.packet_fixed, bit_0)
+            self.assertEqual(parsed.version_fixed, bit_1)
 
         proto._extf = True
         with self.assertRaises(UnsupportedCall):
