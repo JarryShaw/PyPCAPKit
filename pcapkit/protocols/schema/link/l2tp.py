@@ -13,7 +13,7 @@ from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 __all__ = ['L2TP']
 
 if TYPE_CHECKING:
-    from typing import Optional
+    from typing import Any, Optional
 
     from pcapkit.protocols.protocol import ProtocolBase
 
@@ -41,6 +41,24 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         reserved_3: int
         #: Version of L2TP packet.
         version: Literal[2]
+
+
+def l2tp_payload_length(pkt: 'dict[str, Any]') -> 'int':
+    """Length of the :attr:`L2TP.payload` field.
+
+    Args:
+        pkt: Packet data.
+
+    Returns:
+        The Length field less the header, when the ``L`` flag is set; otherwise
+        ``-1``, so that the payload takes the rest of the datagram.
+
+    """
+    flags = pkt['flags']
+    if not flags['len']:
+        return -1
+    size = pkt['offset'] if flags['offset'] else 0
+    return pkt['length'] - (6 + 2 * (1 + 2 * flags['seq'] + flags['offset']) + size)
 
 
 @schema_final
@@ -89,10 +107,16 @@ class L2TP(Schema):
         lambda packet: packet['flags']['offset'],
     )
     #: Payload of L2TP packet.
-    payload: 'bytes' = PayloadField()
+    payload: 'bytes' = PayloadField(length=l2tp_payload_length)
+    #: Octets captured past the Length field, c.f.
+    #: :attr:`IPv4.trailer <pcapkit.protocols.schema.internet.ipv4.IPv4.trailer>`.
+    #: Always empty when the ``L`` flag is clear, since the payload then takes
+    #: the rest of the datagram.
+    trailer: 'bytes' = PayloadField(default=b'')
 
     if TYPE_CHECKING:
         def __init__(self, flags: 'FlagsType', length: 'Optional[int]', tunnel_id: 'int',
                      session_id: 'int', ns: 'Optional[int]', nr: 'Optional[int]',
                      offset: 'Optional[int]', padding: 'bytes',
-                     payload: 'bytes | ProtocolBase | Schema') -> 'None': ...
+                     payload: 'bytes | ProtocolBase | Schema',
+                     trailer: 'bytes' = b'') -> 'None': ...

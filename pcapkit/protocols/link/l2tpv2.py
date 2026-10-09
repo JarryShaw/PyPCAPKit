@@ -230,6 +230,14 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
         if _size:
             self._read_fileng(_size)
 
+        # NOTE: Octets captured past the Length field belong to this layer,
+        # since its own length field is what leaves them out of the payload,
+        # and the rebuild keeps them as captured (:issue:`1455`).
+        if schema.trailer:
+            l2tp.__update__([
+                ('trailer', schema.trailer),
+            ])
+
         length = schema.length if flags.len else (length or len(self))
         # L2TP carries no next-protocol field -- the payload is a PPP frame,
         # which pcapkit does not dissect -- so dispatch on the -1 sentinel, as
@@ -256,6 +264,7 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
              offset: 'Optional[int]' = None,
              padding: 'Optional[bytes]' = None,
              payload: 'bytes | ProtocolBase | Schema' = b'',
+             trailer: 'bytes' = b'',
              **kwargs: 'Any') -> 'Schema_L2TP':  # pylint: disable=unused-argument
         """Make (construct) packet data.
 
@@ -283,6 +292,8 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
             padding: Offset pad, zero-filled or truncated to ``offset`` octets;
                 all zeros when :data:`None`.
             payload: Payload data.
+            trailer: Octets after the datagram, outside the Length field;
+                written as is.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -338,6 +349,7 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
             offset=offset,
             padding=b'' if padding is None else padding,
             payload=payload,
+            trailer=trailer,
         )
 
     ##########################################################################
@@ -425,4 +437,6 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
             'offset': data.offset,
             'padding': data.get('padding'),
             'payload': cls._make_payload(data),
+            # NOTE: And the octets captured past the Length field (:issue:`1455`).
+            'trailer': data.get('trailer', b''),
         }
