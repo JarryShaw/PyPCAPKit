@@ -104,7 +104,11 @@ class ErrorCause(Data):
 
     if TYPE_CHECKING:
         #: Trailing padding octets, as captured; present only when they are
-        #: not all zeros.
+        #: not all zeros, or fewer than the ``length`` calls for (:issue:`1474`).
+        #: Read back by ``from_data`` only, where fewer octets are honoured on
+        #: the last item of its list alone and zero-filled to the full width
+        #: anywhere else. ``make`` builds from keywords and takes no
+        #: ``padding``: every item it builds is padded in zeros.
         padding: 'bytes'
 
 
@@ -267,7 +271,11 @@ class Parameter(Data):
 
     if TYPE_CHECKING:
         #: Trailing padding octets, as captured; present only when they are
-        #: not all zeros.
+        #: not all zeros, or fewer than the ``length`` calls for (:issue:`1474`).
+        #: Read back by ``from_data`` only, where fewer octets are honoured on
+        #: the last item of its list alone and zero-filled to the full width
+        #: anywhere else. ``make`` builds from keywords and takes no
+        #: ``padding``: every item it builds is padded in zeros.
         padding: 'bytes'
 
 
@@ -380,7 +388,11 @@ class Chunk(Data):
 
     if TYPE_CHECKING:
         #: Trailing padding octets, as captured; present only when they are
-        #: not all zeros.
+        #: not all zeros, or fewer than the ``length`` calls for (:issue:`1474`).
+        #: Read back by ``from_data`` only, where fewer octets are honoured on
+        #: the last item of its list alone and zero-filled to the full width
+        #: anywhere else. ``make`` builds from keywords and takes no
+        #: ``padding``: every item it builds is padded in zeros.
         padding: 'bytes'
 
 

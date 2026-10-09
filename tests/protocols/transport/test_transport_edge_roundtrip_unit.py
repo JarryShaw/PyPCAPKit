@@ -18,7 +18,7 @@ import struct
 import unittest
 
 from tests.protocols import _edge_roundtrip as edge
-from tests.protocols._edge_roundtrip import Case, Gap, MakeCase, Reject
+from tests.protocols._edge_roundtrip import Case, MakeCase, Reject
 
 TCP = 'pcapkit.protocols.transport.tcp:TCP'
 UDP = 'pcapkit.protocols.transport.udp:UDP'
@@ -120,18 +120,7 @@ REJECTED = {
     'sctp/data-no-user-data': Reject('ProtocolError', 'SCTP: [Chunk 0] invalid format'),
 }
 
-KNOWN_FAILURES = (
-    # ``sctp/last-chunk-unpadded`` is uncut: a final chunk sent without its pad
-    # octets rebuilds with three zero octets. The four cuts end inside the last
-    # chunk's pad the same way.
-    Gap(1474, 'A last SCTP chunk whose padding is absent rebuilds with it zero-filled: '
-              '``padding_length`` (pcapkit/protocols/schema/transport/sctp.py:83), which '
-              'chunks, parameters and causes share, always writes the full padding.',
-        'PADDED', '',
-        ('sctp/last-chunk-unpadded', 'sctp/data-1-octet-3-pad/cut31',
-         'sctp/data-nonzero-pad/cut31', 'sctp/unassigned-type-action-00/cut19',
-         'sctp/unassigned-type-action-10/cut23')),
-)
+KNOWN_FAILURES = ()  # type: tuple[edge.Gap, ...]
 
 
 @unittest.skipUnless(edge.HAS_RUNTIME, 'runtime dependencies not installed')

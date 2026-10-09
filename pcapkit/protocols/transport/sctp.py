@@ -182,6 +182,7 @@ if TYPE_CHECKING:
 
     Data_T = TypeVar('Data_T', bound=Data)
     Schema_T = TypeVar('Schema_T', bound=Schema)
+    List_T = TypeVar('List_T', bound=list)
 
     ChunkParser = Callable[[Schema_Chunk, NamedArg(Chunks, 'chunks')], Data_Chunk]
     ChunkConstructor = Callable[[Enum_Chunk, DefaultArg(Optional[Data_Chunk]),
@@ -218,14 +219,32 @@ def _keep_padding(schema: 'Schema', data: 'Data_T') -> 'Data_T':
 
     Returns:
         ``data``, with a ``padding`` attribute holding the trailing padding as
-        captured if it is not all zeros -- the form a fresh build writes
-        (:issue:`1223`). :func:`_restore_padding` writes it back.
+        captured if it is not what a fresh build writes: all zeros
+        (:issue:`1223`), and as many as the ``length`` calls for. A final chunk
+        may arrive with fewer, or none (:issue:`1474`), in which case
+        ``padding`` holds the octets that were there, possibly ``b''``.
+        :func:`_restore_padding` writes it back.
 
     """
     padding = schema.__dict__.get('padding')
-    if isinstance(padding, bytes) and any(padding):
+    if isinstance(padding, bytes) and (any(padding) or len(padding) < _padding_width(schema)):
         data.__update__([('padding', padding)])
     return data
+
+
+def _padding_width(schema: 'Schema') -> 'int':
+    """Number of padding octets a fresh build writes after ``schema``.
+
+    Args:
+        schema: Chunk, parameter or error cause schema.
+
+    Returns:
+        The octets that round its ``length`` up to a multiple of four
+        (:rfc:`9260#section-3.2`).
+
+    """
+    length = schema.__dict__.get('length')
+    return -length % 4 if isinstance(length, int) else 0
 
 
 def _restore_padding(data: 'Optional[Data]', schema: 'Schema_T') -> 'Schema_T':
@@ -236,13 +255,58 @@ def _restore_padding(data: 'Optional[Data]', schema: 'Schema_T') -> 'Schema_T':
         schema: Constructed schema.
 
     Returns:
-        ``schema``, with its padding set from ``data``.
+        ``schema``, with its padding set from ``data``. Padding kept shorter
+        than ``length`` calls for also sets the schema's ``__padding__`` to its
+        width, which :func:`~pcapkit.protocols.schema.transport.sctp.padding_length`
+        packs to rather than zero-filling the octets that were never captured
+        (:issue:`1474`).
 
     """
     padding = getattr(data, 'padding', None)
     if isinstance(padding, bytes) and 'padding' in schema.__fields__:
         schema.padding = padding
+        if len(padding) < _padding_width(schema):
+            schema.__dict__['__padding__'] = len(padding)
     return schema
+
+
+def _last_item_only(schemas: 'List_T') -> 'List_T':
+    """Drop the short-padding record from every item but the last.
+
+    Args:
+        schemas: Constructed chunk, parameter or cause list.
+
+    Returns:
+        ``schemas``, in which only the last item may keep the ``__padding__``
+        width :func:`_restore_padding` set. Only the end of a packet may be
+        short of its padding (:issue:`1474`); a short record on any earlier
+        item -- from an edited ``info``, say -- would misalign everything after
+        it, so that item packs to the full width, its ``padding`` octets
+        zero-filled to it. The same goes for the parameters or causes nested in
+        an earlier chunk, whose last item ends that chunk rather than the packet.
+
+    """
+    for schema in schemas[:-1]:
+        _drop_padding_record(schema)
+    return schemas
+
+
+def _drop_padding_record(schema: 'Schema | bytes') -> 'None':
+    """Drop ``schema``'s short-padding record, and its nested items' too.
+
+    Args:
+        schema: Chunk, parameter or cause that does not end the packet.
+
+    """
+    if not isinstance(schema, Schema):
+        return
+    if schema.__dict__.pop('__padding__', None) is not None:
+        schema.__updated__ = True
+    for name in ('parameters', 'error'):
+        nested = schema.__dict__.get(name)
+        if isinstance(nested, list):
+            for item in nested:
+                _drop_padding_record(item)
 
 
 class SCTP(Transport[Data_SCTP, Schema_SCTP],
@@ -987,11 +1051,11 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
                 else:
                     code, args = cast('tuple[Enum_Chunk, dict[str, Any]]', schema)
                     chunks_list.append(self._make_sctp_chunk(code, None, **args))
-            return chunks_list
+            return _last_item_only(chunks_list)
 
         for code, chunk in chunks.items(multi=True):
             chunks_list.append(self._make_sctp_chunk(code, chunk))
-        return chunks_list
+        return _last_item_only(chunks_list)
 
     def _make_sctp_chunk(self, code: 'Enum_Chunk', chunk: 'Optional[Data_Chunk]' = None,
                          **kwargs: 'Any') -> 'Schema_Chunk':
@@ -1059,11 +1123,11 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
                 else:
                     code, args = cast('tuple[Enum_Parameter, dict[str, Any]]', schema)
                     parameters_list.append(self._make_sctp_parameter(code, None, **args))
-            return parameters_list
+            return _last_item_only(parameters_list)
 
         for code, parameter in parameters.items(multi=True):
             parameters_list.append(self._make_sctp_parameter(code, parameter))
-        return parameters_list
+        return _last_item_only(parameters_list)
 
     def _make_sctp_parameter(self, code: 'Enum_Parameter', parameter: 'Optional[Data_Parameter]' = None,
                              **kwargs: 'Any') -> 'Schema_Parameter':
@@ -1131,11 +1195,11 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
                 else:
                     code, args = cast('tuple[Enum_CauseCode, dict[str, Any]]', schema)
                     causes_list.append(self._make_sctp_cause(code, None, **args))
-            return causes_list
+            return _last_item_only(causes_list)
 
         for code, cause in causes.items(multi=True):
             causes_list.append(self._make_sctp_cause(code, cause))
-        return causes_list
+        return _last_item_only(causes_list)
 
     def _make_sctp_cause(self, code: 'Enum_CauseCode', cause: 'Optional[Data_ErrorCause]' = None,
                          **kwargs: 'Any') -> 'Schema_ErrorCause':
