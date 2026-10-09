@@ -96,7 +96,7 @@ class ReturnCode(EnumRegistry, IntEnum):
         obj = int.__new__(cls, value)
         obj._value_ = value
 
-        code = str(value)
+        code = '%03d' % value
         obj.description = description
         obj.kind = ResponseKind(int(code[0]))
         obj.group = GroupingInformation(int(code[1]))
@@ -302,7 +302,7 @@ class ReturnCode(EnumRegistry, IntEnum):
 
         """
         obj = super()._unregistered_member(value, name)
-        code = str(value)
+        code = '%03d' % value
         obj.description = None
         obj.kind = ResponseKind(int(code[0]))
         obj.group = GroupingInformation(int(code[1]))
@@ -312,11 +312,18 @@ class ReturnCode(EnumRegistry, IntEnum):
     def _missing_(cls, value: 'int') -> 'ReturnCode':
         """Lookup function used when value is not found.
 
+        A reply code is three digits (:rfc:`959#section-4.2`), so every value
+        from 0 to 999 can arrive on the wire: one within the registry's range
+        resolves to ``Unassigned``, any other to ``Unknown``.
+
         Args:
             value: Value to get enum item.
 
         """
-        if not (isinstance(value, int) and 100 <= value <= 659):
+        if not (isinstance(value, int) and 0 <= value <= 999):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        #: Unassigned
-        return cls._unregistered_member(value, 'Unassigned')
+        if isinstance(value, int) and 100 <= value <= 659:
+            #: Unassigned
+            return cls._unregistered_member(value, 'Unassigned')
+        #: Unknown
+        return cls._unregistered_member(value, 'Unknown')

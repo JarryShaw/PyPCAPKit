@@ -96,12 +96,19 @@ class {NAME}(EnumRegistry, IntEnum):
     def _missing_(cls, value: 'int') -> '{NAME}':
         """Lookup function used when value is not found.
 
+        A status code is three digits (:rfc:`9112#section-4`), so every value
+        from 0 to 999 can arrive on the wire: one within the registry's range
+        resolves through its unassigned ranges, any other to ``Unknown``.
+
         Args:
             value: Value to get enum item.
 
         """
-        if not ({FLAG}):
+        if not (isinstance(value, int) and 0 <= value <= 999):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
+        if not ({FLAG}):
+            #: Unknown
+            return cls._unregistered_member(value, 'Unknown')
         {MISS}
         {'' if (test := ''.join(MISS.splitlines()[-1:])).startswith('return') or test[8:].startswith('return') else 'return super()._missing_(value)'}
 '''.strip()  # type: Callable[[str, str, str, str, str, str], str]

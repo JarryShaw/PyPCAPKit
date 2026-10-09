@@ -74,13 +74,12 @@ from tests._support import (ISOLATED_PREFIXES, purge_modules, reimport_once_per_
 
 #: Fully qualified names of the :class:`~aenum.IntEnum` classes under
 #: :mod:`pcapkit.const` for which rejecting ``0`` is *correct*, because their
-#: registries simply do not define ``0`` (three-digit response codes starting
-#: at 100, or registries reserving ``0`` and starting real assignments at 1).
-#: Confirmed against the IANA/RFC registries backing each one; see GitHub
-#: issue #492.
+#: registries simply do not define ``0`` (registries reserving ``0`` and
+#: starting real assignments at 1). Confirmed against the IANA/RFC registries
+#: backing each one; see GitHub issue #492. FTP ``ReturnCode`` and HTTP
+#: ``StatusCode`` left the set with GitHub issue #1443: their wire fields are
+#: three digits, so ``000`` resolves to an ``Unknown`` pseudo-member.
 EXPECTED_TO_REJECT_ZERO = frozenset({
-    'pcapkit.const.ftp.return_code.ReturnCode',
-    'pcapkit.const.http.status_code.StatusCode',
     'pcapkit.const.ftp.command.ConformanceRequirement',
     'pcapkit.const.sctp.cause_code.CauseCode',
     'pcapkit.const.sctp.parameter.Parameter',
