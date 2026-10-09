@@ -31,6 +31,92 @@ if TYPE_CHECKING:
 
 _T = TypeVar('_T', bound='int')
 
+#: Instance attribute a parsed value records its bits outside
+#: :attr:`NumberField.bit_length` under, as ``(outside, length, bit_length,
+#: signed, byteorder)``. See GitHub issue :issue:`1488`.
+_OUTSIDE_BITS = '_outside_bits_'
+
+
+class _CapturedInt(int):
+    """An :obj:`int` that also records the bits outside its field's
+    :attr:`~NumberField.bit_length` as they were captured.
+
+    It equals, hashes and renders as the plain :obj:`int` it holds, and any
+    arithmetic on it yields a plain :obj:`int`, which is what lets a value a
+    caller derives from a parsed one keep today's truncating semantics. See
+    GitHub issue :issue:`1488`.
+
+    """
+
+
+def _capture_key(field: 'NumberField') -> 'tuple[int, int, bool, str]':
+    """Return the shape of ``field`` a captured value's bits belong to.
+
+    Args:
+        field: The field packing or unpacking the value.
+
+    Returns:
+        ``(length, bit_length, signed, byteorder)``.
+
+    """
+    return (field._length, field._bit_length,  # pylint: disable=protected-access
+            field._signed, field._byteorder)  # pylint: disable=protected-access
+
+
+def _capture_record(value: 'Any') -> 'Optional[tuple[int, int, int, bool, str]]':
+    """Return the capture ``value`` records, or :data:`None` if it records none.
+
+    Args:
+        value: Field value.
+
+    Returns:
+        ``(outside, length, bit_length, signed, byteorder)``, or :data:`None`.
+
+    The instance dictionary is read rather than :func:`getattr`, so that no
+    class-level attribute -- an enumeration's member lookup among them -- can
+    answer for it.
+
+    """
+    return getattr(value, '__dict__', {}).get(_OUTSIDE_BITS)
+
+
+def _outside_bits(value: 'Any', field: 'NumberField') -> 'Optional[int]':
+    """Return the captured bits ``value`` records outside ``field``'s
+    :attr:`~NumberField.bit_length`, or :data:`None`.
+
+    Args:
+        value: Field value.
+        field: The field packing it.
+
+    Returns:
+        The bits, in place (not shifted down), if ``value`` was captured by a
+        field of the same length, bit length, sign and byte order as
+        ``field``; :data:`None` otherwise, so that any other field packs it
+        exactly as it would the plain value.
+
+    """
+    record = _capture_record(value)
+    if record is None or tuple(record[1:]) != _capture_key(field):
+        return None
+    return record[0]
+
+
+def _with_outside_bits(value: 'int', record: 'tuple[int, int, int, bool, str]') -> 'int':
+    """Return ``value`` recording ``record`` as its captured bits outside
+    :attr:`~NumberField.bit_length`.
+
+    Args:
+        value: Field value, the low :attr:`~NumberField.bit_length` bits.
+        record: ``(outside, length, bit_length, signed, byteorder)``.
+
+    Returns:
+        A :class:`_CapturedInt` equal to ``value``.
+
+    """
+    captured = _CapturedInt(value)
+    setattr(captured, _OUTSIDE_BITS, record)
+    return captured
+
 
 class NumberField(Field[int], Generic[_T]):
     """Numerical value for protocol fields.
@@ -276,9 +362,26 @@ class NumberField(Field[int], Generic[_T]):
             :meth:`int.to_bytes` and :func:`struct.pack` both refuse. See GitHub
             issue :issue:`599`.
 
+            A value :meth:`post_process` returned for octets whose bits outside
+            :attr:`bit_length` were not what packing writes there carries those
+            bits (see :func:`_outside_bits`), and they are written back as
+            captured, so ``pack(unpack(b)) == b`` holds for every ``b``. Only a
+            field of the same length, bit length, sign and byte order as the
+            one that captured them honours them; any other field, and any other
+            value -- one a caller built, or the result of arithmetic on a
+            parsed one, which is a plain :obj:`int` -- is truncated to
+            :attr:`bit_length` bits exactly as before. See GitHub issue
+            :issue:`1488`.
+
         """
+        outside = _outside_bits(value, self)
         value = value & self._bit_mask
-        if self._signed and value > self._bit_mask >> 1:
+        if outside is not None and self._length >= 0:
+            value |= outside
+            width = self._length * 8
+            if self._signed and value >> (width - 1):
+                value -= 1 << width
+        elif self._signed and value > self._bit_mask >> 1:
             value -= self._bit_mask + 1
 
         if self._need_process and self._length < 0:
@@ -313,15 +416,30 @@ class NumberField(Field[int], Generic[_T]):
             resolved signed field therefore decodes ``ffffffff`` as ``-1``
             rather than ``4294967295``. See GitHub issue :issue:`1274`.
 
+            The value is the low :attr:`bit_length` bits, but the octets hold
+            more. When the bits outside it are not what :meth:`pre_process`
+            would write there for this value -- zeros, or for a negative signed
+            value the sign extension -- they are captured but uninterpreted,
+            and the value records them (see :func:`_with_outside_bits`) so that
+            packing it writes them back. Otherwise the value is a plain
+            :obj:`int`, as before. See GitHub issue :issue:`1488`.
+
         """
         if not self._need_process:
-            value = cast('int', value) & self._bit_mask
+            raw = cast('int', value)
         else:
-            value = int.from_bytes(
+            raw = int.from_bytes(
                 cast('bytes', value), self._byteorder, signed=self._signed
-            ) & self._bit_mask
+            )
+        value = raw & self._bit_mask
         if self._signed and value > self._bit_mask >> 1:
             value -= self._bit_mask + 1
+
+        if 0 <= self._bit_length < self._length * 8:
+            spare = ((1 << (self._length * 8)) - 1) & ~self._bit_mask
+            outside = raw & spare
+            if outside != (spare if value < 0 else 0):
+                return _with_outside_bits(value, (outside, *_capture_key(self)))
         return value
 
 
@@ -626,18 +744,41 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
             a registry registered from outside :mod:`pcapkit.const`, which has no
             such obligation to stay quiet.
 
+            Octets carrying bits outside :attr:`~NumberField.bit_length` that
+            :meth:`NumberField.post_process` recorded resolve to a member that
+            records them too, so that packing it writes them back. A registry
+            member is shared, so that one is an unregistered copy of it, built
+            by :meth:`_unregistered_member`: ``isinstance`` against the
+            registry and equality with the member still hold, identity does
+            not. See GitHub issue :issue:`1488`.
+
         """
         value = super().post_process(value, packet)
+        record = _capture_record(value)
         if self._namespace is not None:
             try:
-                return self._namespace(value)
+                member = self._namespace(value)
             except ValueError as error:
                 # NOTE: An in-library rejection is pcapkit's own decision about
                 # the value, rather than the enumeration library reporting that
                 # no member carries it, so it is not this layer's to absorb.
                 if isinstance(error, BaseError):
                     raise
-        return self._pseudo_member(value)
+            else:
+                if record is None:
+                    return member
+                # NOTE: A registry member is shared, so the captured bits
+                # outside ``bit_length`` go on an unregistered copy of it
+                # rather than on the member itself (:issue:`1488`).
+                attrs = {key: val for key, val in vars(member).items()
+                         if key not in ('_name_', '_value_', '__reduce_ex__')}
+                attrs[_OUTSIDE_BITS] = record
+                return self._unregistered_member(
+                    type(member), member._value_, member._name_, **attrs)  # pylint: disable=protected-access
+        pseudo = self._pseudo_member(int(value))
+        if record is not None:
+            setattr(pseudo, _OUTSIDE_BITS, record)
+        return pseudo
 
     def _pseudo_member(self, value: 'int') -> 'StdlibEnum | AenumEnum':
         """Build the bounded nameless pseudo-member this method falls back to

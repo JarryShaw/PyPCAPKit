@@ -34,7 +34,7 @@ import warnings
 from typing import TYPE_CHECKING, NamedTuple
 
 from tests._support import reimport_once_per_class
-from tests.corekit._roundtrip import (OK, Gap, KnownFailureTable, Outcome, describe, diff, run,
+from tests.corekit._roundtrip import (OK, KnownFailureTable, Outcome, describe, diff, run,
                                       skip_without_runtime)
 
 if TYPE_CHECKING:
@@ -549,14 +549,7 @@ class FieldRoundTripTests(KnownFailureTable, unittest.TestCase):
 
     STATUSES = ('OK', 'PACK', 'UNPACK', 'VALUE', 'REPACK', 'WIRE', 'DICT', 'REJECTED', 'TIMEOUT')
 
-    KNOWN_FAILURES = (
-        Gap(1488, 'NumberField with bit_length narrower than its octets masks the unpacked value '
-               'to bit_length bits, so set high bits are dropped and pack writes them as '
-               'zeros (pcapkit/corekit/fields/numbers.py:318, :322). Shipped use: vlan.TCI '
-               '(pcapkit/protocols/schema/link/vlan.py:47-51), which no protocol parses with',
-            'WIRE', '', ('NumberField/bit-length-12/wire/ffff', 'NumberField/bit-length-12/wire/f000',
-                         'EnumField/bit-length-3/wire/ff')),
-    )
+    KNOWN_FAILURES = ()
 
     def setUp(self) -> None:
         skip_without_runtime(self)

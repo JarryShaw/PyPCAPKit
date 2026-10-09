@@ -304,6 +304,9 @@ class UnassignedEnumFieldTests(unittest.TestCase):
         unmasked ``0xF1`` would have produced a pseudo-member instead and hidden
         a regression in the masking.
 
+        The member is an unregistered copy of ``Nibble.ONE`` rather than the
+        member itself, since it also records the captured ``0xF0`` (#1488).
+
         """
         from pcapkit.corekit.fields.numbers import EnumField
 
@@ -314,7 +317,11 @@ class UnassignedEnumFieldTests(unittest.TestCase):
 
         field = EnumField(length=1, namespace=Nibble, bit_length=4)
 
-        self.assertIs(field.unpack(b'\xf1', dict()), Nibble.ONE)
+        resolved = field.unpack(b'\xf1', dict())
+        self.assertIsInstance(resolved, Nibble)
+        self.assertEqual(resolved, Nibble.ONE)
+        self.assertEqual(resolved.name, 'ONE')
+        self.assertIs(field.unpack(b'\x01', dict()), Nibble.ONE)
 
     def test_no_value_of_any_width_escapes_the_field_layer(self) -> None:
         """The property, rather than the reported instance.
