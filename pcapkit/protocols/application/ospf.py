@@ -214,7 +214,7 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
              auth_type_default: 'Optional[int]' = None,
              auth_type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
              auth_type_reversed: 'bool' = False,
-             auth_data: 'bytes | Schema_CryptographicAuthentication | Data_CryptographicAuthentication' = b'\x00\x00\x00\x00\x00\x00\x00\x00',
+             auth_data: 'bytes | Schema_CryptographicAuthentication | Data_CryptographicAuthentication | dict[str, Any]' = b'\x00\x00\x00\x00\x00\x00\x00\x00',  # pylint: disable=line-too-long
              payload: 'bytes | ProtocolBase | Schema' = b'',
              trailer: 'bytes' = b'',
              **kwargs: 'Any') -> 'Schema_OSPF':
@@ -237,7 +237,9 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
             auth_type_default: Default value for ``auth_type`` if not specified.
             auth_type_namespace: Namespace for ``auth_type``.
             auth_type_reversed: Reverse namespace for ``auth_type``.
-            auth_data: Authentication data.
+            auth_data: Authentication data: 8 octets, or, under cryptographic
+                authentication, also a schema, a data model, or the
+                :obj:`dict` form of a data model.
             payload: Payload data.
             trailer: Octets after the packet, outside the Packet Length, such
                 as the message digest appended under cryptographic
@@ -414,12 +416,13 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
         return auth
 
     def _make_encrypt_auth(self,
-                           auth_data: 'bytes | Schema_CryptographicAuthentication | Data_CryptographicAuthentication'  # pylint: disable=line-too-long
+                           auth_data: 'bytes | Schema_CryptographicAuthentication | Data_CryptographicAuthentication | dict[str, Any]'  # pylint: disable=line-too-long
                            ) -> 'Schema_CryptographicAuthentication':
         """Make Authentication field when Cryptographic Authentication is employed.
 
         Args:
-            auth_data: Authentication data.
+            auth_data: Authentication data, as raw octets, a schema, a data
+                model, or the :obj:`dict` form of a data model.
 
         Returns:
             Authentication schema.
@@ -442,4 +445,16 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
                 len=auth_data.len,
                 seq=auth_data.seq,
             )
+        # NOTE: The ``to_dict()`` form of the info above, which ``from_data``
+        # passes through as is (:issue:`1464`).
+        if isinstance(auth_data, dict):
+            try:
+                return Schema_CryptographicAuthentication(
+                    reserved=auth_data.get('reserved', b'\x00\x00'),
+                    key_id=auth_data['key_id'],
+                    len=auth_data['len'],
+                    seq=auth_data['seq'],
+                )
+            except KeyError as exc:
+                raise ProtocolError(f'OSPF: missing {exc} in auth_data: {auth_data!r}') from None
         raise ProtocolError(f'OSPF: invalid type for auth_data: {auth_data!r}')
