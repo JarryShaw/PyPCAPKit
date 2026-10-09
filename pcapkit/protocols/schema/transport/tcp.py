@@ -14,11 +14,11 @@ from pcapkit.corekit.fields.collections import ListField, OptionField
 from pcapkit.corekit.fields.ipaddress import IPv4AddressField, IPv6AddressField
 from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, NoValueField,
                                          PayloadField, SchemaField, SwitchField)
-from pcapkit.corekit.fields.numbers import (EnumField, UInt8Field, UInt16Field, UInt32Field,
-                                            UInt64Field)
+from pcapkit.corekit.fields.numbers import (EnumField, PortEnumField, UInt8Field, UInt16Field,
+                                            UInt32Field, UInt64Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
 from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
-from pcapkit.utilities.exceptions import BaseError, FieldError
+from pcapkit.utilities.exceptions import FieldError
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 
 __all__ = [
@@ -367,124 +367,6 @@ def mptcp_dss_dsn_selector(pkt: 'dict[str, Any]') -> 'Field':
     if not pkt['flags']['M']:
         return NoValueField()
     return UInt64Field() if pkt['flags']['m'] else UInt32Field()
-
-
-class PortEnumField(EnumField):
-    """Enumerated value for protocol fields.
-
-    Args:
-        length: Field size (in bytes); if a callable is given, it should return
-            an integer value and accept the current packet as its only argument.
-        default: Field default value, if any.
-        signed: Whether the field is signed.
-        byteorder: Field byte order.
-        bit_length: Field bit length.
-        callback: Callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
-
-    Important:
-        This class is specifically designed for :class:`~pcapkit.const.reg.apptype.AppType`
-        as it is actually a :class:`~enum.StrEnum` class.
-
-    """
-    if TYPE_CHECKING:
-        _namespace: 'Enum_AppType'
-
-    def pre_process(self, value: 'int | Enum_AppType', packet: 'dict[str, Any]') -> 'int | bytes':
-        """Process field value before construction (packing).
-
-        Arguments:
-            value: Field value.
-            packet: Packet data.
-
-        Returns:
-            Processed field value.
-
-        """
-        if isinstance(value, Enum_AppType):
-            value = value.port
-        return super().pre_process(value, packet)
-
-    def post_process(self, value: 'int | bytes', packet: 'dict[str, Any]') -> 'Enum_AppType':
-        """Process field value after parsing (unpacked).
-
-        Args:
-            value: Field value.
-            packet: Packet data.
-
-        Returns:
-            Processed field value -- the registry member declared for the
-            port, or an unregistered member of the same registry, carrying
-            the port itself, when the registry declares none.
-
-        Notes:
-            :meth:`~pcapkit.const.reg.apptype.AppType.get` mints a fresh
-            member -- via :func:`aenum.extend_enum` -- for any port neither an
-            existing row nor one of :meth:`_missing_`'s documented IANA spans
-            accounts for, which in practice means the ephemeral/dynamic range.
-            Calling it on every parsed port would therefore grow the registry
-            without bound. This peeks at the registry
-            :meth:`~pcapkit.const.reg.apptype.AppType.get` itself would
-            consult -- its per-port rows via ``__registry__.getlist``, then
-            its documented spans via ``_missing_`` -- and only calls
-            :meth:`~pcapkit.const.reg.apptype.AppType.get` once one of those is
-            already known to hold, so a genuine miss gets
-            :meth:`EnumField._unregistered_member` instead of a mint.
-
-            A port outside this field's own width is rejected *before* any of
-            that, rather than being let through to :meth:`_missing_` and
-            caught alongside a genuine miss. Both are a bare :exc:`ValueError`
-            with nothing to tell them apart by type, and
-            :meth:`~pcapkit.const.reg.apptype.AppType.get` rejects the
-            out-of-range case deliberately, so that it is never minted over -- a
-            catch keyed on exception type alone cannot see the difference
-            between that and :mod:`aenum`'s own "no member has this value",
-            so it would absorb both and quietly turn the rejection into a
-            miss. Checking the width first needs no exception-based
-            distinction at all. ``self.length`` is the field's own declared byte
-            width (``2`` for every caller of this class, hence ``0``-``65535``)
-            rather than a hard-coded ``65535`` borrowed from
-            :meth:`~pcapkit.const.reg.apptype.AppType._missing_`'s own guard,
-            so the two stay in lockstep by construction.
-
-        """
-        value = super(EnumField, self).post_process(value, packet)
-        proto = Enum_TransportProtocol.tcp
-        if not (isinstance(value, int) and 0 <= value < (1 << (8 * self.length))):
-            # NOTE: lets AppType.get() -- unmodified -- raise its rejection
-            # for a port this field's own width cannot represent, rather than
-            # risking it being absorbed below as a foreign miss.
-            return self._namespace.get(value, proto=proto)
-        owner = self._namespace._dispatch(value, proto)  # pylint: disable=protected-access
-        if not owner.__registry__.getlist(value):  # type: ignore[union-attr]
-            try:
-                declared = owner._missing_(value)  # pylint: disable=protected-access
-            except ValueError as error:
-                # NOTE: value is already known to be in-width here, so this
-                # ValueError is aenum's own "no member has this value" for an
-                # in-range but unassigned port -- a foreign miss, absorbed --
-                # never the out-of-range rejection, which never reaches
-                # this branch. A pcapkit.utilities.exceptions error is still a
-                # deliberate registry decision and propagates unchanged.
-                if isinstance(error, BaseError):
-                    raise
-                declared = None
-            if declared is None:
-                # NOTE: an unregistered member of ``owner`` itself, per the
-                # ruling in EnumField._unregistered_member, rather than a foreign
-                # pseudo-enum. ``.port``, ``.svc`` and ``.proto`` are what a real
-                # AppType member carries -- read unconditionally by e.g.
-                # Transport._decode_next_layer's ``srcport.port`` -- and
-                # ``svc='unknown'`` marks a port with no declared service. They
-                # are passed in the order AppType.__new__ sets them, because
-                # DictDumper.object_hook renders a member's addon keys straight
-                # out of its ``__dict__`` in insertion order -- so any other
-                # order here would make an unassigned port dump ``port`` before
-                # ``svc`` while every declared one dumps ``svc`` first.
-                return self._unregistered_member(
-                    owner, f'unknown [{value:d} - {proto.name}]',
-                    svc='unknown', port=value, proto=proto)
-        return self._namespace.get(value, proto=proto)
 
 
 class Option(EnumSchema[Enum_Option]):
@@ -1177,9 +1059,11 @@ class TCP(Schema):
     """Header schema for TCP packet."""
 
     #: Source port.
-    srcport: 'Enum_AppType' = PortEnumField(length=2, namespace=Enum_AppType)
+    srcport: 'Enum_AppType' = PortEnumField(length=2, namespace=Enum_AppType,
+                                            proto=Enum_TransportProtocol.tcp)
     #: Destination port.
-    dstport: 'Enum_AppType' = PortEnumField(length=2, namespace=Enum_AppType)
+    dstport: 'Enum_AppType' = PortEnumField(length=2, namespace=Enum_AppType,
+                                            proto=Enum_TransportProtocol.tcp)
     #: Sequence number.
     seq: 'int' = UInt32Field()
     #: Acknowledgement number.

@@ -1018,14 +1018,16 @@ class AppTypeSplitTests(unittest.TestCase):
         """Why refusing one breaks nothing, asserted rather than taken on trust.
 
         The refusal is only safe while every library caller passes a single
-        transport protocol. There are ten call sites into the base registry's lookup
+        transport protocol. There are four call sites into the base registry's lookup
         outside :mod:`pcapkit.const`: one in ``Transport._make_port``, which passes
         the ``proto`` its six call sites hand it -- a literal member every time, two
-        per transport in the TCP, UDP and SCTP protocol modules -- and three in each
-        of the TCP, UDP and SCTP schemas' ``PortEnumField.post_process``, which
-        binds ``proto`` to one literal member and then uses it for ``_dispatch`` and
-        both ``get`` calls. None of them can pass a composite, because none of those
-        modules builds one.
+        per transport in the TCP, UDP and SCTP protocol modules -- and three in the
+        shared ``PortEnumField.post_process`` in :mod:`pcapkit.corekit.fields.numbers`,
+        which binds ``proto`` to the member its constructor was handed and then uses
+        it for ``_dispatch`` and both ``get`` calls. That constructor is called six
+        times, two per transport in the TCP, UDP and SCTP schemas, each with a
+        literal member (GitHub issue #1516). None of them can pass a composite,
+        because none of those modules builds one.
 
         Read off disk rather than through :func:`inspect.getsource`, so this needs
         no import of :mod:`pcapkit.protocols` -- whose runtime dependencies this
@@ -1065,6 +1067,7 @@ class AppTypeSplitTests(unittest.TestCase):
         composites = []  # type: list[tuple[str, int]]
         lookups = []  # type: list[str]
         bindings = []  # type: list[tuple[str, str]]
+        stored = []  # type: list[tuple[str, str]]
         for relative in callers:
             path = root / relative
             with self.subTest(module=relative):
@@ -1075,20 +1078,24 @@ class AppTypeSplitTests(unittest.TestCase):
                     if isinstance(node, ast.BinOp) and isinstance(node.op, ast.BitOr):
                         if 'TransportProtocol' in ast.unparse(node):
                             composites.append((relative, node.lineno))
-                    # What ``proto`` is bound to, for the schema fields that use a
-                    # local rather than passing the member straight in. Only those
-                    # three modules: ``Transport._decode_next_layer`` has a local of
-                    # the same name holding a *port number* for the next-layer
-                    # registry, which never reaches this lookup.
-                    if isinstance(node, ast.Assign) and 'schema' in relative:
+                    # What ``proto`` is bound to, for the port field that uses a
+                    # local rather than passing the member straight in, and what
+                    # that field stores the member it was constructed with as. Not
+                    # the transport modules: ``Transport._decode_next_layer`` has a
+                    # local of the same name holding a *port number* for the
+                    # next-layer registry, which never reaches this lookup.
+                    if isinstance(node, ast.Assign) and ('schema' in relative
+                                                         or relative.endswith('numbers.py')):
                         for target in node.targets:
                             if isinstance(target, ast.Name) and target.id == 'proto':
                                 bindings.append((relative, ast.unparse(node.value)))
+                            if isinstance(target, ast.Attribute) and target.attr == '_proto':
+                                stored.append((relative, ast.unparse(node.value)))
                     if not isinstance(node, ast.Call):
                         continue
                     name = (node.func.attr if isinstance(node.func, ast.Attribute) else
                             node.func.id if isinstance(node.func, ast.Name) else '')
-                    if name not in ('get', 'get_all', '_dispatch', '_make_port'):
+                    if name not in ('get', 'get_all', '_dispatch', '_make_port', 'PortEnumField'):
                         continue
                     arguments = [keyword.value for keyword in node.keywords
                                  if keyword.arg == 'proto']
@@ -1111,27 +1118,27 @@ class AppTypeSplitTests(unittest.TestCase):
             with self.subTest(call=rendered):
                 self.assertIn(rendered.split('proto=', 1)[1].rstrip(')'), permitted)
 
-        # Every local named ``proto`` in these modules is bound to exactly one
-        # member, which is what makes the bare ``proto`` arguments above single-bit.
-        self.assertEqual(sorted(bindings), [
-            ('pcapkit/protocols/schema/transport/sctp.py', 'Enum_TransportProtocol.sctp'),
-            ('pcapkit/protocols/schema/transport/tcp.py', 'Enum_TransportProtocol.tcp'),
-            ('pcapkit/protocols/schema/transport/udp.py', 'Enum_TransportProtocol.udp'),
-        ])
+        # The port field's local ``proto`` is the member its constructor stored,
+        # and the constructor stores nothing but its own ``proto`` argument -- which
+        # every call site below passes as one literal member. That chain is what
+        # makes the bare ``proto`` arguments above single-bit.
+        self.assertEqual(bindings, [('pcapkit/corekit/fields/numbers.py', 'self._proto')])
+        self.assertEqual(stored, [('pcapkit/corekit/fields/numbers.py', 'proto')])
 
         # The sixteen the sweep found, so a new one cannot appear without this test
         # saying so. ``transport.py`` holds the single lookup and the six literal
-        # ``_make_port`` arguments that feed it; each schema module holds three.
+        # ``_make_port`` arguments that feed it; ``numbers.py`` holds the port
+        # field's three, and each schema module constructs that field twice.
         self.assertEqual(sorted(lookups), [
-            'pcapkit/protocols/schema/transport/sctp.py _dispatch(proto=proto)',
-            'pcapkit/protocols/schema/transport/sctp.py get(proto=proto)',
-            'pcapkit/protocols/schema/transport/sctp.py get(proto=proto)',
-            'pcapkit/protocols/schema/transport/tcp.py _dispatch(proto=proto)',
-            'pcapkit/protocols/schema/transport/tcp.py get(proto=proto)',
-            'pcapkit/protocols/schema/transport/tcp.py get(proto=proto)',
-            'pcapkit/protocols/schema/transport/udp.py _dispatch(proto=proto)',
-            'pcapkit/protocols/schema/transport/udp.py get(proto=proto)',
-            'pcapkit/protocols/schema/transport/udp.py get(proto=proto)',
+            'pcapkit/corekit/fields/numbers.py _dispatch(proto=proto)',
+            'pcapkit/corekit/fields/numbers.py get(proto=proto)',
+            'pcapkit/corekit/fields/numbers.py get(proto=proto)',
+            'pcapkit/protocols/schema/transport/sctp.py PortEnumField(proto=Enum_TransportProtocol.sctp)',
+            'pcapkit/protocols/schema/transport/sctp.py PortEnumField(proto=Enum_TransportProtocol.sctp)',
+            'pcapkit/protocols/schema/transport/tcp.py PortEnumField(proto=Enum_TransportProtocol.tcp)',
+            'pcapkit/protocols/schema/transport/tcp.py PortEnumField(proto=Enum_TransportProtocol.tcp)',
+            'pcapkit/protocols/schema/transport/udp.py PortEnumField(proto=Enum_TransportProtocol.udp)',
+            'pcapkit/protocols/schema/transport/udp.py PortEnumField(proto=Enum_TransportProtocol.udp)',
             'pcapkit/protocols/transport/sctp.py _make_port(proto=Enum_TransportProtocol.sctp)',
             'pcapkit/protocols/transport/sctp.py _make_port(proto=Enum_TransportProtocol.sctp)',
             'pcapkit/protocols/transport/tcp.py _make_port(proto=Enum_TransportProtocol.tcp)',

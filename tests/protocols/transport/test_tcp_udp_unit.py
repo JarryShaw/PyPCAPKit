@@ -1187,11 +1187,11 @@ class TCPUDPUnitTests(unittest.TestCase):
         from pcapkit.const.reg.apptype import AppType, TransportProtocol
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
         from pcapkit.const.tcp.option import Option
+        from pcapkit.corekit.fields.numbers import PortEnumField
         from pcapkit.protocols.schema.transport import tcp as tcp_schema
-        from pcapkit.protocols.schema.transport import udp as udp_schema
         from pcapkit.utilities.exceptions import FieldError
 
-        tcp_field = tcp_schema.PortEnumField(length=2, namespace=AppType)
+        tcp_field = PortEnumField(length=2, namespace=AppType, proto=TransportProtocol.tcp)
         tcp_field.name = 'srcport'
         self.assertEqual(
             tcp_field.pack(AppType.get(443, proto=TransportProtocol.tcp), {}),
@@ -1200,7 +1200,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         self.assertEqual(tcp_field.pack(443, {}), b'\x01\xbb')
         self.assertEqual(tcp_field.unpack(b'\x01\xbb', {}).port, 443)
 
-        udp_field = udp_schema.PortEnumField(length=2, namespace=AppType)
+        udp_field = PortEnumField(length=2, namespace=AppType, proto=TransportProtocol.udp)
         udp_field.name = 'dstport'
         self.assertEqual(
             udp_field.pack(AppType.get(53, proto=TransportProtocol.udp), {}),

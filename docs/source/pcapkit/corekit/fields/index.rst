@@ -34,6 +34,7 @@ hierarchy:
            NumberField --> Int16Field & UInt16Field
            NumberField --> Int8Field & UInt8Field
            NumberField --> EnumField
+           EnumField --> PortEnumField
        end
        C --> NumberField
 
@@ -87,6 +88,7 @@ hierarchy:
        click Int8Field "/pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.Int8Field"
        click UInt8Field "/pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.UInt8Field"
        click EnumField "/pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.EnumField"
+       click PortEnumField "/pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.PortEnumField"
 
        click _TextField "/pcapkit/corekit/fields/strings.html#pcapkit.corekit.fields.strings._TextField"
        click BytesField "/pcapkit/corekit/fields/strings.html#pcapkit.corekit.fields.strings.BytesField"

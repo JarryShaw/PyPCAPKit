@@ -17,7 +17,7 @@ __all__ = [
     'Int16Field', 'UInt16Field',
     'Int64Field', 'UInt64Field',
     'Int8Field', 'UInt8Field',
-    'EnumField',
+    'EnumField', 'PortEnumField',
 ]
 
 if TYPE_CHECKING:
@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal, Self
 
+    from pcapkit.const.reg.apptype import AppType, TransportProtocol
     from pcapkit.corekit.fields.field import NoValueType
 
 _T = TypeVar('_T', bound='int')
@@ -822,8 +823,10 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
 
         Note:
             Building a member this way, rather than as some other type
-            altogether, is why :meth:`~pcapkit.protocols.schema.transport.tcp.PortEnumField.post_process`
-            and its siblings need this rather than :meth:`_pseudo_member`:
+            altogether, is why :meth:`PortEnumField.post_process` and
+            :meth:`OptionEnumField.post_process
+            <pcapkit.protocols.schema.misc.pcapng.OptionEnumField.post_process>`
+            need this rather than :meth:`_pseudo_member`:
             the result answers ``isinstance(result, AppType)`` truthfully,
             which matters to at least seven ``isinstance`` sites elsewhere in
             :mod:`pcapkit.protocols` (see ``test_a_member_is_still_an_apptype``
@@ -860,7 +863,7 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
             one lookup this member is deliberately absent from. A minted
             member is registered and so round-trips; left alone, this one
             would not. Measured on CPython 3.14.7, resolving port 53406
-            through :class:`~pcapkit.protocols.schema.transport.tcp.PortEnumField`
+            through the TCP schema's :class:`PortEnumField`
             with nothing in place of the override,
             ``pickle.loads(pickle.dumps(member))`` raised
             ``ValueError: 'unknown [53406 - tcp]' is not a valid TCP`` -- while
@@ -996,3 +999,147 @@ def _reduce_unregistered_member(  # pylint: disable=unused-argument
 
     """
     return (_rebuild_unregistered_member, (namespace, value, name, attrs))
+
+
+class PortEnumField(EnumField):
+    """Enumerated value for transport-layer port fields.
+
+    Args:
+        length: Field size (in bytes); if a callable is given, it should return
+            an integer value and accept the current packet as its only argument.
+        default: Field default value, if any.
+        signed: Whether the field is signed; :data:`None` defers to the
+            class-level ``__signed__``, which this class leaves unset and so
+            means unsigned.
+        byteorder: Field byte order.
+        bit_length: Field bit length.
+        namespace: The port registry, i.e.
+            :class:`~pcapkit.const.reg.apptype.AppType`.
+        callback: Callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
+        proto: The transport protocol whose ports this field carries -- a single
+            :class:`~pcapkit.const.reg.apptype.TransportProtocol` member, which
+            is what tells e.g. TCP/80 from UDP/80. The TCP, UDP and SCTP
+            schemas each pass their own.
+
+    Important:
+        This class is specifically designed for :class:`~pcapkit.const.reg.apptype.AppType`
+        as it is actually a :class:`~enum.StrEnum` class.
+
+    """
+    if TYPE_CHECKING:
+        _namespace: 'Type[AppType]'
+
+    def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
+                 default: 'StdlibEnum | AenumEnum | NoValueType' = NO_VALUE,
+                 signed: 'Optional[bool]' = None,
+                 byteorder: 'Literal["little", "big"]' = 'big',
+                 bit_length: 'Optional[int]' = None,
+                 namespace: 'Optional[Type[AppType]]' = None,
+                 callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None, *,
+                 proto: 'TransportProtocol') -> 'None':
+        super().__init__(length, default, signed, byteorder, bit_length, namespace, callback)
+
+        self._proto = proto
+
+    def pre_process(self, value: 'int | AppType', packet: 'dict[str, Any]') -> 'int | bytes':
+        """Process field value before construction (packing).
+
+        Arguments:
+            value: Field value.
+            packet: Packet data.
+
+        Returns:
+            Processed field value.
+
+        """
+        # NOTE: imported here rather than at module level, as
+        # :mod:`pcapkit.const` itself imports :mod:`pcapkit.corekit`; and tested
+        # against AppType rather than ``self._namespace``, as the three
+        # per-transport copies this class replaced did (:issue:`1516`).
+        from pcapkit.const.reg.apptype import AppType  # pylint: disable=import-outside-toplevel
+
+        if isinstance(value, AppType):
+            value = value.port
+        return super().pre_process(value, packet)
+
+    def post_process(self, value: 'int | bytes', packet: 'dict[str, Any]') -> 'AppType':
+        """Process field value after parsing (unpacked).
+
+        Args:
+            value: Field value.
+            packet: Packet data.
+
+        Returns:
+            Processed field value -- the registry member declared for the
+            port, or an unregistered member of the same registry, carrying
+            the port itself, when the registry declares none.
+
+        Notes:
+            :meth:`~pcapkit.const.reg.apptype.AppType.get` mints a fresh
+            member -- via :func:`aenum.extend_enum` -- for any port neither an
+            existing row nor one of :meth:`_missing_`'s documented IANA spans
+            accounts for, which in practice means the ephemeral/dynamic range.
+            Calling it on every parsed port would therefore grow the registry
+            without bound. This peeks at the registry
+            :meth:`~pcapkit.const.reg.apptype.AppType.get` itself would
+            consult -- its per-port rows via ``__registry__.getlist``, then
+            its documented spans via ``_missing_`` -- and only calls
+            :meth:`~pcapkit.const.reg.apptype.AppType.get` once one of those is
+            already known to hold, so a genuine miss gets
+            :meth:`EnumField._unregistered_member` instead of a mint.
+
+            A port outside this field's own width is rejected *before* any of
+            that, rather than being let through to :meth:`_missing_` and
+            caught alongside a genuine miss. Both are a bare :exc:`ValueError`
+            with nothing to tell them apart by type, and
+            :meth:`~pcapkit.const.reg.apptype.AppType.get` rejects the
+            out-of-range case deliberately, so that it is never minted over -- a
+            catch keyed on exception type alone cannot see the difference
+            between that and :mod:`aenum`'s own "no member has this value",
+            so it would absorb both and quietly turn the rejection into a
+            miss. Checking the width first needs no exception-based
+            distinction at all. ``self.length`` is the field's own declared byte
+            width (``2`` for every caller of this class, hence ``0``-``65535``)
+            rather than a hard-coded ``65535`` borrowed from
+            :meth:`~pcapkit.const.reg.apptype.AppType._missing_`'s own guard,
+            so the two stay in lockstep by construction.
+
+        """
+        value = super(EnumField, self).post_process(value, packet)
+        proto = self._proto
+        if not (isinstance(value, int) and 0 <= value < (1 << (8 * self.length))):
+            # NOTE: lets AppType.get() -- unmodified -- raise its rejection
+            # for a port this field's own width cannot represent, rather than
+            # risking it being absorbed below as a foreign miss.
+            return self._namespace.get(value, proto=proto)
+        owner = self._namespace._dispatch(value, proto)  # pylint: disable=protected-access
+        if not owner.__registry__.getlist(value):  # type: ignore[union-attr]
+            try:
+                declared = owner._missing_(value)  # pylint: disable=protected-access
+            except ValueError as error:
+                # NOTE: value is already known to be in-width here, so this
+                # ValueError is aenum's own "no member has this value" for an
+                # in-range but unassigned port -- a foreign miss, absorbed --
+                # never the out-of-range rejection, which never reaches
+                # this branch. A pcapkit.utilities.exceptions error is still a
+                # deliberate registry decision and propagates unchanged.
+                if isinstance(error, BaseError):
+                    raise
+                declared = None
+            if declared is None:
+                # NOTE: an unregistered member of ``owner`` itself, per the
+                # ruling in EnumField._unregistered_member, rather than a foreign
+                # pseudo-enum. ``.port``, ``.svc`` and ``.proto`` are what a real
+                # AppType member carries -- read unconditionally by e.g.
+                # Transport._decode_next_layer's ``srcport.port`` -- and
+                # ``svc='unknown'`` marks a port with no declared service. They
+                # are passed in the order AppType.__new__ sets them, because
+                # DictDumper.object_hook renders a member's addon keys straight
+                # out of its ``__dict__`` in insertion order -- so any other
+                # order here would make an unassigned port dump ``port`` before
+                # ``svc`` while every declared one dumps ``svc`` first.
+                return self._unregistered_member(
+                    owner, f'unknown [{value:d} - {proto.name}]',
+                    svc='unknown', port=value, proto=proto)
+        return self._namespace.get(value, proto=proto)

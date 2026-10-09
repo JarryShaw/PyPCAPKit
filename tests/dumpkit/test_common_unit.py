@@ -359,11 +359,11 @@ class DumpkitCommonTests(unittest.TestCase):
 
         """
         from pcapkit.const.reg.apptype import AppType, TransportProtocol
+        from pcapkit.corekit.fields.numbers import PortEnumField
         from pcapkit.dumpkit.common import make_dumper
-        from pcapkit.protocols.schema.transport import tcp as tcp_schema
 
         dumper = make_dumper(BaseDumper)()
-        field = tcp_schema.PortEnumField(length=2, namespace=AppType)
+        field = PortEnumField(length=2, namespace=AppType, proto=TransportProtocol.tcp)
 
         declared = dumper.object_hook(AppType.get(80, proto=TransportProtocol.tcp))
         unassigned = dumper.object_hook(field.unpack(b'\xd4\x31', {}))  # 54321
