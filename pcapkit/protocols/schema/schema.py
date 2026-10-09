@@ -450,15 +450,15 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
                 ``__dict__`` without
                 :attr:`~pcapkit.corekit.infoclass.FinalisedState.FINAL`.
 
-        Warning:
-            Out of scope, deliberately -- see
-            :meth:`pcapkit.corekit.infoclass.Info.__new__`, which documents the
-            identical gap: a ``@final`` class descending from a
+        Note:
+            Whether ``cls`` still needs finalising is read from its *own*
+            ``__dict__``, never inherited (GitHub issue :issue:`1498`). Each
+            class is finalised on its first construction, whatever its
+            ancestors' state, so a subclass of a
             :attr:`~pcapkit.corekit.infoclass.FinalisedState.BASE` ancestor
-            inherits ``BASE`` rather than ``NONE`` and so never reaches the
-            branch below at all, regardless of its own marker. No ``BASE``-state
-            schema in the tree is marked ``@final`` by hand, so the escape is
-            theoretical.
+            still gets its own ``__builtin__``, ``__excluded__`` and generated
+            ``__init__``, and a ``@final`` class under a ``BASE`` ancestor is
+            refused like any other.
 
         """
         # NOTE: first instantiation is the earliest point a bare ``@final`` can
@@ -466,10 +466,21 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
         # :meth:`__init_subclass__` has already returned. Nested inside the NONE
         # branch, which is already one-shot per class, so a finalised schema pays
         # nothing for it. See :meth:`pcapkit.corekit.infoclass.Info.__new__`,
-        # which carries the full reasoning and the measurement; on this side the
-        # missing generated ``__init__`` is the one built from
-        # :attr:`__fields__`.
-        if cls.__finalised__ == FinalisedState.NONE:
+        # which carries the full reasoning; on this side the missing generated
+        # ``__init__`` is the one built from :attr:`__fields__`.
+        #
+        # Both lookups read ``cls.__dict__`` rather than ``getattr``, because
+        # both markers are ordinary, inherited class attributes. The outer one:
+        # :func:`schema_final` writes ``BASE`` onto the class it finalises, and a
+        # subclass reading that state through inheritance was never finalised
+        # itself -- it would keep the ``__excluded__`` it copied at declaration,
+        # without the names :func:`schema_final` adds, and leak ``__map__``,
+        # ``__map_reverse__``, ``__buffer__`` and ``__updated__`` from
+        # :meth:`to_dict` (GitHub issue #1498). The inner one: an ancestor
+        # hand-marked bare ``@final`` passes its marker to every subclass
+        # declared before it landed, and ``getattr`` would blame such a subclass
+        # for a mismarking that is its ancestor's.
+        if cls.__dict__.get('__finalised__', FinalisedState.NONE) == FinalisedState.NONE:
             if cls.__dict__.get('__final__'):
                 raise SchemaError(f'{cls.__name__}: marked final but never finalised, so it has no generated '
                                   '__init__; apply schema_final, which applies final itself, not final alone')
