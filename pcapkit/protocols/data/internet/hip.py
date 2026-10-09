@@ -100,11 +100,19 @@ class HIP(Protocol):
     length: 'int'
     #: Packet type.
     type: 'Packet'
+    #: Fixed bit -- the leading bit of the ``Packet Type`` octet, sent as ``0``
+    #: and ignored on receipt (:rfc:`7401#section-5.1`), carried verbatim so
+    #: that re-serialising reproduces it.
+    packet_fixed: 'int'
     #: Version.
     version: 'int'
     #: Reserved bits -- the three bits between ``Version`` and the fixed
     #: low-order bit, carried verbatim so that re-serialising reproduces them.
     reserved: 'int'
+    #: Fixed bit -- the low-order bit of the ``Version`` octet, sent as ``1``
+    #: and ignored on receipt (:rfc:`7401#section-5.1`), carried verbatim so
+    #: that re-serialising reproduces it.
+    version_fixed: 'int'
     #: Checksum.
     chksum: 'bytes'
     #: Control
@@ -118,7 +126,7 @@ class HIP(Protocol):
         #: HIP parameters.
         parameters: 'OrderedMultiDict[Enum_Parameter, Parameter]'
 
-        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', version: 'int', reserved: 'int', chksum: 'bytes', control: 'Control', shit: 'int', rhit: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', packet_fixed: 'int', version: 'int', reserved: 'int', version_fixed: 'int', chksum: 'bytes', control: 'Control', shit: 'int', rhit: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 @info_final
