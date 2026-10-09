@@ -20,9 +20,13 @@ class FakeLayer:
 class FakePySharkPacket:
     def __init__(self, *, ipv6: bool = False, tcp: bool = True,
                  ip: bool = True, ether: bool = True,
-                 link_layer: str = 'eth', encap_type: 'str | None' = None) -> None:
+                 link_layer: str = 'eth', encap_type: 'str | None' = None,
+                 time_epoch: 'object' = 70.5, comment: 'str | None' = None) -> None:
         self.number = '12'
-        frame_fields = {'time_epoch': 70.5, 'cap_len': '54'}  # type: dict[str, object]
+        frame_fields = {'cap_len': '54'}  # type: dict[str, object]
+        if time_epoch is not None:
+            # absent for a Simple Packet Block, which carries no timestamp
+            frame_fields['time_epoch'] = time_epoch
         if encap_type is not None:
             # Real PyShark hands every PDML field over as a
             # ``LayerFieldsContainer``, which subclasses ``str`` -- so
@@ -80,6 +84,14 @@ class FakePySharkPacket:
             # What is under test is the unknown-name path, which ``'ip'``
             # exercises regardless of how a capture would reach it.
             self.layers = self.layers[1:]
+        if comment is not None:
+            # PyShark takes the second PDML ``<proto>`` as ``frame_info``. On a
+            # commented packet that is ``pkt_comment``, and the frame layer
+            # becomes ``layers[0]`` -- measured on ``test.pcapng`` frames 1 and
+            # 6 with tshark 4.6.9: ``frame_info`` ``pkt_comment``, ``layers``
+            # ``['frame', 'eth', 'ip', 'udp', 'dhcp']``.
+            self.layers.insert(0, self.frame_info)
+            self.frame_info = FakeLayer('pkt_comment', frame_comment=comment)
 
     def __contains__(self, name: str) -> bool:
         return name in self._contains
@@ -413,7 +425,7 @@ class PySharkToolkitTests(unittest.TestCase):
         from pcapkit.toolkit import pyshark as toolkit
 
         packet = FakePySharkPacket()
-        data = toolkit.tcp_traceflow(packet)
+        data = toolkit.tcp_traceflow(packet, count=12)
 
         self.assertIsNotNone(data)
         self.assertEqual(data.protocol, LinkType.ETHERNET)
@@ -430,6 +442,301 @@ class PySharkToolkitTests(unittest.TestCase):
         self.assertEqual(data.timestamp, 70.5)
         self.assertEqual(data.header, b'')
         self.assertEqual(data.payload, bytearray())
+
+
+class LayerField(str):
+    """Stands in for PyShark's ``LayerFieldsContainer``, a :obj:`str` subclass."""
+
+
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class PySharkFlagTests(unittest.TestCase):
+    """#1514: tshark 4.x reports a boolean field as ``'True'``/``'False'``, which
+    ``bool(int(...))`` refused with :exc:`ValueError` on the first traced TCP frame.
+
+    """
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def test_parse_flag_accepts_both_spellings(self) -> None:
+        from pcapkit.toolkit import pyshark as toolkit
+
+        for text, expected in (('1', True), ('0', False), ('True', True), ('False', False)):
+            for value in (text, LayerField(text)):
+                with self.subTest(value=value, type=type(value).__name__):
+                    self.assertIs(toolkit._parse_flag(value, 'tcp.flags_syn'), expected)
+
+    def test_parse_flag_rejects_anything_else(self) -> None:
+        from pcapkit.toolkit import pyshark as toolkit
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        for value in ('true', 'false', 'Set', '2', '', ' 1', 1, True, None):
+            with self.subTest(value=value):
+                with self.assertRaises(ProtocolError) as ctx:
+                    toolkit._parse_flag(value, 'tcp.flags_fin')
+                self.assertEqual(str(ctx.exception),
+                                 f'invalid PyShark boolean field tcp.flags_fin: {value!r}')
+
+    def test_tcp_traceflow_reads_tshark_4_flags(self) -> None:
+        from pcapkit.toolkit import pyshark as toolkit
+
+        packet = FakePySharkPacket()
+        for flags in ((True, False, True), (False, True, False)):
+            syn, fin, rst = (LayerField(str(flag)) for flag in flags)
+            packet.tcp.flags_syn, packet.tcp.flags_fin, packet.tcp.flags_reset = syn, fin, rst
+            with self.subTest(flags=flags):
+                data = toolkit.tcp_traceflow(packet)
+                self.assertIsNotNone(data)
+                self.assertEqual((data.syn, data.fin, data.rst), flags)
+
+    def test_tcp_traceflow_raises_for_an_unparsable_flag(self) -> None:
+        from pcapkit.toolkit import pyshark as toolkit
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        packet = FakePySharkPacket()
+        packet.tcp.flags_reset = LayerField('maybe')
+        with self.assertRaises(ProtocolError) as ctx:
+            toolkit.tcp_traceflow(packet)
+        self.assertIn('tcp.flags_reset', str(ctx.exception))
+
+
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class PySharkTraceFieldTests(unittest.TestCase):
+    """The ``timestamp``, ``seq`` and ``ack`` ``tcp_traceflow`` hands the tracer
+    must equal the default engine's. #1514's ``ValueError`` hid that they did not.
+
+    """
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def test_timestamp_is_the_default_engines_float(self) -> None:
+        """tshark prints ``frame.time_epoch`` to the nanosecond. The default
+        engine computes ``ts_sec + Decimal(ts_usec) / 10**6`` (or ``10**9``)
+        and hands the tracer ``float()`` of it
+        (``pcapkit/protocols/misc/pcap/frame.py``), so the float must be
+        identical, not just close.
+
+        """
+        import decimal
+
+        from pcapkit.toolkit import pyshark as toolkit
+
+        cases = [
+            ('1500000000.000638000', 1500000000, 638, 1_000_000),
+            ('1511106549.913720000', 1511106549, 913720, 1_000_000),
+            ('1500000000.123456789', 1500000000, 123456789, 1_000_000_000),
+            ('1500000000.000000000', 1500000000, 0, 1_000_000),
+        ]
+        for text, seconds, fraction, resolution in cases:
+            with self.subTest(time_epoch=text):
+                packet = FakePySharkPacket()
+                packet.frame_info.time_epoch = LayerField(text)
+                data = toolkit.tcp_traceflow(packet)
+                self.assertIs(type(data.timestamp), float)
+                expected = float(decimal.Decimal(seconds) + decimal.Decimal(fraction) / resolution)
+                self.assertEqual(data.timestamp.hex(), expected.hex())
+
+    def test_unparsable_timestamp_raises(self) -> None:
+        from pcapkit.toolkit import pyshark as toolkit
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        packet = FakePySharkPacket()
+        packet.frame_info.time_epoch = LayerField('Jul 14, 2017')
+        with self.assertRaises(ProtocolError) as ctx:
+            toolkit.tcp_traceflow(packet)
+        self.assertEqual(str(ctx.exception), "invalid PyShark frame.time_epoch: 'Jul 14, 2017'")
+
+    def test_seq_and_ack_are_absolute(self) -> None:
+        """tshark's ``tcp.seq``/``tcp.ack`` are relative by default; the
+        absolute numbers are ``tcp.seq_raw``/``tcp.ack_raw``. Measured on
+        ``http.pcap`` frame 2 with tshark 4.6.9: ``seq`` 0, ``seq_raw``
+        2847915401, ``ack`` 1, ``ack_raw`` 832175176.
+
+        """
+        from pcapkit.toolkit import pyshark as toolkit
+
+        packet = FakePySharkPacket()
+        packet.tcp.seq, packet.tcp.seq_raw = LayerField('0'), LayerField('2847915401')
+        packet.tcp.ack, packet.tcp.ack_raw = LayerField('1'), LayerField('832175176')
+        data = toolkit.tcp_traceflow(packet)
+        self.assertEqual((data.seq, data.ack), (2847915401, 832175176))
+
+    def test_seq_and_ack_fall_back_without_raw_fields(self) -> None:
+        """A tshark older than 3.2 reports no ``*_raw`` field."""
+        from pcapkit.toolkit import pyshark as toolkit
+
+        packet = FakePySharkPacket()
+        self.assertFalse(hasattr(packet.tcp, 'seq_raw'))
+        self.assertFalse(hasattr(packet.tcp, 'ack_raw'))
+        data = toolkit.tcp_traceflow(packet)
+        self.assertEqual((data.seq, data.ack), (101, 202))
+
+    def test_simple_packet_block_takes_the_geninfo_timestamp(self) -> None:
+        """A Simple Packet Block has no ``frame.time_epoch``. PyShark's
+        ``sniff_timestamp`` is then ``'0.000000000'`` (``test.pcapng`` frame
+        4, tshark 4.6.9), and the default engine reports 0 too.
+
+        """
+        from pcapkit.toolkit import pyshark as toolkit
+
+        packet = FakePySharkPacket(time_epoch=None)
+        packet.sniff_timestamp = LayerField('0.000000000')
+        data = toolkit.tcp_traceflow(packet)
+        self.assertIs(type(data.timestamp), float)
+        self.assertEqual(data.timestamp, 0.0)
+
+    def test_index_is_the_engine_count_not_the_tshark_number(self) -> None:
+        """Like the dpkt and scapy adapters, the index is the ``count`` the
+        engine passes. tshark's ``frame.number`` also counts records that are
+        not packets, such as a systemd Journal Export Block (#1515).
+
+        """
+        from pcapkit.toolkit import pyshark as toolkit
+
+        packet = FakePySharkPacket()
+        packet.number = '6'
+        self.assertEqual(toolkit.tcp_traceflow(packet, count=5).index, 5)
+        self.assertEqual(toolkit.tcp_traceflow(packet).index, -1)
+
+    def test_journal_block_then_two_tcp_packets(self) -> None:
+        """The #1531 review's capture: a journal block, then two TCP packets.
+        tshark numbers the packets 2 and 3; the default engine, and the
+        PyShark engine once it skips the journal block (#1531), count them 1
+        and 2, and the index follows that count.
+
+        """
+        from pcapkit.toolkit import pyshark as toolkit
+
+        indices = []
+        for number, count in (('2', 1), ('3', 2)):
+            packet = FakePySharkPacket()
+            packet.number = number
+            indices.append(toolkit.tcp_traceflow(packet, count=count).index)
+        self.assertEqual(indices, [1, 2])
+
+    def test_the_engine_passes_its_frame_count(self) -> None:
+        """:meth:`PyShark.read_frame` hands :func:`tcp_traceflow` its own frame
+        count. Without #1531 that count is still tshark's number, so the journal
+        block shifts it here (2 and 3); with #1531 it is 1 and 2. Either way the
+        traced index is the engine's count, never ``packet.number`` read again.
+
+        """
+        import types
+
+        from pcapkit.foundation.engines.pyshark import PyShark
+
+        journal = FakePySharkPacket(ip=False, tcp=False)
+        journal.number = '1'
+        journal.layers = [FakeLayer('systemd_journal', message='hello')]
+        journal.frame_info = FakeLayer('frame', time_epoch='1500000000.004000000')  # no encap_type
+        first, second = FakePySharkPacket(encap_type='1'), FakePySharkPacket(encap_type='1')
+        first.number, second.number = '2', '3'
+
+        traced = []  # type: list[int]
+        stream = iter([journal, first, second])
+        extractor = types.SimpleNamespace(
+            _frnum=0, _vfunc=lambda e, f: None, _flag_q=True, _flag_d=False, _flag_t=True,
+            _tcp=True, _trace=types.SimpleNamespace(tcp=lambda data: traced.append(data.index)))
+        engine = PyShark.__new__(PyShark)  # skip __init__, which imports pyshark
+        engine._extractor = extractor
+        engine._extmp = types.SimpleNamespace(next=lambda: next(stream))
+
+        counts = []
+        while True:
+            try:
+                packet = engine.read_frame()
+            except StopIteration:
+                break
+            if packet is not journal:
+                counts.append(extractor._frnum)
+        self.assertEqual(traced, counts)
+        self.assertIn(traced, ([2, 3], [1, 2]))
+
+
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class PySharkCommentedPacketTests(unittest.TestCase):
+    """On a packet with a comment, PyShark's ``frame_info`` is the
+    ``pkt_comment`` layer and the ``frame`` layer is ``layers[0]``, so the
+    frame fields are looked up on the layer named ``frame``.
+
+    """
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def test_encap_type_and_time_epoch_come_from_the_frame_layer(self) -> None:
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.toolkit import pyshark as toolkit
+
+        packet = FakePySharkPacket(encap_type='174', time_epoch=LayerField('1500000000.005000000'),
+                                   comment='a packet comment')
+        self.assertEqual(packet.frame_info.layer_name, 'pkt_comment')
+        self.assertEqual([layer.layer_name for layer in packet.layers], ['frame', 'eth', 'ip', 'tcp'])
+
+        data = toolkit.tcp_traceflow(packet, count=6)
+        self.assertEqual(data.protocol, LinkType.LOOP)  # 174, not the 'eth' fallback
+        self.assertEqual(data.timestamp, 1500000000.005)
+        self.assertEqual(data.index, 6)
+
+    def test_a_commented_tcp_packet_resolves_its_link_type(self) -> None:
+        """Reading ``encap_type`` from ``frame_info`` found none on the
+        ``pkt_comment`` layer, fell back to ``layers[0]``, which is ``frame``,
+        and raised ``MissingKeyError: 'frame'``.
+
+        """
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.toolkit import pyshark as toolkit
+
+        packet = FakePySharkPacket(encap_type='1', comment='first packet of the second section')
+        data = toolkit.tcp_traceflow(packet)
+        self.assertEqual(data.protocol, LinkType.ETHERNET)
+        self.assertEqual(data.timestamp, 70.5)
+
+    def test_packet2dict_puts_the_frame_layer_on_top(self) -> None:
+        """``frame_info`` put the comment's fields at the top level and nested
+        the frame fields under ``FRAME``. The frame layer's fields belong on
+        top, as for any other packet, and the comment keeps its own key.
+
+        """
+        from pcapkit.toolkit import pyshark as toolkit
+
+        converted = toolkit.packet2dict(FakePySharkPacket(encap_type='1', comment='synthetic frame 0'))
+        self.assertEqual(converted['encap_type'], '1')
+        self.assertEqual(converted['time_epoch'], 70.5)
+        self.assertNotIn('frame_comment', converted)
+        self.assertNotIn('FRAME', converted)
+        self.assertEqual(converted['PKT_COMMENT'], {'frame_comment': 'synthetic frame 0'})
+        self.assertEqual(converted['ETH']['IP']['TCP']['srcport'], '1234')
+
+    def test_packet2dict_without_a_frame_layer_keeps_frame_info(self) -> None:
+        """A record with no ``frame`` layer still converts, from ``frame_info``."""
+        from pcapkit.toolkit import pyshark as toolkit
+
+        packet = FakePySharkPacket(tcp=False)
+        packet.frame_info = FakeLayer('syscall', num='1')
+        self.assertEqual(toolkit.packet2dict(packet)['num'], '1')
+
+    def test_filter_name_fallback_skips_the_frame_layer(self) -> None:
+        """Without ``encap_type``, the root layer is the first one after
+        ``frame``, not ``layers[0]``, which is ``frame`` itself here.
+
+        """
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.toolkit import pyshark as toolkit
+
+        data = toolkit.tcp_traceflow(FakePySharkPacket(comment='a packet comment'))
+        self.assertEqual(data.protocol, LinkType.ETHERNET)
+
+    def test_a_packet_without_a_frame_layer_raises(self) -> None:
+        from pcapkit.toolkit import pyshark as toolkit
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        packet = FakePySharkPacket(comment='a packet comment')
+        packet.layers = packet.layers[1:]
+        with self.assertRaises(ProtocolError) as ctx:
+            toolkit.tcp_traceflow(packet)
+        self.assertEqual(str(ctx.exception), 'PyShark packet 12 has no frame layer')
 
 
 if __name__ == '__main__':

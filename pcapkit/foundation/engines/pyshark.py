@@ -261,7 +261,7 @@ class PyShark(EngineBase['PySharkPacket']):
         # trace flows
         if ext._flag_t:
             if ext._tcp:
-                data_tf_tcp = tcp_traceflow(packet)
+                data_tf_tcp = tcp_traceflow(packet, count=ext._frnum)
                 if data_tf_tcp is not None:
                     ext._trace.tcp(data_tf_tcp)
 

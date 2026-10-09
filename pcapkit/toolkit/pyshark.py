@@ -16,12 +16,13 @@ cannot be used for it.
    the `PyShark`_ engine.
 
 """
+import decimal
 import ipaddress
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
-from pcapkit.utilities.exceptions import MissingKeyError
+from pcapkit.utilities.exceptions import MissingKeyError, ProtocolError
 
 if TYPE_CHECKING:
     from typing import Any
@@ -316,6 +317,107 @@ FILTER_NAME_TO_LINKTYPE = {
     'xra': Enum_LinkType.DOCSIS31_XRA31,                       # docsis31_xra31
 }  # type: dict[str, Enum_LinkType]
 
+#: PyShark's text for a boolean field -> its value. tshark 4.x spells one ``'True'``/``'False'``
+#: (measured for ``tcp.flags_syn``, ``tcp.flags_fin`` and ``tcp.flags_reset`` with PyShark 0.6
+#: on tshark 4.6.9); ``'1'``/``'0'`` is the spelling this module first parsed (#1514).
+_BOOLEAN_FIELD = {'1': True, '0': False, 'True': True, 'False': False}  # type: dict[str, bool]
+
+
+def _parse_flag(value: 'Any', name: 'str') -> 'bool':
+    """Parse a boolean PyShark field, such as ``tcp.flags_syn``.
+
+    Args:
+        value: The field as PyShark reports it, a ``LayerFieldsContainer``
+            (a :obj:`str` subclass).
+        name: The field's name, for the error message.
+
+    Returns:
+        The flag's value.
+
+    Raises:
+        ProtocolError: If ``value`` is not a :obj:`str` spelling ``'1'``,
+            ``'0'``, ``'True'`` or ``'False'``.
+
+    """
+    if isinstance(value, str):
+        flag = _BOOLEAN_FIELD.get(str(value))
+        if flag is not None:
+            return flag
+    raise ProtocolError(f'invalid PyShark boolean field {name}: {value!r}')
+
+
+def _parse_epoch(value: 'Any') -> 'float':
+    """Parse PyShark's ``frame.time_epoch``, such as ``'1500000000.000638000'``.
+
+    Args:
+        value: The field as PyShark reports it, decimal text.
+
+    Returns:
+        The timestamp, as the same :obj:`float` the default engine reports.
+
+    Note:
+        The default engine computes the epoch as a :class:`~decimal.Decimal`
+        and hands the tracer ``float()`` of it (:mod:`pcapkit.toolkit.pcap`).
+        This takes the same route, so both are the double nearest the same
+        decimal value: identical, not merely close.
+
+    Raises:
+        ProtocolError: If ``value`` is not decimal text.
+
+    """
+    try:
+        return float(decimal.Decimal(str(value)))
+    except decimal.InvalidOperation:
+        raise ProtocolError(f'invalid PyShark frame.time_epoch: {value!r}') from None
+
+
+def _absolute(tcp: 'Any', name: 'str') -> 'int':
+    """Read the absolute TCP sequence or acknowledgement number.
+
+    Args:
+        tcp: PyShark TCP layer.
+        name: ``'seq'`` or ``'ack'``.
+
+    Returns:
+        ``tcp.<name>_raw``, the number on the wire, or ``tcp.<name>`` where
+        tshark does not report the former.
+
+    Note:
+        tshark's ``tcp.seq`` and ``tcp.ack`` are *relative* to the flow's first
+        number by default (``0`` where the wire says ``832175175``).
+        ``tcp.seq_raw`` and ``tcp.ack_raw`` exist from Wireshark 3.2: they are
+        absent from 3.0.0's ``epan/dissectors/packet-tcp.c`` and present in
+        3.2.0's and 4.2.2's. On an older tshark the fallback is relative unless
+        its ``tcp.relative_sequence_numbers`` preference is off.
+
+    """
+    value = getattr(tcp, f'{name}_raw', None)
+    if value is None:
+        value = getattr(tcp, name)
+    return int(value)
+
+
+def _frame_layer(packet: 'Packet') -> 'Any':
+    """Find the ``frame`` layer of a PyShark packet.
+
+    Args:
+        packet: PyShark packet.
+
+    Returns:
+        The layer named ``frame``, or :data:`None` if the record has none.
+
+    Note:
+        PyShark takes the second PDML ``<proto>`` as ``frame_info``. On a packet
+        with a comment that is ``pkt_comment``, and the frame layer is
+        ``layers[0]`` (measured on ``test.pcapng`` frames 1 and 6 with tshark
+        4.6.9), so the layer is looked up by name, as the engine does (#1531).
+
+    """
+    for layer in (packet.frame_info, *packet.layers):
+        if layer.layer_name == 'frame':
+            return layer
+    return None
+
 
 def packet2dict(packet: 'Packet') -> 'dict[str, Any]':
     """Convert PyShark packet into :obj:`dict`.
@@ -324,16 +426,27 @@ def packet2dict(packet: 'Packet') -> 'dict[str, Any]':
         packet: PyShark packet.
 
     Returns:
-        A :obj:`dict` mapping of packet data.
+        A :obj:`dict` mapping of packet data: the ``frame`` layer's fields at
+        the top level, and each later layer nested in the one before it. A
+        packet comment, which PyShark reports as ``frame_info`` in place of the
+        frame layer, is kept under its own ``PKT_COMMENT`` key. A record with
+        no ``frame`` layer keeps PyShark's ``frame_info`` at the top level.
 
     """
     dict_ = {}  # type: dict[str, Any]
-    frame = packet.frame_info
+    frame = _frame_layer(packet)
+    if frame is None:
+        frame = packet.frame_info
     for field in frame.field_names:
         dict_[field] = getattr(frame, field)
+    if packet.frame_info is not frame:
+        note = packet.frame_info
+        dict_[note.layer_name.upper()] = {field: getattr(note, field) for field in note.field_names}
 
     tempdict = dict_
     for layer in packet.layers:
+        if layer is frame:
+            continue
         tempdict[layer.layer_name.upper()] = {}
         tempdict = tempdict[layer.layer_name.upper()]
         for field in layer.field_names:
@@ -342,11 +455,14 @@ def packet2dict(packet: 'Packet') -> 'dict[str, Any]':
     return dict_
 
 
-def tcp_traceflow(packet: 'Packet') -> 'TF_TCP_Packet | None':
+def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | None':
     """Trace packet flow for TCP.
 
     Args:
         packet: PyShark packet.
+        count: Packet index. If not provided, default to ``-1``. The engine
+            passes its own frame count, not tshark's ``frame.number``, which
+            also numbers records that are not packets (#1515).
 
     Returns:
         Data for TCP flow tracing.
@@ -355,6 +471,12 @@ def tcp_traceflow(packet: 'Packet') -> 'TF_TCP_Packet | None':
           if it contains TCP layer.
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
           flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.
+
+    Raises:
+        MissingKeyError: If the frame's link type cannot be resolved.
+        ProtocolError: If the packet has no ``frame`` layer, a TCP flag field is
+            not a boolean tshark spelling, or ``frame.time_epoch`` is not decimal
+            text.
 
     See Also:
         :class:`pcapkit.foundation.traceflow.tcp.TCP`
@@ -395,9 +517,16 @@ def tcp_traceflow(packet: 'Packet') -> 'TF_TCP_Packet | None':
         # :exc:`~pcapkit.utilities.exceptions.MissingKeyError` -- this
         # package's own house exception for a lookup miss -- rather than
         # letting it escape this public function.
-        encap_type = getattr(packet.frame_info, 'encap_type', None)
+        #
+        # The frame layer is found by name, not taken as ``frame_info``, which
+        # is ``pkt_comment`` on a commented packet; the root layer is then the
+        # first layer that is not the frame layer.
+        frame = _frame_layer(packet)
+        if frame is None:
+            raise ProtocolError(f'PyShark packet {packet.number} has no frame layer')
+        encap_type = getattr(frame, 'encap_type', None)
         if encap_type is None:
-            name = packet.layers[0].layer_name
+            name = [layer for layer in packet.layers if layer is not frame][0].layer_name
             try:
                 protocol = FILTER_NAME_TO_LINKTYPE[name.lower()]
             except KeyError:
@@ -408,20 +537,28 @@ def tcp_traceflow(packet: 'Packet') -> 'TF_TCP_Packet | None':
             except (KeyError, ValueError):
                 raise MissingKeyError('frame.encap_type=%s' % encap_type) from None
 
+        # A Simple Packet Block carries no timestamp, so tshark reports no
+        # ``frame.time_epoch`` for it; the PDML ``geninfo`` timestamp PyShark
+        # keeps as ``sniff_timestamp`` is then ``'0.000000000'``, which is what
+        # the default engine reports (measured on ``test.pcapng`` frame 4).
+        epoch = getattr(frame, 'time_epoch', None)
+        if epoch is None:
+            epoch = packet.sniff_timestamp
+
         data = TF_TCP_Packet(  # type: ignore[type-var]
             protocol=protocol,                                                   # data link type
-            index=int(packet.number),                                            # frame number
+            index=count,                                                         # frame number
             frame=packet2dict(packet),                                           # extracted packet
-            syn=bool(int(tcp.flags_syn)),                                        # TCP synchronise (SYN) flag
-            fin=bool(int(tcp.flags_fin)),                                        # TCP finish (FIN) flag
-            rst=bool(int(tcp.flags_reset)),                                      # TCP reset (RST) flag
+            syn=_parse_flag(tcp.flags_syn, 'tcp.flags_syn'),                     # TCP synchronise (SYN) flag
+            fin=_parse_flag(tcp.flags_fin, 'tcp.flags_fin'),                     # TCP finish (FIN) flag
+            rst=_parse_flag(tcp.flags_reset, 'tcp.flags_reset'),                 # TCP reset (RST) flag
             src=ipaddress.ip_address(ip.src),                                    # source IP
             dst=ipaddress.ip_address(ip.dst),                                    # destination IP
             srcport=int(tcp.srcport),                                            # TCP source port
             dstport=int(tcp.dstport),                                            # TCP destination port
-            timestamp=packet.frame_info.time_epoch,                              # timestamp
-            seq=int(tcp.seq),                                                    # TCP sequence number
-            ack=int(tcp.ack),                                                    # TCP acknowledgement number
+            timestamp=_parse_epoch(epoch),                                       # timestamp
+            seq=_absolute(tcp, 'seq'),                                           # TCP sequence number
+            ack=_absolute(tcp, 'ack'),                                           # TCP acknowledgement number
             # NOTE: PyShark reports dissected *fields*, not the octets behind
             # them, so there is no header or payload to hand over -- which is
             # the same reason this module carries no ``tcp_reassembly`` at all.
