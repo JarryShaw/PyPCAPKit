@@ -218,14 +218,7 @@ class TestTraceFlowRereadRoundTrip(harness.RoundTripBase):
     """Every scenario and variant reads back as exactly its flows' frames."""
 
     STATUSES = ('ERROR', 'FILE', 'HEADER', 'COUNT', 'RECORD', 'REREAD', 'COVER')
-    KNOWN_FAILURES = (
-        Gap(1500, 'a flow traced at another timestamp resolution than its input keeps the '
-               "input's fraction under the output's magic: PCAPIO._append_value writes "
-               'frame_info.ts_usec unscaled (pcapkit/dumpkit/pcap.py:206-207), and for PCAP-NG '
-               'input tcp_traceflow converts at the block\'s own resolution '
-               '(pcapkit/foundation/engines/pcapng.py:304)',
-            'RECORD', 'fraction ', ('*/usec-to-nsec', '*/nsec-to-usec')),
-    )
+    KNOWN_FAILURES = ()  # type: tuple[Gap, ...]
 
     def setUp(self) -> None:
         super().setUp()
