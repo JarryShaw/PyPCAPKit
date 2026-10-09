@@ -2,7 +2,7 @@
 """A registry-backed ``EnumField`` subclass minted a member per unassigned value.
 
 GitHub issue #575. :meth:`PortEnumField.post_process
-<pcapkit.protocols.schema.transport.tcp.PortEnumField.post_process>` (TCP, UDP,
+<pcapkit.corekit.fields.numbers.PortEnumField.post_process>` (TCP, UDP,
 SCTP) and :meth:`OptionEnumField.post_process
 <pcapkit.protocols.schema.misc.pcapng.OptionEnumField.post_process>` (PCAP-NG)
 each resolved a wire value by calling their registry's ``.get()`` directly::
@@ -93,14 +93,11 @@ class PortEnumFieldBoundedFallbackTests(unittest.TestCase):
 
     def _fields(self) -> 'list[tuple[str, Any, Any]]':
         from pcapkit.const.reg.apptype import AppType, TransportProtocol
-        from pcapkit.protocols.schema.transport import sctp as sctp_schema
-        from pcapkit.protocols.schema.transport import tcp as tcp_schema
-        from pcapkit.protocols.schema.transport import udp as udp_schema
+        from pcapkit.corekit.fields.numbers import PortEnumField
 
         return [
-            ('tcp', tcp_schema.PortEnumField(length=2, namespace=AppType), TransportProtocol.tcp),
-            ('udp', udp_schema.PortEnumField(length=2, namespace=AppType), TransportProtocol.udp),
-            ('sctp', sctp_schema.PortEnumField(length=2, namespace=AppType), TransportProtocol.sctp),
+            (proto.name, PortEnumField(length=2, namespace=AppType, proto=proto), proto)
+            for proto in (TransportProtocol.tcp, TransportProtocol.udp, TransportProtocol.sctp)
         ]
 
     def test_an_ephemeral_port_resolves_without_growing_the_registry(self) -> None:
@@ -269,7 +266,7 @@ class PortEnumFieldBoundedFallbackTests(unittest.TestCase):
 
         """
         from pcapkit.const.reg.apptype import AppType, TransportProtocol
-        from pcapkit.protocols.schema.transport import tcp as tcp_schema
+        from pcapkit.corekit.fields.numbers import PortEnumField
         from pcapkit.utilities.exceptions import FieldValueError
 
         owner = AppType.__registries__[TransportProtocol.tcp]
@@ -281,7 +278,7 @@ class PortEnumFieldBoundedFallbackTests(unittest.TestCase):
 
         owner._missing_ = classmethod(_reject)
         try:
-            field = tcp_schema.PortEnumField(length=2, namespace=AppType)
+            field = PortEnumField(length=2, namespace=AppType, proto=TransportProtocol.tcp)
             with self.assertRaises(FieldValueError):
                 field.unpack(b'\xd4\x31', {})
         finally:
@@ -292,10 +289,10 @@ class PortEnumFieldBoundedFallbackTests(unittest.TestCase):
 
     def test_the_resolved_pseudo_member_repacks_to_the_octets_it_came_from(self) -> None:
         """The fallback is round-trip safe, same as #701's."""
-        from pcapkit.const.reg.apptype import AppType
-        from pcapkit.protocols.schema.transport import tcp as tcp_schema
+        from pcapkit.const.reg.apptype import AppType, TransportProtocol
+        from pcapkit.corekit.fields.numbers import PortEnumField
 
-        field = tcp_schema.PortEnumField(length=2, namespace=AppType)
+        field = PortEnumField(length=2, namespace=AppType, proto=TransportProtocol.tcp)
         resolved = field.unpack(b'\xd4\x31', {})
 
         self.assertEqual(field.pack(resolved, {}), b'\xd4\x31')
@@ -449,10 +446,10 @@ class UnregisteredMemberRoundTripTests(unittest.TestCase):
 
     def _resolved(self) -> 'Any':
         """An unassigned TCP port, resolved through the real field."""
-        from pcapkit.const.reg.apptype import AppType
-        from pcapkit.protocols.schema.transport import tcp as tcp_schema
+        from pcapkit.const.reg.apptype import AppType, TransportProtocol
+        from pcapkit.corekit.fields.numbers import PortEnumField
 
-        field = tcp_schema.PortEnumField(length=2, namespace=AppType)
+        field = PortEnumField(length=2, namespace=AppType, proto=TransportProtocol.tcp)
         return field.unpack(b'\xd0\x9e', {})  # 53406
 
     def test_a_pickle_round_trip_rebuilds_an_equivalent_unregistered_member(self) -> None:

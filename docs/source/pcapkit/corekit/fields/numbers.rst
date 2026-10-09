@@ -45,6 +45,10 @@ Enumeration Fields
    :members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.corekit.fields.numbers.PortEnumField
+   :members:
+   :show-inheritance:
+
 Internal Definitions
 --------------------
 

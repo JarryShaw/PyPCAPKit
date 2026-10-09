@@ -215,7 +215,7 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
             :meth:`self.make <ProtocolBase.make>` accepts a bare :obj:`int` for a
             port, but the schema field converts it only on the way *out* (in
             :meth:`PortEnumField.pre_process
-            <pcapkit.protocols.schema.transport.tcp.PortEnumField.pre_process>`),
+            <pcapkit.corekit.fields.numbers.PortEnumField.pre_process>`),
             so the schema attribute keeps whatever it was handed. Normalising
             here makes a constructed packet carry the same
             :class:`~pcapkit.const.reg.apptype.AppType` as a parsed one, so

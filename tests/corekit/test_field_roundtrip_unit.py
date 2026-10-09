@@ -116,6 +116,7 @@ def field_cases() -> 'tuple[FieldCase, ...]':  # pylint: disable=too-many-locals
     """Every field case, built against the current :mod:`pcapkit` import."""
     import aenum
 
+    from pcapkit.const.reg.apptype import AppType, TransportProtocol
     from pcapkit.const.reg.transtype import TransType
     from pcapkit.corekit.fields import collections as fcoll
     from pcapkit.corekit.fields import ipaddress as fip
@@ -178,6 +179,13 @@ def field_cases() -> 'tuple[FieldCase, ...]':  # pylint: disable=too-many-locals
     cases.append(FieldCase(
         'EnumField/bit-length-3', lambda: fnum.EnumField(length=1, bit_length=3, namespace=None),
         (0, 7), (b'\x00', b'\x07', b'\xff')))
+    # Port 80 is declared on all three transports, so building the value mints
+    # nothing; 54321 is declared on none, and resolves unregistered (#575).
+    for proto in (TransportProtocol.tcp, TransportProtocol.udp, TransportProtocol.sctp):
+        cases.append(FieldCase(
+            f'PortEnumField/{proto.name}',
+            lambda proto=proto: fnum.PortEnumField(length=2, namespace=AppType, proto=proto),
+            (AppType.get(80, proto=proto),), _wires(2) + (b'\xd4\x31',)))
 
     # -- strings ------------------------------------------------------------
     for width in (0, 1, 4):
