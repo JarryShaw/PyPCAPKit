@@ -89,6 +89,11 @@ class Option(Data):
     #: Option data length.
     length: 'int'
 
+    if TYPE_CHECKING:
+        #: Padding of the option value to 32 bits, as captured; present only
+        #: when it is not all zeros (:issue:`1437`).
+        padding: 'bytes'
+
 
 @info_final
 class UnknownOption(Option):
@@ -147,6 +152,10 @@ class SectionHeaderBlock(PCAPNG):
     options: 'OrderedMultiDict[Enum_OptionType, Option]'
 
     if TYPE_CHECKING:
+        #: Octets after ``opt_endofopt``, as captured; present only when the
+        #: option area holds any (:issue:`1437`).
+        padding_opts: 'bytes'
+
         def __init__(self, type: 'Enum_BlockType', length: 'int', byteorder: 'Literal["big", "little"]',
                      version: 'VersionInfo',  # pylint: disable=unused-argument
                      section_length: 'int', options: 'OrderedMultiDict[Enum_OptionType, Option]') -> None: ...
@@ -343,6 +352,13 @@ class InterfaceDescriptionBlock(PCAPNG):
     options: 'OrderedMultiDict[Enum_OptionType, Option]'
 
     if TYPE_CHECKING:
+        #: Reserved octets, as captured; present only when they are not all
+        #: zeros (:issue:`1437`).
+        reserved: 'bytes'
+        #: Octets after ``opt_endofopt``, as captured; present only when the
+        #: option area holds any (:issue:`1437`).
+        padding_opts: 'bytes'
+
         def __init__(self, type: 'Enum_BlockType', length: 'int', linktype: 'Enum_LinkType',
                      snaplen: 'int', options: 'OrderedMultiDict[Enum_OptionType, Option]') -> None: ...
 
@@ -475,6 +491,12 @@ class EnhancedPacketBlock(PCAPNG):
     options: 'OrderedMultiDict[Enum_OptionType, Option]'
 
     if TYPE_CHECKING:
+        #: Padding of the packet data to 32 bits, as captured; present only when
+        #: it is not all zeros (:issue:`1437`).
+        padding_data: 'bytes'
+        #: Octets after ``opt_endofopt``, as captured; present only when the
+        #: option area holds any (:issue:`1437`).
+        padding_opts: 'bytes'
         #: Protocol chain.
         protocols: 'str'
 
@@ -508,6 +530,9 @@ class SimplePacketBlock(PCAPNG):
             )
 
     if TYPE_CHECKING:
+        #: Padding of the packet data to 32 bits, as captured; present only when
+        #: it is not all zeros (:issue:`1437`).
+        padding_data: 'bytes'
         #: Protocol chain.
         protocols: 'str'
 
@@ -529,6 +554,11 @@ class NameResolutionRecord(Data):
     type: 'Enum_RecordType'
     #: Record value length.
     length: 'int'
+
+    if TYPE_CHECKING:
+        #: Padding of the record value to 32 bits, as captured; present only
+        #: when it is not all zeros (:issue:`1437`).
+        padding: 'bytes'
 
 
 @info_final
@@ -637,6 +667,9 @@ class NameResolutionBlock(PCAPNG):
         )
 
     if TYPE_CHECKING:
+        #: Octets after ``opt_endofopt``, as captured; present only when the
+        #: option area holds any (:issue:`1437`).
+        padding_opts: 'bytes'
         #: Name resolution mapping (IP address -> name).
         mapping: 'MultiDict[IPv4Address | IPv6Address, str]'
         #: Name resolution mapping (name -> IP address).
@@ -744,6 +777,10 @@ class InterfaceStatisticsBlock(PCAPNG):
     options: 'OrderedMultiDict[Enum_OptionType, Option]'
 
     if TYPE_CHECKING:
+        #: Octets after ``opt_endofopt``, as captured; present only when the
+        #: option area holds any (:issue:`1437`).
+        padding_opts: 'bytes'
+
         def __init__(self, type: 'Enum_BlockType', length: 'int', interface_id: 'int', timestamp: 'dt_type',
                      timestamp_epoch: 'Decimal', options: 'OrderedMultiDict[Enum_OptionType, Option]') -> 'None': ...
 
@@ -847,6 +884,13 @@ class DecryptionSecretsBlock(PCAPNG):
     options: 'OrderedMultiDict[Enum_OptionType, Option]'
 
     if TYPE_CHECKING:
+        #: Padding of the secrets data to 32 bits, as captured; present only when
+        #: it is not all zeros (:issue:`1437`).
+        padding_data: 'bytes'
+        #: Octets after ``opt_endofopt``, as captured; present only when the
+        #: option area holds any (:issue:`1437`).
+        padding_opts: 'bytes'
+
         def __init__(self, type: 'Enum_BlockType', length: 'int', secrets_type: 'Enum_SecretsType',
                      secrets_length: 'int', secrets_data: 'DSBSecrets',
                      options: 'OrderedMultiDict[Enum_OptionType, Option]') -> 'None': ...
@@ -948,6 +992,12 @@ class PacketBlock(PCAPNG):
     options: 'OrderedMultiDict[Enum_OptionType, Option]'
 
     if TYPE_CHECKING:
+        #: Padding of the packet data to 32 bits, as captured; present only when
+        #: it is not all zeros (:issue:`1437`).
+        padding_data: 'bytes'
+        #: Octets after ``opt_endofopt``, as captured; present only when the
+        #: option area holds any (:issue:`1437`).
+        padding_opts: 'bytes'
         #: Protocol chain.
         protocols: 'str'
 
