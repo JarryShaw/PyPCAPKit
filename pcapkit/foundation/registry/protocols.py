@@ -9,6 +9,7 @@ This module provides the protocol registries for :mod:`pcapkit`.
 """
 import collections.abc
 import enum
+import threading
 from typing import TYPE_CHECKING, cast, overload
 
 import aenum
@@ -169,8 +170,9 @@ def register_protocol(protocol: 'Type[ProtocolBase]') -> 'None':
     presence alone is not enough. This registry's key is *derived* from the
     class rather than supplied by a caller, and this function is the funnel
     every wrapper registrar calls -- :func:`register_tcp`, :func:`register_udp`,
-    :func:`register_apptype`, :func:`register_linktype` and the rest all end in
-    ``register_protocol(module)``. So registering one class under two codes, a
+    :func:`register_apptype`, :func:`register_linktype` and the rest all end by
+    calling it with their class, and registering their code back undoes that
+    call's write (:issue:`1505`). So registering one class under two codes, a
     supported and documented thing to do, reaches this function twice with the
     same class and nothing at stake; a presence-only guard would warn about an
     overwrite that overwrote nothing. Warning on the harmless case is not free:
@@ -234,6 +236,164 @@ def register_protocol(protocol: 'Type[ProtocolBase]') -> 'None':
 
     protocol_registry[name] = protocol
     logger.debug('registered protocol: %s', protocol.__name__)
+
+
+#: Sentinel for a name :data:`pcapkit.protocols.__proto__` did not hold.
+_MISSING = object()
+
+
+class _NameLease:
+    """A :data:`pcapkit.protocols.__proto__` entry a code registration put there.
+
+    Each code registrar below ends by naming its class in the by-name registry,
+    and :mod:`pcapkit.foundation.registry` has no ``unregister``: a code is
+    undone by registering the entry it displaced (:issue:`1363`). Without a
+    record of that by-name write, handing a code back restored the code and left
+    the name behind (:issue:`1505`). A lease records what the write displaced and
+    which codes still dispatch to the class, so the last of them to be handed
+    back puts the displaced entry back, or removes the name if it was new.
+
+    A lease is one write, not one class: the same class can hold two leases on
+    a name -- e.g. a built-in registered at one port over a custom class
+    shadowing it at another -- and each undoes only its own write.
+
+    """
+
+    __slots__ = ('name', 'protocol', 'displaced', 'codes')
+
+    def __init__(self, name: 'str', protocol: 'Type[ProtocolBase]', displaced: 'Any') -> 'None':
+        #: The key written in :data:`pcapkit.protocols.__proto__`.
+        self.name = name
+        #: The class written under it.
+        self.protocol = protocol
+        #: The entry it displaced, or :data:`_MISSING` for a new name.
+        self.displaced = displaced
+        #: ``(destination, code)`` registrations still holding the lease.
+        self.codes = set()  # type: set[tuple[type, Any]]
+
+
+#: Name -> its leases, oldest first. Each lease displaced the one below it,
+#: unless the name was written by other means in between; the last is the one
+#: a lookup sees, unless the name has been written since.
+_NAME_LEASES = {}  # type: dict[str, list[_NameLease]]
+#: ``(destination, code)`` -> the lease its registration holds.
+_CODE_LEASES = {}  # type: dict[tuple[type, Any], _NameLease]
+#: Serialises the two tables above, so concurrent registrars cannot tear them.
+_LEASE_LOCK = threading.RLock()
+
+
+def _fold_lease(stack: 'list[_NameLease]', index: 'int') -> 'None':
+    """Retire ``stack[index]``, a lease now displacing its own class.
+
+    That happens once the lease between it and an earlier write of the same
+    class is handed back, e.g. a custom ``IPv4`` released from under the
+    built-in ``IPv4`` registered over it. Undoing it would change nothing, so
+    its codes move to the lease below when that is the same class, and
+    otherwise -- the class was named by other means -- hold nothing.
+
+    Args:
+        stack: The name's leases, oldest first.
+        index: Position of the lease to retire.
+
+    """
+    lease = stack.pop(index)
+    below = stack[index - 1] if index > 0 else None
+    if below is not None and below.protocol is not lease.protocol:
+        below = None
+    for target in lease.codes:
+        if _CODE_LEASES.get(target) is not lease:
+            continue
+        if below is None:
+            del _CODE_LEASES[target]
+        else:
+            below.codes.add(target)
+            _CODE_LEASES[target] = below
+
+
+def _release_name(target: 'tuple[type, Any]') -> 'None':
+    """Hand back the lease ``target``'s registration held.
+
+    Once no code holds the lease, it leaves its name's stack. On top, it puts
+    the name back to the entry it displaced, or removes a new name -- unless the
+    name was written by other means since, in which case that write stands.
+    Buried, it hands what it displaced to the lease above, if that lease
+    displaced it.
+
+    Args:
+        target: The ``(destination, code)`` being registered over.
+
+    """
+    lease = _CODE_LEASES.pop(target, None)
+    if lease is None:
+        return
+    lease.codes.discard(target)
+    if lease.codes:
+        return
+
+    stack = _NAME_LEASES.get(lease.name, [])
+    index = next((i for i, item in enumerate(stack) if item is lease), None)
+    if index is None:
+        return
+    del stack[index]
+    if index < len(stack):
+        above = stack[index]
+        if above.displaced is lease.protocol:
+            above.displaced = lease.displaced
+            if above.displaced is above.protocol:
+                _fold_lease(stack, index)
+    elif protocol_registry.get(lease.name) is lease.protocol:
+        if lease.displaced is _MISSING:
+            protocol_registry.pop(lease.name, None)
+        else:
+            protocol_registry[lease.name] = lease.displaced
+        logger.debug('released protocol: %s', lease.protocol.__name__)
+    if not stack:
+        _NAME_LEASES.pop(lease.name, None)
+
+
+def _register_name(protocol: 'Type[ProtocolBase]', *targets: 'tuple[type, Any]') -> 'None':
+    """Name ``protocol`` in :data:`pcapkit.protocols.__proto__` for ``targets``.
+
+    The tail of every code registrar: :func:`register_protocol`, preceded by
+    releasing whatever each target code held before, and followed by a lease
+    when the write changed the name, so that registering the code back undoes
+    it (:issue:`1505`). A name already showing ``protocol`` -- shipped, defined
+    by a :class:`~pcapkit.protocols.protocol.Protocol` subclass, or registered
+    directly -- is not leased, so no restore takes it away; one showing it
+    through a lease extends that lease to ``targets``.
+
+    Args:
+        protocol: Protocol class just registered -- and so validated -- at ``targets``.
+        *targets: The ``(destination, code)`` pairs it was registered at.
+
+    """
+    name = protocol.__name__.upper()
+    with _LEASE_LOCK:
+        stack = _NAME_LEASES.get(name)
+        if stack and stack[-1].protocol is protocol and protocol_registry.get(name) is protocol:
+            current = stack[-1]  # type: Optional[_NameLease]
+        else:
+            current = None
+        for target in targets:
+            if current is None or _CODE_LEASES.get(target) is not current:
+                _release_name(target)
+
+        incumbent = protocol_registry.get(name, _MISSING)
+        register_protocol(protocol)
+        if protocol_registry.get(name) is not protocol:
+            return
+
+        stack = _NAME_LEASES.get(name)
+        if incumbent is not protocol:
+            lease = _NameLease(name, protocol, incumbent)
+            _NAME_LEASES.setdefault(name, []).append(lease)
+        elif stack and stack[-1].protocol is protocol:
+            lease = stack[-1]
+        else:
+            return
+        lease.codes.update(targets)
+        for target in targets:
+            _CODE_LEASES[target] = lease
 
 
 #: Enum type -> the class(es) owning the :attr:`ProtocolBase.__proto__
@@ -413,7 +573,7 @@ def register_linktype(code: 'LinkType', module: 'str | ModuleDescriptor[Protocol
     # register protocol to protocol registry
     if isinstance(module, ModuleDescriptor):
         module = module.klass
-    register_protocol(module)
+    _register_name(module, (Frame, code), (PCAPNG, code))
 
 
 @overload
@@ -450,7 +610,7 @@ def register_pcap(code: 'LinkType', module: 'str | ModuleDescriptor[ProtocolBase
     # register protocol to protocol registry
     if isinstance(module, ModuleDescriptor):
         module = module.klass
-    register_protocol(module)
+    _register_name(module, (Frame, code))
 
 
 @overload
@@ -487,7 +647,7 @@ def register_pcapng(code: 'LinkType', module: 'str | ModuleDescriptor[ProtocolBa
     # register protocol to protocol registry
     if isinstance(module, ModuleDescriptor):
         module = module.klass
-    register_protocol(module)
+    _register_name(module, (PCAPNG, code))
 
 
 ###############################################################################
@@ -529,7 +689,7 @@ def register_ethertype(code: 'EtherType', module: 'str | ModuleDescriptor[Protoc
     # register protocol to protocol registry
     if isinstance(module, ModuleDescriptor):
         module = module.klass
-    register_protocol(module)
+    _register_name(module, (Link, code))
 
 
 ###############################################################################
@@ -571,7 +731,7 @@ def register_transtype(code: 'TransType', module: 'str | ModuleDescriptor[Protoc
     # register protocol to protocol registry
     if isinstance(module, ModuleDescriptor):
         module = module.klass
-    register_protocol(module)
+    _register_name(module, (Internet, code))
 
 
 # NOTE: pcapkit.protocols.internet.ipv4.IPv4.__option__
@@ -942,6 +1102,7 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
         TransportProtocol.tcp: TCP,
         TransportProtocol.udp: UDP,
     })
+    targets = []  # type: list[tuple[type, Any]]
     for proto in transport:
         # NOTE: a composite is not a key here, so ``tcp | udp`` is rejected
         # rather than quietly registering under both. Naming them one at a time
@@ -951,12 +1112,13 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
             raise RegistryError(f'unknown transport protocol: {proto.name}')
 
         cls.register(code, module)
+        targets.append((cls, code))
         logger.debug('registered %s port: %s', proto.name, code)
 
     # register protocol to protocol registry
     if isinstance(module, ModuleDescriptor):
         module = module.klass
-    register_protocol(module)
+    _register_name(module, *targets)
 
 
 @overload
@@ -995,7 +1157,7 @@ def register_tcp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Pro
     # register protocol to protocol registry
     if isinstance(module, ModuleDescriptor):
         module = module.klass
-    register_protocol(module)
+    _register_name(module, (TCP, code))
 
 
 # NOTE: pcapkit.protocols.transport.tcp.TCP.__option__
@@ -1084,7 +1246,7 @@ def register_udp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Pro
     # register protocol to protocol registry
     if isinstance(module, ModuleDescriptor):
         module = module.klass
-    register_protocol(module)
+    _register_name(module, (UDP, code))
 
 
 @overload
@@ -1128,7 +1290,7 @@ def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'str | M
     # register protocol to protocol registry
     if isinstance(module, ModuleDescriptor):
         module = module.klass
-    register_protocol(module)
+    _register_name(module, (SCTP, code))
 
 
 ###############################################################################
