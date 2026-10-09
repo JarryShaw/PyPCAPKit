@@ -5,16 +5,19 @@
 .. module:: pcapkit.protocols.application.http
 
 :mod:`pcapkit.protocols.application.http` contains
-:class:`~pcapkit.protocols.application.http.HTTP`
-only, which is a base class for Hypertext Transfer
+:class:`~pcapkit.protocols.application.http.HTTP`,
+which is a base class for Hypertext Transfer
 Protocol (HTTP) [*]_ family, eg.
 :class:`HTTP/1.* <pcapkit.protocols.application.httpv1.HTTP>`
-and :class:`HTTP/2 <pcapkit.protocols.application.httpv2.HTTP>`.
+and :class:`HTTP/2 <pcapkit.protocols.application.httpv2.HTTP>`,
+and :func:`~pcapkit.protocols.application.http.test_start_line`,
+which tells whether a payload opens with an HTTP/1.* start line.
 
 .. [*] https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol
 
 """
 import contextlib
+import re
 import struct
 from typing import TYPE_CHECKING, Generic, cast
 
@@ -30,7 +33,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal, Self
 
-__all__ = ['HTTP']
+__all__ = ['HTTP', 'test_start_line']
 
 #: The HTTP/2 connection preface (:rfc:`9113#section-3.4`). A client opens every
 #: HTTP/2 connection -- with prior knowledge, over TLS, or after an upgrade --
@@ -100,6 +103,99 @@ def _test_http2_frame(data: 'bytes') -> 'bool':
     if stream is None:
         return True
     return any(data[5:9]) is stream
+
+
+# Regular expression to match HTTP methods. Anchored at both ends: :func:`re.match`
+# anchors only at the start, so an unanchored pattern prefix-matches and accepts the
+# leading ``G`` of ``Get`` as a whole method token. Method tokens are case-sensitive
+# per :rfc:`9110#section-9.1`, so ``Get`` is not ``GET`` and must not parse as one.
+_RE_METHOD = re.compile(rb"(?P<method>[A-Z][A-Z-]*)\Z")  # RFC 9110, section 16.1.1, 9.1, 5.6.2
+# Regular expression to match HTTP version string.
+_RE_VERSION = re.compile(rb"HTTP/(?P<version>\d\.\d)")
+# Regular expression to match HTTP status code. Anchored for the same reason as
+# ``_RE_METHOD``, and it matters more here: this pattern is only a guard, and
+# ``httpv1.HTTP`` takes the value from ``int(para2)`` on the raw token, so an
+# unanchored prefix match would let ``200x`` and ``2000`` past the guard and then
+# out of ``int()`` as a bare ``ValueError`` -- where ``_read_http_header``
+# documents ``ProtocolError``.
+# :rfc:`9112#section-4` gives ``status-code = 3DIGIT``, exactly three -- the
+# grammar is in HTTP/1.1 because ``status-code`` is part of its ``status-line``
+# production; :rfc:`9110#section-15` covers the code semantics and registry, not
+# the syntax.
+_RE_STATUS = re.compile(rb'\d{3}\Z')
+
+# The HTTP/2 connection preface's header block, as ``httpv1.HTTP.read`` splits it
+# off at the first CRLFCRLF: ``PRI * HTTP/2.0``. A start line with zero field
+# lines, so the patterns above accept it; it is refused by name in
+# ``httpv1.HTTP._read_http_header`` and :func:`test_start_line` so that the
+# preface never parses as HTTP/1.
+_HTTP2_PREFACE_HEADER = _HTTP2_PREFACE.split(b'\r\n\r\n', maxsplit=1)[0]
+
+
+def test_start_line(data: 'bytes') -> 'bool':
+    """Whether ``data`` opens with an HTTP/1.* start line.
+
+    This is a *classification* predicate and parses nothing: it answers "is this
+    HTTP/1?" for :meth:`HTTP._guess_version
+    <pcapkit.protocols.application.http.HTTP._guess_version>`. Classifying by
+    trial-parsing every version in the family would decide a payload that is
+    not HTTP at all by which parser happened to fail less loudly.
+
+    Args:
+        data: Payload to classify.
+
+    Returns:
+        Whether the payload's first line is a ``request-line`` or a
+        ``status-line`` (:rfc:`9112#section-2.1`).
+
+    Note:
+        The acceptance rule is deliberately the *same* one
+        :meth:`HTTP._read_http_header
+        <pcapkit.protocols.application.httpv1.HTTP._read_http_header>` applies
+        -- ``_RE_METHOD`` with ``_RE_VERSION`` for a request, ``_RE_VERSION``
+        with ``_RE_STATUS`` for a response -- which is why those three patterns
+        are defined beside this predicate and
+        :mod:`~pcapkit.protocols.application.httpv1` imports them from here. The
+        two must accept the same start lines: a predicate looser than the parser
+        classifies payloads the parser then refuses, and one tighter than the
+        parser hands real HTTP/1 to a later arm.
+        ``test_start_line_predicate_agrees_with_the_httpv1_parser`` pins that
+        agreement.
+
+        The checks the parser performs *before* those patterns are mirrored too,
+        and this is not pedantry -- they are the whole reason the HTTP/2
+        connection preface is not claimed here. ``PRI *
+        HTTP/2.0\\r\\n\\r\\nSM\\r\\n\\r\\n`` is deliberately a well-formed
+        HTTP/1.1 *request line* (:rfc:`9113#section-3.4`), so a predicate that
+        tested only the first line would answer :data:`True` for it. Split at the
+        header/body separator first, as :meth:`HTTP.read
+        <pcapkit.protocols.application.httpv1.HTTP.read>` does, and the preface's
+        header is exactly ``PRI * HTTP/2.0`` (``_HTTP2_PREFACE_HEADER``), which
+        the parser refuses by name and so does this. Any *other* header with no
+        CRLF in it is a start line with zero field lines, which
+        :rfc:`9112#section-2.1` allows and both accept (:issue:`1041`).
+
+        An HTTP/0.9 request line carries only two tokens and so is not recognised
+        here either, matching the parser, which raises on fewer than three.
+
+    """
+    header = data.split(b'\r\n\r\n', maxsplit=1)[0]
+    if header == data:  # no header/body separator -- ``read`` raises
+        return False
+
+    if header == _HTTP2_PREFACE_HEADER:  # the preface -- ``_read_http_header`` raises
+        return False
+
+    startline = header.split(b'\r\n', maxsplit=1)[0]
+    try:
+        para1, para2, para3 = re.split(rb'\s+', startline, maxsplit=2)
+    except ValueError:
+        return False
+
+    return bool(
+        (re.match(_RE_METHOD, para1) and re.match(_RE_VERSION, para3))     # request-line
+        or (re.match(_RE_VERSION, para1) and re.match(_RE_STATUS, para2))  # status-line
+    )
 
 
 class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
@@ -473,14 +569,12 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
             return http
 
         from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
-        from pcapkit.protocols.application.httpv1 import \
-            _test_start_line  # isort: skip # pylint: disable=import-outside-toplevel
 
         # NOTE: The second identification: an HTTP/1 ``request-line`` or
         # ``status-line``, tested with the very patterns ``httpv1.HTTP`` parses
-        # with (``httpv1.py``'s ``_RE_METHOD``, ``_RE_VERSION`` and
-        # ``_RE_STATUS``, all anchored), so the predicate and the parser cannot
-        # disagree about what HTTP/1 looks like.
+        # with (``_RE_METHOD``, ``_RE_VERSION`` and ``_RE_STATUS`` above, all
+        # anchored, which ``httpv1.py`` imports from this module), so the
+        # predicate and the parser cannot disagree about what HTTP/1 looks like.
         #
         # Identified means *committed*: a malformed HTTP/1 message is reported as
         # such instead of being handed to the HTTP/2 arm, which accepts any
@@ -494,7 +588,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         # pins that a :exc:`struct.error` -- or pcapkit's own ``StructError``,
         # whose ``eof`` flag ``NoPayload`` handling reads -- reaches the caller
         # from this route rather than being converted or swallowed.
-        if _test_start_line(self._data[:length]):
+        if test_start_line(self._data[:length]):
             return HTTPv1(self._data, length, **kwargs)
 
         # NOTE: Neither identification matched, so this is the fall-through: a

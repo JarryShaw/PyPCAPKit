@@ -699,8 +699,7 @@ class HTTPUnitTests(unittest.TestCase):
         """
         import io
 
-        from pcapkit.protocols.application.http import HTTP
-        from pcapkit.protocols.application.httpv1 import _test_start_line
+        from pcapkit.protocols.application.http import HTTP, test_start_line
         from pcapkit.utilities.exceptions import ProtocolError
 
         preface = b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'
@@ -715,7 +714,7 @@ class HTTPUnitTests(unittest.TestCase):
             with self.subTest(case=label):
                 # Neither identification claims it ...
                 self.assertFalse(raw.startswith(preface))
-                self.assertFalse(_test_start_line(raw))
+                self.assertFalse(test_start_line(raw))
                 # ... and the fall-through refuses it rather than guessing.
                 with self.assertRaises(ProtocolError):
                     HTTP(io.BytesIO(raw), len(raw))
@@ -740,8 +739,7 @@ class HTTPUnitTests(unittest.TestCase):
         """
         import io
 
-        from pcapkit.protocols.application.http import HTTP
-        from pcapkit.protocols.application.httpv1 import _test_start_line
+        from pcapkit.protocols.application.http import HTTP, test_start_line
         from pcapkit.utilities.exceptions import ProtocolError
 
         cases = (
@@ -752,18 +750,18 @@ class HTTPUnitTests(unittest.TestCase):
 
         for label, raw in cases:
             with self.subTest(case=label):
-                self.assertTrue(_test_start_line(raw))
+                self.assertTrue(test_start_line(raw))
                 with self.assertRaises(ProtocolError) as ctx:
                     HTTP(io.BytesIO(raw), len(raw))
                 self.assertEqual(str(ctx.exception), 'HTTP: invalid format')
 
     def test_start_line_predicate_agrees_with_the_httpv1_parser(self) -> None:
-        """``_test_start_line`` must accept exactly what ``httpv1.HTTP`` accepts.
+        """``test_start_line`` must accept exactly what ``httpv1.HTTP`` accepts.
 
         The predicate classifies and the parser parses, and they are two
-        statements of the same rule -- which is why the predicate lives beside
-        ``_RE_METHOD``/``_RE_VERSION``/``_RE_STATUS`` in ``httpv1.py`` rather
-        than in the dispatcher. Drift either way is a defect: a predicate looser
+        statements of the same rule -- which is why the two share one copy of
+        ``_RE_METHOD``/``_RE_VERSION``/``_RE_STATUS``, defined in ``http.py``
+        beside the predicate and imported by ``httpv1.py`` (#1519). Drift either way is a defect: a predicate looser
         than the parser classifies payloads the parser then refuses, and a
         tighter one hands real HTTP/1 to a later arm, which is the mislabel #787
         and #800 are both about.
@@ -775,8 +773,8 @@ class HTTPUnitTests(unittest.TestCase):
         """
         import io
 
+        from pcapkit.protocols.application.http import test_start_line
         from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
-        from pcapkit.protocols.application.httpv1 import _test_start_line
         from pcapkit.utilities.exceptions import ProtocolError
 
         accepted = (
@@ -803,13 +801,13 @@ class HTTPUnitTests(unittest.TestCase):
 
         for label, raw in accepted:
             with self.subTest(accepted=label):
-                self.assertTrue(_test_start_line(raw))
+                self.assertTrue(test_start_line(raw))
                 # The parser agrees: it reads this without raising.
                 self.assertIn(HTTPv1(io.BytesIO(raw), len(raw)).version, ('1.0', '1.1'))
 
         for label, raw in refused:
             with self.subTest(refused=label):
-                self.assertFalse(_test_start_line(raw))
+                self.assertFalse(test_start_line(raw))
                 # The parser agrees: it refuses this at the start line.
                 with self.assertRaises(ProtocolError):
                     HTTPv1(io.BytesIO(raw), len(raw))
@@ -830,8 +828,7 @@ class HTTPUnitTests(unittest.TestCase):
         """
         import io
 
-        from pcapkit.protocols.application.http import HTTP
-        from pcapkit.protocols.application.httpv1 import _test_start_line
+        from pcapkit.protocols.application.http import HTTP, test_start_line
         from pcapkit.utilities.exceptions import ProtocolError
 
         preface = b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'
@@ -839,7 +836,7 @@ class HTTPUnitTests(unittest.TestCase):
 
         # Neither identification fires, so this reaches the fall-through.
         self.assertFalse(settings.startswith(preface))
-        self.assertFalse(_test_start_line(settings))
+        self.assertFalse(test_start_line(settings))
 
         guessed = HTTP(io.BytesIO(settings), len(settings))
         self.assertEqual(guessed.version, '2')
@@ -1059,15 +1056,15 @@ class HTTPUnitTests(unittest.TestCase):
         :rfc:`9112#section-2.1` gives ``*( field-line CRLF )``, so zero fields is
         legal. The header block is then the start line alone, with no CRLF in
         it, which ``_read_http_header`` used to refuse as malformed. Asserted
-        through the dispatcher too: ``_test_start_line`` mirrored that refusal,
+        through the dispatcher too: ``test_start_line`` mirrored that refusal,
         so ``HTTP`` answered ``unknown HTTP version`` for the same bytes.
 
         """
         import io
 
-        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.protocols.application.http import HTTP, test_start_line
         from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
-        from pcapkit.protocols.application.httpv1 import Type, _test_start_line
+        from pcapkit.protocols.application.httpv1 import Type
 
         raw = b'GET / HTTP/1.0\r\n\r\n'
         proto = HTTPv1(io.BytesIO(raw), len(raw))
@@ -1080,16 +1077,16 @@ class HTTPUnitTests(unittest.TestCase):
         self.assertIsNone(proto.info.body)
         self.assertEqual(proto.length, len(b'GET / HTTP/1.0'))
 
-        self.assertTrue(_test_start_line(raw))
+        self.assertTrue(test_start_line(raw))
         self.assertEqual(HTTP(io.BytesIO(raw), len(raw)).version, '1.0')
 
     def test_httpv1_reads_a_response_with_no_header_fields_and_a_body(self) -> None:
         """A status line, the empty line, then a body parses (#1041)."""
         import io
 
-        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.protocols.application.http import HTTP, test_start_line
         from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
-        from pcapkit.protocols.application.httpv1 import Type, _test_start_line
+        from pcapkit.protocols.application.httpv1 import Type
 
         raw = b'HTTP/1.0 200 OK\r\n\r\nbody'
         proto = HTTPv1(io.BytesIO(raw), len(raw))
@@ -1101,7 +1098,7 @@ class HTTPUnitTests(unittest.TestCase):
         self.assertEqual(len(proto.info.header), 0)
         self.assertEqual(proto.info.body, b'body')
 
-        self.assertTrue(_test_start_line(raw))
+        self.assertTrue(test_start_line(raw))
         self.assertEqual(HTTP(io.BytesIO(raw), len(raw)).version, '1.0')
 
     def test_httpv1_make_read_round_trips_a_message_with_no_header_fields(self) -> None:
@@ -1179,9 +1176,8 @@ class HTTPUnitTests(unittest.TestCase):
         """
         import io
 
-        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.protocols.application.http import HTTP, test_start_line
         from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
-        from pcapkit.protocols.application.httpv1 import _test_start_line
         from pcapkit.utilities.exceptions import ProtocolError
 
         cases = (
@@ -1195,7 +1191,7 @@ class HTTPUnitTests(unittest.TestCase):
                 with self.assertRaises(ProtocolError) as ctx:
                     HTTPv1(io.BytesIO(raw), len(raw))
                 self.assertEqual(str(ctx.exception), 'HTTP: invalid format')
-                self.assertFalse(_test_start_line(raw))
+                self.assertFalse(test_start_line(raw))
 
                 with self.assertRaises(ProtocolError) as ctx:
                     HTTP(io.BytesIO(raw), len(raw))
@@ -1725,7 +1721,7 @@ class HTTPUnitTests(unittest.TestCase):
         """
         import re
 
-        from pcapkit.protocols.application.httpv1 import _RE_METHOD
+        from pcapkit.protocols.application.http import _RE_METHOD
 
         for probe, expected in ((b'GET', b'GET'),
                                 (b'POST', b'POST'),
