@@ -259,6 +259,7 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
              type_reversed: 'bool' = False,
              seg_left: 'int' = 0,
              data: 'bytes | Data_IPv6_Route | Schema_RoutingType | dict[str, Any]' = b'\x00\x00\x00\x00',
+             hdr_ext_len: 'Optional[int]' = None,
              payload: 'ProtocolBase | Schema | bytes' = b'',
              **kwargs: 'Any') -> 'Schema_IPv6_Route':
         """Make (construct) packet data.
@@ -275,6 +276,8 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             type_reversed: If the namespace of routing type is reversed.
             seg_left: Segments left.
             data: Routing data.
+            hdr_ext_len: ``Hdr Ext Len`` field value; computed from ``data``
+                when omitted.
             payload: Payload of current instance.
             **kwargs: Arbitrary keyword arguments.
 
@@ -335,6 +338,13 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             data_val = data
         else:
             raise ProtocolError(f'{self.alias}: invalid routing data type: {data.__class__}')
+
+        # NOTE: An explicit ``hdr_ext_len`` is written as given, so that a
+        # ``from_data`` rebuild of a header the capture cut short keeps the
+        # length the sender declared instead of the one that was recorded
+        # (:issue:`1457`), the same as IPv6's ``payload_length``.
+        if hdr_ext_len is not None:
+            length = hdr_ext_len
 
         return Schema_IPv6_Route(
             next=next_val,
@@ -450,6 +460,11 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             'type': data.type,
             'seg_left': data.seg_left,
             'data': data,
+            # NOTE: ``data.length`` is the parsed header length in octets,
+            # passed through as ``Hdr Ext Len`` rather than left to ``make`` to
+            # recompute, so that a truncated capture rebuilds with the length
+            # that was on the wire (:issue:`1457`).
+            'hdr_ext_len': (data.length - 8) // 8,
             'payload': cls._make_payload(data),
         }
 
@@ -784,6 +799,7 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
         Raises:
             FieldValueError: If an entry of ``ip`` is a :obj:`bool` (c.f.
                 :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`).
+            ProtocolError: If ``ip`` is empty.
 
         """
         if route is not None:
@@ -792,8 +808,20 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             pad = route.pad
             reserved = route.reserved
             padding = getattr(route, 'padding', b'')
+
+            # NOTE: A parsed address is decoded to its full 16 octets whenever
+            # the header sat inside IPv6, the ``dst`` prefix restored, so it is
+            # compressed again here: ``Addresses[n]`` by ``CmprE``, every other
+            # one by ``CmprI``. Which item is ``Addresses[n]`` comes from the
+            # count ``Hdr Ext Len`` declares (:rfc:`6554#section-4.2`), since a
+            # capture cut inside the list holds fewer; one it cut short is left
+            # as the raw :obj:`bytes` read and written back as is.
+            area = route.length - 8 - pad
+            count = max(area - (16 - cmpr_e), 0) // (16 - cmpr_i) + 1
+            last = max(len(route.ip), count) - 1
             ip_val = [
-                addr if isinstance(addr, bytes) else addr.packed for addr in route.ip
+                addr if isinstance(addr, bytes) else addr.packed[cmpr_e if index == last else cmpr_i:]
+                for index, addr in enumerate(route.ip)
             ]
         else:
             ip = [] if ip is None else ip
@@ -805,6 +833,12 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             # corrupting the compression metadata: ``ip=[True]`` would pack an
             # address of ``00000001`` with ``cmpr_e=0``.
             descr = f'{self.alias}: invalid RPL source address'
+
+            # NOTE: :rfc:`6554#section-4.2` counts ``n`` as ``(...) + 1``, so
+            # a header always carries ``Addresses[n]``; one with none would not
+            # parse back.
+            if not ip:
+                raise ProtocolError(f'{self.alias}: [TypeNo {type}] RPL source route needs at least one address')
 
             if dst is None:
                 pad = 0
@@ -821,7 +855,13 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
                     else:
                         test_list.append(cast('IPv6Address', parse_ip_address(item, descr, version=6)).packed)
                 prefix_i = os_path.commonprefix(test_list)
-                cmpr_i = len(prefix_i)
+
+                # NOTE: ``CmprI`` and ``CmprE`` are 4-bit fields
+                # (:rfc:`6554#section-3`), so a prefix of all 16 octets -- an
+                # address equal to ``dst``, or no ``Addresses[1..n-1]`` at all,
+                # which leaves ``dst`` alone in the list -- is elided as 15. With
+                # no ``Addresses[1..n-1]``, ``CmprI`` governs nothing and is 0.
+                cmpr_i = min(len(prefix_i), 15) if len(ip) > 1 else 0
 
                 test_list = [dst.packed]
                 if isinstance(ip[-1], bytes):
@@ -829,7 +869,7 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
                 else:
                     test_list.append(cast('IPv6Address', parse_ip_address(ip[-1], descr, version=6)).packed)
                 prefix_e = os_path.commonprefix(test_list)
-                cmpr_e = len(prefix_e)
+                cmpr_e = min(len(prefix_e), 15)
 
                 # NOTE: the outer ``% 8`` keeps an already 8-octet-aligned
                 # vector from being handed a *full* 8 octets of padding
