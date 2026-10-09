@@ -25,6 +25,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import pathlib
+import plistlib
 import tempfile
 import unittest
 import xml.etree.ElementTree as ET
@@ -71,23 +72,29 @@ class PlistKeyEscapingTests(unittest.TestCase):
         return output
 
     def test_the_plist_report_of_a_bytes_keyed_mapping_parses(self) -> None:
-        """The regression itself: the document has to be well-formed XML.
+        """The regression itself: the document has to be a readable property list.
 
-        :func:`plistlib.load` cannot stand in for the parser here --
-        ``dictdumper`` writes a ``<date>`` with fractional seconds, which it
-        rejects for reasons that have nothing to do with #772 (see
-        ``PlistRoundTripTests`` in
-        :file:`tests/integration/test_output_formats.py`) -- so this asserts
-        well-formedness with :mod:`xml.etree.ElementTree` and then reads the key
-        back out of the tree rather than out of the text, which is the part a
-        string comparison would not have caught.
+        This reads the report back with :func:`plistlib.load` and then takes the
+        key from the parsed mappings rather than from the text, which is the
+        part a string comparison would not have caught.
 
         """
         report = self.report('test.pcapng', 'plist')
 
-        keys = [element.text for element in ET.parse(report).iter('key')]
+        keys = []  # type: list[str]
+
+        def collect(node: 'object') -> 'None':
+            if isinstance(node, dict):
+                keys.extend(node)
+                node = list(node.values())
+            if isinstance(node, list):
+                for item in node:
+                    collect(item)
+
+        with report.open('rb') as stream:
+            collect(plistlib.load(stream))
         self.assertIn(ESCAPED_BYTES_KEY, report.read_text(encoding='utf-8'))
-        # ElementTree resolves the entities, so the key comes back as the octets
+        # The parser resolves the entities, so the key comes back as the octets
         # the fixture holds: escaping is a transport detail, not a rename.
         self.assertIn(RAW_BYTES_KEY, keys)
 

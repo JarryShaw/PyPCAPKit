@@ -335,6 +335,11 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
     # report has (GitHub issue #1257). The defect is :mod:`dictdumper`'s, so it
     # is worked around here.
     keep_none = issubclass(output, dictdumper.plist.PLIST)
+    # NOTE: :meth:`~dictdumper.plist.PLIST._append_date` writes every date with
+    # six fractional digits, which the property list ``<date>`` grammar does not
+    # admit, so :func:`plistlib.load` rejects every report (GitHub issue #1448).
+    # The defect is :mod:`dictdumper`'s, so it is worked around here.
+    plist_dates = issubclass(output, dictdumper.plist.PLIST)
     # NOTE: :meth:`~dictdumper.tree.Tree._append_number` hands every number to
     # :func:`math.isnan`, which raises :exc:`TypeError` for a :class:`complex`
     # one, although :class:`~dictdumper.tree.Tree` routes :class:`complex` there
@@ -523,6 +528,41 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                 """
                 value = [self._encode_value(item) if item is None else item for item in value]
                 super()._append_array(value, file)
+
+        if plist_dates:
+            def _append_date(self, value: 'datetime.date', file: 'TextIO') -> 'None':
+                """Call this function to write date contents.
+
+                Args:
+                    self: Dumper instance.
+                    value: Content to be dumped.
+                    file: Output file.
+
+                Notes:
+                    The date is written in UTC to whole seconds, as
+                    :func:`plistlib.dump` writes one: an aware value is
+                    converted to UTC first, a naive one is taken as UTC already,
+                    and the sub-second part of the :class:`~datetime.datetime`
+                    is truncated. That value is already rounded to the
+                    microsecond where it is parsed, so within half a microsecond
+                    of a second boundary the date is one second past the floor
+                    of a finer ``*_epoch``. The exact value is not
+                    lost: every timestamp pcapkit reports sits next to a field
+                    that carries it exactly -- a :class:`~decimal.Decimal`
+                    ``*_epoch`` for frames and PCAP-NG blocks and options, e.g.
+                    ``time_epoch``, and the raw ``ntp_timestamp`` or
+                    ``pmip_timestamp`` for the two MH options.
+
+                """
+                if isinstance(value, datetime.datetime) and value.tzinfo is not None:
+                    value = value.astimezone(datetime.timezone.utc)
+                # NOTE: not :meth:`~datetime.date.strftime`, whose ``%Y`` does not
+                # zero-pad a year below 1000 on every platform.
+                hour, minute, second = (getattr(value, name, 0)
+                                        for name in ('hour', 'minute', 'second'))
+                tabs = '\t' * self._tctr
+                file.write(f'{tabs}<date>{value.year:04d}-{value.month:02d}-{value.day:02d}'
+                           f'T{hour:02d}:{minute:02d}:{second:02d}Z</date>\n')
 
         if escape_json_keys:
             def _append_string(self, value: 'str', file: 'TextIO') -> 'None':

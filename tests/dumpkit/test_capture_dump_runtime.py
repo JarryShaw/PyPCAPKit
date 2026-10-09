@@ -59,17 +59,7 @@ class Gap(NamedTuple):
 
 
 #: Every check that fails today, by test method; each applies to every capture.
-KNOWN_FAILURES = {
-    'test_plist_dump_reads_back_through_plistlib': Gap(
-        1448, 'AttributeError',
-        "dictdumper/plist.py:278 writes each timestamp as '%Y-%m-%dT%H:%M:%S.%fZ', "
-        'and a property list <date> has no fractional part, so plistlib.load '
-        "raises AttributeError: 'NoneType' object has no attribute 'groupdict' on "
-        "every capture's first frame. Repro: extract(fin='in.pcap', fout='o', "
-        "format='plist'); plistlib.load(open('o.plist', 'rb')). Also skipped, "
-        'citing #1448, in tests/integration/test_output_formats.py PlistRoundTripTests.',
-    ),
-}
+KNOWN_FAILURES = {}  # type: dict[str, Gap]
 
 
 def captures(pcapng: 'bool' = True) -> 'list[str]':
@@ -107,8 +97,7 @@ def sections(fmt: 'str', path: 'str') -> 'list[str]':
         with open(path, encoding='utf-8') as file:
             return list(json.load(file))
     if fmt == 'plist':
-        # ElementTree, not plistlib, which cannot read the dump at all; see
-        # :data:`KNOWN_FAILURES`.
+        # ElementTree, so the plistlib test below is checked against an independent reader.
         root = ET.parse(path).getroot()
         return [key.text or '' for key in root[0].findall('key')]
     with open(path, encoding='utf-8') as file:

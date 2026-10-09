@@ -110,33 +110,21 @@ class PlistReportTests(EndToEndTestCase):
         self.assertEqual(plist_keys(extractor.output), IN_PCAP_SECTIONS)
 
 
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class PlistRoundTripTests(EndToEndTestCase):
-    """The property list report against a real property list reader.
+    """The property list report against a real property list reader."""
 
-    Kept apart from :class:`PlistReportTests` so that the skip below covers only
-    the reader, and the structural assertions above keep running.
-
-    """
-
-    @unittest.skip('blocked on dictdumper writing <date> values with fractional seconds, '
-                   'which plistlib rejects (dictdumper/plist.py:278, #1448)')
     def test_plist_report_round_trips_through_plistlib(self) -> None:
-        """A ``plist`` report should be readable by :func:`plistlib.load`.
+        """A ``plist`` report is readable by :func:`plistlib.load` (GitHub issue #1448).
 
-        It is not. ``dictdumper/plist.py:278`` formats every timestamp as
-        ``'%Y-%m-%dT%H:%M:%S.%fZ'``, and a property list ``<date>`` carries no
-        fractional part, so :func:`plistlib.load` fails on the first frame's
-        ``time`` with ``AttributeError: 'NoneType' object has no attribute
-        'groupdict'`` -- its date pattern simply does not match. Reproduce with::
-
-            >>> import dictdumper, datetime, plistlib
-            >>> dictdumper.PLIST('probe.plist')({'time': datetime.datetime.now()})
-            >>> plistlib.load(open('probe.plist', 'rb'))
-
-        The assertions below are what a fixed writer should satisfy, so this
-        test can simply be un-skipped once the dumper emits a conformant date.
+        ``dictdumper`` writes a ``<date>`` with fractional seconds, which
+        :mod:`plistlib` rejects; :mod:`pcapkit.dumpkit` writes it to whole
+        seconds instead, and the exact value stays in ``time_epoch``. The date
+        is compared as naive UTC, since ``aware_datetime`` is new in Python 3.13.
 
         """
+        import datetime
+        import decimal
         import plistlib
 
         extractor = self.extract(fin=sample_path('in.pcap'), fout=self.out('report'),
@@ -147,6 +135,9 @@ class PlistRoundTripTests(EndToEndTestCase):
 
         self.assertEqual(list(report), IN_PCAP_SECTIONS)
         self.assertEqual(report['Frame 1']['protocols'], IN_PCAP_FIRST_CHAIN)
+        self.assertEqual(report['Frame 1']['time'],
+                         datetime.datetime(2017, 11, 19, 15, 49, 5))
+        self.assertEqual(decimal.Decimal(report['Frame 1']['time_epoch']), decimal.Decimal('1511106545.471719'))
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
