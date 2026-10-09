@@ -96,6 +96,9 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
                  item_type: 'Optional[FieldBase]' = None,
                  callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
         #self._name = '<list>'
+        if not hasattr(self, '_name'):
+            self._name = f'<{type(self).__name__[:-5].lower()}>'
+
         self._callback = callback
         self._item_type = item_type
 

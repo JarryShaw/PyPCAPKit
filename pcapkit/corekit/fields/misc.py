@@ -307,7 +307,9 @@ class PayloadField(FieldBase[_TP]):
                  default: '_TP | NoValueType | bytes' = NO_VALUE,
                  protocol: 'Optional[Type[_TP] | str]' = None,
                  callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
-        #self._name = '<payload>'
+        if not hasattr(self, '_name'):
+            self._name = f'<{type(self).__name__[:-5].lower()}>'
+
         self._default = default  # type: ignore[assignment]
 
         # NOTE: Through the property rather than straight to ``_protocol``, so a
@@ -652,7 +654,9 @@ class SchemaField(FieldBase[_TS]):
                  default: '_TS | NoValueType | bytes' = NO_VALUE,
                  packet: 'Optional[dict[str, Any]]' = None,
                  callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
-        #self._name = '<schema>'
+        if not hasattr(self, '_name'):
+            self._name = f'<{type(self).__name__[:-5].lower()}>'
+
         self._callback = callback
 
         if packet is None:
