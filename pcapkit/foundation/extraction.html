@@ -602,6 +602,11 @@ engine is not available, c.f. <a class="reference internal" href="#pcapkit.found
 requested while the extraction engine is PyShark.</p></li>
 </ul>
 </dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – If <code class="docutils literal notranslate"><span class="pre">fin</span></code> is a stream without a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> <code class="docutils literal notranslate"><span class="pre">name</span></code>
+    and the engine that will run – Scapy, PyShark, PyPCAP or
+    pcap-ct – opens its input by path.</p>
+</dd>
 </dl>
 </dd></dl>
 
@@ -627,6 +632,8 @@ requested while the extraction engine is PyShark.</p></li>
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor.input">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">input</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor.input" title="Link to this definition">¶</a></dt>
 <dd><p>Name of input PCAP file.</p>
+<p>For a binary IO object without a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> <code class="docutils literal notranslate"><span class="pre">name</span></code>, a placeholder
+naming its type, e.g. <code class="docutils literal notranslate"><span class="pre">&lt;BytesIO&gt;</span></code>.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -924,7 +931,8 @@ rules it out, or the supplied engine is unknown.</p>
 <ol class="arabic simple">
 <li><p>sanitise <code class="docutils literal notranslate"><span class="pre">fin</span></code> as the input PCAP filename; <code class="docutils literal notranslate"><span class="pre">in.pcap</span></code> as default value and
 append <code class="docutils literal notranslate"><span class="pre">.pcap</span></code> extension if needed and <code class="docutils literal notranslate"><span class="pre">extension</span></code> is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>; as well
-as test if the file exists; for a binary IO object, use its <code class="docutils literal notranslate"><span class="pre">name</span></code>;</p></li>
+as test if the file exists; for a binary IO object, use its <code class="docutils literal notranslate"><span class="pre">name</span></code>,
+or a placeholder such as <code class="docutils literal notranslate"><span class="pre">&lt;BytesIO&gt;</span></code> if it has no <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> one;</p></li>
 <li><p>if <code class="docutils literal notranslate"><span class="pre">nofile</span></code> is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, skips following processing;</p></li>
 <li><p>look up the output file extension registered for <code class="docutils literal notranslate"><span class="pre">fmt</span></code>; should none be
 registered, then it raises <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FormatError</span></code></a>;</p></li>
