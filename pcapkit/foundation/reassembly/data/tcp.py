@@ -4,7 +4,8 @@
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from pcapkit.corekit.infoclass import Info, info_final
-from pcapkit.foundation.reassembly.data.data import Completion, Deferred, DeferredPacket
+from pcapkit.corekit.packet import DeferredPacket
+from pcapkit.foundation.reassembly.data.data import Completion, Deferred
 from pcapkit.utilities.compat import Tuple
 
 __all__ = [
@@ -92,8 +93,11 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     #: as it would for a :obj:`bool`.
     completed: 'Completion'
     #: Listing ``packet`` here is what makes it lazy -- see
-    #: :class:`~pcapkit.foundation.reassembly.data.data.DeferredPacket`.
+    #: :class:`~pcapkit.corekit.packet.DeferredPacket`.
     __additional__ = ['packet']
+    #: Placeholder class :attr:`packet` may hold, for
+    #: :class:`~pcapkit.corekit.packet.DeferredPacket` to resolve.
+    __deferred__ = Deferred
 
     #: Original packet identifier.
     id: 'DatagramID[_AT]'

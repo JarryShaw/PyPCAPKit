@@ -4,7 +4,8 @@
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from pcapkit.corekit.infoclass import Info, info_final
-from pcapkit.foundation.traceflow.data.data import Deferred, DeferredPacket
+from pcapkit.corekit.packet import DeferredPacket
+from pcapkit.foundation.traceflow.data.data import Deferred
 from pcapkit.utilities.compat import Tuple
 
 __all__ = ['BufferID', 'Packet', 'Buffer', 'Index']
@@ -158,8 +159,11 @@ class Index(DeferredPacket, Info):
     """
 
     #: Listing ``packet`` here is what makes :attr:`packet` lazy -- see
-    #: :class:`~pcapkit.foundation.traceflow.data.data.DeferredPacket`.
+    #: :class:`~pcapkit.corekit.packet.DeferredPacket`.
     __additional__ = ['packet']
+    #: Placeholder class :attr:`packet` may hold, for
+    #: :class:`~pcapkit.corekit.packet.DeferredPacket` to resolve.
+    __deferred__ = Deferred
 
     #: Output filename if exists.
     fpout: 'Optional[str]'

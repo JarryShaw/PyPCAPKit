@@ -5,12 +5,13 @@ from typing import TYPE_CHECKING
 
 from pcapkit.corekit.enum import EnumLookup
 from pcapkit.corekit.infoclass import Info, info_final
+from pcapkit.corekit.packet import DeferredPacket
 from pcapkit.utilities.compat import StrEnum, auto
 
 __all__ = ['ReassemblyData', 'Completion', 'Deferred', 'DeferredPacket']
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Optional
+    from typing import Callable, Optional
 
     from pcapkit.const.reg.transtype import TransType
     from pcapkit.foundation.reassembly.data.ip import Datagram as IP_Datagram
@@ -124,9 +125,9 @@ class Deferred:
     :file:`http.pcap` pass against 1117.
 
     Holding the call here defers it to the first read of
-    :attr:`Datagram.packet`, so a caller that wants the parsed payload still gets
-    exactly the object an eager call would produce, and one that does not never
-    pays for it.
+    :attr:`Datagram.packet`, where :class:`~pcapkit.corekit.packet.DeferredPacket`
+    runs it, so a caller that wants the parsed payload still gets exactly the
+    object an eager call would produce, and one that does not never pays for it.
 
     Args:
         analyze: The analyser to call, i.e.
@@ -153,86 +154,6 @@ class Deferred:
 
         """
         return self.analyze(self.proto, self.payload)
-
-
-class DeferredPacket:
-    """Resolves a :class:`Deferred` ``packet`` field on first read.
-
-    A reassembled datagram's ``packet`` is the parsed form of the payload it just
-    reassembled, and both reassemblers can hand a :class:`Deferred` in its place.
-    This carries the reading half of that arrangement, so the two ``Datagram``
-    models share it rather than each declaring it.
-
-    A subclass has to list ``packet`` in its ``__additional__``. That is what makes
-    the field lazy at all: :class:`~pcapkit.corekit.infoclass.Info` stores a field
-    whose name is a *builtin* name under a mangled key and maps it back on the way
-    out, so ``packet`` never lands in :attr:`~object.__dict__` itself -- which
-    routes reading it through :meth:`__getattr__`, where the deferred analysis can
-    run, while ``dict(datagram)``, :meth:`to_dict` and iteration still report the
-    field under its own name.
-
-    """
-
-    # NOTE: the ``super()`` calls below are suppressed for both checkers. They are
-    # undefined *on this mixin*, which is what a mixin is -- the base arrives at
-    # the point of use, where every subclass is declared
-    # ``class X(DeferredPacket, Info)`` and :class:`~pcapkit.corekit.infoclass.Info`
-    # supplies all three. Neither mypy nor pylint can see that from here, and
-    # pylint calls it an *error* rather than a warning.
-
-    def __analyse__(self) -> 'Optional[ProtocolBase]':
-        """Resolve a deferred analysis, at most once.
-
-        Returns:
-            Parsed payload, or :data:`None` for a datagram reported as the tuple
-            of its received runs.
-
-        """
-        key = self.__map__.get('packet', 'packet')
-        value = self.__dict__[key]
-        if isinstance(value, Deferred):
-            value = value()
-            self.__dict__[key] = value
-        return value
-
-    def __getattr__(self, name: 'str') -> 'Any':
-        # NOTE: reached only for names absent from ``__dict__``, which ``packet``
-        # always is -- see ``__additional__`` above. Everything else has to raise,
-        # or a typo would silently answer with a parsed payload.
-        if name != 'packet':
-            raise AttributeError(f'{type(self).__name__!r} object has no attribute {name!r}')
-        return self.__analyse__()
-
-    def __getitem__(self, name: 'str') -> 'Any':
-        if name == 'packet':
-            return self.__analyse__()
-        return super().__getitem__(name)  # type: ignore[misc] # pylint: disable=no-member
-
-    def __contains__(self, name: 'object') -> 'bool':
-        # NOTE: ``Mapping.__contains__`` answers by fetching the value, which
-        # would run the deferred analysis merely to decide that the field exists.
-        # ``packet`` is a declared field, so it is always there.
-        return name == 'packet' or super().__contains__(name)  # type: ignore[misc] # pylint: disable=no-member
-
-    def __str__(self) -> 'str':
-        self.__analyse__()
-        return super().__str__()
-
-    def __repr__(self) -> 'str':
-        self.__analyse__()
-        return super().__repr__()
-
-    def to_dict(self) -> 'dict[str, Any]':
-        """Convert :class:`Datagram` into :obj:`dict`.
-
-        Returns:
-            The datagram's fields, with ``packet`` analysed if it had not been
-            read yet -- a :obj:`dict` holding a :class:`Deferred` would leak an
-            implementation detail into what is meant to be plain data.
-
-        """
-        self.__analyse__()
-        return super().to_dict()  # type: ignore[misc] # pylint: disable=no-member
 
 
 @info_final
