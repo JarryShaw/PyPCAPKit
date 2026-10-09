@@ -12,12 +12,19 @@ The six fixtures and what each is for are documented in the module docstring of
 :file:`examples/generators/pcapng.py`, which also records the parser defects
 they provoke -- those show up as log noise here and are not assertions.
 
+The ``many_interfaces.pcapng`` counts are those of the upstream download. When
+the download fails the generator writes a 24-frame stand-in instead, and
+:func:`~tests._support.skip_if_stand_in` turns each assertion pinned to upstream
+into a skip rather than a failure (#1478). The ``dhcp_big_endian.pcapng``
+stand-in is built to upstream's four-frame inventory, so it is asserted either
+way.
+
 """
 from __future__ import annotations
 
 import unittest
 
-from tests._support import sample_path
+from tests._support import sample_path, skip_if_stand_in
 from tests.integration._helpers import (HAS_RUNTIME, EndToEndTestCase, read_json, report_stems,
                                         section_counts)
 
@@ -30,6 +37,10 @@ PCAPNG_FRAMES = {
     'test.pcapng': 5,
     'profile.pcapng': 40,
 }
+
+#: Fixtures whose counts above hold for the upstream download only, not for the
+#: stand-in the generator synthesises when that download fails (#1478).
+UPSTREAM_ONLY_COUNTS = frozenset({'many_interfaces.pcapng'})
 
 #: Block inventory of each fixture whose report can be read back. The
 #: ``test.pcapng`` report cannot; see :class:`PcapngUnescapedKeyTests`.
@@ -63,7 +74,10 @@ class PcapngTreeReportTests(EndToEndTestCase):
     def test_every_fixture_dumps_a_report_with_its_expected_frame_count(self) -> None:
         for capture, frames in PCAPNG_FRAMES.items():
             with self.subTest(capture=capture):
-                extractor = self.extract(fin=sample_path(capture), fout=self.out(capture),
+                path = sample_path(capture)
+                if capture in UPSTREAM_ONLY_COUNTS:
+                    skip_if_stand_in(self, path)
+                extractor = self.extract(fin=path, fout=self.out(capture),
                                          format='tree', store=False)
 
                 report = self.tmp_path / f'{capture}.txt'
@@ -81,7 +95,10 @@ class PcapngJsonReportTests(EndToEndTestCase):
     def test_reports_hold_the_expected_blocks(self) -> None:
         for capture, sections in PCAPNG_SECTIONS.items():
             with self.subTest(capture=capture):
-                extractor = self.extract(fin=sample_path(capture), fout=self.out(capture),
+                path = sample_path(capture)
+                if capture in UPSTREAM_ONLY_COUNTS:
+                    skip_if_stand_in(self, path)
+                extractor = self.extract(fin=path, fout=self.out(capture),
                                          format='json', store=False)
                 report = read_json(extractor.output)
 
@@ -89,8 +106,9 @@ class PcapngJsonReportTests(EndToEndTestCase):
                 self.assertEqual(extractor.length, PCAPNG_FRAMES[capture])
 
     def test_interface_descriptions_are_reported_one_per_interface(self) -> None:
-        extractor = self.extract(fin=sample_path('many_interfaces.pcapng'),
-                                 fout=self.out('many'), format='json', store=False)
+        path = sample_path('many_interfaces.pcapng')
+        skip_if_stand_in(self, path)
+        extractor = self.extract(fin=path, fout=self.out('many'), format='json', store=False)
         report = read_json(extractor.output)
 
         self.assertEqual(extractor.length, 64)

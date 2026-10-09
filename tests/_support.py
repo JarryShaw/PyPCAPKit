@@ -3,6 +3,8 @@ from __future__ import annotations
 import abc
 import collections.abc
 import contextlib
+import functools
+import hashlib
 import importlib.util
 import inspect
 import math
@@ -228,6 +230,78 @@ def sample_path(name: str) -> str:
             f'{REGENERATE_SAMPLES_CMD!r} from {ROOT}'
         )
     return str(path)
+
+
+#: The generator that downloads the upstream PCAP-NG captures, and pins the
+#: SHA-256 of the exact bytes each download must have.
+PCAPNG_GENERATOR = ROOT / 'examples' / 'generators' / 'pcapng.py'
+
+
+@functools.lru_cache(maxsize=None)
+def upstream_digests() -> 'dict[str, str]':
+    """The pinned SHA-256 of every capture :file:`pcapng.py` downloads, by name.
+
+    Read out of the generator's own ``FIXTURES`` table, so the digest lives in
+    one place. The module is executed by path under a private name -- the
+    directory is not a package -- and imports nothing of :mod:`pcapkit` at the
+    top level, so this is cheap and safe from the unit tier.
+
+    """
+    spec = importlib.util.spec_from_file_location('_pcapng_generator', PCAPNG_GENERATOR)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f'Unable to load {PCAPNG_GENERATOR}')
+    module = importlib.util.module_from_spec(spec)
+    saved = list(sys.path)
+    try:
+        spec.loader.exec_module(module)
+    finally:
+        # The generator puts the tree root on sys.path for its own sake (#1343).
+        sys.path[:] = saved
+    return {fixture.name: fixture.sha256 for fixture in module.FIXTURES
+            if fixture.sha256 is not None}
+
+
+def stand_in_reason(path: str) -> 'Optional[str]':
+    """Say why ``path`` is not the upstream capture, or :data:`None` if it is.
+
+    When a download fails, :file:`examples/generators/pcapng.py` writes a
+    synthesised stand-in under the upstream name rather than failing (#1478).
+    The stand-in parses, but its block inventory and options differ, so an
+    assertion pinned to the upstream bytes has to skip on it rather than fail.
+    The pinned digest already tells the two apart, so no marker file is needed
+    and none can fall out of step with the bytes on disk.
+
+    Args:
+        path: A capture, as returned by :func:`sample_path`.
+
+    Returns:
+        A skip reason, or :data:`None` if ``path`` holds the pinned upstream bytes
+        or is not a downloaded capture at all.
+
+    """
+    name = pathlib.Path(path).name
+    expected = upstream_digests().get(name)
+    if expected is None:
+        return None
+    digest = hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest()
+    if digest == expected:
+        return None
+    return (f'{name} is a synthesised stand-in, not the upstream capture this test is '
+            f'pinned to (SHA-256 {digest[:12]}..., expected {expected[:12]}...); its '
+            f'download most likely failed -- re-run {REGENERATE_SAMPLES_CMD!r} with '
+            f'network access')
+
+
+def skip_if_stand_in(test: 'unittest.TestCase', path: str) -> None:
+    """Skip ``test`` -- or its current subtest -- if ``path`` is a stand-in.
+
+    See :func:`stand_in_reason`. Call it only ahead of assertions pinned to the
+    upstream bytes; whatever a stand-in also satisfies should stay unguarded.
+
+    """
+    reason = stand_in_reason(path)
+    if reason is not None:
+        test.skipTest(reason)
 
 
 def ensure_package(name: str, path: pathlib.Path) -> types.ModuleType:
