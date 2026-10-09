@@ -265,7 +265,16 @@ class BitField(_TextField[Dict[str, Any]]):
         callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
+    Bits that no subfield names are kept as captured: where any of them is
+    set, the unpacked value carries them under an ``__unnamed__`` key, as an
+    integer over the whole field with every named bit cleared, and packing
+    writes them back (:issue:`1487`). The key is absent when they are all
+    zero, so a value built without it packs them as zeros.
+
     """
+
+    #: Key of the unpacked value that carries the unnamed bits.
+    UNNAMED = '__unnamed__'
 
     def __init__(self, length: 'int',
                  default: 'dict[str, Any] | NoValueType' = NO_VALUE,
@@ -288,6 +297,11 @@ class BitField(_TextField[Dict[str, Any]]):
                     f'{start}-{start + size - 1} of a {width}-bit field'
                 )
 
+        #: Mask of the bits no subfield names, most significant bit first.
+        self._unnamed = (1 << width) - 1
+        for start, size in self._namespace.values():
+            self._unnamed &= ~(((1 << size) - 1) << (width - start - size))
+
     def pre_process(self, value: 'dict[str, Any]', packet: 'dict[str, Any]') -> 'bytes':  # pylint: disable=unused-argument
         """Process field value before construction (packing).
 
@@ -300,7 +314,8 @@ class BitField(_TextField[Dict[str, Any]]):
 
         Raises:
             FieldValueError: If a subfield value does not fit the bits it was
-                declared to occupy.
+                declared to occupy, or the ``__unnamed__`` value is not an
+                integer.
 
         """
         # NOTE: The buffer holds one ASCII digit per bit, so it must be seeded with
@@ -308,7 +323,15 @@ class BitField(_TextField[Dict[str, Any]]):
         # is the *character* ``b'0'``, which is itself non-zero, so a truthiness test
         # over the buffer cannot tell a cleared bit from a set one and would report
         # every named bit as set.
-        buffer = bytearray(b'0' * (self.length * 8))
+        #
+        # The unnamed bits seed it, so that they come back as captured; masking
+        # them keeps a stray named bit in the record from overriding a subfield.
+        unnamed = value.get(self.UNNAMED, 0)
+        if isinstance(unnamed, bool) or not isinstance(unnamed, int):
+            raise FieldValueError(
+                f'{type(self).__name__}: {self.UNNAMED} must be an int, not {unnamed!r}'
+            )
+        buffer = bytearray(f'{unnamed & self._unnamed:0{self.length * 8}b}'.encode())
         for name, (start, size) in self._namespace.items():
             bits = f'{value[name]:0{size}b}'
             if len(bits) > size:
@@ -335,6 +358,9 @@ class BitField(_TextField[Dict[str, Any]]):
         for name, (start, len) in self._namespace.items():
             end = start + len
             buffer[name] = int(binary[start:end], 2)
+        unnamed = int.from_bytes(value, 'big') & self._unnamed
+        if unnamed:
+            buffer[self.UNNAMED] = unnamed
         return buffer
 
 
