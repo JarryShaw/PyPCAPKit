@@ -360,7 +360,7 @@ class CookiePreservativeParameter(Parameter):
 class HostNameAddressParameter(Parameter):
     """Data model for SCTP host name address parameter."""
 
-    #: Host name, including at least one null terminator.
+    #: Host name as captured, null terminator included; a parsed name may lack one.
     name: 'bytes'
 
     if TYPE_CHECKING:

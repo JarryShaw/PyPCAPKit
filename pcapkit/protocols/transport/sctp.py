@@ -2723,8 +2723,9 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             The usage of this parameter is deprecated by
             :rfc:`9260#section-3.3.2.1.4`; it is parsed so that a packet
             carrying one can still be inspected. The host name is kept as raw
-            :obj:`bytes`, including its null terminator, since the encoding is
-            not specified on the wire.
+            :obj:`bytes`, including any null terminator, since the encoding is
+            not specified on the wire. A name captured without a terminator is
+            kept as read and rebuilds as read (:issue:`1482`).
 
         """
         if schema.length < 4:
@@ -2957,14 +2958,18 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             Constructed parameter schema.
 
         Raises:
-            ProtocolError: If ``name`` is not null-terminated, as required by
-                :rfc:`9260#section-3.3.2.1.4`.
+            ProtocolError: If a user-supplied ``name`` is not null-terminated,
+                as required by :rfc:`9260#section-3.3.2.1.4`.
+
+        Note:
+            A parsed ``param`` carries its name as captured, so a name the
+            reader accepted without a terminator rebuilds as read
+            (:issue:`1482`). The terminator check applies to ``name`` only.
 
         """
         if param is not None:
             name = param.name
-
-        if not name.endswith(b'\x00'):
+        elif not name.endswith(b'\x00'):
             raise ProtocolError(f'{self.alias}: [Param {code}] invalid format')
 
         return Schema_HostNameAddressParameter(
