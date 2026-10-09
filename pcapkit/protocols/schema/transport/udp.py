@@ -104,9 +104,14 @@ class UDP(Schema):
     len: 'int' = UInt16Field()
     #: Checksum of UDP packet.
     checksum: 'bytes' = BytesField(length=2)
-    #: Payload.
-    payload: 'bytes' = PayloadField()
+    #: Payload. A Length below the header's own 8 octets leaves the length
+    #: negative, which takes the rest of the datagram, as before.
+    payload: 'bytes' = PayloadField(length=lambda pkt: pkt['len'] - 8)
+    #: Octets captured past the Length field, c.f.
+    #: :attr:`IPv4.trailer <pcapkit.protocols.schema.internet.ipv4.IPv4.trailer>`.
+    trailer: 'bytes' = PayloadField(default=b'')
 
     if TYPE_CHECKING:
         def __init__(self, srcport: 'Enum_AppType | int', dstport: 'Enum_AppType | int', len: 'int',
-                     checksum: 'bytes', payload: 'bytes | Schema | ProtocolBase') -> 'None': ...
+                     checksum: 'bytes', payload: 'bytes | Schema | ProtocolBase',
+                     trailer: 'bytes' = b'') -> 'None': ...
