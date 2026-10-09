@@ -173,6 +173,14 @@ class UDP(Transport[Data_UDP, Schema_UDP],
             checksum=schema.checksum,
         )
 
+        # NOTE: Octets captured past the Length field belong to this layer,
+        # since its own length field is what leaves them out of the payload,
+        # and the rebuild keeps them as captured (:issue:`1461`).
+        if schema.trailer:
+            udp.__update__([
+                ('trailer', schema.trailer),
+            ])
+
         return self._decode_next_layer(udp, (udp.srcport.port, udp.dstport.port), udp.len - 8)
 
     def make(self,
@@ -181,6 +189,7 @@ class UDP(Transport[Data_UDP, Schema_UDP],
              checksum: 'bytes' = b'\x00\x00',
              total_length: 'Optional[int]' = None,
              payload: 'bytes | Schema | ProtocolBase' = b'',
+             trailer: 'bytes' = b'',
              **kwargs: 'Any') -> 'Schema_UDP':
         """Make (construct) packet data.
 
@@ -191,6 +200,8 @@ class UDP(Transport[Data_UDP, Schema_UDP],
             total_length: Length of the datagram, header included; computed from
                 the header and the payload when omitted.
             payload: Payload data.
+            trailer: Octets after the datagram, outside the Length field;
+                written as is and not counted in a computed ``total_length``.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -211,6 +222,7 @@ class UDP(Transport[Data_UDP, Schema_UDP],
             len=total_length,
             checksum=checksum,
             payload=payload,
+            trailer=trailer,
         )
 
     ##########################################################################
@@ -257,4 +269,6 @@ class UDP(Transport[Data_UDP, Schema_UDP],
             # the length that was on the wire (:issue:`1155`).
             'total_length': data.len,
             'payload': cls._make_payload(data),
+            # NOTE: And the octets captured past the Length field (:issue:`1461`).
+            'trailer': data.get('trailer', b''),
         }
