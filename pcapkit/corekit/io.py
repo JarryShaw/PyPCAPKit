@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
-"""Seekable I/O Object
-=========================
+"""I/O Objects
+===============
 
 .. module:: pcapkit.corekit.io
 
 :mod:`pcapkit.corekit.io` contains seekable I/O object
 :class:`~pcapkit.corekit.io.SeekableReader`, which is a customised
-implementation to :class:`io.BufferedReader`.
+implementation to :class:`io.BufferedReader`, and the stream proxies
+:class:`~pcapkit.corekit.io.PeekableStream`, which adds ``peek`` to a
+seekable stream, and :class:`~pcapkit.corekit.io.NamedStream`, which gives
+a stream a ``name``.
 
 """
 import io
@@ -19,11 +22,11 @@ from pcapkit.utilities.warnings import SeekWarning, warn
 
 if TYPE_CHECKING:
     from io import BytesIO, RawIOBase
-    from typing import IO, Iterable, Optional
+    from typing import IO, Any, BinaryIO, Iterable, Optional
 
     from typing_extensions import Buffer
 
-__all__ = ['SeekableReader']
+__all__ = ['SeekableReader', 'PeekableStream', 'NamedStream']
 
 
 class SeekableReader(io.BufferedReader):
@@ -677,3 +680,73 @@ class SeekableReader(io.BufferedReader):
                         self._write_buffer(buf_tmp)
                         buf += buf_tmp
         return buf
+
+
+class PeekableStream:
+    """Give a seekable binary stream without ``peek`` one.
+
+    :class:`~pcapkit.foundation.extraction.Extractor` and the PCAP-NG engine
+    read ahead with ``peek``, which :class:`io.BufferedReader` has and a plain
+    :class:`typing.IO` such as :class:`io.BytesIO` does not (#1506). The
+    read-ahead is a read and a seek back, and every other attribute is the
+    stream's own. It is not an :class:`io.IOBase`, so it has no finaliser that
+    could close the caller's stream behind their back (#610).
+
+    Arguments:
+        stream: seekable binary stream
+
+    """
+
+    def __init__(self, stream: 'IO[bytes]') -> 'None':
+        self._stream = stream
+
+    def peek(self, size: 'int' = 0) -> 'bytes':
+        """Return up to ``size`` octets, at least one if any remain, without consuming them.
+
+        Arguments:
+            size: number of octets wanted
+
+        Returns:
+            The octets at the current position.
+
+        """
+        pos = self._stream.tell()
+        try:
+            return self._stream.read(max(size, 1))
+        finally:
+            self._stream.seek(pos, io.SEEK_SET)
+
+    def __getattr__(self, name: 'str') -> 'Any':
+        return getattr(self._stream, name)
+
+
+class NamedStream:
+    """Read-only proxy that gives a stream the ``name`` attribute.
+
+    :func:`pcapfile.savefile.load_savefile` dereferences ``input_file.name``
+    unconditionally, on the way into its trace helper. That is fine for the
+    :class:`~io.BufferedReader` :class:`~pcapkit.foundation.extraction.Extractor`
+    normally holds, but not for the :class:`~pcapkit.corekit.io.SeekableReader`
+    it substitutes when the caller supplied a non-seekable stream -- that class
+    exposes no ``name``, so the load would fail with :exc:`AttributeError` before
+    a single byte was read.
+
+    Args:
+        stream: Underlying binary stream.
+        name: Name to report as :attr:`name`.
+
+    """
+
+    def __init__(self, stream: 'BinaryIO', name: 'str') -> 'None':
+        self._stream = stream
+        #: Name of the underlying stream.
+        self.name = name
+
+    def read(self, size: 'int' = -1) -> 'bytes':
+        """Read from the underlying stream.
+
+        Args:
+            size: Number of bytes to read; all remaining bytes if negative.
+
+        """
+        return self._stream.read(size)
