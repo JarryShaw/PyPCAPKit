@@ -12,6 +12,7 @@ which is a base class for internet layer protocols, eg. :class:`~pcapkit.protoco
 
 """
 import collections
+import io
 from typing import TYPE_CHECKING, Generic, cast
 
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
@@ -23,7 +24,7 @@ from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
-    from typing import Any, Optional, Type
+    from typing import IO, Any, Optional, Type
 
     from typing_extensions import Literal
 
@@ -172,6 +173,36 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             warn(f'protocol {code} already registered, overwriting '
                  f'{incumbent!r} with {protocol!r}', RegistryWarning)
         cls.__proto__[code] = protocol
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    def __post_init__(self, file: 'Optional[IO[bytes] | bytes]' = None,
+                      length: 'Optional[int]' = None, *,
+                      extension: 'bool' = False, **kwargs: 'Any') -> 'None':
+        """Post initialisation hook.
+
+        Args:
+            file: Source packet stream.
+            length: Length of packet data.
+            extension: If the protocol is used as an IPv6 extension header.
+            **kwargs: Arbitrary keyword arguments.
+
+        Notes:
+            An IPv6 extension header is handed the rest of the datagram, but
+            parses only itself: its :attr:`info` holds no payload, and
+            :class:`~pcapkit.protocols.internet.ipv6.IPv6` decodes what follows.
+            So :attr:`data` is cut down to the header's own :attr:`length`, and
+            ``from_data(info).data`` rebuilds it exactly (:issue:`1446`).
+
+        """
+        super().__post_init__(file, length, extension=extension, **kwargs)  # type: ignore[arg-type]
+
+        if extension and file is not None and len(self._data) > self.length:
+            self._data = self._data[:self.length]
+            self._file = io.BytesIO(self._data)
+            self.__cached__.pop('__len__', None)
 
     ##########################################################################
     # Utilities.
