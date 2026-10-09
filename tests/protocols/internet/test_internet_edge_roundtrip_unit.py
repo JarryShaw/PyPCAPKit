@@ -251,42 +251,6 @@ REJECTED = {
 }
 
 KNOWN_FAILURES = (
-    Gap(1456,
-        'An RPL Source Route header under an IPv6 header parses with its compressed '
-        'addresses expanded against the IPv6 destination, and the rebuild writes them '
-        'back at 16 octets each, with CmprI/CmprE unchanged and Hdr Ext Len recomputed '
-        'from the 16-octet vector: ``_make_data_type_rpl`` takes ``addr.packed`` without '
-        'the ``[cmpr_i:]``/``[cmpr_e:]`` slice its ``ip=`` branch applies '
-        '(pcapkit/protocols/internet/ipv6_route.py:795-797). Standalone, with no '
-        'destination to expand against, the addresses stay bytes and round-trip.',
-        # The rebuilt routing header's first five octets: Hdr Ext Len grown, or
-        # (cut63) the first address written out at 16 octets.
-        'MISMATCH', ('023b100301ff', '023b04030188', '023b0303010f', '023b050301cd', '023b0e0301ff',
-                     '023b0203018800000000000000000000000102'),
-        ('ipv6-route/rpl-cmpr-15-15-x8/in-ipv6', 'ipv6-route/rpl-cmpr-8-8-x2/in-ipv6',
-         'ipv6-route/rpl-cmpr-0-15-pad7/in-ipv6', 'ipv6-route/rpl-cmpr-12-13-pad1/in-ipv6',
-         'ipv6-route/rpl-cmpr-15-15-x8/in-ipv6/cut55', 'ipv6-route/rpl-cmpr-8-8-x2/in-ipv6/cut63',
-         'ipv6-route/rpl-cmpr-0-15-pad7/in-ipv6/cut55', 'ipv6-route/rpl-cmpr-12-13-pad1/in-ipv6/cut55')),
-    Gap(1457,
-        'A truncated RPL address vector is split by the octets actually read, not by '
-        'Hdr Ext Len (``RPL.post_process``, pcapkit/protocols/schema/internet/ipv6_route.py:280-305). '
-        'A short uncompressed address leaks ``ValueError`` from ``ipaddress.ip_address`` '
-        '(PARSE); otherwise the rebuild recomputes Hdr Ext Len from the addresses read, '
-        'so it either fails the reader\'s own length check '
-        '(``IPv6-Route: [TypeNo 3] invalid format``, REBUILD) or writes a smaller one '
-        '(MISMATCH).',
-        ('PARSE', 'REBUILD', 'MISMATCH'),
-        ('ValueError: ', 'IPv6-Route: [TypeNo 3] invalid format', 'octets 3b010301880000000102'),
-        ('ipv6-route/rpl-uncompressed/cut*', 'ipv6-route/rpl-uncompressed/extension/cut*',
-         'ipv6-route/rpl-cmpr-15-0-x1/cut*', 'ipv6-route/rpl-cmpr-15-0-x1/extension/cut*',
-         'ipv6-route/rpl-cmpr-15-15-x8/cut8', 'ipv6-route/rpl-cmpr-15-15-x8/extension/cut8',
-         'ipv6-route/rpl-cmpr-8-8-x2/cut*', 'ipv6-route/rpl-cmpr-8-8-x2/extension/cut*')),
-    Gap(1459,
-        'HIP rejects a packet whose two fixed bits (the leading bit of Packet Type, '
-        'the trailing bit of Version) are not 0 and 1, where RFC 7401 section 5.1 '
-        'says a receiver MUST ignore them; the parse raises ``ProtocolError``.',
-        'REJECTED', 'ProtocolError: HIP: invalid format',
-        ('hip/fixed-bit-clear', 'hip/leading-bit-set')),
     Gap(1451, edge.ZERO_FILLED_EXTENSION_HEADER, 'PADDED', '',
         ('ipv6-route/unassigned-type/cut*', 'ipv6-route/unassigned-type-24-octets/cut*',
          'ipv6-route/type0-no-address/cut*', 'ipv6-route/type0-reserved-set/cut*',
@@ -312,9 +276,11 @@ KNOWN_FAILURES = (
          'hip/no-parameters/cut*', 'hip/packet-type-0-reserved/cut*',
          'hip/packet-type-127-unassigned/cut*', 'hip/version-1/cut*', 'hip/version-15/cut*',
          'hip/every-control-bit/cut*', 'hip/next-tcp-no-payload/cut*',
-         'hip/no-parameters/not-extension/cut*')),
+         'hip/no-parameters/not-extension/cut*',
+         'hip/fixed-bit-clear/cut*', 'hip/leading-bit-set/cut*')),
     Gap(1458, edge.ZERO_FILLED_SHORT_READ, 'PADDED', '',
-        ('ipx/min-header/cut*', 'ipx/transport-control-255/cut*',
+        ('ipv6-route/rpl-cmpr-0-15-pad7/in-ipv6/cut55', 'ipv6-route/rpl-cmpr-12-13-pad1/in-ipv6/cut55',
+         'ipx/min-header/cut*', 'ipx/transport-control-255/cut*',
          'ipx/unassigned-packet-type/cut16', 'ipx/length-short-of-the-data/cut15',
          'ipx/checksum-not-ffff/cut*', 'ipx/length-past-the-data/cut16',
          'ipv6/no-next-header-empty/cut*', 'ipv6/no-next-header-with-octets/cut22',

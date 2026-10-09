@@ -120,17 +120,6 @@ REJECTED = {
 }
 
 KNOWN_FAILURES = (
-    Gap(1455,
-        'Octets past a length field shorter than the data are kept by the parse '
-        '(``data``) but not by ``info``, so ``from_data`` drops them. IPv4 and '
-        'IPv6 keep them as ``trailer``; L2TPv2 (Length) and OSPF (Packet Length) '
-        'have no such key. pcapkit/protocols/link/l2tpv2.py, '
-        'pcapkit/protocols/application/ospf.py',
-        # The rebuild stops at the declared length.
-        'MISMATCH', ('8 octets 4002000800010002 != ',
-                     '24 octets 020100180102030400000000abcd00000000000000000000 != '),
-        ('l2tpv2/length-short-of-the-data', 'l2tpv2/length-short-of-the-data/cut9',
-         'ospf/packet-length-short-of-the-data', 'ospf/packet-length-short-of-the-data/cut25')),
     Gap(1458, edge.ZERO_FILLED_SHORT_READ, 'PADDED', '',
         ('ethernet/header-only-*/cut*', 'ethernet/length-field-0/cut7',
          'ethernet/length-field-1500/cut9', 'ethernet/unassigned-type-ffff/cut8',
