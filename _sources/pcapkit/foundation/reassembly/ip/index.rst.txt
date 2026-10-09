@@ -89,3 +89,7 @@ Algorithm
       flush all reassembly with this BUFID;
       DONE.
    }
+
+Because completion frees the buffer (:rfc:`791#section-3.2`), a fragment that
+arrives after its datagram has completed opens a new buffer, which is later
+reported as a separate incomplete datagram; this is intended (:issue:`1507`).

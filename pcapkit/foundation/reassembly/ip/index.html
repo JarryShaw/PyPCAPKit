@@ -598,6 +598,9 @@ timer expires: {
 }
 </pre></div>
 </div>
+<p>Because completion frees the buffer (<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html#section-3.2"><strong>RFC 791 Section 3.2</strong></a>), a fragment that
+arrives after its datagram has completed opens a new buffer, which is later
+reported as a separate incomplete datagram; this is intended (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1507">#1507</a>).</p>
 </section>
 </section>
 

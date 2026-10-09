@@ -796,6 +796,13 @@ and none of those is named as the namespace of a plain
 loses its force through this method. The distinction is therefore for
 a registry registered from outside <a class="reference internal" href="../../const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a>, which has no
 such obligation to stay quiet.</p>
+<p>Octets carrying bits outside <a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.bit_length" title="pcapkit.corekit.fields.numbers.NumberField.bit_length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">bit_length</span></code></a> that
+<a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.post_process" title="pcapkit.corekit.fields.numbers.NumberField.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">NumberField.post_process()</span></code></a> recorded resolve to a member that
+records them too, so that packing it writes them back. A registry
+member is shared, so that one is an unregistered copy of it, built
+by <a class="reference internal" href="#pcapkit.corekit.fields.numbers.EnumField._unregistered_member" title="pcapkit.corekit.fields.numbers.EnumField._unregistered_member"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code></a>: <code class="docutils literal notranslate"><span class="pre">isinstance</span></code> against the
+registry and equality with the member still hold, identity does
+not. See GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1488">#1488</a>.</p>
 </div>
 </dd></dl>
 
@@ -1133,6 +1140,16 @@ exact multiple of eight would be sized one octet short – <code class="docutils
 one octet, <code class="docutils literal notranslate"><span class="pre">65536</span></code> at two, and <code class="docutils literal notranslate"><span class="pre">1</span></code> itself at <em>zero</em> – which
 <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#int.to_bytes" title="(in Python v3.15)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">int.to_bytes()</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.pack" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">struct.pack()</span></code></a> both refuse. See GitHub
 issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/599">#599</a>.</p>
+<p>A value <a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.post_process" title="pcapkit.corekit.fields.numbers.NumberField.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">post_process()</span></code></a> returned for octets whose bits outside
+<a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.bit_length" title="pcapkit.corekit.fields.numbers.NumberField.bit_length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">bit_length</span></code></a> were not what packing writes there carries those
+bits (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_outside_bits()</span></code>), and they are written back as
+captured, so <code class="docutils literal notranslate"><span class="pre">pack(unpack(b))</span> <span class="pre">==</span> <span class="pre">b</span></code> holds for every <code class="docutils literal notranslate"><span class="pre">b</span></code>. Only a
+field of the same length, bit length, sign and byte order as the
+one that captured them honours them; any other field, and any other
+value – one a caller built, or the result of arithmetic on a
+parsed one, which is a plain <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> – is truncated to
+<a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.bit_length" title="pcapkit.corekit.fields.numbers.NumberField.bit_length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">bit_length</span></code></a> bits exactly as before. See GitHub issue
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1488">#1488</a>.</p>
 </div>
 </dd></dl>
 
@@ -1161,6 +1178,13 @@ yields the unsigned pattern, so a signed field maps it back into
 its signed range afterwards, mirroring <a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.pre_process" title="pcapkit.corekit.fields.numbers.NumberField.pre_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pre_process()</span></code></a>. A
 resolved signed field therefore decodes <code class="docutils literal notranslate"><span class="pre">ffffffff</span></code> as <code class="docutils literal notranslate"><span class="pre">-1</span></code>
 rather than <code class="docutils literal notranslate"><span class="pre">4294967295</span></code>. See GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1274">#1274</a>.</p>
+<p>The value is the low <a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.bit_length" title="pcapkit.corekit.fields.numbers.NumberField.bit_length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">bit_length</span></code></a> bits, but the octets hold
+more. When the bits outside it are not what <a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.pre_process" title="pcapkit.corekit.fields.numbers.NumberField.pre_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pre_process()</span></code></a>
+would write there for this value – zeros, or for a negative signed
+value the sign extension – they are captured but uninterpreted,
+and the value records them (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_with_outside_bits()</span></code>) so that
+packing it writes them back. Otherwise the value is a plain
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>, as before. See GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1488">#1488</a>.</p>
 </div>
 </dd></dl>
 

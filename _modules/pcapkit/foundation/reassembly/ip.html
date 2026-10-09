@@ -561,6 +561,16 @@
 <span class="sd">        Arguments:</span>
 <span class="sd">            info: info dict of packets to be reassembled</span>
 
+<span class="sd">        Note:</span>
+<span class="sd">            A completed datagram's buffer is freed, as in the</span>
+<span class="sd">            :rfc:`791#section-3.2` reassembly procedure, so a fragment of it</span>
+<span class="sd">            that arrives afterwards -- a late duplicate, say -- opens a new</span>
+<span class="sd">            buffer. The caller sees that buffer as a separate incomplete</span>
+<span class="sd">            datagram, ``PARTIAL`` at the end of the capture or ``TIMEOUT`` if</span>
+<span class="sd">            it expires first. This is intended, is permitted by</span>
+<span class="sd">            :rfc:`8200#section-4.5`, and matches Linux, Zeek and Wireshark</span>
+<span class="sd">            (:issue:`1507`).</span>
+
 <span class="sd">        """</span>
         <span class="c1"># clear cache</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span> <span class="o">=</span> <span class="kc">False</span>
