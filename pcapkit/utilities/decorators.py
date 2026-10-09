@@ -149,7 +149,16 @@ def beholder(
             # turning a next-layer parse failure that should have degraded to
             # Raw into a crash. Reachable once something is registered on an
             # SCTP payload protocol identifier, which NGAP is.
-            file_ = self._get_payload()
+            #
+            # A ``payload`` passed to the decorated method is the octets that
+            # method was asked to parse, and wins: IPv6 hands its upper layer
+            # the payload *past* the extension headers, so falling back to the
+            # whole IPv6 payload would hold those headers twice, once in the
+            # extension header chain and once more in this ``Raw``
+            # (:issue:`1471`).
+            file_ = cast('Optional[bytes]', kwargs.get('payload'))
+            if file_ is None:
+                file_ = self._get_payload()
 
             # NOTE: ``alias=proto`` matches what ``_import_next_layer`` passes, so
             # a payload that failed to parse still reports the code it arrived

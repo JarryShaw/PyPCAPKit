@@ -392,6 +392,21 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             'trailer': data.get('trailer', b''),
         }
 
+    @staticmethod
+    def _exthdr_key(alias: 'str') -> 'str':
+        """Key an extension header's info is written under in :class:`Data_IPv6`.
+
+        Args:
+            alias: :attr:`~pcapkit.protocols.protocol.ProtocolBase.alias` of
+                the extension header's parser.
+
+        Returns:
+            The key; :meth:`str.lstrip` strips a character *set*, which every
+            parser's alias is chosen to suit.
+
+        """
+        return alias.lstrip('IPv6-').lower()
+
     @classmethod
     def _lookup_exthdr(cls, data: 'Data_IPv6') -> 'tuple[tuple[str, ...], tuple[tuple[Type[ProtocolBase], Any], ...]]':  # pylint: disable=line-too-long
         """Recover the extension header chain of ``data`` without ``__exthdr__``.
@@ -412,6 +427,9 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         predecessor, and ``data.items(multi=True)`` yields each of them in turn.
 
         """
+        from pcapkit.protocols.internet.ipv6_ext import \
+            IPv6_Ext  # isort: skip # pylint: disable=import-outside-toplevel
+
         names = []  # type: list[str]
         chain = []  # type: list[tuple[Type[ProtocolBase], Any]]
         proto = data.get('next')
@@ -429,8 +447,19 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             # carrying ``next`` ends the chain, and so does a fragment header.
             if 'next' not in info:
                 break
+
+            # NOTE: A header whose dedicated parser raised was parsed by
+            # :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` instead,
+            # c.f. :meth:`_import_next_layer`, and written under that class's
+            # key rather than the dedicated one's. Rebuilding it with the
+            # dedicated class would look for fields only that class parses
+            # (:issue:`1473`), so the key decides the parser.
+            if key == cls._exthdr_key(IPv6_Ext.alias.fget(None)):  # type: ignore[attr-defined]
+                parser = IPv6_Ext  # type: Type[ProtocolBase]
+            else:
+                parser = cls._lookup_next_layer(cls.__proto__, int(ex_proto))
             names.append(key)
-            chain.append((cls._lookup_next_layer(cls.__proto__, int(ex_proto)), info))
+            chain.append((parser, info))
 
             proto = info['next']
             if ex_proto == Enum_ExtensionHeader.IPv6_Frag:
@@ -528,7 +557,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             # keeps its predecessor's info rather than overwriting it, and
             # :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>`
             # writes every one of them, in wire order (:issue:`1453`).
-            name = next_.alias.lstrip('IPv6-').lower()
+            name = self._exthdr_key(next_.alias)
             ipv6.__update__(OrderedMultiDict([(name, info)]))
 
             # record protocol name
