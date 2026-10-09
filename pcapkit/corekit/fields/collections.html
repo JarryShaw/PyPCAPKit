@@ -555,6 +555,9 @@ instead of updating the current instance.</p>
 <dd class="field-odd"><p>Packed field value.</p>
 </dd>
 </dl>
+<p>Without an <code class="docutils literal notranslate"><span class="pre">item_type</span></code>, <a class="reference internal" href="#pcapkit.corekit.fields.collections.ListField.unpack" title="pcapkit.corekit.fields.collections.ListField.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unpack()</span></code></a> returns the field’s octets as
+a single <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>, so such a value is written as-is rather than
+iterated item by item.</p>
 </dd></dl>
 
 <dl class="py method">

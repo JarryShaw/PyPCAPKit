@@ -809,7 +809,9 @@
                  <span class="n">default</span><span class="p">:</span> <span class="s1">'_TP | NoValueType | bytes'</span> <span class="o">=</span> <span class="n">NO_VALUE</span><span class="p">,</span>
                  <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Optional[Type[_TP] | str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">callback</span><span class="p">:</span> <span class="s1">'Callable[[Self, dict[str, Any]], None]'</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-        <span class="c1">#self._name = '&lt;payload&gt;'</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'_name'</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'&lt;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">[:</span><span class="o">-</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s1">&gt;'</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_default</span> <span class="o">=</span> <span class="n">default</span>  <span class="c1"># type: ignore[assignment]</span>
 
         <span class="c1"># NOTE: Through the property rather than straight to ``_protocol``, so a</span>
@@ -1184,7 +1186,9 @@
                  <span class="n">default</span><span class="p">:</span> <span class="s1">'_TS | NoValueType | bytes'</span> <span class="o">=</span> <span class="n">NO_VALUE</span><span class="p">,</span>
                  <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[dict[str, Any]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">callback</span><span class="p">:</span> <span class="s1">'Callable[[Self, dict[str, Any]], None]'</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-        <span class="c1">#self._name = '&lt;schema&gt;'</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'_name'</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'&lt;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">[:</span><span class="o">-</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s1">&gt;'</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span> <span class="o">=</span> <span class="n">callback</span>
 
         <span class="k">if</span> <span class="n">packet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
