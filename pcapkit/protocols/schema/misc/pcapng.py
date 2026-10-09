@@ -522,6 +522,25 @@ def pcapng_block_selector(packet: 'dict[str, Any]') -> 'Field':
     return SchemaField(length=max(packet['__length__'], 0), schema=schema)
 
 
+def _cut_last_line(schema: 'Schema', index: 'int', lines: 'list[str]') -> 'bool':
+    """Tell whether a key log line that did not parse is one the capture cut.
+
+    Args:
+        schema: Key log secrets schema, just unpacked.
+        index: Index of the line in ``lines``.
+        lines: Lines of the key log.
+
+    Returns:
+        Whether ``lines[index]`` is the last line of a key log the data ended
+        inside, which :meth:`Schema.unpack
+        <pcapkit.protocols.schema.schema.Schema.unpack>` records as
+        ``__short_read__``. Such a line is only the first octets of an entry,
+        and the log text, kept verbatim, still rebuilds it (:issue:`1470`).
+
+    """
+    return index == len(lines) - 1 and '__short_read__' in schema.__dict__
+
+
 def dsb_secrets_selector(packet: 'dict[str, Any]') -> 'Field':
     """Selector function for :attr:`DecryptionSecretsBlock.secrets_data` field.
 
@@ -2194,14 +2213,20 @@ class TLSKeyLog(DSBSecrets, code=Enum_SecretsType.TLS_Key_Log):
         from pcapkit.protocols.misc.pcapng import TLSKeyLabel
 
         entries = collections.defaultdict(OrderedMultiDict)  # type: dict[TLSKeyLabel, OrderedMultiDict[bytes, bytes]]
-        for line in self.data.splitlines():
+        lines = self.data.splitlines()
+        for index, line in enumerate(lines):
             if not line or line.startswith('#'):
                 continue
 
-            label, random, secret = line.strip().split()
-            label_enum = TLSKeyLabel(label.upper())
-            entries[label_enum].add(bytes.fromhex(random),
-                                    bytes.fromhex(secret))
+            try:
+                label, random, secret = line.strip().split()
+                label_enum = TLSKeyLabel(label.upper())
+                entries[label_enum].add(bytes.fromhex(random),
+                                        bytes.fromhex(secret))
+            except ValueError as error:
+                if _cut_last_line(self, index, lines):
+                    break
+                raise FieldValueError(f'invalid TLS key log format: {line!r}') from error
 
         self.entries = entries
         return self
@@ -2233,16 +2258,24 @@ class WireGuardKeyLog(DSBSecrets, code=Enum_SecretsType.WireGuard_Key_Log):
         from pcapkit.protocols.misc.pcapng import WireGuardKeyLabel
 
         entries = OrderedMultiDict()  # type: OrderedMultiDict[WireGuardKeyLabel, bytes]
-        for line in self.data.splitlines():
+        lines = self.data.splitlines()
+        for index, line in enumerate(lines):
             if not line or line.startswith('#'):
                 continue
 
             fields = line.strip().split()
-            if len(fields) != 3 or fields[1] != '=':
-                raise FieldValueError(f'invalid WireGuard key log format: {line!r}')
-            label, _, secret = fields
-            label_enum = WireGuardKeyLabel(label.upper())
-            entries.add(label_enum, base64.b64decode(secret))
+            try:
+                if len(fields) != 3 or fields[1] != '=':
+                    raise FieldValueError(f'invalid WireGuard key log format: {line!r}')
+                label, _, secret = fields
+                label_enum = WireGuardKeyLabel(label.upper())
+                entries.add(label_enum, base64.b64decode(secret))
+            except ValueError as error:
+                if _cut_last_line(self, index, lines):
+                    break
+                if isinstance(error, FieldValueError):
+                    raise
+                raise FieldValueError(f'invalid WireGuard key log format: {line!r}') from error
 
         self.entries = entries
         return self
