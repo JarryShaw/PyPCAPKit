@@ -370,16 +370,9 @@ class OwnDictRuleTests(unittest.TestCase):
 
         The same shape as above, left *unfinalised*: a class that inherits
         ``__final__`` from a parent finalised after it was declared has not been
-        mismarked by anybody, so constructing it must not raise. It inherits its
-        parent's generated ``__init__`` and behaves accordingly -- which is the
-        pre-existing "a descendant of a finalised class is not re-finalised"
-        behaviour, not something this guard is entitled to turn into an error.
-
-        Only the guard's own property is asserted. Such a class is *imperfect*
-        for the pre-existing reason -- ``__excluded__`` was never populated for
-        it, so :meth:`to_dict` also returns the inherited ``__map__`` and
-        ``__map_reverse__`` -- and that is deliberately left unpinned here, so
-        that fixing the wart does not read as breaking this guard.
+        mismarked by anybody, so constructing it must not raise. Its own
+        ``__finalised__`` is unset, so its first construction finalises it to
+        :attr:`~FinalisedState.BASE` with an ``__init__`` of its own (#1490).
 
         """
         from pcapkit.corekit.infoclass import Info, info_final
@@ -396,7 +389,7 @@ class OwnDictRuleTests(unittest.TestCase):
         self.assertNotIn('__final__', Child.__dict__)
 
         # No InfoError: the marker is inherited, not owned by this class.
-        self.assertEqual(Child(1).x, 1)
+        self.assertEqual(Child(1, 2).to_dict(), {'x': 1, 'y': 2})
 
     def test_a_subclass_that_predates_an_unfinalised_ancestors_bare_final_is_not_blamed_for_it(self) -> None:
         """The one shape that actually tells ``__dict__`` and ``getattr`` apart
@@ -443,24 +436,17 @@ class OwnDictRuleTests(unittest.TestCase):
         # the marker from ``Parent``, which is not the class this constructs.
         self.assertEqual(Child(1, 2).to_dict(), {'x': 1, 'y': 2})
 
-    def test_a_final_class_descending_from_a_base_state_ancestor_escapes_the_guard(self) -> None:
-        """A documented gap, not a guarantee -- see the ``Warning`` on
-        :meth:`Info.__new__`.
+    def test_a_final_class_descending_from_a_base_state_ancestor_is_refused(self) -> None:
+        """``__finalised__`` is read from each class's own ``__dict__`` (#1490).
 
-        ``__finalised__`` inherits, and :attr:`~FinalisedState.BASE` is no
-        exception: a class marked ``@final`` while descending from a ``BASE``
-        ancestor reads ``BASE`` off it, never sees its own
-        :attr:`~FinalisedState.NONE`, and so never reaches the branch that reads
-        its marker at all. Closing this would mean re-finalising every
-        descendant of a ``BASE`` class on each subclassing, which is exactly the
-        auto-finalisation behaviour
-        :meth:`test_an_unfinalised_descendant_is_not_mistaken_for_a_mismarked_class`
-        establishes elsewhere in this file. This test pins today's behaviour so
-        that a change to it is a deliberate decision, not a silent side effect.
+        A class marked ``@final`` under a :attr:`~FinalisedState.BASE` ancestor
+        no longer reads ``BASE`` off it, so it reaches the branch that reads its
+        own marker and is refused like any other mismarked class.
 
         """
         from pcapkit.corekit.infoclass import FinalisedState, Info
         from pcapkit.utilities.compat import final
+        from pcapkit.utilities.exceptions import InfoError
 
         class Parent(Info):
             x: int
@@ -470,15 +456,15 @@ class OwnDictRuleTests(unittest.TestCase):
         self.assertNotIn('__final__', Parent.__dict__)
 
         @final
-        class Escaped(Parent):
+        class Mismarked(Parent):
             pass
 
-        self.assertIn('__final__', Escaped.__dict__)
-        self.assertEqual(Escaped.__finalised__, FinalisedState.BASE)
+        self.assertIn('__final__', Mismarked.__dict__)
+        self.assertNotIn('__finalised__', Mismarked.__dict__)
 
-        # No InfoError, despite ``Escaped`` carrying its own ``__final__`` and
-        # never having been run through ``info_final``.
-        self.assertEqual(Escaped(1).to_dict(), {'x': 1})
+        with self.assertRaises(InfoError) as caught:
+            Mismarked(1)
+        self.assertIn('Mismarked', str(caught.exception))
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')

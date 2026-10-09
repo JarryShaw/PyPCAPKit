@@ -38,7 +38,7 @@ import unittest
 from typing import TYPE_CHECKING
 
 from tests._support import reimport_once_per_class
-from tests.corekit._roundtrip import (OK, Gap, KnownFailureTable, Outcome, describe, run,
+from tests.corekit._roundtrip import (OK, KnownFailureTable, Outcome, describe, run,
                                       skip_without_runtime)
 
 if TYPE_CHECKING:
@@ -222,23 +222,7 @@ class InfoRoundTripTests(KnownFailureTable, unittest.TestCase):
 
     STATUSES = ('OK', 'BUILD', 'TO_DICT', 'FROM_DICT', 'EQUAL', 'MULTI', 'TYPE', 'TIMEOUT')
 
-    KNOWN_FAILURES = (
-        Gap(1490, 'A non-final model declared under a non-final parent is never finalised '
-               'once the parent has been: Info.__new__ auto-finalises only while '
-               '__finalised__ reads NONE, and it reads the BASE the parent was given '
-               'through inheritance (pcapkit/corekit/infoclass.py:435, :223). The class keeps '
-               'the __excluded__ list it copied at class creation, before info_final added '
-               'the bookkeeping names to the parent\'s (pcapkit/corekit/infoclass.py:272-280, '
-               ':146), so to_dict() emits __map__, __map_reverse__ and __multi__ as keys. '
-               'Order-dependent: the census instantiates each parent first',
-            'TO_DICT', "'.__map__: builtins.dict'",
-            ('protocols.data.internet.hopopt:QuickStartOption/*',
-             'protocols.data.internet.hopopt:SMFDPDOption/*',
-             'protocols.data.internet.ipv6_opts:QuickStartOption/*',
-             'protocols.data.internet.ipv6_opts:SMFDPDOption/*',
-             'protocols.data.internet.ipv4:QSOption/*',
-             'protocols.data.transport.tcp:MPTCPJoin/*')),
-    )
+    KNOWN_FAILURES = ()
 
     def setUp(self) -> None:
         skip_without_runtime(self)
@@ -337,12 +321,7 @@ class InfoMechanicsTests(unittest.TestCase):
         self.assertEqual(check(info), OK)
 
     def test_an_intermediate_model_after_its_parent(self) -> None:
-        """Pins the root cause of the census gap above directly (#1490).
-
-        Expected-failure style: it asserts the defect, so a fix turns it red and
-        has to flip it together with the census entry.
-
-        """
+        """#1490: a non-final model built after its non-final parent is finalised too."""
         from pcapkit.corekit.infoclass import Info
 
         class Parent(Info):
@@ -358,7 +337,8 @@ class InfoMechanicsTests(unittest.TestCase):
         Parent.from_dict({'a': 1})
         child = Child.from_dict({'a': 1, 'b': 2})
         self.assertEqual(list(Parent.from_dict({'a': 1}).to_dict()), ['a'])
-        self.assertEqual(list(child.to_dict()), ['__map__', '__map_reverse__', '__multi__', 'a', 'b'])
+        self.assertEqual(list(child.to_dict()), ['a', 'b'])
+        self.assertEqual((len(child), list(child)), (2, ['a', 'b']))
 
     def test_bookkeeping_keys_survive_a_second_round(self) -> None:
         """#1465 and #1475: the dunder keys survive ``to_dict`` -> ``from_dict`` twice."""
