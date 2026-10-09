@@ -31,7 +31,8 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.multidict import OrderedMultiDict
+from pcapkit.corekit.infoclass import Info
+from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.data.internet.ipv6 import IPv6 as Data_IPv6
 from pcapkit.protocols.internet.ip import IP
@@ -407,15 +408,18 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             The keys the extension headers are under, and the chain in the
             shape of ``__exthdr__``, i.e. the parser class and info of each.
 
-        Note:
-            A header repeated in the chain is written under the key of its
-            predecessor, so only the last of them is left in ``data``.
+        A header repeated in the chain is held under the same key as its
+        predecessor, and ``data.items(multi=True)`` yields each of them in turn.
 
         """
         names = []  # type: list[str]
         chain = []  # type: list[tuple[Type[ProtocolBase], Any]]
         proto = data.get('next')
-        for key in cls._lookup_nested(data):
+        nested = cls._lookup_nested(data)
+        pairs = data.items(multi=True) if isinstance(data, (Info, MultiDict)) else data.items()
+        for (key, info) in pairs:
+            if key not in nested:
+                continue
             try:
                 ex_proto = Enum_ExtensionHeader(proto)
             except ValueError:
@@ -423,7 +427,6 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
 
             # NOTE: As in :meth:`_decode_next_layer`, a code with no parser
             # carrying ``next`` ends the chain, and so does a fragment header.
-            info = data[key]
             if 'next' not in info:
                 break
             names.append(key)
@@ -521,10 +524,12 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             if not hasattr(info, 'next'):
                 break
 
+            # NOTE: Added through a :class:`MultiDict`, so a repeated header
+            # keeps its predecessor's info rather than overwriting it, and
+            # :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>`
+            # writes every one of them, in wire order (:issue:`1453`).
             name = next_.alias.lstrip('IPv6-').lower()
-            ipv6.__update__({
-                name: info,
-            })
+            ipv6.__update__(OrderedMultiDict([(name, info)]))
 
             # record protocol name
             # self._protos = ProtoChain(name, chain, alias)
@@ -561,9 +566,8 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             # update next header
             'protocol': proto,
 
-            # extension header chain in wire order, for ``from_data``; the
-            # per-header keys above cannot carry it, since a repeated header
-            # overwrites its predecessor's key
+            # extension header chain in wire order, with the parser of each,
+            # for ``from_data``
             '__exthdr__': tuple(_exthdr),
         })
 

@@ -20,12 +20,13 @@ import typing
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from pcapkit.corekit.enum import EnumLookup
+from pcapkit.corekit.multidict import InfoDict, MultiDict
 from pcapkit.utilities.compat import Mapping, final
 from pcapkit.utilities.exceptions import InfoError, UnsupportedCall, stacklevel
 from pcapkit.utilities.warnings import InfoWarning, warn
 
 if TYPE_CHECKING:
-    from typing import Any, Iterable, Iterator, NoReturn, Optional, Type
+    from typing import Any, ItemsView, Iterable, Iterator, NoReturn, Optional, Type
 
     from typing_extensions import Self
 
@@ -137,7 +138,7 @@ def info_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
     if cls is Info and cls.__dict__.get('__base_ready__'):
         return cls
 
-    temp = ['__map__', '__map_reverse__', '__builtin__', '__finalised__']
+    temp = ['__map__', '__map_reverse__', '__multi__', '__builtin__', '__finalised__']
     temp.extend(cls.__additional__)
     for obj in cls.mro():
         temp.extend(dir(obj))
@@ -306,6 +307,10 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
         #: Mapping of name conflicts with builtin methods (transformed names to
         #: original names).
         __map_reverse__: 'dict[str, str]'
+        #: Values of keys held more than once, i.e. every value but the first,
+        #: keyed by the (transformed) key that was last in :attr:`__dict__` when
+        #: each was added, so :meth:`to_dict` writes it right after that key.
+        __multi__: 'dict[str, list[tuple[str, Any]]]'
         #: List of builtin methods.
         __builtin__: 'set[str]'
 
@@ -439,8 +444,19 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
         # and thus being shared by all instances.
         super().__setattr__(self, '__map__', {})
         super().__setattr__(self, '__map_reverse__', {})
+        super().__setattr__(self, '__multi__', {})
 
         return self
+
+    def __copy__(self) -> 'Self':
+        # NOTE: The bookkeeping mappings are per instance, so a copy gets its
+        # own: a later :meth:`__update__` on it must not reach the original.
+        new = type(self).__new__(type(self))
+        new.__dict__.update(self.__dict__)
+        new.__dict__['__map__'] = dict(self.__map__)
+        new.__dict__['__map_reverse__'] = dict(self.__map_reverse__)
+        new.__dict__['__multi__'] = {key: list(values) for (key, values) in self.__multi__.items()}
+        return new
 
     def __post_init__(self) -> 'None':
         """Customisation method to be called after initialisation."""
@@ -452,16 +468,39 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
         # implicitly and internally. Such mapping information will be stored
         # within the :attr:`__map__` attribute.
 
+        # NOTE: A :class:`MultiDict` *adds* its values to the ones already held,
+        # as :meth:`MultiDict.update` does: a key already present keeps its
+        # value and records the new one in :attr:`__multi__`. Anything else
+        # replaces the values held.
+
         __name__ = type(self).__name__  # pylint: disable=redefined-builtin
 
+        multi_iter = ()  # type: Iterable[tuple[str, Any]]
         if dict_ is None:
             data_iter = kwargs.items()  # type: Iterable[tuple[str, Any]]
+        elif isinstance(dict_, MultiDict):
+            multi_iter = dict_.items(multi=True)
+            data_iter = kwargs.items()
         elif isinstance(dict_, (dict, collections.abc.Mapping)) or hasattr(dict_, 'items'):
             data_iter = itertools.chain(dict_.items(), kwargs.items())
         else:
             data_iter = itertools.chain(dict_, kwargs.items())
 
+        for (key, value) in multi_iter:
+            new_key = f'_{__name__}{key}' if key in self.__builtin__ else key
+            if new_key in self.__dict__ and new_key not in self.__excluded__:
+                anchor = next(reversed(self.__dict__))
+                self.__multi__.setdefault(anchor, []).append((new_key, value))
+            else:
+                self.__update__({key: value})
+
         for (key, value) in data_iter:
+            if self.__multi__:
+                # NOTE: A key replaced drops the values it held besides the first.
+                new_key = f'_{__name__}{key}' if key in self.__builtin__ else key
+                for values in self.__multi__.values():
+                    values[:] = [item for item in values if item[0] != new_key]
+
             if key in self.__builtin__:
                 new_key = f'_{__name__}{key}'
 
@@ -524,6 +563,27 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
         key = self.__map__.get(name, name)
         return self.__dict__[key]
 
+    def items(self, multi: 'bool' = False) -> 'ItemsView[str, VT] | Iterator[tuple[str, VT]]':  # type: ignore[override]
+        """Return the ``(key, value)`` pairs.
+
+        Args:
+            multi: If set to :obj:`True`, an iterator with a pair for each value
+                of each key, as :meth:`to_dict` writes them. Otherwise a view of
+                the pairs of the first value of each key, as
+                :meth:`Mapping.items <collections.abc.Mapping.items>` returns.
+
+        """
+        if not multi:
+            return super().items()
+        return ((self.__map_reverse__.get(key, key), value) for (key, value) in self.__items_multi())
+
+    def __items_multi(self) -> 'Iterator[tuple[str, VT]]':
+        """Every ``(key, value)`` pair, with the transformed keys, in order."""
+        for (key, value) in self.__dict__.items():
+            if key not in self.__excluded__:
+                yield key, value
+            yield from self.__multi__.get(key, ())
+
     def __setattr__(self, name: 'str', value: 'VT') -> 'NoReturn':
         raise UnsupportedCall("can't set attribute")
 
@@ -541,6 +601,10 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
           ``for k, v in dict_: self[k] = v``.
         * If ``dict_`` is not present, then does:
           ``for k, v in kwargs.items(): self[k] = v``.
+        * If ``dict_`` is a :class:`~pcapkit.corekit.multidict.MultiDict`, a
+          key it holds more than once keeps every value, as :meth:`to_dict`
+          returns them: the first is the value of the key, and
+          ``items(multi=True)`` yields all of them.
 
         A mapping given for a key whose type annotation resolves at runtime to
         an :class:`Info` subclass (or to :data:`~typing.Optional` of one) is
@@ -568,10 +632,20 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
             value = self.__dict__.get(key)
             if isinstance(value, Mapping) and not isinstance(value, Info):
                 self.__dict__[key] = info_cls.from_dict(value)
+            for values in self.__multi__.values():
+                for (index, (rkey, rvalue)) in enumerate(values):
+                    if rkey == key and isinstance(rvalue, Mapping) and not isinstance(rvalue, Info):
+                        values[index] = (rkey, info_cls.from_dict(rvalue))
         return self
 
-    def to_dict(self) -> 'dict[str, VT]':
+    def to_dict(self) -> 'InfoDict[str, VT]':
         """Convert :class:`Info` into :obj:`dict`.
+
+        The :obj:`dict` is an :class:`~pcapkit.corekit.multidict.InfoDict`. A key
+        held more than once -- as given by a
+        :class:`~pcapkit.corekit.multidict.MultiDict` to :meth:`from_dict`, e.g.
+        a repeated IPv6 extension header -- keeps every value for
+        ``items(multi=True)``, while the :obj:`dict` interface sees the first.
 
         Important:
             We only convert nested :class:`Info` objects into :obj:`dict` if
@@ -585,18 +659,15 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
             annotation resolves at runtime to an :class:`Info` subclass. For
             any other key -- every key of a bare :class:`Info`, and annotations
             naming a type imported only under :data:`~typing.TYPE_CHECKING` --
-            the conversion is one-way, and the nested value comes back as a
-            plain :obj:`dict`.
+            the conversion is one-way, and the nested value comes back as the
+            :class:`~pcapkit.corekit.multidict.InfoDict` it was written as.
 
         """
-        dict_ = {}  # type: dict[str, Any]
-        for (key, value) in self.__dict__.items():
-            if key in self.__excluded__:
-                continue
-
+        dict_ = InfoDict()  # type: InfoDict[str, Any]
+        for (key, value) in self.__items_multi():
             out_key = self.__map_reverse__.get(key, key)
             if isinstance(value, Info):
-                dict_[out_key] = value.to_dict()
+                dict_.add(out_key, value.to_dict())
 
             #elif isinstance(value, (tuple, list, set, frozenset)):
             #    temp = []  # type: list[Any]
@@ -608,7 +679,7 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
             #    dict_[out_key] = value.__class__(temp)
 
             else:
-                dict_[out_key] = value
+                dict_.add(out_key, value)
         return dict_
 
 

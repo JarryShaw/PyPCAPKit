@@ -30,7 +30,7 @@ import dictdumper.plist
 import dictdumper.tree
 
 from pcapkit.corekit.infoclass import Info
-from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
+from pcapkit.corekit.multidict import InfoDict, MultiDict, OrderedMultiDict
 from pcapkit.corekit.sentinels import NoValueType, NullType
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.exceptions import UnsupportedCall
@@ -427,7 +427,10 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                 :func:`escape_key` instead. An
                 :class:`~pcapkit.corekit.multidict.OrderedMultiDict` becomes a
                 :class:`list` of single-key :class:`dict` objects, each of
-                which comes back through the :class:`dict` branch.
+                which comes back through the :class:`dict` branch. An
+                :class:`~pcapkit.corekit.multidict.InfoDict`, the fields of an
+                :class:`~pcapkit.corekit.infoclass.Info`, takes that branch
+                directly, so it is written with one value per key.
 
             """
             if isinstance(o, decimal.Decimal):
@@ -445,7 +448,7 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                 result = '<NULL>'
             elif isinstance(o, NoValueType):
                 result = '<NO_VALUE>'
-            elif isinstance(o, OrderedMultiDict):
+            elif isinstance(o, OrderedMultiDict) and not isinstance(o, InfoDict):
                 # NOTE: one single-key mapping per entry, in insertion order --
                 # i.e. wire order for the option lists -- since a mapping keyed
                 # by name could only gather the repeats of a key under its first
@@ -456,7 +459,7 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                     {render_enum(key) if isinstance(key, (enum.Enum, aenum.Enum)) else key: val}
                     for key, val in o.items(multi=True)
                 ]
-            elif isinstance(o, MultiDict):
+            elif isinstance(o, MultiDict) and not isinstance(o, InfoDict):
                 # NOTE: a :class:`MultiDict` keeps no order across keys, only
                 # among the values of each, so grouping by key loses nothing.
                 temp = collections.defaultdict(list)  # type: DefaultDict[str, list[Any]]

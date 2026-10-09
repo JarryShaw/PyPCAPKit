@@ -12,17 +12,19 @@ is inspired and based on the `Werkzeug`_ project.
 
 """
 
+import collections.abc
 import copy
 from typing import TYPE_CHECKING, Generic, TypeVar, cast, overload
 
 from pcapkit.utilities.exceptions import MissingKeyError, UnsupportedCall
 
 if TYPE_CHECKING:
-    from typing import Any, Iterable, Iterator, Mapping, NoReturn, Optional, SupportsIndex
+    from typing import (Any, ItemsView, Iterable, Iterator, KeysView, Mapping, NoReturn, Optional,
+                        SupportsIndex, ValuesView)
 
     from typing_extensions import Literal
 
-__all__ = ['MultiDict', 'OrderedMultiDict']
+__all__ = ['MultiDict', 'OrderedMultiDict', 'InfoDict']
 
 ###############################################################################
 # Type variables
@@ -636,3 +638,73 @@ class OrderedMultiDict(MultiDict[_KT, _VT]):
             bucket.unlink(self)
 
         return key, [x.value for x in buckets]
+
+
+class InfoDict(OrderedMultiDict[_KT, _VT]):
+    """The :class:`OrderedMultiDict` that :meth:`Info.to_dict
+    <pcapkit.corekit.infoclass.Info.to_dict>` returns.
+
+    It is the fields of an :class:`~pcapkit.corekit.infoclass.Info` as a mapping:
+    through the :obj:`dict` interface it holds one value per key, the first, so
+    :mod:`json`, :mod:`plistlib` and the dumpers see a plain mapping. A field the
+    :class:`~pcapkit.corekit.infoclass.Info` holds more than once, such as a
+    repeated IPv6 extension header, keeps every value, in order, for
+    ``items(multi=True)``.
+
+    That sets it apart from an :class:`OrderedMultiDict` held as a field *value*,
+    e.g. a list of options, which the dumpers write as one entry per value.
+
+    Note:
+        Unlike :class:`OrderedMultiDict`, :meth:`keys`, :meth:`values` and
+        :meth:`items` return views, and it compares like a :obj:`dict`: equal to
+        a mapping with the same keys -- in any order -- when each key holds the
+        one value the mapping has, or the same values as another
+        :class:`MultiDict`.
+
+    """
+
+    def __eq__(self, other: 'Any') -> 'bool':
+        if isinstance(other, MultiDict):
+            if len(self) != len(other):
+                return False
+            return all(other.getlist(key) == values for key, values in self.lists())
+        if isinstance(other, collections.abc.Mapping):
+            if len(self) != len(other):
+                return False
+            for key, values in self.lists():
+                if key not in other or values != [other[key]]:
+                    return False
+            return True
+        return NotImplemented
+
+    def __ne__(self, other: 'Any') -> 'bool':
+        # NOTE: :obj:`dict` defines its own ``__ne__``, which compares the
+        # internal buckets rather than negating :meth:`__eq__`.
+        result = self.__eq__(other)
+        if result is NotImplemented:
+            return result
+        return not result
+
+    def __iter__(self) -> 'Iterator[_KT]':
+        return (key for key, _ in OrderedMultiDict.items(self))
+
+    def keys(self) -> 'KeysView[_KT]':  # type: ignore[override]
+        """Return a view of the keys, each once, as :meth:`dict.keys` does."""
+        return collections.abc.KeysView(self)
+
+    def values(self) -> 'ValuesView[_VT]':  # type: ignore[override]
+        """Return a view of the first value of each key, as :meth:`dict.values` does."""
+        return collections.abc.ValuesView(self)
+
+    def items(self, multi: 'bool' = False) -> 'ItemsView[_KT, _VT] | Iterator[tuple[_KT, _VT]]':  # type: ignore[override] # pylint: disable=line-too-long
+        """Return the ``(key, value)`` pairs.
+
+        Args:
+            multi: If set to :obj:`True`, an iterator with a pair for each value
+                of each key, in insertion order. Otherwise a view of the pairs
+                of the first value of each key, as :meth:`dict.items` returns.
+
+        """
+        if multi:
+            return OrderedMultiDict.items(self, multi=True)
+        return collections.abc.ItemsView(self)
