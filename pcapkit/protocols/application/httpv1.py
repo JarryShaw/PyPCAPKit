@@ -435,7 +435,8 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             if isinstance(msg, str):
                 msg = msg.encode()
 
-            header_line = b'HTTP/%s %s %s\r\n' % (version, str(status_code_val).encode(), msg)
+            # status-code is 3DIGIT (RFC 9112, section 4), so keep a leading zero
+            header_line = b'HTTP/%s %03d %s\r\n' % (version, status_code_val, msg)
         else:
             raise ProtocolError('HTTP packet must be either request or response.')
         return header_line

@@ -211,7 +211,7 @@ class FTP(Application[Data_FTP, Schema_FTP],
             mf = b''
         elif cmmd is None and code is not None:
             code_val = int(code)
-            prefix = str(code_val).encode()
+            prefix = b'%03d' % code_val  # reply codes are three digits, so keep a leading zero
 
             mf = b'-' if more else b''
         else:
