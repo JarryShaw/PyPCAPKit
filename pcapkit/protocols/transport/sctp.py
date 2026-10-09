@@ -566,6 +566,14 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             chunks=self._read_sctp_chunks(),
         )
 
+        # NOTE: With no packet length field, octets after the last whole chunk
+        # cannot be told apart from a chunk cut short, so they are kept as
+        # captured rather than rejected (:issue:`1468`).
+        if schema.trailer:
+            sctp.__update__([
+                ('trailer', schema.trailer),
+            ])
+
         # NOTE: The next layer is named by the DATA chunk's payload protocol
         # identifier, not by a port number. A packet may bundle several DATA
         # chunks; we dispatch on the first one, and the rest stay recorded in
@@ -587,6 +595,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
              vtag: 'int' = 0,
              chksum: 'Optional[bytes]' = None,
              chunks: 'Optional[list[Schema_Chunk | tuple[Enum_Chunk, dict[str, Any]] | bytes] | Chunks]' = None,  # pylint: disable=line-too-long
+             trailer: 'bytes' = b'',
              **kwargs: 'Any') -> 'Schema_SCTP':
         """Make (construct) packet data.
 
@@ -598,6 +607,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
                 constructed packet is computed and inserted, per
                 :rfc:`9260#section-6.8`.
             chunks: SCTP chunks.
+            trailer: Octets after the last chunk, written as is and covered by
+                the computed checksum.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -620,6 +631,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             vtag=vtag,
             chksum=b'\x00\x00\x00\x00' if chksum is None else chksum,
             chunks=chunks_value,
+            trailer=trailer,
         )
 
         if chksum is None:
@@ -856,6 +868,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             'vtag': data.vtag,
             'chksum': data.chksum,
             'chunks': data.chunks,
+            'trailer': data.get('trailer', b''),
         }
 
     def _get_payload(self) -> 'bytes':
@@ -918,10 +931,20 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Returns:
             Extracted SCTP chunks.
 
+        Raises:
+            ProtocolError: If a raw chunk given to :meth:`make` is not a whole
+                chunk. Parsed, its octets would fall to the trailer rather than
+                to the chunk list, so it is rejected, as it was before
+                :issue:`1468`.
+
         """
         chunks = OrderedMultiDict()  # type: Chunks
 
-        for schema in self.__header__.chunks:
+        for schema in cast('list[Schema_Chunk | bytes]', self.__header__.chunks):
+            if isinstance(schema, bytes):
+                raise ProtocolError(f'{self.alias}: raw chunk {schema!r} runs past the end of '
+                                    'the data, so it is not a whole chunk')
+
             code = schema.type
             name = self._lookup_registry(self.__chunk__, code)
 

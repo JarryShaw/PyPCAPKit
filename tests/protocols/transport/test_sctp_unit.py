@@ -854,12 +854,15 @@ class SCTPUnitTests(unittest.TestCase):
                     '0002' '0003' '0005' '0005',
             # SHUTDOWN must be exactly 8.
             'shutdown': '07' '00' '0004' '0a0b0c10',
-            # SHUTDOWN ACK must be exactly 4.
-            'shutdown_ack': '08' '00' '0008',
+            # SHUTDOWN ACK must be exactly 4. The schema reads only the
+            # header, so the other four declared octets are a well-formed
+            # chunk of the same type; with them absent, the chunk would run
+            # past the data and be kept as the packet's trailer (#1468).
+            'shutdown_ack': '08' '00' '0008' '08000004',
             # COOKIE ACK must be exactly 4.
-            'cookie_ack': '0b' '00' '0008',
+            'cookie_ack': '0b' '00' '0008' '0b000004',
             # SHUTDOWN COMPLETE must be exactly 4.
-            'shutdown_complete': '0e' '00' '0008',
+            'shutdown_complete': '0e' '00' '0008' '0e000004',
         }
         for name, body in cases.items():
             with self.subTest(chunk=name):

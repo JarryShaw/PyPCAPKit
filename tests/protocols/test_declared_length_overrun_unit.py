@@ -73,8 +73,9 @@ OVERRUNS = {
                 bytes.fromhex('3b010000 00000000 010400000000 0103')),
     'HOPOPT PadN': ('pcapkit.protocols.internet.hopopt', 'HOPOPT', _ext6(bytes.fromhex('010700000000'))),
     'IPv6-Opts PadN': ('pcapkit.protocols.internet.ipv6_opts', 'IPv6_Opts', _ext6(bytes.fromhex('010700000000'))),
-    'SCTP INIT parameter': ('pcapkit.protocols.transport.sctp', 'SCTP', _sctp(
-        bytes.fromhex('01000020 00000001 00010000 00010001 00000001 000c0010 00050000'))),
+    # An SCTP chunk declaring more octets than the packet holds is not here:
+    # with no packet length field it is kept as the packet's trailer instead,
+    # c.f. ``tests/protocols/transport/test_sctp_stray_octets_unit.py`` (#1468).
     # an unassigned kind declaring 12 octets, 8 present
     'TCP unassigned': ('pcapkit.protocols.transport.tcp', 'TCP', _tcp(bytes.fromhex('4f0caabb ccddeeff'))),
     # an unassigned option declaring 12 octets, 8 present in a complete
@@ -103,8 +104,6 @@ IN_PARENT = {
     'MH PadN': ('pcapkit.protocols.internet.ipv6', 'IPv6', _ipv6(135, OVERRUNS['MH PadN'][2])),
     'HOPOPT PadN': ('pcapkit.protocols.internet.ipv6', 'IPv6', _ipv6(0, OVERRUNS['HOPOPT PadN'][2])),
     'IPv6-Opts PadN': ('pcapkit.protocols.internet.ipv6', 'IPv6', _ipv6(60, OVERRUNS['IPv6-Opts PadN'][2])),
-    'SCTP INIT parameter': ('pcapkit.protocols.internet.ipv4', 'IPv4',
-                            _ipv4(b'', ihl=5, proto=132, payload=OVERRUNS['SCTP INIT parameter'][2])),
     'TCP unassigned': ('pcapkit.protocols.internet.ipv4', 'IPv4',
                        _ipv4(b'', ihl=5, proto=6, payload=OVERRUNS['TCP unassigned'][2])),
     'IPv4 unassigned': ('pcapkit.protocols.link.ethernet', 'Ethernet',
