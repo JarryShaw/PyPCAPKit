@@ -482,6 +482,7 @@
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
@@ -493,7 +494,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
@@ -647,6 +648,36 @@
                  <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">incumbent</span><span class="si">!r}</span><span class="s1"> with </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">protocol</span></div>
 
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Data models.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'Optional[IO[bytes] | bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">extension</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Post initialisation hook.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            file: Source packet stream.</span>
+<span class="sd">            length: Length of packet data.</span>
+<span class="sd">            extension: If the protocol is used as an IPv6 extension header.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            An IPv6 extension header is handed the rest of the datagram, but</span>
+<span class="sd">            parses only itself: its :attr:`info` holds no payload, and</span>
+<span class="sd">            :class:`~pcapkit.protocols.internet.ipv6.IPv6` decodes what follows.</span>
+<span class="sd">            So :attr:`data` is cut down to the header's own :attr:`length`, and</span>
+<span class="sd">            ``from_data(info).data`` rebuilds it exactly (:issue:`1446`).</span>
+
+<span class="sd">        """</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__post_init__</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+
+        <span class="k">if</span> <span class="n">extension</span> <span class="ow">and</span> <span class="n">file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_file</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'__len__'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Utilities.</span>

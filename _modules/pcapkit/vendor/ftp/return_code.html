@@ -595,7 +595,7 @@
 <span class="s1">        obj = int.__new__(cls, value)</span>
 <span class="s1">        obj._value_ = value</span>
 
-<span class="s1">        code = str(value)</span>
+<span class="s1">        code = '%03d' % value</span>
 <span class="s1">        obj.description = description</span>
 <span class="s1">        obj.kind = ResponseKind(int(code[0]))</span>
 <span class="s1">        obj.group = GroupingInformation(int(code[1]))</span>
@@ -628,7 +628,7 @@
 
 <span class="s1">        """</span>
 <span class="s1">        obj = super()._unregistered_member(value, name)</span>
-<span class="s1">        code = str(value)</span>
+<span class="s1">        code = '%03d' % value</span>
 <span class="s1">        obj.description = None</span>
 <span class="s1">        obj.kind = ResponseKind(int(code[0]))</span>
 <span class="s1">        obj.group = GroupingInformation(int(code[1]))</span>
@@ -638,14 +638,21 @@
 <span class="s1">    def _missing_(cls, value: 'int') -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
 <span class="s1">        """Lookup function used when value is not found.</span>
 
+<span class="s1">        A reply code is three digits (:rfc:`959#section-4.2`), so every value</span>
+<span class="s1">        from 0 to 999 can arrive on the wire: one within the registry's range</span>
+<span class="s1">        resolves to ``Unassigned``, any other to ``Unknown``.</span>
+
 <span class="s1">        Args:</span>
 <span class="s1">            value: Value to get enum item.</span>
 
 <span class="s1">        """</span>
-<span class="s1">        if not (</span><span class="si">{</span><span class="n">FLAG</span><span class="si">}</span><span class="s1">):</span>
+<span class="s1">        if not (isinstance(value, int) and 0 &lt;= value &lt;= 999):</span>
 <span class="s1">            raise ValueError('%r is not a valid %s' % (value, cls.__name__))</span>
-<span class="s1">        #: Unassigned</span>
-<span class="s1">        return cls._unregistered_member(value, 'Unassigned')</span>
+<span class="s1">        if </span><span class="si">{</span><span class="n">FLAG</span><span class="si">}</span><span class="s1">:</span>
+<span class="s1">            #: Unassigned</span>
+<span class="s1">            return cls._unregistered_member(value, 'Unassigned')</span>
+<span class="s1">        #: Unknown</span>
+<span class="s1">        return cls._unregistered_member(value, 'Unknown')</span>
 <span class="s1">'''</span>  <span class="c1"># type: Callable[[str, str, str, str, str], str]</span>
 
 
