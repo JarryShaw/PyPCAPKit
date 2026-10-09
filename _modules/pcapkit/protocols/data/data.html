@@ -494,7 +494,13 @@
         <span class="c1">#: Next field name, i.e., the name of the payload field.</span>
         <span class="n">__next_name__</span><span class="p">:</span> <span class="s1">'str'</span>
         <span class="c1">#: Next field type, i.e., the type of the payload field.</span>
-        <span class="n">__next_type__</span><span class="p">:</span> <span class="s1">'Type[ProtocolBase]'</span></div>
+        <span class="n">__next_type__</span><span class="p">:</span> <span class="s1">'Type[ProtocolBase]'</span>
+        <span class="c1">#: Name of the header field the data ended inside, and how many of its</span>
+        <span class="c1">#: octets were there; present only then. Not excluded, so that</span>
+        <span class="c1">#: :meth:`to_dict` carries it and ``from_data(info.to_dict())`` cuts</span>
+        <span class="c1">#: the rebuild back as ``from_data(info)`` does. See</span>
+        <span class="c1">#: :func:`~pcapkit.protocols.schema.schema.keep_short_read`.</span>
+        <span class="n">__short_read__</span><span class="p">:</span> <span class="s1">'tuple[str, int]'</span></div>
 
 </pre></div>
         </article>

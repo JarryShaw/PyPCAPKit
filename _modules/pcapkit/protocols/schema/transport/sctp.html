@@ -472,6 +472,7 @@
 <span class="c1"># mypy: disable-error-code=assignment</span>
 <span class="sd">"""header schema for stream control transmission protocol"""</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype</span><span class="w"> </span><span class="kn">import</span> <span class="n">AppType</span> <span class="k">as</span> <span class="n">Enum_AppType</span>
@@ -483,7 +484,7 @@
     <span class="n">PayloadProtocolIdentifier</span> <span class="k">as</span> <span class="n">Enum_PayloadProtocolIdentifier</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">ListField</span><span class="p">,</span> <span class="n">OptionField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4AddressField</span><span class="p">,</span> <span class="n">IPv6AddressField</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="n">SchemaField</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="n">PayloadField</span><span class="p">,</span> <span class="n">SchemaField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumField</span><span class="p">,</span> <span class="n">UInt16Field</span><span class="p">,</span> <span class="n">UInt32Field</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.strings</span><span class="w"> </span><span class="kn">import</span> <span class="n">BitField</span><span class="p">,</span> <span class="n">BytesField</span><span class="p">,</span> <span class="n">PaddingField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumSchema</span><span class="p">,</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
@@ -519,7 +520,7 @@
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 
@@ -1495,6 +1496,70 @@
 
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">whole_chunks_length</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Length of the run of whole chunks at the front of ``data``.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data: Chunk area of an SCTP packet.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Number of octets up to the end of the last chunk whose declared</span>
+<span class="sd">        ``length`` octets are all present, with as much of its padding as there</span>
+<span class="sd">        is, c.f. :func:`padding_length`. A ``length`` below the four-octet chunk</span>
+<span class="sd">        header (:rfc:`9260#section-3.2`) delimits nothing, so the run stops</span>
+<span class="sd">        there too; four zero octets would otherwise read as a DATA chunk.</span>
+
+<span class="sd">    """</span>
+    <span class="n">end</span><span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">size</span> <span class="o">-</span> <span class="n">end</span> <span class="o">&gt;=</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">end</span> <span class="o">+</span> <span class="mi">2</span><span class="p">:</span><span class="n">end</span> <span class="o">+</span> <span class="mi">4</span><span class="p">],</span> <span class="s1">'big'</span><span class="p">)</span>
+        <span class="n">stop</span> <span class="o">=</span> <span class="n">end</span> <span class="o">+</span> <span class="n">length</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">4</span> <span class="ow">or</span> <span class="n">stop</span> <span class="o">&gt;</span> <span class="n">size</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">stop</span> <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="n">length</span> <span class="o">%</span> <span class="mi">4</span><span class="p">),</span> <span class="n">size</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">end</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ChunkListField</span><span class="p">(</span><span class="n">OptionField</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Chunk list that stops at the last whole chunk.</span>
+
+<span class="sd">    SCTP has no packet length field, so octets after the last whole chunk --</span>
+<span class="sd">    fewer than a chunk header, or a chunk whose ``length`` runs past the data --</span>
+<span class="sd">    cannot be told apart from a chunk cut short. They are not parsed but</span>
+<span class="sd">    reported as option padding, which :meth:`Schema.unpack</span>
+<span class="sd">    &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;` hands back to the stream for</span>
+<span class="sd">    :attr:`SCTP.trailer` to keep as captured (:issue:`1468`).</span>
+
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="s1">'bytes | IO[bytes]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[Chunk]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Unpack field value from :obj:`bytes`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            buffer: Field buffer.</span>
+<span class="sd">            packet: Packet data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Unpacked whole chunks.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">buffer</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_length</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="n">buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
+
+        <span class="n">area</span><span class="p">,</span> <span class="n">whole</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span><span class="p">,</span> <span class="n">whole_chunks_length</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="n">whole</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">chunks</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">data</span><span class="p">[:</span><span class="n">whole</span><span class="p">],</span> <span class="n">packet</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="n">area</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_option_padding</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">whole</span>
+        <span class="k">return</span> <span class="n">chunks</span>
+
+
 <div class="viewcode-block" id="SCTP">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.schema.transport.sctp.SCTP">[docs]</a>
 <span class="nd">@schema_final</span>
@@ -1520,17 +1585,21 @@
     <span class="c1">#: Checksum, as a CRC32c over the whole packet with this field zeroed.</span>
     <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
     <span class="c1">#: Chunks.</span>
-    <span class="n">chunks</span><span class="p">:</span> <span class="s1">'list[Chunk]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
+    <span class="n">chunks</span><span class="p">:</span> <span class="s1">'list[Chunk]'</span> <span class="o">=</span> <span class="n">ChunkListField</span><span class="p">(</span>
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">],</span> <span class="mi">0</span><span class="p">),</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">Chunk</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
         <span class="n">registry</span><span class="o">=</span><span class="n">Chunk</span><span class="o">.</span><span class="n">registry</span><span class="p">,</span>
     <span class="p">)</span>
+    <span class="c1">#: Octets captured after the last whole chunk, c.f. :class:`ChunkListField`</span>
+    <span class="c1">#: and :attr:`IPv4.trailer &lt;pcapkit.protocols.schema.internet.ipv4.IPv4.trailer&gt;`.</span>
+    <span class="n">trailer</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">srcport</span><span class="p">:</span> <span class="s1">'Enum_AppType | int'</span><span class="p">,</span> <span class="n">dstport</span><span class="p">:</span> <span class="s1">'Enum_AppType | int'</span><span class="p">,</span>
                      <span class="n">vtag</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
-                     <span class="n">chunks</span><span class="p">:</span> <span class="s1">'list[Chunk | bytes] | bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">chunks</span><span class="p">:</span> <span class="s1">'list[Chunk | bytes] | bytes'</span><span class="p">,</span>
+                     <span class="n">trailer</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 </pre></div>
         </article>

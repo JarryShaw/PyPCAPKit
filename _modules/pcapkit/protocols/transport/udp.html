@@ -647,6 +647,14 @@
             <span class="n">checksum</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">checksum</span><span class="p">,</span>
         <span class="p">)</span>
 
+        <span class="c1"># NOTE: Octets captured past the Length field belong to this layer,</span>
+        <span class="c1"># since its own length field is what leaves them out of the payload,</span>
+        <span class="c1"># and the rebuild keeps them as captured (:issue:`1461`).</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">:</span>
+            <span class="n">udp</span><span class="o">.</span><span class="n">__update__</span><span class="p">([</span>
+                <span class="p">(</span><span class="s1">'trailer'</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">),</span>
+            <span class="p">])</span>
+
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">udp</span><span class="p">,</span> <span class="p">(</span><span class="n">udp</span><span class="o">.</span><span class="n">srcport</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="n">udp</span><span class="o">.</span><span class="n">dstport</span><span class="o">.</span><span class="n">port</span><span class="p">),</span> <span class="n">udp</span><span class="o">.</span><span class="n">len</span> <span class="o">-</span> <span class="mi">8</span><span class="p">)</span></div>
 
 
@@ -658,6 +666,7 @@
              <span class="n">checksum</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>
              <span class="n">total_length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | Schema | ProtocolBase'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
+             <span class="n">trailer</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_UDP'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
 
@@ -668,6 +677,8 @@
 <span class="sd">            total_length: Length of the datagram, header included; computed from</span>
 <span class="sd">                the header and the payload when omitted.</span>
 <span class="sd">            payload: Payload data.</span>
+<span class="sd">            trailer: Octets after the datagram, outside the Length field;</span>
+<span class="sd">                written as is and not counted in a computed ``total_length``.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -688,6 +699,7 @@
             <span class="nb">len</span><span class="o">=</span><span class="n">total_length</span><span class="p">,</span>
             <span class="n">checksum</span><span class="o">=</span><span class="n">checksum</span><span class="p">,</span>
             <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>
+            <span class="n">trailer</span><span class="o">=</span><span class="n">trailer</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -740,6 +752,8 @@
             <span class="c1"># the length that was on the wire (:issue:`1155`).</span>
             <span class="s1">'total_length'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+            <span class="c1"># NOTE: And the octets captured past the Length field (:issue:`1461`).</span>
+            <span class="s1">'trailer'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'trailer'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">),</span>
         <span class="p">}</span></div>
 </div>
 

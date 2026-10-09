@@ -576,12 +576,17 @@
     <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
     <span class="c1">#: Checksum of UDP packet.</span>
     <span class="n">checksum</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-    <span class="c1">#: Payload.</span>
-    <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">()</span>
+    <span class="c1">#: Payload. A Length below the header's own 8 octets leaves the length</span>
+    <span class="c1">#: negative, which takes the rest of the datagram, as before.</span>
+    <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">8</span><span class="p">)</span>
+    <span class="c1">#: Octets captured past the Length field, c.f.</span>
+    <span class="c1">#: :attr:`IPv4.trailer &lt;pcapkit.protocols.schema.internet.ipv4.IPv4.trailer&gt;`.</span>
+    <span class="n">trailer</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">srcport</span><span class="p">:</span> <span class="s1">'Enum_AppType | int'</span><span class="p">,</span> <span class="n">dstport</span><span class="p">:</span> <span class="s1">'Enum_AppType | int'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">checksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | Schema | ProtocolBase'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+                     <span class="n">checksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | Schema | ProtocolBase'</span><span class="p">,</span>
+                     <span class="n">trailer</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 </pre></div>
         </article>

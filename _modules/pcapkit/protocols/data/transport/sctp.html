@@ -1215,6 +1215,10 @@
     <span class="n">chunks</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[ChunkType, Chunk]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Octets captured after the last whole chunk, present only when there</span>
+        <span class="c1">#: are any.</span>
+        <span class="n">trailer</span><span class="p">:</span> <span class="s1">'bytes'</span>
+
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">srcport</span><span class="p">:</span> <span class="s1">'AppType'</span><span class="p">,</span> <span class="n">dstport</span><span class="p">:</span> <span class="s1">'AppType'</span><span class="p">,</span> <span class="n">vtag</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">chunks</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[ChunkType, Chunk]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 </pre></div>

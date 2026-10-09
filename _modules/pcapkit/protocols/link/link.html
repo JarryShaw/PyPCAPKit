@@ -491,13 +491,14 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.ethertype</span><span class="w"> </span><span class="kn">import</span> <span class="n">EtherType</span> <span class="k">as</span> <span class="n">Enum_EtherType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span><span class="p">,</span> <span class="n">ProtocolBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">keep_short_read</span><span class="p">,</span> <span class="n">replay_short_read</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistryError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Self</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Link'</span><span class="p">]</span>
 
@@ -628,6 +629,44 @@
                  <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">incumbent</span><span class="si">!r}</span><span class="s1"> with </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">protocol</span></div>
 
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'_PT | dict[str, Any]'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Create protocol instance from data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Protocol data.</span>
+<span class="sd">            **kwargs: Construction keywords, as for :meth:`ProtocolBase.from_data</span>
+<span class="sd">                &lt;pcapkit.protocols.protocol.ProtocolBase.from_data&gt;`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Protocol instance, cut back to what was captured when the header</span>
+<span class="sd">            it was parsed from was cut short (:issue:`1458`).</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">replay_short_read</span><span class="p">(</span><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="n">data</span><span class="p">)</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Data models.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'Optional[IO[bytes] | bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Post initialisation hook.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            file: Source packet stream.</span>
+<span class="sd">            length: Length of packet data.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            A header the data ends inside keeps that in its :attr:`info`, so</span>
+<span class="sd">            that :meth:`from_data` rebuilds only what was captured</span>
+<span class="sd">            (:issue:`1458`).</span>
+
+<span class="sd">        """</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__post_init__</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="n">keep_short_read</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Utilities.</span>

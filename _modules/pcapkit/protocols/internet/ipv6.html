@@ -501,7 +501,8 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv6.extension_header</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExtensionHeader</span> <span class="k">as</span> <span class="n">Enum_ExtensionHeader</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiDict</span><span class="p">,</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.protochain</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoChain</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span> <span class="k">as</span> <span class="n">Data_IPv6</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP</span>
@@ -894,15 +895,18 @@
 <span class="sd">            The keys the extension headers are under, and the chain in the</span>
 <span class="sd">            shape of ``__exthdr__``, i.e. the parser class and info of each.</span>
 
-<span class="sd">        Note:</span>
-<span class="sd">            A header repeated in the chain is written under the key of its</span>
-<span class="sd">            predecessor, so only the last of them is left in ``data``.</span>
+<span class="sd">        A header repeated in the chain is held under the same key as its</span>
+<span class="sd">        predecessor, and ``data.items(multi=True)`` yields each of them in turn.</span>
 
 <span class="sd">        """</span>
         <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
         <span class="n">chain</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[tuple[Type[ProtocolBase], Any]]</span>
         <span class="n">proto</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'next'</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_lookup_nested</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="n">nested</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_lookup_nested</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">pairs</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">MultiDict</span><span class="p">))</span> <span class="k">else</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span> <span class="ow">in</span> <span class="n">pairs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nested</span><span class="p">:</span>
+                <span class="k">continue</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">ex_proto</span> <span class="o">=</span> <span class="n">Enum_ExtensionHeader</span><span class="p">(</span><span class="n">proto</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
@@ -910,7 +914,6 @@
 
             <span class="c1"># NOTE: As in :meth:`_decode_next_layer`, a code with no parser</span>
             <span class="c1"># carrying ``next`` ends the chain, and so does a fragment header.</span>
-            <span class="n">info</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
             <span class="k">if</span> <span class="s1">'next'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span><span class="p">:</span>
                 <span class="k">break</span>
             <span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
@@ -1010,10 +1013,12 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="s1">'next'</span><span class="p">):</span>
                 <span class="k">break</span>
 
+            <span class="c1"># NOTE: Added through a :class:`MultiDict`, so a repeated header</span>
+            <span class="c1"># keeps its predecessor's info rather than overwriting it, and</span>
+            <span class="c1"># :meth:`Info.to_dict &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;`</span>
+            <span class="c1"># writes every one of them, in wire order (:issue:`1453`).</span>
             <span class="n">name</span> <span class="o">=</span> <span class="n">next_</span><span class="o">.</span><span class="n">alias</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">'IPv6-'</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-            <span class="n">ipv6</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span>
-                <span class="n">name</span><span class="p">:</span> <span class="n">info</span><span class="p">,</span>
-            <span class="p">})</span>
+            <span class="n">ipv6</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">OrderedMultiDict</span><span class="p">([(</span><span class="n">name</span><span class="p">,</span> <span class="n">info</span><span class="p">)]))</span>
 
             <span class="c1"># record protocol name</span>
             <span class="c1"># self._protos = ProtoChain(name, chain, alias)</span>
@@ -1050,9 +1055,8 @@
             <span class="c1"># update next header</span>
             <span class="s1">'protocol'</span><span class="p">:</span> <span class="n">proto</span><span class="p">,</span>
 
-            <span class="c1"># extension header chain in wire order, for ``from_data``; the</span>
-            <span class="c1"># per-header keys above cannot carry it, since a repeated header</span>
-            <span class="c1"># overwrites its predecessor's key</span>
+            <span class="c1"># extension header chain in wire order, with the parser of each,</span>
+            <span class="c1"># for ``from_data``</span>
             <span class="s1">'__exthdr__'</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">_exthdr</span><span class="p">),</span>
         <span class="p">})</span>
 

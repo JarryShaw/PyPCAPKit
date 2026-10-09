@@ -981,6 +981,9 @@ the field’s span unread carries those octets under a
 <code class="docutils literal notranslate"><span class="pre">__remainder_offset__</span></code>. <a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.from_dict" title="pcapkit.protocols.schema.schema.Schema.from_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_dict()</span></code></a> accepts both back, so
 that the rebuilt field still packs them (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1380">#1380</a>). The keys
 are absent otherwise.</p>
+<p>A schema whose data ended inside one of its fields carries the
+<code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> that <a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.unpack" title="pcapkit.protocols.schema.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unpack()</span></code></a> recorded, and
+<a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.from_dict" title="pcapkit.protocols.schema.schema.Schema.from_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_dict()</span></code></a> accepts it back, likewise.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>

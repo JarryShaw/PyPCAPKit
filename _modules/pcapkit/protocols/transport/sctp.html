@@ -1040,6 +1040,14 @@
             <span class="n">chunks</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_sctp_chunks</span><span class="p">(),</span>
         <span class="p">)</span>
 
+        <span class="c1"># NOTE: With no packet length field, octets after the last whole chunk</span>
+        <span class="c1"># cannot be told apart from a chunk cut short, so they are kept as</span>
+        <span class="c1"># captured rather than rejected (:issue:`1468`).</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">:</span>
+            <span class="n">sctp</span><span class="o">.</span><span class="n">__update__</span><span class="p">([</span>
+                <span class="p">(</span><span class="s1">'trailer'</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">),</span>
+            <span class="p">])</span>
+
         <span class="c1"># NOTE: The next layer is named by the DATA chunk's payload protocol</span>
         <span class="c1"># identifier, not by a port number. A packet may bundle several DATA</span>
         <span class="c1"># chunks; we dispatch on the first one, and the rest stay recorded in</span>
@@ -1064,6 +1072,7 @@
              <span class="n">vtag</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
              <span class="n">chksum</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">chunks</span><span class="p">:</span> <span class="s1">'Optional[list[Schema_Chunk | tuple[Enum_Chunk, dict[str, Any]] | bytes] | Chunks]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+             <span class="n">trailer</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_SCTP'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
 
@@ -1075,6 +1084,8 @@
 <span class="sd">                constructed packet is computed and inserted, per</span>
 <span class="sd">                :rfc:`9260#section-6.8`.</span>
 <span class="sd">            chunks: SCTP chunks.</span>
+<span class="sd">            trailer: Octets after the last chunk, written as is and covered by</span>
+<span class="sd">                the computed checksum.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -1097,6 +1108,7 @@
             <span class="n">vtag</span><span class="o">=</span><span class="n">vtag</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00\x00\x00</span><span class="s1">'</span> <span class="k">if</span> <span class="n">chksum</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">chksum</span><span class="p">,</span>
             <span class="n">chunks</span><span class="o">=</span><span class="n">chunks_value</span><span class="p">,</span>
+            <span class="n">trailer</span><span class="o">=</span><span class="n">trailer</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">chksum</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1360,6 +1372,7 @@
             <span class="s1">'vtag'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">vtag</span><span class="p">,</span>
             <span class="s1">'chksum'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="s1">'chunks'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">chunks</span><span class="p">,</span>
+            <span class="s1">'trailer'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'trailer'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">),</span>
         <span class="p">}</span></div>
 
 
@@ -1431,10 +1444,20 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Extracted SCTP chunks.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If a raw chunk given to :meth:`make` is not a whole</span>
+<span class="sd">                chunk. Parsed, its octets would fall to the trailer rather than</span>
+<span class="sd">                to the chunk list, so it is rejected, as it was before</span>
+<span class="sd">                :issue:`1468`.</span>
+
 <span class="sd">        """</span>
         <span class="n">chunks</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: Chunks</span>
 
-        <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">chunks</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'list[Schema_Chunk | bytes]'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">chunks</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: raw chunk </span><span class="si">{</span><span class="n">schema</span><span class="si">!r}</span><span class="s1"> runs past the end of '</span>
+                                    <span class="s1">'the data, so it is not a whole chunk'</span><span class="p">)</span>
+
             <span class="n">code</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span>
             <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__chunk__</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
 

@@ -490,12 +490,13 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumLookup</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">InfoDict</span><span class="p">,</span> <span class="n">MultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">final</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">InfoError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">InfoWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ItemsView</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Self</span>
 
@@ -609,7 +610,7 @@
     <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="n">Info</span> <span class="ow">and</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__base_ready__'</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">cls</span>
 
-    <span class="n">temp</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'__map__'</span><span class="p">,</span> <span class="s1">'__map_reverse__'</span><span class="p">,</span> <span class="s1">'__builtin__'</span><span class="p">,</span> <span class="s1">'__finalised__'</span><span class="p">]</span>
+    <span class="n">temp</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'__map__'</span><span class="p">,</span> <span class="s1">'__map_reverse__'</span><span class="p">,</span> <span class="s1">'__multi__'</span><span class="p">,</span> <span class="s1">'__builtin__'</span><span class="p">,</span> <span class="s1">'__finalised__'</span><span class="p">]</span>
     <span class="n">temp</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__additional__</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">mro</span><span class="p">():</span>
         <span class="n">temp</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">dir</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
@@ -784,6 +785,10 @@
         <span class="c1">#: Mapping of name conflicts with builtin methods (transformed names to</span>
         <span class="c1">#: original names).</span>
         <span class="n">__map_reverse__</span><span class="p">:</span> <span class="s1">'dict[str, str]'</span>
+        <span class="c1">#: Values of keys held more than once, i.e. every value but the first,</span>
+        <span class="c1">#: keyed by the (transformed) key that was last in :attr:`__dict__` when</span>
+        <span class="c1">#: each was added, so :meth:`to_dict` writes it right after that key.</span>
+        <span class="n">__multi__</span><span class="p">:</span> <span class="s1">'dict[str, list[tuple[str, Any]]]'</span>
         <span class="c1">#: List of builtin methods.</span>
         <span class="n">__builtin__</span><span class="p">:</span> <span class="s1">'set[str]'</span>
 
@@ -922,9 +927,20 @@
         <span class="c1"># and thus being shared by all instances.</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'__map__'</span><span class="p">,</span> <span class="p">{})</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'__map_reverse__'</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'__multi__'</span><span class="p">,</span> <span class="p">{})</span>
 
         <span class="k">return</span> <span class="bp">self</span></div>
 
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>
+        <span class="c1"># NOTE: The bookkeeping mappings are per instance, so a copy gets its</span>
+        <span class="c1"># own: a later :meth:`__update__` on it must not reach the original.</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="n">new</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
+        <span class="n">new</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">'__map__'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__map__</span><span class="p">)</span>
+        <span class="n">new</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">'__map_reverse__'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__map_reverse__</span><span class="p">)</span>
+        <span class="n">new</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">'__multi__'</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__multi__</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="k">return</span> <span class="n">new</span>
 
 <div class="viewcode-block" id="Info.__post_init__">
 <a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.Info.__post_init__">[docs]</a>
@@ -939,16 +955,39 @@
         <span class="c1"># implicitly and internally. Such mapping information will be stored</span>
         <span class="c1"># within the :attr:`__map__` attribute.</span>
 
+        <span class="c1"># NOTE: A :class:`MultiDict` *adds* its values to the ones already held,</span>
+        <span class="c1"># as :meth:`MultiDict.update` does: a key already present keeps its</span>
+        <span class="c1"># value and records the new one in :attr:`__multi__`. Anything else</span>
+        <span class="c1"># replaces the values held.</span>
+
         <span class="vm">__name__</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
 
+        <span class="n">multi_iter</span> <span class="o">=</span> <span class="p">()</span>  <span class="c1"># type: Iterable[tuple[str, Any]]</span>
         <span class="k">if</span> <span class="n">dict_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">data_iter</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>  <span class="c1"># type: Iterable[tuple[str, Any]]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dict_</span><span class="p">,</span> <span class="n">MultiDict</span><span class="p">):</span>
+            <span class="n">multi_iter</span> <span class="o">=</span> <span class="n">dict_</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">data_iter</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dict_</span><span class="p">,</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">))</span> <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">dict_</span><span class="p">,</span> <span class="s1">'items'</span><span class="p">):</span>
             <span class="n">data_iter</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">dict_</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">data_iter</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">dict_</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
 
+        <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">multi_iter</span><span class="p">:</span>
+            <span class="n">new_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_</span><span class="si">{</span><span class="vm">__name__</span><span class="si">}{</span><span class="n">key</span><span class="si">}</span><span class="s1">'</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__builtin__</span> <span class="k">else</span> <span class="n">key</span>
+            <span class="k">if</span> <span class="n">new_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span> <span class="ow">and</span> <span class="n">new_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__excluded__</span><span class="p">:</span>
+                <span class="n">anchor</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__multi__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">anchor</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">new_key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span>
+
         <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">data_iter</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__multi__</span><span class="p">:</span>
+                <span class="c1"># NOTE: A key replaced drops the values it held besides the first.</span>
+                <span class="n">new_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_</span><span class="si">{</span><span class="vm">__name__</span><span class="si">}{</span><span class="n">key</span><span class="si">}</span><span class="s1">'</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__builtin__</span> <span class="k">else</span> <span class="n">key</span>
+                <span class="k">for</span> <span class="n">values</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__multi__</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                    <span class="n">values</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">values</span> <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">new_key</span><span class="p">]</span>
+
             <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__builtin__</span><span class="p">:</span>
                 <span class="n">new_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_</span><span class="si">{</span><span class="vm">__name__</span><span class="si">}{</span><span class="n">key</span><span class="si">}</span><span class="s1">'</span>
 
@@ -1011,6 +1050,30 @@
         <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 
+<div class="viewcode-block" id="Info.items">
+<a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.Info.items">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">multi</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ItemsView[str, VT] | Iterator[tuple[str, VT]]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<span class="w">        </span><span class="sd">"""Return the ``(key, value)`` pairs.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            multi: If set to :obj:`True`, an iterator with a pair for each value</span>
+<span class="sd">                of each key, as :meth:`to_dict` writes them. Otherwise a view of</span>
+<span class="sd">                the pairs of the first value of each key, as</span>
+<span class="sd">                :meth:`Mapping.items &lt;collections.abc.Mapping.items&gt;` returns.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">multi</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">__map_reverse__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">key</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__items_multi</span><span class="p">())</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__items_multi</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Iterator[tuple[str, VT]]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Every ``(key, value)`` pair, with the transformed keys, in order."""</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__excluded__</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span>
+            <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">__multi__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">())</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'VT'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'NoReturn'</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="s2">"can't set attribute"</span><span class="p">)</span>
 
@@ -1030,6 +1093,10 @@
 <span class="sd">          ``for k, v in dict_: self[k] = v``.</span>
 <span class="sd">        * If ``dict_`` is not present, then does:</span>
 <span class="sd">          ``for k, v in kwargs.items(): self[k] = v``.</span>
+<span class="sd">        * If ``dict_`` is a :class:`~pcapkit.corekit.multidict.MultiDict`, a</span>
+<span class="sd">          key it holds more than once keeps every value, as :meth:`to_dict`</span>
+<span class="sd">          returns them: the first is the value of the key, and</span>
+<span class="sd">          ``items(multi=True)`` yields all of them.</span>
 
 <span class="sd">        A mapping given for a key whose type annotation resolves at runtime to</span>
 <span class="sd">        an :class:`Info` subclass (or to :data:`~typing.Optional` of one) is</span>
@@ -1057,13 +1124,23 @@
             <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Info</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">info_cls</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">values</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__multi__</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="k">for</span> <span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="p">(</span><span class="n">rkey</span><span class="p">,</span> <span class="n">rvalue</span><span class="p">))</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">rkey</span> <span class="o">==</span> <span class="n">key</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rvalue</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rvalue</span><span class="p">,</span> <span class="n">Info</span><span class="p">):</span>
+                        <span class="n">values</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">rkey</span><span class="p">,</span> <span class="n">info_cls</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">rvalue</span><span class="p">))</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
 
 <div class="viewcode-block" id="Info.to_dict">
 <a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.Info.to_dict">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, VT]'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'InfoDict[str, VT]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Convert :class:`Info` into :obj:`dict`.</span>
+
+<span class="sd">        The :obj:`dict` is an :class:`~pcapkit.corekit.multidict.InfoDict`. A key</span>
+<span class="sd">        held more than once -- as given by a</span>
+<span class="sd">        :class:`~pcapkit.corekit.multidict.MultiDict` to :meth:`from_dict`, e.g.</span>
+<span class="sd">        a repeated IPv6 extension header -- keeps every value for</span>
+<span class="sd">        ``items(multi=True)``, while the :obj:`dict` interface sees the first.</span>
 
 <span class="sd">        Important:</span>
 <span class="sd">            We only convert nested :class:`Info` objects into :obj:`dict` if</span>
@@ -1077,18 +1154,15 @@
 <span class="sd">            annotation resolves at runtime to an :class:`Info` subclass. For</span>
 <span class="sd">            any other key -- every key of a bare :class:`Info`, and annotations</span>
 <span class="sd">            naming a type imported only under :data:`~typing.TYPE_CHECKING` --</span>
-<span class="sd">            the conversion is one-way, and the nested value comes back as a</span>
-<span class="sd">            plain :obj:`dict`.</span>
+<span class="sd">            the conversion is one-way, and the nested value comes back as the</span>
+<span class="sd">            :class:`~pcapkit.corekit.multidict.InfoDict` it was written as.</span>
 
 <span class="sd">        """</span>
-        <span class="n">dict_</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, Any]</span>
-        <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__excluded__</span><span class="p">:</span>
-                <span class="k">continue</span>
-
+        <span class="n">dict_</span> <span class="o">=</span> <span class="n">InfoDict</span><span class="p">()</span>  <span class="c1"># type: InfoDict[str, Any]</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__items_multi</span><span class="p">():</span>
             <span class="n">out_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map_reverse__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Info</span><span class="p">):</span>
-                <span class="n">dict_</span><span class="p">[</span><span class="n">out_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+                <span class="n">dict_</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">out_key</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>
 
             <span class="c1">#elif isinstance(value, (tuple, list, set, frozenset)):</span>
             <span class="c1">#    temp = []  # type: list[Any]</span>
@@ -1100,7 +1174,7 @@
             <span class="c1">#    dict_[out_key] = value.__class__(temp)</span>
 
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">dict_</span><span class="p">[</span><span class="n">out_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="n">dict_</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">out_key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">dict_</span></div>
 </div>
 

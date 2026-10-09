@@ -496,6 +496,10 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Self</span>
 
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
+
+    <span class="n">_PB</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_PB'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">ProtocolBase</span><span class="p">)</span>
+
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Schema'</span><span class="p">,</span> <span class="s1">'EnumSchema'</span><span class="p">,</span> <span class="s1">'schema_final'</span><span class="p">]</span>
 
 <span class="n">_VT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_VT'</span><span class="p">)</span>
@@ -571,7 +575,8 @@
 
     <span class="n">temp</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'__map__'</span><span class="p">,</span> <span class="s1">'__map_reverse__'</span><span class="p">,</span> <span class="s1">'__builtin__'</span><span class="p">,</span>
             <span class="s1">'__fields__'</span><span class="p">,</span> <span class="s1">'__buffer__'</span><span class="p">,</span> <span class="s1">'__updated__'</span><span class="p">,</span>
-            <span class="s1">'__payload__'</span><span class="p">,</span> <span class="s1">'__finalised__'</span><span class="p">,</span> <span class="s1">'__remainder__'</span><span class="p">,</span> <span class="s1">'__remainder_offset__'</span><span class="p">]</span>
+            <span class="s1">'__payload__'</span><span class="p">,</span> <span class="s1">'__finalised__'</span><span class="p">,</span> <span class="s1">'__remainder__'</span><span class="p">,</span> <span class="s1">'__remainder_offset__'</span><span class="p">,</span>
+            <span class="s1">'__short_read__'</span><span class="p">]</span>
     <span class="n">temp</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__additional__</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">mro</span><span class="p">():</span>
         <span class="n">temp</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">el</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="k">if</span> <span class="n">el</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__fields__</span><span class="p">)</span>
@@ -1046,7 +1051,8 @@
             <span class="c1"># NOTE: Not a field, but what :meth:`to_dict` emits for the octets an</span>
             <span class="c1"># enclosing ``SchemaField`` span held beyond this schema, and where,</span>
             <span class="c1"># so that a rebuilt schema still re-emits them (:issue:`1380`).</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'__remainder__'</span><span class="p">,</span> <span class="s1">'__remainder_offset__'</span><span class="p">):</span>
+            <span class="c1"># NOTE: Nor is the short read :meth:`unpack` records (:issue:`1458`).</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'__remainder__'</span><span class="p">,</span> <span class="s1">'__remainder_offset__'</span><span class="p">,</span> <span class="s1">'__short_read__'</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
                 <span class="k">continue</span>
 
@@ -1201,6 +1207,10 @@
 <span class="sd">            that the rebuilt field still packs them (:issue:`1380`). The keys</span>
 <span class="sd">            are absent otherwise.</span>
 
+<span class="sd">            A schema whose data ended inside one of its fields carries the</span>
+<span class="sd">            ``__short_read__`` that :meth:`unpack` recorded, and</span>
+<span class="sd">            :meth:`from_dict` accepts it back, likewise.</span>
+
 <span class="sd">        """</span>
         <span class="n">dict_</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, Any]</span>
         <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -1213,7 +1223,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">dict_</span><span class="p">[</span><span class="n">out_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'__remainder__'</span><span class="p">,</span> <span class="s1">'__remainder_offset__'</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'__remainder__'</span><span class="p">,</span> <span class="s1">'__remainder_offset__'</span><span class="p">,</span> <span class="s1">'__short_read__'</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
                 <span class="n">dict_</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">dict_</span></div>
@@ -1417,9 +1427,47 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cut_short_read</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__updated__</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__bytes__</span><span class="p">()</span></div>
 
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_note_short_read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">byte</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Record the first field the data ends inside, for :meth:`_cut_short_read`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name: Field name.</span>
+<span class="sd">            length: Octets the field declares.</span>
+<span class="sd">            byte: Octets actually read for it.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">byte</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">length</span> <span class="ow">and</span> <span class="s1">'__short_read__'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">'__short_read__'</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">byte</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_cut_short_read</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Cut the packed buffers back to the octets a short read consumed.</span>
+
+<span class="sd">        A schema whose data ended inside one of its fields records, as</span>
+<span class="sd">        ``__short_read__``, that field's name and how many of its octets were</span>
+<span class="sd">        there (see :meth:`unpack`). Its value is read as though the missing</span>
+<span class="sd">        octets were zeros, so packing it writes the field at full width and</span>
+<span class="sd">        every field after it besides, none of which was captured. Only the</span>
+<span class="sd">        octets read are kept here, so a truncated header packs back to exactly</span>
+<span class="sd">        what was captured (:issue:`1458`).</span>
+
+<span class="sd">        """</span>
+        <span class="n">record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__short_read__'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">record</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">name</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">record</span>
+        <span class="n">cut</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cut</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
+            <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">key</span><span class="p">][:</span><span class="n">count</span><span class="p">]</span>
+                <span class="n">cut</span> <span class="o">=</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="Schema.pre_pack">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.pre_pack">[docs]</a>
@@ -1521,6 +1569,7 @@
 
                 <span class="n">byte</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">byte</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_note_short_read</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">byte</span><span class="p">)</span>
 
                 <span class="n">packet</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">byte</span>
                 <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">-=</span> <span class="n">length</span>
@@ -1540,6 +1589,8 @@
 
             <span class="n">byte</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">byte</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">ForwardMatchField</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_note_short_read</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">byte</span><span class="p">)</span>
 
             <span class="n">value</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">byte</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">SchemaField</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
@@ -1910,6 +1961,72 @@
         <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">schema</span>  <span class="c1"># type: ignore[index]</span></div>
 </div>
 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">keep_short_read</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'ProtocolBase'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Carry a parsed header's short read into the protocol's info.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        protocol: Protocol instance, just parsed.</span>
+
+<span class="sd">    Called by the layer base classes once a parse is done. When the data ended</span>
+<span class="sd">    inside one of the header's fields, ``info`` gains the ``__short_read__``</span>
+<span class="sd">    record :meth:`Schema.unpack` made, so that :func:`replay_short_read` can</span>
+<span class="sd">    cut the rebuild back to what was captured (:issue:`1458`). The key is an</span>
+<span class="sd">    ordinary one, so :meth:`Info.to_dict &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;`</span>
+<span class="sd">    carries it and ``from_data(info.to_dict())`` replays it too; it is absent</span>
+<span class="sd">    for a header that was captured whole.</span>
+
+<span class="sd">    """</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[Schema]'</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="s1">'__header__'</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">header</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">record</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__short_read__'</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">record</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">protocol</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span><span class="s1">'__short_read__'</span><span class="p">:</span> <span class="n">record</span><span class="p">})</span>  <span class="c1"># pylint: disable=protected-access</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">replay_short_read</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'_PB'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_PB'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Cut a protocol rebuilt by ``from_data`` back to the octets its header had.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        protocol: Protocol instance, just built by ``from_data``.</span>
+<span class="sd">        data: The info it was built from.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ``protocol`` itself.</span>
+
+<span class="sd">    The rebuild packs every field at full width, the missing octets as the</span>
+<span class="sd">    zeros they were read as. The ``__short_read__`` record that</span>
+<span class="sd">    :func:`keep_short_read` left in ``data`` names the field the capture ended</span>
+<span class="sd">    inside and how much of it there was, so everything from that point on is</span>
+<span class="sd">    dropped (:issue:`1458`). A header cut short has no payload past it.</span>
+
+<span class="sd">    """</span>
+    <span class="n">record</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__short_read__'</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[Schema]'</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="s1">'__header__'</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">record</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">header</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">protocol</span>
+
+    <span class="n">name</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">record</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">header</span><span class="o">.</span><span class="n">__fields__</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+            <span class="n">offset</span> <span class="o">+=</span> <span class="nb">min</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">key</span><span class="p">]))</span>
+            <span class="k">break</span>
+        <span class="n">offset</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">protocol</span>
+
+    <span class="n">header</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">'__short_read__'</span><span class="p">]</span> <span class="o">=</span> <span class="n">record</span>
+    <span class="n">header</span><span class="o">.</span><span class="n">_cut_short_read</span><span class="p">()</span>  <span class="c1"># pylint: disable=protected-access</span>
+
+    <span class="c1"># pylint: disable=protected-access</span>
+    <span class="n">protocol</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">_data</span><span class="p">[:</span><span class="n">offset</span><span class="p">]</span>
+    <span class="n">protocol</span><span class="o">.</span><span class="n">_file</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">protocol</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+    <span class="n">protocol</span><span class="o">.</span><span class="n">__cached__</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'__len__'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">protocol</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span><span class="s1">'__short_read__'</span><span class="p">:</span> <span class="n">record</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">protocol</span>
 </pre></div>
         </article>
       </div>
