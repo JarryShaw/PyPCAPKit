@@ -16,10 +16,11 @@ and :class:`HTTP/2 <pcapkit.protocols.application.httpv2.HTTP>`.
 """
 import contextlib
 import struct
-from typing import TYPE_CHECKING, Generic
+from typing import TYPE_CHECKING, Generic, cast
 
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.application.application import Application
+from pcapkit.protocols.data.data import Data
 from pcapkit.protocols.misc.null import NoPayload
 from pcapkit.protocols.protocol import _PT, _ST
 from pcapkit.utilities.exceptions import ProtocolError
@@ -27,7 +28,7 @@ from pcapkit.utilities.exceptions import ProtocolError
 if TYPE_CHECKING:
     from typing import Any, Optional
 
-    from typing_extensions import Literal
+    from typing_extensions import Literal, Self
 
 __all__ = ['HTTP']
 
@@ -295,6 +296,33 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
     ##########################################################################
     # Utilities.
     ##########################################################################
+
+    @classmethod
+    def from_data(cls, data: '_PT | dict[str, Any]', **kwargs: 'Any') -> 'Self':
+        """Create protocol instance from data.
+
+        Args:
+            data: Protocol data. A :obj:`dict`, as :meth:`Info.to_dict
+                <pcapkit.corekit.infoclass.Info.to_dict>` returns it, is rebuilt
+                into the versioned data model its keys belong to -- ``receipt``
+                is HTTP/1.*'s and ``sid`` HTTP/2's -- since this class's own data
+                model carries no version.
+            **kwargs: As :meth:`ProtocolBase.from_data
+                <pcapkit.protocols.protocol.ProtocolBase.from_data>`.
+
+        Returns:
+            Protocol instance.
+
+        """
+        from pcapkit.protocols.data.application.httpv1 import HTTP as Data_HTTPv1  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
+        from pcapkit.protocols.data.application.httpv2 import HTTP as Data_HTTPv2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
+
+        if not isinstance(data, Data) and not issubclass(cls.__data__, (Data_HTTPv1, Data_HTTPv2)):
+            if 'receipt' in data:
+                data = cast('_PT', Data_HTTPv1.from_dict(data))
+            elif 'sid' in data:
+                data = cast('_PT', Data_HTTPv2.from_dict(data))
+        return super().from_data(data, **kwargs)
 
     @classmethod
     def _make_data(cls, data: '_PT') -> 'dict[str, Any]':  # type: ignore[override]

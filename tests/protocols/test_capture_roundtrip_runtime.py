@@ -63,17 +63,6 @@ class Gap(NamedTuple):
 #: IPv6 extension-header rebuild (#1446).
 LAYER_GAPS: 'dict[str, Gap]' = {}
 
-_DICT_DROPS_PAYLOAD = (
-    'from_data(info.to_dict()) rebuilds the header only: to_dict() leaves out the '
-    '__next_type__ and __next_name__ keys _make_payload dispatches on '
-    '(pcapkit/protocols/protocol.py:1926), so the payload becomes NoPayload. '
-    'IPv6 also loses its extension headers, which _make_data reads from the '
-    'equally dropped __exthdr__ key (pcapkit/protocols/internet/ipv6.py:367). '
-    'Repro: Ethernet.from_data(eth.info.to_dict()).data is 14 of 1870 octets '
-    'for ipv4.pcap frame 1.'
-)
-
-
 class DictGap(NamedTuple):
     """A protocol whose dict-form rebuild does not close."""
 
@@ -89,17 +78,8 @@ class DictGap(NamedTuple):
 
 
 #: Every protocol, by class name, whose rebuild from ``info.to_dict()`` fails.
-DICT_GAPS = {
-    **{name: DictGap(1447, 'TRUNCATED', 'payload', _DICT_DROPS_PAYLOAD)
-       for name in ('Frame', 'Ethernet', 'ARP', 'IPv4', 'IPv6', 'TCP', 'UDP')},
-    'HTTP': DictGap(
-        1447, 'ProtocolError', 'always',
-        "HTTP.from_data(info.to_dict()) raises ProtocolError('invalid HTTP data: "
-        "Raw'): the dict is rebuilt into a generic data model that "
-        'HTTP._make_data does not accept. Repro: the first HTTP layer of '
-        'http.pcap.',
-    ),
-}
+#: Empty since the payload is found from the dict's structure (#1447).
+DICT_GAPS: 'dict[str, DictGap]' = {}
 
 
 def captures() -> 'list[str]':
