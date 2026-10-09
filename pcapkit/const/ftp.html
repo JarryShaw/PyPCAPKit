@@ -526,14 +526,14 @@ defaults; <a class="reference internal" href="#pcapkit.const.ftp.command.Command
 </div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.feat">
-<span class="sig-name descname"><span class="pre">feat</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.const.ftp.command.FEATCode" title="pcapkit.const.ftp.command.FEATCode"><span class="pre">FEATCode</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#pcapkit.const.ftp.command.Command.feat" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">feat</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.const.ftp.command.FEATCode" title="pcapkit.const.ftp.command.FEATCode"><span class="pre">FEATCode</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#pcapkit.const.ftp.command.Command.feat" title="Link to this definition">¶</a></dt>
 <dd><p>Feature code. Keyword returned in FEAT response line for this command/extension,
 c.f., <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5797.html#section-2.2"><strong>RFC 5797 Section 2.2</strong></a>.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.desc">
-<span class="sig-name descname"><span class="pre">desc</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#pcapkit.const.ftp.command.Command.desc" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">desc</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#pcapkit.const.ftp.command.Command.desc" title="Link to this definition">¶</a></dt>
 <dd><p>Brief description of command / extension.</p>
 </dd></dl>
 
@@ -917,7 +917,7 @@ c.f., <span class="target" id="index-1"></span><a class="rfc reference external"
 the same defaults <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> itself would, rather than missing
 entirely – <code class="xref py py-meth docutils literal notranslate">
 <span class="pre">_unregistered_member()</span></code> bypasses <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> (it calls
-<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>’s directly), so those four attributes would otherwise
+<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>’s directly), so those four attributes would otherwise
 be absent and <code class="xref py py-meth docutils literal notranslate"><span class="pre">__repr__()</span></code> (which reads <a class="reference internal" href="#pcapkit.const.ftp.command.Command.desc" title="pcapkit.const.ftp.command.Command.desc"><code class="xref py py-attr docutils literal notranslate"><span class="pre">desc</span></code></a>) would
 raise on the result. There is no more specific value to reconstruct
 them from – a bare wire command word carries none of the four,
@@ -927,7 +927,7 @@ can actually supply them.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Value to get enum item – the convention here, shared with
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Value to get enum item – the convention here, shared with
 <a class="reference internal" href="#pcapkit.const.ftp.command.FEATCode" title="pcapkit.const.ftp.command.FEATCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FEATCode</span></code></a> and
 <a class="reference internal" href="http.html#pcapkit.const.http.method.Method" title="pcapkit.const.http.method.Method"><code class="xref py py-class docutils literal notranslate"><span class="pre">Method</span></code></a>, is the caller’s
 own casing, unchanged: an unregistered member’s <em>value</em> is
@@ -935,7 +935,7 @@ exactly what was observed on the wire, matching how a
 <em>registered</em> member’s own value is exactly what was
 declared, never reformatted. Only <code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code> – the
 identifier, not the value – is canonicalised.</p></li>
-<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Bare label for the unregistered member – here, the
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Bare label for the unregistered member – here, the
 canonical upper-case form of <code class="docutils literal notranslate"><span class="pre">value</span></code>, matching the name
 every <em>registered</em> member of this class is looked up by,
 since <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a>’s open-vocabulary registries have no manufactured
@@ -959,8 +959,8 @@ before <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Value of the new member.</p></li>
-<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the new member, in any case.</p></li>
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Value of the new member.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the new member, in any case.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -970,7 +970,7 @@ before <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.
 <dd class="field-odd"><p>The newly registered member.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – As <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>.</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – As <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -984,8 +984,8 @@ before <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Value of the existing member to alias.</p></li>
-<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Alias to add for it, in any case.</p></li>
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Value of the existing member to alias.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Alias to add for it, in any case.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -996,7 +996,7 @@ before <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.
 as well.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – As
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – As
     <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry.register_alias" title="pcapkit.corekit.enum.EnumRegistry.register_alias"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_alias()</span></code></a>.</p>
 </dd>
 </dl>
@@ -1008,7 +1008,7 @@ as well.</p>
 <dd><p>Lookup function used when value is not found.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Value to get enum item. Matched case-insensitively against
+<dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Value to get enum item. Matched case-insensitively against
 the canonical upper-case member names.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -1166,7 +1166,7 @@ recommendation, while 5 of this registry’s 15 codes are registered in
 lower case – measured on the IANA CSV: 10 distinct all-upper-case
 keywords against <code class="docutils literal notranslate"><span class="pre">base</span></code>, <code class="docutils literal notranslate"><span class="pre">feat</span></code>, <code class="docutils literal notranslate"><span class="pre">hist</span></code>, <code class="docutils literal notranslate"><span class="pre">nat6</span></code> and <code class="docutils literal notranslate"><span class="pre">secu</span></code>,
 with none mixed. Without this override <code class="docutils literal notranslate"><span class="pre">get('BASE')</span></code> raised
-<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a>, which is the defect GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/903">#903</a>’s audit found.</p>
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a>, which is the defect GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/903">#903</a>’s audit found.</p>
 <p>The obvious objection, answered: <span class="target" id="index-103"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5797.html"><strong>RFC 5797</strong></a> uses case <em>presentationally</em>
 to tell a real keyword from a placeholder – <em>“defined FEAT keywords
 codes are listed in all uppercase, whereas placeholder keywords … are
@@ -1185,14 +1185,14 @@ own precedence – name before value – and its non-minting <code class="docuti
 path both survive: nothing here calls <code class="docutils literal notranslate"><span class="pre">cls(key)</span></code>, so a key matching
 no member, folded or not, still raises rather than growing the
 registry. <code class="docutils literal notranslate"><span class="pre">get('ZZ-NOT-REAL')</span></code> therefore still raises
-<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> while <code class="docutils literal notranslate"><span class="pre">FEATCode('ZZ-NOT-REAL')</span></code> still yields an
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> while <code class="docutils literal notranslate"><span class="pre">FEATCode('ZZ-NOT-REAL')</span></code> still yields an
 unregistered member, exactly as before.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>key</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Name or value to look up. A non-<code class="docutils literal notranslate"><span class="pre">str</span></code> key is passed
+<li><p><strong>key</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Name or value to look up. A non-<code class="docutils literal notranslate"><span class="pre">str</span></code> key is passed
 straight through, since case cannot apply to it.</p></li>
-<li><p><strong>default</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – As <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a>. Not
+<li><p><strong>default</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – As <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a>. Not
 folded – it names an already-registered value rather than
 arriving from the wire, so the caller spells it from this
 module.</p></li>
@@ -1206,9 +1206,9 @@ module.</p></li>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
-<li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><strong>KeyError</strong></a> – If no member matches <code class="docutils literal notranslate"><span class="pre">key</span></code> exactly or case-insensitively
+<li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.15)"><strong>KeyError</strong></a> – If no member matches <code class="docutils literal notranslate"><span class="pre">key</span></code> exactly or case-insensitively
     and there is no usable <code class="docutils literal notranslate"><span class="pre">default</span></code>.</p></li>
-<li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – As <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a>, for a
+<li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – As <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a>, for a
     non-<code class="docutils literal notranslate"><span class="pre">str</span></code> key.</p></li>
 </ul>
 </dd>
@@ -1221,7 +1221,7 @@ module.</p></li>
 <dd><p>Lookup function used when value is not found.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Value to get enum item.</p>
+<dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Value to get enum item.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ftp.command.FEATCode" title="pcapkit.const.ftp.command.FEATCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FEATCode</span></code></a></span></p>
@@ -1249,7 +1249,7 @@ which is automatically generated from <a class="reference internal" href="../ven
 <p>[ReturnCode] FTP Server Return Code</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.description">
-<span class="sig-name descname"><span class="pre">description</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.description" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">description</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.description" title="Link to this definition">¶</a></dt>
 <dd><p>Description of the return code.</p>
 </dd></dl>
 
@@ -1609,14 +1609,14 @@ directory or dataset).</p>
 <p>Reconstructs <a class="reference internal" href="#pcapkit.const.ftp.return_code.ReturnCode.description" title="pcapkit.const.ftp.return_code.ReturnCode.description"><code class="xref py py-attr docutils literal notranslate"><span class="pre">description</span></code></a>, <a class="reference internal" href="#pcapkit.const.ftp.return_code.ReturnCode.kind" title="pcapkit.const.ftp.return_code.ReturnCode.kind"><code class="xref py py-attr docutils literal notranslate"><span class="pre">kind</span></code></a> and <a class="reference internal" href="#pcapkit.const.ftp.return_code.ReturnCode.group" title="pcapkit.const.ftp.return_code.ReturnCode.group"><code class="xref py py-attr docutils literal notranslate"><span class="pre">group</span></code></a> the
 same way <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> would, rather than leaving them unset –
 <a class="reference internal" href="../corekit/enum.html#id2" title="pcapkit.corekit.enum.EnumRegistry._unregistered_member"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code></a>
-bypasses <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> entirely (it calls <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>’s directly),
+bypasses <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> entirely (it calls <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>’s directly),
 so those three attributes would otherwise be missing from the result
 and <code class="xref py py-meth docutils literal notranslate"><span class="pre">__str__()</span></code>/<code class="xref py py-meth docutils literal notranslate"><span class="pre">__repr__()</span></code> would raise on it.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value to get enum item.</p></li>
-<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Bare label for the unregistered member, per the ranged
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value to get enum item.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Bare label for the unregistered member, per the ranged
 mint/unmint criterion.</p></li>
 </ul>
 </dd>
@@ -1635,7 +1635,7 @@ from 0 to 999 can arrive on the wire: one within the registry’s range
 resolves to <code class="docutils literal notranslate"><span class="pre">Unassigned</span></code>, any other to <code class="docutils literal notranslate"><span class="pre">Unknown</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value to get enum item.</p>
+<dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value to get enum item.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ftp.return_code.ReturnCode" title="pcapkit.const.ftp.return_code.ReturnCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReturnCode</span></code></a></span></p>

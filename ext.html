@@ -759,7 +759,7 @@ comprehensive implementation can be found in the
 protocol <em>through its constructor</em> with a keyword that no signature
 declares raises <a class="reference internal" href="pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedCall</span></code></a> rather than
 discarding it silently, so a misspelling costs an exception instead of a
-silently wrong field. The accepted set is read from <a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.signature" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">inspect.signature()</span></code></a> – the union of every
+silently wrong field. The accepted set is read from <a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.signature" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">inspect.signature()</span></code></a> – the union of every
 keyword-taking parameter of <code class="docutils literal notranslate"><span class="pre">make</span></code>, <code class="docutils literal notranslate"><span class="pre">read</span></code>, <code class="docutils literal notranslate"><span class="pre">pack</span></code>, <code class="docutils literal notranslate"><span class="pre">unpack</span></code>,
 <code class="docutils literal notranslate"><span class="pre">__post_init__</span></code> and <code class="docutils literal notranslate"><span class="pre">__init__</span></code> anywhere in the class’s MRO – which is
 wider than <code class="docutils literal notranslate"><span class="pre">make</span></code> alone because <code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.__post_init__</span></code> hands the same
@@ -778,10 +778,10 @@ declares still travels through <code class="docutils literal notranslate"><span 
         <span class="o">...</span>
 </pre></div>
 </div>
-<p>Setting it to <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> skips the check entirely, and is meant only for a
+<p>Setting it to <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> skips the check entirely, and is meant only for a
 <em>dispatcher</em> whose real signature belongs to a class chosen at call time –
 <a class="reference internal" href="pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.HTTP.make" title="pcapkit.protocols.application.http.HTTP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTP.make</span></code></a> is the one
-such class in the library. Unlike a set, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> is not inherited, so a
+such class in the library. Unlike a set, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> is not inherited, so a
 subclass of a dispatcher is checked normally. Prefer a declared parameter to
 either: it is also what documents the keyword to your callers.</p>
 <p>Parsing is unaffected, and so is <code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.from_data</span></code>, which warns
@@ -818,7 +818,7 @@ either:</p>
 <a class="reference internal" href="pcapkit/protocols/link/link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a>, a
 <a class="reference internal" href="pcapkit/const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransType</span></code></a> member always means
 <a class="reference internal" href="pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Internet</span></code></a>, and so on – so a
-raw <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, such as a TCP or UDP port, cannot say which registry it
+raw <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, such as a TCP or UDP port, cannot say which registry it
 belongs to and must be given explicitly: <code class="docutils literal notranslate"><span class="pre">code={TCP:</span> <span class="pre">21}</span></code>. Either form
 may appear in an iterable to register one class into several registries
 at once. See
@@ -1468,7 +1468,7 @@ functions:</p>
 of datagrams that submission produced. A flow tracing callback runs as each flow
 is finalised and takes that flow’s
 <a class="reference internal" href="pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Index" title="pcapkit.foundation.traceflow.data.tcp.Index"><code class="xref py py-class docutils literal notranslate"><span class="pre">Index</span></code></a>. Either returns
-<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>; any return value is ignored.</p>
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>; any return value is ignored.</p>
 <p>A reassembly callback can modify its list in place, which discards datagrams,
 but prefer not to: if the reassembly or tracing result itself is wrong for your
 purpose, subclass the reassembly or flow tracing class and change its algorithm

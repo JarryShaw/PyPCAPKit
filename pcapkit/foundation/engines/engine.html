@@ -491,7 +491,7 @@ every extraction engine.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.Engine">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.engines.engine.</span></span><span class="sig-name descname"><span class="pre">Engine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/engine.html#Engine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.engine.Engine" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.engines.engine.pcapkit.foundation.engines.engine._T" title="pcapkit.foundation.engines.engine.pcapkit.foundation.engines.engine._T"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_T</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.engines.engine.pcapkit.foundation.engines.engine._T" title="pcapkit.foundation.engines.engine.pcapkit.foundation.engines.engine._T"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_T</span></code></a>]</p>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.engines.engine.pcapkit.foundation.engines.engine._T" title="pcapkit.foundation.engines.engine.pcapkit.foundation.engines.engine._T"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_T</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.engines.engine.pcapkit.foundation.engines.engine._T" title="pcapkit.foundation.engines.engine.pcapkit.foundation.engines.engine._T"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_T</span></code></a>]</p>
 <p>Base class for engine support.</p>
 <div class="admonition-example admonition">
 <p class="admonition-title">Example</p>
@@ -530,10 +530,10 @@ that is not meant to be selectable by name declines:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>engine</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Engine name to register the subclass under, lowercased.
-<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> (the default) skips registration entirely.</p></li>
-<li><p><strong>*args</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
+<li><p><strong>engine</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Engine name to register the subclass under, lowercased.
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> (the default) skips registration entirely.</p></li>
+<li><p><strong>*args</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
@@ -560,7 +560,7 @@ cannot be passed as a class keyword at all on Python 3.10:
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">abc.ABCMeta.__new__()</span></code> takes <code class="docutils literal notranslate"><span class="pre">mcls</span></code>, <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">bases</span></code> and
 <code class="docutils literal notranslate"><span class="pre">namespace</span></code> as positional-<em>or-keyword</em> parameters
 before 3.11, so a class keyword by any of those four names collides
-with one of them and the class statement raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a> from
+with one of them and the class statement raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a> from
 the metaclass before this method is reached. <code class="docutils literal notranslate"><span class="pre">engine</span></code> is outside
 that set, so the documented registration path works on every
 supported version. Measured on 3.10.21, 3.11.15 and 3.14.7; those
@@ -582,7 +582,7 @@ reaches this method at all.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.EngineBase">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.engines.engine.</span></span><span class="sig-name descname"><span class="pre">EngineBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/engine.html#EngineBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.engine.EngineBase" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.engines.engine.pcapkit.foundation.engines.engine._T" title="pcapkit.foundation.engines.engine.pcapkit.foundation.engines.engine._T"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_T</span></code></a>]</p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.engines.engine.pcapkit.foundation.engines.engine._T" title="pcapkit.foundation.engines.engine.pcapkit.foundation.engines.engine._T"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_T</span></code></a>]</p>
 <p>Base class for engine support.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -596,7 +596,7 @@ reaches this method at all.</p>
 </div>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.EngineBase.name">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.engine.EngineBase.name" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.engine.EngineBase.name" title="Link to this definition">¶</a></dt>
 <dd><p>Engine name.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -607,7 +607,7 @@ reaches this method at all.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.EngineBase.module">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">module</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.engine.EngineBase.module" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">module</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.engine.EngineBase.module" title="Link to this definition">¶</a></dt>
 <dd><p>Engine module name.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -650,15 +650,15 @@ This hook is for the cases that question cannot answer – most often a
 dependency that installs cleanly and only fails when it is <em>used</em>, so the
 import test passes and the error escapes from the engine’s constructor as
 a hard failure instead of degrading to the default engine.</p>
-<p>The default is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>, i.e. always available; override it only where
+<p>The default is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>, i.e. always available; override it only where
 there is a real limitation, and return a short phrase naming the <em>cause</em>
 rather than merely refusing, since the string is shown to the user.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A phrase describing the limitation, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> when the engine is
+<dd class="field-even"><p>A phrase describing the limitation, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> when the engine is
 usable here.</p>
 </dd>
 </dl>
@@ -666,7 +666,7 @@ usable here.</p>
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.pypcapfile.PyPCAPFile</span></code></a> overrides
 this, because <code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code> installs on Python 3.12 and newer and then
-raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ModuleNotFoundError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code></a> on first use.</p>
+raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ModuleNotFoundError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code></a> on first use.</p>
 </div>
 </dd></dl>
 
@@ -688,7 +688,7 @@ read a frame from the file using the prepared engine instance and
 return the parsed frame.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">_T</span></code>)</span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">_T</span></code>)</span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -711,13 +711,13 @@ extraction process.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.EngineBase.__engine_name__">
-<span class="sig-name descname"><span class="pre">__engine_name__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.engine.EngineBase.__engine_name__" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__engine_name__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.engine.EngineBase.__engine_name__" title="Link to this definition">¶</a></dt>
 <dd><p>Engine name.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.EngineBase.__engine_module__">
-<span class="sig-name descname"><span class="pre">__engine_module__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.engine.EngineBase.__engine_module__" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__engine_module__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.engine.EngineBase.__engine_module__" title="Link to this definition">¶</a></dt>
 <dd><p>Engine module name.</p>
 </dd></dl>
 
@@ -728,7 +728,7 @@ extraction process.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.EngineMeta">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.engines.engine.</span></span><span class="sig-name descname"><span class="pre">EngineMeta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/engine.html#EngineMeta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.engine.EngineMeta" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABCMeta" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABCMeta</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.engines.engine.pcapkit.foundation.engines.engine._T" title="pcapkit.foundation.engines.engine.pcapkit.foundation.engines.engine._T"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_T</span></code></a>]</p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABCMeta" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABCMeta</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.engines.engine.pcapkit.foundation.engines.engine._T" title="pcapkit.foundation.engines.engine.pcapkit.foundation.engines.engine._T"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_T</span></code></a>]</p>
 <p>Meta class to add dynamic support to <a class="reference internal" href="#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a>.</p>
 <p>This meta class is used to generate necessary attributes for the
 <a class="reference internal" href="#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a> class. It can be useful to reduce unnecessary
@@ -740,7 +740,7 @@ registry calls and simplify the customisation process.</p>
 <h2>Type Variables<a class="headerlink" href="#type-variables" title="Link to this heading">¶</a></h2>
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.pcapkit.foundation.engines.engine._T">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.engines.engine.</span></span><span class="sig-name descname"><span class="pre">_T</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.engine.pcapkit.foundation.engines.engine._T" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.engines.engine.</span></span><span class="sig-name descname"><span class="pre">_T</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.engine.pcapkit.foundation.engines.engine._T" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </section>

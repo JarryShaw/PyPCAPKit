@@ -652,6 +652,7 @@
 
     <span class="n">Data_T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'Data_T'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Data</span><span class="p">)</span>
     <span class="n">Schema_T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'Schema_T'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Schema</span><span class="p">)</span>
+    <span class="n">List_T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'List_T'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
 
     <span class="n">ChunkParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Schema_Chunk</span><span class="p">,</span> <span class="n">NamedArg</span><span class="p">(</span><span class="n">Chunks</span><span class="p">,</span> <span class="s1">'chunks'</span><span class="p">)],</span> <span class="n">Data_Chunk</span><span class="p">]</span>
     <span class="n">ChunkConstructor</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Enum_Chunk</span><span class="p">,</span> <span class="n">DefaultArg</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="n">Data_Chunk</span><span class="p">]),</span>
@@ -688,14 +689,32 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        ``data``, with a ``padding`` attribute holding the trailing padding as</span>
-<span class="sd">        captured if it is not all zeros -- the form a fresh build writes</span>
-<span class="sd">        (:issue:`1223`). :func:`_restore_padding` writes it back.</span>
+<span class="sd">        captured if it is not what a fresh build writes: all zeros</span>
+<span class="sd">        (:issue:`1223`), and as many as the ``length`` calls for. A final chunk</span>
+<span class="sd">        may arrive with fewer, or none (:issue:`1474`), in which case</span>
+<span class="sd">        ``padding`` holds the octets that were there, possibly ``b''``.</span>
+<span class="sd">        :func:`_restore_padding` writes it back.</span>
 
 <span class="sd">    """</span>
     <span class="n">padding</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'padding'</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">padding</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">padding</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">padding</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">any</span><span class="p">(</span><span class="n">padding</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">padding</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">_padding_width</span><span class="p">(</span><span class="n">schema</span><span class="p">)):</span>
         <span class="n">data</span><span class="o">.</span><span class="n">__update__</span><span class="p">([(</span><span class="s1">'padding'</span><span class="p">,</span> <span class="n">padding</span><span class="p">)])</span>
     <span class="k">return</span> <span class="n">data</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_padding_width</span><span class="p">(</span><span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Number of padding octets a fresh build writes after ``schema``.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        schema: Chunk, parameter or error cause schema.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The octets that round its ``length`` up to a multiple of four</span>
+<span class="sd">        (:rfc:`9260#section-3.2`).</span>
+
+<span class="sd">    """</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'length'</span><span class="p">)</span>
+    <span class="k">return</span> <span class="o">-</span><span class="n">length</span> <span class="o">%</span> <span class="mi">4</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_restore_padding</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="s1">'Optional[Data]'</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_T'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_T'</span><span class="p">:</span>
@@ -706,13 +725,58 @@
 <span class="sd">        schema: Constructed schema.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        ``schema``, with its padding set from ``data``.</span>
+<span class="sd">        ``schema``, with its padding set from ``data``. Padding kept shorter</span>
+<span class="sd">        than ``length`` calls for also sets the schema's ``__padding__`` to its</span>
+<span class="sd">        width, which :func:`~pcapkit.protocols.schema.transport.sctp.padding_length`</span>
+<span class="sd">        packs to rather than zero-filling the octets that were never captured</span>
+<span class="sd">        (:issue:`1474`).</span>
 
 <span class="sd">    """</span>
     <span class="n">padding</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">padding</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">'padding'</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">__fields__</span><span class="p">:</span>
         <span class="n">schema</span><span class="o">.</span><span class="n">padding</span> <span class="o">=</span> <span class="n">padding</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">padding</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">_padding_width</span><span class="p">(</span><span class="n">schema</span><span class="p">):</span>
+            <span class="n">schema</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">'__padding__'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">padding</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">schema</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_last_item_only</span><span class="p">(</span><span class="n">schemas</span><span class="p">:</span> <span class="s1">'List_T'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'List_T'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Drop the short-padding record from every item but the last.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        schemas: Constructed chunk, parameter or cause list.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ``schemas``, in which only the last item may keep the ``__padding__``</span>
+<span class="sd">        width :func:`_restore_padding` set. Only the end of a packet may be</span>
+<span class="sd">        short of its padding (:issue:`1474`); a short record on any earlier</span>
+<span class="sd">        item -- from an edited ``info``, say -- would misalign everything after</span>
+<span class="sd">        it, so that item packs to the full width, its ``padding`` octets</span>
+<span class="sd">        zero-filled to it. The same goes for the parameters or causes nested in</span>
+<span class="sd">        an earlier chunk, whose last item ends that chunk rather than the packet.</span>
+
+<span class="sd">    """</span>
+    <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="n">schemas</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="n">_drop_padding_record</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">schemas</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_drop_padding_record</span><span class="p">(</span><span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema | bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Drop ``schema``'s short-padding record, and its nested items' too.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        schema: Chunk, parameter or cause that does not end the packet.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'__padding__'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">schema</span><span class="o">.</span><span class="n">__updated__</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'parameters'</span><span class="p">,</span> <span class="s1">'error'</span><span class="p">):</span>
+        <span class="n">nested</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nested</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">nested</span><span class="p">:</span>
+                <span class="n">_drop_padding_record</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="SCTP">
@@ -1503,11 +1567,11 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">code</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'tuple[Enum_Chunk, dict[str, Any]]'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
                     <span class="n">chunks_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_sctp_chunk</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">))</span>
-            <span class="k">return</span> <span class="n">chunks_list</span>
+            <span class="k">return</span> <span class="n">_last_item_only</span><span class="p">(</span><span class="n">chunks_list</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">chunks</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
             <span class="n">chunks_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_sctp_chunk</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">chunk</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">chunks_list</span></div>
+        <span class="k">return</span> <span class="n">_last_item_only</span><span class="p">(</span><span class="n">chunks_list</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SCTP._make_sctp_chunk">
@@ -1584,11 +1648,11 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">code</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'tuple[Enum_Parameter, dict[str, Any]]'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
                     <span class="n">parameters_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_sctp_parameter</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">))</span>
-            <span class="k">return</span> <span class="n">parameters_list</span>
+            <span class="k">return</span> <span class="n">_last_item_only</span><span class="p">(</span><span class="n">parameters_list</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
             <span class="n">parameters_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_sctp_parameter</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">parameter</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">parameters_list</span></div>
+        <span class="k">return</span> <span class="n">_last_item_only</span><span class="p">(</span><span class="n">parameters_list</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SCTP._make_sctp_parameter">
@@ -1665,11 +1729,11 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">code</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'tuple[Enum_CauseCode, dict[str, Any]]'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
                     <span class="n">causes_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_sctp_cause</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">))</span>
-            <span class="k">return</span> <span class="n">causes_list</span>
+            <span class="k">return</span> <span class="n">_last_item_only</span><span class="p">(</span><span class="n">causes_list</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">cause</span> <span class="ow">in</span> <span class="n">causes</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
             <span class="n">causes_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_sctp_cause</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">cause</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">causes_list</span></div>
+        <span class="k">return</span> <span class="n">_last_item_only</span><span class="p">(</span><span class="n">causes_list</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SCTP._make_sctp_cause">

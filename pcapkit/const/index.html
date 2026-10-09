@@ -490,12 +490,12 @@
 automatically generated from the <a class="reference internal" href="../vendor/index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a> module.</p>
 <section id="unrecognised-values">
 <span id="id1"></span><h2>Unrecognised Values<a class="headerlink" href="#unrecognised-values" title="Link to this heading">¶</a></h2>
-<p>Nearly every registry below departs from <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a> in one deliberate way, and it
+<p>Nearly every registry below departs from <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a> in one deliberate way, and it
 is the behaviour to know about before using any of them: looking one up by a value
 it does not define does <strong>not</strong> raise. Its <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> override returns a
 member-like object for a value inside the registry’s valid range, named for the
 unassigned or reserved band it falls in. Only a value outside that range, or of the
-wrong type, raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>.</p>
+wrong type, raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>.</p>
 <p>In almost every registry that object is <strong>not</strong> installed: the registry does not
 grow, and a second lookup of the same value returns an equal but distinct object.
 A handful behave otherwise, and <a class="reference internal" href="../../contributing/conventions/mint-criterion.html#mint-criterion"><span class="std std-ref">Minting an Unrecognised Value</span></a> gives the full split:</p>
@@ -512,7 +512,7 @@ and iteration are unchanged.</p></li>
 <a class="reference internal" href="ipv6.html#pcapkit.const.ipv6.extension_header.ExtensionHeader" title="pcapkit.const.ipv6.extension_header.ExtensionHeader"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExtensionHeader</span></code></a>,
 <a class="reference internal" href="pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel" title="pcapkit.const.pcapng.tls_key_label.TLSKeyLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLSKeyLabel</span></code></a> and the memberless
 <a class="reference internal" href="reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a> base raise
-<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> for any unknown value.</p></li>
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> for any unknown value.</p></li>
 </ul>
 <p>That is what makes the enumerations usable against live capture data, where a
 protocol number assigned after this release was generated is a routine

@@ -879,6 +879,21 @@
         <span class="p">}</span></div>
 
 
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_exthdr_key</span><span class="p">(</span><span class="n">alias</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Key an extension header's info is written under in :class:`Data_IPv6`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            alias: :attr:`~pcapkit.protocols.protocol.ProtocolBase.alias` of</span>
+<span class="sd">                the extension header's parser.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The key; :meth:`str.lstrip` strips a character *set*, which every</span>
+<span class="sd">            parser's alias is chosen to suit.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">alias</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">'IPv6-'</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_lookup_exthdr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Data_IPv6'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[tuple[str, ...], tuple[tuple[Type[ProtocolBase], Any], ...]]'</span><span class="p">:</span>  <span class="c1"># pylint: disable=line-too-long</span>
 <span class="w">        </span><span class="sd">"""Recover the extension header chain of ``data`` without ``__exthdr__``.</span>
@@ -899,6 +914,9 @@
 <span class="sd">        predecessor, and ``data.items(multi=True)`` yields each of them in turn.</span>
 
 <span class="sd">        """</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6_ext</span><span class="w"> </span><span class="kn">import</span> \
+            <span class="n">IPv6_Ext</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+
         <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
         <span class="n">chain</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[tuple[Type[ProtocolBase], Any]]</span>
         <span class="n">proto</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'next'</span><span class="p">)</span>
@@ -916,8 +934,19 @@
             <span class="c1"># carrying ``next`` ends the chain, and so does a fragment header.</span>
             <span class="k">if</span> <span class="s1">'next'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span><span class="p">:</span>
                 <span class="k">break</span>
+
+            <span class="c1"># NOTE: A header whose dedicated parser raised was parsed by</span>
+            <span class="c1"># :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` instead,</span>
+            <span class="c1"># c.f. :meth:`_import_next_layer`, and written under that class's</span>
+            <span class="c1"># key rather than the dedicated one's. Rebuilding it with the</span>
+            <span class="c1"># dedicated class would look for fields only that class parses</span>
+            <span class="c1"># (:issue:`1473`), so the key decides the parser.</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_exthdr_key</span><span class="p">(</span><span class="n">IPv6_Ext</span><span class="o">.</span><span class="n">alias</span><span class="o">.</span><span class="n">fget</span><span class="p">(</span><span class="kc">None</span><span class="p">)):</span>  <span class="c1"># type: ignore[attr-defined]</span>
+                <span class="n">parser</span> <span class="o">=</span> <span class="n">IPv6_Ext</span>  <span class="c1"># type: Type[ProtocolBase]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">parser</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_lookup_next_layer</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">ex_proto</span><span class="p">))</span>
             <span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-            <span class="n">chain</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="bp">cls</span><span class="o">.</span><span class="n">_lookup_next_layer</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">ex_proto</span><span class="p">)),</span> <span class="n">info</span><span class="p">))</span>
+            <span class="n">chain</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">parser</span><span class="p">,</span> <span class="n">info</span><span class="p">))</span>
 
             <span class="n">proto</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">'next'</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">ex_proto</span> <span class="o">==</span> <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">IPv6_Frag</span><span class="p">:</span>
@@ -1017,7 +1046,7 @@
             <span class="c1"># keeps its predecessor's info rather than overwriting it, and</span>
             <span class="c1"># :meth:`Info.to_dict &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;`</span>
             <span class="c1"># writes every one of them, in wire order (:issue:`1453`).</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="n">next_</span><span class="o">.</span><span class="n">alias</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">'IPv6-'</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exthdr_key</span><span class="p">(</span><span class="n">next_</span><span class="o">.</span><span class="n">alias</span><span class="p">)</span>
             <span class="n">ipv6</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">OrderedMultiDict</span><span class="p">([(</span><span class="n">name</span><span class="p">,</span> <span class="n">info</span><span class="p">)]))</span>
 
             <span class="c1"># record protocol name</span>

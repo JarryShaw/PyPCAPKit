@@ -585,7 +585,11 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Trailing padding octets, as captured; present only when they are</span>
-        <span class="c1">#: not all zeros.</span>
+        <span class="c1">#: not all zeros, or fewer than the ``length`` calls for (:issue:`1474`).</span>
+        <span class="c1">#: Read back by ``from_data`` only, where fewer octets are honoured on</span>
+        <span class="c1">#: the last item of its list alone and zero-filled to the full width</span>
+        <span class="c1">#: anywhere else. ``make`` builds from keywords and takes no</span>
+        <span class="c1">#: ``padding``: every item it builds is padded in zeros.</span>
         <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span></div>
 
 
@@ -793,7 +797,11 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Trailing padding octets, as captured; present only when they are</span>
-        <span class="c1">#: not all zeros.</span>
+        <span class="c1">#: not all zeros, or fewer than the ``length`` calls for (:issue:`1474`).</span>
+        <span class="c1">#: Read back by ``from_data`` only, where fewer octets are honoured on</span>
+        <span class="c1">#: the last item of its list alone and zero-filled to the full width</span>
+        <span class="c1">#: anywhere else. ``make`` builds from keywords and takes no</span>
+        <span class="c1">#: ``padding``: every item it builds is padded in zeros.</span>
         <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span></div>
 
 
@@ -936,7 +944,11 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Trailing padding octets, as captured; present only when they are</span>
-        <span class="c1">#: not all zeros.</span>
+        <span class="c1">#: not all zeros, or fewer than the ``length`` calls for (:issue:`1474`).</span>
+        <span class="c1">#: Read back by ``from_data`` only, where fewer octets are honoured on</span>
+        <span class="c1">#: the last item of its list alone and zero-filled to the full width</span>
+        <span class="c1">#: anywhere else. ``make`` builds from keywords and takes no</span>
+        <span class="c1">#: ``padding``: every item it builds is padded in zeros.</span>
         <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span></div>
 
 

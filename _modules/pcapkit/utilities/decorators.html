@@ -624,7 +624,16 @@
             <span class="c1"># turning a next-layer parse failure that should have degraded to</span>
             <span class="c1"># Raw into a crash. Reachable once something is registered on an</span>
             <span class="c1"># SCTP payload protocol identifier, which NGAP is.</span>
-            <span class="n">file_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_payload</span><span class="p">()</span>
+            <span class="c1">#</span>
+            <span class="c1"># A ``payload`` passed to the decorated method is the octets that</span>
+            <span class="c1"># method was asked to parse, and wins: IPv6 hands its upper layer</span>
+            <span class="c1"># the payload *past* the extension headers, so falling back to the</span>
+            <span class="c1"># whole IPv6 payload would hold those headers twice, once in the</span>
+            <span class="c1"># extension header chain and once more in this ``Raw``</span>
+            <span class="c1"># (:issue:`1471`).</span>
+            <span class="n">file_</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[bytes]'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'payload'</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">file_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">file_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_payload</span><span class="p">()</span>
 
             <span class="c1"># NOTE: ``alias=proto`` matches what ``_import_next_layer`` passes, so</span>
             <span class="c1"># a payload that failed to parse still reports the code it arrived</span>

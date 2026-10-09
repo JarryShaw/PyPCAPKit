@@ -574,17 +574,44 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        Number of padding bytes, clamped to the number of bytes left in the</span>
 <span class="sd">        enclosing structure, since :rfc:`9260#section-3.2` allows the final</span>
-<span class="sd">        padding of a packet to be omitted.</span>
+<span class="sd">        padding of a packet to be omitted. When packing, it is clamped as well</span>
+<span class="sd">        to the ``__padding__`` width :func:`pre_pack_padding` hands over, so a</span>
+<span class="sd">        final chunk captured without (all of) its padding rebuilds without it</span>
+<span class="sd">        (:issue:`1474`).</span>
 
 <span class="sd">    """</span>
     <span class="n">length</span> <span class="o">=</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'length'</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span>
     <span class="n">padding</span> <span class="o">=</span> <span class="o">-</span><span class="n">length</span> <span class="o">%</span> <span class="mi">4</span>
+
+    <span class="n">width</span> <span class="o">=</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__padding__'</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">width</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">padding</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">padding</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span>
 
     <span class="n">remaining</span> <span class="o">=</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__length__'</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">remaining</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">remaining</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">padding</span>
     <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">padding</span><span class="p">,</span> <span class="n">remaining</span><span class="p">)</span></div>
 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">pre_pack_padding</span><span class="p">(</span><span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Hand a schema's recorded padding width to :func:`padding_length`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        schema: Chunk, parameter or error cause being packed.</span>
+<span class="sd">        packet: Packet data, shared with the enclosing and sibling schemas.</span>
+
+<span class="sd">    A schema whose padding was captured short -- only the last chunk of a</span>
+<span class="sd">    packet can be -- carries the width as captured under ``__padding__`` in its</span>
+<span class="sd">    ``__dict__``, set by :func:`~pcapkit.protocols.transport.sctp._restore_padding`</span>
+<span class="sd">    from the chunk's ``padding`` as parsed (:issue:`1474`). The key is written to</span>
+<span class="sd">    ``packet`` for *every* schema, ``None`` when there is no record, since</span>
+<span class="sd">    :meth:`Schema.pack &lt;pcapkit.protocols.schema.schema.Schema.pack&gt;` shares one</span>
+<span class="sd">    ``packet`` mapping across siblings and a record left behind by one would</span>
+<span class="sd">    otherwise shorten the padding of the next.</span>
+
+<span class="sd">    """</span>
+    <span class="n">packet</span><span class="p">[</span><span class="s1">'__padding__'</span><span class="p">]</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__padding__'</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">bounded</span><span class="p">(</span><span class="n">length</span><span class="p">:</span> <span class="s1">'Callable[[dict[str, Any]], int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Callable[[dict[str, Any]], int]'</span><span class="p">:</span>
@@ -743,7 +770,14 @@
     <span class="c1">#: Cause code.</span>
     <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_CauseCode'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_CauseCode</span><span class="p">)</span>
     <span class="c1">#: Cause length.</span>
-    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span></div>
+    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ErrorCause.pre_pack">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.schema.transport.sctp.ErrorCause.pre_pack">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pre_pack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Prepare ``packet`` data for packing process; see :func:`pre_pack_padding`."""</span>
+        <span class="n">pre_pack_padding</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span></div>
+</div>
 
 
 
@@ -984,7 +1018,14 @@
     <span class="c1">#: Parameter type.</span>
     <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="p">)</span>
     <span class="c1">#: Parameter length.</span>
-    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span></div>
+    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Parameter.pre_pack">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.schema.transport.sctp.Parameter.pre_pack">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pre_pack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Prepare ``packet`` data for packing process; see :func:`pre_pack_padding`."""</span>
+        <span class="n">pre_pack_padding</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span></div>
+</div>
 
 
 
@@ -1166,7 +1207,14 @@
     <span class="c1">#: Chunk flags, whose meaning depends on the chunk type.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="c1">#: Chunk length, excluding any trailing padding.</span>
-    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span></div>
+    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Chunk.pre_pack">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.schema.transport.sctp.Chunk.pre_pack">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pre_pack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Prepare ``packet`` data for packing process; see :func:`pre_pack_padding`."""</span>
+        <span class="n">pre_pack_padding</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span></div>
+</div>
 
 
 

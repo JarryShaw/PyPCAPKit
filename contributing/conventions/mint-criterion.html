@@ -508,7 +508,7 @@ object rather than handing back the first.</p>
 <dt><code class="docutils literal notranslate"><span class="pre">super()._missing_(value)</span></code> – <em>hand back to</em> <code class="docutils literal notranslate"><span class="pre">aenum</span></code></dt><dd><p>Neither of the above. For an <code class="docutils literal notranslate"><span class="pre">aenum</span></code> flag base this composes a pseudo-member and
 caches it in <code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code> only, so <code class="docutils literal notranslate"><span class="pre">__members__</span></code> and iteration are
 unchanged but a second lookup returns the same object. For a plain enum it
-returns <code class="docutils literal notranslate"><span class="pre">None</span></code> and the lookup raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>; the measured case is
+returns <code class="docutils literal notranslate"><span class="pre">None</span></code> and the lookup raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>; the measured case is
 an in-range hole in an unmint registry, <code class="docutils literal notranslate"><span class="pre">BlockType(11)</span></code>.</p>
 </dd>
 </dl>
@@ -625,7 +625,7 @@ attribution: there the company holds the block and assigned nothing, so the nota
 <section id="checking-the-current-state">
 <h2>Checking the Current State<a class="headerlink" href="#checking-the-current-state" title="Link to this heading">¶</a></h2>
 <p>The split is measurable rather than a matter of memory. Slice each <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> body
-and see which call it makes – an <a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> walk is reliable where a text search is
+and see which call it makes – an <a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> walk is reliable where a text search is
 not, because <code class="docutils literal notranslate"><span class="pre">extend_enum</span></code> also appears in imports and in prose. Match on the
 attribute name as well as on the bare name: <code class="docutils literal notranslate"><span class="pre">extend_enum</span></code> is called as a plain
 function, but <code class="docutils literal notranslate"><span class="pre">_unregistered_member</span></code> is called on <code class="docutils literal notranslate"><span class="pre">cls</span></code>, so a walk that inspects

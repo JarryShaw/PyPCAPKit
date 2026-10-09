@@ -594,7 +594,7 @@ they widen both the ICV coverage and the AEAD associated data.</p>
 <p>Two structural notes for anyone starting. Adding an integrity algorithm that is
 not an HMAC needs more than a row –
 <a class="reference internal" href="../pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.IntegritySuite" title="pcapkit.protocols.internet.esp.IntegritySuite"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntegritySuite</span></code></a> records the digest as
-the name of a <a class="reference external" href="https://docs.python.org/3/library/hashlib.html#module-hashlib" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">hashlib</span></code></a> constructor, which AES-XCBC and AES-CMAC are not.
+the name of a <a class="reference external" href="https://docs.python.org/3/library/hashlib.html#module-hashlib" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">hashlib</span></code></a> constructor, which AES-XCBC and AES-CMAC are not.
 And <a class="reference internal" href="../pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.load_cryptography" title="pcapkit.protocols.internet.esp.load_cryptography"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_cryptography()</span></code></a> imports only the
 <code class="docutils literal notranslate"><span class="pre">ciphers</span></code> submodules of <code class="xref py py-mod docutils literal notranslate"><span class="pre">cryptography</span></code>, so the AEAD and CMAC primitives
 have to be added there before a cipher suite can reach them. Unsupported
@@ -640,7 +640,7 @@ embed the flag-driven range lists of <span class="target" id="index-18"></span><
 with its own dissector’s worth of structure; the mobility options around them
 are fully decoded, and each records which format its payload is in.</p>
 <p>What is wanted is to carry these as <a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>
-rather than as bare <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>, dispatched through a <strong>per-payload registry</strong>
+rather than as bare <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>, dispatched through a <strong>per-payload registry</strong>
 in the style of <a class="reference internal" href="../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH.__option__" title="pcapkit.protocols.internet.mh.MH.__option__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MH.__option__</span></code></a>,
 keyed on the field that already names the format –
 <a class="reference internal" href="../pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.TrafficSelectorSuboption.ts_format" title="pcapkit.protocols.schema.internet.mh.TrafficSelectorSuboption.ts_format"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ts_format</span></code></a>
@@ -665,7 +665,7 @@ than in four separate makers.</p>
 only ever called at a layer boundary and appends to the frame’s protocol chain.
 An MLD address record inside a mobility option did not follow MH on the wire,
 so putting it in that chain would make <code class="docutils literal notranslate"><span class="pre">layer=</span></code> and <code class="docutils literal notranslate"><span class="pre">protocol=</span></code> limits
-behave wrongly. Changing the parsed shape from <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> to <code class="docutils literal notranslate"><span class="pre">Raw</span></code> also
+behave wrongly. Changing the parsed shape from <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> to <code class="docutils literal notranslate"><span class="pre">Raw</span></code> also
 changes what existing captures dump to, so it is its own change.</p>
 </li>
 </ul>
@@ -826,9 +826,9 @@ things were wrong on the hot path, none of them the ones the thread predicted:</
 extraction – 3011 <a class="reference external" href="https://chardet.readthedocs.io/en/latest/api/index.html#chardet.detect" title="(in chardet v7.6)"><code class="xref py py-func docutils literal notranslate"><span class="pre">chardet.detect()</span></code></a> calls over 163 distinct
 bytestrings;</p></li>
 <li><p>every field of every protocol was copied through the generic
-<a class="reference external" href="https://docs.python.org/3/library/copy.html#copy.copy" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy.copy()</span></code></a> machinery, 63207 times per extraction;</p></li>
+<a class="reference external" href="https://docs.python.org/3/library/copy.html#copy.copy" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy.copy()</span></code></a> machinery, 63207 times per extraction;</p></li>
 <li><p><a class="reference internal" href="../pcapkit/corekit/fields/field.html#pcapkit.corekit.fields.field.FieldBase.length" title="pcapkit.corekit.fields.field.FieldBase.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Field.length</span></code></a> recomputes
-<a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.calcsize" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">struct.calcsize()</span></code></a> on each read and was read two to four times per field;</p></li>
+<a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.calcsize" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">struct.calcsize()</span></code></a> on each read and was read two to four times per field;</p></li>
 <li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.__setattr__</span></code>
 re-entered itself once per field assigned.</p></li>
 </ul>
@@ -878,9 +878,9 @@ through its own child obtained from
 <code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.registry</span></code> can be silenced independently of
 <code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction</span></code>;</p></li>
 <li><p><strong>library-safe defaults</strong> – importing <a class="reference internal" href="../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> attaches only a
-<a class="reference external" href="https://docs.python.org/3/library/logging.handlers.html#logging.NullHandler" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">logging.NullHandler</span></code></a> and sets no level, leaving the destination and
+<a class="reference external" href="https://docs.python.org/3/library/logging.handlers.html#logging.NullHandler" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">logging.NullHandler</span></code></a> and sets no level, leaving the destination and
 verbosity to the application. <span class="target" id="index-27"></span><a class="reference internal" href="../pcapkit/index.html#envvar-PCAPKIT_DEVMODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DEVMODE</span></code></a> bootstraps a
-<a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stderr" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sys.stderr</span></code></a> handler at <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.DEBUG" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.DEBUG</span></code></a>;</p></li>
+<a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stderr" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sys.stderr</span></code></a> handler at <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.DEBUG" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.DEBUG</span></code></a>;</p></li>
 <li><p>a <strong>runtime configuration API</strong> –
 <a class="reference internal" href="../pcapkit/utilities/logging.html#pcapkit.utilities.logging.configure" title="pcapkit.utilities.logging.configure"><code class="xref py py-func docutils literal notranslate"><span class="pre">configure()</span></code></a>,
 <a class="reference internal" href="../pcapkit/utilities/logging.html#pcapkit.utilities.logging.reset" title="pcapkit.utilities.logging.reset"><code class="xref py py-func docutils literal notranslate"><span class="pre">reset()</span></code></a> and
@@ -896,11 +896,11 @@ flow-tracing setup – so that <code class="docutils literal notranslate"><span 
 file without descending into per-field parsing.</p></li>
 </ul>
 <p>See <a class="reference internal" href="../pcapkit/utilities/logging.html"><span class="doc">Logging System</span></a> for the configuration recipes, including
-the one-line restore of <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stderr" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sys.stderr</span></code></a> output.</p>
+the one-line restore of <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stderr" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sys.stderr</span></code></a> output.</p>
 <p>One item remains wanted, called out there as deliberately out of scope:
 <a class="reference internal" href="../pcapkit/utilities/functools.html#pcapkit.utilities.warnings.warn" title="pcapkit.utilities.warnings.warn"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.warn()</span></code></a> still reports every warning twice, once
-through <a class="reference external" href="https://docs.python.org/3/library/logging.html#module-logging" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">logging</span></code></a> and once through <a class="reference external" href="https://docs.python.org/3/library/warnings.html#module-warnings" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">warnings</span></code></a>, so an application that
-has routed <a class="reference external" href="https://docs.python.org/3/library/warnings.html#module-warnings" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">warnings</span></code></a> into <a class="reference external" href="https://docs.python.org/3/library/logging.html#module-logging" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">logging</span></code></a> sees each one of them twice.</p>
+through <a class="reference external" href="https://docs.python.org/3/library/logging.html#module-logging" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">logging</span></code></a> and once through <a class="reference external" href="https://docs.python.org/3/library/warnings.html#module-warnings" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">warnings</span></code></a>, so an application that
+has routed <a class="reference external" href="https://docs.python.org/3/library/warnings.html#module-warnings" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">warnings</span></code></a> into <a class="reference external" href="https://docs.python.org/3/library/logging.html#module-logging" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">logging</span></code></a> sees each one of them twice.</p>
 </section>
 <section id="new-engines">
 <h2>New Engines<a class="headerlink" href="#new-engines" title="Link to this heading">¶</a></h2>
@@ -923,7 +923,7 @@ both of the following are worth knowing before reaching for them:</p>
 Python 3.12. Precisely, <code class="docutils literal notranslate"><span class="pre">pcapfile/linklayer.py</span></code> imports it at module scope
 and <code class="docutils literal notranslate"><span class="pre">pcapfile.savefile</span></code> imports <code class="docutils literal notranslate"><span class="pre">linklayer</span></code>, so while a bare
 <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pcapfile</span></code> still succeeds on 3.12+, the two modules the engine
-actually needs raise <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ModuleNotFoundError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code></a>. Upstream <code class="docutils literal notranslate"><span class="pre">master</span></code> (0.12.1,
+actually needs raise <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ModuleNotFoundError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code></a>. Upstream <code class="docutils literal notranslate"><span class="pre">master</span></code> (0.12.1,
 unreleased) has fixed this, and that is what the engine was verified against.
 The extra therefore installs a version that only works on Python 3.10 and
 3.11 until 0.12.1 is published.</p></li>
@@ -958,7 +958,7 @@ and release workflows – all of which install <code class="docutils literal not
 on the macOS runner, where <code class="file docutils literal notranslate"><span class="pre">pcap.h</span></code> is present but no
 <code class="docutils literal notranslate"><span class="pre">libpcap.dylib</span></code> is.</p>
 <p>That is solved, though not by changing the <code class="docutils literal notranslate"><span class="pre">PyPCAP</span></code> extra. <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> re-implements the <code class="docutils literal notranslate"><span class="pre">pypcap</span></code> API in pure
-Python over <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#module-ctypes" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ctypes</span></code></a>, and it is wired up as a <strong>separate engine</strong>,
+Python over <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#module-ctypes" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ctypes</span></code></a>, and it is wired up as a <strong>separate engine</strong>,
 <a class="reference internal" href="../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pcap_ct.PCAP_CT" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAP_CT</span></code></a>, selected with
 <code class="docutils literal notranslate"><span class="pre">engine='pcap_ct'</span></code> and installed with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pypcapkit[PCAP_CT]</span></code>. It
 works on every supported interpreter, verified on 3.10 and 3.14.</p>
@@ -1025,14 +1025,14 @@ resolves paths from a repository root that an installed package does not have.
 Anyone wanting to run the tests wants the repository, which is where they are.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p><code class="docutils literal notranslate"><span class="pre">dictdumper</span></code>’s <code class="docutils literal notranslate"><span class="pre">PLIST</span></code> writer formats every <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a> as
+<p><code class="docutils literal notranslate"><span class="pre">dictdumper</span></code>’s <code class="docutils literal notranslate"><span class="pre">PLIST</span></code> writer formats every <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a> as
 <code class="docutils literal notranslate"><span class="pre">'%Y-%m-%dT%H:%M:%S.%fZ'</span></code>, always with six fractional digits, and
-<a class="reference external" href="https://docs.python.org/3/library/plistlib.html#module-plistlib" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">plistlib</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">&lt;date&gt;</span></code> pattern admits none, so <a class="reference external" href="https://docs.python.org/3/library/plistlib.html#plistlib.load" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">plistlib.load()</span></code></a>
+<a class="reference external" href="https://docs.python.org/3/library/plistlib.html#module-plistlib" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">plistlib</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">&lt;date&gt;</span></code> pattern admits none, so <a class="reference external" href="https://docs.python.org/3/library/plistlib.html#plistlib.load" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">plistlib.load()</span></code></a>
 failed on every <code class="docutils literal notranslate"><span class="pre">format='plist'</span></code> report with <code class="docutils literal notranslate"><span class="pre">AttributeError:</span> <span class="pre">'NoneType'</span>
 <span class="pre">object</span> <span class="pre">has</span> <span class="pre">no</span> <span class="pre">attribute</span> <span class="pre">'groupdict'</span></code>. The upstream defect is
 <a class="reference external" href="https://github.com/JarryShaw/DictDumper/issues/122">JarryShaw/DictDumper#122</a>.
 <a class="reference internal" href="../pcapkit/dumpkit/common.html#pcapkit.dumpkit.common.make_dumper" title="pcapkit.dumpkit.common.make_dumper"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.dumpkit.common.make_dumper()</span></code></a> works around it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1448">#1448</a>): it
-writes each date in UTC to whole seconds, as <a class="reference external" href="https://docs.python.org/3/library/plistlib.html#plistlib.dump" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">plistlib.dump()</span></code></a> does. The
+writes each date in UTC to whole seconds, as <a class="reference external" href="https://docs.python.org/3/library/plistlib.html#plistlib.dump" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">plistlib.dump()</span></code></a> does. The
 exact value stays in the sibling field every timestamp already has, such as
 <code class="docutils literal notranslate"><span class="pre">time_epoch</span></code>.
 <code class="docutils literal notranslate"><span class="pre">PlistRoundTripTests.test_plist_report_round_trips_through_plistlib</span></code>, in
@@ -1148,7 +1148,7 @@ buffer whose first-arriving fragment is older than
 seconds, and the buffer models carry the timestamp that makes it possible.</p>
 <p>The clock is the <strong>capture’s own timestamps</strong>, not the host’s: an offline
 parser has no other notion of time passing, and keying on
-<a class="reference external" href="https://docs.python.org/3/library/time.html#time.time" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">time.time()</span></code></a> would make the same file reassemble differently on every
+<a class="reference external" href="https://docs.python.org/3/library/time.html#time.time" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">time.time()</span></code></a> would make the same file reassemble differently on every
 run. A fragment being handed over is the only evidence capture time has
 advanced, so that is when the sweep happens – which means the clock advances
 only while the reassembler is being fed. For IPv4 and TCP that is nearly every
@@ -1419,7 +1419,7 @@ are in.</p>
 <p><strong>Queued behind wave 2 — the Mobility Header sub-layer registry.</strong> Several
 mobility options carry a payload belonging to another protocol, and those
 payloads want carrying as <a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> through a
-per-payload registry rather than as bare <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> — see <a class="reference internal" href="#mobility-header">Mobility Header</a>
+per-payload registry rather than as bare <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> — see <a class="reference internal" href="#mobility-header">Mobility Header</a>
 above, which describes the payloads in question and why a registry of their own
 is wanted instead of
 <a class="reference internal" href="../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_decode_next_layer()</span></code></a>. It is
@@ -1428,7 +1428,7 @@ sequenced <em>after</em> wave 2 rather than by preference: the multicast options
 both wave 2 deliverables. Landing the registry first would give a dispatch table
 with nothing but <code class="docutils literal notranslate"><span class="pre">Raw</span></code> to register. The counter-argument is real though, and
 worth weighing rather than dismissing: changing the parsed shape from
-<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> to <code class="docutils literal notranslate"><span class="pre">Raw</span></code> is the disruptive half, since it changes what existing
+<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> to <code class="docutils literal notranslate"><span class="pre">Raw</span></code> is the disruptive half, since it changes what existing
 captures dump to, so there is a case for taking that churn early and registering
 dissectors later. The third format, the <span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6088.html"><strong>RFC 6088</strong></a> traffic selectors of
 <span class="target" id="index-43"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6089.html"><strong>RFC 6089</strong></a> and <span class="target" id="index-44"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7222.html"><strong>RFC 7222</strong></a>, has no wave at all — it is a registry of its own and
