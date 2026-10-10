@@ -533,6 +533,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         _protos = []                # ProtoChain buffer
         _exthdr = []                # (parser class, info) per extension header
         split = None                # type: Optional[tuple[int, int]] # at first Fragment header
+        opaque = False              # walk ended at a non-zero Fragment Offset
 
         # traverse if next header is an extension header
         payload = self.__header__.get_payload()
@@ -620,6 +621,8 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
                 # fragment carries a slice of the Fragmentable Part from its
                 # offset on, and that slice starts with no header at all.
                 if not self._is_first_fragment(info):
+                    # a header parsed with no offset is not known to be later
+                    opaque = info.get('offset') is not None
                     break
 
         # record real header & payload length (headers exclude)
@@ -635,8 +638,16 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             '__exthdr__': tuple(_exthdr),
         })
 
+        # NOTE: Nor does a later fragment's slice start with the upper-layer
+        # header, though ``protocol`` above still names the one the first
+        # fragment carries. No code is dispatched on, so the registry's
+        # fallback leaves the octets as :class:`~pcapkit.protocols.misc.raw.Raw`
+        # with no protocol to alias it as, and ``'UDP' in frame`` does not hold
+        # of a slice of UDP payload (:issue:`1545`). Reassembly takes
+        # ``fragment`` above, which this leaves as it was.
         ipv6_exthdr = ProtoChain.from_list(_protos)  # type: ignore[arg-type]
-        return super()._decode_next_layer(ipv6, proto, raw_len, packet=packet, ipv6_exthdr=ipv6_exthdr, payload=payload)
+        return super()._decode_next_layer(ipv6, None if opaque else proto, raw_len, packet=packet,
+                                          ipv6_exthdr=ipv6_exthdr, payload=payload)
 
     @beholder  # type: ignore[arg-type]
     def _import_next_layer(self, proto: 'int', length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
