@@ -45,7 +45,7 @@ from pcapkit.utilities.warnings import ProtocolWarning, warn
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
     from ipaddress import IPv6Address
-    from typing import Any, Optional, Type
+    from typing import Any, Mapping, Optional, Type
 
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
@@ -436,7 +436,10 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         nested = cls._lookup_nested(data)
         pairs = data.items(multi=True) if isinstance(data, (Info, MultiDict)) else data.items()
         for (key, info) in pairs:
-            if key not in nested:
+            # NOTE: ``fragment`` is declared only for type checkers, so it reads
+            # as nested, but it is the packet split at the Fragment header and
+            # sits between that header and the next one.
+            if key not in nested or key == 'fragment':
                 continue
             try:
                 ex_proto = Enum_ExtensionHeader(proto)
@@ -444,7 +447,8 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
                 break
 
             # NOTE: As in :meth:`_decode_next_layer`, a code with no parser
-            # carrying ``next`` ends the chain, and so does a fragment header.
+            # carrying ``next`` ends the chain, and so does a Fragment header
+            # other than a first fragment's.
             if 'next' not in info:
                 break
 
@@ -462,9 +466,26 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             chain.append((parser, info))
 
             proto = info['next']
-            if ex_proto == Enum_ExtensionHeader.IPv6_Frag:
+            if ex_proto == Enum_ExtensionHeader.IPv6_Frag and not cls._is_first_fragment(info):
                 break
         return tuple(names), tuple(chain)
+
+    @staticmethod
+    def _is_first_fragment(info: 'Mapping[str, Any]') -> 'bool':
+        """Whether a Fragment header's info is that of a first fragment.
+
+        Args:
+            info: info of a Fragment header, as parsed or from :meth:`Info.to_dict
+                <pcapkit.corekit.infoclass.Info.to_dict>`
+
+        Returns:
+            :data:`True` at a Fragment Offset of zero. A header whose dedicated
+            parser raised was parsed by
+            :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` instead and
+            has no offset, so it does not count as one.
+
+        """
+        return info.get('offset') == 0
 
     def _read_ip_hextet(self) -> 'tuple[int, int, int]':
         """Read the first four octets of IPv6.
@@ -511,6 +532,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         raw_len = ipv6.payload if length is None else length  # payload length
         _protos = []                # ProtoChain buffer
         _exthdr = []                # (parser class, info) per extension header
+        split = None                # type: Optional[tuple[int, int]] # at first Fragment header
 
         # traverse if next header is an extension header
         payload = self.__header__.get_payload()
@@ -582,15 +604,28 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
 
             # keep original data after fragment header
             if ex_proto == Enum_ExtensionHeader.IPv6_Frag:
-                ipv6.__update__({
-                    'fragment': self._read_packet(header=hdr_len, payload=raw_len),
-                })
-                break
+                # NOTE: The first Fragment header splits the packet for
+                # reassembly, so ``fragment``, ``hdr_len`` and ``raw_len`` keep
+                # that split however far the walk goes on.
+                if split is None:
+                    split = (hdr_len, raw_len)
+                    ipv6.__update__({
+                        'fragment': self._read_packet(header=hdr_len, payload=raw_len),
+                    })
+
+                # NOTE: Only a first fragment goes on. :rfc:`8200#section-4.5`
+                # puts every header through the upper-layer one in the fragment
+                # at offset zero, so what follows its Fragment header is walked
+                # exactly as it would be without one (:issue:`1539`). A later
+                # fragment carries a slice of the Fragmentable Part from its
+                # offset on, and that slice starts with no header at all.
+                if not self._is_first_fragment(info):
+                    break
 
         # record real header & payload length (headers exclude)
         ipv6.__update__({
-            'hdr_len': hdr_len,
-            'raw_len': raw_len,
+            'hdr_len': hdr_len if split is None else split[0],
+            'raw_len': raw_len if split is None else split[1],
 
             # update next header
             'protocol': proto,
