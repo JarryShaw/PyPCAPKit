@@ -10,24 +10,134 @@ The reassembly and flow tracing adapters return the data their
 cannot be used for it.
 
 """
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, NamedTuple, cast
 
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
+from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
+from pcapkit.protocols.misc.raw import Raw
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
+    from typing import Optional
 
     from pcapkit.const.reg.linktype import LinkType
+    from pcapkit.protocols.data.internet.ipv4 import IPv4 as Data_IPv4
+    from pcapkit.protocols.data.internet.ipv6 import IPv6 as Data_IPv6
     from pcapkit.protocols.internet.ipv4 import IPv4
     from pcapkit.protocols.internet.ipv6 import IPv6
     from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
     from pcapkit.protocols.misc.pcap import Frame
+    from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.transport.tcp import TCP
 
 __all__ = ['ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow']
+
+
+class _TCPSegment(NamedTuple):
+    """The fields of a TCP segment that the reassembly and flow tracing records take."""
+
+    #: Info of the IP layer carrying the segment.
+    ip: 'Data_IPv4 | Data_IPv6'
+    #: TCP source port.
+    srcport: 'int'
+    #: TCP destination port.
+    dstport: 'int'
+    #: TCP sequence number.
+    seq: 'int'
+    #: TCP acknowledgement number.
+    ack: 'int'
+    #: TCP synchronise (SYN) flag.
+    syn: 'bool'
+    #: TCP finish (FIN) flag.
+    fin: 'bool'
+    #: TCP reset (RST) flag.
+    rst: 'bool'
+    #: Raw TCP header, as captured.
+    header: 'bytes'
+    #: Raw TCP payload, as captured.
+    payload: 'bytes'
+
+
+def _tcp_segment(frame: 'ProtocolBase') -> 'Optional[_TCPSegment]':
+    """The TCP segment ``frame`` carries, or :data:`None` if it carries none.
+
+    Args:
+        frame: PCAP frame or PCAP-NG block.
+
+    Returns:
+        The fields of the TCP layer if :mod:`pcapkit` parsed one. Otherwise, the
+        fields of the fixed 20-octet TCP header (:rfc:`9293#section-3.1`) if the
+        IP payload is a :class:`~pcapkit.protocols.misc.raw.Raw` the TCP parser
+        rejected, of protocol TCP, from a datagram that is not a later fragment,
+        with at least those 20 octets captured; else :data:`None`.
+
+    Note:
+        A capture snapped inside the TCP header leaves a Data Offset that runs
+        past the captured octets, and the TCP parser rejects such a header by
+        design (:issue:`1404`), so the segment arrives as
+        :class:`~pcapkit.protocols.misc.raw.Raw`. The ports, numbers and flags
+        are all in the fixed header, so the segment still belongs to its flow,
+        as it does for :mod:`dpkt`, :mod:`scapy` and Wireshark (:issue:`1518`).
+        The header and payload are then the captured octets either side of the
+        Data Offset.
+
+    """
+    if 'TCP' in frame:
+        tcp = cast('TCP', frame['TCP'])
+        tcp_info = tcp.info
+        return _TCPSegment(
+            ip=cast('IPv4 | IPv6', frame['IP']).info,
+            srcport=tcp_info.srcport.port,
+            dstport=tcp_info.dstport.port,
+            seq=tcp_info.seq,
+            ack=tcp_info.ack,
+            syn=tcp_info.flags.syn,
+            fin=tcp_info.flags.fin,
+            rst=tcp_info.flags.rst,
+            header=tcp.packet.header,
+            payload=tcp.packet.payload,
+        )
+
+    if 'IP' not in frame:
+        return None
+    ip = cast('IPv4 | IPv6', frame['IP'])
+    ip_info = ip.info
+    raw = ip.payload
+    # NOTE: a Raw with no error is one the caller asked for, by stopping the
+    # dissection at a ``layer`` or ``protocol``, not a segment TCP rejected.
+    if (not isinstance(raw, Raw) or raw.info.error is None
+            or ip_info.protocol != Enum_TransType.TCP):
+        return None
+
+    # A later fragment's payload starts mid-datagram, with no TCP header in it.
+    if ip_info.version == 4:
+        offset = ip_info.offset
+    else:
+        frag = cast('IPv6', ip).extension_headers.get(Enum_ExtensionHeader.IPv6_Frag)  # type: ignore[call-overload]
+        offset = 0 if frag is None else cast('IPv6_Frag', frag).info.offset
+    if offset:
+        return None
+
+    octets = bytes(raw.packet.payload)
+    hdr_len = (octets[12] >> 4) * 4 if len(octets) >= 20 else 0
+    if hdr_len < 20:
+        return None
+    flags = octets[13]
+    return _TCPSegment(
+        ip=ip_info,
+        srcport=int.from_bytes(octets[0:2], 'big'),
+        dstport=int.from_bytes(octets[2:4], 'big'),
+        seq=int.from_bytes(octets[4:8], 'big'),
+        ack=int.from_bytes(octets[8:12], 'big'),
+        syn=bool(flags & 0x02),
+        fin=bool(flags & 0x01),
+        rst=bool(flags & 0x04),
+        header=octets[:hdr_len],
+        payload=octets[hdr_len:],
+    )
 
 
 def ipv4_reassembly(frame: 'Frame') -> 'IP_Packet[IPv4Address] | None':
@@ -150,7 +260,9 @@ def tcp_reassembly(frame: 'Frame') -> 'TCP_Packet | None':
         A tuple of data for TCP reassembly.
 
         * If the ``frame`` can be used for TCP reassembly. A frame can be reassembled
-          if it contains TCP layer (:class:`~pcapkit.protocols.transport.tcp.TCP`).
+          if it contains TCP layer (:class:`~pcapkit.protocols.transport.tcp.TCP`),
+          or a TCP segment whose header the TCP parser rejected, as it does one the
+          snapshot length cut short (:issue:`1518`).
         * If the ``frame`` can be reassembled, then the :obj:`dict` mapping of data for TCP
           reassembly (:term:`reasm.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
@@ -158,30 +270,25 @@ def tcp_reassembly(frame: 'Frame') -> 'TCP_Packet | None':
         :class:`pcapkit.foundation.reassembly.tcp.TCP`
 
     """
-    if 'TCP' in frame:
-        ip = cast('IPv4 | IPv6', frame['IP'])
-        ip_info = ip.info
-        tcp = cast('TCP', frame['TCP'])
-        tcp_info = tcp.info
-
-        raw_len = len(tcp.packet.payload)
+    if (segment := _tcp_segment(frame)) is not None:
+        raw_len = len(segment.payload)
         data = TCP_Packet(
             bufid=(
-                ip_info.src,                        # source IP address
-                tcp_info.srcport.port,              # source port
-                ip_info.dst,                        # destination IP address
-                tcp_info.dstport.port,              # destination port
+                segment.ip.src,                     # source IP address
+                segment.srcport,                    # source port
+                segment.ip.dst,                     # destination IP address
+                segment.dstport,                    # destination port
             ),
             num=frame.info.number,                  # original packet range number
-            ack=tcp_info.ack,                       # acknowledgement
-            dsn=tcp_info.seq,                       # data sequence number
-            syn=tcp_info.flags.syn,                 # synchronise flag
-            fin=tcp_info.flags.fin,                 # finish flag
-            rst=tcp_info.flags.rst,                 # reset connection flag
-            header=tcp.packet.header,               # raw bytes type header
-            payload=bytearray(tcp.packet.payload),  # raw bytearray type payload
-            first=tcp_info.seq,                     # first sequence number of payload
-            last=tcp_info.seq + raw_len - 1,        # last sequence number of payload
+            ack=segment.ack,                        # acknowledgement
+            dsn=segment.seq,                        # data sequence number
+            syn=segment.syn,                        # synchronise flag
+            fin=segment.fin,                        # finish flag
+            rst=segment.rst,                        # reset connection flag
+            header=segment.header,                  # raw bytes type header
+            payload=bytearray(segment.payload),     # raw bytearray type payload
+            first=segment.seq,                      # first sequence number of payload
+            last=segment.seq + raw_len - 1,         # last sequence number of payload
             len=raw_len,                            # payload length, header excludes
             timestamp=float(frame.info.time_epoch),  # capture timestamp
         )
@@ -200,7 +307,9 @@ def tcp_traceflow(frame: 'Frame', *, data_link: 'LinkType') -> 'TF_TCP_Packet | 
         Data for TCP reassembly.
 
         * If the ``packet`` can be used for TCP flow tracing. A frame can be reassembled
-          if it contains TCP layer (:class:`~pcapkit.protocols.transport.tcp.TCP`).
+          if it contains TCP layer (:class:`~pcapkit.protocols.transport.tcp.TCP`),
+          or a TCP segment whose header the TCP parser rejected, as it does one the
+          snapshot length cut short (:issue:`1518`).
         * If the ``frame`` can be reassembled, then the :obj:`dict` mapping of data for TCP
           flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
@@ -208,28 +317,23 @@ def tcp_traceflow(frame: 'Frame', *, data_link: 'LinkType') -> 'TF_TCP_Packet | 
         :class:`pcapkit.foundation.traceflow.tcp.TCP`
 
     """
-    if 'TCP' in frame:
-        ip = cast('IPv4 | IPv6', frame['IP'])
-        ip_info = ip.info
-        tcp = cast('TCP', frame['TCP'])
-        tcp_info = tcp.info
-
+    if (segment := _tcp_segment(frame)) is not None:
         data = TF_TCP_Packet(  # type: ignore[type-var]
             protocol=data_link,                      # data link type from global header
             index=frame.info.number,                 # frame number
             frame=frame.info,                        # extracted frame info
-            syn=tcp_info.flags.syn,                  # TCP synchronise (SYN) flag
-            fin=tcp_info.flags.fin,                  # TCP finish (FIN) flag
-            rst=tcp_info.flags.rst,                  # TCP reset (RST) flag
-            src=ip_info.src,                         # source IP
-            dst=ip_info.dst,                         # destination IP
-            srcport=tcp_info.srcport.port,           # TCP source port
-            dstport=tcp_info.dstport.port,           # TCP destination port
+            syn=segment.syn,                         # TCP synchronise (SYN) flag
+            fin=segment.fin,                         # TCP finish (FIN) flag
+            rst=segment.rst,                         # TCP reset (RST) flag
+            src=segment.ip.src,                      # source IP
+            dst=segment.ip.dst,                      # destination IP
+            srcport=segment.srcport,                 # TCP source port
+            dstport=segment.dstport,                 # TCP destination port
             timestamp=float(frame.info.time_epoch),  # frame timestamp
-            seq=tcp_info.seq,                        # TCP sequence number
-            ack=tcp_info.ack,                        # TCP acknowledgement number
-            header=tcp.packet.header,                # raw bytes type header
-            payload=bytearray(tcp.packet.payload),   # raw bytearray type payload
+            seq=segment.seq,                         # TCP sequence number
+            ack=segment.ack,                         # TCP acknowledgement number
+            header=segment.header,                   # raw bytes type header
+            payload=bytearray(segment.payload),      # raw bytearray type payload
         )
         return data
     return None

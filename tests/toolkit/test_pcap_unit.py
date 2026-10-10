@@ -56,6 +56,9 @@ class PCAPToolkitTests(unittest.TestCase):
                 len=28,
             ),
             packet=types.SimpleNamespace(header=b'I' * 20, payload=b'ipv4data'),
+            # the next layer, which the TCP adapters inspect when there is no TCP
+            # layer (#1518); a frame without TCP here carries no ``Raw`` either
+            payload=None,
         )
 
     def _make_ipv6(self, *, with_fragment: bool = True):
