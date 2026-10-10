@@ -399,9 +399,9 @@ class LinkProtocolUnitTests(unittest.TestCase):
             callback_payload(descriptor_field, {'type': custom_type})
             self.assertIs(descriptor_field.protocol, Raw)
 
-            # Resolving a registered descriptor memoises the imported class,
-            # which the callback used to resolve afresh on every frame.
-            self.assertIs(registry[custom_type], Raw)
+            # Resolving a registered descriptor leaves the descriptor in place:
+            # a memoised class would go stale on a reload (#1559).
+            self.assertIsInstance(registry[custom_type], ModuleDescriptor)
 
             # An *unregistered* EtherType still resolves to Raw, and must not be
             # recorded on the way: the registry is Link.__proto__, shared by

@@ -34,7 +34,7 @@ import struct
 import tempfile
 import unittest
 
-from tests._support import isolate_modules, reimport_once_per_class
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -174,12 +174,6 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
 
     def test_dispatch_keys_did_not_move_with_the_modules(self) -> None:
         """The dispatch tier is decoupled from the subpackage, deliberately."""
-        # A dispatch hit writes the resolved class back over its descriptor
-        # (``ProtocolBase._lookup_next_layer``), and the parsing tests below
-        # share this class's import. So this test takes a fresh one, and reads
-        # the registrations as declared whatever order the tests run in. Run
-        # after any of them on the shared import, it failed (GitHub issue #1538).
-        isolate_modules(self)
         from pcapkit.const.reg.ethertype import EtherType
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.corekit.module import ModuleDescriptor

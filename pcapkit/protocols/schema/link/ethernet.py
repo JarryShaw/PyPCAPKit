@@ -39,9 +39,9 @@ def callback_payload(self: 'PayloadField', packet: 'dict[str, Any]') -> 'None':
         saw would be recorded as though somebody had registered it, and
         :meth:`Link.register <pcapkit.protocols.link.link.Link.register>` would
         afterwards report it as an overwrite. The helper reads the fallback
-        without recording it, and for a code that really is registered as a
-        :class:`~pcapkit.corekit.module.ModuleDescriptor` it writes the resolved
-        class back, so the import happens once.
+        without recording it, and resolves a
+        :class:`~pcapkit.corekit.module.ModuleDescriptor` without writing the
+        class back, so the registry is left as registered (:issue:`1559`).
 
     """
     from pcapkit.protocols.link.ethernet import Ethernet  # pylint: disable=import-outside-toplevel

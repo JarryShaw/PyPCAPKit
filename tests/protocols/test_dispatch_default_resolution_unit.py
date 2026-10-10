@@ -8,8 +8,9 @@ class-level :class:`collections.defaultdict` and recording a miss in it is the
 defect GitHub issue #421 reported and pull request #426 fixed at this layer,
 pull request #428 extended to the option, chunk and block registries, and pull
 request #560 fixed at the schema layer. The cost of not writing it back is that
-every unrecognised frame resolves the same descriptor again: 48 of the 52
-resolutions an extraction of :file:`many_interfaces.pcapng` performs.
+every unrecognised frame resolves the same descriptor again. Since GitHub issue
+#1559 a registered descriptor is not written back either, so an extraction of
+:file:`many_interfaces.pcapng` performs 296 resolutions, 48 of them fallbacks.
 
 Proposed by @Ts-Boom in GitHub pull request #563, which paid that cost with a
 class-level cache of resolved classes and no invalidation -- so a

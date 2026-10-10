@@ -261,7 +261,8 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         )
         analyzed_module = DummyProtocol.analyze(4, b'module-body', alias=4)
         self.assertIsInstance(analyzed_module, Raw)
-        self.assertIs(DummyProtocol.__proto__[4], Raw)
+        # resolved for the dispatch, not written back over the descriptor (#1559)
+        self.assertIsInstance(DummyProtocol.__proto__[4], ModuleDescriptor)
 
         DummyProtocol.__proto__ = collections.defaultdict(lambda: Raw, {1: Raw})
         analyzed = DummyProtocol.analyze(1, b'raw-body', alias=1)
@@ -335,7 +336,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
             {5: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw')},
         )
         self.assertIsInstance(proto_module._import_next_layer(5, None), Raw)
-        self.assertIs(proto_module.__proto__[5], Raw)
+        self.assertIsInstance(proto_module.__proto__[5], ModuleDescriptor)  # not written back (#1559)
 
         proto_stop = DummyProtocol(packet=b'abpayload', _protocol='dummyprotocol')
         self.assertTrue(proto_stop._check_term_threshold())
@@ -419,8 +420,8 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         :meth:`~pcapkit.protocols.protocol.ProtocolBase.register` call.
 
         Resolving a :class:`~pcapkit.corekit.module.ModuleDescriptor` for a code
-        that *is* registered still writes back, since that is memoisation of an
-        import rather than a new entry.
+        that *is* registered does not write back either: the resolved class
+        would go stale on :func:`importlib.reload` (GitHub issue #1559).
 
         """
         DummyProtocol, _, _ = self._make_protocol_class()
@@ -439,9 +440,9 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         self.assertNotIn(99, registry)
         self.assertEqual(set(registry), {7})
 
-        # A hit resolves the descriptor once and keeps the resolved class.
+        # A hit resolves the descriptor and keeps the descriptor.
         self.assertIs(DummyProtocol._lookup_next_layer(registry, 7), Raw)
-        self.assertIs(registry[7], Raw)
+        self.assertIsInstance(registry[7], ModuleDescriptor)
 
         # A class registered directly is returned as it is.
         registry[8] = Raw

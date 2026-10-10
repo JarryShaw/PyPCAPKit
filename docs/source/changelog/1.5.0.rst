@@ -306,9 +306,10 @@ Changed
   Mappings now, so ``len()`` and iteration yield field names rather than values.
 * ``ModuleDescriptor.klass`` reads an already-imported module out of ``sys.modules``
   rather than re-entering ``importlib.import_module``, since next layer dispatch
-  resolves a descriptor there on a per-frame path. A registry *hit* holding a
-  ``ModuleDescriptor`` is resolved once and written back; a *miss* deliberately is not
-  -- recording a miss in a class-level ``collections.defaultdict`` is the defect
+  resolves a descriptor there on a per-frame path. Neither a registry *hit* holding a
+  ``ModuleDescriptor`` nor a *miss* writes the resolved class back: a memoised hit went
+  stale on ``importlib.reload`` (:issue:`1559`), and recording a miss in a class-level
+  ``collections.defaultdict`` is the defect
   :issue:`421`/:pr:`426` fixed at this layer, :issue:`425`/:pr:`428` for the option,
   chunk and block registries, and :issue:`555`/:pr:`560` at the schema layer. A
   resolution now costs ~117 ns rather than ~436 ns, which is **not measurable in**

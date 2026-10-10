@@ -184,7 +184,8 @@ class InternetBaseUnitTests(unittest.TestCase):
         proto._sigterm = False
         module = DummyInternet._import_next_layer(proto, TransType.get(251), length=4, payload=b'mod!')
         self.assertEqual(module.data, b'mod!')
-        self.assertNotIsInstance(DummyInternet.__dict__['__proto__'][TransType.get(251)], ModuleDescriptor)
+        # resolved for the dispatch, not written back over the descriptor (#1559)
+        self.assertIsInstance(DummyInternet.__dict__['__proto__'][TransType.get(251)], ModuleDescriptor)
 
         from_header = DummyInternet._import_next_layer(proto, TransType.get(250))
         self.assertEqual(from_header.file, b'header-payload')

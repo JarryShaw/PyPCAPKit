@@ -233,7 +233,8 @@ class IPv6UnitTests(unittest.TestCase):
         })
         imported = proto._import_next_layer(custom_proto, payload=b'module')
         self.assertIsInstance(imported, Raw)
-        self.assertIs(proto.__proto__[custom_proto], Raw)
+        # resolved for the dispatch, not written back over the descriptor (#1559)
+        self.assertIsInstance(proto.__proto__[custom_proto], ModuleDescriptor)
 
     def test_ipv6_remaining_decode_and_import_edges(self) -> None:
         from collections import defaultdict
