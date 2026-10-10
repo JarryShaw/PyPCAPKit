@@ -414,15 +414,6 @@ class TestRegistrySymmetry(harness.RoundTripBase):
             tuple(f'{name}/{variant}/dispatch'
                   for name in ('register_linktype', 'register_pcapng')
                   for variant in ('override', 'override-same-name', 'restore-by-name'))),
-        Gap(1505, 'a protocol registrar adds the class it registers to pcapkit.protocols.__proto__ '
-               'by name (pcapkit/foundation/registry/protocols.py:235, reached from e.g. :416), '
-               'and restoring the code leaves that name behind: nothing removes it',
-            'CHANGED', "names['ROUNDTRIPCUSTOM'] added",
-            tuple(f'{name}/{variant}/names'
-                  for name in ('register_linktype', 'register_pcap', 'register_pcapng',
-                               'register_ethertype', 'register_transtype', 'register_tcp',
-                               'register_udp', 'register_apptype', 'register_sctp')
-                  for variant in ('override', 'restore-by-name'))),
     )
 
     def setUp(self) -> None:
