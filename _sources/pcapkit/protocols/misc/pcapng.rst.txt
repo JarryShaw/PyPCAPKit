@@ -510,7 +510,11 @@ Type Stubs
 Auxiliary Functions
 -------------------
 
-.. autofunction:: pcapkit.protocols.schema.misc.pcapng.byteorder_callback
+The byte order of every block but the Section Header Block is read by
+:func:`~pcapkit.protocols.schema.misc.byteorder.byteorder_callback`, which is
+shared with the PCAP frame header and documented in
+:mod:`pcapkit.protocols.schema.misc.byteorder`.
+
 .. autofunction:: pcapkit.protocols.schema.misc.pcapng.shb_byteorder_callback
 .. autofunction:: pcapkit.protocols.schema.misc.pcapng.pcapng_block_selector
 .. autofunction:: pcapkit.protocols.schema.misc.pcapng.dsb_secrets_selector

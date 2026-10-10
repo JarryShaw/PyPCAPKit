@@ -261,6 +261,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/ipv6_option.html">IPv6 Options - Shared Option Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/ah.html">AH - Authentication Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
@@ -290,6 +291,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/misc/pcap.html">PCAP File Headers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/misc/byteorder.html">Byte Order - Shared Byte-Order Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/misc/raw.html">Raw Packet Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/misc/null.html">No-Payload Packet</a></li>
 </ul>
@@ -488,7 +490,7 @@
 <h1>GitHub Actions Workflows<a class="headerlink" href="#github-actions-workflows" title="Link to this heading">¶</a></h1>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>The ten workflows under <code class="file docutils literal notranslate"><span class="pre">.github/workflows/</span></code> trigger each other, and
+<p>The eleven workflows under <code class="file docutils literal notranslate"><span class="pre">.github/workflows/</span></code> trigger each other, and
 the chain that results is not visible from any single file – reading one
 <code class="docutils literal notranslate"><span class="pre">on:</span></code> block never shows what a <em>different</em> workflow’s completion goes on
 to start. This page is the repository-wide graph. The release <em>pipeline</em>
@@ -590,6 +592,14 @@ itself, job by job from a version bump to a published package, is on
 <td><p><strong>Unit Tests</strong></p></td>
 <td><p>–</p></td>
 </tr>
+<tr class="row-even"><td><p>CI Timing</p></td>
+<td><p><code class="file docutils literal notranslate"><span class="pre">ci-timing.yml</span></code></p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
+<td><p>Mon 07:23</p></td>
+<td><p>–</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">workflow_dispatch</span></code></p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -616,7 +626,7 @@ than starting a new one.</p>
     PUSH[&quot;push: main&quot;]
     PR[&quot;pull_request: main&quot;]
     TAG[&quot;push: tags v*&quot;]
-    SCHED[&quot;schedule (Saturday, or daily)&quot;]
+    SCHED[&quot;schedule (Saturday, Monday, or daily)&quot;]
     ISSUES[&quot;issues&quot;]
     PRT[&quot;pull_request_target&quot;]
     DISPATCH[&quot;workflow_dispatch&quot;]
@@ -631,6 +641,7 @@ than starting a new one.</p>
     CR[&quot;Create Release&lt;br/&gt;create-release.yml&quot;]
     PS[&quot;Project Status&lt;br/&gt;project-status.yml&quot;]
     CC[&quot;Coverage Comment&lt;br/&gt;coverage-comment.yml&quot;]
+    CT[&quot;CI Timing&lt;br/&gt;ci-timing.yml&quot;]
 
     PUSH --&gt; CQ
     PR --&gt; CQ
@@ -659,6 +670,9 @@ than starting a new one.</p>
     PRT --&gt; PS
     SCHED --&gt;|daily 00:37| PS
     DISPATCH --&gt; PS
+
+    SCHED --&gt;|Mon 07:23| CT
+    DISPATCH --&gt; CT
 
     UT ==&gt;|workflow_run: completed| VU
     UT ==&gt;|workflow_run: completed| CU
@@ -739,7 +753,7 @@ and <code class="docutils literal notranslate"><span class="pre">project-tests</
 Checks</a> below), gated out by their own <code class="docutils literal notranslate"><span class="pre">if:</span></code> rather than by having
 already run. <code class="docutils literal notranslate"><span class="pre">changelog</span></code> carries no
 <code class="docutils literal notranslate"><span class="pre">if:</span></code> at all and runs on every path regardless – deliberately, per its own
-comment (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1250-1256</span></code>): <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code> feeds
+comment (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1277-1283</span></code>): <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code> feeds
 <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> to the GitHub Release body, so the release path is exactly
 where a drifted file must not go unchecked. Confirmed on run <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295">36210743295</a> (a
 schedule-triggered GitHub Pages run): both <code class="docutils literal notranslate"><span class="pre">Changelog</span> <span class="pre">drift</span></code> and <code class="docutils literal notranslate"><span class="pre">Gate</span>
@@ -853,6 +867,120 @@ sha, and renders its own Markdown from validated numbers. It edits one comment,
 found by a hidden marker, on each push. The first line says when the tests
 failed. Neither workflow’s coverage step is a required check.</p>
 </section>
+<section id="ci-timing-review-1538">
+<h2>CI Timing Review (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1538">#1538</a>)<a class="headerlink" href="#ci-timing-review-1538" title="Link to this heading">¶</a></h2>
+<p><strong>CI Timing</strong> (<code class="file docutils literal notranslate"><span class="pre">ci-timing.yml</span></code>) runs <code class="file docutils literal notranslate"><span class="pre">util/ci_timing.py</span></code> every Monday,
+or on dispatch with a <code class="docutils literal notranslate"><span class="pre">days</span></code> window and an optional <code class="docutils literal notranslate"><span class="pre">concurrency_hours</span></code> runner-pool
+measurement. Through the API it lists every completed run in the window of Unit Tests,
+Python Compatibility, Lint, CodeQL and GitHub Pages, a day per query because a
+filtered listing stops at 1,000 runs (Pages completed 1,154 in the week to
+2026-10-09). It then reads the jobs of an evenly spaced sample – 150 push and 150
+pull-request runs of Unit Tests, 60 runs of each other workflow – and the summary
+says how many runs each sample holds and which span they cover. That is about 625
+calls (estimate) of <code class="docutils literal notranslate"><span class="pre">GITHUB_TOKEN</span></code>’s 1,000 an hour, on a read-only token
+(<code class="docutils literal notranslate"><span class="pre">actions:</span> <span class="pre">read</span></code>, <code class="docutils literal notranslate"><span class="pre">contents:</span> <span class="pre">read</span></code>). A job is measured by its own outcome: one
+cancelled at 95% of its cap or later timed out and counts, even in a run that reads
+<code class="docutils literal notranslate"><span class="pre">cancelled</span></code> for that reason; one cancelled earlier was superseded and does not.
+The report goes to the job summary and to the <code class="docutils literal notranslate"><span class="pre">ci-timing-report</span></code> artifact (90
+days), and the newest earlier report is the next run’s baseline. It is not a
+<code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> on Unit Tests, which would add a job per run to a runner pool
+measured saturated at 20 concurrent jobs.</p>
+<p>Per-test timings come from the <code class="docutils literal notranslate"><span class="pre">test</span></code> and <code class="docutils literal notranslate"><span class="pre">integration</span></code> legs, which run pytest
+with <code class="docutils literal notranslate"><span class="pre">--durations=30</span> <span class="pre">--durations-min=1.0</span></code> and <code class="docutils literal notranslate"><span class="pre">--junitxml</span></code> and upload the file as
+<code class="docutils literal notranslate"><span class="pre">junit-unit-&lt;version&gt;</span></code> or <code class="docutils literal notranslate"><span class="pre">junit-integration-&lt;version&gt;</span></code> (14 days). Each upload
+step is <code class="docutils literal notranslate"><span class="pre">continue-on-error</span></code>, so an artifact-service outage cannot fail a leg that
+<code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code> needs. pytest writes one <code class="docutils literal notranslate"><span class="pre">&lt;testcase&gt;</span></code> per test however
+many subtests it runs – about 0.6 MB per unit leg (estimate) – but the suite’s
+<code class="docutils literal notranslate"><span class="pre">tests=</span></code> count includes subtests, so the review reads each testcase’s <code class="docutils literal notranslate"><span class="pre">time</span></code>. The
+ordering, <code class="docutils literal notranslate"><span class="pre">gate</span></code>, <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> and <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> legs write no file, and nor
+does a leg killed at its cap, since pytest writes it at session end.</p>
+<p>A HARD threshold fails the run with status 1, and GitHub emails a scheduled
+workflow’s failure to whoever last edited its cron line; a WARN is an annotation. A
+run that cannot read the API ends with 2 and one that crashes with 3, each with an
+annotation saying no threshold was evaluated. Each threshold is anchored to a figure
+measured on the issue:</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 8.0%" />
+<col style="width: 64.0%" />
+<col style="width: 28.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ID</p></th>
+<th class="head"><p>Fires when</p></th>
+<th class="head"><p>Measured</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">H1</span></code></p></td>
+<td><p>a job’s p90 reaches 50% of its <code class="docutils literal notranslate"><span class="pre">timeout-minutes</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Python</span> <span class="pre">3.14</span></code>: 12.1 of 45 min</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">H2</span></code></p></td>
+<td><p>a step with a cap of its own reaches 50% of it at p90 (the ordering cells’ 20)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">protocols</span> <span class="pre">(rest)</span></code>: 319 s</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">H3</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">W9</span></code>’s p90 is at or over 30 min and 25% or more above the baseline’s (needs a
+baseline)</p></td>
+<td><p>–</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">H4</span></code></p></td>
+<td><p>a job’s or capped step’s linear fit reaches its cap within 14 days</p></td>
+<td><p>–</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">W1</span></code></p></td>
+<td><p>a job’s median rises 20% on the baseline, with 20 samples each side</p></td>
+<td><p>–</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">W2</span></code></p></td>
+<td><p>pull-request time to mergeable passes 18 min at the median</p></td>
+<td><p>14.4 min</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">W3</span></code></p></td>
+<td><p>the coverage leg’s tests step passes 1.8 times its paired legs’ (median)</p></td>
+<td><p>1.57</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">W4</span></code></p></td>
+<td><p>ms per test on 3.13 rises 15% on the baseline</p></td>
+<td><p>110.8 ms</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">W5</span></code></p></td>
+<td><p>run queue p90 passes 5 min on pull requests or 15 min on pushes</p></td>
+<td><p>3.1 and 9.6 min</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">W6</span></code></p></td>
+<td><p>more than 35% of pull-request runs are cancelled, i.e. superseded</p></td>
+<td><p>29%</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">W7</span></code></p></td>
+<td><p>a module passes 30 s summed or a test 10 s on 3.13, a module enters the top
+10, or a class’s every test costs about what its first does</p></td>
+<td><p>–</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">W8</span></code></p></td>
+<td><p>a different job finishes last before <code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Python</span> <span class="pre">3.14</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">W9</span></code></p></td>
+<td><p>pull-request time to <code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code> reaches 30 min at p90</p></td>
+<td><p>19.6 min; 36.7 in the two days to 2026-10-10</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The cap line sits at 50% because at the fastest growth measured, +1.27 min/day on
+<code class="docutils literal notranslate"><span class="pre">Python</span> <span class="pre">3.14</span></code>, crossing it leaves 12-18 days before the cap: one review and one
+fixing pull request. Time to <code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code> is HARD only as a regression
+because its p90 measures runner-queue load as much as test time: it was 19.6 min when
+the line was set and 36.7 min in the two days to 2026-10-10 with the pool saturated,
+so an absolute HARD line would email about the queue every week. The 25% rise is an
+initial value, to tune once weekly reports exist. <code class="docutils literal notranslate"><span class="pre">W9</span></code> is therefore expected to fire
+while the pool stays saturated, and the first runs with JUnit will show whether
+<code class="docutils literal notranslate"><span class="pre">W7</span></code>’s 10-second test line needs raising. What to do when one fires is on
+<a class="reference internal" href="conventions/process.html"><span class="doc">Running the Repository</span></a>.</p>
+</section>
 <section id="required-status-checks">
 <h2>Required Status Checks<a class="headerlink" href="#required-status-checks" title="Link to this heading">¶</a></h2>
 <p>Ruleset <code class="docutils literal notranslate"><span class="pre">23497679</span></code> on <code class="docutils literal notranslate"><span class="pre">main</span></code> requires six contexts, with
@@ -870,7 +998,7 @@ grepping every workflow file for its name:</p>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code></p></td>
 <td><p>job <code class="docutils literal notranslate"><span class="pre">required-checks</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1559</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1586</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.10</span></code></p></td>
 <td><p>job <code class="docutils literal notranslate"><span class="pre">compatibility</span></code>, matrix leg <code class="docutils literal notranslate"><span class="pre">3.10</span></code></p></td>
@@ -896,19 +1024,19 @@ grepping every workflow file for its name:</p>
 </table>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code> is defined by exactly one job
-(<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1559</span></code>). <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span></code> is defined by two in
+(<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1586</span></code>). <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span></code> is defined by two in
 <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>: the required <code class="docutils literal notranslate"><span class="pre">compatibility</span></code> job (<code class="docutils literal notranslate"><span class="pre">:31</span></code>,
 <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">${{</span> <span class="pre">matrix.python-version</span> <span class="pre">}}</span></code>, expanding to the five required
 legs at <code class="docutils literal notranslate"><span class="pre">:41-45</span></code>) and the non-required <code class="docutils literal notranslate"><span class="pre">compatibility-nightly</span></code> job (<code class="docutils literal notranslate"><span class="pre">:69</span></code>,
 <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.15</span> <span class="pre">(scheduled)</span></code>, see below). A comment at
-<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1474</span></code> mentions the string without defining it.</p>
+<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1501</span></code> mentions the string without defining it.</p>
 <p><code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code> is an aggregate, not a single check run. The ruleset
 requires it and the five <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.10</span></code>-<code class="docutils literal notranslate"><span class="pre">3.14</span></code> legs, nothing else, as
-<code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s own comment (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1473-1483</span></code>) records. It
+<code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s own comment (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1500-1510</span></code>) records. It
 <code class="docutils literal notranslate"><span class="pre">needs:</span></code> the gating jobs of <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> – <code class="docutils literal notranslate"><span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">integration</span></code>,
 <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> and <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code>, plus <code class="docutils literal notranslate"><span class="pre">changes</span></code> and <code class="docutils literal notranslate"><span class="pre">project-tests</span></code>
 for the docs-only path – and checks each result explicitly
-(<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1558-1612</span></code>). Rulesets match check names literally, with no
+(<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1585-1639</span></code>). Rulesets match check names literally, with no
 wildcard, so requiring the matrix cells one by one would mean editing the
 ruleset whenever a matrix changes; the aggregate keeps the required list fixed.
 It accepts the four legs as <code class="docutils literal notranslate"><span class="pre">skipped</span></code> only on a docs-only pull request, where
@@ -917,12 +1045,12 @@ instead. The <code class="docutils literal notranslate"><span class="pre">Compat
 <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>, and a job cannot <code class="docutils literal notranslate"><span class="pre">needs:</span></code> a job in another
 workflow file. This job runs on Unit Tests’ own <code class="docutils literal notranslate"><span class="pre">push</span></code>/<code class="docutils literal notranslate"><span class="pre">pull_request</span></code>
 triggers; the <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code> reusable calls documented above skip it via
-<code class="docutils literal notranslate"><span class="pre">if:</span> <span class="pre">${{</span> <span class="pre">always()</span> <span class="pre">&amp;&amp;</span> <span class="pre">inputs.gate-only</span> <span class="pre">!=</span> <span class="pre">true</span> <span class="pre">}}</span></code> (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1561</span></code>),
+<code class="docutils literal notranslate"><span class="pre">if:</span> <span class="pre">${{</span> <span class="pre">always()</span> <span class="pre">&amp;&amp;</span> <span class="pre">inputs.gate-only</span> <span class="pre">!=</span> <span class="pre">true</span> <span class="pre">}}</span></code> (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1588</span></code>),
 so it is never produced – and never expected – on those paths.</p>
 <p><code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.10</span></code>-<code class="docutils literal notranslate"><span class="pre">3.14</span></code> are five ordinary matrix legs, not an
 aggregate: <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>’s own comment (<code class="docutils literal notranslate"><span class="pre">:37-40</span></code>) and
 <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s matching one for its own, differently-matrixed
-<code class="docutils literal notranslate"><span class="pre">test</span></code>/<code class="docutils literal notranslate"><span class="pre">integration</span></code> jobs (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:59-62</span></code>, <code class="docutils literal notranslate"><span class="pre">unit-tests.yml:281</span></code>) both say why 3.15 is
+<code class="docutils literal notranslate"><span class="pre">test</span></code>/<code class="docutils literal notranslate"><span class="pre">integration</span></code> jobs (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:59-62</span></code>, <code class="docutils literal notranslate"><span class="pre">unit-tests.yml:297</span></code>) both say why 3.15 is
 excluded from every <em>required</em> matrix in this repository – the ruleset’s
 required-checks list stops at 3.14, so a 3.15 leg cannot gate a merge and is
 kept advisory (<code class="docutils literal notranslate"><span class="pre">continue-on-error:</span> <span class="pre">true</span></code> in <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>’s
@@ -1012,6 +1140,7 @@ repeating it here.</p>
 <li><a class="reference internal" href="#the-skip-cascade-888">The Skip Cascade (#888)</a></li>
 <li><a class="reference internal" href="#pull-request-target"><code class="docutils literal notranslate"><span class="pre">pull_request_target</span></code></a></li>
 <li><a class="reference internal" href="#coverage-1063">Coverage (#1063)</a></li>
+<li><a class="reference internal" href="#ci-timing-review-1538">CI Timing Review (#1538)</a></li>
 <li><a class="reference internal" href="#required-status-checks">Required Status Checks</a></li>
 <li><a class="reference internal" href="#deployment-environment">Deployment <code class="docutils literal notranslate"><span class="pre">environment:</span></code></a></li>
 </ul>

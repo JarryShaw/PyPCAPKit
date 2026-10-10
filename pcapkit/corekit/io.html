@@ -261,6 +261,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_option.html">IPv6 Options - Shared Option Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ah.html">AH - Authentication Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
@@ -290,6 +291,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/misc/pcap.html">PCAP File Headers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/misc/byteorder.html">Byte Order - Shared Byte-Order Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/misc/raw.html">Raw Packet Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/misc/null.html">No-Payload Packet</a></li>
 </ul>
@@ -842,6 +844,12 @@ read ahead with <code class="docutils literal notranslate"><span class="pre">pee
 read-ahead is a read and a seek back, and every other attribute is the
 stream’s own. It is not an <a class="reference external" href="https://docs.python.org/3/library/io.html#io.IOBase" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">io.IOBase</span></code></a>, so it has no finaliser that
 could close the caller’s stream behind their back (#610).</p>
+<p>Copying and pickling follow the stream (#1524). <a class="reference external" href="https://docs.python.org/3/library/copy.html#copy.copy" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy.copy()</span></code></a> gives a
+second proxy over the <em>same</em> stream, so the two share one position.
+<a class="reference external" href="https://docs.python.org/3/library/copy.html#copy.deepcopy" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy.deepcopy()</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/pickle.html#module-pickle" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a> copy the stream too, so they work
+exactly when the stream itself can be deep-copied or pickled at that
+protocol: an <a class="reference external" href="https://docs.python.org/3/library/io.html#io.BytesIO" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">io.BytesIO</span></code></a> pickles at protocol 2 and above, and an
+open file not at all.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>stream</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]</span>) – seekable binary stream</p>

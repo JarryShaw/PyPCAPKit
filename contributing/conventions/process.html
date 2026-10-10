@@ -261,6 +261,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_option.html">IPv6 Options - Shared Option Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ah.html">AH - Authentication Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
@@ -290,6 +291,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/misc/pcap.html">PCAP File Headers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/misc/byteorder.html">Byte Order - Shared Byte-Order Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/misc/raw.html">Raw Packet Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/misc/null.html">No-Payload Packet</a></li>
 </ul>
@@ -875,6 +877,28 @@ metadata that changes as work moves, and a link to them goes stale the way a lin
 number does; the changelog’s <code class="docutils literal notranslate"><span class="pre">:issue:</span></code> and <code class="docutils literal notranslate"><span class="pre">:pr:</span></code> roles are the durable trail.
 The repository wiki is disabled – contributor documentation lives on these pages.</p>
 </section>
+<section id="ci-timing-review">
+<h2>CI Timing Review<a class="headerlink" href="#ci-timing-review" title="Link to this heading">¶</a></h2>
+<p>CI time is reviewed on a schedule rather than when it starts to hurt, at the owner’s
+request on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1538">#1538</a>, because the suite’s run time grows faster than its test count:
+measured there, the tests grew by about a third while test time grew by about 90%.
+<code class="file docutils literal notranslate"><span class="pre">.github/workflows/ci-timing.yml</span></code> reports every Monday; what it measures and the
+thresholds are on <a class="reference internal" href="../workflows.html"><span class="doc">GitHub Actions Workflows</span></a>.</p>
+<ul class="simple">
+<li><p><strong>The owner reads the Monday summary.</strong> Warnings are annotations on it. A run fails,
+which is what sends the email, on a HARD threshold or when it could not read the API
+or crashed; its annotation says which.</p></li>
+<li><p><strong>A HARD failure gets an issue</strong> labelled <code class="docutils literal notranslate"><span class="pre">ci</span></code>, with the run’s <code class="docutils literal notranslate"><span class="pre">ci-timing-report</span></code>
+artifact attached and the summary’s slowest-module table pasted in. The cap
+thresholds are set to fire with about two weeks to spare.</p></li>
+<li><p><strong>Re-baseline after a shape change.</strong> When a merged <code class="docutils literal notranslate"><span class="pre">ci</span></code> pull request changes a
+job’s shape or selection – a leg added, split or moved – dispatch the workflow, so
+the next week compares like with like.</p></li>
+<li><p><strong>Monthly, refresh the measured figures</strong> quoted in <code class="file docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s
+comments that the report shows to be stale – the coverage leg’s headroom, the
+ordering cells’ timings and their step cap’s rationale.</p></li>
+</ul>
+</section>
 </section>
 
         </article>
@@ -938,6 +962,7 @@ The repository wiki is disabled – contributor documentation lives on these pag
 <li><a class="reference internal" href="#issue-and-pull-request-labels">Issue and Pull Request Labels</a></li>
 <li><a class="reference internal" href="#the-breaking-label">The <code class="docutils literal notranslate"><span class="pre">breaking</span></code> Label</a></li>
 <li><a class="reference internal" href="#milestones-and-the-project-board">Milestones and the Project Board</a></li>
+<li><a class="reference internal" href="#ci-timing-review">CI Timing Review</a></li>
 </ul>
 </li>
 </ul>

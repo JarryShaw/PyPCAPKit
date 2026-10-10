@@ -254,6 +254,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_option.html">IPv6 Options - Shared Option Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ah.html">AH - Authentication Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
@@ -283,6 +284,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/misc/pcap.html">PCAP File Headers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/misc/byteorder.html">Byte Order - Shared Byte-Order Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/misc/raw.html">Raw Packet Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/misc/null.html">No-Payload Packet</a></li>
 </ul>
@@ -475,14 +477,16 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span><span class="p">,</span> <span class="n">info_final</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'TraceFlowData'</span><span class="p">,</span> <span class="s1">'Deferred'</span><span class="p">,</span> <span class="s1">'DeferredPacket'</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'TraceFlowData'</span><span class="p">,</span> <span class="s1">'Deferred'</span><span class="p">,</span> <span class="s1">'DeferredPacket'</span><span class="p">,</span> <span class="s1">'FrameRecord'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">decimal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Decimal</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Datagram</span> <span class="k">as</span> <span class="n">TCP_Datagram</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">TCP_Reassembly</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Index</span> <span class="k">as</span> <span class="n">TCP_Index</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameInfo</span> <span class="k">as</span> <span class="n">Data_FrameInfo</span>
 
 
 <div class="viewcode-block" id="Deferred">
@@ -624,6 +628,68 @@
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>  <span class="c1"># type: ignore[misc] # pylint: disable=no-member</span></div>
 </div>
 
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">FrameRecord</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""A frame as a third-party engine's flow tracing adapter reports it.</span>
+
+<span class="sd">    The mapping is the engine's own dissection of the frame, exactly as before, so</span>
+<span class="sd">    every trace format that takes a mapping writes it unchanged. Beside it, as</span>
+<span class="sd">    attributes the mapping does not show, it carries what the PCAP trace dumper</span>
+<span class="sd">    reads of a frame -- :meth:`PCAPIO._append_value</span>
+<span class="sd">    &lt;pcapkit.dumpkit.pcap.PCAPIO._append_value&gt;` takes ``packet``,</span>
+<span class="sd">    ``frame_info`` and ``time_epoch`` -- so ``trace_format='pcap'`` writes the</span>
+<span class="sd">    frame's record too (:issue:`1507`).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        mapping: The engine's dissection of the frame.</span>
+<span class="sd">        packet: The frame's captured octets.</span>
+<span class="sd">        frame_info: The frame's PCAP record header.</span>
+<span class="sd">        time_epoch: The frame's exact UNIX timestamp.</span>
+
+<span class="sd">    """</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'packet'</span><span class="p">,</span> <span class="s1">'frame_info'</span><span class="p">,</span> <span class="s1">'time_epoch'</span><span class="p">)</span>
+
+    <span class="c1">#: The frame's captured octets.</span>
+    <span class="n">packet</span><span class="p">:</span> <span class="s1">'bytes'</span>
+    <span class="c1">#: The frame's PCAP record header, with the fraction in the capture's own</span>
+    <span class="c1">#: resolution.</span>
+    <span class="n">frame_info</span><span class="p">:</span> <span class="s1">'Data_FrameInfo'</span>
+    <span class="c1">#: The frame's exact UNIX timestamp, from which</span>
+    <span class="c1">#: :meth:`PCAPIO._make_timestamp &lt;pcapkit.dumpkit.pcap.PCAPIO._make_timestamp&gt;`</span>
+    <span class="c1">#: tells which resolution ``frame_info.ts_usec`` is in. A</span>
+    <span class="c1">#: :class:`~decimal.Decimal`, since only that settles it exactly.</span>
+    <span class="n">time_epoch</span><span class="p">:</span> <span class="s1">'Decimal'</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mapping</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
+                 <span class="n">frame_info</span><span class="p">:</span> <span class="s1">'Data_FrameInfo'</span><span class="p">,</span> <span class="n">time_epoch</span><span class="p">:</span> <span class="s1">'Decimal'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">mapping</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">packet</span> <span class="o">=</span> <span class="n">packet</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frame_info</span> <span class="o">=</span> <span class="n">frame_info</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_epoch</span> <span class="o">=</span> <span class="n">time_epoch</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__reduce__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Any, ...]'</span><span class="p">:</span>
+        <span class="c1"># NOTE: spelled out because a ``dict`` subclass with ``__slots__`` cannot</span>
+        <span class="c1"># be pickled with protocol 0 or 1 otherwise</span>
+        <span class="k">return</span> <span class="n">_frame_record</span><span class="p">,</span> <span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">packet</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_info</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_epoch</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_frame_record</span><span class="p">(</span><span class="n">mapping</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
+                  <span class="n">frame_info</span><span class="p">:</span> <span class="s1">'Data_FrameInfo'</span><span class="p">,</span> <span class="n">time_epoch</span><span class="p">:</span> <span class="s1">'Decimal'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'FrameRecord'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Rebuild a pickled :class:`FrameRecord`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        mapping: The engine's dissection of the frame.</span>
+<span class="sd">        packet: The frame's captured octets.</span>
+<span class="sd">        frame_info: The frame's PCAP record header.</span>
+<span class="sd">        time_epoch: The frame's exact UNIX timestamp.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The frame record.</span>
+
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">FrameRecord</span><span class="p">(</span><span class="n">mapping</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">,</span> <span class="n">frame_info</span><span class="o">=</span><span class="n">frame_info</span><span class="p">,</span> <span class="n">time_epoch</span><span class="o">=</span><span class="n">time_epoch</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="TraceFlowData">

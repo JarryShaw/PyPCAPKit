@@ -254,6 +254,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_option.html">IPv6 Options - Shared Option Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ah.html">AH - Authentication Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
@@ -283,6 +284,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/pcap.html">PCAP File Headers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/byteorder.html">Byte Order - Shared Byte-Order Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/raw.html">Raw Packet Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/null.html">No-Payload Packet</a></li>
 </ul>
@@ -517,15 +519,78 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Scapy'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterator</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">ScapyPacket</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">PcapReader</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
 
 <span class="c1">#: logging.Logger: Module-level logger, a child of the package-wide</span>
 <span class="c1">#: :data:`pcapkit.utilities.logging.logger`.</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_reader_type</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s1">'Type[PcapReader]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A :class:`scapy.utils.PcapReader` that stamps each packet with its resolution.</span>
+
+<span class="sd">    `Scapy`_'s readers convert a record's timestamp to a :class:`~decimal.Decimal`</span>
+<span class="sd">    and drop the resolution it was counted in, and an exact count of microseconds</span>
+<span class="sd">    comes out with the same digits whether the capture counted microseconds or</span>
+<span class="sd">    nanoseconds. The PCAP frame record of a packet needs that resolution, so these</span>
+<span class="sd">    subclasses attach it with :func:`pcapkit.toolkit.scapy.attach_resolution`:</span>
+<span class="sd">    from the global header of a PCAP, and from the interface of each PCAP-NG</span>
+<span class="sd">    packet block, which :meth:`~scapy.utils.RawPcapNgReader._read_block` is the</span>
+<span class="sd">    last place to see.</span>
+
+<span class="sd">    Built when called, so that importing this module does not import `Scapy`_,</span>
+<span class="sd">    and so that it always subclasses the :class:`scapy.utils.PcapReader` of the</span>
+<span class="sd">    moment.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A reader type, which opens a PCAP-NG file as its PCAP-NG alternative.</span>
+
+<span class="sd">    .. _Scapy: https://scapy.net</span>
+
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">PcapNgReader</span><span class="p">,</span> <span class="n">PcapReader</span>  <span class="c1"># isort:skip</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.scapy</span><span class="w"> </span><span class="kn">import</span> <span class="n">attach_resolution</span>  <span class="c1"># isort:skip</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">_Closing</span><span class="p">:</span>
+        <span class="c1"># ``sniff`` closes the reader at the end of the file, and the engine closes</span>
+        <span class="c1"># it again in case ``sniff`` raised first; only the first close is real,</span>
+        <span class="c1"># since closing a gzip reader twice raises</span>
+        <span class="n">_closed</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>  <span class="c1"># type: ignore[misc]</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">_PcapReader</span><span class="p">(</span><span class="n">_Closing</span><span class="p">,</span> <span class="n">PcapReader</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">read_packet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ScapyPacket'</span><span class="p">:</span>
+            <span class="n">packet</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">read_packet</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">attach_resolution</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="mi">1_000_000_000</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nano</span> <span class="k">else</span> <span class="mi">1_000_000</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">packet</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">_PcapNgReader</span><span class="p">(</span><span class="n">_Closing</span><span class="p">,</span> <span class="n">PcapNgReader</span><span class="p">):</span>
+        <span class="c1"># the metaclass makes this ``_PcapReader``'s alternative in turn</span>
+        <span class="n">alternative</span> <span class="o">=</span> <span class="n">_PcapReader</span>
+
+        <span class="n">_resolution</span> <span class="o">=</span> <span class="mi">1_000_000</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_read_block</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+            <span class="n">block</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_read_block</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_resolution</span> <span class="o">=</span> <span class="n">block</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tsresol</span>
+            <span class="k">return</span> <span class="n">block</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">read_packet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ScapyPacket'</span><span class="p">:</span>
+            <span class="n">packet</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">read_packet</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">attach_resolution</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolution</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">packet</span>
+
+    <span class="k">return</span> <span class="n">_PcapReader</span>
 
 
 <div class="viewcode-block" id="Scapy">
@@ -656,7 +721,18 @@
 
         <span class="c1"># extract &amp; analyse file</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'scapy: sniffing </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ifnm</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span><span class="o">.</span><span class="n">sniff</span><span class="p">(</span><span class="n">offline</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_ifnm</span><span class="p">))</span></div>
+        <span class="c1"># NOTE: the reader is opened here rather than by ``sniff(offline=...)`` so</span>
+        <span class="c1"># that every packet carries its capture's timestamp resolution, which</span>
+        <span class="c1"># Scapy's own readers discard (#1507). Labelled with the file name, as</span>
+        <span class="c1"># ``offline=`` labels it, so ``Packet.sniffed_on`` is unchanged. ``sniff``</span>
+        <span class="c1"># closes it at the end of the file, as it closes the reader ``offline=``</span>
+        <span class="c1"># opens; it is closed here as well in case ``sniff`` raised first, which</span>
+        <span class="c1"># the reader takes as a no-op once closed.</span>
+        <span class="n">reader</span> <span class="o">=</span> <span class="n">_reader_type</span><span class="p">()(</span><span class="n">ext</span><span class="o">.</span><span class="n">_ifnm</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span><span class="o">.</span><span class="n">sniff</span><span class="p">(</span><span class="n">opened_socket</span><span class="o">=</span><span class="p">{</span><span class="n">reader</span><span class="p">:</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ifnm</span><span class="p">}))</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">reader</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="Scapy.read_frame">

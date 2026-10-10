@@ -254,6 +254,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_option.html">IPv6 Options - Shared Option Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ah.html">AH - Authentication Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
@@ -283,6 +284,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/pcap.html">PCAP File Headers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/byteorder.html">Byte Order - Shared Byte-Order Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/raw.html">Raw Packet Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/null.html">No-Payload Packet</a></li>
 </ul>
@@ -1897,13 +1899,12 @@
             <span class="c1"># &lt;pcapkit.foundation.traceflow.traceflow.TraceFlowBase.__init__&gt;`</span>
             <span class="c1"># itself substitutes ``'pcap'`` for ``None``.</span>
             <span class="c1">#</span>
-            <span class="c1"># DPKT and Scapy belong on this list too: their adapters build the frame</span>
-            <span class="c1"># with ``packet2dict`` exactly as the other two do, so both crash the</span>
-            <span class="c1"># same way. The guard is written from what the adapters produce, not</span>
-            <span class="c1"># from which engines are seen to crash, because an engine that</span>
-            <span class="c1"># dissects nothing never feeds the tracer and so hides the defect</span>
-            <span class="c1"># rather than avoiding it (#406).</span>
-            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'dpkt'</span><span class="p">,</span> <span class="s1">'scapy'</span><span class="p">,</span> <span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcapfile'</span><span class="p">)</span>
+            <span class="c1"># The guard is written from what the adapters produce, not from which</span>
+            <span class="c1"># engines are seen to crash, because an engine that dissects nothing</span>
+            <span class="c1"># never feeds the tracer and so hides the defect rather than avoiding</span>
+            <span class="c1"># it (#406). DPKT and Scapy are off the list because their adapters</span>
+            <span class="c1"># build a PCAP frame record from the captured octets (#1507).</span>
+            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcapfile'</span><span class="p">)</span>
                     <span class="ow">and</span> <span class="n">trace_format</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'pcap'</span><span class="p">,</span> <span class="s1">'cap'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)):</span>
                 <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'Extractor(engine=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span><span class="si">}</span><span class="s2">)' does not support 'trace_format=</span><span class="si">{</span><span class="n">trace_format</span><span class="si">}</span><span class="s2">'; "</span>
                      <span class="s2">"using 'trace_format=</span><span class="se">\"</span><span class="s2">json</span><span class="se">\"</span><span class="s2">' instead"</span><span class="p">,</span> <span class="n">FormatWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>

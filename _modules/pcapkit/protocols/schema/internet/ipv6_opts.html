@@ -254,6 +254,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_option.html">IPv6 Options - Shared Option Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ah.html">AH - Authentication Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
@@ -283,6 +284,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/misc/pcap.html">PCAP File Headers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/misc/byteorder.html">Byte Order - Shared Byte-Order Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/misc/raw.html">Raw Packet Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/misc/null.html">No-Payload Packet</a></li>
 </ul>
@@ -480,18 +482,18 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv6.router_alert</span><span class="w"> </span><span class="kn">import</span> <span class="n">RouterAlert</span> <span class="k">as</span> <span class="n">Enum_RouterAlert</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv6.seed_id</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeedID</span> <span class="k">as</span> <span class="n">Enum_SeedID</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv6.smf_dpd_mode</span><span class="w"> </span><span class="kn">import</span> <span class="n">SMFDPDMode</span> <span class="k">as</span> <span class="n">Enum_SMFDPDMode</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv6.tagger_id</span><span class="w"> </span><span class="kn">import</span> <span class="n">TaggerID</span> <span class="k">as</span> <span class="n">Enum_TaggerID</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">OptionField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">NO_VALUE</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4AddressField</span><span class="p">,</span> <span class="n">IPv6AddressField</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">ConditionalField</span><span class="p">,</span> <span class="n">ForwardMatchField</span><span class="p">,</span> <span class="n">NoValueField</span><span class="p">,</span>
-                                         <span class="n">PayloadField</span><span class="p">,</span> <span class="n">SchemaField</span><span class="p">,</span> <span class="n">SwitchField</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6AddressField</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">ConditionalField</span><span class="p">,</span> <span class="n">ForwardMatchField</span><span class="p">,</span> <span class="n">PayloadField</span><span class="p">,</span>
+                                         <span class="n">SwitchField</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.numbers</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">EnumField</span><span class="p">,</span> <span class="n">NumberField</span><span class="p">,</span> <span class="n">UInt8Field</span><span class="p">,</span> <span class="n">UInt16Field</span><span class="p">,</span>
                                             <span class="n">UInt32Field</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.strings</span><span class="w"> </span><span class="kn">import</span> <span class="n">BitField</span><span class="p">,</span> <span class="n">BytesField</span><span class="p">,</span> <span class="n">PaddingField</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">ipv6_option</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6_option</span><span class="w"> </span><span class="kn">import</span> <span class="n">pad_opt_data_len</span><span class="p">,</span> <span class="n">rpl_opt_sub_tlv_len</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumSchema</span><span class="p">,</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldValueError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">SPHINX_TYPE_CHECKING</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -623,19 +625,10 @@
 
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">rpl_opt_sub_tlv_len</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return RPL option sub-TLV length.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        pkt: RPL option unpacked schema.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        RPL option sub-TLV length, i.e. ``Opt Data Len`` less the four octets</span>
-<span class="sd">        of the fixed fields. An ``Opt Data Len`` below ``4`` gives ``0``, and</span>
-<span class="sd">        the reader then rejects the option.</span>
-
-<span class="sd">    """</span>
-    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="c1"># NOTE: The option helpers are shared with HOPOPT and live in</span>
+<span class="c1"># :mod:`pcapkit.protocols.schema.internet.ipv6_option`. The functions below bind</span>
+<span class="c1"># what differs between the two headers: the ``IPv6-Opts`` error prefix, and the</span>
+<span class="c1"># option schemas of this module.</span>
 
 
 <div class="viewcode-block" id="mpl_opt_seed_id_len">
@@ -643,23 +636,11 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">mpl_opt_seed_id_len</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return MPL Seed-ID length.</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        pkt: MPL option unpacked schema.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        MPL Seed-ID length.</span>
+<span class="sd">    See :func:`pcapkit.protocols.schema.internet.ipv6_option.mpl_opt_seed_id_len`;</span>
+<span class="sd">    errors are reported as ``IPv6-Opts``.</span>
 
 <span class="sd">    """</span>
-    <span class="n">s_type</span> <span class="o">=</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'type'</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">s_type</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">return</span> <span class="mi">0</span>
-    <span class="k">if</span> <span class="n">s_type</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">return</span> <span class="mi">2</span>
-    <span class="k">if</span> <span class="n">s_type</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="k">return</span> <span class="mi">8</span>
-    <span class="k">if</span> <span class="n">s_type</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-        <span class="k">return</span> <span class="mi">16</span>
-    <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IPv6-Opts: invalid MPL Seed-ID type: </span><span class="si">{</span><span class="n">s_type</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">ipv6_option</span><span class="o">.</span><span class="n">mpl_opt_seed_id_len</span><span class="p">(</span><span class="n">pkt</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">'IPv6-Opts'</span><span class="p">)</span></div>
 
 
 
@@ -668,22 +649,11 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">smf_i_dpd_id_len</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return SMF I-DPD identifier length.</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        pkt: SMF identification-based DPD option unpacked schema.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        SMF I-DPD identifier length.</span>
-
-<span class="sd">    Raises:</span>
-<span class="sd">        FieldValueError: If ``Opt Data Len`` on the wire is too short to hold</span>
-<span class="sd">            the TaggerID it declares, which would otherwise underflow the</span>
-<span class="sd">            identifier length below zero.</span>
+<span class="sd">    See :func:`pcapkit.protocols.schema.internet.ipv6_option.smf_i_dpd_id_len`;</span>
+<span class="sd">    errors are reported as ``IPv6-Opts``.</span>
 
 <span class="sd">    """</span>
-    <span class="n">length</span> <span class="o">=</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'info'</span><span class="p">][</span><span class="s1">'type'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'info'</span><span class="p">][</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span><span class="p">))</span>
-    <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IPv6-Opts: invalid SMF I-DPD option length: </span><span class="si">{</span><span class="n">pkt</span><span class="p">[</span><span class="s2">"len"</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">length</span></div>
+    <span class="k">return</span> <span class="n">ipv6_option</span><span class="o">.</span><span class="n">smf_i_dpd_id_len</span><span class="p">(</span><span class="n">pkt</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">'IPv6-Opts'</span><span class="p">)</span></div>
 
 
 
@@ -692,38 +662,12 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">smf_dpd_data_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Field'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Selector function for :attr:`_SMFDPDOption.data` field.</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        pkt: Packet data.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        * If ``mode`` is ``0``, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`</span>
-<span class="sd">          wrapped :class:`~pcapkit.protocols.schema.internet.ipv6_opts.SMFIdentificationBasedDPDOption`</span>
-<span class="sd">          instance.</span>
-<span class="sd">        * If ``mode`` is ``1``, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`</span>
-<span class="sd">          wrapped :class:`~pcapkit.protocols.schema.internet.ipv6_opts.SMFHashBasedDPDOption`</span>
-<span class="sd">          instance.</span>
-
-<span class="sd">    Note:</span>
-<span class="sd">        The field is sized ``Opt Data Len + 2`` rather than ``Opt Data Len``.</span>
-<span class="sd">        ``Opt Data Len`` counts only what follows the option header</span>
-<span class="sd">        [:rfc:`8200#section-4.2`], while both schemas this may return inherit</span>
-<span class="sd">        :attr:`Option.type` and :attr:`Option.len` and so parse those two octets</span>
-<span class="sd">        themselves. Sizing the field at ``Opt Data Len`` would hand them an area two</span>
-<span class="sd">        octets short of the option they read, which</span>
-<span class="sd">        :class:`~pcapkit.corekit.fields.collections.OptionField` would then</span>
-<span class="sd">        mis-count against the option area.</span>
+<span class="sd">    See :func:`pcapkit.protocols.schema.internet.ipv6_option.smf_dpd_data_selector`,</span>
+<span class="sd">    choosing among the schemas registered with :class:`SMFDPDOption`; errors</span>
+<span class="sd">    are reported as ``IPv6-Opts``.</span>
 
 <span class="sd">    """</span>
-    <span class="c1"># NOTE: With ``Opt Data Len`` 0 the option has no data octet, so the mode</span>
-    <span class="c1"># bit forward-matched above belongs to whatever follows the option.</span>
-    <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'test'</span><span class="p">][</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="s1">'IPv6-Opts: invalid SMF DPD option length: 0'</span><span class="p">)</span>
-
-    <span class="n">mode</span> <span class="o">=</span> <span class="n">Enum_SMFDPDMode</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'test'</span><span class="p">][</span><span class="s1">'mode'</span><span class="p">])</span>
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">SMFDPDOption</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">mode</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IPv6-Opts: invalid SMF DPD mode: </span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'test'</span><span class="p">][</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">ipv6_option</span><span class="o">.</span><span class="n">smf_dpd_data_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">'IPv6-Opts'</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="n">SMFDPDOption</span><span class="p">)</span></div>
 
 
 
@@ -732,38 +676,11 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">smf_i_dpd_tid_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Field'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Selector function for :attr:`SMFIdentificationBasedDPDOption.tid` field.</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        pkt: Packet data.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        * If ``tid_type`` is ``0``, returns a :class:`~pcapkit.corekit.fields.misc.NoValueField`</span>
-<span class="sd">          instance.</span>
-<span class="sd">        * If ``tid_type`` is ``1``, returns a :class:`~pcapkit.corekit.fields.ipaddress.IPv4AddressField`</span>
-<span class="sd">          instance.</span>
-<span class="sd">        * If ``tid_type`` is ``2``, returns a :class:`~pcapkit.corekit.fields.ipaddress.IPv6AddressField`</span>
-<span class="sd">          instance.</span>
-<span class="sd">        * Otherwise, returns a :class:`~pcapkit.corekit.fields.strings.BytesField` instance.</span>
+<span class="sd">    See :func:`pcapkit.protocols.schema.internet.ipv6_option.smf_i_dpd_tid_selector`;</span>
+<span class="sd">    errors are reported as ``IPv6-Opts``.</span>
 
 <span class="sd">    """</span>
-    <span class="n">tid_type</span> <span class="o">=</span> <span class="n">Enum_TaggerID</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'info'</span><span class="p">][</span><span class="s1">'type'</span><span class="p">])</span>
-    <span class="n">tid_len</span> <span class="o">=</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'info'</span><span class="p">][</span><span class="s1">'len'</span><span class="p">]</span>
-
-    <span class="c1"># update type</span>
-    <span class="n">pkt</span><span class="p">[</span><span class="s1">'info'</span><span class="p">][</span><span class="s1">'type'</span><span class="p">]</span> <span class="o">=</span> <span class="n">tid_type</span>
-
-    <span class="k">if</span> <span class="n">tid_type</span> <span class="o">==</span> <span class="n">Enum_TaggerID</span><span class="o">.</span><span class="n">NULL</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">tid_len</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IPv6-Opts: invalid TaggerID length: </span><span class="si">{</span><span class="n">tid_len</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">NoValueField</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">tid_type</span> <span class="o">==</span> <span class="n">Enum_TaggerID</span><span class="o">.</span><span class="n">IPv4</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">tid_len</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IPv6-Opts: invalid TaggerID length: </span><span class="si">{</span><span class="n">tid_len</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">IPv4AddressField</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">tid_type</span> <span class="o">==</span> <span class="n">Enum_TaggerID</span><span class="o">.</span><span class="n">IPv6</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">tid_len</span> <span class="o">!=</span> <span class="mi">15</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IPv6-Opts: invalid TaggerID length: </span><span class="si">{</span><span class="n">tid_len</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">IPv6AddressField</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">tid_len</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">ipv6_option</span><span class="o">.</span><span class="n">smf_i_dpd_tid_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">'IPv6-Opts'</span><span class="p">)</span></div>
 
 
 
@@ -772,69 +689,13 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">quick_start_data_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Field'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Selector function for :attr:`_QuickStartOption.data` field.</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        pkt: Packet data.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        * If ``func`` is ``0``, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`</span>
-<span class="sd">          wrapped :class:`~pcapkit.protocols.schema.internet.ipv6_opts.QuickStartRequestOption`</span>
-<span class="sd">          instance.</span>
-<span class="sd">        * If ``func`` is ``8``, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`</span>
-<span class="sd">          wrapped :class:`~pcapkit.protocols.schema.internet.ipv6_opts.QuickStartReportOption`</span>
-<span class="sd">          instance.</span>
-<span class="sd">        * Otherwise, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`</span>
-<span class="sd">          wrapped :class:`~pcapkit.protocols.schema.internet.ipv6_opts.UnassignedOption`</span>
-<span class="sd">          instance, sized by the option's own ``Opt Data Len``.</span>
+<span class="sd">    See :func:`pcapkit.protocols.schema.internet.ipv6_option.quick_start_data_selector`,</span>
+<span class="sd">    choosing among the schemas registered with :class:`QuickStartOption`, and</span>
+<span class="sd">    :class:`UnassignedOption` for an unassigned QS function.</span>
 
 <span class="sd">    """</span>
-    <span class="n">func</span> <span class="o">=</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'func'</span><span class="p">])</span>
-    <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'func'</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span>
-
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">QuickStartOption</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">func</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="c1"># An unassigned function has no defined layout, so the option is kept</span>
-        <span class="c1"># as raw data, sized by its own ``Opt Data Len``.</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">UnassignedOption</span><span class="p">)</span>
-
-    <span class="c1"># NOTE: The suboption schemas carry the option's own ``type`` and ``len``</span>
-    <span class="c1"># octets, so this is the width of the whole option: the two header octets</span>
-    <span class="c1"># plus the six data octets :rfc:`4782#section-3.2` gives both functions.</span>
-    <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span></div>
-
-
-
-<div class="viewcode-block" id="pad_opt_data_len">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.pad_opt_data_len">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">pad_opt_data_len</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the length of the padding data of a padding option.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        pkt: Padding option unpacked schema.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        Number of padding octets carried after the option header, i.e. the</span>
-<span class="sd">        value of the ``Opt Data Len`` field of a ``PadN`` option, and zero for</span>
-<span class="sd">        a ``Pad1`` option, which carries no such field.</span>
-
-<span class="sd">    Note:</span>
-<span class="sd">        A ``Pad1`` option is a single octet with neither an ``Opt Data Len``</span>
-<span class="sd">        field nor any option data (c.f. :rfc:`8200#section-4.2`), which is why</span>
-<span class="sd">        :attr:`Option.len` is declared as a</span>
-<span class="sd">        :class:`~pcapkit.corekit.fields.misc.ConditionalField` and is skipped</span>
-<span class="sd">        for it. A skipped conditional field is *recorded* in the packet data as</span>
-<span class="sd">        :data:`~pcapkit.corekit.fields.field.NO_VALUE`, rather than being left</span>
-<span class="sd">        out of it, so the test below has to be on the **value** and not on the</span>
-<span class="sd">        presence of the key: ``pkt.get('len', 0)`` on its own hands that</span>
-<span class="sd">        :obj:`~pcapkit.corekit.fields.field.NoValueType` straight to</span>
-<span class="sd">        :class:`~pcapkit.corekit.fields.strings.PaddingField`, where it becomes</span>
-<span class="sd">        an unusable :mod:`struct` template and surfaces much later as an opaque</span>
-<span class="sd">        :exc:`struct.error`, which is how a ``Pad1`` option would fail to parse.</span>
-
-<span class="sd">    """</span>
-    <span class="n">length</span> <span class="o">=</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'len'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>  <span class="c1"># ``NO_VALUE`` (skipped) or :obj:`None` (unset)</span>
-        <span class="k">return</span> <span class="mi">0</span>
-    <span class="k">return</span> <span class="n">length</span></div>
+    <span class="k">return</span> <span class="n">ipv6_option</span><span class="o">.</span><span class="n">quick_start_data_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="n">QuickStartOption</span><span class="p">,</span>
+                                                 <span class="n">unassigned</span><span class="o">=</span><span class="n">UnassignedOption</span><span class="p">)</span></div>
 
 
 
@@ -843,23 +704,11 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">calipso_pad_len</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return CALIPSO option padding length.</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        pkt: CALIPSO option unpacked schema.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        CALIPSO option padding length.</span>
-
-<span class="sd">    Raises:</span>
-<span class="sd">        FieldValueError: If ``Opt Data Len`` on the wire is too short to hold</span>
-<span class="sd">            the fixed header and the compartment bitmap declared by</span>
-<span class="sd">            ``cmpt_len``, which would otherwise underflow the padding length</span>
-<span class="sd">            below zero.</span>
+<span class="sd">    See :func:`pcapkit.protocols.schema.internet.ipv6_option.calipso_pad_len`;</span>
+<span class="sd">    errors are reported as ``IPv6-Opts``.</span>
 
 <span class="sd">    """</span>
-    <span class="n">length</span> <span class="o">=</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">8</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'cmpt_len'</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
-    <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IPv6-Opts: invalid CALIPSO option length: </span><span class="si">{</span><span class="n">pkt</span><span class="p">[</span><span class="s2">"len"</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">length</span></div>
+    <span class="k">return</span> <span class="n">ipv6_option</span><span class="o">.</span><span class="n">calipso_pad_len</span><span class="p">(</span><span class="n">pkt</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">'IPv6-Opts'</span><span class="p">)</span></div>
 
 
 
@@ -868,22 +717,11 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">mpl_opt_pad_len</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return MPL option padding length.</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        pkt: MPL option unpacked schema.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        MPL option padding length.</span>
-
-<span class="sd">    Raises:</span>
-<span class="sd">        FieldValueError: If ``Opt Data Len`` on the wire is too short to hold</span>
-<span class="sd">            the fixed header and the Seed-ID declared by ``flags.type``, which</span>
-<span class="sd">            would otherwise underflow the padding length below zero.</span>
+<span class="sd">    See :func:`pcapkit.protocols.schema.internet.ipv6_option.mpl_opt_pad_len`;</span>
+<span class="sd">    errors are reported as ``IPv6-Opts``.</span>
 
 <span class="sd">    """</span>
-    <span class="n">length</span> <span class="o">=</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">-</span> <span class="p">(</span><span class="mi">0</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'type'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">mpl_opt_seed_id_len</span><span class="p">(</span><span class="n">pkt</span><span class="p">))</span>
-    <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IPv6-Opts: invalid MPL option length: </span><span class="si">{</span><span class="n">pkt</span><span class="p">[</span><span class="s2">"len"</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">length</span></div>
+    <span class="k">return</span> <span class="n">ipv6_option</span><span class="o">.</span><span class="n">mpl_opt_pad_len</span><span class="p">(</span><span class="n">pkt</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">'IPv6-Opts'</span><span class="p">)</span></div>
 
 
 

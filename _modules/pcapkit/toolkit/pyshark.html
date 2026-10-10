@@ -254,6 +254,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_option.html">IPv6 Options - Shared Option Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ah.html">AH - Authentication Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
@@ -283,6 +284,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/pcap.html">PCAP File Headers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/byteorder.html">Byte Order - Shared Byte-Order Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/raw.html">Raw Packet Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/null.html">No-Payload Packet</a></li>
 </ul>
@@ -486,12 +488,13 @@
 <span class="sd">   the `PyShark`_ engine.</span>
 
 <span class="sd">"""</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">decimal</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">MissingKeyError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">MissingKeyError</span><span class="p">,</span> <span class="n">ProtocolError</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
@@ -786,6 +789,107 @@
     <span class="s1">'xra'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">DOCSIS31_XRA31</span><span class="p">,</span>                       <span class="c1"># docsis31_xra31</span>
 <span class="p">}</span>  <span class="c1"># type: dict[str, Enum_LinkType]</span>
 
+<span class="c1">#: PyShark's text for a boolean field -&gt; its value. tshark 4.x spells one ``'True'``/``'False'``</span>
+<span class="c1">#: (measured for ``tcp.flags_syn``, ``tcp.flags_fin`` and ``tcp.flags_reset`` with PyShark 0.6</span>
+<span class="c1">#: on tshark 4.6.9); ``'1'``/``'0'`` is the spelling this module first parsed (#1514).</span>
+<span class="n">_BOOLEAN_FIELD</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'1'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">'0'</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">'True'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">'False'</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>  <span class="c1"># type: dict[str, bool]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_parse_flag</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Parse a boolean PyShark field, such as ``tcp.flags_syn``.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value: The field as PyShark reports it, a ``LayerFieldsContainer``</span>
+<span class="sd">            (a :obj:`str` subclass).</span>
+<span class="sd">        name: The field's name, for the error message.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The flag's value.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ProtocolError: If ``value`` is not a :obj:`str` spelling ``'1'``,</span>
+<span class="sd">            ``'0'``, ``'True'`` or ``'False'``.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">flag</span> <span class="o">=</span> <span class="n">_BOOLEAN_FIELD</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">flag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">flag</span>
+    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid PyShark boolean field </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_parse_epoch</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'float'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Parse PyShark's ``frame.time_epoch``, such as ``'1500000000.000638000'``.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value: The field as PyShark reports it, decimal text.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The timestamp, as the same :obj:`float` the default engine reports.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The default engine computes the epoch as a :class:`~decimal.Decimal`</span>
+<span class="sd">        and hands the tracer ``float()`` of it (:mod:`pcapkit.toolkit.pcap`).</span>
+<span class="sd">        This takes the same route, so both are the double nearest the same</span>
+<span class="sd">        decimal value: identical, not merely close.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ProtocolError: If ``value`` is not decimal text.</span>
+
+<span class="sd">    """</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
+    <span class="k">except</span> <span class="n">decimal</span><span class="o">.</span><span class="n">InvalidOperation</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid PyShark frame.time_epoch: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_absolute</span><span class="p">(</span><span class="n">tcp</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Read the absolute TCP sequence or acknowledgement number.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        tcp: PyShark TCP layer.</span>
+<span class="sd">        name: ``'seq'`` or ``'ack'``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ``tcp.&lt;name&gt;_raw``, the number on the wire, or ``tcp.&lt;name&gt;`` where</span>
+<span class="sd">        tshark does not report the former.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        tshark's ``tcp.seq`` and ``tcp.ack`` are *relative* to the flow's first</span>
+<span class="sd">        number by default (``0`` where the wire says ``832175175``).</span>
+<span class="sd">        ``tcp.seq_raw`` and ``tcp.ack_raw`` exist from Wireshark 3.2: they are</span>
+<span class="sd">        absent from 3.0.0's ``epan/dissectors/packet-tcp.c`` and present in</span>
+<span class="sd">        3.2.0's and 4.2.2's. On an older tshark the fallback is relative unless</span>
+<span class="sd">        its ``tcp.relative_sequence_numbers`` preference is off.</span>
+
+<span class="sd">    """</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">tcp</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">_raw'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">tcp</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_frame_layer</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Find the ``frame`` layer of a PyShark packet.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: PyShark packet.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The layer named ``frame``, or :data:`None` if the record has none.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        PyShark takes the second PDML ``&lt;proto&gt;`` as ``frame_info``. On a packet</span>
+<span class="sd">        with a comment that is ``pkt_comment``, and the frame layer is</span>
+<span class="sd">        ``layers[0]`` (measured on ``test.pcapng`` frames 1 and 6 with tshark</span>
+<span class="sd">        4.6.9), so the layer is looked up by name, as the engine does (#1531).</span>
+
+<span class="sd">    """</span>
+    <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">frame_info</span><span class="p">,</span> <span class="o">*</span><span class="n">packet</span><span class="o">.</span><span class="n">layers</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">layer</span><span class="o">.</span><span class="n">layer_name</span> <span class="o">==</span> <span class="s1">'frame'</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">layer</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
 
 <div class="viewcode-block" id="packet2dict">
 <a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pyshark.packet2dict">[docs]</a>
@@ -796,16 +900,27 @@
 <span class="sd">        packet: PyShark packet.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        A :obj:`dict` mapping of packet data.</span>
+<span class="sd">        A :obj:`dict` mapping of packet data: the ``frame`` layer's fields at</span>
+<span class="sd">        the top level, and each later layer nested in the one before it. A</span>
+<span class="sd">        packet comment, which PyShark reports as ``frame_info`` in place of the</span>
+<span class="sd">        frame layer, is kept under its own ``PKT_COMMENT`` key. A record with</span>
+<span class="sd">        no ``frame`` layer keeps PyShark's ``frame_info`` at the top level.</span>
 
 <span class="sd">    """</span>
     <span class="n">dict_</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, Any]</span>
-    <span class="n">frame</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">frame_info</span>
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">_frame_layer</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">frame_info</span>
     <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">frame</span><span class="o">.</span><span class="n">field_names</span><span class="p">:</span>
         <span class="n">dict_</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">packet</span><span class="o">.</span><span class="n">frame_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">frame</span><span class="p">:</span>
+        <span class="n">note</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">frame_info</span>
+        <span class="n">dict_</span><span class="p">[</span><span class="n">note</span><span class="o">.</span><span class="n">layer_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span> <span class="o">=</span> <span class="p">{</span><span class="n">field</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">note</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">note</span><span class="o">.</span><span class="n">field_names</span><span class="p">}</span>
 
     <span class="n">tempdict</span> <span class="o">=</span> <span class="n">dict_</span>
     <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">packet</span><span class="o">.</span><span class="n">layers</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">layer</span> <span class="ow">is</span> <span class="n">frame</span><span class="p">:</span>
+            <span class="k">continue</span>
         <span class="n">tempdict</span><span class="p">[</span><span class="n">layer</span><span class="o">.</span><span class="n">layer_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">tempdict</span> <span class="o">=</span> <span class="n">tempdict</span><span class="p">[</span><span class="n">layer</span><span class="o">.</span><span class="n">layer_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span>
         <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">layer</span><span class="o">.</span><span class="n">field_names</span><span class="p">:</span>
@@ -817,11 +932,14 @@
 
 <div class="viewcode-block" id="tcp_traceflow">
 <a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pyshark.tcp_traceflow">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">tcp_traceflow</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'TF_TCP_Packet | None'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">tcp_traceflow</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'TF_TCP_Packet | None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Trace packet flow for TCP.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        packet: PyShark packet.</span>
+<span class="sd">        count: Packet index. If not provided, default to ``-1``. The engine</span>
+<span class="sd">            passes its own frame count, not tshark's ``frame.number``, which</span>
+<span class="sd">            also numbers records that are not packets (#1515).</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Data for TCP flow tracing.</span>
@@ -830,6 +948,12 @@
 <span class="sd">          if it contains TCP layer.</span>
 <span class="sd">        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP</span>
 <span class="sd">          flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        MissingKeyError: If the frame's link type cannot be resolved.</span>
+<span class="sd">        ProtocolError: If the packet has no ``frame`` layer, a TCP flag field is</span>
+<span class="sd">            not a boolean tshark spelling, or ``frame.time_epoch`` is not decimal</span>
+<span class="sd">            text.</span>
 
 <span class="sd">    See Also:</span>
 <span class="sd">        :class:`pcapkit.foundation.traceflow.tcp.TCP`</span>
@@ -870,9 +994,16 @@
         <span class="c1"># :exc:`~pcapkit.utilities.exceptions.MissingKeyError` -- this</span>
         <span class="c1"># package's own house exception for a lookup miss -- rather than</span>
         <span class="c1"># letting it escape this public function.</span>
-        <span class="n">encap_type</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">frame_info</span><span class="p">,</span> <span class="s1">'encap_type'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="c1">#</span>
+        <span class="c1"># The frame layer is found by name, not taken as ``frame_info``, which</span>
+        <span class="c1"># is ``pkt_comment`` on a commented packet; the root layer is then the</span>
+        <span class="c1"># first layer that is not the frame layer.</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">_frame_layer</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PyShark packet </span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">number</span><span class="si">}</span><span class="s1"> has no frame layer'</span><span class="p">)</span>
+        <span class="n">encap_type</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="s1">'encap_type'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">encap_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">layer_name</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="p">[</span><span class="n">layer</span> <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">packet</span><span class="o">.</span><span class="n">layers</span> <span class="k">if</span> <span class="n">layer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">frame</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">layer_name</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">protocol</span> <span class="o">=</span> <span class="n">FILTER_NAME_TO_LINKTYPE</span><span class="p">[</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
@@ -883,20 +1014,28 @@
             <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="n">MissingKeyError</span><span class="p">(</span><span class="s1">'frame.encap_type=</span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="n">encap_type</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
 
+        <span class="c1"># A Simple Packet Block carries no timestamp, so tshark reports no</span>
+        <span class="c1"># ``frame.time_epoch`` for it; the PDML ``geninfo`` timestamp PyShark</span>
+        <span class="c1"># keeps as ``sniff_timestamp`` is then ``'0.000000000'``, which is what</span>
+        <span class="c1"># the default engine reports (measured on ``test.pcapng`` frame 4).</span>
+        <span class="n">epoch</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="s1">'time_epoch'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">epoch</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">epoch</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">sniff_timestamp</span>
+
         <span class="n">data</span> <span class="o">=</span> <span class="n">TF_TCP_Packet</span><span class="p">(</span>  <span class="c1"># type: ignore[type-var]</span>
             <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span>                                                   <span class="c1"># data link type</span>
-            <span class="n">index</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">number</span><span class="p">),</span>                                            <span class="c1"># frame number</span>
+            <span class="n">index</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>                                                         <span class="c1"># frame number</span>
             <span class="n">frame</span><span class="o">=</span><span class="n">packet2dict</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span>                                           <span class="c1"># extracted packet</span>
-            <span class="n">syn</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">flags_syn</span><span class="p">)),</span>                                        <span class="c1"># TCP synchronise (SYN) flag</span>
-            <span class="n">fin</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">flags_fin</span><span class="p">)),</span>                                        <span class="c1"># TCP finish (FIN) flag</span>
-            <span class="n">rst</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">flags_reset</span><span class="p">)),</span>                                      <span class="c1"># TCP reset (RST) flag</span>
+            <span class="n">syn</span><span class="o">=</span><span class="n">_parse_flag</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">flags_syn</span><span class="p">,</span> <span class="s1">'tcp.flags_syn'</span><span class="p">),</span>                     <span class="c1"># TCP synchronise (SYN) flag</span>
+            <span class="n">fin</span><span class="o">=</span><span class="n">_parse_flag</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">flags_fin</span><span class="p">,</span> <span class="s1">'tcp.flags_fin'</span><span class="p">),</span>                     <span class="c1"># TCP finish (FIN) flag</span>
+            <span class="n">rst</span><span class="o">=</span><span class="n">_parse_flag</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">flags_reset</span><span class="p">,</span> <span class="s1">'tcp.flags_reset'</span><span class="p">),</span>                 <span class="c1"># TCP reset (RST) flag</span>
             <span class="n">src</span><span class="o">=</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">src</span><span class="p">),</span>                                    <span class="c1"># source IP</span>
             <span class="n">dst</span><span class="o">=</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">dst</span><span class="p">),</span>                                    <span class="c1"># destination IP</span>
             <span class="n">srcport</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">srcport</span><span class="p">),</span>                                            <span class="c1"># TCP source port</span>
             <span class="n">dstport</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">dstport</span><span class="p">),</span>                                            <span class="c1"># TCP destination port</span>
-            <span class="n">timestamp</span><span class="o">=</span><span class="n">packet</span><span class="o">.</span><span class="n">frame_info</span><span class="o">.</span><span class="n">time_epoch</span><span class="p">,</span>                              <span class="c1"># timestamp</span>
-            <span class="n">seq</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">seq</span><span class="p">),</span>                                                    <span class="c1"># TCP sequence number</span>
-            <span class="n">ack</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">ack</span><span class="p">),</span>                                                    <span class="c1"># TCP acknowledgement number</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="n">_parse_epoch</span><span class="p">(</span><span class="n">epoch</span><span class="p">),</span>                                       <span class="c1"># timestamp</span>
+            <span class="n">seq</span><span class="o">=</span><span class="n">_absolute</span><span class="p">(</span><span class="n">tcp</span><span class="p">,</span> <span class="s1">'seq'</span><span class="p">),</span>                                           <span class="c1"># TCP sequence number</span>
+            <span class="n">ack</span><span class="o">=</span><span class="n">_absolute</span><span class="p">(</span><span class="n">tcp</span><span class="p">,</span> <span class="s1">'ack'</span><span class="p">),</span>                                           <span class="c1"># TCP acknowledgement number</span>
             <span class="c1"># NOTE: PyShark reports dissected *fields*, not the octets behind</span>
             <span class="c1"># them, so there is no header or payload to hand over -- which is</span>
             <span class="c1"># the same reason this module carries no ``tcp_reassembly`` at all.</span>

@@ -254,6 +254,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_option.html">IPv6 Options - Shared Option Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ah.html">AH - Authentication Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
@@ -283,6 +284,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/pcap.html">PCAP File Headers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/byteorder.html">Byte Order - Shared Byte-Order Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/raw.html">Raw Packet Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/null.html">No-Payload Packet</a></li>
 </ul>
@@ -702,6 +704,16 @@
 <span class="sd">            3-octet payload would raise ``SchemaWarning: packet length &lt; 0: -3``</span>
 <span class="sd">            from a dumper that only has to copy it.</span>
 
+<span class="sd">            ``incl_len`` is written as ``len(value.packet)``, the octets that</span>
+<span class="sd">            follow it, not as ``value.frame_info.incl_len``. The two are equal</span>
+<span class="sd">            for every record a file holds whole. A record whose captured length</span>
+<span class="sd">            runs past the end of its file, or a PCAP-NG block whose captured</span>
+<span class="sd">            length runs past the block (:issue:`1405`), is *kept as captured*</span>
+<span class="sd">            by its reader: the declared length stays in ``frame_info``, so the</span>
+<span class="sd">            source rebuilds byte-exactly, and ``packet`` is the octets present.</span>
+<span class="sd">            Copying that declared length would claim octets the trace does not</span>
+<span class="sd">            hold, and a reader would run off the end of the file (:issue:`1541`).</span>
+
 <span class="sd">        """</span>
         <span class="c1"># NOTE: The payload is read before the metadata so that a caller passing a</span>
         <span class="c1"># mapping rather than a dissected frame -- which the flow-tracing adapters</span>
@@ -714,7 +726,7 @@
 
         <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rechdr</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">ts_sec</span> <span class="o">&amp;</span> <span class="n">_UINT32_MASK</span><span class="p">,</span>
                                      <span class="n">ts_frac</span> <span class="o">&amp;</span> <span class="n">_UINT32_MASK</span><span class="p">,</span>
-                                     <span class="n">frame_info</span><span class="o">.</span><span class="n">incl_len</span> <span class="o">&amp;</span> <span class="n">_UINT32_MASK</span><span class="p">,</span>
+                                     <span class="nb">len</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">_UINT32_MASK</span><span class="p">,</span>
                                      <span class="n">frame_info</span><span class="o">.</span><span class="n">orig_len</span> <span class="o">&amp;</span> <span class="n">_UINT32_MASK</span><span class="p">)</span> <span class="o">+</span> <span class="n">packet</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span> <span class="o">+=</span> <span class="mi">1</span>
 

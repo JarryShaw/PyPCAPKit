@@ -261,6 +261,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../internet/ipv6_option.html">IPv6 Options - Shared Option Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../internet/ah.html">AH - Authentication Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../internet/esp.html">ESP - Encapsulating Security Payload</a></li>
@@ -290,6 +291,7 @@
 <li class="toctree-l3 current has-children"><a class="reference internal" href="index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" checked="" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l4 current current-page"><a class="current reference internal" href="#">PCAP File Headers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapng.html">PCAP-NG File Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="byteorder.html">Byte Order - Shared Byte-Order Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="raw.html">Raw Packet Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="null.html">No-Payload Packet</a></li>
 </ul>
@@ -1017,6 +1019,12 @@ cannot be recovered from the stream once we get here.</p></li>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.misc.pcap.frame.Frame" title="pcapkit.protocols.data.misc.pcap.frame.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code></a></span></p>
+</dd>
+<dt class="field-even">Warns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>pcapkit.utilities.warnings.ProtocolWarning</strong> – If the timestamp is out
+of range, or if the record’s <code class="docutils literal notranslate"><span class="pre">incl_len</span></code> runs past the end of
+the data being parsed, in which case the record is kept as
+captured.</p>
 </dd>
 </dl>
 </dd></dl>

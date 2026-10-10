@@ -254,6 +254,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_option.html">IPv6 Options - Shared Option Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ah.html">AH - Authentication Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
@@ -283,6 +284,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/pcap.html">PCAP File Headers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/byteorder.html">Byte Order - Shared Byte-Order Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/raw.html">Raw Packet Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/null.html">No-Payload Packet</a></li>
 </ul>
@@ -483,16 +485,20 @@
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">decimal</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">IP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TCP_Packet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameRecord</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameInfo</span> <span class="k">as</span> <span class="n">Data_FrameInfo</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">decimal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Decimal</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
 
@@ -504,8 +510,8 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">'ipv6_hdr_len'</span><span class="p">,</span> <span class="s1">'attach_timestamp'</span><span class="p">,</span> <span class="s1">'packet2timestamp'</span><span class="p">,</span> <span class="s1">'attach_buffer'</span><span class="p">,</span> <span class="s1">'packet2bytes'</span><span class="p">,</span>
-    <span class="s1">'packet2chain'</span><span class="p">,</span> <span class="s1">'packet2dict'</span><span class="p">,</span>
+    <span class="s1">'RecordTimestamp'</span><span class="p">,</span> <span class="s1">'Timestamp'</span><span class="p">,</span> <span class="s1">'DecimalTimestamp'</span><span class="p">,</span> <span class="s1">'ipv6_hdr_len'</span><span class="p">,</span> <span class="s1">'attach_timestamp'</span><span class="p">,</span> <span class="s1">'packet2timestamp'</span><span class="p">,</span> <span class="s1">'attach_buffer'</span><span class="p">,</span> <span class="s1">'packet2bytes'</span><span class="p">,</span>
+    <span class="s1">'packet2frame'</span><span class="p">,</span> <span class="s1">'packet2chain'</span><span class="p">,</span> <span class="s1">'packet2dict'</span><span class="p">,</span>
     <span class="s1">'ipv4_reassembly'</span><span class="p">,</span> <span class="s1">'ipv6_reassembly'</span><span class="p">,</span> <span class="s1">'tcp_reassembly'</span><span class="p">,</span> <span class="s1">'tcp_traceflow'</span>
 <span class="p">]</span>
 
@@ -537,6 +543,87 @@
 <span class="c1">#:</span>
 <span class="c1">#: .. _DPKT: https://dpkt.readthedocs.io</span>
 <span class="n">BUFFER_ATTR</span> <span class="o">=</span> <span class="s1">'__pcapkit_buffer__'</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">RecordTimestamp</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A record's capture timestamp, with what a PCAP frame record needs of it.</span>
+
+<span class="sd">    The readers :class:`~pcapkit.foundation.engines.dpkt.DPKT` uses yield</span>
+<span class="sd">    ``(timestamp, octets)`` and nothing else, so a record's exact timestamp, its</span>
+<span class="sd">    resolution and its original length would be lost between the reader and</span>
+<span class="sd">    :func:`packet2frame`. The engine's readers yield a :class:`Timestamp` or a</span>
+<span class="sd">    :class:`DecimalTimestamp` instead, which *is* the value `DPKT`_ yields --</span>
+<span class="sd">    so reassembly and flow labels see exactly what they did before -- and also</span>
+<span class="sd">    carries those three.</span>
+
+<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
+
+<span class="sd">    """</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Exact timestamp, in seconds since the UNIX epoch.</span>
+        <span class="n">exact</span><span class="p">:</span> <span class="s1">'Decimal'</span>
+        <span class="c1">#: Timestamp resolution of the record, in units per second.</span>
+        <span class="n">resolution</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="c1">#: Original length of the packet, or :data:`None` if unknown.</span>
+        <span class="n">orig_len</span><span class="p">:</span> <span class="s1">'Optional[int]'</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Timestamp</span><span class="p">(</span><span class="n">RecordTimestamp</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""A :obj:`float` capture timestamp; see :class:`RecordTimestamp`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value: The timestamp, as `DPKT`_ yields it.</span>
+<span class="sd">        exact: Exact timestamp; ``value`` itself if not given.</span>
+<span class="sd">        resolution: Timestamp resolution of the record, in units per second.</span>
+<span class="sd">        orig_len: Original length of the packet, or :data:`None` if unknown.</span>
+
+<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
+
+<span class="sd">    """</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'exact'</span><span class="p">,</span> <span class="s1">'resolution'</span><span class="p">,</span> <span class="s1">'orig_len'</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">exact</span><span class="p">:</span> <span class="s1">'Optional[Decimal]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">resolution</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">1_000_000</span><span class="p">,</span> <span class="n">orig_len</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Timestamp'</span><span class="p">:</span>
+        <span class="bp">self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exact</span> <span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span> <span class="k">if</span> <span class="n">exact</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">exact</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="n">resolution</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orig_len</span> <span class="o">=</span> <span class="n">orig_len</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__reduce__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Any, ...]'</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">exact</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">orig_len</span><span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">DecimalTimestamp</span><span class="p">(</span><span class="n">RecordTimestamp</span><span class="p">,</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""A :class:`~decimal.Decimal` capture timestamp; see :class:`RecordTimestamp`.</span>
+
+<span class="sd">    `DPKT`_ yields a :class:`~decimal.Decimal` for a nanosecond PCAP.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value: The timestamp, as `DPKT`_ yields it, which is exact.</span>
+<span class="sd">        resolution: Timestamp resolution of the record, in units per second.</span>
+<span class="sd">        orig_len: Original length of the packet, or :data:`None` if unknown.</span>
+
+<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
+
+<span class="sd">    """</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'exact'</span><span class="p">,</span> <span class="s1">'resolution'</span><span class="p">,</span> <span class="s1">'orig_len'</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span> <span class="o">=</span> <span class="s1">'0'</span><span class="p">,</span> <span class="n">resolution</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">1_000_000_000</span><span class="p">,</span>
+                <span class="n">orig_len</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'DecimalTimestamp'</span><span class="p">:</span>
+        <span class="bp">self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exact</span> <span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="n">resolution</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orig_len</span> <span class="o">=</span> <span class="n">orig_len</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__reduce__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Any, ...]'</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">orig_len</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">attach_timestamp</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
@@ -613,6 +700,66 @@
     <span class="k">if</span> <span class="n">buffer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">buffer</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">packet2frame</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float | Decimal'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                 <span class="n">data_link</span><span class="p">:</span> <span class="s1">'Enum_LinkType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'FrameRecord'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Report a DPKT packet to the flow tracer, with its PCAP frame record.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: DPKT packet.</span>
+<span class="sd">        timestamp: Capture timestamp of the packet. The one attached by</span>
+<span class="sd">            :func:`attach_timestamp`, if any, is preferred, since it is the value</span>
+<span class="sd">            `DPKT`_'s reader yielded.</span>
+<span class="sd">        data_link: Data link type.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The :func:`packet2dict` mapping of the packet, which every trace format</span>
+<span class="sd">        but PCAP writes as it always has, carrying the captured octets, from</span>
+<span class="sd">        :func:`packet2bytes`, the PCAP record header the PCAP trace dumper</span>
+<span class="sd">        writes, and the exact timestamp it reads the header's resolution from.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The fraction in ``frame_info.ts_usec`` is in the capture's own resolution,</span>
+<span class="sd">        as the default engine's is, and both it and ``orig_len`` come from the</span>
+<span class="sd">        reader: :class:`~pcapkit.foundation.engines.dpkt.DPKT` reads PCAP and</span>
+<span class="sd">        PCAP-NG alike into a :class:`RecordTimestamp`. A timestamp that is not one</span>
+<span class="sd">        -- a packet built by hand, or read by a ``dpkt`` whose reader the engine</span>
+<span class="sd">        could not extend -- is read as `DPKT`_ yields it: a</span>
+<span class="sd">        :class:`~decimal.Decimal` counts nanoseconds and a :obj:`float`</span>
+<span class="sd">        microseconds, and the octets are taken to be whole.</span>
+
+<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
+
+<span class="sd">    """</span>
+    <span class="n">stamp</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">TIMESTAMP_ATTR</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span>
+    <span class="n">octets</span> <span class="o">=</span> <span class="n">packet2bytes</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stamp</span><span class="p">,</span> <span class="n">RecordTimestamp</span><span class="p">):</span>
+        <span class="n">epoch</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">orig_len</span> <span class="o">=</span> <span class="n">stamp</span><span class="o">.</span><span class="n">exact</span><span class="p">,</span> <span class="n">stamp</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span> <span class="n">stamp</span><span class="o">.</span><span class="n">orig_len</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stamp</span><span class="p">,</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">):</span>
+        <span class="n">epoch</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">orig_len</span> <span class="o">=</span> <span class="n">stamp</span><span class="p">,</span> <span class="mi">1_000_000_000</span><span class="p">,</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">epoch</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">orig_len</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">stamp</span><span class="p">),</span> <span class="mi">6</span><span class="p">),</span> <span class="mi">1_000_000</span><span class="p">,</span> <span class="kc">None</span>
+    <span class="n">ts_sec</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span>
+    <span class="n">ts_usec</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">epoch</span> <span class="o">-</span> <span class="n">ts_sec</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1_000_000_000</span> <span class="k">if</span> <span class="n">resolution</span> <span class="o">&gt;</span> <span class="mi">1_000_000</span> <span class="k">else</span> <span class="mi">1_000_000</span><span class="p">))</span>
+
+    <span class="c1"># the mapping is exactly the one reported before #1507, plain value types</span>
+    <span class="c1"># included, so that the dict-capable trace formats write the same bytes</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">):</span>
+        <span class="n">timestamp</span> <span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">FrameRecord</span><span class="p">(</span>
+        <span class="n">packet2dict</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">data_link</span><span class="o">=</span><span class="n">data_link</span><span class="p">),</span>
+        <span class="n">packet</span><span class="o">=</span><span class="n">octets</span><span class="p">,</span>
+        <span class="n">frame_info</span><span class="o">=</span><span class="n">Data_FrameInfo</span><span class="p">(</span>
+            <span class="n">ts_sec</span><span class="o">=</span><span class="n">ts_sec</span><span class="p">,</span>
+            <span class="n">ts_usec</span><span class="o">=</span><span class="n">ts_usec</span><span class="p">,</span>
+            <span class="n">incl_len</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">octets</span><span class="p">),</span>
+            <span class="n">orig_len</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">octets</span><span class="p">)</span> <span class="k">if</span> <span class="n">orig_len</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">orig_len</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">time_epoch</span><span class="o">=</span><span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">epoch</span><span class="p">),</span>
+    <span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_ipv6_ext_hdrs</span><span class="p">(</span><span class="n">ipv6</span><span class="p">:</span> <span class="s1">'IP6'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[Any]'</span><span class="p">:</span>
@@ -1087,7 +1234,7 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">TF_TCP_Packet</span><span class="p">(</span>  <span class="c1"># type: ignore[type-var]</span>
             <span class="n">protocol</span><span class="o">=</span><span class="n">data_link</span><span class="p">,</span>                                         <span class="c1"># data link type from global header</span>
             <span class="n">index</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>                                                <span class="c1"># frame number</span>
-            <span class="n">frame</span><span class="o">=</span><span class="n">packet2dict</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">data_link</span><span class="o">=</span><span class="n">data_link</span><span class="p">),</span>  <span class="c1"># extracted packet</span>
+            <span class="n">frame</span><span class="o">=</span><span class="n">packet2frame</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">data_link</span><span class="o">=</span><span class="n">data_link</span><span class="p">),</span>  <span class="c1"># extracted packet</span>
             <span class="n">syn</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">flags</span><span class="p">[</span><span class="mi">6</span><span class="p">])),</span>                                    <span class="c1"># TCP synchronise (SYN) flag</span>
             <span class="n">fin</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">flags</span><span class="p">[</span><span class="mi">7</span><span class="p">])),</span>                                    <span class="c1"># TCP finish (FIN) flag</span>
             <span class="n">rst</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">flags</span><span class="p">[</span><span class="mi">5</span><span class="p">])),</span>                                    <span class="c1"># TCP reset (RST) flag</span>

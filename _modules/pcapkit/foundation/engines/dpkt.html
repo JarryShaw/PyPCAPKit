@@ -254,6 +254,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_option.html">IPv6 Options - Shared Option Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ah.html">AH - Authentication Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
@@ -283,6 +284,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/pcap.html">PCAP File Headers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/byteorder.html">Byte Order - Shared Byte-Order Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/raw.html">Raw Packet Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/null.html">No-Payload Packet</a></li>
 </ul>
@@ -609,7 +611,11 @@
 <span class="sd">            little: Whether the enclosing section is little-endian.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Timestamp in seconds since the UNIX epoch, and the packet data.</span>
+<span class="sd">            Timestamp in seconds since the UNIX epoch, and the packet data. The</span>
+<span class="sd">            timestamp is a :class:`~pcapkit.toolkit.dpkt.Timestamp`: the</span>
+<span class="sd">            :obj:`float` this reader always yielded, which also carries the exact</span>
+<span class="sd">            value, the interface's resolution and the packet's original length,</span>
+<span class="sd">            for the PCAP frame record of the packet (:issue:`1507`).</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            FormatError: If the section describes no interface of the ID the</span>
@@ -617,6 +623,8 @@
 
 <span class="sd">        """</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">dpkt</span>  <span class="c1"># isort:skip</span>
+
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.dpkt</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timestamp</span>  <span class="c1"># isort:skip</span>
 
         <span class="k">if</span> <span class="n">block_type</span> <span class="o">==</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Enhanced_Packet_Block</span><span class="p">:</span>
             <span class="n">tag</span> <span class="o">=</span> <span class="s1">'EPB'</span>
@@ -643,8 +651,82 @@
             <span class="n">timestamp</span> <span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">ticks</span><span class="p">)</span> <span class="o">/</span> <span class="n">resolution</span> <span class="o">+</span> <span class="n">offset</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_linktype</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">linktype</span>
-        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="n">pkt</span><span class="o">.</span><span class="n">pkt_data</span></div>
+        <span class="k">return</span> <span class="p">(</span><span class="n">Timestamp</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">pkt</span><span class="o">.</span><span class="n">pkt_len</span><span class="p">),</span>  <span class="c1"># pylint: disable=no-member</span>
+                <span class="n">pkt</span><span class="o">.</span><span class="n">pkt_data</span><span class="p">)</span></div>
 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_pcap_reader</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s1">'Type[PCAPReader]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A :class:`dpkt.pcap.Reader` that keeps each record's original length.</span>
+
+<span class="sd">    :class:`dpkt.pcap.Reader` parses every record header and then yields only</span>
+<span class="sd">    ``(timestamp, octets)``, so the record's original length and the file's</span>
+<span class="sd">    resolution are lost by the time a PCAP frame record of the packet is built</span>
+<span class="sd">    (:issue:`1507`). This subclass yields the same timestamp, as a</span>
+<span class="sd">    :class:`~pcapkit.toolkit.dpkt.Timestamp` or, for a nanosecond file, a</span>
+<span class="sd">    :class:`~pcapkit.toolkit.dpkt.DecimalTimestamp`, which carries the two.</span>
+
+<span class="sd">    Built when called, so that importing this module does not import `DPKT`_,</span>
+<span class="sd">    and so that it always subclasses the :class:`dpkt.pcap.Reader` of the moment.</span>
+
+<span class="sd">    Warns:</span>
+<span class="sd">        DPKTWarning: If this `DPKT`_'s reader lacks the attributes the loop reads</span>
+<span class="sd">            -- they are private, and ``dpkt`` is not pinned. The reader then runs</span>
+<span class="sd">            unchanged, and a traced PCAP record's original length is its captured</span>
+<span class="sd">            length.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The reader type.</span>
+
+<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
+
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">dpkt</span>  <span class="c1"># isort:skip</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.dpkt</span><span class="w"> </span><span class="kn">import</span> <span class="n">DecimalTimestamp</span><span class="p">,</span> <span class="n">Timestamp</span>  <span class="c1"># isort:skip</span>
+
+    <span class="c1">#: Attributes of :class:`dpkt.pcap.Reader` the loop below reads, as of dpkt 1.9.8.</span>
+    <span class="n">private</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'_Reader__f'</span><span class="p">,</span> <span class="s1">'_Reader__ph'</span><span class="p">,</span> <span class="s1">'_divisor'</span><span class="p">)</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">_Reader</span><span class="p">(</span><span class="n">dpkt</span><span class="o">.</span><span class="n">pcap</span><span class="o">.</span><span class="n">Reader</span><span class="p">):</span>  <span class="c1"># type: ignore[name-defined,misc]</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileobj</span><span class="p">:</span> <span class="s1">'IO[bytes]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">fileobj</span><span class="p">)</span>
+            <span class="n">missing</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">private</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)]</span>
+            <span class="c1">#: Whether to read with :meth:`dpkt.pcap.Reader.__iter__` unchanged.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_upstream</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
+                <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"dpkt </span><span class="si">{</span><span class="nb">getattr</span><span class="p">(</span><span class="n">dpkt</span><span class="p">,</span><span class="w"> </span><span class="s1">'__version__'</span><span class="p">,</span><span class="w"> </span><span class="s1">'(unknown version)'</span><span class="p">)</span><span class="si">}</span><span class="s2">: "</span>
+                     <span class="sa">f</span><span class="s2">"'dpkt.pcap.Reader' has no </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">missing</span><span class="p">)</span><span class="si">}</span><span class="s2">; "</span>
+                     <span class="s2">"reading PCAP records without their original length, so a traced "</span>
+                     <span class="s1">'PCAP record gives its captured length instead'</span><span class="p">,</span> <span class="n">DPKTWarning</span><span class="p">,</span>
+                     <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+
+        <span class="c1"># NOTE: the loop is :meth:`dpkt.pcap.Reader.__iter__`'s, over the stream</span>
+        <span class="c1"># and the record header type that method reads them through. A generator,</span>
+        <span class="c1"># so ``dpkt.pcap.Reader.__init__`` calling it runs none of it before</span>
+        <span class="c1"># :attr:`_upstream` is set.</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Iterator[tuple[float, bytes]]'</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_upstream</span><span class="p">:</span>
+                <span class="k">yield from</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__iter__</span><span class="p">()</span>
+                <span class="k">return</span>
+
+            <span class="n">file</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Reader__f</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Reader__ph</span>  <span class="c1"># pylint: disable=no-member</span>
+            <span class="n">nanosecond</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_divisor</span><span class="p">,</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">)</span>
+            <span class="n">resolution</span> <span class="o">=</span> <span class="mi">1_000_000_000</span> <span class="k">if</span> <span class="n">nanosecond</span> <span class="k">else</span> <span class="mi">1_000_000</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">buf</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">__hdr_len__</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">buf</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="n">hdr</span> <span class="o">=</span> <span class="n">header</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+                <span class="n">buf</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">hdr</span><span class="o">.</span><span class="n">caplen</span><span class="p">)</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">hdr</span><span class="o">.</span><span class="n">tv_sec</span> <span class="o">+</span> <span class="p">(</span><span class="n">hdr</span><span class="o">.</span><span class="n">tv_usec</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_divisor</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">nanosecond</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="n">DecimalTimestamp</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">hdr</span><span class="o">.</span><span class="n">len</span><span class="p">),</span> <span class="n">buf</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">exact</span> <span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">hdr</span><span class="o">.</span><span class="n">tv_sec</span><span class="p">)</span> <span class="o">+</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">hdr</span><span class="o">.</span><span class="n">tv_usec</span><span class="p">)</span> <span class="o">/</span> <span class="n">resolution</span>
+                    <span class="k">yield</span> <span class="n">Timestamp</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">exact</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">hdr</span><span class="o">.</span><span class="n">len</span><span class="p">),</span> <span class="n">buf</span>
+
+    <span class="k">return</span> <span class="n">_Reader</span>
 
 
 <div class="viewcode-block" id="DPKT">
@@ -756,7 +838,7 @@
 
         <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">magic_number</span> <span class="ow">in</span> <span class="n">PCAP</span><span class="o">.</span><span class="n">MAGIC_NUMBER</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'dpkt: reading </span><span class="si">%s</span><span class="s1"> as PCAP'</span><span class="p">,</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ifnm</span><span class="p">)</span>
-            <span class="n">reader</span> <span class="o">=</span> <span class="n">dpkt</span><span class="o">.</span><span class="n">pcap</span><span class="o">.</span><span class="n">Reader</span><span class="p">(</span><span class="n">ext</span><span class="o">.</span><span class="n">_ifile</span><span class="p">)</span>
+            <span class="n">reader</span> <span class="o">=</span> <span class="n">_pcap_reader</span><span class="p">()(</span><span class="n">ext</span><span class="o">.</span><span class="n">_ifile</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">ext</span><span class="o">.</span><span class="n">magic_number</span> <span class="ow">in</span> <span class="n">PCAPNG</span><span class="o">.</span><span class="n">MAGIC_NUMBER</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'dpkt: reading </span><span class="si">%s</span><span class="s1"> as PCAP-NG'</span><span class="p">,</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ifnm</span><span class="p">)</span>
             <span class="n">reader</span> <span class="o">=</span> <span class="n">PCAPNGReader</span><span class="p">(</span><span class="n">ext</span><span class="o">.</span><span class="n">_ifile</span><span class="p">)</span>

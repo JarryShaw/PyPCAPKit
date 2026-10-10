@@ -261,6 +261,7 @@
 <li class="toctree-l4 current current-page"><a class="current reference internal" href="#">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipv6_option.html">IPv6 Options - Shared Option Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ipsec.html">IPsec - Internet Protocol Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ah.html">AH - Authentication Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="esp.html">ESP - Encapsulating Security Payload</a></li>
@@ -290,6 +291,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../misc/pcap.html">PCAP File Headers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../misc/pcapng.html">PCAP-NG File Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../misc/byteorder.html">Byte Order - Shared Byte-Order Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../misc/raw.html">Raw Packet Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../misc/null.html">No-Payload Packet</a></li>
 </ul>
@@ -2670,76 +2672,35 @@ conforms to this specification.</p>
 </section>
 <section id="auxiliary-functions">
 <h3>Auxiliary Functions<a class="headerlink" href="#auxiliary-functions" title="Link to this heading">¶</a></h3>
+<p>The option helpers are shared with
+<a class="reference internal" href="hopopt.html#module-pcapkit.protocols.schema.internet.hopopt" title="pcapkit.protocols.schema.internet.hopopt"><code class="xref py py-mod docutils literal notranslate"><span class="pre">hopopt</span></code></a> and documented in
+<a class="reference internal" href="ipv6_option.html#module-pcapkit.protocols.schema.internet.ipv6_option" title="pcapkit.protocols.schema.internet.ipv6_option"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.internet.ipv6_option</span></code></a>. The functions below bind
+them to this module’s error prefix and option schemas;
+<a class="reference internal" href="ipv6_option.html#pcapkit.protocols.schema.internet.ipv6_option.rpl_opt_sub_tlv_len" title="pcapkit.protocols.schema.internet.ipv6_option.rpl_opt_sub_tlv_len"><code class="xref py py-func docutils literal notranslate"><span class="pre">rpl_opt_sub_tlv_len()</span></code></a> and
+<a class="reference internal" href="ipv6_option.html#pcapkit.protocols.schema.internet.ipv6_option.pad_opt_data_len" title="pcapkit.protocols.schema.internet.ipv6_option.pad_opt_data_len"><code class="xref py py-func docutils literal notranslate"><span class="pre">pad_opt_data_len()</span></code></a> are
+used unchanged.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6_opts.mpl_opt_seed_id_len">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.ipv6_opts.</span></span><span class="sig-name descname"><span class="pre">mpl_opt_seed_id_len</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pkt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/ipv6_opts.html#mpl_opt_seed_id_len"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_opts.mpl_opt_seed_id_len" title="Link to this definition">¶</a></dt>
 <dd><p>Return MPL Seed-ID length.</p>
+<p>See <a class="reference internal" href="ipv6_option.html#pcapkit.protocols.schema.internet.ipv6_option.mpl_opt_seed_id_len" title="pcapkit.protocols.schema.internet.ipv6_option.mpl_opt_seed_id_len"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.internet.ipv6_option.mpl_opt_seed_id_len()</span></code></a>;
+errors are reported as <code class="docutils literal notranslate"><span class="pre">IPv6-Opts</span></code>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>pkt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – MPL option unpacked schema.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>MPL Seed-ID length.</p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6_opts.pad_opt_data_len">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.ipv6_opts.</span></span><span class="sig-name descname"><span class="pre">pad_opt_data_len</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pkt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/ipv6_opts.html#pad_opt_data_len"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_opts.pad_opt_data_len" title="Link to this definition">¶</a></dt>
-<dd><p>Return the length of the padding data of a padding option.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>pkt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Padding option unpacked schema.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Number of padding octets carried after the option header, i.e. the
-value of the <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> field of a <code class="docutils literal notranslate"><span class="pre">PadN</span></code> option, and zero for
-a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option, which carries no such field.</p>
-</dd>
-</dl>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>A <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option is a single octet with neither an <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code>
-field nor any option data (c.f. <span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.2"><strong>RFC 8200 Section 4.2</strong></a>), which is why
-<a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.Option.len" title="pcapkit.protocols.schema.internet.ipv6_opts.Option.len"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Option.len</span></code></a> is declared as a
-<a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.ConditionalField" title="pcapkit.corekit.fields.misc.ConditionalField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConditionalField</span></code></a> and is skipped
-for it. A skipped conditional field is <em>recorded</em> in the packet data as
-<a class="reference internal" href="../../corekit/fields/field.html#pcapkit.corekit.fields.field.NO_VALUE" title="pcapkit.corekit.fields.field.NO_VALUE"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_VALUE</span></code></a>, rather than being left
-out of it, so the test below has to be on the <strong>value</strong> and not on the
-presence of the key: <code class="docutils literal notranslate"><span class="pre">pkt.get('len',</span> <span class="pre">0)</span></code> on its own hands that
-<a class="reference internal" href="../../corekit/fields/field.html#pcapkit.corekit.fields.field.NoValueType" title="pcapkit.corekit.fields.field.NoValueType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NoValueType</span></code></a> straight to
-<a class="reference internal" href="../../corekit/fields/strings.html#pcapkit.corekit.fields.strings.PaddingField" title="pcapkit.corekit.fields.strings.PaddingField"><code class="xref py py-class docutils literal notranslate"><span class="pre">PaddingField</span></code></a>, where it becomes
-an unusable <a class="reference external" href="https://docs.python.org/3/library/struct.html#module-struct" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">struct</span></code></a> template and surfaces much later as an opaque
-<a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.error" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">struct.error</span></code></a>, which is how a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option would fail to parse.</p>
-</div>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6_opts.calipso_pad_len">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.ipv6_opts.</span></span><span class="sig-name descname"><span class="pre">calipso_pad_len</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pkt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/ipv6_opts.html#calipso_pad_len"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_opts.calipso_pad_len" title="Link to this definition">¶</a></dt>
 <dd><p>Return CALIPSO option padding length.</p>
+<p>See <a class="reference internal" href="ipv6_option.html#pcapkit.protocols.schema.internet.ipv6_option.calipso_pad_len" title="pcapkit.protocols.schema.internet.ipv6_option.calipso_pad_len"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.internet.ipv6_option.calipso_pad_len()</span></code></a>;
+errors are reported as <code class="docutils literal notranslate"><span class="pre">IPv6-Opts</span></code>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>pkt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – CALIPSO option unpacked schema.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>CALIPSO option padding length.</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> on the wire is too short to hold
-    the fixed header and the compartment bitmap declared by
-    <code class="docutils literal notranslate"><span class="pre">cmpt_len</span></code>, which would otherwise underflow the padding length
-    below zero.</p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2748,20 +2709,11 @@ an unusable <a class="reference external" href="https://docs.python.org/3/librar
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6_opts.mpl_opt_pad_len">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.ipv6_opts.</span></span><span class="sig-name descname"><span class="pre">mpl_opt_pad_len</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pkt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/ipv6_opts.html#mpl_opt_pad_len"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_opts.mpl_opt_pad_len" title="Link to this definition">¶</a></dt>
 <dd><p>Return MPL option padding length.</p>
+<p>See <a class="reference internal" href="ipv6_option.html#pcapkit.protocols.schema.internet.ipv6_option.mpl_opt_pad_len" title="pcapkit.protocols.schema.internet.ipv6_option.mpl_opt_pad_len"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.internet.ipv6_option.mpl_opt_pad_len()</span></code></a>;
+errors are reported as <code class="docutils literal notranslate"><span class="pre">IPv6-Opts</span></code>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>pkt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – MPL option unpacked schema.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>MPL option padding length.</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> on the wire is too short to hold
-    the fixed header and the Seed-ID declared by <code class="docutils literal notranslate"><span class="pre">flags.type</span></code>, which
-    would otherwise underflow the padding length below zero.</p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2770,60 +2722,25 @@ an unusable <a class="reference external" href="https://docs.python.org/3/librar
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6_opts.smf_dpd_data_selector">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.ipv6_opts.</span></span><span class="sig-name descname"><span class="pre">smf_dpd_data_selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pkt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/ipv6_opts.html#smf_dpd_data_selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_opts.smf_dpd_data_selector" title="Link to this definition">¶</a></dt>
 <dd><p>Selector function for <code class="xref py py-attr docutils literal notranslate"><span class="pre">_SMFDPDOption.data</span></code> field.</p>
+<p>See <a class="reference internal" href="ipv6_option.html#pcapkit.protocols.schema.internet.ipv6_option.smf_dpd_data_selector" title="pcapkit.protocols.schema.internet.ipv6_option.smf_dpd_data_selector"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.internet.ipv6_option.smf_dpd_data_selector()</span></code></a>,
+choosing among the schemas registered with <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.SMFDPDOption" title="pcapkit.protocols.schema.internet.ipv6_opts.SMFDPDOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">SMFDPDOption</span></code></a>; errors
+are reported as <code class="docutils literal notranslate"><span class="pre">IPv6-Opts</span></code>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>pkt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Packet data.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../corekit/fields/field.html#pcapkit.corekit.fields.field.FieldBase" title="pcapkit.corekit.fields.field.FieldBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldBase</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><ul class="simple">
-<li><p>If <code class="docutils literal notranslate"><span class="pre">mode</span></code> is <code class="docutils literal notranslate"><span class="pre">0</span></code>, returns a <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField" title="pcapkit.corekit.fields.misc.SchemaField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaField</span></code></a>
-wrapped <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.SMFIdentificationBasedDPDOption" title="pcapkit.protocols.schema.internet.ipv6_opts.SMFIdentificationBasedDPDOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">SMFIdentificationBasedDPDOption</span></code></a>
-instance.</p></li>
-<li><p>If <code class="docutils literal notranslate"><span class="pre">mode</span></code> is <code class="docutils literal notranslate"><span class="pre">1</span></code>, returns a <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField" title="pcapkit.corekit.fields.misc.SchemaField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaField</span></code></a>
-wrapped <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.SMFHashBasedDPDOption" title="pcapkit.protocols.schema.internet.ipv6_opts.SMFHashBasedDPDOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">SMFHashBasedDPDOption</span></code></a>
-instance.</p></li>
-</ul>
-</p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../corekit/fields/field.html#pcapkit.corekit.fields.field.FieldBase" title="pcapkit.corekit.fields.field.FieldBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldBase</span></code></a></span></p>
 </dd>
 </dl>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>The field is sized <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span> <span class="pre">+</span> <span class="pre">2</span></code> rather than <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code>.
-<code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> counts only what follows the option header
-[<span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.2"><strong>RFC 8200 Section 4.2</strong></a>], while both schemas this may return inherit
-<a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.Option.type" title="pcapkit.protocols.schema.internet.ipv6_opts.Option.type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Option.type</span></code></a> and <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.Option.len" title="pcapkit.protocols.schema.internet.ipv6_opts.Option.len"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Option.len</span></code></a> and so parse those two octets
-themselves. Sizing the field at <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> would hand them an area two
-octets short of the option they read, which
-<a class="reference internal" href="../../corekit/fields/collections.html#pcapkit.corekit.fields.collections.OptionField" title="pcapkit.corekit.fields.collections.OptionField"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionField</span></code></a> would then
-mis-count against the option area.</p>
-</div>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6_opts.smf_i_dpd_tid_selector">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.ipv6_opts.</span></span><span class="sig-name descname"><span class="pre">smf_i_dpd_tid_selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pkt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/ipv6_opts.html#smf_i_dpd_tid_selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_opts.smf_i_dpd_tid_selector" title="Link to this definition">¶</a></dt>
 <dd><p>Selector function for <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.SMFIdentificationBasedDPDOption.tid" title="pcapkit.protocols.schema.internet.ipv6_opts.SMFIdentificationBasedDPDOption.tid"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SMFIdentificationBasedDPDOption.tid</span></code></a> field.</p>
+<p>See <a class="reference internal" href="ipv6_option.html#pcapkit.protocols.schema.internet.ipv6_option.smf_i_dpd_tid_selector" title="pcapkit.protocols.schema.internet.ipv6_option.smf_i_dpd_tid_selector"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.internet.ipv6_option.smf_i_dpd_tid_selector()</span></code></a>;
+errors are reported as <code class="docutils literal notranslate"><span class="pre">IPv6-Opts</span></code>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>pkt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Packet data.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../corekit/fields/field.html#pcapkit.corekit.fields.field.FieldBase" title="pcapkit.corekit.fields.field.FieldBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldBase</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><ul class="simple">
-<li><p>If <code class="docutils literal notranslate"><span class="pre">tid_type</span></code> is <code class="docutils literal notranslate"><span class="pre">0</span></code>, returns a <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.NoValueField" title="pcapkit.corekit.fields.misc.NoValueField"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueField</span></code></a>
-instance.</p></li>
-<li><p>If <code class="docutils literal notranslate"><span class="pre">tid_type</span></code> is <code class="docutils literal notranslate"><span class="pre">1</span></code>, returns a <a class="reference internal" href="../../corekit/fields/ipaddress.html#pcapkit.corekit.fields.ipaddress.IPv4AddressField" title="pcapkit.corekit.fields.ipaddress.IPv4AddressField"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4AddressField</span></code></a>
-instance.</p></li>
-<li><p>If <code class="docutils literal notranslate"><span class="pre">tid_type</span></code> is <code class="docutils literal notranslate"><span class="pre">2</span></code>, returns a <a class="reference internal" href="../../corekit/fields/ipaddress.html#pcapkit.corekit.fields.ipaddress.IPv6AddressField" title="pcapkit.corekit.fields.ipaddress.IPv6AddressField"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6AddressField</span></code></a>
-instance.</p></li>
-<li><p>Otherwise, returns a <a class="reference internal" href="../../corekit/fields/strings.html#pcapkit.corekit.fields.strings.BytesField" title="pcapkit.corekit.fields.strings.BytesField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BytesField</span></code></a> instance.</p></li>
-</ul>
-</p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../corekit/fields/field.html#pcapkit.corekit.fields.field.FieldBase" title="pcapkit.corekit.fields.field.FieldBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldBase</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2832,20 +2749,11 @@ instance.</p></li>
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6_opts.smf_i_dpd_id_len">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.ipv6_opts.</span></span><span class="sig-name descname"><span class="pre">smf_i_dpd_id_len</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pkt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/ipv6_opts.html#smf_i_dpd_id_len"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_opts.smf_i_dpd_id_len" title="Link to this definition">¶</a></dt>
 <dd><p>Return SMF I-DPD identifier length.</p>
+<p>See <a class="reference internal" href="ipv6_option.html#pcapkit.protocols.schema.internet.ipv6_option.smf_i_dpd_id_len" title="pcapkit.protocols.schema.internet.ipv6_option.smf_i_dpd_id_len"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.internet.ipv6_option.smf_i_dpd_id_len()</span></code></a>;
+errors are reported as <code class="docutils literal notranslate"><span class="pre">IPv6-Opts</span></code>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>pkt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – SMF identification-based DPD option unpacked schema.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>SMF I-DPD identifier length.</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> on the wire is too short to hold
-    the TaggerID it declares, which would otherwise underflow the
-    identifier length below zero.</p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2854,26 +2762,12 @@ instance.</p></li>
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6_opts.quick_start_data_selector">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.ipv6_opts.</span></span><span class="sig-name descname"><span class="pre">quick_start_data_selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pkt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/ipv6_opts.html#quick_start_data_selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_opts.quick_start_data_selector" title="Link to this definition">¶</a></dt>
 <dd><p>Selector function for <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts._QuickStartOption.data" title="pcapkit.protocols.schema.internet.ipv6_opts._QuickStartOption.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_QuickStartOption.data</span></code></a> field.</p>
+<p>See <a class="reference internal" href="ipv6_option.html#pcapkit.protocols.schema.internet.ipv6_option.quick_start_data_selector" title="pcapkit.protocols.schema.internet.ipv6_option.quick_start_data_selector"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.internet.ipv6_option.quick_start_data_selector()</span></code></a>,
+choosing among the schemas registered with <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.QuickStartOption" title="pcapkit.protocols.schema.internet.ipv6_opts.QuickStartOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuickStartOption</span></code></a>, and
+<a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.UnassignedOption" title="pcapkit.protocols.schema.internet.ipv6_opts.UnassignedOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">UnassignedOption</span></code></a> for an unassigned QS function.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>pkt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Packet data.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../corekit/fields/field.html#pcapkit.corekit.fields.field.FieldBase" title="pcapkit.corekit.fields.field.FieldBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldBase</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><ul class="simple">
-<li><p>If <code class="docutils literal notranslate"><span class="pre">func</span></code> is <code class="docutils literal notranslate"><span class="pre">0</span></code>, returns a <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField" title="pcapkit.corekit.fields.misc.SchemaField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaField</span></code></a>
-wrapped <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.QuickStartRequestOption" title="pcapkit.protocols.schema.internet.ipv6_opts.QuickStartRequestOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuickStartRequestOption</span></code></a>
-instance.</p></li>
-<li><p>If <code class="docutils literal notranslate"><span class="pre">func</span></code> is <code class="docutils literal notranslate"><span class="pre">8</span></code>, returns a <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField" title="pcapkit.corekit.fields.misc.SchemaField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaField</span></code></a>
-wrapped <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.QuickStartReportOption" title="pcapkit.protocols.schema.internet.ipv6_opts.QuickStartReportOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuickStartReportOption</span></code></a>
-instance.</p></li>
-<li><p>Otherwise, returns a <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField" title="pcapkit.corekit.fields.misc.SchemaField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaField</span></code></a>
-wrapped <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.UnassignedOption" title="pcapkit.protocols.schema.internet.ipv6_opts.UnassignedOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">UnassignedOption</span></code></a>
-instance, sized by the option’s own <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code>.</p></li>
-</ul>
-</p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../corekit/fields/field.html#pcapkit.corekit.fields.field.FieldBase" title="pcapkit.corekit.fields.field.FieldBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldBase</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -3179,7 +3073,7 @@ a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_opts.RPLOption.sub_tlvs">
 <span class="sig-name descname"><span class="pre">sub_tlvs</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_opts.RPLOption.sub_tlvs" title="Link to this definition">¶</a></dt>
-<dd><p>Sub-TLVs [<span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6553.html#section-3"><strong>RFC 6553 Section 3</strong></a>], kept as raw octets.</p>
+<dd><p>Sub-TLVs [<span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6553.html#section-3"><strong>RFC 6553 Section 3</strong></a>], kept as raw octets.</p>
 </dd></dl>
 
 </dd></dl>

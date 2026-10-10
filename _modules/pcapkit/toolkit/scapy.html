@@ -254,6 +254,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_option.html">IPv6 Options - Shared Option Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ah.html">AH - Authentication Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
@@ -283,6 +284,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/pcap.html">PCAP File Headers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/byteorder.html">Byte Order - Shared Byte-Order Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/raw.html">Raw Packet Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/null.html">No-Payload Packet</a></li>
 </ul>
@@ -505,6 +507,7 @@
 <span class="sd">   importing :mod:`scapy.all` in its constructor.</span>
 
 <span class="sd">"""</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">decimal</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
@@ -512,7 +515,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">IP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TCP_Packet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameRecord</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameInfo</span> <span class="k">as</span> <span class="n">Data_FrameInfo</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="ne">ModuleNotFoundError</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">MissingKeyError</span><span class="p">,</span> <span class="n">ModuleNotFound</span><span class="p">,</span> <span class="n">stacklevel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScapyWarning</span><span class="p">,</span> <span class="n">warn</span>
@@ -533,9 +538,26 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">'packet2chain'</span><span class="p">,</span> <span class="s1">'packet2dict'</span><span class="p">,</span>
+    <span class="s1">'attach_resolution'</span><span class="p">,</span> <span class="s1">'packet2chain'</span><span class="p">,</span> <span class="s1">'packet2dict'</span><span class="p">,</span> <span class="s1">'packet2frame'</span><span class="p">,</span>
     <span class="s1">'ipv4_reassembly'</span><span class="p">,</span> <span class="s1">'ipv6_reassembly'</span><span class="p">,</span> <span class="s1">'tcp_reassembly'</span><span class="p">,</span> <span class="s1">'tcp_traceflow'</span>
 <span class="p">]</span>
+
+
+<span class="c1">#: Attribute a packet's timestamp resolution is stashed under, in units per</span>
+<span class="c1">#: second, by :func:`attach_resolution`.</span>
+<span class="n">RESOLUTION_ATTR</span> <span class="o">=</span> <span class="s1">'__pcapkit_resolution__'</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">attach_resolution</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">resolution</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Stash the timestamp resolution of a packet's capture on the packet.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: Scapy packet.</span>
+<span class="sd">        resolution: Timestamp resolution, in units per second: the PCAP global</span>
+<span class="sd">            header's, or the PCAP-NG interface's the packet was captured on.</span>
+
+<span class="sd">    """</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">RESOLUTION_ATTR</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="packet2chain">
@@ -611,6 +633,59 @@
         <span class="n">packet</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">wrapper</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span>
     <span class="p">}</span></div>
 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">packet2frame</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'FrameRecord'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Report a Scapy packet to the flow tracer, with its PCAP frame record.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: Scapy packet.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The :func:`packet2dict` mapping of the packet, which every trace format</span>
+<span class="sd">        but PCAP writes as it always has, carrying the octets `Scapy`_ dissected</span>
+<span class="sd">        the packet from, the PCAP record header the PCAP trace dumper writes, and</span>
+<span class="sd">        the exact timestamp it reads the header's resolution from.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ModuleNotFound: If `Scapy`_ is not installed.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The octets are ``packet.original``, which `Scapy`_'s readers keep as read,</span>
+<span class="sd">        rather than ``bytes(packet)``, which rebuilds them. ``orig_len`` is</span>
+<span class="sd">        ``packet.wirelen``, the record's original length.</span>
+
+<span class="sd">        The fraction in ``frame_info.ts_usec`` is in the capture's own resolution,</span>
+<span class="sd">        as the default engine's is. That resolution is the one</span>
+<span class="sd">        :class:`~pcapkit.foundation.engines.scapy.Scapy` attaches with</span>
+<span class="sd">        :func:`attach_resolution`, never one guessed from the value: a</span>
+<span class="sd">        nanosecond count that is a whole number of microseconds has the same</span>
+<span class="sd">        digits as the microsecond count. A packet that carries none, e.g. one</span>
+<span class="sd">        built by hand, is taken to count microseconds.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">scapy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ModuleNotFound</span><span class="p">(</span><span class="s2">"No module named 'scapy'"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'scapy'</span><span class="p">)</span>
+    <span class="n">mapping</span> <span class="o">=</span> <span class="n">packet2dict</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+
+    <span class="n">original</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="s1">'original'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">octets</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">original</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">original</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">))</span> <span class="k">else</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+    <span class="n">wirelen</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="s1">'wirelen'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">orig_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">octets</span><span class="p">)</span> <span class="k">if</span> <span class="n">wirelen</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">wirelen</span><span class="p">)</span>
+
+    <span class="n">nanosecond</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">RESOLUTION_ATTR</span><span class="p">,</span> <span class="mi">1_000_000</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1_000_000</span>
+    <span class="n">stamp</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">time</span>
+    <span class="n">epoch</span> <span class="o">=</span> <span class="p">(</span><span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">stamp</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stamp</span><span class="p">,</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">)</span>
+             <span class="k">else</span> <span class="nb">round</span><span class="p">(</span><span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">stamp</span><span class="p">),</span> <span class="mi">9</span> <span class="k">if</span> <span class="n">nanosecond</span> <span class="k">else</span> <span class="mi">6</span><span class="p">))</span>
+    <span class="n">ts_sec</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span>
+    <span class="n">ts_usec</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">epoch</span> <span class="o">-</span> <span class="n">ts_sec</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1_000_000_000</span> <span class="k">if</span> <span class="n">nanosecond</span> <span class="k">else</span> <span class="mi">1_000_000</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">FrameRecord</span><span class="p">(</span><span class="n">mapping</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">octets</span><span class="p">,</span> <span class="n">frame_info</span><span class="o">=</span><span class="n">Data_FrameInfo</span><span class="p">(</span>
+        <span class="n">ts_sec</span><span class="o">=</span><span class="n">ts_sec</span><span class="p">,</span>
+        <span class="n">ts_usec</span><span class="o">=</span><span class="n">ts_usec</span><span class="p">,</span>
+        <span class="n">incl_len</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">octets</span><span class="p">),</span>
+        <span class="n">orig_len</span><span class="o">=</span><span class="n">orig_len</span><span class="p">,</span>
+    <span class="p">),</span> <span class="n">time_epoch</span><span class="o">=</span><span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">epoch</span><span class="p">))</span>
 
 
 <div class="viewcode-block" id="ipv4_reassembly">
@@ -847,7 +922,7 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">TF_TCP_Packet</span><span class="p">(</span>  <span class="c1"># type: ignore[type-var]</span>
             <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span>                                   <span class="c1"># data link type</span>
             <span class="n">index</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>                                         <span class="c1"># frame number</span>
-            <span class="n">frame</span><span class="o">=</span><span class="n">packet2dict</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span>                           <span class="c1"># extracted packet</span>
+            <span class="n">frame</span><span class="o">=</span><span class="n">packet2frame</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span>                          <span class="c1"># extracted packet</span>
             <span class="n">syn</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">S</span><span class="p">),</span>                               <span class="c1"># TCP synchronise (SYN) flag</span>
             <span class="n">fin</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">F</span><span class="p">),</span>                               <span class="c1"># TCP finish (FIN) flag</span>
             <span class="n">rst</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">R</span><span class="p">),</span>                               <span class="c1"># TCP reset (RST) flag</span>

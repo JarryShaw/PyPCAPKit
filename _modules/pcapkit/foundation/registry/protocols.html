@@ -254,6 +254,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_option.html">IPv6 Options - Shared Option Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ah.html">AH - Authentication Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
@@ -283,6 +284,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/pcap.html">PCAP File Headers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/byteorder.html">Byte Order - Shared Byte-Order Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/raw.html">Raw Packet Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/null.html">No-Payload Packet</a></li>
 </ul>
@@ -479,6 +481,7 @@
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections.abc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">aenum</span>
@@ -641,8 +644,9 @@
 <span class="sd">    presence alone is not enough. This registry's key is *derived* from the</span>
 <span class="sd">    class rather than supplied by a caller, and this function is the funnel</span>
 <span class="sd">    every wrapper registrar calls -- :func:`register_tcp`, :func:`register_udp`,</span>
-<span class="sd">    :func:`register_apptype`, :func:`register_linktype` and the rest all end in</span>
-<span class="sd">    ``register_protocol(module)``. So registering one class under two codes, a</span>
+<span class="sd">    :func:`register_apptype`, :func:`register_linktype` and the rest all end by</span>
+<span class="sd">    calling it with their class, and registering their code back undoes that</span>
+<span class="sd">    call's write (:issue:`1505`). So registering one class under two codes, a</span>
 <span class="sd">    supported and documented thing to do, reaches this function twice with the</span>
 <span class="sd">    same class and nothing at stake; a presence-only guard would warn about an</span>
 <span class="sd">    overwrite that overwrote nothing. Warning on the harmless case is not free:</span>
@@ -707,6 +711,164 @@
     <span class="n">protocol_registry</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">protocol</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered protocol: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">protocol</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span></div>
 
+
+
+<span class="c1">#: Sentinel for a name :data:`pcapkit.protocols.__proto__` did not hold.</span>
+<span class="n">_MISSING</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_NameLease</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A :data:`pcapkit.protocols.__proto__` entry a code registration put there.</span>
+
+<span class="sd">    Each code registrar below ends by naming its class in the by-name registry,</span>
+<span class="sd">    and :mod:`pcapkit.foundation.registry` has no ``unregister``: a code is</span>
+<span class="sd">    undone by registering the entry it displaced (:issue:`1363`). Without a</span>
+<span class="sd">    record of that by-name write, handing a code back restored the code and left</span>
+<span class="sd">    the name behind (:issue:`1505`). A lease records what the write displaced and</span>
+<span class="sd">    which codes still dispatch to the class, so the last of them to be handed</span>
+<span class="sd">    back puts the displaced entry back, or removes the name if it was new.</span>
+
+<span class="sd">    A lease is one write, not one class: the same class can hold two leases on</span>
+<span class="sd">    a name -- e.g. a built-in registered at one port over a custom class</span>
+<span class="sd">    shadowing it at another -- and each undoes only its own write.</span>
+
+<span class="sd">    """</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'name'</span><span class="p">,</span> <span class="s1">'protocol'</span><span class="p">,</span> <span class="s1">'displaced'</span><span class="p">,</span> <span class="s1">'codes'</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Type[ProtocolBase]'</span><span class="p">,</span> <span class="n">displaced</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+        <span class="c1">#: The key written in :data:`pcapkit.protocols.__proto__`.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="c1">#: The class written under it.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span>
+        <span class="c1">#: The entry it displaced, or :data:`_MISSING` for a new name.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">displaced</span> <span class="o">=</span> <span class="n">displaced</span>
+        <span class="c1">#: ``(destination, code)`` registrations still holding the lease.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">codes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>  <span class="c1"># type: set[tuple[type, Any]]</span>
+
+
+<span class="c1">#: Name -&gt; its leases, oldest first. Each lease displaced the one below it,</span>
+<span class="c1">#: unless the name was written by other means in between; the last is the one</span>
+<span class="c1">#: a lookup sees, unless the name has been written since.</span>
+<span class="n">_NAME_LEASES</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, list[_NameLease]]</span>
+<span class="c1">#: ``(destination, code)`` -&gt; the lease its registration holds.</span>
+<span class="n">_CODE_LEASES</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[tuple[type, Any], _NameLease]</span>
+<span class="c1">#: Serialises the two tables above, so concurrent registrars cannot tear them.</span>
+<span class="n">_LEASE_LOCK</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">RLock</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_fold_lease</span><span class="p">(</span><span class="n">stack</span><span class="p">:</span> <span class="s1">'list[_NameLease]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Retire ``stack[index]``, a lease now displacing its own class.</span>
+
+<span class="sd">    That happens once the lease between it and an earlier write of the same</span>
+<span class="sd">    class is handed back, e.g. a custom ``IPv4`` released from under the</span>
+<span class="sd">    built-in ``IPv4`` registered over it. Undoing it would change nothing, so</span>
+<span class="sd">    its codes move to the lease below when that is the same class, and</span>
+<span class="sd">    otherwise -- the class was named by other means -- hold nothing.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        stack: The name's leases, oldest first.</span>
+<span class="sd">        index: Position of the lease to retire.</span>
+
+<span class="sd">    """</span>
+    <span class="n">lease</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+    <span class="n">below</span> <span class="o">=</span> <span class="n">stack</span><span class="p">[</span><span class="n">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">below</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">below</span><span class="o">.</span><span class="n">protocol</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">lease</span><span class="o">.</span><span class="n">protocol</span><span class="p">:</span>
+        <span class="n">below</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">lease</span><span class="o">.</span><span class="n">codes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">_CODE_LEASES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">target</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">lease</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">below</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">_CODE_LEASES</span><span class="p">[</span><span class="n">target</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">below</span><span class="o">.</span><span class="n">codes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+            <span class="n">_CODE_LEASES</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="n">below</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_release_name</span><span class="p">(</span><span class="n">target</span><span class="p">:</span> <span class="s1">'tuple[type, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Hand back the lease ``target``'s registration held.</span>
+
+<span class="sd">    Once no code holds the lease, it leaves its name's stack. On top, it puts</span>
+<span class="sd">    the name back to the entry it displaced, or removes a new name -- unless the</span>
+<span class="sd">    name was written by other means since, in which case that write stands.</span>
+<span class="sd">    Buried, it hands what it displaced to the lease above, if that lease</span>
+<span class="sd">    displaced it.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        target: The ``(destination, code)`` being registered over.</span>
+
+<span class="sd">    """</span>
+    <span class="n">lease</span> <span class="o">=</span> <span class="n">_CODE_LEASES</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">lease</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">lease</span><span class="o">.</span><span class="n">codes</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">lease</span><span class="o">.</span><span class="n">codes</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="n">stack</span> <span class="o">=</span> <span class="n">_NAME_LEASES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">lease</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="p">[])</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">stack</span><span class="p">)</span> <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="n">lease</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="k">del</span> <span class="n">stack</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">stack</span><span class="p">):</span>
+        <span class="n">above</span> <span class="o">=</span> <span class="n">stack</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">above</span><span class="o">.</span><span class="n">displaced</span> <span class="ow">is</span> <span class="n">lease</span><span class="o">.</span><span class="n">protocol</span><span class="p">:</span>
+            <span class="n">above</span><span class="o">.</span><span class="n">displaced</span> <span class="o">=</span> <span class="n">lease</span><span class="o">.</span><span class="n">displaced</span>
+            <span class="k">if</span> <span class="n">above</span><span class="o">.</span><span class="n">displaced</span> <span class="ow">is</span> <span class="n">above</span><span class="o">.</span><span class="n">protocol</span><span class="p">:</span>
+                <span class="n">_fold_lease</span><span class="p">(</span><span class="n">stack</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">protocol_registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">lease</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="n">lease</span><span class="o">.</span><span class="n">protocol</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">lease</span><span class="o">.</span><span class="n">displaced</span> <span class="ow">is</span> <span class="n">_MISSING</span><span class="p">:</span>
+            <span class="n">protocol_registry</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">lease</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">protocol_registry</span><span class="p">[</span><span class="n">lease</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">lease</span><span class="o">.</span><span class="n">displaced</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'released protocol: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">lease</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">stack</span><span class="p">:</span>
+        <span class="n">_NAME_LEASES</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">lease</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_register_name</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'Type[ProtocolBase]'</span><span class="p">,</span> <span class="o">*</span><span class="n">targets</span><span class="p">:</span> <span class="s1">'tuple[type, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Name ``protocol`` in :data:`pcapkit.protocols.__proto__` for ``targets``.</span>
+
+<span class="sd">    The tail of every code registrar: :func:`register_protocol`, preceded by</span>
+<span class="sd">    releasing whatever each target code held before, and followed by a lease</span>
+<span class="sd">    when the write changed the name, so that registering the code back undoes</span>
+<span class="sd">    it (:issue:`1505`). A name already showing ``protocol`` -- shipped, defined</span>
+<span class="sd">    by a :class:`~pcapkit.protocols.protocol.Protocol` subclass, or registered</span>
+<span class="sd">    directly -- is not leased, so no restore takes it away; one showing it</span>
+<span class="sd">    through a lease extends that lease to ``targets``.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        protocol: Protocol class just registered -- and so validated -- at ``targets``.</span>
+<span class="sd">        *targets: The ``(destination, code)`` pairs it was registered at.</span>
+
+<span class="sd">    """</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">_LEASE_LOCK</span><span class="p">:</span>
+        <span class="n">stack</span> <span class="o">=</span> <span class="n">_NAME_LEASES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">stack</span> <span class="ow">and</span> <span class="n">stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">protocol</span> <span class="ow">is</span> <span class="n">protocol</span> <span class="ow">and</span> <span class="n">protocol_registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="n">protocol</span><span class="p">:</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="n">stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># type: Optional[_NameLease]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">current</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">_CODE_LEASES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">target</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">current</span><span class="p">:</span>
+                <span class="n">_release_name</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+
+        <span class="n">incumbent</span> <span class="o">=</span> <span class="n">protocol_registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">_MISSING</span><span class="p">)</span>
+        <span class="n">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">protocol_registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">protocol</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">stack</span> <span class="o">=</span> <span class="n">_NAME_LEASES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">protocol</span><span class="p">:</span>
+            <span class="n">lease</span> <span class="o">=</span> <span class="n">_NameLease</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="n">incumbent</span><span class="p">)</span>
+            <span class="n">_NAME_LEASES</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lease</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">stack</span> <span class="ow">and</span> <span class="n">stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">protocol</span> <span class="ow">is</span> <span class="n">protocol</span><span class="p">:</span>
+            <span class="n">lease</span> <span class="o">=</span> <span class="n">stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">lease</span><span class="o">.</span><span class="n">codes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">targets</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">:</span>
+            <span class="n">_CODE_LEASES</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="n">lease</span>
 
 
 <span class="c1">#: Enum type -&gt; the class(es) owning the :attr:`ProtocolBase.__proto__</span>
@@ -891,7 +1053,7 @@
     <span class="c1"># register protocol to protocol registry</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
         <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
-    <span class="n">register_protocol</span><span class="p">(</span><span class="n">module</span><span class="p">)</span></div>
+    <span class="n">_register_name</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="p">(</span><span class="n">Frame</span><span class="p">,</span> <span class="n">code</span><span class="p">),</span> <span class="p">(</span><span class="n">PCAPNG</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
 
 
 
@@ -931,7 +1093,7 @@
     <span class="c1"># register protocol to protocol registry</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
         <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
-    <span class="n">register_protocol</span><span class="p">(</span><span class="n">module</span><span class="p">)</span></div>
+    <span class="n">_register_name</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="p">(</span><span class="n">Frame</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
 
 
 
@@ -971,7 +1133,7 @@
     <span class="c1"># register protocol to protocol registry</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
         <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
-    <span class="n">register_protocol</span><span class="p">(</span><span class="n">module</span><span class="p">)</span></div>
+    <span class="n">_register_name</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="p">(</span><span class="n">PCAPNG</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
 
 
 
@@ -1016,7 +1178,7 @@
     <span class="c1"># register protocol to protocol registry</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
         <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
-    <span class="n">register_protocol</span><span class="p">(</span><span class="n">module</span><span class="p">)</span></div>
+    <span class="n">_register_name</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="p">(</span><span class="n">Link</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
 
 
 
@@ -1061,7 +1223,7 @@
     <span class="c1"># register protocol to protocol registry</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
         <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
-    <span class="n">register_protocol</span><span class="p">(</span><span class="n">module</span><span class="p">)</span></div>
+    <span class="n">_register_name</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="p">(</span><span class="n">Internet</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
 
 
 
@@ -1459,6 +1621,7 @@
         <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span><span class="p">:</span> <span class="n">TCP</span><span class="p">,</span>
         <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span><span class="p">:</span> <span class="n">UDP</span><span class="p">,</span>
     <span class="p">})</span>
+    <span class="n">targets</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[tuple[type, Any]]</span>
     <span class="k">for</span> <span class="n">proto</span> <span class="ow">in</span> <span class="n">transport</span><span class="p">:</span>
         <span class="c1"># NOTE: a composite is not a key here, so ``tcp | udp`` is rejected</span>
         <span class="c1"># rather than quietly registering under both. Naming them one at a time</span>
@@ -1468,12 +1631,13 @@
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown transport protocol: </span><span class="si">{</span><span class="n">proto</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="bp">cls</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
+        <span class="n">targets</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered </span><span class="si">%s</span><span class="s1"> port: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">proto</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
         <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
-    <span class="n">register_protocol</span><span class="p">(</span><span class="n">module</span><span class="p">)</span></div>
+    <span class="n">_register_name</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="o">*</span><span class="n">targets</span><span class="p">)</span></div>
 
 
 
@@ -1515,7 +1679,7 @@
     <span class="c1"># register protocol to protocol registry</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
         <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
-    <span class="n">register_protocol</span><span class="p">(</span><span class="n">module</span><span class="p">)</span></div>
+    <span class="n">_register_name</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="p">(</span><span class="n">TCP</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
 
 
 
@@ -1613,7 +1777,7 @@
     <span class="c1"># register protocol to protocol registry</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
         <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
-    <span class="n">register_protocol</span><span class="p">(</span><span class="n">module</span><span class="p">)</span></div>
+    <span class="n">_register_name</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="p">(</span><span class="n">UDP</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
 
 
 
@@ -1660,7 +1824,7 @@
     <span class="c1"># register protocol to protocol registry</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
         <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">klass</span>
-    <span class="n">register_protocol</span><span class="p">(</span><span class="n">module</span><span class="p">)</span></div>
+    <span class="n">_register_name</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="p">(</span><span class="n">SCTP</span><span class="p">,</span> <span class="n">code</span><span class="p">))</span></div>
 
 
 

@@ -254,6 +254,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_option.html">IPv6 Options - Shared Option Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ah.html">AH - Authentication Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
@@ -283,6 +284,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/pcap.html">PCAP File Headers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/byteorder.html">Byte Order - Shared Byte-Order Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/raw.html">Raw Packet Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/null.html">No-Payload Packet</a></li>
 </ul>
@@ -515,7 +517,7 @@
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">StdlibEnum</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6Address</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">AenumEnum</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
@@ -923,7 +925,10 @@
         <span class="n">nested</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_lookup_nested</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="n">pairs</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">MultiDict</span><span class="p">))</span> <span class="k">else</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
         <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span> <span class="ow">in</span> <span class="n">pairs</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nested</span><span class="p">:</span>
+            <span class="c1"># NOTE: ``fragment`` is declared only for type checkers, so it reads</span>
+            <span class="c1"># as nested, but it is the packet split at the Fragment header and</span>
+            <span class="c1"># sits between that header and the next one.</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nested</span> <span class="ow">or</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">'fragment'</span><span class="p">:</span>
                 <span class="k">continue</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">ex_proto</span> <span class="o">=</span> <span class="n">Enum_ExtensionHeader</span><span class="p">(</span><span class="n">proto</span><span class="p">)</span>
@@ -931,7 +936,8 @@
                 <span class="k">break</span>
 
             <span class="c1"># NOTE: As in :meth:`_decode_next_layer`, a code with no parser</span>
-            <span class="c1"># carrying ``next`` ends the chain, and so does a fragment header.</span>
+            <span class="c1"># carrying ``next`` ends the chain, and so does a Fragment header</span>
+            <span class="c1"># other than a first fragment's.</span>
             <span class="k">if</span> <span class="s1">'next'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span><span class="p">:</span>
                 <span class="k">break</span>
 
@@ -949,9 +955,26 @@
             <span class="n">chain</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">parser</span><span class="p">,</span> <span class="n">info</span><span class="p">))</span>
 
             <span class="n">proto</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">'next'</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">ex_proto</span> <span class="o">==</span> <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">IPv6_Frag</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ex_proto</span> <span class="o">==</span> <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">IPv6_Frag</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_is_first_fragment</span><span class="p">(</span><span class="n">info</span><span class="p">):</span>
                 <span class="k">break</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">names</span><span class="p">),</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">chain</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_is_first_fragment</span><span class="p">(</span><span class="n">info</span><span class="p">:</span> <span class="s1">'Mapping[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Whether a Fragment header's info is that of a first fragment.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            info: info of a Fragment header, as parsed or from :meth:`Info.to_dict</span>
+<span class="sd">                &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;`</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :data:`True` at a Fragment Offset of zero. A header whose dedicated</span>
+<span class="sd">            parser raised was parsed by</span>
+<span class="sd">            :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` instead and</span>
+<span class="sd">            has no offset, so it does not count as one.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'offset'</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_ip_hextet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[int, int, int]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Read the first four octets of IPv6.</span>
@@ -1000,6 +1023,7 @@
         <span class="n">raw_len</span> <span class="o">=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">payload</span> <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">length</span>  <span class="c1"># payload length</span>
         <span class="n">_protos</span> <span class="o">=</span> <span class="p">[]</span>                <span class="c1"># ProtoChain buffer</span>
         <span class="n">_exthdr</span> <span class="o">=</span> <span class="p">[]</span>                <span class="c1"># (parser class, info) per extension header</span>
+        <span class="n">split</span> <span class="o">=</span> <span class="kc">None</span>                <span class="c1"># type: Optional[tuple[int, int]] # at first Fragment header</span>
 
         <span class="c1"># traverse if next header is an extension header</span>
         <span class="n">payload</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">get_payload</span><span class="p">()</span>
@@ -1071,15 +1095,28 @@
 
             <span class="c1"># keep original data after fragment header</span>
             <span class="k">if</span> <span class="n">ex_proto</span> <span class="o">==</span> <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">IPv6_Frag</span><span class="p">:</span>
-                <span class="n">ipv6</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span>
-                    <span class="s1">'fragment'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_packet</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="n">hdr_len</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="n">raw_len</span><span class="p">),</span>
-                <span class="p">})</span>
-                <span class="k">break</span>
+                <span class="c1"># NOTE: The first Fragment header splits the packet for</span>
+                <span class="c1"># reassembly, so ``fragment``, ``hdr_len`` and ``raw_len`` keep</span>
+                <span class="c1"># that split however far the walk goes on.</span>
+                <span class="k">if</span> <span class="n">split</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">split</span> <span class="o">=</span> <span class="p">(</span><span class="n">hdr_len</span><span class="p">,</span> <span class="n">raw_len</span><span class="p">)</span>
+                    <span class="n">ipv6</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span>
+                        <span class="s1">'fragment'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_packet</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="n">hdr_len</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="n">raw_len</span><span class="p">),</span>
+                    <span class="p">})</span>
+
+                <span class="c1"># NOTE: Only a first fragment goes on. :rfc:`8200#section-4.5`</span>
+                <span class="c1"># puts every header through the upper-layer one in the fragment</span>
+                <span class="c1"># at offset zero, so what follows its Fragment header is walked</span>
+                <span class="c1"># exactly as it would be without one (:issue:`1539`). A later</span>
+                <span class="c1"># fragment carries a slice of the Fragmentable Part from its</span>
+                <span class="c1"># offset on, and that slice starts with no header at all.</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_first_fragment</span><span class="p">(</span><span class="n">info</span><span class="p">):</span>
+                    <span class="k">break</span>
 
         <span class="c1"># record real header &amp; payload length (headers exclude)</span>
         <span class="n">ipv6</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span>
-            <span class="s1">'hdr_len'</span><span class="p">:</span> <span class="n">hdr_len</span><span class="p">,</span>
-            <span class="s1">'raw_len'</span><span class="p">:</span> <span class="n">raw_len</span><span class="p">,</span>
+            <span class="s1">'hdr_len'</span><span class="p">:</span> <span class="n">hdr_len</span> <span class="k">if</span> <span class="n">split</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">split</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="s1">'raw_len'</span><span class="p">:</span> <span class="n">raw_len</span> <span class="k">if</span> <span class="n">split</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">split</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
 
             <span class="c1"># update next header</span>
             <span class="s1">'protocol'</span><span class="p">:</span> <span class="n">proto</span><span class="p">,</span>
