@@ -1,11 +1,14 @@
-Seekable I/O Object
-===================
+I/O Objects
+===========
 
 .. module:: pcapkit.corekit.io
 
 :mod:`pcapkit.corekit.io` contains
 :class:`~pcapkit.corekit.io.SeekableReader`, a seekable customisation of
-:class:`io.BufferedReader`.
+:class:`io.BufferedReader`, and two stream proxies:
+:class:`~pcapkit.corekit.io.PeekableStream`, which adds ``peek`` to a seekable
+stream, and :class:`~pcapkit.corekit.io.NamedStream`, which gives a stream a
+``name``.
 
 .. autoclass:: pcapkit.corekit.io.SeekableReader
    :no-members:
@@ -41,3 +44,14 @@ Seekable I/O Object
 
    .. automethod:: fileno
    .. automethod:: isatty
+
+.. autoclass:: pcapkit.corekit.io.PeekableStream
+   :no-members:
+
+   .. automethod:: peek
+
+.. autoclass:: pcapkit.corekit.io.NamedStream
+   :no-members:
+
+   .. autoattribute:: name
+   .. automethod:: read

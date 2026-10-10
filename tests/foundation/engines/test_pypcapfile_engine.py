@@ -426,19 +426,6 @@ class PyPCAPFileEngineTests(unittest.TestCase):
         extractor._reasm.tcp.assert_not_called()
         extractor._trace.tcp.assert_not_called()
 
-    ##########################################################################
-    # _NamedStream
-    ##########################################################################
-
-    def test_named_stream_proxies_reads_and_carries_a_name(self) -> None:
-        from pcapkit.foundation.engines.pypcapfile import _NamedStream
-
-        stream = _NamedStream(io.BytesIO(b'abcdef'), 'given.pcap')
-        self.assertEqual(stream.name, 'given.pcap')
-        self.assertEqual(stream.read(2), b'ab')
-        self.assertEqual(stream.read(), b'cdef')
-        self.assertEqual(stream.read(), b'')
-
 
 class PyPCAPFilePythonCeilingTests(unittest.TestCase):
     """The engine rules itself out above its dependency's Python ceiling.

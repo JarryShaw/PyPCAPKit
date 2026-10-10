@@ -16,6 +16,7 @@ import sys
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+from pcapkit.corekit.io import NamedStream
 from pcapkit.foundation.engines.engine import EngineBase
 from pcapkit.foundation.reassembly import ReassemblyManager
 from pcapkit.utilities.exceptions import FormatError, stacklevel
@@ -24,43 +25,11 @@ from pcapkit.utilities.warnings import AttributeWarning, warn
 __all__ = ['PyPCAPFile']
 
 if TYPE_CHECKING:
-    from typing import Any, BinaryIO, Callable, Iterator, Optional
+    from typing import Any, Callable, Iterator, Optional
 
     from pcapfile.structs import pcap_packet as PCAPFilePacket
 
     from pcapkit.foundation.extraction import Extractor
-
-
-class _NamedStream:
-    """Read-only proxy that gives a stream the ``name`` attribute.
-
-    :func:`pcapfile.savefile.load_savefile` dereferences ``input_file.name``
-    unconditionally, on the way into its trace helper. That is fine for the
-    :class:`~io.BufferedReader` :class:`~pcapkit.foundation.extraction.Extractor`
-    normally holds, but not for the :class:`~pcapkit.corekit.io.SeekableReader`
-    it substitutes when the caller supplied a non-seekable stream -- that class
-    exposes no ``name``, so the load would fail with :exc:`AttributeError` before
-    a single byte was read.
-
-    Args:
-        stream: Underlying binary stream.
-        name: Name to report as :attr:`name`.
-
-    """
-
-    def __init__(self, stream: 'BinaryIO', name: 'str') -> 'None':
-        self._stream = stream
-        #: Name of the underlying stream.
-        self.name = name
-
-    def read(self, size: 'int' = -1) -> 'bytes':
-        """Read from the underlying stream.
-
-        Args:
-            size: Number of bytes to read; all remaining bytes if negative.
-
-        """
-        return self._stream.read(size)
 
 
 class PyPCAPFile(EngineBase['PCAPFilePacket']):
@@ -233,7 +202,7 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
                  "so 'ipv6=True' will be ignored", AttributeWarning, stacklevel=stacklevel())
 
         sfile = pcapfile.savefile.load_savefile(
-            _NamedStream(ext._ifile, ext._ifnm), layers=0, lazy=True,
+            NamedStream(ext._ifile, ext._ifnm), layers=0, lazy=True,
         )
         self._dlink = Enum_LinkType.get(sfile.header.ll_type)
         self._declf = self._get_decoder(sfile.header.ll_type)

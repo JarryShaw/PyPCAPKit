@@ -25,7 +25,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar, cast
 from dictdumper.dumper import Dumper
 
 from pcapkit.corekit.context import ContextRegistry
-from pcapkit.corekit.io import SeekableReader
+from pcapkit.corekit.io import PeekableStream, SeekableReader
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.dumpkit.common import make_dumper
 from pcapkit.foundation.engines.engine import Engine, EngineBase
@@ -185,44 +185,6 @@ def _restore_shipped_dumper(registry: 'dict[str, Any]', format: 'str',  # pylint
 #: Engines whose library opens the input by *path*, ``Extractor._ifnm``, rather
 #: than reading ``Extractor._ifile``, so they cannot take an unnamed stream.
 _PATH_ENGINES = frozenset({'scapy', 'pyshark', 'pypcap', 'pcap_ct'})
-
-
-class _PeekableStream:
-    """Give a seekable binary stream without ``peek`` one.
-
-    :class:`Extractor` and the PCAP-NG engine read ahead with ``peek``, which
-    :class:`io.BufferedReader` has and a plain :class:`typing.IO` such as
-    :class:`io.BytesIO` does not (#1506). The read-ahead is a read and a seek
-    back, and every other attribute is the stream's own. It is not an
-    :class:`io.IOBase`, so it has no finaliser that could close the caller's
-    stream behind their back (#610).
-
-    Arguments:
-        stream: seekable binary stream
-
-    """
-
-    def __init__(self, stream: 'IO[bytes]') -> 'None':
-        self._stream = stream
-
-    def peek(self, size: 'int' = 0) -> 'bytes':
-        """Return up to ``size`` octets, at least one if any remain, without consuming them.
-
-        Arguments:
-            size: number of octets wanted
-
-        Returns:
-            The octets at the current position.
-
-        """
-        pos = self._stream.tell()
-        try:
-            return self._stream.read(max(size, 1))
-        finally:
-            self._stream.seek(pos, io.SEEK_SET)
-
-    def __getattr__(self, name: 'str') -> 'Any':
-        return getattr(self._stream, name)
 
 
 class Extractor(Generic[_P]):
@@ -1487,8 +1449,8 @@ class Extractor(Generic[_P]):
             self._ifile = SeekableReader(self._ifile, buffer_size, buffer_save, buffer_path,
                                          stream_closing=self._flag_s)
         elif not hasattr(self._ifile, 'peek'):
-            logger.debug('input stream has no peek(), wrapping it in _PeekableStream')
-            self._ifile = cast('BufferedReader', _PeekableStream(self._ifile))
+            logger.debug('input stream has no peek(), wrapping it in PeekableStream')
+            self._ifile = cast('BufferedReader', PeekableStream(self._ifile))
 
         if not self._flag_q:
             output, ext = self.__output__[fmt]
