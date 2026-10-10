@@ -35,6 +35,7 @@ from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.data.internet.ipv6 import IPv6 as Data_IPv6
+from pcapkit.protocols.internet.internet import EXTENSION_HEADER_LIMIT
 from pcapkit.protocols.internet.ip import IP
 from pcapkit.protocols.schema.internet.ipv6 import IPv6 as Schema_IPv6
 from pcapkit.protocols.schema.internet.ipv6 import jumbo_payload_length
@@ -530,7 +531,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
 
         hdr_len = self.length       # header length
         raw_len = ipv6.payload if length is None else length  # payload length
-        _protos = []                # ProtoChain buffer
+        _protos = []                # type: list[ProtocolBase] # ProtoChain buffer
         _exthdr = []                # (parser class, info) per extension header
         split = None                # type: Optional[tuple[int, int]] # at first Fragment header
         opaque = False              # walk ended at a non-zero Fragment Offset
@@ -541,6 +542,15 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             try:
                 ex_proto = Enum_ExtensionHeader(proto)
             except ValueError:
+                break
+
+            # NOTE: At most :data:`EXTENSION_HEADER_LIMIT
+            # <pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT>`
+            # headers are walked, as at most that many are dissected after any
+            # other layer. This header and the rest are then the upper layer,
+            # which :meth:`_import_next_layer` keeps raw, with one warning
+            # (:issue:`1604`).
+            if len(_protos) >= EXTENSION_HEADER_LIMIT:
                 break
 
             # # directly break when No Next Header occurs
@@ -646,6 +656,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         # of a slice of UDP payload (:issue:`1545`). Reassembly takes
         # ``fragment`` above, which this leaves as it was.
         ipv6_exthdr = ProtoChain.from_list(_protos)  # type: ignore[arg-type]
+        self._exthdr_depth = len(_protos)  # the headers the upper layer follows
         return super()._decode_next_layer(ipv6, None if opaque else proto, raw_len, packet=packet,
                                           ipv6_exthdr=ipv6_exthdr, payload=payload)
 
@@ -689,10 +700,15 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             ends after it -- see :attr:`__generic_ext_codes__`'s docstring for
             the full distinction.
 
-        """
-        if TYPE_CHECKING:
-            protocol: 'Type[ProtocolBase]'
+            The upper layer past a walk cut at :data:`EXTENSION_HEADER_LIMIT
+            <pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT>` is the
+            next extension header, and is kept raw with one
+            :exc:`~pcapkit.utilities.warnings.ProtocolWarning`, as in
+            :meth:`Internet._import_next_layer
+            <pcapkit.protocols.internet.internet.Internet._import_next_layer>`
+            (:issue:`1604`).
 
+        """
         if payload is None:
             file_ = self.__header__.get_payload()
         else:
@@ -700,19 +716,11 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         if length is None:
             length = len(file_)
 
-        if min(length, len(file_)) == 0:
-            from pcapkit.protocols.misc.null import \
-                NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel
-        elif self._sigterm:
-            from pcapkit.protocols.misc.raw import \
-                Raw as protocol  # isort: skip # pylint: disable=import-outside-toplevel
-        else:
-            protocol = self._lookup_next_layer(self.__proto__, proto)
-
+        protocol, extra = self._next_layer_class(proto, file_, length, extension)
         try:
             next_ = self._parse_next_layer(protocol, file_, length, version=version, extension=extension,
                                            alias=proto, packet=packet, layer=self._exlayer,
-                                           protocol=self._exproto, __context__=self._exctx)
+                                           protocol=self._exproto, __context__=self._exctx, **extra)
         except Exception as exc:
             from pcapkit.protocols.internet.ipv6_ext import \
                 IPv6_Ext  # isort: skip # pylint: disable=import-outside-toplevel
