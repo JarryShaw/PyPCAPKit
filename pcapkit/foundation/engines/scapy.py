@@ -37,10 +37,11 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
        warnings.filterwarnings('ignore', category=CryptographyDeprecationWarning)
 
 """
+import struct
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.foundation.engines.engine import EngineBase
-from pcapkit.utilities.exceptions import stacklevel
+from pcapkit.utilities.exceptions import VersionError, stacklevel
 from pcapkit.utilities.logging import get_logger
 from pcapkit.utilities.warnings import AttributeWarning, warn
 
@@ -58,23 +59,64 @@ if TYPE_CHECKING:
 #: :data:`pcapkit.utilities.logging.logger`.
 logger = get_logger(__name__)
 
+#: The private methods of :class:`scapy.utils.PcapNgReader` that
+#: :func:`_reader_type` overrides.
+_READER_HOOKS = ('_read_block', '_read_block_shb', '_read_block_idb', '_check_interface_id')
+
+
+def _read_tsoffset(options: 'bytes', endian: 'str') -> 'int':
+    """Read the ``if_tsoffset`` of a PCAP-NG Interface Description Block (#1549).
+
+    Read here rather than by `Scapy`_'s ``_read_options``, whose result differs
+    by version: keyed by option code in 2.7 and 2.8, and in 2.5 by name, with
+    only ``tsresol`` and ``comment`` kept.
+
+    Args:
+        options: The block's options area.
+        endian: :mod:`struct` byte order of the section, ``'<'`` or ``'>'``.
+
+    Returns:
+        The offset (option 14), a signed count of seconds; 0 without one.
+
+    .. _Scapy: https://scapy.net
+
+    """
+    while len(options) >= 4:
+        code, length = struct.unpack(f'{endian}HH', options[:4])
+        if not code:  # opt_endofopt
+            break
+        if code == 14 and length == 8 and len(options) >= 12:
+            return cast('int', struct.unpack(f'{endian}q', options[4:12])[0])
+        options = options[4 + length + (-length % 4):]
+    return 0
+
+
 def _reader_type() -> 'Type[PcapReader]':
-    """A :class:`scapy.utils.PcapReader` that stamps each packet with its resolution.
+    """A :class:`scapy.utils.PcapReader` that stamps each packet with its interface.
 
     `Scapy`_'s readers convert a record's timestamp to a :class:`~decimal.Decimal`
     and drop the resolution it was counted in, and an exact count of microseconds
     comes out with the same digits whether the capture counted microseconds or
-    nanoseconds. The PCAP frame record of a packet needs that resolution, so these
-    subclasses attach it with :func:`pcapkit.toolkit.scapy.attach_resolution`:
-    from the global header of a PCAP, and from the interface of each PCAP-NG
-    packet block, which :meth:`~scapy.utils.RawPcapNgReader._read_block` is the
-    last place to see.
+    nanoseconds. They drop the link type too, once it has picked the packet's
+    first layer, and a layer does not name its link type: a raw IPv4 packet's is
+    :class:`~scapy.layers.inet.IP` (#1517). The PCAP frame record and the flow
+    tracing input of a packet need both, so these subclasses attach them with
+    :func:`pcapkit.toolkit.scapy.attach_resolution` and
+    :func:`pcapkit.toolkit.scapy.attach_linktype`: from the global header of a
+    PCAP, and from the interface of each PCAP-NG packet block, which
+    :meth:`~scapy.utils.RawPcapNgReader._read_block` is the last place to see.
 
     The PCAP-NG subclass also starts each section with no interfaces, as the
     PCAP-NG specification defines a section: an interface ID counts the Interface
     Description Blocks of its own section only. `Scapy`_'s reader keeps appending
     to one table across Section Header Blocks, so a later section's interface 0
     resolved to the first section's, with its link type and resolution (#1522).
+
+    And it dates two kinds of packet as the default engine does. A Simple Packet
+    Block has no timestamp, and `Scapy`_ leaves its packet with the time it was
+    built, so it is set to 0 (#1503). `Scapy`_ ignores an interface's
+    ``if_tsoffset``, the seconds to add to each of its timestamps, so the
+    subclass reads it and adds it (#1549).
 
     Built when called, so that importing this module does not import `Scapy`_,
     and so that it always subclasses the :class:`scapy.utils.PcapReader` of the
@@ -83,12 +125,23 @@ def _reader_type() -> 'Type[PcapReader]':
     Returns:
         A reader type, which opens a PCAP-NG file as its PCAP-NG alternative.
 
+    Raises:
+        VersionError: If :class:`scapy.utils.PcapNgReader` lacks a method in
+            :data:`_READER_HOOKS`, which these subclasses override.
+
     .. _Scapy: https://scapy.net
 
     """
-    from scapy.utils import PcapNgReader, PcapReader  # isort:skip
+    from scapy.utils import EDecimal, PcapNgReader, PcapReader  # isort:skip
 
-    from pcapkit.toolkit.scapy import attach_resolution  # isort:skip
+    from pcapkit.toolkit.scapy import attach_linktype, attach_resolution  # isort:skip
+
+    # The PCAP-NG hooks overridden below are private to Scapy. One renamed away
+    # would leave its fix unapplied without a word, so a missing one is an error.
+    missing = [name for name in _READER_HOOKS if not callable(getattr(PcapNgReader, name, None))]
+    if missing:
+        raise VersionError(f"scapy.utils.PcapNgReader has no {', '.join(missing)}, which the Scapy "
+                           "engine's reader overrides; this Scapy version is not supported")
 
     class _Closing:
         # ``sniff`` closes the reader at the end of the file, and the engine closes
@@ -105,6 +158,7 @@ def _reader_type() -> 'Type[PcapReader]':
         def read_packet(self, *args: 'Any', **kwargs: 'Any') -> 'ScapyPacket':
             packet = super().read_packet(*args, **kwargs)
             attach_resolution(packet, 1_000_000_000 if self.nano else 1_000_000)
+            attach_linktype(packet, self.linktype)
             return packet
 
     class _PcapNgReader(_Closing, PcapNgReader):
@@ -112,21 +166,55 @@ def _reader_type() -> 'Type[PcapReader]':
         alternative = _PcapReader
 
         _resolution = 1_000_000
+        # each set from the packet block last read, before ``read_packet`` reads it
+        _linktype: 'int'
+        _timed: 'bool'
+        _offset: 'int'
+        _interface: 'int'
+        #: ``if_tsoffset`` of each interface of the section, by interface ID.
+        #: Kept here: what Scapy keeps of an interface differs by version.
+        _offsets: 'list[int]'
 
         def _read_block_shb(self, *args: 'Any', **kwargs: 'Any') -> 'None':
             super()._read_block_shb(*args, **kwargs)
             # a new section: its interface IDs restart from 0 (#1522)
             self.interfaces = []
+            self._offsets = []
+
+        def _read_block_idb(self, block: 'bytes', *args: 'Any', **kwargs: 'Any') -> 'None':
+            super()._read_block_idb(block, *args, **kwargs)
+            # appended once Scapy has appended the interface, so the IDs match
+            self._offsets.append(_read_tsoffset(block[8:], self.endian))
+
+        def _check_interface_id(self, intid: 'int') -> 'Any':
+            # Each packet block's reader checks its interface ID here, a Simple
+            # Packet Block's as 0, and the metadata it returns does not keep it.
+            # Scapy 2.8 skips the block when this returns false, and before 2.8
+            # it raises instead, so the result must be passed through. A block
+            # it rejects is never returned, so its ID is never read.
+            self._interface = intid
+            return super()._check_interface_id(intid)
 
         def _read_block(self, *args: 'Any', **kwargs: 'Any') -> 'Any':
             block = super()._read_block(*args, **kwargs)
             if block is not None:
                 self._resolution = block[1].tsresol
+                self._linktype = block[1].linktype
+                # ``None`` for a Simple Packet Block, which has no timestamp (#1503)
+                self._timed = block[1].tshigh is not None
+                self._offset = self._offsets[self._interface]
             return block
 
         def read_packet(self, *args: 'Any', **kwargs: 'Any') -> 'ScapyPacket':
             packet = super().read_packet(*args, **kwargs)
             attach_resolution(packet, self._resolution)
+            attach_linktype(packet, self._linktype)
+            if not self._timed:
+                # no timestamp at all, which the default engine reads as 0, where
+                # Scapy leaves the time the packet was built (#1503)
+                packet.time = EDecimal(0)
+            elif self._offset:
+                packet.time += self._offset  # if_tsoffset (#1549)
             return packet
 
     return _PcapReader

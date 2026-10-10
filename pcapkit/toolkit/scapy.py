@@ -66,7 +66,7 @@ if TYPE_CHECKING:
     from scapy.packet import Packet
 
 __all__ = [
-    'attach_resolution', 'packet2chain', 'packet2dict', 'packet2frame',
+    'attach_linktype', 'attach_resolution', 'packet2chain', 'packet2dict', 'packet2frame',
     'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow'
 ]
 
@@ -74,6 +74,10 @@ __all__ = [
 #: Attribute a packet's timestamp resolution is stashed under, in units per
 #: second, by :func:`attach_resolution`.
 RESOLUTION_ATTR = '__pcapkit_resolution__'
+
+#: Attribute a packet's data link type is stashed under, as the capture's
+#: ``LINKTYPE_*`` number, by :func:`attach_linktype`.
+LINKTYPE_ATTR = '__pcapkit_linktype__'
 
 
 def attach_resolution(packet: 'Packet', resolution: 'int') -> 'None':
@@ -86,6 +90,18 @@ def attach_resolution(packet: 'Packet', resolution: 'int') -> 'None':
 
     """
     setattr(packet, RESOLUTION_ATTR, resolution)
+
+
+def attach_linktype(packet: 'Packet', linktype: 'int') -> 'None':
+    """Stash the data link type of a packet's capture on the packet.
+
+    Args:
+        packet: Scapy packet.
+        linktype: ``LINKTYPE_*`` number: the PCAP global header's, or the
+            PCAP-NG interface's the packet was captured on.
+
+    """
+    setattr(packet, LINKTYPE_ATTR, linktype)
 
 
 def packet2chain(packet: 'Packet') -> 'str':
@@ -408,27 +424,36 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
         ip = cast('IP', packet['IP']) if 'IP' in packet else cast('IPv6', packet['IPv6'])
         tcp = cast('TCP', packet['TCP'])
 
-        # NOTE: no default here, deliberately. ``get()`` with no default
-        # raises on an unresolvable name rather than minting one (#775).
-        # NULL and RAW are genuine DLTs -- BSD loopback and raw IP
-        # framing, respectively -- each meant to go with its own handler
-        # protocol class, so neither is an honest stand-in for "unknown link
-        # type" and this must not paper over the miss with either. An
-        # IP-rooted Scapy packet's ``(IP()/TCP()).name`` is ``'IP'``, which is
-        # not a LinkType member name, and raises. Note the asymmetry, which
-        # is not a choice made here: an IPv6-rooted packet's name uppercases to
-        # ``'IPV6'``, which *is* a member (``LinkType.IPV6``, 229), so it
-        # resolves silently -- to a DLT the caller never chose. Only the v4 name
-        # happens to miss. The ``KeyError``
-        # from :meth:`LinkType.get` is caught and re-raised as
-        # :exc:`~pcapkit.utilities.exceptions.MissingKeyError` -- this
-        # package's own house exception for a lookup miss -- rather than
-        # letting it escape this public function.
-        name = packet.name.upper()
-        try:
-            protocol = Enum_LinkType.get(name)
-        except KeyError:
-            raise MissingKeyError(name) from None
+        # NOTE: the link type of the interface the packet was read from, which
+        # :class:`~pcapkit.foundation.engines.scapy.Scapy` attaches with
+        # :func:`attach_linktype` -- not one inferred from the first layer,
+        # which a raw IPv4 interface's packets share with no link type (#1517).
+        linktype = getattr(packet, LINKTYPE_ATTR, None)
+        if linktype is not None:
+            protocol = Enum_LinkType.get(linktype)
+        else:
+            # A packet built by hand carries none, so it is looked up by its
+            # first layer's name -- with no default, deliberately. ``get()``
+            # with no default raises on an unresolvable name rather than minting
+            # one (#775). NULL and RAW are genuine DLTs -- BSD loopback and raw
+            # IP framing, respectively -- each meant to go with its own handler
+            # protocol class, so neither is an honest stand-in for "unknown link
+            # type" and this must not paper over the miss with either. An
+            # IP-rooted Scapy packet's ``(IP()/TCP()).name`` is ``'IP'``, which
+            # is not a LinkType member name, and raises. Note the asymmetry,
+            # which is not a choice made here: an IPv6-rooted packet's name
+            # uppercases to ``'IPV6'``, which *is* a member (``LinkType.IPV6``,
+            # 229), so it resolves silently -- to a DLT the caller never chose.
+            # Only the v4 name happens to miss. The ``KeyError`` from
+            # :meth:`LinkType.get` is caught and re-raised as
+            # :exc:`~pcapkit.utilities.exceptions.MissingKeyError` -- this
+            # package's own house exception for a lookup miss -- rather than
+            # letting it escape this public function.
+            name = packet.name.upper()
+            try:
+                protocol = Enum_LinkType.get(name)
+            except KeyError:
+                raise MissingKeyError(name) from None
 
         data = TF_TCP_Packet(  # type: ignore[type-var]
             protocol=protocol,                                   # data link type

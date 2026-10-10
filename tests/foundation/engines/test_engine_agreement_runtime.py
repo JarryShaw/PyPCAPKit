@@ -394,10 +394,6 @@ class TestEngineAgreement(harness.RoundTripBase):
             ('INPUTS', 'DATAGRAMS'), ('extra, default has none', 'datagrams != '),
             ('test.pcapng/scapy/ipv4', 'test.pcapng/scapy/datagrams',
              'many_interfaces.pcapng/scapy/ipv4', 'many_interfaces.pcapng/scapy/datagrams')),
-        Gap(1503, 'the scapy engine dates a Simple Packet Block, which carries no timestamp, with '
-               'the wall-clock time it was read (scapy leaves Packet.time at construction; '
-               'pcapkit/toolkit/scapy.py:186 forwards it), where default reports 0',
-            'RECORDS', 'frame 4: timestamp ', ('test.pcapng/scapy/timestamps',)),
     )
 
     def setUp(self) -> None:

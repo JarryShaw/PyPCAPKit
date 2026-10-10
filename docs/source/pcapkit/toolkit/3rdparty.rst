@@ -33,6 +33,12 @@ Auxiliary Functions
 
 .. autofunction:: pcapkit.toolkit.scapy.packet2dict
 
+.. autofunction:: pcapkit.toolkit.scapy.packet2frame
+
+.. autofunction:: pcapkit.toolkit.scapy.attach_resolution
+
+.. autofunction:: pcapkit.toolkit.scapy.attach_linktype
+
 DPKT Tools
 ==========
 
