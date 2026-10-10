@@ -65,7 +65,13 @@ class TestIPReassemblyLastFragmentOffset(unittest.TestCase):
                             datagram, = reasm.datagram
                             self.assertIs(datagram.completed, Completion.PARTIAL)
                             self.assertEqual(datagram.index, (1,))
-                            if strict:
+                            if strict and mf:
+                                # a non-final fragment ending mid-block was cut
+                                # or is malformed, so its block is not received
+                                # (#1567) -- and the datagram is still reported
+                                # (#1566)
+                                self.assertEqual(datagram.payload, ())
+                            elif strict:
                                 run, = datagram.payload
                                 self.assertEqual(run[:size], tail)
                             elif mf:
@@ -112,7 +118,9 @@ class TestIPReassemblyLastFragmentOffset(unittest.TestCase):
                             run, = datagram.payload
                         else:
                             run = datagram.payload
-                        self.assertEqual(run[:LAST + size], BODY + tail)
+                        # the tail ends mid-block on a non-final fragment, so
+                        # its block is not received (#1567)
+                        self.assertEqual(run, BODY)
 
     def test_a_tso_fragment_at_the_largest_offset_composes_with_the_buffer_growth(self) -> None:
         # Total Length 0 (#1555): 7 octets end exactly at the preallocated

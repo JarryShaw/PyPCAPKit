@@ -65,6 +65,17 @@ Terminology
 
        .. note::
 
+          ``tl`` is derived from the captured payload, not from the Payload
+          Length field, so a fragment the snapshot length cut does not show it
+          in ``tl``. A non-final fragment must carry a multiple of 8 octets
+          (:rfc:`8200#section-4.5`), so reassembly does not count the partial
+          last block of one that ends mid-block as received: the datagram
+          stays incomplete, rather than completing with zeros where the cut
+          octets were (:issue:`1567`). A cut *final* fragment cannot be told
+          from a whole one.
+
+       .. note::
+
           The reassembly key is the Fragment header's *Identification*
           (:rfc:`8200#section-4.5`), not the IPv6 header's *Flow Label*. The
           label is optional and routinely zero, so keying on it collapses

@@ -93,3 +93,11 @@ Algorithm
 Because completion frees the buffer (:rfc:`791#section-3.2`), a fragment that
 arrives after its datagram has completed opens a new buffer, which is later
 reported as a separate incomplete datagram; this is intended (:issue:`1507`).
+
+Two departures from the procedure above:
+
+* Only the final fragment's partial last ``RCVBT`` block is set. A non-final
+  fragment carries a multiple of 8 octets, so one ending mid-block was cut or
+  is malformed, and setting its last block would complete the datagram with
+  octets nobody sent (:issue:`1567`).
+* A datagram longer than the data buffer is never complete (:issue:`1566`).

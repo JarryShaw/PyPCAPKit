@@ -98,16 +98,18 @@ class IPReassemblyTests(unittest.TestCase):
         self.assertEqual(pending._buffer[self._packet(num=0, fo=0, mf=True, payload=b'').bufid].header,
                          b'updated')
 
+        # a buffer with no run received is still reported, as strict=False
+        # reports it (#1566)
         empty = TestIP()
         src = ip_address('192.0.2.1')
         dst = ip_address('198.51.100.2')
-        self.assertEqual(
-            empty.submit(
-                Buffer(-1, bytearray(b'\x00\x00'), [], b'', bytearray(b''), 1000.0, []),
-                bufid=(src, dst, 42, TransType.UDP),
-            ),
-            [],
+        datagram, = empty.submit(
+            Buffer(-1, bytearray(b'\x00\x00'), [], b'', bytearray(b''), 1000.0, []),
+            bufid=(src, dst, 42, TransType.UDP),
         )
+        self.assertFalse(datagram.completed)
+        self.assertEqual(datagram.payload, ())
+        self.assertIsNone(datagram.packet)
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')

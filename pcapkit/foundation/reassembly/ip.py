@@ -35,14 +35,16 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
 
     Args:
         strict: if :data:`True`, report a datagram that is not completely
-            reassembled as the tuple of its received runs; otherwise as one
-            contiguous payload, its holes zero-filled -- or, while the total
-            length is unknown, only the prefix up to the first hole. Receipt
-            is tracked in 8-octet blocks, so the partial last block of a
-            snaplen-truncated fragment is not counted as received: it is left
-            out of the runs and ends the prefix, but once the total length is
-            known the contiguous payload keeps its real octets, with only the
-            rest of the hole zero-filled
+            reassembled as the tuple of its received runs, empty if none was;
+            otherwise as one contiguous payload, its holes zero-filled -- or,
+            while the total length is unknown, only the prefix up to the first
+            hole. Receipt is tracked in 8-octet blocks, and only the final
+            fragment's partial last block counts as received -- a non-final
+            fragment's, or a snaplen-truncated or buffer-clipped fragment's,
+            does not: it is left out of the runs and ends the prefix, but once
+            the total length is known the contiguous payload keeps its real
+            octets, with only the rest of the hole zero-filled. A datagram
+            longer than the data buffer is never complete
         store: if store reassembled datagram in memory, i.e.,
             :attr:`self._dtgram <pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram>`
             (if not, datagram will be discarded after callback)
@@ -168,12 +170,12 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         # grows to hold such a datagram rather than clipping it, ``RCVBT`` in
         # step with it.
         #
-        # With nothing declared, a snaplen cut cannot be seen in the length.
-        # A fragment with **MF** set must carry a multiple of 8 octets, so its
-        # partial last block is a cut and is left unmarked below. Any other cut
-        # -- an unfragmented frame's, or a final fragment's -- cannot be told
-        # from a whole one, since the frame's original length is not part of
-        # the input, and the datagram comes out ``COMPLETE`` but short.
+        # With nothing declared, a snaplen cut cannot be seen in the length. A
+        # non-final fragment's cut still shows, as a partial last block, which
+        # is left unmarked below. Any other cut -- an unfragmented frame's, or
+        # a final fragment's -- cannot be told from a whole one, since the
+        # frame's original length is not part of the input, and the datagram
+        # comes out ``COMPLETE`` but short.
         if TL == 0:
             length = len(info.payload)
             extent = FO + length
@@ -206,13 +208,23 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         buf.datagram[start:stop] = payload
 
         # Set RCVBT bits (in 8 octets) for the blocks this fragment actually
-        # filled. A fragment held in full marks its last block even when it is
-        # short, as the final fragment's is; a truncated one leaves its partial
-        # last block clear, since the octets after the cut are a real hole --
-        # as does a non-final fragment with Total Length 0, whose partial last
-        # block can only be a cut.
+        # filled. Only the final fragment, held in full, marks a partial last
+        # block: the octets after its end are past the datagram's. Every other
+        # partial last block is left clear, as a hole --
+        #
+        # * a truncated fragment's, since the octets after the cut are missing.
+        #   That includes one clipped by the data buffer's end, whose octets
+        #   past it cannot be held, so it counts as cut there (:issue:`1566`).
+        # * a non-final fragment's. :rfc:`791#section-3.2` and
+        #   :rfc:`8200#section-4.5` make every fragment but the last carry a
+        #   multiple of 8 octets, so one that ends mid-block was cut or is
+        #   malformed, and nobody sent the rest of its block. Marking it would
+        #   complete the datagram with zeros in their place. This is the only
+        #   way a cut shows when the length is not declared: under Total
+        #   Length 0, and on IPv6, whose adapters derive it from the captured
+        #   payload (:issue:`1567`).
         start = FO // 8
-        if held == length and not (TL == 0 and MF):
+        if held == length and not MF:
             stop = (FO + held + 7) // 8
         else:
             stop = (FO + held) // 8
@@ -224,15 +236,32 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         # fragment with MF clear has arrived, and ``0`` is a valid length
         if not MF:
             buf.__update__(TDL=length + FO)
-        TDL = buf.TDL
 
         # when datagram is reassembled in whole
-        start = 0
-        stop = (TDL + 7) // 8
-        if TDL >= 0 and all(buf.RCVBT[start:stop]):
+        if self._is_complete(buf):
             self._dtgram.extend(
                 self.submit(self._buffer.pop(BUFID), bufid=BUFID, checked=True)
             )
+
+    @staticmethod
+    def _is_complete(buf: 'Buffer[_AT]') -> 'bool':
+        """Tell whether a buffer holds its whole datagram.
+
+        Arguments:
+            buf: buffer to check
+
+        Returns:
+            Whether the total data length is known, fits the data buffer, and
+            every 8-octet block up to it is marked received.
+
+        A datagram longer than the data buffer cannot be held, so it is never
+        complete. Checking ``RCVBT`` alone does not show that: slicing it past
+        its end stops silently, so the blocks past the buffer would read as
+        received (:issue:`1566`).
+
+        """
+        TDL = buf.TDL
+        return 0 <= TDL <= len(buf.datagram) and all(buf.RCVBT[:(TDL + 7) // 8])
 
     @staticmethod
     def _detect_conflicts(rcvbt: 'bytearray', tdl: 'int', datagram: 'bytearray', payload: 'bytearray',
@@ -331,9 +360,7 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         datagram = buf.datagram
         conflict = tuple(buf.conflict)
 
-        start = 0
-        stop = (TDL + 7) // 8
-        flag = checked or (TDL >= 0 and all(RCVBT[start:stop]))
+        flag = checked or self._is_complete(buf)
         ret = []  # type: list[Datagram[_AT]]
 
         # How completely this datagram came out, and why it stopped. Derived once,
@@ -361,23 +388,24 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
             # the last run may reach the end of the bit table
             if byte:
                 data.append(bytes(byte))
-            # strip empty packets
-            if data or header:
-                packet = Datagram(
-                    completed=completion,
-                    id=DatagramID(
-                        src=bufid[0],
-                        dst=bufid[1],
-                        id=bufid[2],
-                        proto=bufid[3],
-                    ),
-                    index=tuple(index),
-                    header=header,
-                    payload=tuple(data),
-                    packet=None,
-                    conflict=conflict,
-                )
-                ret.append(packet)
+            # Report it even with no run received, its payload ``()``, as
+            # ``strict=False`` reports it with an empty payload: ``index``
+            # still says which frames were its fragments (:issue:`1566`).
+            packet = Datagram(
+                completed=completion,
+                id=DatagramID(
+                    src=bufid[0],
+                    dst=bufid[1],
+                    id=bufid[2],
+                    proto=bufid[3],
+                ),
+                index=tuple(index),
+                header=header,
+                payload=tuple(data),
+                packet=None,
+                conflict=conflict,
+            )
+            ret.append(packet)
         # if datagram is reassembled in whole -- or if it is not, and ``strict``
         # asked for one contiguous payload rather than the received runs
         else:
