@@ -5,7 +5,7 @@ import unittest
 from collections import ChainMap
 from collections.abc import Mapping
 
-from tests._support import purge_modules, reimport_once_per_class
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -51,20 +51,17 @@ class SchemaMetaAbcCacheTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        # Fresh :mod:`pcapkit` classes *and* a freshly reset
-        # :mod:`collections.abc` cache, for every test. Both matter: a stale
-        # positive cache entry left over from an earlier test in the same
-        # process would make the very first assertion below true for the wrong
-        # reason. :func:`reimport_once_per_class` resets the cache each time;
-        # the classes are fresh each time only because ``tearDown`` purges them
-        # before :func:`reimport_once_per_class` can keep them for the next test.
-        reimport_once_per_class(self)
-
-    def tearDown(self) -> None:
-        # A couple of tests below deliberately poison collections.abc's shared
-        # caches (that is the point of them) -- reset them again on the way
-        # out, so nothing outside this module ever reads what was left behind.
-        purge_modules(['pcapkit'])
+        # A freshly reset :mod:`collections.abc` cache for every test: a stale
+        # positive entry left over from an earlier test would make the very
+        # first assertion below true for the wrong reason.
+        # :func:`reimport_once_per_class` resets it on every call. The classes
+        # are the class's own import, kept across its tests (GitHub issue
+        # #1538): on the #439 defect every schema class shares ``Mapping``'s
+        # cache, so that reset reaches it too, and reverting the fix fails the
+        # same tests either way. A couple of tests deliberately poison the
+        # shared caches, so ``restore=True`` resets them again on the way out
+        # of the class, and nothing outside it reads what was left behind.
+        reimport_once_per_class(self, restore=True)
 
     def test_a_plain_dict_is_not_a_schema_after_mapping_is_asked_first(self) -> None:
         """The order-sensitive reproduction from GitHub issue #439 itself.

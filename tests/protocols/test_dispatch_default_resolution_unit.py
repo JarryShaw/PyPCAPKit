@@ -49,7 +49,7 @@ import unittest
 import warnings
 from unittest import mock
 
-from tests._support import purge_modules, reimport_once_per_class
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -61,15 +61,15 @@ RAW_MODULE = 'pcapkit.protocols.misc.raw'
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class DefaultDescriptorResolutionTests(unittest.TestCase):
     def setUp(self) -> None:
-        reimport_once_per_class(self)
-
-    def tearDown(self) -> None:
         # ``test_no_stale_class_survives_a_module_reload`` leaves a reloaded
         # module behind, whose ``Raw`` is a different object from the one the
-        # rest of the imported tree holds. Purging here keeps that confined to
-        # the test that did it, rather than handing it to whatever imports
-        # :mod:`pcapkit` next.
-        purge_modules(['pcapkit'])
+        # rest of the imported tree holds. ``restore=True`` keeps that confined
+        # to this class's own import, rather than handing it to whatever
+        # imports :mod:`pcapkit` next. Inside the class it is harmless: every
+        # test reads ``Raw`` through :data:`sys.modules`, as dispatch itself
+        # does, so both sides of each assertion see the same class whichever
+        # order the tests run in (GitHub issue #1538).
+        reimport_once_per_class(self, restore=True)
 
     def _dummy_protocol(self) -> type:
         """Build a protocol class with a registry of its own.

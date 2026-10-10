@@ -6,7 +6,7 @@ import logging
 import os
 import unittest
 
-from tests._support import load_module, purge_modules, reimport_once_per_class
+from tests._support import load_module, reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -44,7 +44,6 @@ class LoggingEnvironmentTests(unittest.TestCase):
                 os.environ.pop(key, None)
             else:
                 os.environ[key] = value
-        purge_modules(['pcapkit'])
         pristine()
 
     def test_boolean_environment_flags_are_parsed(self) -> None:
@@ -100,7 +99,6 @@ class LoggingImportTimeTests(unittest.TestCase):
             os.environ.pop('PCAPKIT_DEVMODE', None)
         else:
             os.environ['PCAPKIT_DEVMODE'] = self._saved
-        purge_modules(['pcapkit'])
         pristine()
 
     def test_fresh_import_attaches_only_a_null_handler(self) -> None:
@@ -188,7 +186,6 @@ class LoggerHierarchyTests(unittest.TestCase):
         pristine()
 
     def tearDown(self) -> None:
-        purge_modules(['pcapkit'])
         pristine()
 
     def test_get_logger_maps_module_names_onto_the_hierarchy(self) -> None:
@@ -245,7 +242,6 @@ class LoggingConfigureTests(unittest.TestCase):
         pristine()
 
     def tearDown(self) -> None:
-        purge_modules(['pcapkit'])
         pristine()
 
     def test_configure_sets_level_and_attaches_a_stream_handler(self) -> None:
@@ -400,7 +396,6 @@ class RegistryLogLevelTests(unittest.TestCase):
         pristine()
 
     def tearDown(self) -> None:
-        purge_modules(['pcapkit'])
         pristine()
 
     def test_registry_bookkeeping_is_logged_at_debug_not_info(self) -> None:
@@ -462,7 +457,6 @@ class ExtractorLoggingTests(unittest.TestCase):
         pristine()
 
     def tearDown(self) -> None:
-        purge_modules(['pcapkit'])
         pristine()
 
     def test_extraction_emits_a_debug_trail(self) -> None:
