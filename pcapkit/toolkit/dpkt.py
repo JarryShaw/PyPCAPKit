@@ -23,6 +23,7 @@ from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.data import FrameRecord
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
 from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
+from pcapkit.toolkit.pypcapfile import _default_accepts
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
 if TYPE_CHECKING:
@@ -431,6 +432,36 @@ def _network(packet: 'Packet') -> 'Optional[IP | IP6]':
     return getattr(packet, 'ip6', None)
 
 
+def _ipv4_accepted(ipv4: 'IP') -> 'bool':
+    """Test if the default engine reads a DPKT IPv4 packet as an IPv4 layer.
+
+    Args:
+        ipv4: DPKT IPv4 packet.
+
+    Returns:
+        :data:`False` if the default engine's IPv4 parser rejects its header --
+        its version is not 4, its options are ones the parser rejects, or its
+        IHL runs past the captured octets (:issue:`1607`) -- as the default
+        engine then dissects nothing past it; else :data:`True`.
+
+    Note:
+        `DPKT`_ decodes what an IPv4 EtherType or tunnel carries as IPv4
+        whatever its version, and never checks its options, so the header is
+        asked of the parser itself, as the pypcapfile engine asks it (see
+        :func:`pcapkit.toolkit.pypcapfile._default_accepts`). Its octets are the
+        fields as `DPKT`_ read them and the options as captured, which is
+        exact. A header of version 4 with no options is not parsed: `DPKT`_
+        decodes none shorter than 20 octets or with an IHL below 5, and the
+        parser checks nothing else of one.
+
+    .. _DPKT: https://dpkt.readthedocs.io
+
+    """
+    if ipv4.v == 4 and ipv4.hl == 5:
+        return True
+    return _default_accepts('IPv4', ipv4.pack_hdr() + bytes(ipv4.opts))
+
+
 def _tcp_carrier(packet: 'Packet') -> 'tuple[Optional[IP | IP6], Optional[TCP]]':
     """Fetch the IP layer of a DPKT packet that carries its TCP segment, and the segment.
 
@@ -441,9 +472,11 @@ def _tcp_carrier(packet: 'Packet') -> 'tuple[Optional[IP | IP6], Optional[TCP]]'
         The innermost IPv4 or IPv6 packet of the network layer (see
         :func:`_network`) and of the IP-in-IP tunnels it carries, and its
         :class:`dpkt.tcp.TCP` payload, if it has one; else :data:`None` for the
-        latter, and for both with no network layer. A tunnel is a packet whose
-        protocol, or for IPv6 the next header after its extension headers, is
-        one of the :data:`IP_TUNNELS`.
+        latter, and for both with no network layer, or if the default engine
+        rejects the header of an IPv4 packet on the way (see
+        :func:`_ipv4_accepted`). A tunnel is a packet whose protocol, or for
+        IPv6 the next header after its extension headers, is one of the
+        :data:`IP_TUNNELS`.
 
     Note:
         `DPKT`_ decodes an IPv4 or IPv6 packet inside another (:rfc:`2003`,
@@ -460,7 +493,11 @@ def _tcp_carrier(packet: 'Packet') -> 'tuple[Optional[IP | IP6], Optional[TCP]]'
     ip = _network(packet)
     if ip is None:
         return None, None
-    while getattr(ip, 'p', None) in IP_TUNNELS and isinstance(ip.data, (dpkt.ip.IP, dpkt.ip6.IP6)):
+    while True:
+        if isinstance(ip, dpkt.ip.IP) and not _ipv4_accepted(ip):
+            return None, None
+        if getattr(ip, 'p', None) not in IP_TUNNELS or not isinstance(ip.data, (dpkt.ip.IP, dpkt.ip6.IP6)):
+            break
         ip = ip.data
 
     tcp = getattr(ip, 'tcp', None)  # type: Optional[TCP]
@@ -565,7 +602,8 @@ def ipv4_reassembly(packet: 'Packet', timestamp: 'float', *,
         Data for IPv4 reassembly.
 
         * If the ``packet`` can be used for IPv4 reassembly. A packet can be reassembled
-          if it contains IPv4 layer (:class:`dpkt.ip.IP`) and the **DF** (:attr:`dpkt.ip.IP.df`)
+          if it contains IPv4 layer (:class:`dpkt.ip.IP`) whose header the default engine
+          accepts (see :func:`_ipv4_accepted`), and the **DF** (:attr:`dpkt.ip.IP.df`)
           flag is :data:`False`.
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv4
           reassembly (:term:`reasm.ipv4.packet`) will be returned; otherwise, returns :data:`None`.
@@ -586,7 +624,7 @@ def ipv4_reassembly(packet: 'Packet', timestamp: 'float', *,
     network = _network(packet)
     # an IPv6 layer is the one with extension headers, as in ``_wire_hdr_len``
     ipv4 = None if hasattr(network, 'extension_hdrs') else network
-    if ipv4 is not None:
+    if ipv4 is not None and _ipv4_accepted(ipv4):
         if ipv4.df:     # dismiss not fragmented packet
             return None
         # internet header length, in octets -- ``IP.hl`` counts 32-bit words and
@@ -720,7 +758,8 @@ def tcp_reassembly(packet: 'Packet', timestamp: 'float', *,
 
         * If the ``packet`` can be used for TCP reassembly. A packet can be reassembled
           if it contains TCP layer (:class:`dpkt.tcp.TCP`), keyed by the IP packet that
-          carries it -- in an IP-in-IP tunnel, the innermost (see :func:`_tcp_carrier`).
+          carries it -- in an IP-in-IP tunnel, the innermost (see :func:`_tcp_carrier`)
+          -- and behind no IPv4 header the default engine rejects.
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
           reassembly (:term:`reasm.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
@@ -785,7 +824,8 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
 
         * If the ``packet`` can be used for TCP flow tracing. A packet can be reassembled
           if it contains TCP layer (:class:`dpkt.tcp.TCP`), keyed by the IP packet that
-          carries it -- in an IP-in-IP tunnel, the innermost (see :func:`_tcp_carrier`).
+          carries it -- in an IP-in-IP tunnel, the innermost (see :func:`_tcp_carrier`)
+          -- and behind no IPv4 header the default engine rejects.
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
           flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
