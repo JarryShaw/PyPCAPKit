@@ -212,12 +212,23 @@ class _Run:
 
 
 _RUNS = {}  # type: dict[tuple[str, str], _Run]
+#: What pyshark raises when tshark exits non-zero, by class name, so this module
+#: imports without pyshark.
+TSHARK_CRASH = 'TSharkCrashException'
 
 
 def _run(engine: 'str', capture: 'str') -> '_Run':
     key = (engine, capture)
     if key not in _RUNS:
-        _RUNS[key] = _Run(engine, capture)
+        run = _Run(engine, capture)
+        # tshark sometimes exits 255 on a capture it reads cleanly on a rerun
+        # (#1534), and the run is cached, so one crash fails every aspect. Retry
+        # once, visibly; a crash that persists stays an ERROR.
+        if run.error is not None and run.error.split(':', 1)[0] == TSHARK_CRASH:
+            warnings.warn(f'{engine} on {capture}: {run.error.splitlines()[0]} '
+                          'Retrying once (#1534).', RuntimeWarning)
+            run = _Run(engine, capture)
+        _RUNS[key] = run
     return _RUNS[key]
 
 
