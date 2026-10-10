@@ -692,6 +692,13 @@ class PeekableStream:
     stream's own. It is not an :class:`io.IOBase`, so it has no finaliser that
     could close the caller's stream behind their back (#610).
 
+    Copying and pickling follow the stream (#1524). :func:`copy.copy` gives a
+    second proxy over the *same* stream, so the two share one position.
+    :func:`copy.deepcopy` and :mod:`pickle` copy the stream too, so they work
+    exactly when the stream itself can be deep-copied or pickled at that
+    protocol: an :class:`io.BytesIO` pickles at protocol 2 and above, and an
+    open file not at all.
+
     Arguments:
         stream: seekable binary stream
 
@@ -717,6 +724,15 @@ class PeekableStream:
             self._stream.seek(pos, io.SEEK_SET)
 
     def __getattr__(self, name: 'str') -> 'Any':
+        # NOTE: reached only for a name the proxy lacks, and two kinds are refused
+        # rather than forwarded. ``_stream`` is the proxy's own: :mod:`copy` and
+        # :mod:`pickle` build an instance without :meth:`__init__`, so it is not set
+        # yet, and forwarding would look it up through here again until the
+        # recursion limit (#1524). A dunder names a protocol of the proxy's, not of
+        # the stream's: forwarded, the stream's ``__setstate__`` or ``__deepcopy__``
+        # would be applied to the proxy.
+        if name == '_stream' or (name.startswith('__') and name.endswith('__')):
+            raise AttributeError(f'{type(self).__name__!r} object has no attribute {name!r}')
         return getattr(self._stream, name)
 
 
