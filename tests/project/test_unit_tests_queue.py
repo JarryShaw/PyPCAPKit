@@ -10,8 +10,10 @@ These fail silently if they drift, so they are pinned here:
 * The ``changes`` classifier must call anything outside ``docs/`` and ``*.md``
   code, and a Markdown file under a code directory code too.
 * ``unittest-ordering`` stays off pull requests and out of the required set,
-  and ``engine-tests``'s 3.15 cell stays non-blocking through a step-level
-  ``continue-on-error`` rather than a job-level one.
+  and queues behind ``test`` without needing it to pass (#1538);
+  ``engine-tests``'s 3.15 cell stays non-blocking through a step-level
+  ``continue-on-error`` rather than a job-level one, runs on ``main`` pushes
+  only, and the job has no ``DPKT`` cell (#1538).
 * The classifier, the engine cell loops and the apt retry are executed too: the
   classifier against a scratch merge commit, the others with their commands
   stubbed on ``PATH``.
@@ -224,6 +226,32 @@ class TestJobGating(unittest.TestCase):
         self.assertNotIn('continue-on-error', gating)
         self.assertIn('for py in 3.10 3.11 3.12 3.13 3.14;', gating)
 
+    def test_unittest_ordering_queues_behind_test_and_survives_its_failure(self) -> None:
+        """#1538 P4(a): queued after ``test``, and ``!cancelled()`` so a red ``test`` still runs it.
+
+        Without the status function the implicit ``success()`` would skip every cell
+        whenever ``test`` failed, and the push run would stop failing on ordering.
+
+        """
+        head = header(job('unittest-ordering'))
+        self.assertRegex(head, r'(?m)^    needs: \[test\]$')
+        self.assertIn("    if: ${{ !cancelled() && inputs.gate-only != true"
+                      " && github.event_name != 'pull_request' }}\n", head)
+
+    def test_the_315_cell_runs_on_main_pushes_only(self) -> None:
+        """#1538 P6: a step-level ``if:``, which narrows #845's ruling to ``main`` pushes."""
+        experimental = step(job('engine-tests'), 'Run the 3.15 cell (experimental, non-blocking)')
+        self.assertIn("        if: ${{ github.event_name != 'pull_request' }}\n", experimental)
+
+    def test_engine_tests_has_no_dpkt_cell(self) -> None:
+        """#1538 P8: its only path, test_dpkt_unit.py, already runs in ``test`` with DPKT."""
+        section = job('engine-tests')
+        engines = re.search(r'(?m)^        engine:\n((?:          - \w+\n)+)', section)
+        self.assertIsNotNone(engines)
+        declared = re.findall(r'- (\w+)', engines.group(1))  # type: ignore[union-attr]
+        self.assertNotIn('DPKT', declared)
+        self.assertNotRegex(section, r'(?m)^ +DPKT\)')
+
 
 def step(section: 'str', name: 'str') -> 'str':
     """The text of the step called ``name`` in ``section``, up to the next step."""
@@ -368,7 +396,7 @@ class TestEngineCellLoops(_Scratch):
         (self.tmp / 'engine-cell.sh').write_text(
             'echo "$1" >> "$RUNNER_TEMP/calls"\n[ "$1" != "$FAIL_PY" ]\n', encoding='utf-8')
         status = bash(step_script(job('engine-tests'), name),
-                      {'RUNNER_TEMP': str(self.tmp), 'ENGINE': 'DPKT', 'FAIL_PY': fail,
+                      {'RUNNER_TEMP': str(self.tmp), 'ENGINE': 'Scapy', 'FAIL_PY': fail,
                        'GITHUB_STEP_SUMMARY': str(self.tmp / 'summary')})
         calls = self.tmp / 'calls'
         return status, calls.read_text(encoding='utf-8').split() if calls.exists() else []
