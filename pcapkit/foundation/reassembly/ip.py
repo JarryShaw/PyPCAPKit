@@ -126,11 +126,14 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         # the header of the fragment at offset zero is the reassembled datagram's
         header = b'' if FO else self._rectify_header(info.header, BUFID[3])
 
-        # initialise buffer with BUFID
+        # initialise buffer with BUFID; ``RCVBT`` holds one entry per 8-octet
+        # block of the data buffer, its partial last block included -- 8191
+        # covered octets 0 to 65527 only, so a fragment reaching octet 65528,
+        # e.g. at the largest Fragment Offset, indexed past it (:issue:`1565`)
         if BUFID not in self._buffer:
             self._buffer[BUFID] = Buffer(
                 TDL=-1,                              # Total Data Length
-                RCVBT=bytearray(8191),              # Fragment Received Bit Table
+                RCVBT=bytearray(8192),              # Fragment Received Bit Table
                 index=[],                           # index record
                 header=header,                      # header buffer
                 datagram=bytearray(65535),          # data buffer
@@ -151,8 +154,34 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         # octets the capture actually holds can be written: a snaplen-truncated
         # fragment carries fewer, and anything past the declared length is not
         # fragment data. The data buffer is preallocated, so the write is also
-        # clipped to it -- its length never changes.
-        length = TL - IHL
+        # clipped to it.
+        #
+        # A Total Length of 0 declares nothing. It is what TCP segmentation
+        # offload leaves in a capture taken on the sending host, and the
+        # datagram then runs to the end of the captured frame -- which is the
+        # payload every adapter hands over (:issue:`1547`). Wireshark ("presumed
+        # TSO") substitutes that length for the field before it reassembles
+        # anything, and so does this, whatever **MF** and the offset say: an
+        # unfragmented one is then whole rather than ``-IHL`` octets long
+        # (:issue:`1555`). Linux's BIG TCP zeroes the field precisely because
+        # the datagram outgrows the 65535 octets it can declare, so the buffer
+        # grows to hold such a datagram rather than clipping it, ``RCVBT`` in
+        # step with it.
+        #
+        # With nothing declared, a snaplen cut cannot be seen in the length.
+        # A fragment with **MF** set must carry a multiple of 8 octets, so its
+        # partial last block is a cut and is left unmarked below. Any other cut
+        # -- an unfragmented frame's, or a final fragment's -- cannot be told
+        # from a whole one, since the frame's original length is not part of
+        # the input, and the datagram comes out ``COMPLETE`` but short.
+        if TL == 0:
+            length = len(info.payload)
+            extent = FO + length
+            if extent > len(buf.datagram):
+                buf.datagram.extend(bytes(extent - len(buf.datagram)))
+                buf.RCVBT.extend(bytes((extent + 7) // 8 - len(buf.RCVBT)))
+        else:
+            length = TL - IHL
         held = max(min(len(info.payload), length, len(buf.datagram) - FO), 0)
         payload = info.payload[:held]
 
@@ -179,9 +208,11 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         # Set RCVBT bits (in 8 octets) for the blocks this fragment actually
         # filled. A fragment held in full marks its last block even when it is
         # short, as the final fragment's is; a truncated one leaves its partial
-        # last block clear, since the octets after the cut are a real hole.
+        # last block clear, since the octets after the cut are a real hole --
+        # as does a non-final fragment with Total Length 0, whose partial last
+        # block can only be a cut.
         start = FO // 8
-        if held == length:
+        if held == length and not (TL == 0 and MF):
             stop = (FO + held + 7) // 8
         else:
             stop = (FO + held) // 8
@@ -192,7 +223,7 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         # get total data length (header excludes); it stays ``-1`` until the
         # fragment with MF clear has arrived, and ``0`` is a valid length
         if not MF:
-            buf.__update__(TDL=TL - IHL + FO)
+            buf.__update__(TDL=length + FO)
         TDL = buf.TDL
 
         # when datagram is reassembled in whole
