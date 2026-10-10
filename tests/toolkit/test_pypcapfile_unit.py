@@ -199,6 +199,9 @@ def fake_ip_decoder() -> dict[str, types.ModuleType]:
             if packet[0] >> 4 != 4 or packet[0] & 0x0F <= 4:
                 raise AssertionError('not an IPv4 packet.')
             struct.unpack('!BBHHHBBHII', packet[:20])
+            # the header length and options, sliced without a bounds check, as the real one does
+            self.hl = packet[0] & 0x0F
+            self.opt = packet[20:self.hl * 4]
 
     modules = {name: types.ModuleType(name) for name in (
         'pcapfile', 'pcapfile.protocols', 'pcapfile.protocols.network',
@@ -223,6 +226,52 @@ def total_length(packet: bytes, value: int) -> bytes:
 def tunnel(packet: bytes, protocol: int, **fields) -> FakeEthernet:
     """An IPv4 frame tunnelling ``packet``, as PyPCAPFile decodes it: payload hex-encoded."""
     return FakeEthernet(FakeIP(binascii.hexlify(packet), p=protocol, **fields))
+
+
+#: IPv4 options the default engine's IPv4 parser rejects: a Record Route of
+#: length 1, one whose length runs past the option area, and a Router Alert of
+#: length 2.
+BAD_IPV4_OPTIONS = (b'\x07\x01\x00\x00', b'\x07\x08\x00\x00', b'\x94\x02\x00\x00')
+
+#: IPv4 options it accepts: four No Operations, a Router Alert, and an End of
+#: Option List followed by octets it leaves as padding.
+GOOD_IPV4_OPTIONS = (b'\x01' * 4, b'\x94\x04\x00\x00', b'\x00\xff\xff\xff')
+
+
+def ah(nxt: int, words: int = 4) -> bytes:
+    """An IP Authentication Header whose Payload Length is ``words``, then next header ``nxt``."""
+    icv = b'\xaa' * max((words + 2) * 4 - 12, 0)
+    return bytes([nxt, words, 0, 0]) + (0x100).to_bytes(4, 'big') + (1).to_bytes(4, 'big') + icv
+
+
+def options_header(nxt: int, padn: bytes = b'\x01\x04\x00\x00\x00\x00') -> bytes:
+    """An IPv6 Hop-by-Hop or Destination Options header of 8 octets, then next header ``nxt``."""
+    return bytes([nxt, 0]) + padn
+
+
+#: IPv6 extension headers the default engine reads past inside IPv4, each with
+#: its protocol number, then TCP: Hop-by-Hop and Destination Options, Routing
+#: (type 0, then type 2), a Fragment header (a later fragment), Mobility (a
+#: Binding Refresh Request) and HIP (an I1, with no parameters).
+IPV4_EXTENSION_HEADERS = (
+    ('hop-by-hop', 0, options_header(6)),
+    ('destination options', 60, options_header(6)),
+    ('routing type 0', 43, bytes([6, 0, 0, 0]) + bytes(4)),
+    ('routing type 2', 43, bytes([6, 2, 2, 1]) + bytes(20)),
+    ('later fragment', 44, bytes([6, 0, 0, 0x10]) + (1).to_bytes(4, 'big')),
+    ('mobility', 135, bytes([6, 1, 0, 0]) + bytes(12)),
+    ('hip', 139, bytes([6, 4, 0x01, 0x21]) + bytes(36)),
+)
+
+
+def ihl(packet: bytes, words: int) -> bytes:
+    """``packet``, an IPv4 packet, with its IHL set to ``words``."""
+    return bytes([0x40 | words]) + packet[1:]
+
+
+def udp_fragment(**fields) -> bytes:
+    """A first IPv4 fragment of a UDP datagram, more to come."""
+    return wire.ipv4(wire.udp(b'u' * 24)[:16], proto=17, mf=True, **fields)
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -737,6 +786,9 @@ class PyPCAPFileEncapsulatedTCPTests(unittest.TestCase):
              tunnel(total_length(wire.ipv4(make_tcp(b'', options=b'\x02\x04\x05\xb4'), proto=6), 40)
                     + bytes(8), 4)),
             ('tunnelled data offset 4', tunnel(wire.ipv4(data_offset(TCP_SEGMENT, 4), proto=6), 4)),
+            # nor is a tunnel whose outer IPv4 header the default engine rejects (#1591, #1596)
+            ('outer ipv4 option', tunnel(tcp4, 4, hl=6, opt=b'\x94\x02\x00\x00')),  # router alert, length 2
+            ('outer ipv4 header overruns the packet', tunnel(tcp4, 4, hl=6, opt=b'\x94\x04')),
             # nor is one whose Data Offset is under 5 words, over IPv6 alone too
             ('ipv6 data offset 4', ipv6_frame(wire.ipv6(data_offset(TCP_SEGMENT, 4), nxt=6))),
             ('802.1Q, ipv6 data offset 0', tagged_frame(wire.ipv6(data_offset(TCP_SEGMENT, 0), nxt=6),
@@ -816,7 +868,7 @@ class PyPCAPFileEncapsulatedTCPTests(unittest.TestCase):
              tunnel(wire.ipv4(make_tcp(b'x', options=b'\x02\x00\x05\xb4'), proto=6), 4)),
             ('tunnelled tcp option past its area',
              ipv6_frame(wire.ipv6(wire.ipv6(make_tcp(b'x', options=b'\x08\x0a\x00\x00'), nxt=6), nxt=41))),
-            ('outer ipv4 option', tunnel(tcp4, 4, hl=6, opt=b'\x94\x02\x00\x00')),  # router alert, length 2
+            ('inner ipv4 option', tunnel(make_ipv4(TCP_SEGMENT, options=b'\x94\x02\x00\x00'), 4)),
         ):
             with self.subTest(case=label):
                 messages = self.decline(make_packet(frame))
@@ -1324,6 +1376,157 @@ class PyPCAPFileToolkitAgainstRealDecodersTests(unittest.TestCase):
                 self.assertTrue(messages[0].startswith('Frame 2: TCP tunnelled in IP'), messages)
                 self.assertTrue(messages[1].startswith('Frame 5: TCP over IPv6'), messages)
                 self.assertEqual([tuple(flow.index) for flow in extractor.trace.tcp], [(1,)])
+            finally:
+                close_extractor(extractor)
+
+
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+@unittest.skipUnless(HAS_PYPCAPFILE, 'pypcapfile not installed or not importable')
+class PyPCAPFileHeaderCheckAgreementTests(unittest.TestCase):
+    """Frames whose headers PyPCAPFile reads but does not check, against the default engine.
+
+    C.f. #1590 (Data Offset below 5), #1591 (IHL past the packet), #1592 (IPv4 in
+    IPv6), #1593 (TCP behind AH over IPv4), #1596 (IPv4 options) and #1597 (TCP
+    behind IPv6 extension headers in IPv4).
+
+    """
+
+    ASPECTS = PyPCAPFileToolkitAgainstRealDecodersTests.ASPECTS
+    read = PyPCAPFileToolkitAgainstRealDecodersTests.read
+    read_both = PyPCAPFileToolkitAgainstRealDecodersTests.read_both
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def agree(self, frames, **want) -> dict:
+        """:meth:`read_both` ``frames``; check each aspect agrees, and pypcapfile's inputs are ``want``."""
+        mine, theirs = self.read_both(frames)
+        for kind, numbers in want.items():
+            self.assertEqual(sorted(mine[kind]), numbers, kind)
+        for aspect in self.ASPECTS:
+            with self.subTest(aspect=aspect):
+                self.assertEqual(mine[aspect], theirs[aspect])
+        return mine
+
+    def test_data_offset_below_5_agrees(self) -> None:
+        segment = wire.tcp(b'data', seq=1)
+        self.agree([
+            wire.ethernet(wire.ipv4(data_offset(segment, 4), proto=6), 0x0800),
+            tagged(wire.ipv4(data_offset(segment, 0), proto=6), 0x0800, C_TAG),
+            wire.ethernet(wire.ipv4(segment, proto=6), 0x0800),
+        ], tcp=[3], trace=[3])
+
+    def test_ipv4_header_past_the_packet_agrees(self) -> None:
+        self.agree([
+            wire.ethernet(ihl(wire.ipv4(wire.tcp(b'', seq=1), proto=6), 15), 0x0800),
+            tagged(ihl(wire.ipv4(wire.tcp(b'', seq=1), proto=6), 15), 0x0800, C_TAG),
+            wire.ethernet(ihl(wire.ipv4(b'', proto=17), 6), 0x0800),
+            wire.ethernet(wire.ipv4(b'', proto=17), 0x0800),
+        ], ipv4=[4], tcp=[])
+
+    def test_ipv4_in_ipv6_agrees(self) -> None:
+        datagram = wire.udp(b'u' * 24)
+        first = wire.ipv4(datagram[:16], proto=17, mf=True, ident=5)
+        frames = [
+            # one datagram, in two fragments, each in IPv6
+            wire.ethernet(wire.ipv6(first, nxt=4), 0x86DD),
+            tagged(wire.ipv6(wire.ipv4(datagram[16:], proto=17, offset=16, ident=5), nxt=4),
+                   0x86DD, C_TAG),
+            wire.ethernet(wire.ipv6(bytes([4, 0, 1, 4, 0, 0, 0, 0]) + udp_fragment(), nxt=0), 0x86DD),
+            wire.ethernet(wire.ipv6(wire.ipv6(udp_fragment(), nxt=4), nxt=41), 0x86DD),
+            wire.ethernet(wire.ipv6(udp_fragment(), nxt=4), 0x86DD) + bytes(9),
+            wire.ethernet(wire.ipv6(make_ipv4(b'u' * 8, protocol=17, flags=1,
+                                              options=b'\x94\x04\x00\x00'), nxt=4), 0x86DD),
+            # none: DF set, a later IPv6 fragment, an IHL past the packet, options it rejects
+            wire.ethernet(wire.ipv6(wire.ipv4(wire.udp(b'x'), proto=17, df=True), nxt=4), 0x86DD),
+            wire.ethernet(wire.ipv6_fragment(udp_fragment(), offset=8, nxt=4), 0x86DD),
+            wire.ethernet(wire.ipv6(ihl(udp_fragment(), 15), nxt=4), 0x86DD),
+            wire.ethernet(wire.ipv6(make_ipv4(b'u' * 8, protocol=17, flags=1,
+                                              options=BAD_IPV4_OPTIONS[0]), nxt=4), 0x86DD),
+        ]
+        mine = self.agree(frames, ipv4=[1, 2, 3, 4, 5, 6])
+        self.assertIn(datagram, [item['payload'] for item in mine['ipv4 datagrams'] if item['completed']])
+
+    def test_tcp_behind_ah_agrees(self) -> None:
+        def over_ah(segment: bytes, header: bytes = ah(6), **fields) -> bytes:
+            return wire.ethernet(wire.ipv4(header + segment, proto=51, **fields), 0x0800)
+
+        frames = [
+            # a flow behind AH, then behind two, tagged, and with Ethernet padding
+            over_ah(wire.tcp(b'', seq=0, syn=True)),
+            over_ah(wire.tcp(b'hello', seq=1, ack=1), ah(51) + ah(6, 1)),
+            tagged(wire.ipv4(ah(6) + wire.tcp(b'!', seq=6, ack=1), proto=51), 0x0800, C_TAG),
+            over_ah(wire.tcp(b'', seq=7, ack=1, fin=True)) + bytes(7),
+            over_ah(make_tcp(b'opts', options=b'\x02\x04\x05\xb4')),
+            # none: a Payload Length of 0, a Data Offset past the capture or below
+            # 5, an option the TCP parser rejects, a later fragment
+            over_ah(wire.tcp(b'x', seq=0), ah(6, 0)),
+            over_ah(data_offset(wire.tcp(b'x', seq=0), 9)),
+            over_ah(data_offset(wire.tcp(b'x', seq=0), 4)),
+            over_ah(make_tcp(b'x', options=b'\x02\x03\x00\x00')),
+            over_ah(wire.tcp(b'x', seq=0), offset=8),
+        ]
+        mine = self.agree(frames, tcp=[1, 2, 3, 4, 5], trace=[1, 2, 3, 4, 5])
+        self.assertEqual(mine['tcp'][2]['payload'], b'hello')
+
+    def test_tcp_behind_ipv6_extension_headers_in_ipv4_agrees(self) -> None:
+        # C.f. #1597: the default engine reads IPv4's protocol as IPv6 reads a
+        # Next Header, so dissects these headers there too, and the TCP after them.
+        def over(protocol: int, header: bytes, segment: bytes) -> bytes:
+            return wire.ethernet(wire.ipv4(header + segment, proto=protocol), 0x0800)
+
+        frames = [over(protocol, header, wire.tcp(b'data', seq=number, sport=1000 + number))
+                  for number, (_, protocol, header) in enumerate(IPV4_EXTENSION_HEADERS)]
+        frames += [
+            # two, then AH after one, tagged
+            over(0, options_header(60) + options_header(6), wire.tcp(b'data', seq=7)),
+            over(60, options_header(51) + ah(6), wire.tcp(b'data', seq=8)),
+            tagged(wire.ipv4(options_header(6) + wire.tcp(b'data', seq=9), proto=60), 0x0800, C_TAG),
+            # none: an option the default engine rejects, a header cut short, a HIP
+            # Header Length under 4, Shim6, and a TCP option behind it the TCP parser rejects
+            over(60, options_header(6, b'\x01\x09' + bytes(4)), wire.tcp(b'data', seq=10)),
+            wire.ethernet(wire.ipv4(options_header(6)[:4], proto=60), 0x0800),
+            wire.ethernet(wire.ipv4(bytes([6, 0, 0, 0]), proto=43), 0x0800),
+            over(139, bytes([6, 3, 0x01, 0x21]) + bytes(28), wire.tcp(b'data', seq=11)),
+            over(140, bytes([6, 0, 0x80, 0]) + bytes(4), wire.tcp(b'data', seq=12)),
+            over(60, options_header(6), make_tcp(b'x', options=b'\x02\x03\x00\x00')),
+        ]
+        self.agree(frames, tcp=list(range(1, 11)), trace=list(range(1, 11)))
+
+    def test_ipv4_options_agree(self) -> None:
+        frames = []
+        for options in (*GOOD_IPV4_OPTIONS, *BAD_IPV4_OPTIONS):
+            segment = make_tcp(b'data', src_port=1000 + len(frames))
+            frames += [
+                wire.ethernet(make_ipv4(segment, options=options), 0x0800),
+                tagged(make_ipv4(segment, options=options), 0x0800, C_TAG),
+                wire.ethernet(make_ipv4(b'x' * 16, protocol=17, flags=1, options=options), 0x0800),
+            ]
+        self.agree(frames, ipv4=list(range(1, 10)), tcp=[1, 2, 4, 5, 7, 8])
+
+    def test_engine_warns_of_a_tunnel_behind_ah(self) -> None:
+        from pcapkit import extract
+
+        frames = (
+            # a TCP header behind AH that the TCP parser rejects is no TCP at all
+            wire.ethernet(wire.ipv4(ah(6) + data_offset(TCP_SEGMENT, 9), proto=51), 0x0800),
+            wire.ethernet(wire.ipv4(ah(4) + wire.ipv4(TCP_SEGMENT, proto=6), proto=51), 0x0800),
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, 'ah.pcap')
+            with open(path, 'wb') as file:
+                file.write(wire.pcap([(1, number, frame) for number, frame in enumerate(frames)]))
+            with warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter('always')
+                extractor = extract(fin=path, nofile=True, engine='pypcapfile', reassembly=True,
+                                    tcp=True, trace=True, trace_fout=os.path.join(tmp, 'trace'),
+                                    trace_format='json')
+            try:
+                self.assertEqual(extractor._exnam, 'pypcapfile')
+                messages = [str(item.message) for item in caught if 'left out' in str(item.message)]
+                self.assertEqual(len(messages), 1, messages)
+                self.assertTrue(messages[0].startswith('Frame 2: TCP tunnelled in IP'), messages)
+                self.assertEqual(len(extractor.reassembly.tcp), 0)
             finally:
                 close_extractor(extractor)
 
