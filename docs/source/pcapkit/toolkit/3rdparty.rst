@@ -185,11 +185,13 @@ cannot be used for it.
    IPv6 fragment".
 
    Nor does it decode a VLAN tag or a tunnel. The adapters read an IPv4 packet
-   behind 802.1Q and 802.1ad tags as `PyPCAPFile`_ reads an untagged one, while
-   TCP over IPv6 and TCP tunnelled in IP (e.g. 6in4, 4in4, 6in6) are left out of
+   behind 802.1Q and 802.1ad tags as `PyPCAPFile`_ reads an untagged one, and
+   TCP tunnelled in IP (e.g. 4in4, 4in6) from its innermost IPv4 packet, keyed by
+   that packet's addresses as the default engine keys it, while TCP over IPv6,
+   tunnelled (e.g. 6in4, 6in6) or not, is left out of
    :func:`~pcapkit.toolkit.pypcapfile.tcp_reassembly` and
    :func:`~pcapkit.toolkit.pypcapfile.tcp_traceflow`, with an
-   :class:`~pcapkit.utilities.warnings.AttributeWarning` once per capture for each.
+   :class:`~pcapkit.utilities.warnings.AttributeWarning` once per capture.
 
 .. autofunction:: pcapkit.toolkit.pypcapfile.ipv4_reassembly
 

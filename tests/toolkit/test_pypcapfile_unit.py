@@ -26,6 +26,7 @@ import warnings
 
 from tests._support import close_extractor, reimport_once_per_class
 from tests.foundation import _roundtrip as wire
+from tests.toolkit import test_tunnelled_tcp_flow_key_1581_unit as tunnels
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -185,8 +186,9 @@ def tagged_frame(packet: bytes, ethertype: int, *tpids: int) -> FakeEthernet:
 def fake_ip_decoder() -> dict[str, types.ModuleType]:
     """Stand-in modules for :mod:`pcapfile.protocols.network.ip`, for :data:`sys.modules`.
 
-    Their ``IP`` records what it was given, and refuses what is not an IPv4
-    header of at least 20 octets as the real decoder does.
+    Their ``IP`` records what it was given, refuses what is not an IPv4 header
+    of at least 20 octets as the real decoder does, and decodes the fields as
+    it does, with the options and the payload hex-encoded.
 
     """
     class IP:
@@ -198,10 +200,15 @@ def fake_ip_decoder() -> dict[str, types.ModuleType]:
             self.calls.append((packet, layers))
             if packet[0] >> 4 != 4 or packet[0] & 0x0F <= 4:
                 raise AssertionError('not an IPv4 packet.')
-            struct.unpack('!BBHHHBBHII', packet[:20])
-            # the header length and options, sliced without a bounds check, as the real one does
-            self.hl = packet[0] & 0x0F
-            self.opt = packet[20:self.hl * 4]
+            fields = struct.unpack('!BBHHHBBHII', packet[:20])
+            self.v, self.hl = fields[0] >> 4, fields[0] & 0x0F
+            self.tos, self.len, self.id = fields[1:4]
+            self.flags, self.off = fields[4] >> 13, fields[4] & 0x1FFF
+            self.ttl, self.p, self.sum = fields[5:8]
+            self.src, self.dst = (str(ipaddress.IPv4Address(field)).encode() for field in fields[8:])
+            # the options and payload, sliced without a bounds check, as the real one does
+            self.opt = binascii.hexlify(packet[20:self.hl * 4])
+            self.payload = binascii.hexlify(packet[self.hl * 4:])
 
     modules = {name: types.ModuleType(name) for name in (
         'pcapfile', 'pcapfile.protocols', 'pcapfile.protocols.network',
@@ -716,40 +723,82 @@ class PyPCAPFileEncapsulatedTCPTests(unittest.TestCase):
                 self.assertTrue(messages[0].startswith('Frame 1: TCP over IPv6 is left out'),
                                 messages)
 
-    def test_tunnelled_tcp_warns(self) -> None:
+    def test_tunnelled_tcp_over_ipv6_warns(self) -> None:
+        # C.f. #1581: TCP whose innermost IP layer is IPv6 is TCP over IPv6,
+        # however deep the tunnel, and warns as such.
+        from unittest import mock
+
         tcp4, tcp6 = wire.ipv4(TCP_SEGMENT, proto=6), wire.ipv6(TCP_SEGMENT, nxt=6)
         hop_by_hop = bytes([6, 0]) + b'\x01\x04' + bytes(4)
         for label, frame in (
-            ('4in4', tunnel(tcp4, 4)),
             ('6in4', tunnel(tcp6, 41)),
             ('6in6', ipv6_frame(wire.ipv6(tcp6, nxt=41))),
-            ('4in6', ipv6_frame(wire.ipv6(tcp4, nxt=4))),
-            ('4in4in4', tunnel(wire.ipv4(tcp4, proto=4), 4)),
             ('6in4in6', ipv6_frame(wire.ipv6(wire.ipv4(tcp6, proto=41), nxt=4))),
-            ('outer first fragment', tunnel(tcp4, 4, flags=0b001)),
-            ('inner ipv4 options', tunnel(make_ipv4(TCP_SEGMENT, options=b'\x01\x01\x01\x00'), 4)),
-            ('inner first fragment', tunnel(wire.ipv4(TCP_SEGMENT, proto=6, mf=True), 4)),
-            ('inner total length 0', tunnel(total_length(tcp4, 0), 4)),
-            ('outer padded', tunnel(tcp4 + bytes(6), 4, len=20 + len(tcp4))),
+            ('6in4in4', tunnel(wire.ipv4(tcp6, proto=41), 4)),
+            ('6in6 in a 4in4', tunnel(wire.ipv4(wire.ipv6(tcp6, nxt=41), proto=41), 4)),
+            ('outer first fragment', tunnel(tcp6, 41, flags=0b001)),
             ('inner hop-by-hop', tunnel(wire.ipv6(hop_by_hop + TCP_SEGMENT, nxt=0), 41)),
             ('tunnel behind hop-by-hop',
              ipv6_frame(wire.ipv6(bytes([41, 0]) + b'\x01\x04' + bytes(4) + tcp6, nxt=0))),
             ('6in6 behind 802.1Q', tagged_frame(wire.ipv6(tcp6, nxt=41), 0x86DD, C_TAG)),
-            ('4in6 behind QinQ', tagged_frame(wire.ipv6(tcp4, nxt=4), 0x86DD, S_TAG, C_TAG)),
-            # the default engine's TCP parser accepts these headers
-            ('tcp options', tunnel(wire.ipv4(make_tcp(b'x', options=b'\x02\x04\x05\xb4'), proto=6), 4)),
-            ('an unknown tcp option', tunnel(wire.ipv4(make_tcp(b'x', options=b'\xfe\x04\x00\x00'),
-                                                       proto=6), 4)),
+            ('6in4 behind ah', tunnel(ah(41) + tcp6, 51)),
             ('inner ipv6 jumbogram', tunnel(JUMBOGRAM, 41)),
-            ('outer ipv4 option', tunnel(tcp4, 4, hl=6, opt=b'\x94\x04\x00\x00')),  # router alert
+            ('outer ipv4 option', tunnel(tcp6, 41, hl=6, opt=b'\x94\x04\x00\x00')),  # router alert
         ):
-            with self.subTest(case=label):
+            with self.subTest(case=label), mock.patch.dict('sys.modules', fake_ip_decoder()):
                 messages = self.decline(make_packet(frame))
                 self.assertEqual(len(messages), 1, messages)
-                self.assertTrue(messages[0].startswith('Frame 1: TCP tunnelled in IP'), messages)
-                self.assertIn("'pypcapfile' decodes no tunnel", messages[0])
+                self.assertTrue(messages[0].startswith('Frame 1: TCP over IPv6 is left out'), messages)
+
+    def test_tunnelled_tcp_over_ipv4_is_found_in_the_innermost_ipv4(self) -> None:
+        # C.f. #1581: TCP whose innermost IP layer is IPv4 is read from that
+        # layer, which keys it, rather than left out with a warning.
+        from unittest import mock
+
+        from pcapkit.toolkit.pypcapfile import _innermost, _transport
+
+        tcp4 = wire.ipv4(TCP_SEGMENT, proto=6)
+        options = make_tcp(b'x', options=b'\x02\x04\x05\xb4')
+        ipv4_options = make_ipv4(TCP_SEGMENT, options=b'\x01\x01\x01\x00')
+        for label, frame, inner, segment in (
+            ('4in4', tunnel(tcp4, 4), tcp4, TCP_SEGMENT),
+            ('4in6', ipv6_frame(wire.ipv6(tcp4, nxt=4)), tcp4, TCP_SEGMENT),
+            ('4in4in4', tunnel(wire.ipv4(tcp4, proto=4), 4), tcp4, TCP_SEGMENT),
+            ('4in6in4', tunnel(wire.ipv6(tcp4, nxt=4), 41), tcp4, TCP_SEGMENT),
+            ('4in6 behind QinQ', tagged_frame(wire.ipv6(tcp4, nxt=4), 0x86DD, S_TAG, C_TAG), tcp4,
+             TCP_SEGMENT),
+            ('4in4 behind ah', tunnel(ah(4) + tcp4, 51), tcp4, TCP_SEGMENT),
+            ('4in4 behind destination options', tunnel(options_header(4) + tcp4, 60), tcp4, TCP_SEGMENT),
+            ('outer first fragment', tunnel(tcp4, 4, flags=0b001), tcp4, TCP_SEGMENT),
+            ('outer padded', tunnel(tcp4 + bytes(6), 4, len=20 + len(tcp4)), tcp4, TCP_SEGMENT),
+            ('outer ipv4 option', tunnel(tcp4, 4, hl=6, opt=b'\x94\x04\x00\x00'), tcp4, TCP_SEGMENT),
+            ('inner ipv4 options', tunnel(ipv4_options, 4), ipv4_options, TCP_SEGMENT),
+            ('inner first fragment', tunnel(wire.ipv4(TCP_SEGMENT, proto=6, mf=True), 4),
+             wire.ipv4(TCP_SEGMENT, proto=6, mf=True), TCP_SEGMENT),
+            ('inner total length 0', tunnel(total_length(tcp4, 0), 4), total_length(tcp4, 0),
+             TCP_SEGMENT),
+            ('inner ah', tunnel(wire.ipv4(ah(6) + TCP_SEGMENT, proto=51), 4),
+             wire.ipv4(ah(6) + TCP_SEGMENT, proto=51), TCP_SEGMENT),
+            ('tcp options', tunnel(wire.ipv4(options, proto=6), 4), wire.ipv4(options, proto=6), options),
+            # the default engine reads these out of the raw octets (#1518), in a tunnel too
+            ('tcp option of length 0', tunnel(wire.ipv4(make_tcp(b'x', options=b'\x02\x00\x05\xb4'),
+                                                        proto=6), 4),
+             wire.ipv4(make_tcp(b'x', options=b'\x02\x00\x05\xb4'), proto=6),
+             make_tcp(b'x', options=b'\x02\x00\x05\xb4')),
+            ('data offset past the capture', tunnel(wire.ipv4(data_offset(TCP_SEGMENT, 15), proto=6), 4),
+             wire.ipv4(data_offset(TCP_SEGMENT, 15), proto=6), data_offset(TCP_SEGMENT, 15)),
+        ):
+            with self.subTest(case=label), mock.patch.dict('sys.modules', fake_ip_decoder()) as modules:
+                IP = modules['pcapfile.protocols.network.ip'].IP
+                ipv4, upper = _innermost(make_packet(frame))
+                self.assertIsInstance(ipv4, IP)
+                self.assertIsNone(upper)
+                self.assertEqual(IP.calls[-1], (inner, 0))
+                self.assertEqual(_transport(ipv4), segment)
 
     def test_no_warning_where_the_default_engine_finds_no_tcp(self) -> None:
+        from unittest import mock
+
         tcp4, tcp6 = wire.ipv4(TCP_SEGMENT, proto=6), wire.ipv6(TCP_SEGMENT, nxt=6)
         arp = b'\x00\x01\x08\x00' + bytes(24)
         decoded = tagged_frame(b'', 0x86DD, C_TAG)
@@ -779,16 +828,15 @@ class PyPCAPFileEncapsulatedTCPTests(unittest.TestCase):
             # a Payload Length of 0 with no Jumbo Payload option leaves no payload
             ('inner payload length 0, no jumbo option', tunnel(tcp6[:4] + b'\x00\x00' + tcp6[6:], 41)),
             ('ipv6 payload length 0, no jumbo option', ipv6_frame(tcp6[:4] + b'\x00\x00' + tcp6[6:])),
-            # in a tunnel, a header the default engine's TCP parser rejects is no TCP
-            ('tunnelled data offset past the capture',
-             tunnel(wire.ipv4(data_offset(TCP_SEGMENT, 9), proto=6), 4)),
-            ('tunnelled data offset past the inner total length',
-             tunnel(total_length(wire.ipv4(make_tcp(b'', options=b'\x02\x04\x05\xb4'), proto=6), 40)
-                    + bytes(8), 4)),
             ('tunnelled data offset 4', tunnel(wire.ipv4(data_offset(TCP_SEGMENT, 4), proto=6), 4)),
+            ('tunnelled ipv6 data offset 4', tunnel(wire.ipv6(data_offset(TCP_SEGMENT, 4), nxt=6), 41)),
             # nor is a tunnel whose outer IPv4 header the default engine rejects (#1591, #1596)
             ('outer ipv4 option', tunnel(tcp4, 4, hl=6, opt=b'\x94\x02\x00\x00')),  # router alert, length 2
             ('outer ipv4 header overruns the packet', tunnel(tcp4, 4, hl=6, opt=b'\x94\x04')),
+            # or the inner one (#1581), as the default engine dissects nothing past it
+            ('inner ipv4 option', tunnel(make_ipv4(TCP_SEGMENT, options=b'\x94\x02\x00\x00'), 4)),
+            ('6in4 in an inner ipv4 it rejects',
+             tunnel(make_ipv4(tcp6, protocol=41, options=b'\x94\x02\x00\x00'), 4)),
             # nor is one whose Data Offset is under 5 words, over IPv6 alone too
             ('ipv6 data offset 4', ipv6_frame(wire.ipv6(data_offset(TCP_SEGMENT, 4), nxt=6))),
             ('802.1Q, ipv6 data offset 0', tagged_frame(wire.ipv6(data_offset(TCP_SEGMENT, 0), nxt=6),
@@ -802,7 +850,7 @@ class PyPCAPFileEncapsulatedTCPTests(unittest.TestCase):
             # 0x9100 is a pre-standard QinQ TPID, which the default engine does not dissect
             ('0x9100 tag', tagged_frame(tcp6, 0x86DD, 0x9100)),
         ):
-            with self.subTest(case=label):
+            with self.subTest(case=label), mock.patch.dict('sys.modules', fake_ip_decoder()):
                 self.assertEqual(self.decline(make_packet(frame)), [])
 
     def test_network_decodes_the_ipv4_behind_the_tags(self) -> None:
@@ -845,35 +893,21 @@ class PyPCAPFileEncapsulatedTCPTests(unittest.TestCase):
         ])
 
     def test_tcp_over_ipv6_the_tcp_parser_rejects_still_warns(self) -> None:
-        # Over IPv6, unlike in a tunnel, the default engine reads such a header
-        # out of the raw octets its TCP parser leaves.
+        # Over IPv6 the default engine reads such a header out of the raw octets
+        # its TCP parser leaves, in a tunnel too, where that IPv6 layer keys it (#1581).
         for label, frame in (
             ('data offset past the capture', ipv6_frame(wire.ipv6(data_offset(TCP_SEGMENT, 9), nxt=6))),
             ('option of length 0', ipv6_frame(wire.ipv6(make_tcp(b'x', options=b'\x02\x00\x05\xb4'),
                                                         nxt=6))),
             ('jumbogram', ipv6_frame(JUMBOGRAM)),
+            ('6in4, data offset past the capture', tunnel(wire.ipv6(data_offset(TCP_SEGMENT, 9), nxt=6), 41)),
+            ('6in6, option past its area',
+             ipv6_frame(wire.ipv6(wire.ipv6(make_tcp(b'x', options=b'\x08\x0a\x00\x00'), nxt=6), nxt=41))),
         ):
             with self.subTest(case=label):
                 messages = self.decline(make_packet(frame))
                 self.assertEqual(len(messages), 1, messages)
                 self.assertTrue(messages[0].startswith('Frame 1: TCP over IPv6'), messages)
-
-    def test_malformed_tunnelled_tcp_the_header_walk_cannot_see_into_still_warns(self) -> None:
-        # The residual _upper_layer documents: the default engine rejects these
-        # options, and so finds no TCP, but nothing short of dissecting the frame
-        # would show that -- the warning errs on the side of being given.
-        tcp4 = wire.ipv4(TCP_SEGMENT, proto=6)
-        for label, frame in (
-            ('tunnelled tcp option of length 0',
-             tunnel(wire.ipv4(make_tcp(b'x', options=b'\x02\x00\x05\xb4'), proto=6), 4)),
-            ('tunnelled tcp option past its area',
-             ipv6_frame(wire.ipv6(wire.ipv6(make_tcp(b'x', options=b'\x08\x0a\x00\x00'), nxt=6), nxt=41))),
-            ('inner ipv4 option', tunnel(make_ipv4(TCP_SEGMENT, options=b'\x94\x02\x00\x00'), 4)),
-        ):
-            with self.subTest(case=label):
-                messages = self.decline(make_packet(frame))
-                self.assertEqual(len(messages), 1, messages)
-                self.assertTrue(messages[0].startswith('Frame 1: TCP tunnelled in IP'), messages)
 
     def test_detection_leaves_the_warnings_filters_and_the_logger_alone(self) -> None:
         # The warnings filters and the logger are process-wide state of the
@@ -886,8 +920,10 @@ class PyPCAPFileEncapsulatedTCPTests(unittest.TestCase):
 
         logger = logging.getLogger('pcapkit')
         level = logger.level
+        # options the default engine's TCP and IPv4 parsers each reject, so log
         frames = (ipv6_frame(wire.ipv6(wire.ipv6(data_offset(TCP_SEGMENT, 9), nxt=6), nxt=41)),
-                  tunnel(wire.ipv4(make_tcp(b'x', options=b'\x02\x00\x05\xb4'), proto=6), 4),
+                  FakeEthernet(FakeIP(ah(6) + make_tcp(b'x', options=b'\x02\x00\x05\xb4'), p=51)),
+                  FakeEthernet(FakeIP(TCP_SEGMENT, hl=6, opt=b'\x94\x02\x00\x00')),
                   ipv6_frame(wire.ipv6(TCP_SEGMENT, nxt=6)))
 
         def user_warning() -> None:
@@ -927,7 +963,7 @@ class PyPCAPFileEncapsulatedTCPTests(unittest.TestCase):
         cut = wire.ipv6(wire.ipv6(make_tcp(b'', options=b'\x02\x04\x05\xb4'), nxt=6), nxt=41)[:-4]
         packets = [make_packet(ipv6_frame(cut)) for _ in range(10)]  # a TCP header cut short in a tunnel
         for packet in packets[1:]:
-            packet.header = packets[0].header  # one capture, which never warns
+            packet.header = packets[0].header  # one capture, which warns once
         with mock.patch.object(toolkit, '_upper_layer', wraps=toolkit._upper_layer) as walk, \
                 mock.patch.object(ProtocolBase, '__init__', spy_init), \
                 warnings.catch_warnings(record=True) as caught:
@@ -935,25 +971,29 @@ class PyPCAPFileEncapsulatedTCPTests(unittest.TestCase):
             for count, packet in enumerate(packets, start=1):
                 self.assertIsNone(toolkit.tcp_reassembly(packet, count=count))
                 self.assertIsNone(toolkit.tcp_traceflow(packet, data_link=LinkType.ETHERNET, count=count))
-        self.assertEqual([str(item.message) for item in caught], [])
+        self.assertEqual([str(item.message).split(': ', 1)[0] for item in caught], ['Frame 1'])
         # the outer IPv6 header and the inner one, per frame and adapter ...
         self.assertEqual(walk.call_count, 2 * 2 * len(packets))
         # ... and no protocol of the default engine's dissected along the way
         self.assertEqual(built, [])
 
-    def test_each_kind_warns_once_per_capture(self) -> None:
+    def test_tcp_over_ipv6_warns_once_per_capture_tunnelled_or_not(self) -> None:
+        # C.f. #1581: TCP over IPv6 in a tunnel is no kind of its own.
+        from unittest import mock
+
         frames = (ipv6_frame(wire.ipv6(TCP_SEGMENT, nxt=6)),
                   ipv6_frame(wire.ipv6(wire.ipv6(TCP_SEGMENT, nxt=6), nxt=41)),
                   tagged_frame(wire.ipv6(TCP_SEGMENT, nxt=6), 0x86DD, C_TAG),
-                  tunnel(wire.ipv4(TCP_SEGMENT, proto=6), 4))
+                  tunnel(wire.ipv6(TCP_SEGMENT, nxt=6), 41),
+                  tunnel(wire.ipv4(wire.ipv6(TCP_SEGMENT, nxt=6), proto=41), 4))
         packets = [make_packet(frame) for frame in frames]
         for packet in packets[1:]:
-            packet.header = packets[0].header  # all four frames of one capture
+            packet.header = packets[0].header  # all five frames of one capture
 
-        messages = self.decline(*packets)
-        self.assertEqual(len(messages), 2, messages)
+        with mock.patch.dict('sys.modules', fake_ip_decoder()):
+            messages = self.decline(*packets)
+        self.assertEqual(len(messages), 1, messages)
         self.assertTrue(messages[0].startswith('Frame 1: TCP over IPv6'), messages)
-        self.assertTrue(messages[1].startswith('Frame 2: TCP tunnelled in IP'), messages)
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -1318,45 +1358,24 @@ class PyPCAPFileToolkitAgainstRealDecodersTests(unittest.TestCase):
             with self.subTest(aspect=aspect):
                 self.assertEqual(mine[aspect], theirs[aspect])
 
-    def test_engine_does_not_warn_of_tunnelled_tcp_headers_the_default_engine_rejects(self) -> None:
+    def test_engine_warns_of_tunnelled_tcp_over_ipv6_only(self) -> None:
+        # C.f. #1581: tunnelled TCP is read where its innermost IP layer is
+        # IPv4, keyed by that layer, and is TCP over IPv6 where it is IPv6.
         from pcapkit import extract
 
-        tcp4 = wire.ipv4(TCP_SEGMENT, proto=6)
         syn = make_tcp(b'', flags=0x02, options=b'\x02\x04\x05\xb4')
         frames = (
+            tunnels.frame(tunnels.ip(4, TCP_SEGMENT, '10.9.9.1', '10.9.9.2', 6)),
+            tunnels.tunnelled('4in4', TCP_SEGMENT),
+            # a tunnelled TCP header with a Data Offset under 5 words is no TCP
+            tunnels.tunnelled('4in4', data_offset(TCP_SEGMENT, 4)),
+            tunnels.tunnelled('6in4', TCP_SEGMENT),
+            # nor warned of again, as for TCP over IPv6 with no tunnel
+            wire.ethernet(wire.ipv6(TCP_SEGMENT, nxt=6), 0x86DD),
             # a tunnelled SYN whose options the snapshot length cut off
-            wire.ethernet(wire.ipv6(wire.ipv6(syn, nxt=6), nxt=41), 0x86DD)[:-2],
-            # a tunnelled TCP header with a Data Offset under 5 words
-            wire.ethernet(wire.ipv4(wire.ipv4(data_offset(TCP_SEGMENT, 4), proto=6), proto=4), 0x0800),
-            wire.ethernet(wire.ipv4(tcp4, proto=4), 0x0800),
-        )
-        with tempfile.TemporaryDirectory() as tmp:
-            path = os.path.join(tmp, 'tunnels.pcap')
-            with open(path, 'wb') as file:
-                file.write(wire.pcap([(1, number, frame) for number, frame in enumerate(frames)]))
-            with warnings.catch_warnings(record=True) as caught:
-                warnings.simplefilter('always')
-                extractor = extract(fin=path, nofile=True, engine='pypcapfile', reassembly=True,
-                                    tcp=True, trace=True, trace_fout=os.path.join(tmp, 'trace'),
-                                    trace_format='json')
-            try:
-                self.assertEqual(extractor._exnam, 'pypcapfile')
-                self.assertEqual([str(item.message).split(': ', 1)[0] for item in caught
-                                  if 'left out' in str(item.message)], ['Frame 3'])
-            finally:
-                close_extractor(extractor)
-
-    def test_engine_warns_once_per_capture_on_tunnelled_tcp(self) -> None:
-        from pcapkit import extract
-
-        tcp4, tcp6 = wire.ipv4(TCP_SEGMENT, proto=6), wire.ipv6(TCP_SEGMENT, nxt=6)
-        frames = (
-            wire.ethernet(tcp4, 0x0800),
-            wire.ethernet(wire.ipv4(tcp4, proto=4), 0x0800),
-            wire.ethernet(wire.ipv4(tcp6, proto=41), 0x0800),
-            wire.ethernet(wire.ipv6(tcp6, nxt=41), 0x86DD),
-            tagged(tcp6, 0x86DD, C_TAG),
-            tagged(wire.ipv4(tcp4, proto=4), 0x0800, C_TAG),
+            tunnels.tunnelled('6in6', syn)[:-2],
+            tagged(tunnels.ip(4, tunnels.ip(4, TCP_SEGMENT, '10.0.0.3', '10.0.0.4', 6),
+                              *tunnels.OUTER[4], 4), 0x0800, C_TAG),
         )
         with tempfile.TemporaryDirectory() as tmp:
             path = os.path.join(tmp, 'tunnels.pcap')
@@ -1372,12 +1391,28 @@ class PyPCAPFileToolkitAgainstRealDecodersTests(unittest.TestCase):
                 messages = [str(item.message) for item in caught
                             if 'left out' in str(item.message)]
                 self.assertEqual(extractor._exnam, 'pypcapfile')
-                self.assertEqual(len(messages), 2, messages)
-                self.assertTrue(messages[0].startswith('Frame 2: TCP tunnelled in IP'), messages)
-                self.assertTrue(messages[1].startswith('Frame 5: TCP over IPv6'), messages)
-                self.assertEqual([tuple(flow.index) for flow in extractor.trace.tcp], [(1,)])
+                self.assertEqual(len(messages), 1, messages)
+                self.assertTrue(messages[0].startswith('Frame 4: TCP over IPv6'), messages)
+                self.assertEqual([(flow.label.rsplit('-', 1)[0], tuple(flow.index))
+                                  for flow in extractor.trace.tcp],
+                                 [('10.9.9.1_40000-10.9.9.2_9', (1,)), ('10.0.0.1_40000-10.0.0.2_9', (2,)),
+                                  ('10.0.0.3_40000-10.0.0.4_9', (7,))])
             finally:
                 close_extractor(extractor)
+
+    def test_two_connections_through_one_tunnel_are_two_flows(self) -> None:
+        # C.f. #1581: as for the other engines (see
+        # tests.toolkit.test_tunnelled_tcp_flow_key_1581_unit), over IPv4 only.
+        for kind in ('4in4', '4in6'):
+            with self.subTest(kind=kind):
+                mine, theirs = self.read_both(tunnels.connections(kind))
+                self.assertEqual([index for _, index in mine['flows']], [(1, 2, 3), (4, 5, 6)])
+                self.assertEqual([label.rsplit('-', 1)[0] for label, _ in mine['flows']],
+                                 ['10.0.0.1_40000-10.0.0.2_9', '10.0.0.3_40000-10.0.0.4_9'])
+                self.assertEqual(sorted({str(item['id'].src[0]) for item in mine['tcp datagrams']}),
+                                 ['10.0.0.1', '10.0.0.3'])
+                for aspect in self.ASPECTS:
+                    self.assertEqual(mine[aspect], theirs[aspect], aspect)
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -1504,31 +1539,44 @@ class PyPCAPFileHeaderCheckAgreementTests(unittest.TestCase):
             ]
         self.agree(frames, ipv4=list(range(1, 10)), tcp=[1, 2, 4, 5, 7, 8])
 
-    def test_engine_warns_of_a_tunnel_behind_ah(self) -> None:
-        from pcapkit import extract
+    def test_tunnelled_tcp_over_ipv4_agrees(self) -> None:
+        # C.f. #1581: read from, and keyed by, the innermost IPv4 layer.
+        ip, inner, outer = tunnels.ip, tunnels.INNER[4], tunnels.OUTER
 
-        frames = (
-            # a TCP header behind AH that the TCP parser rejects is no TCP at all
-            wire.ethernet(wire.ipv4(ah(6) + data_offset(TCP_SEGMENT, 9), proto=51), 0x0800),
-            wire.ethernet(wire.ipv4(ah(4) + wire.ipv4(TCP_SEGMENT, proto=6), proto=51), 0x0800),
-        )
-        with tempfile.TemporaryDirectory() as tmp:
-            path = os.path.join(tmp, 'ah.pcap')
-            with open(path, 'wb') as file:
-                file.write(wire.pcap([(1, number, frame) for number, frame in enumerate(frames)]))
-            with warnings.catch_warnings(record=True) as caught:
-                warnings.simplefilter('always')
-                extractor = extract(fin=path, nofile=True, engine='pypcapfile', reassembly=True,
-                                    tcp=True, trace=True, trace_fout=os.path.join(tmp, 'trace'),
-                                    trace_format='json')
-            try:
-                self.assertEqual(extractor._exnam, 'pypcapfile')
-                messages = [str(item.message) for item in caught if 'left out' in str(item.message)]
-                self.assertEqual(len(messages), 1, messages)
-                self.assertTrue(messages[0].startswith('Frame 2: TCP tunnelled in IP'), messages)
-                self.assertEqual(len(extractor.reassembly.tcp), 0)
-            finally:
-                close_extractor(extractor)
+        def in4(packet: bytes, protocol: int = 4, **fields) -> bytes:
+            return tunnels.frame(ip(4, packet, *outer[4], protocol, **fields))
+
+        def tcp4(segment: bytes, connection: int = 0, protocol: int = 6, **fields) -> bytes:
+            return ip(4, segment, *inner[connection], protocol, **fields)
+
+        segment = wire.tcp(b'hello', seq=1, ack=1)
+        bad_option = make_tcp(b'x', options=b'\x02\x00\x05\xb4')  # an MSS of length 0
+        frames = [
+            tunnels.tunnelled('4in4', segment),
+            tunnels.tunnelled('4in6', segment, 1),
+            in4(ip(4, tcp4(segment), '172.16.0.1', '172.16.0.2', 4)),
+            in4(ip(6, tcp4(segment, 1), 'fd01::1', 'fd01::2', 4), 41),
+            in4(ah(4) + tcp4(segment), 51),
+            in4(options_header(4) + tcp4(segment, 1), 60),
+            in4(tcp4(ah(6) + segment), 4),
+            in4(tcp4(options_header(6) + segment, 1, 0), 4),
+            in4(tcp4(segment), 4, mf=True),
+            in4(tcp4(segment, 1, mf=True), 4),
+            in4(tcp4(segment)) + bytes(6),
+            tagged(ip(4, tcp4(segment, 1), *outer[4], 4), 0x0800, C_TAG),
+            # a TCP header the TCP parser rejects, read out of the raw octets (#1518)
+            in4(tcp4(data_offset(segment, 9))),
+            in4(tcp4(bad_option, 1)),
+            # 15 to 19: no TCP -- an inner header the IPv4 parser rejects, a later
+            # inner fragment, a Data Offset under 5, and behind AH, no fall-back
+            # to the raw octets
+            in4(make_ipv4(segment, options=b'\x94\x02\x00\x00')),
+            in4(tcp4(segment, offset=8)),
+            in4(tcp4(data_offset(segment, 4))),
+            in4(tcp4(ah(6) + bad_option, 1, 51)),
+            in4(tcp4(ah(6) + data_offset(segment, 9), 0, 51)),
+        ]
+        self.agree(frames, tcp=list(range(1, 15)), trace=list(range(1, 15)))
 
 
 if __name__ == '__main__':

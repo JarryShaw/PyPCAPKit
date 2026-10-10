@@ -72,6 +72,17 @@ TIMESTAMP_ATTR = '__pcapkit_timestamp__'
 #: .. _DPKT: https://dpkt.readthedocs.io
 BUFFER_ATTR = '__pcapkit_buffer__'
 
+#: IP protocol numbers of the IP-in-IP tunnels the default engine dissects
+#: (see :attr:`Internet.__proto__
+#: <pcapkit.protocols.internet.internet.Internet.__proto__>`), over IPv4 and
+#: IPv6 alike: IPv4 (protocol 4, :rfc:`2003`) and IPv6 (protocol 41,
+#: :rfc:`2473` and :rfc:`4213`). `DPKT`_ also decodes an IPv4 packet's
+#: protocol 0 as IPv4, its ``IP_PROTO_IP``, where the default engine reads an
+#: IPv6 Hop-by-Hop Options header, so :func:`_tcp_carrier` does not enter it.
+#:
+#: .. _DPKT: https://dpkt.readthedocs.io
+IP_TUNNELS = frozenset((int(Enum_TransType.IPv4), int(Enum_TransType.IPv6)))
+
 
 class RecordTimestamp:
     """A record's capture timestamp, with what a PCAP frame record needs of it.
@@ -420,6 +431,44 @@ def _network(packet: 'Packet') -> 'Optional[IP | IP6]':
     return getattr(packet, 'ip6', None)
 
 
+def _tcp_carrier(packet: 'Packet') -> 'tuple[Optional[IP | IP6], Optional[TCP]]':
+    """Fetch the IP layer of a DPKT packet that carries its TCP segment, and the segment.
+
+    Args:
+        packet: DPKT packet, i.e. the outermost layer.
+
+    Returns:
+        The innermost IPv4 or IPv6 packet of the network layer (see
+        :func:`_network`) and of the IP-in-IP tunnels it carries, and its
+        :class:`dpkt.tcp.TCP` payload, if it has one; else :data:`None` for the
+        latter, and for both with no network layer. A tunnel is a packet whose
+        protocol, or for IPv6 the next header after its extension headers, is
+        one of the :data:`IP_TUNNELS`.
+
+    Note:
+        `DPKT`_ decodes an IPv4 or IPv6 packet inside another (:rfc:`2003`,
+        :rfc:`2473`, :rfc:`4213`) as its ``data``. The TCP endpoints are the
+        innermost packet's addresses, as for the default engine
+        (:func:`pcapkit.toolkit.pcap.tcp_segment`); the outer ones are the
+        tunnel's (:issue:`1581`).
+
+    .. _DPKT: https://dpkt.readthedocs.io
+
+    """
+    import dpkt  # isort:skip
+
+    ip = _network(packet)
+    if ip is None:
+        return None, None
+    while getattr(ip, 'p', None) in IP_TUNNELS and isinstance(ip.data, (dpkt.ip.IP, dpkt.ip6.IP6)):
+        ip = ip.data
+
+    tcp = getattr(ip, 'tcp', None)  # type: Optional[TCP]
+    if tcp is None and type(getattr(ip, 'data', None)).__name__ == 'TCP':
+        tcp = cast('TCP', ip.data)
+    return ip, tcp
+
+
 def ipv6_hdr_len(ipv6: 'IP6') -> 'int':
     """Calculate length of headers before IPv6 Fragment header.
 
@@ -670,7 +719,8 @@ def tcp_reassembly(packet: 'Packet', timestamp: 'float', *,
         Data for TCP reassembly.
 
         * If the ``packet`` can be used for TCP reassembly. A packet can be reassembled
-          if it contains TCP layer (:class:`dpkt.tcp.TCP`).
+          if it contains TCP layer (:class:`dpkt.tcp.TCP`), keyed by the IP packet that
+          carries it -- in an IP-in-IP tunnel, the innermost (see :func:`_tcp_carrier`).
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
           reassembly (:term:`reasm.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
@@ -687,14 +737,8 @@ def tcp_reassembly(packet: 'Packet', timestamp: 'float', *,
         :class:`pcapkit.foundation.reassembly.tcp.TCP`
 
     """
-    ip = _network(packet)
-    if ip is None:
-        return None
-
-    tcp = getattr(ip, 'tcp', None)  # type: Optional[TCP]
-    if tcp is None and type(getattr(ip, 'data', None)).__name__ == 'TCP':
-        tcp = cast('TCP', ip.data)
-    if tcp is not None:
+    ip, tcp = _tcp_carrier(packet)
+    if ip is not None and tcp is not None:
         flags = bin(tcp.flags)[2:].zfill(8)
         wire, _ = _layer2bytes(packet, tcp)
         raw_len = len(tcp.data)                                 # payload length, header excludes
@@ -740,7 +784,8 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
         Data for TCP reassembly.
 
         * If the ``packet`` can be used for TCP flow tracing. A packet can be reassembled
-          if it contains TCP layer (:class:`dpkt.tcp.TCP`).
+          if it contains TCP layer (:class:`dpkt.tcp.TCP`), keyed by the IP packet that
+          carries it -- in an IP-in-IP tunnel, the innermost (see :func:`_tcp_carrier`).
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
           flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
@@ -757,14 +802,8 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
         :class:`pcapkit.foundation.traceflow.tcp.TCP`
 
     """
-    ip = _network(packet)
-    if ip is None:
-        return None
-
-    tcp = getattr(ip, 'tcp', None)  # type: Optional[TCP]
-    if tcp is None and type(getattr(ip, 'data', None)).__name__ == 'TCP':
-        tcp = cast('TCP', ip.data)
-    if tcp is not None:
+    ip, tcp = _tcp_carrier(packet)
+    if ip is not None and tcp is not None:
         flags = bin(tcp.flags)[2:].zfill(8)
         wire, _ = _layer2bytes(packet, tcp)
 
