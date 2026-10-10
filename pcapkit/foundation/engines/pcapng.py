@@ -9,10 +9,12 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
 """
 import collections
+import os
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
 from pcapkit.corekit.infoclass import Info, info_final
+from pcapkit.corekit.io import SeekableReader
 from pcapkit.dumpkit.pcap import PCAPIO
 from pcapkit.foundation.engines.engine import EngineBase
 from pcapkit.protocols.misc.pcapng import PCAPNG as P_PCAPNG
@@ -27,7 +29,7 @@ __all__ = ['PCAPNG']
 logger = get_logger(__name__)
 
 if TYPE_CHECKING:
-    from typing import Optional
+    from typing import Literal, Optional
 
     from pcapkit.foundation.extraction import Extractor
     from pcapkit.protocols.data.misc.pcapng import PCAPNG as Data_PCAPNG
@@ -106,6 +108,27 @@ class PCAPNG(EngineBase[P_PCAPNG]):
         b'\x0a\x0d\x0d\x0a',
     )
 
+    #: A section header block's Byte-Order Magic, mapped to the byte order it
+    #: declares for its section.
+    BYTE_ORDER_MAGIC = {
+        b'\x1a\x2b\x3c\x4d': 'big',
+        b'\x4d\x3c\x2b\x1a': 'little',
+    }  # type: dict[bytes, Literal['big', 'little']]
+
+    #: Block types mapped to the octets their fixed fields span, Block Type and
+    #: both copies of Block Total Length included; any other block spans 12.
+    BLOCK_MINIMUM = {
+        Enum_BlockType.Section_Header_Block: 28,
+        Enum_BlockType.Interface_Description_Block: 20,
+        Enum_BlockType.Packet_Block: 32,
+        Enum_BlockType.Simple_Packet_Block: 16,
+        Enum_BlockType.Interface_Statistics_Block: 24,
+        Enum_BlockType.Enhanced_Packet_Block: 32,
+        Enum_BlockType.Decryption_Secrets_Block: 20,
+        Enum_BlockType.Custom_Block_that_rewriters_can_copy_into_new_files: 16,
+        Enum_BlockType.Custom_Block_that_rewriters_should_not_copy_into_new_files: 16,
+    }  # type: dict[int, int]
+
     #: Block types that carry a captured packet, mapped to the tag used when
     #: reporting them. Parsing any of them resolves the interface the packet was
     #: captured on, so the enclosing section must describe at least one
@@ -156,6 +179,7 @@ class PCAPNG(EngineBase[P_PCAPNG]):
         """
         ext = self._extractor
 
+        self._bound_read_ahead()
         shb = P_PCAPNG(ext._ifile, num=0, sct=1, ctx=None)
         if shb.info.type != Enum_BlockType.Section_Header_Block:
             raise FormatError(f'PCAP-NG: [SHB] invalid block type: {shb.info.type!r}')
@@ -202,6 +226,7 @@ class PCAPNG(EngineBase[P_PCAPNG]):
             self._check_packet_block_context()
 
             # read next block
+            self._bound_read_ahead()
             block = P_PCAPNG(ext._ifile, num=ext._frnum+1, sct=len(self._ctx_list),
                              ctx=self._ctx, layer=ext._exlyr, protocol=ext._exptl,
                              __context__=ext._exctx,
@@ -367,12 +392,74 @@ class PCAPNG(EngineBase[P_PCAPNG]):
             not have a whole block type field left to read.
 
         """
-        ext = self._extractor
-
-        buffer = ext._ifile.peek(4)[:4]
+        buffer = self._peek(4)
         if len(buffer) < 4:
             return None
         return int.from_bytes(buffer, self._ctx.section.byteorder)
+
+    def _peek(self, size: 'int') -> 'bytes':
+        """Read the next ``size`` octets of the input without consuming them.
+
+        Args:
+            size: Number of octets wanted.
+
+        Returns:
+            The octets, fewer than ``size`` only at the end of the input.
+
+        ``peek`` makes at most one read, which a pipe may answer short of ``size``
+        mid-capture, so a short answer is read again and the position put back
+        (:issue:`1586`).
+
+        """
+        ifile = self._extractor._ifile  # pylint: disable=protected-access
+
+        buffer = ifile.peek(size)[:size]
+        if len(buffer) < size:
+            position = ifile.tell()
+            buffer = ifile.read(size)
+            ifile.seek(position, os.SEEK_SET)
+        return buffer
+
+    def _bound_read_ahead(self) -> 'None':
+        """Have a non-seekable input read ahead to the end of the next block, no further.
+
+        A block is measured, and then parsed, from as far as
+        :meth:`SeekableReader.seek <pcapkit.corekit.io.SeekableReader.seek>` reads
+        ahead, so the read has to cover all the block's parse reads, however long --
+        the buffer grows to hold them. A read past that waits, on a live capture, for
+        the blocks after: a buffer's worth held each block back until that much more
+        had arrived (:issue:`1586`). A bogus length is read as far as the stream goes,
+        which is as far as a file read goes too.
+
+        How far is enough is the block's Total Length, in the section's byte order
+        or, for a section header block, the one its Byte-Order Magic declares. Two
+        kinds of block are parsed past it, and so are read as far as from a file:
+        one shorter than its own fixed fields, or not a whole number of words,
+        keeps the buffer's worth; a Decryption Secrets Block reads as far as its
+        Secrets Length runs.
+
+        """
+        # pylint: disable=protected-access
+        ifile = self._extractor._ifile
+        if not isinstance(ifile, SeekableReader):
+            return
+        size = ifile._buffer_size
+
+        head = self._peek(12)
+        if head[:4] == self.MAGIC_NUMBER[0]:
+            byteorder = self.BYTE_ORDER_MAGIC.get(head[8:12])
+        else:
+            byteorder = self._ctx.section.byteorder if self._ctx is not None else None
+
+        if byteorder is not None and len(head) >= 8:
+            block_type = int.from_bytes(head[:4], byteorder)
+            length = int.from_bytes(head[4:8], byteorder)
+            if length >= self.BLOCK_MINIMUM.get(block_type, 12) and length % 4 == 0:
+                size = length
+                if block_type == Enum_BlockType.Decryption_Secrets_Block:
+                    secrets = int.from_bytes(self._peek(16)[12:16], byteorder)
+                    size = max(size, 20 + secrets + -secrets % 4)
+        ifile._read_ahead_size = size
 
     def _check_packet_block_context(self) -> 'None':
         """Reject a packet block in a section that describes no interface.

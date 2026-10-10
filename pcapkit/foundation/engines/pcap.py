@@ -8,8 +8,10 @@ This module contains the implementation for PCAP file extraction
 support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
 """
+import io
 from typing import TYPE_CHECKING
 
+from pcapkit.corekit.io import SeekableReader
 from pcapkit.foundation.engines.engine import EngineBase
 from pcapkit.protocols.misc.pcap.frame import Frame
 from pcapkit.protocols.misc.pcap.header import Header
@@ -157,6 +159,7 @@ class PCAP(EngineBase[Frame]):
         ext = self._extractor
 
         # read frame header
+        self._bound_read_ahead()
         frame = Frame(ext._ifile, num=ext._frnum+1, header=self._gbhdr.info,
                       layer=ext._exlyr, protocol=ext._exptl, nanosecond=self._nnsec,
                       __context__=ext._exctx)
@@ -207,3 +210,34 @@ class PCAP(EngineBase[Frame]):
 
         # return frame record
         return frame
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    def _bound_read_ahead(self) -> 'None':
+        """Have a non-seekable input read ahead to the end of the next record, no further.
+
+        A record is measured by reading ahead (see :meth:`SeekableReader.seek
+        <pcapkit.corekit.io.SeekableReader.seek>`), and then read again from its first
+        octet. A read past it waits, on a live capture, for the records after: a
+        buffer's worth held each frame back until that much more had arrived. A read
+        short of it lets a record longer than the buffer slide out of it before it is
+        read again (:issue:`1586`). So the read covers the record header and the
+        ``incl_len`` octets it declares, in the global header's byte order -- as far as
+        the stream goes, for a bogus length, which is as far as a file read goes too.
+
+        """
+        # pylint: disable=protected-access
+        ifile = self._extractor._ifile
+        if not isinstance(ifile, SeekableReader):
+            return
+
+        position = ifile.tell()
+        head = ifile.read(16)
+        ifile.seek(position, io.SEEK_SET)
+
+        size = 16
+        if len(head) == 16:
+            size += int.from_bytes(head[8:12], self._gbhdr.byteorder)
+        ifile._read_ahead_size = size

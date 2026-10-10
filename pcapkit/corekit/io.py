@@ -28,6 +28,10 @@ if TYPE_CHECKING:
 
 __all__ = ['SeekableReader', 'PeekableStream', 'NamedStream']
 
+#: Most octets :class:`SeekableReader` asks of its stream in one read. A read
+#: allocates what it asks for up front, so a record's bogus length is read in pieces.
+_READ_CHUNK = 1 << 20
+
 
 class SeekableReader(io.BufferedReader):
     """Seekable buffered reader.
@@ -74,6 +78,9 @@ class SeekableReader(io.BufferedReader):
         _buffer_set: 'int'
         #: Buffer current position.
         _buffer_cur: 'int'
+        #: Octets :meth:`seek` reads past the position to find the end of the stream;
+        #: the buffer size by default.
+        _read_ahead_size: 'int'
 
         #: Path to save buffer.
         _buffer_path: 'str'
@@ -109,6 +116,7 @@ class SeekableReader(io.BufferedReader):
 
         self._buffer_view = self._buffer.getbuffer()
         self._buffer_size = buffer_size
+        self._read_ahead_size = buffer_size
 
         if buffer_save:
             if buffer_path is None:
@@ -149,6 +157,82 @@ class SeekableReader(io.BufferedReader):
             self._buffer.seek(-buf_len, io.SEEK_END)
         else:
             self._buffer_view[old_ptr:self._buffer_cur] = buf
+
+    def _fill(self, size: 'int', minimum: 'Optional[int]' = None, /, *,
+              keep: 'Optional[int]' = None) -> 'bytes':
+        """Read up to ``size`` octets from the stream into the buffer, and return them.
+
+        Args:
+            size: Octets to ask for; negative reads to the end of the stream.
+            minimum: Octets to keep reading for; ``size`` if omitted.
+            keep: Position the buffer must still hold afterwards; it grows rather than
+                slide past it.
+
+        Returns:
+            The octets read, fewer than ``minimum`` only once the stream has ended.
+
+        Note:
+            One read may return fewer octets than asked for at any point -- a pipe hands
+            over what has been written so far, a raw stream what one system call returned
+            -- and only an empty one means the stream has ended. Taking the first answer
+            for all there is ended a capture at a chunk boundary (:issue:`1586`), so this
+            reads until ``minimum`` octets are in hand. Past that it does not wait:
+            ``read1``, where the stream has it, returns what is already there. A
+            non-blocking stream's :obj:`None` stops the reading. No one read asks for
+            more than ``_READ_CHUNK`` octets, so a bogus length read from a record allocates
+            only what the stream actually holds.
+
+        """
+        if size < 0:
+            buf = self._stream.read(size) or b''
+            self._write_buffer(buf)
+            return buf
+
+        minimum = size if minimum is None else minimum
+        read = getattr(self._stream, 'read1', self._stream.read)
+
+        chunks = []  # type: list[bytes]
+        count = 0
+        while True:
+            chunk = read(min(size - count, _READ_CHUNK))
+            if not chunk:
+                break
+            chunks.append(chunk)
+            count += len(chunk)
+            if count >= minimum:
+                break
+
+        buf = b''.join(chunks)
+        if keep is not None:
+            span = self._buffer_set + self._buffer_cur + len(buf) - max(keep, self._buffer_set)
+            if span > self._buffer_size:
+                self._truncate_buffer(span)
+        self._write_buffer(buf)
+        return buf
+
+    def _read_ahead(self) -> 'int':
+        """Read the stream to :attr:`_read_ahead_size` octets past the position.
+
+        Returns:
+            How far the stream has been read: that many octets past the position, or the
+            end of the stream if it ended first. :meth:`seek` takes this as the end.
+
+        Note:
+            The buffer slides forward to make the room, so after this only the last
+            ``_buffer_size`` less ``_read_ahead_size`` octets before the position can still
+            be sought back to -- none, at the default -- unless ``buffer_save`` keeps them.
+            It grows instead of sliding past the position itself, so a record longer than
+            the buffer is held whole, as its reader seeks back to its first octet; a bogus
+            length grows it only as far as the stream goes. A live stream holds the reader
+            here until the octets arrive, which is why the engines set
+            :attr:`_read_ahead_size` to the record they are about to read.
+
+        """
+        end = self._buffer_set + self._buffer_cur
+        want = self._tell + self._read_ahead_size - end
+        if want > 0:
+            end += len(self._fill(want, keep=self._tell))
+        return end
 
     def _seek_buffer(self) -> 'int':
         """Point the buffer at the current stream position, and say how much it can serve.
@@ -222,7 +306,10 @@ class SeekableReader(io.BufferedReader):
         read-only and non-blocking streams."""
         if self._buffer_file is not None:
             self._buffer_file.flush()
-        self._stream.flush()
+        # NOTE: a stream its owner has closed already has nothing to flush, and asking
+        # raises -- out of :meth:`close` too, which a finaliser can only print.
+        if not getattr(self._stream, 'closed', False):
+            self._stream.flush()
 
     def isatty(self) -> 'bool':
         """Return :data:`True` if the stream is interactive (i.e., connected to a
@@ -344,21 +431,30 @@ class SeekableReader(io.BufferedReader):
             the window, it holds with a saved buffer as well, which is exempt from the window
             check and would otherwise return a negative position as if the seek had worked.
 
-        """
-        # NOTE: we mark the end of buffer content to the end of buffer
-        # so that it may trigger the IO to read more data to fill in
-        # the content.
-        buf_end = self._buffer_set + self._buffer_size
-        #buf_end = self._buffer_set + self._buffer_cur
+            A non-seekable stream has no end until it is over, so :data:`~io.SEEK_END` is
+            as far as :meth:`_read_ahead` reads past the position: ``_read_ahead_size``
+            octets, a buffer's worth by default, or to the real end if that comes first.
+            The frame readers measure what is left this way, and the engines set that size
+            to the next record, so a record is measured whole, however long. The end used to
+            be the buffer's far edge, which once the buffer has filled is just how far the
+            stream has been read, so the first record ending there was taken for the end of
+            the capture (:issue:`1586`). The read slides the buffer, so a position before
+            the one :data:`~io.SEEK_END` was sought from may then be refused, as
+            :meth:`_read_ahead` says.
 
+        """
         if whence == io.SEEK_SET:
             target = offset
         elif whence == io.SEEK_CUR:
             target = self._tell + offset
         elif whence == io.SEEK_END:
-            target = buf_end + offset
+            target = self._read_ahead() + offset
         else:
             raise SeekError(f'invalid whence ({whence}, should be {io.SEEK_SET}, {io.SEEK_CUR} or {io.SEEK_END})')
+
+        # NOTE: the buffer's far edge, read after :meth:`_read_ahead` has slid it, is how far
+        # a seek may go unwarned. It is not the end of the stream.
+        buf_end = self._buffer_set + self._buffer_size
 
         if target < 0:
             raise SeekError(f'negative seek value {target}')
@@ -370,9 +466,7 @@ class SeekableReader(io.BufferedReader):
 
         self._tell = target
         if self._tell >= self._buffer_set:
-            if self._tell > buf_end:
-                warn(f'seek beyond the end of the buffer: {self._tell} > {buf_end}',
-                     SeekWarning, stacklevel=stacklevel())
+            ended = False
             if self._tell > (tmp_end := self._buffer_set + self._buffer_cur):
                 # NOTE: if we do need to seek beyond the existing contents,
                 # then we'll do a quick read to make up the contents; the
@@ -380,11 +474,23 @@ class SeekableReader(io.BufferedReader):
                 # the size of the content to be read, whichever is larger.
                 # However, the length to fill must not be larger than the
                 # buffer size itself.
-                tmp_len = min(max(self._tell - tmp_end, self._buffer_size // 4), self._buffer_size)
-                self._tell = tmp_end
+                #
+                # The gap is waited for and the rest is not, and the position is
+                # the target, or the end of the stream if that comes first -- not
+                # wherever an over-asking read happened to stop (:issue:`1586`).
+                tmp_gap = min(self._tell - tmp_end, self._buffer_size)
+                tmp_len = min(max(tmp_gap, self._buffer_size // 4), self._buffer_size)
 
-                tmp_buf = self.read1(tmp_len)
-                self._tell = tmp_end + len(tmp_buf)
+                tmp_buf = self._fill(tmp_len, tmp_gap)
+                ended = len(tmp_buf) < tmp_gap
+                self._tell = min(self._tell, tmp_end + len(tmp_buf))
+            # NOTE: past a stream that ended inside the buffer, this is the silent seek past
+            # the end of a file, which a frame reader makes over a record the capture cut
+            # short. A seek that went past the buffer's edge, or stopped short of a target
+            # beyond it, is still warned of.
+            if target > buf_end and not (ended and self._tell <= buf_end):
+                warn(f'seek beyond the end of the buffer: {target} > {buf_end}',
+                     SeekWarning, stacklevel=stacklevel())
             self._buffer.seek(self._tell - self._buffer_set, io.SEEK_SET)
         else:
             # NOTE: only a saved buffer reaches here -- the refusal above has already
@@ -518,9 +624,11 @@ class SeekableReader(io.BufferedReader):
         if size is None or size < 0:
             size = -1
 
+        # NOTE: both reads from the stream go through :meth:`_fill`, which keeps reading
+        # past a short answer, as :meth:`io.BufferedIOBase.read` is specified to: a short
+        # result here means the end of the stream, and the frame readers take it so.
         if self._tell >= self._buffer_set + self._buffer_cur:
-            buf = self._stream.read(size)
-            self._write_buffer(buf)
+            buf = self._fill(size)
         else:
             if self._buffer_file is not None and self._tell < self._buffer_set:
                 with open(self._buffer_path, 'rb') as temp_file:
@@ -535,9 +643,7 @@ class SeekableReader(io.BufferedReader):
 
             size_rem = -1
             if size < 0 or (size_rem := size - len(buf)) > 0:
-                buf_tmp = self._stream.read(size_rem)
-                self._write_buffer(buf_tmp)
-                buf += buf_tmp
+                buf += self._fill(size_rem)
 
         self._tell += len(buf)
         return buf

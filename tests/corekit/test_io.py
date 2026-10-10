@@ -257,7 +257,10 @@ class SeekableReaderTests(unittest.TestCase):
             reader.seek(0, 99)
         reader.read(2)
         self.assertEqual(reader.seek(-1, io.SEEK_CUR), 1)
-        self.assertEqual(reader.seek(-1, io.SEEK_END), 3)
+        # NOTE: the end is a buffer's worth past the position, 1 + 4, so one before it is
+        # 4. It was the buffer's far edge, 0 + 4, until #1586 -- which a full buffer's
+        # edge reaches no further than the stream has been read.
+        self.assertEqual(reader.seek(-1, io.SEEK_END), 4)
         with mock.patch.object(self.io_module, 'warn') as warn:
             self.assertEqual(reader.seek(20), 6)
         warn.assert_called_once()
