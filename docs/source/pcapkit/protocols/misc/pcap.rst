@@ -114,6 +114,7 @@ whose structure is described as below:
    .. automethod:: make
 
    .. automethod:: _make_data
+   .. automethod:: _dispatch_linktype
 
    .. autoattribute:: __proto__
       :no-value:

@@ -341,7 +341,7 @@ class ThirdPartyEngineTests(unittest.TestCase):
         self.assertEqual(engine._get_protocol(LinkType.ETHERNET).__name__, 'Ethernet')
         self.assertEqual(engine._get_protocol(LinkType.IPV4).__name__, 'IP')
         self.assertEqual(engine._get_protocol(LinkType.IPV6).__name__, 'IP6')
-        raw_cls = engine._get_protocol(LinkType.NULL)
+        raw_cls = engine._get_protocol(LinkType.FDDI)
         raw = raw_cls(b'raw')
         self.assertEqual(bytes(raw), b'raw')
         self.assertEqual(len(raw), 3)

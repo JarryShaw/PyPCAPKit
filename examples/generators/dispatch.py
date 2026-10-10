@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Enumerate the seven ``__proto__`` dispatch registries, and probe every entry.
+"""Enumerate the eight ``__proto__`` dispatch registries, and probe every entry.
 
 :file:`pcapkit/foundation/registry/protocols.py` documents the registries that
 decide *which* :class:`~pcapkit.protocols.protocol.Protocol` subclass parses the
@@ -274,6 +274,12 @@ def _ethernet(ethertype: 'int', payload: 'bytes') -> 'bytes':
     return bytes(Ethernet(type=ethertype, payload=payload))
 
 
+def _loopback(family: 'int', payload: 'bytes', byteorder: 'str' = 'little') -> 'bytes':
+    """A BSD loopback header carrying ``payload``."""
+    from pcapkit.protocols.link.loopback import Loopback
+    return bytes(Loopback(family=family, byteorder=byteorder, payload=payload))
+
+
 ###############################################################################
 # Link -- EtherType.
 ###############################################################################
@@ -508,7 +514,8 @@ def _linktype_payload(code: 'Any') -> 'tuple[bytes, bool]':
     Returns:
         The record's octets, and whether they still need an Ethernet wrapper
         (true for :attr:`~pcapkit.const.reg.linktype.LinkType.ETHERNET`, false
-        for the two raw-IP link types, which carry no link layer at all).
+        for the two raw-IP link types, which carry no link layer at all, and
+        for the two loopback link types, whose header is built here).
 
     """
     from pcapkit.const.reg.linktype import LinkType
@@ -519,6 +526,10 @@ def _linktype_payload(code: 'Any') -> 'tuple[bytes, bool]':
         return _ip4(6, _tcp(9999)), False
     if code == LinkType.IPV6:
         return _ip6(6, _tcp(9999)), False
+    if code == LinkType.NULL:  # in the capturing host's byte order (#1574)
+        return _loopback(2, _ip4(6, _tcp(9999))), False
+    if code == LinkType.LOOP:  # in network byte order (#1574)
+        return _loopback(2, _ip4(6, _tcp(9999)), byteorder='big'), False
     raise LookupError(f'linktype: no payload builder for {code!r}')  # pragma: no cover
 
 
@@ -537,6 +548,21 @@ def _pcapng_build(code: 'Any') -> 'Any':
     payload, wrap = _linktype_payload(code)
     record = _ethernet(0x0800, payload) if wrap else payload
     return _extract_first(_pcapng_bytes(code, record), '.pcapng')
+
+
+###############################################################################
+# Loopback -- address family.
+###############################################################################
+
+
+def _loopback_registry() -> 'Any':
+    from pcapkit.protocols.link.loopback import Loopback
+    return Loopback.__proto__
+
+
+def _loopback_build(family: 'int') -> 'Any':
+    payload = _ip4(6, _tcp(9999)) if family == 2 else _ip6(6, _tcp(9999))
+    return _extract_first(_pcap_bytes((_loopback(family, payload),), linktype=0), '.pcap')
 
 
 ###############################################################################
@@ -571,7 +597,7 @@ def _internet_enum() -> 'Any':
 
 
 #: Every family this module exercises, one per ``__proto__`` table named in
-#: GitHub issue #496.
+#: GitHub issue #496, and the loopback table #1574 added.
 FAMILIES = (
     Family('link', _link_registry, _link_build, _link_enum),
     Family('internet', _internet_registry, _internet_build, _internet_enum),
@@ -580,6 +606,7 @@ FAMILIES = (
     Family('sctp', _sctp_registry, _sctp_build),
     Family('pcap-frame', _pcap_frame_registry, _pcap_frame_build),
     Family('pcapng-frame', _pcapng_registry, _pcapng_build),
+    Family('loopback', _loopback_registry, _loopback_build),
 )
 
 #: The families keyed by label, for a caller -- :func:`probe` -- that wants
@@ -665,14 +692,24 @@ PINNED_TARGETS = {
         ('pcapkit.protocols.application.ngap', 'NGAP'),
 
     # -- Frame.__proto__ (pcap LinkType) ---------------------------------------
+    'pcap-frame/NULL': ('pcapkit.protocols.link', 'Loopback'),
     'pcap-frame/ETHERNET': ('pcapkit.protocols.link', 'Ethernet'),
+    'pcap-frame/LOOP': ('pcapkit.protocols.link', 'Loopback'),
     'pcap-frame/IPV4': ('pcapkit.protocols.internet', 'IPv4'),
     'pcap-frame/IPV6': ('pcapkit.protocols.internet', 'IPv6'),
 
     # -- PCAPNG.__proto__ (LinkType) --------------------------------------------
+    'pcapng-frame/NULL': ('pcapkit.protocols.link', 'Loopback'),
     'pcapng-frame/ETHERNET': ('pcapkit.protocols.link', 'Ethernet'),
+    'pcapng-frame/LOOP': ('pcapkit.protocols.link', 'Loopback'),
     'pcapng-frame/IPV4': ('pcapkit.protocols.internet', 'IPv4'),
     'pcapng-frame/IPV6': ('pcapkit.protocols.internet', 'IPv6'),
+
+    # -- Loopback.__proto__ (address family) ------------------------------------
+    'loopback/2': ('pcapkit.protocols.internet.ipv4', 'IPv4'),
+    'loopback/24': ('pcapkit.protocols.internet.ipv6', 'IPv6'),
+    'loopback/28': ('pcapkit.protocols.internet.ipv6', 'IPv6'),
+    'loopback/30': ('pcapkit.protocols.internet.ipv6', 'IPv6'),
 }
 
 

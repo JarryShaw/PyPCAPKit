@@ -11,6 +11,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
 """
 import decimal
+import functools
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
@@ -298,6 +299,58 @@ def _pcap_reader() -> 'Type[PCAPReader]':
     return _Reader
 
 
+@functools.lru_cache(maxsize=None)
+def _loopback_protocol(base: 'Type[DPKTPacket]', ip: 'Type[DPKTPacket]', ip6: 'Type[DPKTPacket]',
+                       linktype: 'int') -> 'Type[DPKTPacket]':
+    """A :class:`dpkt.loopback.Loopback` that reads as the default engine's.
+
+    It reads the address family in the byte order
+    :func:`~pcapkit.protocols.link.loopback.family_byteorder` gives for
+    ``linktype`` -- network byte order for ``LINKTYPE_LOOP``, inferred for
+    ``LINKTYPE_NULL`` -- and dispatches on the same families as
+    :class:`~pcapkit.protocols.link.loopback.Loopback`. Unlike `DPKT`_'s own, it
+    names an IPv4 or IPv6 payload ``ip`` or ``ip6``, as
+    :class:`dpkt.ethernet.Ethernet` does and as :mod:`pcapkit.toolkit.dpkt`
+    looks for it, and keeps a payload of any other family as raw octets rather
+    than parsing it as Ethernet (:issue:`1574`).
+
+    Args:
+        base: :class:`dpkt.loopback.Loopback` itself.
+        ip: :class:`dpkt.ip.IP`, the payload of family 2.
+        ip6: :class:`dpkt.ip6.IP6`, the payload of families 24, 28 and 30.
+        linktype: ``LINKTYPE_NULL`` or ``LINKTYPE_LOOP``.
+
+    Returns:
+        The packet type, built once per argument tuple rather than once per
+        packet. Every class it is built from is part of that key, so a reloaded
+        `DPKT`_ module gets a class of its own instead of one holding stale
+        classes.
+
+    .. _DPKT: https://dpkt.readthedocs.io
+
+    """
+    import dpkt  # isort:skip
+
+    from pcapkit.protocols.link.loopback import family_byteorder  # isort:skip
+
+    layers = {2: ip, 24: ip6, 28: ip6, 30: ip6}
+
+    class Loopback(base):
+        """BSD loopback encapsulation."""
+
+        def unpack(ext, buf: 'bytes') -> 'None':
+            dpkt.dpkt.Packet.unpack(ext, buf)
+            family = buf[:ext.__hdr_len__]
+            ext.family = int.from_bytes(family, family_byteorder(family, linktype))
+            layer = layers.get(ext.family)
+            if layer is not None:
+                payload = layer(buf[ext.__hdr_len__:])
+                ext.data = payload
+                setattr(ext, layer.__name__.lower(), payload)
+
+    return Loopback
+
+
 class DPKT(EngineBase['DPKTPacket']):
     """DPKT engine support.
 
@@ -434,7 +487,7 @@ class DPKT(EngineBase['DPKTPacket']):
         # interface this packet was captured on, so ask only after reading it
         timestamp, pkt = cast('tuple[float, bytes]', next(reader))
         linktype = Enum_LinkType.get(reader.datalink())
-        protocol = self._get_protocol(linktype)
+        protocol = self._get_protocol(linktype, pkt)
         try:
             packet = protocol(pkt)  # type: DPKTPacket
         except Exception as exc:  # pylint: disable=broad-except
@@ -511,11 +564,19 @@ class DPKT(EngineBase['DPKTPacket']):
     # Utilities.
     ##########################################################################
 
-    def _get_protocol(self, linktype: 'Optional[Enum_LinkType]' = None) -> 'Type[DPKTPacket]':
+    def _get_protocol(self, linktype: 'Optional[Enum_LinkType]' = None,
+                      data: 'bytes' = b'') -> 'Type[DPKTPacket]':
         """Returns the protocol for parsing the current packet.
 
         Args:
             linktype: Link type code.
+            data: Octets of the current packet. ``LINKTYPE_RAW`` (101) carries
+                a bare IPv4 or IPv6 datagram, and only the version nibble of
+                its first octet tells which (:issue:`1502`).
+
+        Notes:
+            ``LINKTYPE_NULL`` (0) and ``LINKTYPE_LOOP`` (108) are parsed with
+            :func:`_loopback_protocol` (:issue:`1574`).
 
         """
         dpkt = self._expkg
@@ -523,13 +584,16 @@ class DPKT(EngineBase['DPKTPacket']):
 
         if linktype is None:
             linktype = Enum_LinkType.get(reader.datalink())
+        version = data[0] >> 4 if data else None
 
         if linktype == Enum_LinkType.ETHERNET:
             pkg = dpkt.ethernet.Ethernet
-        elif linktype.value == Enum_LinkType.IPV4:
+        elif linktype.value == Enum_LinkType.IPV4 or (linktype.value == Enum_LinkType.RAW and version == 4):
             pkg = dpkt.ip.IP
-        elif linktype.value == Enum_LinkType.IPV6:
+        elif linktype.value == Enum_LinkType.IPV6 or (linktype.value == Enum_LinkType.RAW and version == 6):
             pkg = dpkt.ip6.IP6
+        elif linktype.value in (Enum_LinkType.NULL, Enum_LinkType.LOOP):
+            pkg = _loopback_protocol(dpkt.loopback.Loopback, dpkt.ip.IP, dpkt.ip6.IP6, linktype.value)
         else:
             warn('unrecognised link layer protocol; all analysis functions ignored',
                  DPKTWarning, stacklevel=stacklevel())

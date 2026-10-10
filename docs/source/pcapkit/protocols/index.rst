@@ -27,7 +27,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        A{{ProtocolMeta}} -.->|metaclass| B(ProtocolBase)
 
        subgraph link [Link Layer]
-           Link --> Ethernet & L2TP & VLAN & ARP
+           Link --> Ethernet & L2TP & Loopback & VLAN & ARP
 
            subgraph arp [ARP Family]
                ARP --> InARP
@@ -108,6 +108,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        click Ethernet "/pcapkit/protocols/link/ethernet.html#pcapkit.protocols.link.ethernet.Ethernet"
        click L2TP "/pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP"
        click L2TPv2 "/pcapkit/protocols/link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2"
+       click Loopback "/pcapkit/protocols/link/loopback.html#pcapkit.protocols.link.loopback.Loopback"
        click VLAN "/pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN"
        click C_Tag "/pcapkit/protocols/link/c_tag.html#pcapkit.protocols.link.c_tag.C_Tag"
        click S_Tag "/pcapkit/protocols/link/s_tag.html#pcapkit.protocols.link.s_tag.S_Tag"

@@ -120,7 +120,7 @@ __all__ = [
     'NoPayload',                                            # No Payload
     'Raw',                                                  # Raw Packet
     'ARP', 'C_Tag', 'Ethernet', 'InARP', 'L2TP', 'L2TPv2',
-    'S_Tag', 'VLAN',                                        # Link Layer
+    'Loopback', 'S_Tag', 'VLAN',                            # Link Layer
     'AH', 'ESP', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',      # Internet Layer
     'HIP', 'HOPOPT', 'IPv6_Ext', 'IPv6_Frag', 'IPv6_Opts', 'IPv6_Route', 'MH',
                                                             # IPv6 Extension Header

@@ -365,13 +365,6 @@ class TestEngineAgreement(harness.RoundTripBase):
                'Extractor swaps the format with a FormatWarning '
                '(pcapkit/foundation/extraction.py:1439-1443)',
             'FLOWS', 'file of ', tuple(f'{capture}/pypcapfile/flows' for capture in TRACED_IPV4_ONLY_PCAP)),
-        Gap(1502, 'the default engine does not dissect LINKTYPE_RAW (101) frames, which scapy reads '
-               'as IPv4: neither Frame.__proto__ nor PCAPNG.__proto__ registers LinkType.RAW '
-               '(pcapkit/protocols/misc/pcap/frame.py:90, pcapkit/protocols/misc/pcapng.py:699), '
-               'so those frames are Raw and never reach reassembly',
-            ('INPUTS', 'DATAGRAMS'), ('extra, default has none', 'datagrams != '),
-            ('test.pcapng/scapy/ipv4', 'test.pcapng/scapy/datagrams',
-             'many_interfaces.pcapng/scapy/ipv4', 'many_interfaces.pcapng/scapy/datagrams')),
     )
 
     def setUp(self) -> None:

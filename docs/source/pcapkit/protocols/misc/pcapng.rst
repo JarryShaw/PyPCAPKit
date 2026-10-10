@@ -38,6 +38,7 @@ which implements extractor for PCAP-NG file format [*]_.
    .. automethod:: index
 
    .. automethod:: _decode_next_layer
+   .. automethod:: _dispatch_linktype
 
    .. automethod:: _get_payload
    .. automethod:: _make_data
