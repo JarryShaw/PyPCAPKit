@@ -236,6 +236,12 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
         Returns:
             Data_Frame: Parsed packet data.
 
+        Warns:
+            pcapkit.utilities.warnings.ProtocolWarning: If the timestamp is out
+                of range, or if the record's ``incl_len`` runs past the end of
+                the data being parsed, in which case the record is kept as
+                captured.
+
         """
         schema = self.__header__
 
@@ -314,6 +320,19 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
 
             #: bytes: Raw frame data.
             self._data = self._read_fileng(self.length + _ilen)
+
+            # NOTE: A record whose ``incl_len`` runs past the end of the data is
+            # kept as captured, as the PCAP-NG reader keeps a captured length
+            # running past its block (:issue:`1405`): ``incl_len`` and ``cap_len``
+            # stay as declared, so the record rebuilds byte-exactly, and the
+            # packet is the octets present. A writer must not copy the declared
+            # length, c.f. :meth:`PCAPIO._append_value
+            # <pcapkit.dumpkit.pcap.PCAPIO._append_value>` (:issue:`1541`).
+            held = len(self._data) - self.length
+            if held < _ilen:
+                warn(f'PCAP: [Frame {self._fnum}] captured length {_ilen} runs past the data, '
+                     f'which holds {held} octet(s); kept as captured',
+                     ProtocolWarning, stacklevel=stacklevel())
 
             # move forward to the beginning of the next frame
             self._file.seek(seek_cur, io.SEEK_SET)

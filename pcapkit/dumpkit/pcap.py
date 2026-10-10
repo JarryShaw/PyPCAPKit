@@ -230,6 +230,16 @@ class PCAPIO(DumperBase):
             3-octet payload would raise ``SchemaWarning: packet length < 0: -3``
             from a dumper that only has to copy it.
 
+            ``incl_len`` is written as ``len(value.packet)``, the octets that
+            follow it, not as ``value.frame_info.incl_len``. The two are equal
+            for every record a file holds whole. A record whose captured length
+            runs past the end of its file, or a PCAP-NG block whose captured
+            length runs past the block (:issue:`1405`), is *kept as captured*
+            by its reader: the declared length stays in ``frame_info``, so the
+            source rebuilds byte-exactly, and ``packet`` is the octets present.
+            Copying that declared length would claim octets the trace does not
+            hold, and a reader would run off the end of the file (:issue:`1541`).
+
         """
         # NOTE: The payload is read before the metadata so that a caller passing a
         # mapping rather than a dissected frame -- which the flow-tracing adapters
@@ -242,7 +252,7 @@ class PCAPIO(DumperBase):
 
         file.write(self._rechdr.pack(ts_sec & _UINT32_MASK,
                                      ts_frac & _UINT32_MASK,
-                                     frame_info.incl_len & _UINT32_MASK,
+                                     len(packet) & _UINT32_MASK,
                                      frame_info.orig_len & _UINT32_MASK) + packet)
         self._fnum += 1
 
