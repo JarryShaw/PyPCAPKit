@@ -376,7 +376,17 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         else:
             _plen = 0
 
-        return self._decode_next_layer(ipv4, ipv4.protocol, _plen, packet=__packet__)
+        # NOTE: A later fragment, one with a non-zero Fragment Offset, carries a
+        # slice of the datagram's data from that offset on, and that slice
+        # starts with no upper-layer header (:rfc:`791#section-3.2`), though
+        # ``protocol`` above still names the one the first fragment carries. No
+        # code is dispatched on, so the registry's fallback leaves the octets as
+        # :class:`~pcapkit.protocols.misc.raw.Raw` with no protocol to alias it
+        # as, and ``'UDP' in frame`` does not hold of a slice of UDP payload
+        # (:issue:`1553`). Reassembly takes ``packet.payload``, the octets as
+        # captured, which this leaves as they were.
+        return self._decode_next_layer(ipv4, None if ipv4.offset else ipv4.protocol, _plen,
+                                       packet=__packet__)
 
     def make(self,
              tos_pre: 'Enum_ToSPrecedence | StdlibEnum | AenumEnum | int | str' = Enum_ToSPrecedence.Routine,
