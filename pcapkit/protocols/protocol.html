@@ -1181,21 +1181,21 @@ declares – normally <a class="reference internal" href="misc/raw.html#pcapkit.
 <p class="admonition-title">Important</p>
 <p>The lookup itself is <code class="xref py py-meth docutils literal notranslate"><span class="pre">self._lookup_registry</span></code>, so a miss does not grow the shared
 registry. What this adds is the next-layer-specific resolution step:
-a registered code may hold a
+the entry found – registered, or the fallback – may be a
 <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> rather than a
-class, and importing it is written back so the import happens once.</p>
-<p>That write-back is deliberately confined to a <em>hit</em>. Memoising the
-fallback’s resolution under <code class="docutils literal notranslate"><span class="pre">proto</span></code> would be exactly the insertion
+class, and it is resolved to the class it names.</p>
+<p>Nothing is written back, on a hit or a miss. A miss has no key to
+write under, and recording one would be exactly the insertion
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">self._lookup_registry</span></code> exists
-to avoid.</p>
-<p>So a miss resolves its fallback descriptor again on every frame, and
-what keeps that affordable is <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor.klass" title="pcapkit.corekit.module.ModuleDescriptor.klass"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ModuleDescriptor.klass</span></code></a> reading
+to avoid. A hit memoised under <code class="docutils literal notranslate"><span class="pre">proto</span></code> would retain a class that
+<a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.reload" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.reload()</span></code></a> then makes stale, and would make parsing
+mutate a registry shared by the whole process (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1559">#1559</a>). The
+same holds for a memo in <code class="docutils literal notranslate"><span class="pre">registry</span></code>’s default factory or in a cache
+beside the registry (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/421">#421</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/425">#425</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/555">#555</a>).</p>
+<p>So every lookup resolves its descriptor again, and what keeps that
+affordable is <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor.klass" title="pcapkit.corekit.module.ModuleDescriptor.klass"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ModuleDescriptor.klass</span></code></a> reading
 <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.modules" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.modules</span></code></a> instead of re-entering
-<a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.import_module" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.import_module()</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/574">#574</a>). Memoising the
-resolved class instead, whether under <code class="docutils literal notranslate"><span class="pre">proto</span></code>, in <code class="docutils literal notranslate"><span class="pre">registry</span></code>’s
-default factory, or in a cache beside the registry, would retain a
-class that <a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.reload" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.reload()</span></code></a> then makes stale (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/421">#421</a>,
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/425">#425</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/555">#555</a>).</p>
+<a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.import_module" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.import_module()</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/574">#574</a>).</p>
 </div>
 </dd></dl>
 

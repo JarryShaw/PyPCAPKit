@@ -2632,35 +2632,29 @@
 <span class="sd">            The lookup itself is :meth:`self._lookup_registry</span>
 <span class="sd">            &lt;ProtocolBase._lookup_registry&gt;`, so a miss does not grow the shared</span>
 <span class="sd">            registry. What this adds is the next-layer-specific resolution step:</span>
-<span class="sd">            a registered code may hold a</span>
+<span class="sd">            the entry found -- registered, or the fallback -- may be a</span>
 <span class="sd">            :class:`~pcapkit.corekit.module.ModuleDescriptor` rather than a</span>
-<span class="sd">            class, and importing it is written back so the import happens once.</span>
+<span class="sd">            class, and it is resolved to the class it names.</span>
 
-<span class="sd">            That write-back is deliberately confined to a *hit*. Memoising the</span>
-<span class="sd">            fallback's resolution under ``proto`` would be exactly the insertion</span>
+<span class="sd">            Nothing is written back, on a hit or a miss. A miss has no key to</span>
+<span class="sd">            write under, and recording one would be exactly the insertion</span>
 <span class="sd">            :meth:`self._lookup_registry &lt;ProtocolBase._lookup_registry&gt;` exists</span>
-<span class="sd">            to avoid.</span>
+<span class="sd">            to avoid. A hit memoised under ``proto`` would retain a class that</span>
+<span class="sd">            :func:`importlib.reload` then makes stale, and would make parsing</span>
+<span class="sd">            mutate a registry shared by the whole process (:issue:`1559`). The</span>
+<span class="sd">            same holds for a memo in ``registry``'s default factory or in a cache</span>
+<span class="sd">            beside the registry (:issue:`421`, :issue:`425`, :issue:`555`).</span>
 
-<span class="sd">            So a miss resolves its fallback descriptor again on every frame, and</span>
-<span class="sd">            what keeps that affordable is :attr:`ModuleDescriptor.klass</span>
+<span class="sd">            So every lookup resolves its descriptor again, and what keeps that</span>
+<span class="sd">            affordable is :attr:`ModuleDescriptor.klass</span>
 <span class="sd">            &lt;pcapkit.corekit.module.ModuleDescriptor.klass&gt;` reading</span>
 <span class="sd">            :data:`sys.modules` instead of re-entering</span>
-<span class="sd">            :func:`importlib.import_module` (:issue:`574`). Memoising the</span>
-<span class="sd">            resolved class instead, whether under ``proto``, in ``registry``'s</span>
-<span class="sd">            default factory, or in a cache beside the registry, would retain a</span>
-<span class="sd">            class that :func:`importlib.reload` then makes stale (:issue:`421`,</span>
-<span class="sd">            :issue:`425`, :issue:`555`).</span>
+<span class="sd">            :func:`importlib.import_module` (:issue:`574`).</span>
 
 <span class="sd">        """</span>
         <span class="n">protocol</span> <span class="o">=</span> <span class="n">ProtocolBase</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="n">registry</span><span class="p">,</span> <span class="n">proto</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
-            <span class="n">klass</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
-            <span class="c1"># a descriptor can also come back from the default factory, and that</span>
-            <span class="c1"># one has no key to memoise under -- writing it back would recreate</span>
-            <span class="c1"># the insertion-on-miss this exists to avoid</span>
-            <span class="k">if</span> <span class="n">proto</span> <span class="ow">in</span> <span class="n">registry</span><span class="p">:</span>
-                <span class="n">registry</span><span class="p">[</span><span class="n">proto</span><span class="p">]</span> <span class="o">=</span> <span class="n">klass</span>  <span class="c1"># update mapping upon import</span>
-            <span class="k">return</span> <span class="n">klass</span>
+            <span class="k">return</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
         <span class="k">return</span> <span class="n">protocol</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_decode_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">'_PT'</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>

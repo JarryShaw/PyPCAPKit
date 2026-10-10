@@ -92,7 +92,9 @@ offers, and the ones that cannot say so rather than quietly doing less:
 | :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile`      | no IPv6 decoder, hence no IPv6 reassembly -- disabled with an |
 |                                                                 | :class:`~pcapkit.utilities.warnings.AttributeWarning`, and    |
 |                                                                 | :func:`~pcapkit.toolkit.pypcapfile.ipv6_reassembly` raises;   |
-|                                                                 | PCAP savefiles only, otherwise                                |
+|                                                                 | TCP over IPv6 is left out of TCP reassembly and flow tracing, |
+|                                                                 | with an :class:`~pcapkit.utilities.warnings.AttributeWarning` |
+|                                                                 | once per capture; PCAP savefiles only, otherwise              |
 |                                                                 | :exc:`~pcapkit.utilities.exceptions.FormatError`              |
 +-----------------------------------------------------------------+---------------------------------------------------------------+
 | :class:`~pcapkit.foundation.engines.dpkt.DPKT`,                 | no PCAP output, since each frame reaches the writer as a      |

@@ -572,7 +572,9 @@ reassembly (<a class="reference internal" href="../foundation/reassembly/ip/ipv6
 <dd class="field-odd"><p><p>A tuple of data for TCP reassembly.</p>
 <ul class="simple">
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">frame</span></code> can be used for TCP reassembly. A frame can be reassembled
-if it contains TCP layer (<a class="reference internal" href="../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP" title="pcapkit.protocols.transport.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a>).</p></li>
+if it contains TCP layer (<a class="reference internal" href="../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP" title="pcapkit.protocols.transport.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a>),
+or a TCP segment whose header the TCP parser rejected, as it does one the
+snapshot length cut short (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1518">#1518</a>).</p></li>
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">frame</span></code> can be reassembled, then the <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> mapping of data for TCP
 reassembly (<a class="reference internal" href="../foundation/reassembly/tcp.html#term-reasm.tcp.packet"><span class="xref std std-term">reasm.tcp.packet</span></a>) will be returned; otherwise, returns <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p></li>
 </ul>
@@ -603,7 +605,9 @@ reassembly (<a class="reference internal" href="../foundation/reassembly/tcp.htm
 <dd class="field-odd"><p><p>Data for TCP reassembly.</p>
 <ul class="simple">
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be used for TCP flow tracing. A frame can be reassembled
-if it contains TCP layer (<a class="reference internal" href="../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP" title="pcapkit.protocols.transport.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a>).</p></li>
+if it contains TCP layer (<a class="reference internal" href="../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP" title="pcapkit.protocols.transport.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a>),
+or a TCP segment whose header the TCP parser rejected, as it does one the
+snapshot length cut short (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1518">#1518</a>).</p></li>
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">frame</span></code> can be reassembled, then the <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> mapping of data for TCP
 flow tracing (<a class="reference internal" href="../foundation/traceflow/tcp.html#term-trace.tcp.packet"><span class="xref std std-term">trace.tcp.packet</span></a>) will be returned; otherwise, returns <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p></li>
 </ul>
@@ -700,7 +704,9 @@ reassembly (<a class="reference internal" href="../foundation/reassembly/ip/ipv6
 <dd class="field-odd"><p><p>A tuple of data for TCP reassembly.</p>
 <ul class="simple">
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">frame</span></code> can be used for TCP reassembly. A frame can be reassembled
-if it contains TCP layer (<a class="reference internal" href="../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP" title="pcapkit.protocols.transport.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a>).</p></li>
+if it contains TCP layer (<a class="reference internal" href="../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP" title="pcapkit.protocols.transport.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a>),
+or a TCP segment whose header the TCP parser rejected, as it does one the
+snapshot length cut short (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1518">#1518</a>).</p></li>
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">frame</span></code> can be reassembled, then the <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> mapping of data for TCP
 reassembly (<a class="reference internal" href="../foundation/reassembly/tcp.html#term-reasm.tcp.packet"><span class="xref std std-term">reasm.tcp.packet</span></a>) will be returned; otherwise, returns <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p></li>
 </ul>
@@ -731,7 +737,9 @@ reassembly (<a class="reference internal" href="../foundation/reassembly/tcp.htm
 <dd class="field-odd"><p><p>Data for TCP reassembly.</p>
 <ul class="simple">
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be used for TCP flow tracing. A frame can be reassembled
-if it contains TCP layer (<a class="reference internal" href="../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP" title="pcapkit.protocols.transport.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a>).</p></li>
+if it contains TCP layer (<a class="reference internal" href="../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP" title="pcapkit.protocols.transport.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a>),
+or a TCP segment whose header the TCP parser rejected, as it does one the
+snapshot length cut short (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1518">#1518</a>).</p></li>
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">frame</span></code> can be reassembled, then the <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> mapping of data for TCP
 flow tracing (<a class="reference internal" href="../foundation/traceflow/tcp.html#term-trace.tcp.packet"><span class="xref std std-term">trace.tcp.packet</span></a>) will be returned; otherwise, returns <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p></li>
 </ul>

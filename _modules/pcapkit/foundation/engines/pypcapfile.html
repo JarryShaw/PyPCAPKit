@@ -515,9 +515,12 @@
 <span class="sd">    no PCAP-NG support. Consequently this engine</span>
 
 <span class="sd">    * reads PCAP savefiles only, raising</span>
-<span class="sd">      :exc:`~pcapkit.utilities.exceptions.FormatError` on PCAP-NG, and</span>
+<span class="sd">      :exc:`~pcapkit.utilities.exceptions.FormatError` on PCAP-NG,</span>
 <span class="sd">    * disables IPv6 reassembly, warning as it does so, while leaving IPv4 and</span>
-<span class="sd">      TCP reassembly and TCP flow tracing in place.</span>
+<span class="sd">      TCP reassembly and TCP flow tracing in place, and</span>
+<span class="sd">    * leaves TCP over IPv6 out of TCP reassembly and flow tracing, with one</span>
+<span class="sd">      :exc:`~pcapkit.utilities.warnings.AttributeWarning` per capture -- see</span>
+<span class="sd">      :mod:`pcapkit.toolkit.pypcapfile`.</span>
 
 <span class="sd">    The engine stops decoding at the network layer rather than descending into</span>
 <span class="sd">    the transport layer. `PyPCAPFile`_ decoders *replace* the payload bytes of</span>

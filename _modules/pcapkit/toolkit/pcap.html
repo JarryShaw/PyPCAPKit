@@ -483,24 +483,134 @@
 <span class="sd">cannot be used for it.</span>
 
 <span class="sd">"""</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">NamedTuple</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv6.extension_header</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExtensionHeader</span> <span class="k">as</span> <span class="n">Enum_ExtensionHeader</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">IP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TCP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.ipv4</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4</span> <span class="k">as</span> <span class="n">Data_IPv4</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span> <span class="k">as</span> <span class="n">Data_IPv6</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv4</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6_frag</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Frag</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'ipv4_reassembly'</span><span class="p">,</span> <span class="s1">'ipv6_reassembly'</span><span class="p">,</span> <span class="s1">'tcp_reassembly'</span><span class="p">,</span> <span class="s1">'tcp_traceflow'</span><span class="p">]</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_TCPSegment</span><span class="p">(</span><span class="n">NamedTuple</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The fields of a TCP segment that the reassembly and flow tracing records take."""</span>
+
+    <span class="c1">#: Info of the IP layer carrying the segment.</span>
+    <span class="n">ip</span><span class="p">:</span> <span class="s1">'Data_IPv4 | Data_IPv6'</span>
+    <span class="c1">#: TCP source port.</span>
+    <span class="n">srcport</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: TCP destination port.</span>
+    <span class="n">dstport</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: TCP sequence number.</span>
+    <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: TCP acknowledgement number.</span>
+    <span class="n">ack</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: TCP synchronise (SYN) flag.</span>
+    <span class="n">syn</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: TCP finish (FIN) flag.</span>
+    <span class="n">fin</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: TCP reset (RST) flag.</span>
+    <span class="n">rst</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: Raw TCP header, as captured.</span>
+    <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span>
+    <span class="c1">#: Raw TCP payload, as captured.</span>
+    <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_tcp_segment</span><span class="p">(</span><span class="n">frame</span><span class="p">:</span> <span class="s1">'ProtocolBase'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[_TCPSegment]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The TCP segment ``frame`` carries, or :data:`None` if it carries none.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        frame: PCAP frame or PCAP-NG block.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The fields of the TCP layer if :mod:`pcapkit` parsed one. Otherwise, the</span>
+<span class="sd">        fields of the fixed 20-octet TCP header (:rfc:`9293#section-3.1`) if the</span>
+<span class="sd">        IP payload is a :class:`~pcapkit.protocols.misc.raw.Raw` the TCP parser</span>
+<span class="sd">        rejected, of protocol TCP, from a datagram that is not a later fragment,</span>
+<span class="sd">        with at least those 20 octets captured; else :data:`None`.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        A capture snapped inside the TCP header leaves a Data Offset that runs</span>
+<span class="sd">        past the captured octets, and the TCP parser rejects such a header by</span>
+<span class="sd">        design (:issue:`1404`), so the segment arrives as</span>
+<span class="sd">        :class:`~pcapkit.protocols.misc.raw.Raw`. The ports, numbers and flags</span>
+<span class="sd">        are all in the fixed header, so the segment still belongs to its flow,</span>
+<span class="sd">        as it does for :mod:`dpkt`, :mod:`scapy` and Wireshark (:issue:`1518`).</span>
+<span class="sd">        The header and payload are then the captured octets either side of the</span>
+<span class="sd">        Data Offset.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="s1">'TCP'</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
+        <span class="n">tcp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'TCP'</span><span class="p">,</span> <span class="n">frame</span><span class="p">[</span><span class="s1">'TCP'</span><span class="p">])</span>
+        <span class="n">tcp_info</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">info</span>
+        <span class="k">return</span> <span class="n">_TCPSegment</span><span class="p">(</span>
+            <span class="n">ip</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'IPv4 | IPv6'</span><span class="p">,</span> <span class="n">frame</span><span class="p">[</span><span class="s1">'IP'</span><span class="p">])</span><span class="o">.</span><span class="n">info</span><span class="p">,</span>
+            <span class="n">srcport</span><span class="o">=</span><span class="n">tcp_info</span><span class="o">.</span><span class="n">srcport</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
+            <span class="n">dstport</span><span class="o">=</span><span class="n">tcp_info</span><span class="o">.</span><span class="n">dstport</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
+            <span class="n">seq</span><span class="o">=</span><span class="n">tcp_info</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
+            <span class="n">ack</span><span class="o">=</span><span class="n">tcp_info</span><span class="o">.</span><span class="n">ack</span><span class="p">,</span>
+            <span class="n">syn</span><span class="o">=</span><span class="n">tcp_info</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">syn</span><span class="p">,</span>
+            <span class="n">fin</span><span class="o">=</span><span class="n">tcp_info</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">fin</span><span class="p">,</span>
+            <span class="n">rst</span><span class="o">=</span><span class="n">tcp_info</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">rst</span><span class="p">,</span>
+            <span class="n">header</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">packet</span><span class="o">.</span><span class="n">header</span><span class="p">,</span>
+            <span class="n">payload</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">packet</span><span class="o">.</span><span class="n">payload</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="s1">'IP'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv4 | IPv6'</span><span class="p">,</span> <span class="n">frame</span><span class="p">[</span><span class="s1">'IP'</span><span class="p">])</span>
+    <span class="n">ip_info</span> <span class="o">=</span> <span class="n">ip</span><span class="o">.</span><span class="n">info</span>
+    <span class="n">raw</span> <span class="o">=</span> <span class="n">ip</span><span class="o">.</span><span class="n">payload</span>
+    <span class="c1"># NOTE: a Raw with no error is one the caller asked for, by stopping the</span>
+    <span class="c1"># dissection at a ``layer`` or ``protocol``, not a segment TCP rejected.</span>
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">Raw</span><span class="p">)</span> <span class="ow">or</span> <span class="n">raw</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">error</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="ow">or</span> <span class="n">ip_info</span><span class="o">.</span><span class="n">protocol</span> <span class="o">!=</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">TCP</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># A later fragment's payload starts mid-datagram, with no TCP header in it.</span>
+    <span class="k">if</span> <span class="n">ip_info</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">ip_info</span><span class="o">.</span><span class="n">offset</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">frag</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6'</span><span class="p">,</span> <span class="n">ip</span><span class="p">)</span><span class="o">.</span><span class="n">extension_headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">IPv6_Frag</span><span class="p">)</span>  <span class="c1"># type: ignore[call-overload]</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">frag</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6_Frag'</span><span class="p">,</span> <span class="n">frag</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">offset</span>
+    <span class="k">if</span> <span class="n">offset</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">octets</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">packet</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span>
+    <span class="n">hdr_len</span> <span class="o">=</span> <span class="p">(</span><span class="n">octets</span><span class="p">[</span><span class="mi">12</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">octets</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">20</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">hdr_len</span> <span class="o">&lt;</span> <span class="mi">20</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">flags</span> <span class="o">=</span> <span class="n">octets</span><span class="p">[</span><span class="mi">13</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">_TCPSegment</span><span class="p">(</span>
+        <span class="n">ip</span><span class="o">=</span><span class="n">ip_info</span><span class="p">,</span>
+        <span class="n">srcport</span><span class="o">=</span><span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">octets</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span> <span class="s1">'big'</span><span class="p">),</span>
+        <span class="n">dstport</span><span class="o">=</span><span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">octets</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">],</span> <span class="s1">'big'</span><span class="p">),</span>
+        <span class="n">seq</span><span class="o">=</span><span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">octets</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">8</span><span class="p">],</span> <span class="s1">'big'</span><span class="p">),</span>
+        <span class="n">ack</span><span class="o">=</span><span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">octets</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">12</span><span class="p">],</span> <span class="s1">'big'</span><span class="p">),</span>
+        <span class="n">syn</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="mh">0x02</span><span class="p">),</span>
+        <span class="n">fin</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="mh">0x01</span><span class="p">),</span>
+        <span class="n">rst</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="mh">0x04</span><span class="p">),</span>
+        <span class="n">header</span><span class="o">=</span><span class="n">octets</span><span class="p">[:</span><span class="n">hdr_len</span><span class="p">],</span>
+        <span class="n">payload</span><span class="o">=</span><span class="n">octets</span><span class="p">[</span><span class="n">hdr_len</span><span class="p">:],</span>
+    <span class="p">)</span>
 
 
 <div class="viewcode-block" id="ipv4_reassembly">
@@ -631,7 +741,9 @@
 <span class="sd">        A tuple of data for TCP reassembly.</span>
 
 <span class="sd">        * If the ``frame`` can be used for TCP reassembly. A frame can be reassembled</span>
-<span class="sd">          if it contains TCP layer (:class:`~pcapkit.protocols.transport.tcp.TCP`).</span>
+<span class="sd">          if it contains TCP layer (:class:`~pcapkit.protocols.transport.tcp.TCP`),</span>
+<span class="sd">          or a TCP segment whose header the TCP parser rejected, as it does one the</span>
+<span class="sd">          snapshot length cut short (:issue:`1518`).</span>
 <span class="sd">        * If the ``frame`` can be reassembled, then the :obj:`dict` mapping of data for TCP</span>
 <span class="sd">          reassembly (:term:`reasm.tcp.packet`) will be returned; otherwise, returns :data:`None`.</span>
 
@@ -639,30 +751,25 @@
 <span class="sd">        :class:`pcapkit.foundation.reassembly.tcp.TCP`</span>
 
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="s1">'TCP'</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
-        <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv4 | IPv6'</span><span class="p">,</span> <span class="n">frame</span><span class="p">[</span><span class="s1">'IP'</span><span class="p">])</span>
-        <span class="n">ip_info</span> <span class="o">=</span> <span class="n">ip</span><span class="o">.</span><span class="n">info</span>
-        <span class="n">tcp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'TCP'</span><span class="p">,</span> <span class="n">frame</span><span class="p">[</span><span class="s1">'TCP'</span><span class="p">])</span>
-        <span class="n">tcp_info</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">info</span>
-
-        <span class="n">raw_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">packet</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">segment</span> <span class="o">:=</span> <span class="n">_tcp_segment</span><span class="p">(</span><span class="n">frame</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">raw_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">segment</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">TCP_Packet</span><span class="p">(</span>
             <span class="n">bufid</span><span class="o">=</span><span class="p">(</span>
-                <span class="n">ip_info</span><span class="o">.</span><span class="n">src</span><span class="p">,</span>                        <span class="c1"># source IP address</span>
-                <span class="n">tcp_info</span><span class="o">.</span><span class="n">srcport</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>              <span class="c1"># source port</span>
-                <span class="n">ip_info</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span>                        <span class="c1"># destination IP address</span>
-                <span class="n">tcp_info</span><span class="o">.</span><span class="n">dstport</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>              <span class="c1"># destination port</span>
+                <span class="n">segment</span><span class="o">.</span><span class="n">ip</span><span class="o">.</span><span class="n">src</span><span class="p">,</span>                     <span class="c1"># source IP address</span>
+                <span class="n">segment</span><span class="o">.</span><span class="n">srcport</span><span class="p">,</span>                    <span class="c1"># source port</span>
+                <span class="n">segment</span><span class="o">.</span><span class="n">ip</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span>                     <span class="c1"># destination IP address</span>
+                <span class="n">segment</span><span class="o">.</span><span class="n">dstport</span><span class="p">,</span>                    <span class="c1"># destination port</span>
             <span class="p">),</span>
             <span class="n">num</span><span class="o">=</span><span class="n">frame</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">number</span><span class="p">,</span>                  <span class="c1"># original packet range number</span>
-            <span class="n">ack</span><span class="o">=</span><span class="n">tcp_info</span><span class="o">.</span><span class="n">ack</span><span class="p">,</span>                       <span class="c1"># acknowledgement</span>
-            <span class="n">dsn</span><span class="o">=</span><span class="n">tcp_info</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>                       <span class="c1"># data sequence number</span>
-            <span class="n">syn</span><span class="o">=</span><span class="n">tcp_info</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">syn</span><span class="p">,</span>                 <span class="c1"># synchronise flag</span>
-            <span class="n">fin</span><span class="o">=</span><span class="n">tcp_info</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">fin</span><span class="p">,</span>                 <span class="c1"># finish flag</span>
-            <span class="n">rst</span><span class="o">=</span><span class="n">tcp_info</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">rst</span><span class="p">,</span>                 <span class="c1"># reset connection flag</span>
-            <span class="n">header</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">packet</span><span class="o">.</span><span class="n">header</span><span class="p">,</span>               <span class="c1"># raw bytes type header</span>
-            <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">packet</span><span class="o">.</span><span class="n">payload</span><span class="p">),</span>  <span class="c1"># raw bytearray type payload</span>
-            <span class="n">first</span><span class="o">=</span><span class="n">tcp_info</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>                     <span class="c1"># first sequence number of payload</span>
-            <span class="n">last</span><span class="o">=</span><span class="n">tcp_info</span><span class="o">.</span><span class="n">seq</span> <span class="o">+</span> <span class="n">raw_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>        <span class="c1"># last sequence number of payload</span>
+            <span class="n">ack</span><span class="o">=</span><span class="n">segment</span><span class="o">.</span><span class="n">ack</span><span class="p">,</span>                        <span class="c1"># acknowledgement</span>
+            <span class="n">dsn</span><span class="o">=</span><span class="n">segment</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>                        <span class="c1"># data sequence number</span>
+            <span class="n">syn</span><span class="o">=</span><span class="n">segment</span><span class="o">.</span><span class="n">syn</span><span class="p">,</span>                        <span class="c1"># synchronise flag</span>
+            <span class="n">fin</span><span class="o">=</span><span class="n">segment</span><span class="o">.</span><span class="n">fin</span><span class="p">,</span>                        <span class="c1"># finish flag</span>
+            <span class="n">rst</span><span class="o">=</span><span class="n">segment</span><span class="o">.</span><span class="n">rst</span><span class="p">,</span>                        <span class="c1"># reset connection flag</span>
+            <span class="n">header</span><span class="o">=</span><span class="n">segment</span><span class="o">.</span><span class="n">header</span><span class="p">,</span>                  <span class="c1"># raw bytes type header</span>
+            <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">segment</span><span class="o">.</span><span class="n">payload</span><span class="p">),</span>     <span class="c1"># raw bytearray type payload</span>
+            <span class="n">first</span><span class="o">=</span><span class="n">segment</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>                      <span class="c1"># first sequence number of payload</span>
+            <span class="n">last</span><span class="o">=</span><span class="n">segment</span><span class="o">.</span><span class="n">seq</span> <span class="o">+</span> <span class="n">raw_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>         <span class="c1"># last sequence number of payload</span>
             <span class="nb">len</span><span class="o">=</span><span class="n">raw_len</span><span class="p">,</span>                            <span class="c1"># payload length, header excludes</span>
             <span class="n">timestamp</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">time_epoch</span><span class="p">),</span>  <span class="c1"># capture timestamp</span>
         <span class="p">)</span>
@@ -684,7 +791,9 @@
 <span class="sd">        Data for TCP reassembly.</span>
 
 <span class="sd">        * If the ``packet`` can be used for TCP flow tracing. A frame can be reassembled</span>
-<span class="sd">          if it contains TCP layer (:class:`~pcapkit.protocols.transport.tcp.TCP`).</span>
+<span class="sd">          if it contains TCP layer (:class:`~pcapkit.protocols.transport.tcp.TCP`),</span>
+<span class="sd">          or a TCP segment whose header the TCP parser rejected, as it does one the</span>
+<span class="sd">          snapshot length cut short (:issue:`1518`).</span>
 <span class="sd">        * If the ``frame`` can be reassembled, then the :obj:`dict` mapping of data for TCP</span>
 <span class="sd">          flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.</span>
 
@@ -692,28 +801,23 @@
 <span class="sd">        :class:`pcapkit.foundation.traceflow.tcp.TCP`</span>
 
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="s1">'TCP'</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
-        <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv4 | IPv6'</span><span class="p">,</span> <span class="n">frame</span><span class="p">[</span><span class="s1">'IP'</span><span class="p">])</span>
-        <span class="n">ip_info</span> <span class="o">=</span> <span class="n">ip</span><span class="o">.</span><span class="n">info</span>
-        <span class="n">tcp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'TCP'</span><span class="p">,</span> <span class="n">frame</span><span class="p">[</span><span class="s1">'TCP'</span><span class="p">])</span>
-        <span class="n">tcp_info</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">info</span>
-
+    <span class="k">if</span> <span class="p">(</span><span class="n">segment</span> <span class="o">:=</span> <span class="n">_tcp_segment</span><span class="p">(</span><span class="n">frame</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">TF_TCP_Packet</span><span class="p">(</span>  <span class="c1"># type: ignore[type-var]</span>
             <span class="n">protocol</span><span class="o">=</span><span class="n">data_link</span><span class="p">,</span>                      <span class="c1"># data link type from global header</span>
             <span class="n">index</span><span class="o">=</span><span class="n">frame</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">number</span><span class="p">,</span>                 <span class="c1"># frame number</span>
             <span class="n">frame</span><span class="o">=</span><span class="n">frame</span><span class="o">.</span><span class="n">info</span><span class="p">,</span>                        <span class="c1"># extracted frame info</span>
-            <span class="n">syn</span><span class="o">=</span><span class="n">tcp_info</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">syn</span><span class="p">,</span>                  <span class="c1"># TCP synchronise (SYN) flag</span>
-            <span class="n">fin</span><span class="o">=</span><span class="n">tcp_info</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">fin</span><span class="p">,</span>                  <span class="c1"># TCP finish (FIN) flag</span>
-            <span class="n">rst</span><span class="o">=</span><span class="n">tcp_info</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">rst</span><span class="p">,</span>                  <span class="c1"># TCP reset (RST) flag</span>
-            <span class="n">src</span><span class="o">=</span><span class="n">ip_info</span><span class="o">.</span><span class="n">src</span><span class="p">,</span>                         <span class="c1"># source IP</span>
-            <span class="n">dst</span><span class="o">=</span><span class="n">ip_info</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span>                         <span class="c1"># destination IP</span>
-            <span class="n">srcport</span><span class="o">=</span><span class="n">tcp_info</span><span class="o">.</span><span class="n">srcport</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>           <span class="c1"># TCP source port</span>
-            <span class="n">dstport</span><span class="o">=</span><span class="n">tcp_info</span><span class="o">.</span><span class="n">dstport</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>           <span class="c1"># TCP destination port</span>
+            <span class="n">syn</span><span class="o">=</span><span class="n">segment</span><span class="o">.</span><span class="n">syn</span><span class="p">,</span>                         <span class="c1"># TCP synchronise (SYN) flag</span>
+            <span class="n">fin</span><span class="o">=</span><span class="n">segment</span><span class="o">.</span><span class="n">fin</span><span class="p">,</span>                         <span class="c1"># TCP finish (FIN) flag</span>
+            <span class="n">rst</span><span class="o">=</span><span class="n">segment</span><span class="o">.</span><span class="n">rst</span><span class="p">,</span>                         <span class="c1"># TCP reset (RST) flag</span>
+            <span class="n">src</span><span class="o">=</span><span class="n">segment</span><span class="o">.</span><span class="n">ip</span><span class="o">.</span><span class="n">src</span><span class="p">,</span>                      <span class="c1"># source IP</span>
+            <span class="n">dst</span><span class="o">=</span><span class="n">segment</span><span class="o">.</span><span class="n">ip</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span>                      <span class="c1"># destination IP</span>
+            <span class="n">srcport</span><span class="o">=</span><span class="n">segment</span><span class="o">.</span><span class="n">srcport</span><span class="p">,</span>                 <span class="c1"># TCP source port</span>
+            <span class="n">dstport</span><span class="o">=</span><span class="n">segment</span><span class="o">.</span><span class="n">dstport</span><span class="p">,</span>                 <span class="c1"># TCP destination port</span>
             <span class="n">timestamp</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">time_epoch</span><span class="p">),</span>  <span class="c1"># frame timestamp</span>
-            <span class="n">seq</span><span class="o">=</span><span class="n">tcp_info</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>                        <span class="c1"># TCP sequence number</span>
-            <span class="n">ack</span><span class="o">=</span><span class="n">tcp_info</span><span class="o">.</span><span class="n">ack</span><span class="p">,</span>                        <span class="c1"># TCP acknowledgement number</span>
-            <span class="n">header</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">packet</span><span class="o">.</span><span class="n">header</span><span class="p">,</span>                <span class="c1"># raw bytes type header</span>
-            <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">packet</span><span class="o">.</span><span class="n">payload</span><span class="p">),</span>   <span class="c1"># raw bytearray type payload</span>
+            <span class="n">seq</span><span class="o">=</span><span class="n">segment</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>                         <span class="c1"># TCP sequence number</span>
+            <span class="n">ack</span><span class="o">=</span><span class="n">segment</span><span class="o">.</span><span class="n">ack</span><span class="p">,</span>                         <span class="c1"># TCP acknowledgement number</span>
+            <span class="n">header</span><span class="o">=</span><span class="n">segment</span><span class="o">.</span><span class="n">header</span><span class="p">,</span>                   <span class="c1"># raw bytes type header</span>
+            <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">segment</span><span class="o">.</span><span class="n">payload</span><span class="p">),</span>      <span class="c1"># raw bytearray type payload</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span>
     <span class="k">return</span> <span class="kc">None</span></div>

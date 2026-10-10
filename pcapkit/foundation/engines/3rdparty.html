@@ -1681,9 +1681,12 @@ TCP and UDP, and nothing else – in particular there is no IPv6 decoder and
 no PCAP-NG support. Consequently this engine</p>
 <ul class="simple">
 <li><p>reads PCAP savefiles only, raising
-<a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FormatError</span></code></a> on PCAP-NG, and</p></li>
+<a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FormatError</span></code></a> on PCAP-NG,</p></li>
 <li><p>disables IPv6 reassembly, warning as it does so, while leaving IPv4 and
-TCP reassembly and TCP flow tracing in place.</p></li>
+TCP reassembly and TCP flow tracing in place, and</p></li>
+<li><p>leaves TCP over IPv6 out of TCP reassembly and flow tracing, with one
+<a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a> per capture – see
+<a class="reference internal" href="../../toolkit/3rdparty.html#module-pcapkit.toolkit.pypcapfile" title="pcapkit.toolkit.pypcapfile"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pypcapfile</span></code></a>.</p></li>
 </ul>
 <p>The engine stops decoding at the network layer rather than descending into
 the transport layer. <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> decoders <em>replace</em> the payload bytes of

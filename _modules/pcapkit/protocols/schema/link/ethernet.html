@@ -514,9 +514,9 @@
 <span class="sd">        saw would be recorded as though somebody had registered it, and</span>
 <span class="sd">        :meth:`Link.register &lt;pcapkit.protocols.link.link.Link.register&gt;` would</span>
 <span class="sd">        afterwards report it as an overwrite. The helper reads the fallback</span>
-<span class="sd">        without recording it, and for a code that really is registered as a</span>
-<span class="sd">        :class:`~pcapkit.corekit.module.ModuleDescriptor` it writes the resolved</span>
-<span class="sd">        class back, so the import happens once.</span>
+<span class="sd">        without recording it, and resolves a</span>
+<span class="sd">        :class:`~pcapkit.corekit.module.ModuleDescriptor` without writing the</span>
+<span class="sd">        class back, so the registry is left as registered (:issue:`1559`).</span>
 
 <span class="sd">    """</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.ethernet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Ethernet</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>

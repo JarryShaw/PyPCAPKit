@@ -853,7 +853,17 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">_plen</span> <span class="o">=</span> <span class="mi">0</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">ipv4</span><span class="p">,</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span> <span class="n">_plen</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">__packet__</span><span class="p">)</span></div>
+        <span class="c1"># NOTE: A later fragment, one with a non-zero Fragment Offset, carries a</span>
+        <span class="c1"># slice of the datagram's data from that offset on, and that slice</span>
+        <span class="c1"># starts with no upper-layer header (:rfc:`791#section-3.2`), though</span>
+        <span class="c1"># ``protocol`` above still names the one the first fragment carries. No</span>
+        <span class="c1"># code is dispatched on, so the registry's fallback leaves the octets as</span>
+        <span class="c1"># :class:`~pcapkit.protocols.misc.raw.Raw` with no protocol to alias it</span>
+        <span class="c1"># as, and ``'UDP' in frame`` does not hold of a slice of UDP payload</span>
+        <span class="c1"># (:issue:`1553`). Reassembly takes ``packet.payload``, the octets as</span>
+        <span class="c1"># captured, which this leaves as they were.</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">ipv4</span><span class="p">,</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">offset</span> <span class="k">else</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span> <span class="n">_plen</span><span class="p">,</span>
+                                       <span class="n">packet</span><span class="o">=</span><span class="n">__packet__</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="IPv4.make">

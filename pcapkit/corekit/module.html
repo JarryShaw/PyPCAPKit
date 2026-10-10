@@ -515,13 +515,13 @@ class can be imported by <code class="docutils literal notranslate"><span class=
 <p>The module is read from <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.modules" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.modules</span></code></a> first, and
 <a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.import_module" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.import_module()</span></code></a> is entered only when it is not
 loaded yet. That matters because this property is on a <em>per-frame</em>
-dispatch path: a next layer code nobody registered falls back to a
-<a class="reference internal" href="#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> for
-<a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> which
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase._lookup_next_layer</span></code>
-deliberately does not write back, so every unrecognised frame
-resolves the same descriptor again – 48 of the 52 resolutions an
-extraction of <code class="file docutils literal notranslate"><span class="pre">many_interfaces.pcapng</span></code> performs.
+dispatch path: <code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase._lookup_next_layer</span></code>
+deliberately writes no resolved class back, so every next layer
+lookup resolves its descriptor again – the one registered for the
+code, or the fallback for <a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>
+when nobody registered it. An extraction of
+<code class="file docutils literal notranslate"><span class="pre">many_interfaces.pcapng</span></code> performs 296 resolutions, 48 of them
+fallbacks (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1559">#1559</a>).
 <a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.import_module" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">import_module()</span></code></a> keeps real per-call work for an
 already-imported module (locks, <a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.machinery.ModuleSpec" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleSpec</span></code></a>
 checks, the <code class="docutils literal notranslate"><span class="pre">fromlist</span></code> walk), so each repeat costs ~436 ns

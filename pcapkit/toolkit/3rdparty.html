@@ -1467,7 +1467,8 @@ reassembly (<a class="reference internal" href="../foundation/reassembly/ip/ipv4
 <dd class="field-odd"><p><p>Data for TCP reassembly.</p>
 <ul class="simple">
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be used for TCP reassembly. A packet can be reassembled
-if it contains an IPv4 layer carrying a TCP segment.</p></li>
+if it contains an IPv4 layer carrying a TCP segment; TCP over IPv6 cannot
+be, as <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> has no IPv6 decoder.</p></li>
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be reassembled, then the <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> mapping of data for TCP
 reassembly (<a class="reference internal" href="../foundation/reassembly/tcp.html#term-reasm.tcp.packet"><span class="xref std std-term">reasm.tcp.packet</span></a>) will be returned; otherwise, returns <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p></li>
 </ul>
@@ -1476,6 +1477,12 @@ reassembly (<a class="reference internal" href="../foundation/reassembly/tcp.htm
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">ipv4.src</span></code> or <code class="docutils literal notranslate"><span class="pre">ipv4.dst</span></code> cannot be parsed as an
     IPv4 address.</p>
+</dd>
+<dt class="field-odd">Warns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>AttributeWarning</strong> – If <code class="docutils literal notranslate"><span class="pre">packet</span></code> carries TCP over IPv6, which is left out,
+and is the first such frame of its capture to reach either
+<a class="reference internal" href="#pcapkit.toolkit.pypcapfile.tcp_reassembly" title="pcapkit.toolkit.pypcapfile.tcp_reassembly"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_reassembly()</span></code></a> or <a class="reference internal" href="#pcapkit.toolkit.pypcapfile.tcp_traceflow" title="pcapkit.toolkit.pypcapfile.tcp_traceflow"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_traceflow()</span></code></a>. The rest of that
+capture’s such frames are left out without another warning.</p>
 </dd>
 </dl>
 <div class="admonition seealso">
@@ -1503,7 +1510,8 @@ reassembly (<a class="reference internal" href="../foundation/reassembly/tcp.htm
 <dd class="field-odd"><p><p>Data for TCP flow tracing.</p>
 <ul class="simple">
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be used for TCP flow tracing. A packet can be traced
-if it contains an IPv4 layer carrying a TCP segment.</p></li>
+if it contains an IPv4 layer carrying a TCP segment; TCP over IPv6 cannot
+be, as <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> has no IPv6 decoder.</p></li>
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be traced, then the <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> mapping of data for TCP
 flow tracing (<a class="reference internal" href="../foundation/traceflow/tcp.html#term-trace.tcp.packet"><span class="xref std std-term">trace.tcp.packet</span></a>) will be returned; otherwise, returns <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p></li>
 </ul>
@@ -1513,6 +1521,12 @@ flow tracing (<a class="reference internal" href="../foundation/traceflow/tcp.ht
 <dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">ipv4.src</span></code> or <code class="docutils literal notranslate"><span class="pre">ipv4.dst</span></code> cannot be parsed as an
     IPv4 address.</p>
 </dd>
+<dt class="field-odd">Warns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>AttributeWarning</strong> – If <code class="docutils literal notranslate"><span class="pre">packet</span></code> carries TCP over IPv6, which is left out,
+and is the first such frame of its capture to reach either
+<a class="reference internal" href="#pcapkit.toolkit.pypcapfile.tcp_reassembly" title="pcapkit.toolkit.pypcapfile.tcp_reassembly"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_reassembly()</span></code></a> or <a class="reference internal" href="#pcapkit.toolkit.pypcapfile.tcp_traceflow" title="pcapkit.toolkit.pypcapfile.tcp_traceflow"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_traceflow()</span></code></a>. The rest of that
+capture’s such frames are left out without another warning.</p>
+</dd>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
@@ -1520,8 +1534,8 @@ flow tracing (<a class="reference internal" href="../foundation/traceflow/tcp.ht
 </div>
 </dd></dl>
 
-<section id="id18">
-<h3>Auxiliary Functions<a class="headerlink" href="#id18" title="Link to this heading">¶</a></h3>
+<section id="id20">
+<h3>Auxiliary Functions<a class="headerlink" href="#id20" title="Link to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.pypcapfile.packet2timestamp">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pypcapfile.</span></span><span class="sig-name descname"><span class="pre">packet2timestamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pypcapfile.html#packet2timestamp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pypcapfile.packet2timestamp" title="Link to this definition">¶</a></dt>
@@ -1728,7 +1742,7 @@ see the module notes.</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-pcapkit.toolkit.pypcapfile">PyPCAPFile Tools</a><ul>
-<li><a class="reference internal" href="#id18">Auxiliary Functions</a></li>
+<li><a class="reference internal" href="#id20">Auxiliary Functions</a></li>
 <li><a class="reference internal" href="#internal-definitions">Internal Definitions</a></li>
 </ul>
 </li>

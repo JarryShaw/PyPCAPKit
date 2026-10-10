@@ -794,9 +794,10 @@ than <code class="docutils literal notranslate"><span class="pre">typing.NamedTu
 Mappings now, so <code class="docutils literal notranslate"><span class="pre">len()</span></code> and iteration yield field names rather than values.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ModuleDescriptor.klass</span></code> reads an already-imported module out of <code class="docutils literal notranslate"><span class="pre">sys.modules</span></code>
 rather than re-entering <code class="docutils literal notranslate"><span class="pre">importlib.import_module</span></code>, since next layer dispatch
-resolves a descriptor there on a per-frame path. A registry <em>hit</em> holding a
-<code class="docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code> is resolved once and written back; a <em>miss</em> deliberately is not
-– recording a miss in a class-level <code class="docutils literal notranslate"><span class="pre">collections.defaultdict</span></code> is the defect
+resolves a descriptor there on a per-frame path. Neither a registry <em>hit</em> holding a
+<code class="docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code> nor a <em>miss</em> writes the resolved class back: a memoised hit went
+stale on <code class="docutils literal notranslate"><span class="pre">importlib.reload</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1559">#1559</a>), and recording a miss in a class-level
+<code class="docutils literal notranslate"><span class="pre">collections.defaultdict</span></code> is the defect
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/421">#421</a>/<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/426">#426</a> fixed at this layer, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/425">#425</a>/<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/428">#428</a> for the option,
 chunk and block registries, and <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/555">#555</a>/<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/560">#560</a> at the schema layer. A
 resolution now costs ~117 ns rather than ~436 ns, which is <strong>not measurable in</strong>

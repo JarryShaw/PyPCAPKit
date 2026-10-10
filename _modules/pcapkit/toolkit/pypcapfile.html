@@ -492,6 +492,17 @@
 <span class="sd">   instead of quietly returning :data:`None`, which would be indistinguishable</span>
 <span class="sd">   from "this frame carries no IPv6 fragment".</span>
 
+<span class="sd">   For the same reason :func:`tcp_reassembly` and :func:`tcp_traceflow` see TCP</span>
+<span class="sd">   over IPv4 only, and decline a frame carrying TCP over IPv6. That loss is not</span>
+<span class="sd">   silent: it is reported with one</span>
+<span class="sd">   :exc:`~pcapkit.utilities.warnings.AttributeWarning` per capture, on its first</span>
+<span class="sd">   such frame, rather than one per frame.</span>
+
+<span class="sd">   That warning covers IPv6 straight over Ethernet only. `PyPCAPFile`_ decodes</span>
+<span class="sd">   no VLAN tag (802.1Q), no QinQ (802.1ad) and no tunnel (e.g. IPv6 in IPv4, or</span>
+<span class="sd">   GRE), so TCP inside any of them is left out without a warning, over IPv6 and</span>
+<span class="sd">   IPv4 alike.</span>
+
 <span class="sd">   Note also that `PyPCAPFile`_ decoders *replace* the payload bytes of the layer</span>
 <span class="sd">   they decode. :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile` therefore</span>
 <span class="sd">   stops at the network layer, which keeps the transport segment verbatim so that</span>
@@ -502,19 +513,25 @@
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">binascii</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ctypes</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">struct</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">textwrap</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv6.extension_header</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExtensionHeader</span> <span class="k">as</span> <span class="n">Enum_ExtensionHeader</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.ethertype</span><span class="w"> </span><span class="kn">import</span> <span class="n">EtherType</span> <span class="k">as</span> <span class="n">Enum_EtherType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">IP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TCP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedDict</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
 
@@ -541,6 +558,32 @@
 
 <span class="c1">#: IPv4 **MF** (more fragments) bit, within the three-bit flags field.</span>
 <span class="n">IPV4_FLAG_MF</span> <span class="o">=</span> <span class="mb">0b001</span>
+
+<span class="c1">#: Length of the fixed IPv6 header, :rfc:`8200#section-3`.</span>
+<span class="n">IPV6_HEADER_LEN</span> <span class="o">=</span> <span class="mi">40</span>
+
+<span class="c1">#: IPv6 extension headers that :func:`_ipv6_carries_tcp` steps over on its way</span>
+<span class="c1">#: to the upper-layer protocol, as the default engine does: the ones</span>
+<span class="c1">#: :rfc:`8200#section-4.1` orders before it, less ESP, whose payload is</span>
+<span class="c1">#: encrypted, plus the Mobility, HIP and Shim6 headers. Those three are sized in</span>
+<span class="c1">#: 8-octet units like most of the rest, and the default engine dissects whatever</span>
+<span class="c1">#: protocol their next header field names. The experimental 253 and 254 are left</span>
+<span class="c1">#: out, because the default engine dissects nothing after them.</span>
+<span class="n">IPV6_EXTENSION_HEADERS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">((</span>
+    <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">HOPOPT</span><span class="p">,</span> <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">IPv6_Opts</span><span class="p">,</span> <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">IPv6_Route</span><span class="p">,</span>
+    <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">IPv6_Frag</span><span class="p">,</span> <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">AH</span><span class="p">,</span> <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">Mobility_Header</span><span class="p">,</span>
+    <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">HIP</span><span class="p">,</span> <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">Shim6</span><span class="p">,</span>
+<span class="p">))</span>
+
+<span class="c1">#: How many captures :func:`_decline_ipv6_tcp` remembers having warned about.</span>
+<span class="c1">#: Each one pins a packet of its own in memory (see :func:`_capture_of`), so the</span>
+<span class="c1">#: memory is bounded and the oldest is forgotten first. Up to this many captures</span>
+<span class="c1">#: read at the same time warn exactly once each.</span>
+<span class="n">IPV6_TCP_WARNED_LIMIT</span> <span class="o">=</span> <span class="mi">32</span>
+
+<span class="c1">#: The captures :func:`_decline_ipv6_tcp` has warned about, oldest first. Each</span>
+<span class="c1">#: key :func:`_capture_of` gives maps to the anchor that keeps that key unique.</span>
+<span class="n">_ipv6_tcp_warned</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">()</span>  <span class="c1"># type: OrderedDict[int, Any]</span>
 
 
 <div class="viewcode-block" id="packet2timestamp">
@@ -761,6 +804,124 @@
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">!=</span> <span class="s1">'IP'</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">return</span> <span class="n">payload</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_ipv6_carries_tcp</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Test if a PyPCAPFile frame is an IPv6 packet carrying TCP.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: PyPCAPFile packet.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        :data:`True` if the frame is IPv6 straight over Ethernet and its</span>
+<span class="sd">        upper-layer protocol is TCP, whether directly or behind the extension</span>
+<span class="sd">        headers in :data:`IPV6_EXTENSION_HEADERS`. A VLAN-tagged, QinQ or</span>
+<span class="sd">        tunnelled frame is not looked into, so it never counts.</span>
+<span class="sd">        A first fragment is read past its Fragment header as if that header</span>
+<span class="sd">        were not there. A later fragment never counts, since from its offset on</span>
+<span class="sd">        it carries a slice of the payload and no header (:rfc:`8200#section-4.5`).</span>
+<span class="sd">        An ESP payload cannot be seen into, so it does not count, and nor does a</span>
+<span class="sd">        truncated header chain or, as for IPv4 (see :func:`_transport`), a TCP</span>
+<span class="sd">        segment too short to hold a header.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        `PyPCAPFile`_ leaves an IPv6 frame's payload undecoded and hex-encoded</span>
+<span class="sd">        (see :func:`_maybe_unhex`), so this reads the raw header chain. It</span>
+<span class="sd">        reads only as far as the upper-layer protocol number and decodes</span>
+<span class="sd">        nothing.</span>
+
+<span class="sd">        Each of these rules is the default engine's own, so that the warning</span>
+<span class="sd">        fires on the frames the default engine finds TCP in.</span>
+
+<span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
+
+<span class="sd">    """</span>
+    <span class="n">link</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">packet</span>
+    <span class="k">if</span> <span class="n">_is_raw</span><span class="p">(</span><span class="n">link</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="s1">'type'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">!=</span> <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_6</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">payload</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="s1">'payload'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># type: Any</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_is_raw</span><span class="p">(</span><span class="n">payload</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">_maybe_unhex</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">payload</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">IPV6_HEADER_LEN</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">nxt</span><span class="p">,</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="n">IPV6_HEADER_LEN</span>
+    <span class="k">while</span> <span class="n">nxt</span> <span class="ow">in</span> <span class="n">IPV6_EXTENSION_HEADERS</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">offset</span> <span class="o">+</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">nxt</span> <span class="o">==</span> <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">IPv6_Frag</span><span class="p">:</span>  <span class="c1"># fixed length, second octet reserved</span>
+            <span class="k">if</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">'!H'</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">offset</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">3</span><span class="p">:</span>  <span class="c1"># a later fragment</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="mi">8</span>
+        <span class="k">elif</span> <span class="n">nxt</span> <span class="o">==</span> <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">AH</span><span class="p">:</span>  <span class="c1"># length in 4-octet units, less two</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">offset</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># length in 8-octet units, less one</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">offset</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span>
+        <span class="n">nxt</span><span class="p">,</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">offset</span><span class="p">],</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">length</span>
+    <span class="k">return</span> <span class="n">nxt</span> <span class="o">==</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">TCP</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">TCP_MIN_HEADER_LEN</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_capture_of</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[int, Any]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Identify the capture a PyPCAPFile packet was read from.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: PyPCAPFile packet.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A key, equal for every packet of one capture, and an anchor: while the</span>
+<span class="sd">        anchor is alive, no packet of another capture has the same key.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        :attr:`pcap_packet.header &lt;pcapfile.structs.pcap_packet.header&gt;` is a</span>
+<span class="sd">        :mod:`ctypes` pointer to the savefile header. Each read of the field</span>
+<span class="sd">        builds a new pointer object, but every one of them points at the same</span>
+<span class="sd">        header, so the header's address is the key. The pointer object read</span>
+<span class="sd">        here is the anchor: it keeps its packet alive and, through that packet,</span>
+<span class="sd">        the header itself, so no other capture's header can be allocated at</span>
+<span class="sd">        that address while it is held. A header that is not a :mod:`ctypes`</span>
+<span class="sd">        pointer is keyed by its identity instead, and anchors itself.</span>
+
+<span class="sd">    """</span>
+    <span class="n">anchor</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">header</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">addressof</span><span class="p">(</span><span class="n">anchor</span><span class="o">.</span><span class="n">contents</span><span class="p">),</span> <span class="n">anchor</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">id</span><span class="p">(</span><span class="n">anchor</span><span class="p">),</span> <span class="n">anchor</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_decline_ipv6_tcp</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Warn that a frame carrying TCP over IPv6 is left out, once per capture.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: PyPCAPFile packet, which :func:`_network` found no IPv4 layer in.</span>
+<span class="sd">        count: Packet index.</span>
+
+<span class="sd">    Warns:</span>
+<span class="sd">        AttributeWarning: If ``packet`` carries TCP over IPv6 and is the first</span>
+<span class="sd">            such frame of its capture to reach :func:`tcp_reassembly` or</span>
+<span class="sd">            :func:`tcp_traceflow`. Later frames of the same capture are left out</span>
+<span class="sd">            without another warning, and every other capture warns once of its</span>
+<span class="sd">            own, however their frames interleave. Only the</span>
+<span class="sd">            :data:`IPV6_TCP_WARNED_LIMIT` captures warned about most recently</span>
+<span class="sd">            are remembered, so with more than that read at once a forgotten one</span>
+<span class="sd">            warns again: the warning can repeat, but is never omitted.</span>
+
+<span class="sd">    """</span>
+    <span class="n">key</span><span class="p">,</span> <span class="n">anchor</span> <span class="o">=</span> <span class="n">_capture_of</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">_ipv6_tcp_warned</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_ipv6_carries_tcp</span><span class="p">(</span><span class="n">packet</span><span class="p">):</span>
+        <span class="k">return</span>
+
+    <span class="n">_ipv6_tcp_warned</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">anchor</span>
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">_ipv6_tcp_warned</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">IPV6_TCP_WARNED_LIMIT</span><span class="p">:</span>
+        <span class="n">_ipv6_tcp_warned</span><span class="o">.</span><span class="n">popitem</span><span class="p">(</span><span class="n">last</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Frame </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2">: TCP over IPv6 is left out of TCP reassembly and flow tracing, as "</span>
+         <span class="s2">"'pypcapfile' has no IPv6 decoder; later such frames of this capture are left out "</span>
+         <span class="s1">'without another warning'</span><span class="p">,</span> <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_transport</span><span class="p">(</span><span class="n">ipv4</span><span class="p">:</span> <span class="s1">'IP'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[bytes]'</span><span class="p">:</span>
@@ -1018,7 +1179,8 @@
 <span class="sd">        Data for TCP reassembly.</span>
 
 <span class="sd">        * If the ``packet`` can be used for TCP reassembly. A packet can be reassembled</span>
-<span class="sd">          if it contains an IPv4 layer carrying a TCP segment.</span>
+<span class="sd">          if it contains an IPv4 layer carrying a TCP segment; TCP over IPv6 cannot</span>
+<span class="sd">          be, as `PyPCAPFile`_ has no IPv6 decoder.</span>
 <span class="sd">        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP</span>
 <span class="sd">          reassembly (:term:`reasm.tcp.packet`) will be returned; otherwise, returns :data:`None`.</span>
 
@@ -1026,12 +1188,21 @@
 <span class="sd">        ProtocolError: If ``ipv4.src`` or ``ipv4.dst`` cannot be parsed as an</span>
 <span class="sd">            IPv4 address.</span>
 
+<span class="sd">    Warns:</span>
+<span class="sd">        AttributeWarning: If ``packet`` carries TCP over IPv6, which is left out,</span>
+<span class="sd">            and is the first such frame of its capture to reach either</span>
+<span class="sd">            :func:`tcp_reassembly` or :func:`tcp_traceflow`. The rest of that</span>
+<span class="sd">            capture's such frames are left out without another warning.</span>
+
 <span class="sd">    See Also:</span>
 <span class="sd">        :class:`pcapkit.foundation.reassembly.tcp.TCP`</span>
+
+<span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
 
 <span class="sd">    """</span>
     <span class="n">ipv4</span> <span class="o">=</span> <span class="n">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">ipv4</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_decline_ipv6_tcp</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="n">segment</span> <span class="o">=</span> <span class="n">_transport</span><span class="p">(</span><span class="n">ipv4</span><span class="p">)</span>
@@ -1084,7 +1255,8 @@
 <span class="sd">        Data for TCP flow tracing.</span>
 
 <span class="sd">        * If the ``packet`` can be used for TCP flow tracing. A packet can be traced</span>
-<span class="sd">          if it contains an IPv4 layer carrying a TCP segment.</span>
+<span class="sd">          if it contains an IPv4 layer carrying a TCP segment; TCP over IPv6 cannot</span>
+<span class="sd">          be, as `PyPCAPFile`_ has no IPv6 decoder.</span>
 <span class="sd">        * If the ``packet`` can be traced, then the :obj:`dict` mapping of data for TCP</span>
 <span class="sd">          flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.</span>
 
@@ -1092,12 +1264,21 @@
 <span class="sd">        ProtocolError: If ``ipv4.src`` or ``ipv4.dst`` cannot be parsed as an</span>
 <span class="sd">            IPv4 address.</span>
 
+<span class="sd">    Warns:</span>
+<span class="sd">        AttributeWarning: If ``packet`` carries TCP over IPv6, which is left out,</span>
+<span class="sd">            and is the first such frame of its capture to reach either</span>
+<span class="sd">            :func:`tcp_reassembly` or :func:`tcp_traceflow`. The rest of that</span>
+<span class="sd">            capture's such frames are left out without another warning.</span>
+
 <span class="sd">    See Also:</span>
 <span class="sd">        :class:`pcapkit.foundation.traceflow.tcp.TCP`</span>
+
+<span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
 
 <span class="sd">    """</span>
     <span class="n">ipv4</span> <span class="o">=</span> <span class="n">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">ipv4</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_decline_ipv6_tcp</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="n">segment</span> <span class="o">=</span> <span class="n">_transport</span><span class="p">(</span><span class="n">ipv4</span><span class="p">)</span>
