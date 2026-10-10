@@ -28,6 +28,7 @@ __all__ = [
     'ARP',
     'Ethernet',
     'L2TP',
+    'Loopback',
     'VLAN', 'VLAN_TCI',
 
     # Internet Layer Protocols

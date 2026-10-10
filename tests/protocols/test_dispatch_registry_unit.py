@@ -212,7 +212,7 @@ class DispatchRegistryTests(unittest.TestCase):
                 )
 
     def test_cases_cover_every_table_named_in_the_issue(self) -> None:
-        """The enumeration finds all 39 entries the issue counted, across all seven tables.
+        """The enumeration finds all 47 entries, across the seven tables of #496 and #1574's loopback table.
 
         A guard on the shape of the result rather than on any one case: if the
         registries grow or shrink without this module noticing, the per-family
@@ -224,18 +224,20 @@ class DispatchRegistryTests(unittest.TestCase):
         # new entry, Internet.__proto__[TransType.Shim6], registered at
         # IPv6_Ext where it previously had none at all (defaulted to
         # Raw). Diffed against origin/main: no other table changed shape.
-        self.assertEqual(len(cases), 39,
-                         'expected exactly 39 entries across the seven __proto__ '
-                         'tables named in GitHub issue #496; a different count '
-                         'means a registry changed shape and this module was not '
-                         'updated to match')
+        # #1574: 39 -> 47 -- LinkType.NULL and LinkType.LOOP in both link-type
+        # tables, and the four address families of the new Loopback.__proto__.
+        self.assertEqual(len(cases), 47,
+                         'expected exactly 47 entries across the seven __proto__ '
+                         'tables named in GitHub issue #496 and the loopback table '
+                         'of #1574; a different count means a registry changed '
+                         'shape and this module was not updated to match')
 
         by_family = {}  # type: dict[str, int]
         for case in cases:
             by_family[case.family] = by_family.get(case.family, 0) + 1
         self.assertEqual(by_family, {
             'link': 7, 'internet': 17, 'tcp': 4, 'udp': 3, 'sctp': 2,
-            'pcap-frame': 3, 'pcapng-frame': 3,
+            'pcap-frame': 5, 'pcapng-frame': 5, 'loopback': 4,
         })
 
     def test_dispatch_reaches_target_or_is_a_recorded_degrade(self) -> None:

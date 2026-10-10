@@ -79,7 +79,7 @@ def _spb(order: str, data: bytes, original_len: 'int | None' = None) -> bytes:
 #: Packets of :func:`_capture`: (link type, parsed-as, timestamp), in file order.
 EXPECTED = [
     (1, 'Ethernet', TICKS / 10**6),              # section 1, interface 0
-    (101, 'RawPacket', TICKS / 10**9),           # section 1, interface 1, if_tsresol=9
+    (101, 'IP', TICKS / 10**9),                  # section 1, interface 1, if_tsresol=9; #1502
     (1, 'Ethernet', TICKS / 10**6),              # section 1, interface 0 again
     (228, 'IP', TICKS / 2**10 + 100),            # section 2, interface 0, 2^-10 + offset
 ]

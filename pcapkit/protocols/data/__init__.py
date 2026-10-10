@@ -61,6 +61,9 @@ __all__ = [
     # Ethernet Protocol
     'Ethernet',
 
+    # BSD Loopback Encapsulation
+    'Loopback',
+
     # 802.1Q/802.1ad VLAN Tag Types
     'VLAN', 'VLAN_TCI',
 

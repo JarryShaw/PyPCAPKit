@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """Link-layer edge cases round-trip byte for byte. C.f. #1202.
 
-Ethernet, the 802.1Q/802.1ad tags, ARP and RARP, L2TPv2 and OSPF, at their
-minimum and maximum lengths, with reserved bits set, with zero-length
-addresses and offset pads, and with unassigned codes. The harness and the
-meaning of each table are in :mod:`tests.protocols._edge_roundtrip`.
+Ethernet, the 802.1Q/802.1ad tags, ARP and RARP, L2TPv2, the BSD loopback
+and OSPF, at their minimum and maximum lengths, with reserved bits set, with
+zero-length addresses and offset pads, and with unassigned codes. The harness
+and the meaning of each table are in :mod:`tests.protocols._edge_roundtrip`.
 
 Every case builds its own octets in memory and reads no capture.
 
@@ -24,6 +24,7 @@ S_TAG = 'pcapkit.protocols.link.s_tag:S_Tag'
 ARP = 'pcapkit.protocols.link.arp:ARP'
 RARP = 'pcapkit.protocols.application.rarp:RARP'
 L2TPV2 = 'pcapkit.protocols.link.l2tpv2:L2TPv2'
+LOOPBACK = 'pcapkit.protocols.link.loopback:Loopback'
 OSPF = 'pcapkit.protocols.application.ospf:OSPF'
 
 #: Destination and source MAC.
@@ -86,6 +87,14 @@ CASES = (
     Case('l2tpv2/length-short-of-the-header', L2TPV2, b'\x40\x02' + b'\x00\x02' + b'\x00\x01\x00\x02' + b'pp'),
     Case('l2tpv2/length-past-the-data', L2TPV2, b'\x40\x02' + b'\x00\x40' + b'\x00\x01\x00\x02' + b'pp'),
     Case('l2tpv2/version-3', L2TPV2, b'\x00\x03' + b'\x00\x01\x00\x02'),
+    # -- BSD loopback (#1574) ----------------------------------------------
+    Case('loopback/header-only-ipv4-little', LOOPBACK, b'\x02\x00\x00\x00'),
+    Case('loopback/header-only-ipv6-big', LOOPBACK, b'\x00\x00\x00\x1e'),
+    Case('loopback/family-0', LOOPBACK, bytes(4) + b'xyz'),
+    Case('loopback/family-osi-7', LOOPBACK, b'\x07\x00\x00\x00' + b'xyz'),
+    Case('loopback/family-ffffffff', LOOPBACK, b'\xff' * 4 + b'xyz'),
+    Case('loopback/both-halves-set', LOOPBACK, b'\x02\x00\x02\x00' + b'xyz'),
+    Case('loopback/ipv4-short-of-a-header', LOOPBACK, b'\x00\x00\x00\x02' + b'\x45\x00'),
     # -- OSPF --------------------------------------------------------------
     Case('ospf/hello-header-only', OSPF, ospf()),
     Case('ospf/type-0-unassigned', OSPF, ospf(type_=0)),
@@ -111,6 +120,10 @@ MAKE_CASES = (
              {'type': 1, 'length_flag': True, 'ns': 1, 'nr': 2, 'offset': 0, 'priority': True}),
     MakeCase('l2tpv2/make/offset-pad', L2TPV2, {'offset': 3, 'padding': b'\x01\x02\x03', 'payload': b'pp'}),
     MakeCase('l2tpv2/make/reserved-bits', L2TPV2, {'reserved': 0x34f0}),
+    MakeCase('loopback/make/default', LOOPBACK, {}),
+    MakeCase('loopback/make/ipv6-darwin-big', LOOPBACK, {'family': 30, 'byteorder': 'big', 'payload': b'xy'}),
+    MakeCase('loopback/make/unassigned-family-little', LOOPBACK,
+             {'family': 0xffff, 'byteorder': 'little', 'payload': b'xy'}),
     MakeCase('ospf/make/default', OSPF, {}),
     MakeCase('ospf/make/unassigned-codes', OSPF, {'type': 200, 'auth_type': 9}),
 )

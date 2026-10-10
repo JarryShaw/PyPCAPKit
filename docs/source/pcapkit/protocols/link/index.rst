@@ -16,6 +16,7 @@ link layer, with detailed implementation and methods.
    arp
    l2tp
    l2tpv2
+   loopback
    vlan
    c_tag
    s_tag

@@ -17,6 +17,7 @@ from pcapkit.protocols.link.link import Link
 # Link Layer Protocols
 from pcapkit.protocols.link.arp import ARP, InARP
 from pcapkit.protocols.link.ethernet import Ethernet
+from pcapkit.protocols.link.loopback import Loopback
 
 # VLAN Tag Family
 from pcapkit.protocols.link.vlan import VLAN
@@ -35,5 +36,5 @@ __all__ = [
     'LINKTYPE',
 
     # Link Layer Protocols
-    'ARP', 'C_Tag', 'Ethernet', 'InARP', 'L2TP', 'L2TPv2', 'S_Tag', 'VLAN',
+    'ARP', 'C_Tag', 'Ethernet', 'InARP', 'L2TP', 'L2TPv2', 'Loopback', 'S_Tag', 'VLAN',
 ]

@@ -429,12 +429,20 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
        * - Index
          - Protocol
+       * - :attr:`pcapkit.const.reg.linktype.LinkType.NULL`
+         - :class:`pcapkit.protocols.link.loopback.Loopback`
        * - :attr:`pcapkit.const.reg.linktype.LinkType.ETHERNET`
          - :class:`pcapkit.protocols.link.ethernet.Ethernet`
+       * - :attr:`pcapkit.const.reg.linktype.LinkType.LOOP`
+         - :class:`pcapkit.protocols.link.loopback.Loopback`
        * - :attr:`pcapkit.const.reg.linktype.LinkType.IPV4`
          - :class:`pcapkit.protocols.internet.ipv4.IPv4`
        * - :attr:`pcapkit.const.reg.linktype.LinkType.IPV6`
          - :class:`pcapkit.protocols.internet.ipv6.IPv6`
+
+    :attr:`pcapkit.const.reg.linktype.LinkType.RAW` has no entry of its own:
+    its data is dispatched as ``IPV4`` or ``IPV6`` by the version nibble of
+    its first octet, see :meth:`_dispatch_linktype`.
 
     The class currently supports parsing of the following block types, which
     are registered in the :attr:`self.__block__ <pcapkit.protocols.misc.pcapng.PCAPNG.__block__>`
@@ -699,7 +707,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
     __proto__ = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
         {
+            Enum_LinkType.NULL:     ModuleDescriptor('pcapkit.protocols.link', 'Loopback'),
             Enum_LinkType.ETHERNET: ModuleDescriptor('pcapkit.protocols.link', 'Ethernet'),
+            Enum_LinkType.LOOP:     ModuleDescriptor('pcapkit.protocols.link', 'Loopback'),
             Enum_LinkType.IPV4:     ModuleDescriptor('pcapkit.protocols.internet', 'IPv4'),
             Enum_LinkType.IPV6:     ModuleDescriptor('pcapkit.protocols.internet', 'IPv6'),
         },
@@ -2081,7 +2091,11 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             We also added a new key ``protocols`` to ``dict_`` to store the
             protocol chain of the current packet (frame).
 
+            ``proto`` is dispatched as :meth:`_dispatch_linktype` says, so
+            ``LINKTYPE_RAW`` data is read as IPv4 or IPv6 (:issue:`1502`).
+
         """
+        proto = self._dispatch_linktype(proto, length)
         next_ = cast('ProtocolBase', self._import_next_layer(proto, length, packet=packet))  # type: ignore[misc,call-arg,redundant-cast]
         info, chain = next_.info, next_.protochain
 
@@ -2099,6 +2113,39 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         self._next = next_  # pylint: disable=attribute-defined-outside-init
         self._protos = chain  # pylint: disable=attribute-defined-outside-init
         return dict_
+
+    def _dispatch_linktype(self, proto: 'Optional[int]', length: 'Optional[int]' = None) -> 'Optional[int]':
+        """Link type a packet block's data is dispatched under.
+
+        Arguments:
+            proto: link type of the interface the block was captured on
+            length: valid (*non-padding*) length
+
+        Returns:
+            For :attr:`LinkType.RAW <pcapkit.const.reg.linktype.LinkType.RAW>`
+            data whose first octet carries IP version 4 or 6,
+            :attr:`LinkType.IPV4 <pcapkit.const.reg.linktype.LinkType.IPV4>` or
+            :attr:`LinkType.IPV6 <pcapkit.const.reg.linktype.LinkType.IPV6>`;
+            otherwise ``proto``.
+
+        Note:
+            As :meth:`Frame._dispatch_linktype
+            <pcapkit.protocols.misc.pcap.frame.Frame._dispatch_linktype>` does
+            for PCAP: ``LINKTYPE_RAW`` (101) data is IPv4 or IPv6 by its version
+            nibble, an entry registered under ``RAW`` itself is used as it
+            stands, and data of any other version is kept as
+            :class:`~pcapkit.protocols.misc.raw.Raw` (:issue:`1502`).
+
+        """
+        if proto != Enum_LinkType.RAW or Enum_LinkType.RAW in self.__proto__:
+            return proto
+        data = self._get_payload()[:length]
+        version = data[0] >> 4 if data else None
+        if version == 4:
+            return Enum_LinkType.IPV4
+        if version == 6:
+            return Enum_LinkType.IPV6
+        return proto
 
     def _read_block_unknown(self, schema: 'Schema_UnknownBlock', *,
                             header: 'Schema_PCAPNG') -> 'Data_UnknownBlock':
