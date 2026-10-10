@@ -4,7 +4,8 @@
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from pcapkit.corekit.infoclass import Info, info_final
-from pcapkit.foundation.reassembly.data.data import Completion, Deferred, DeferredPacket
+from pcapkit.corekit.packet import DeferredPacket
+from pcapkit.foundation.reassembly.data.data import Completion, Deferred
 from pcapkit.utilities.compat import Tuple
 
 __all__ = [
@@ -86,7 +87,11 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     #: itself -- which routes reading it through :meth:`__getattr__`, where a
     #: :class:`Deferred` analysis can be run, while ``dict(datagram)``,
     #: :meth:`to_dict` and iteration still report the field under its own name.
+    #: See :class:`~pcapkit.corekit.packet.DeferredPacket`.
     __additional__ = ['packet']
+    #: Placeholder class :attr:`packet` may hold, for
+    #: :class:`~pcapkit.corekit.packet.DeferredPacket` to resolve.
+    __deferred__ = Deferred
 
     #: How completely the datagram was reassembled, and why reassembly stopped.
     #: Only :attr:`Completion.COMPLETE` is truthy, so ``if datagram.completed:``
