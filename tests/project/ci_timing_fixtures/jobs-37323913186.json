@@ -1,0 +1,120 @@
+{
+ "total_count": 3,
+ "jobs": [
+  {
+   "id": 111809650222,
+   "run_id": 37323913186,
+   "run_attempt": 1,
+   "name": "Python 3.14",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-10-05T14:20:31Z",
+   "started_at": "2026-10-05T14:20:33Z",
+   "completed_at": "2026-10-05T14:36:31Z",
+   "runner_name": "GitHub Actions 1000067272",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "steps": [
+    {
+     "number": 1,
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-05T14:20:34Z",
+     "completed_at": "2026-10-05T14:20:35Z"
+    },
+    {
+     "number": 4,
+     "name": "Install package and test dependencies",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-05T14:20:39Z",
+     "completed_at": "2026-10-05T14:21:12Z"
+    },
+    {
+     "number": 6,
+     "name": "Run unit tests",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-05T14:21:12Z",
+     "completed_at": "2026-10-05T14:36:28Z"
+    }
+   ]
+  },
+  {
+   "id": 111809650330,
+   "run_id": 37323913186,
+   "run_attempt": 1,
+   "name": "Plain unittest ordering (protocols)",
+   "status": "completed",
+   "conclusion": "cancelled",
+   "created_at": "2026-10-05T14:20:31Z",
+   "started_at": "2026-10-05T14:20:33Z",
+   "completed_at": "2026-10-05T15:06:08Z",
+   "runner_name": "GitHub Actions 1000067284",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "steps": [
+    {
+     "number": 1,
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-05T14:20:33Z",
+     "completed_at": "2026-10-05T14:20:34Z"
+    },
+    {
+     "number": 4,
+     "name": "Install package and test dependencies",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-05T14:20:40Z",
+     "completed_at": "2026-10-05T14:21:07Z"
+    },
+    {
+     "number": 6,
+     "name": "Run tests/protocols and the root-level modules under plain unittest",
+     "status": "completed",
+     "conclusion": "cancelled",
+     "started_at": "2026-10-05T14:21:07Z",
+     "completed_at": "2026-10-05T15:06:06Z"
+    }
+   ]
+  },
+  {
+   "id": 111819495539,
+   "run_id": 37323913186,
+   "run_attempt": 1,
+   "name": "Required checks passed",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-10-05T14:41:55Z",
+   "started_at": "2026-10-05T14:55:17Z",
+   "completed_at": "2026-10-05T14:55:20Z",
+   "runner_name": "GitHub Actions 1000067534",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "steps": [
+    {
+     "number": 1,
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-05T14:55:17Z",
+     "completed_at": "2026-10-05T14:55:18Z"
+    },
+    {
+     "number": 2,
+     "name": "Check every required job succeeded",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-05T14:55:18Z",
+     "completed_at": "2026-10-05T14:55:18Z"
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,169 @@
+{
+ "total_count": 5,
+ "jobs": [
+  {
+   "id": 114062040386,
+   "run_id": 38002005234,
+   "run_attempt": 1,
+   "name": "Classify changed files",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-10-09T22:57:58Z",
+   "started_at": "2026-10-09T23:02:23Z",
+   "completed_at": "2026-10-09T23:02:29Z",
+   "runner_name": "GitHub Actions 1000093373",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "steps": [
+    {
+     "number": 1,
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-09T23:02:24Z",
+     "completed_at": "2026-10-09T23:02:25Z"
+    },
+    {
+     "number": 3,
+     "name": "Classify the diff",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-09T23:02:26Z",
+     "completed_at": "2026-10-09T23:02:26Z"
+    }
+   ]
+  },
+  {
+   "id": 114063308717,
+   "run_id": 38002005234,
+   "run_attempt": 1,
+   "name": "Integration Python 3.14",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-10-09T23:02:29Z",
+   "started_at": "2026-10-09T23:04:01Z",
+   "completed_at": "2026-10-09T23:06:43Z",
+   "runner_name": "GitHub Actions 1000093387",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "steps": [
+    {
+     "number": 1,
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-09T23:04:03Z",
+     "completed_at": "2026-10-09T23:04:03Z"
+    },
+    {
+     "number": 7,
+     "name": "Run full test suite",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-09T23:04:24Z",
+     "completed_at": "2026-10-09T23:06:39Z"
+    }
+   ]
+  },
+  {
+   "id": 114063308849,
+   "run_id": 38002005234,
+   "run_attempt": 1,
+   "name": "Python 3.14",
+   "status": "completed",
+   "conclusion": "cancelled",
+   "created_at": "2026-10-09T23:02:30Z",
+   "started_at": "2026-10-09T23:21:48Z",
+   "completed_at": "2026-10-09T23:28:11Z",
+   "runner_name": "GitHub Actions 1000093554",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "steps": [
+    {
+     "number": 1,
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-09T23:21:49Z",
+     "completed_at": "2026-10-09T23:21:51Z"
+    },
+    {
+     "number": 4,
+     "name": "Install package and test dependencies",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-09T23:21:54Z",
+     "completed_at": "2026-10-09T23:22:26Z"
+    },
+    {
+     "number": 7,
+     "name": "Run unit tests",
+     "status": "completed",
+     "conclusion": "cancelled",
+     "started_at": "2026-10-09T23:22:27Z",
+     "completed_at": "2026-10-09T23:28:07Z"
+    },
+    {
+     "number": 8,
+     "name": "Report coverage",
+     "status": "completed",
+     "conclusion": "skipped",
+     "started_at": "2026-10-09T23:28:07Z",
+     "completed_at": "2026-10-09T23:28:07Z"
+    }
+   ]
+  },
+  {
+   "id": 114063308937,
+   "run_id": 38002005234,
+   "run_attempt": 1,
+   "name": "Python 3.10",
+   "status": "completed",
+   "conclusion": "cancelled",
+   "created_at": "2026-10-09T23:02:30Z",
+   "started_at": "2026-10-09T23:02:30Z",
+   "completed_at": "2026-10-09T23:27:54Z",
+   "runner_name": "",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "steps": []
+  },
+  {
+   "id": 114070278597,
+   "run_id": 38002005234,
+   "run_attempt": 1,
+   "name": "Required checks passed",
+   "status": "completed",
+   "conclusion": "failure",
+   "created_at": "2026-10-09T23:28:11Z",
+   "started_at": "2026-10-09T23:31:10Z",
+   "completed_at": "2026-10-09T23:31:12Z",
+   "runner_name": "GitHub Actions 1000093623",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "steps": [
+    {
+     "number": 1,
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-09T23:31:11Z",
+     "completed_at": "2026-10-09T23:31:11Z"
+    },
+    {
+     "number": 2,
+     "name": "Check every required job succeeded",
+     "status": "completed",
+     "conclusion": "failure",
+     "started_at": "2026-10-09T23:31:11Z",
+     "completed_at": "2026-10-09T23:31:11Z"
+    }
+   ]
+  }
+ ]
+}
