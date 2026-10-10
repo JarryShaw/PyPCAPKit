@@ -39,6 +39,9 @@ class FakeIP:
     """Stand-in for :class:`pcapfile.protocols.network.ip.IP`."""
 
     def __init__(self, payload: bytes) -> None:
+        self.hl = 5                      # header length, in 4-octet words
+        self.len = 20 + len(payload)     # total length
+        self.off = 0                     # fragment offset: a first fragment
         self.p = 6
         self.src = b'10.1.1.2'
         self.dst = b'10.1.1.3'

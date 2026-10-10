@@ -184,6 +184,13 @@ cannot be used for it.
    :data:`None` -- which would be indistinguishable from "this frame carries no
    IPv6 fragment".
 
+   Nor does it decode a VLAN tag or a tunnel. The adapters read an IPv4 packet
+   behind 802.1Q and 802.1ad tags as `PyPCAPFile`_ reads an untagged one, while
+   TCP over IPv6 and TCP tunnelled in IP (e.g. 6in4, 4in4, 6in6) are left out of
+   :func:`~pcapkit.toolkit.pypcapfile.tcp_reassembly` and
+   :func:`~pcapkit.toolkit.pypcapfile.tcp_traceflow`, with an
+   :class:`~pcapkit.utilities.warnings.AttributeWarning` once per capture for each.
+
 .. autofunction:: pcapkit.toolkit.pypcapfile.ipv4_reassembly
 
 .. autofunction:: pcapkit.toolkit.pypcapfile.ipv6_reassembly
