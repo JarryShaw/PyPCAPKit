@@ -128,14 +128,17 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     #:
     #: :attr:`Buffer.RCVBT <pcapkit.foundation.reassembly.data.ip.Buffer.RCVBT>`
     #: only records receipt in 8-octet blocks, coarser than the octet
-    #: granularity a conflict needs. Every fragment but the last is required
-    #: to be block-aligned (and :attr:`Packet.fo` is *always* a multiple of 8,
-    #: being wire-encoded in 8-octet units), so the only block that can be
-    #: partially real is the one holding the final fragment's own tail -- and
-    #: a range reported here never extends past
+    #: granularity a conflict needs, and an octet is compared only if its
+    #: block is marked. :attr:`Packet.fo` is *always* a multiple of 8, being
+    #: wire-encoded in 8-octet units, and only the final fragment marks a
+    #: partial last block, so the only marked block that can be partially real
+    #: is the one holding the final fragment's own tail -- and a range reported
+    #: here never extends past
     #: :attr:`Buffer.TDL <pcapkit.foundation.reassembly.data.ip.Buffer.TDL>`
     #: for exactly that reason, even though a whole ``RCVBT`` block straddling
-    #: it reads as "received". See
+    #: it reads as "received". Any other partial last block -- a non-final,
+    #: truncated or clipped fragment's -- is left unmarked, so a later fragment
+    #: that overwrites its octets records no conflict. See
     #: :meth:`IP._detect_conflicts <pcapkit.foundation.reassembly.ip.IP._detect_conflicts>`.
     conflict: 'tuple[tuple[int, int], ...]'
 

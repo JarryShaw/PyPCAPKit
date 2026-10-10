@@ -29,6 +29,11 @@ if TYPE_CHECKING:
 
 __all__ = ['IP']
 
+#: The most octets a 16-bit length field declares -- IPv4's Total Length, the
+#: header included, and IPv6's Payload Length, the fixed header excluded -- and
+#: so the length the data buffer is preallocated to.
+_MAX_LENGTH = 65535
+
 
 class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[_AT]):  # pylint: disable=abstract-method
     """Reassembly for IP payload.
@@ -44,7 +49,7 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
             does not: it is left out of the runs and ends the prefix, but once
             the total length is known the contiguous payload keeps its real
             octets, with only the rest of the hole zero-filled. A datagram
-            longer than the data buffer is never complete
+            longer than its length field can declare is never complete
         store: if store reassembled datagram in memory, i.e.,
             :attr:`self._dtgram <pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram>`
             (if not, datagram will be discarded after callback)
@@ -82,6 +87,23 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
 
         """
         return header
+
+    def _header_overhead(self, length: 'int') -> 'int':
+        """Count the header octets that a datagram's length field includes.
+
+        The base implementation counts them all, which is what IPv4 wants: its
+        Total Length is the header's length plus the data's
+        (:rfc:`791#section-3.1`). IPv6 overrides this, because its Payload
+        Length leaves out the fixed header (:rfc:`8200#section-3`).
+
+        Args:
+            length: Length of the datagram's header.
+
+        Returns:
+            How many of those octets the length field counts.
+
+        """
+        return length
 
     def reassembly(self, info: 'Packet[_AT]') -> 'None':
         """Reassembly procedure.
@@ -138,7 +160,7 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
                 RCVBT=bytearray(8192),              # Fragment Received Bit Table
                 index=[],                           # index record
                 header=header,                      # header buffer
-                datagram=bytearray(65535),          # data buffer
+                datagram=bytearray(_MAX_LENGTH),    # data buffer
                 timestamp=TS,                       # first-arriving fragment's clock reading
                 conflict=[],                        # conflicting octet ranges
             )
@@ -166,9 +188,12 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         # anything, and so does this, whatever **MF** and the offset say: an
         # unfragmented one is then whole rather than ``-IHL`` octets long
         # (:issue:`1555`). Linux's BIG TCP zeroes the field precisely because
-        # the datagram outgrows the 65535 octets it can declare, so the buffer
-        # grows to hold such a datagram rather than clipping it, ``RCVBT`` in
-        # step with it.
+        # the datagram, header included, outgrows the 65535 octets it can
+        # declare -- and such a datagram never completes in a buffer of that
+        # length (:meth:`_is_complete`). So the buffer grows past it, to hold
+        # the datagram rather than clip it, ``RCVBT`` in step with it; it grows
+        # by an octet even when the data alone would fit, since its growing is
+        # what lifts the bound.
         #
         # With nothing declared, a snaplen cut cannot be seen in the length. A
         # non-final fragment's cut still shows, as a partial last block, which
@@ -179,9 +204,10 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         if TL == 0:
             length = len(info.payload)
             extent = FO + length
-            if extent > len(buf.datagram):
-                buf.datagram.extend(bytes(extent - len(buf.datagram)))
-                buf.RCVBT.extend(bytes((extent + 7) // 8 - len(buf.RCVBT)))
+            if self._header_overhead(IHL) + extent > _MAX_LENGTH:
+                size = max(extent, _MAX_LENGTH + 1, len(buf.datagram))
+                buf.datagram.extend(bytes(size - len(buf.datagram)))
+                buf.RCVBT.extend(bytes((size + 7) // 8 - len(buf.RCVBT)))
         else:
             length = TL - IHL
         held = max(min(len(info.payload), length, len(buf.datagram) - FO), 0)
@@ -243,25 +269,35 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
                 self.submit(self._buffer.pop(BUFID), bufid=BUFID, checked=True)
             )
 
-    @staticmethod
-    def _is_complete(buf: 'Buffer[_AT]') -> 'bool':
+    def _is_complete(self, buf: 'Buffer[_AT]') -> 'bool':
         """Tell whether a buffer holds its whole datagram.
 
         Arguments:
             buf: buffer to check
 
         Returns:
-            Whether the total data length is known, fits the data buffer, and
-            every 8-octet block up to it is marked received.
+            Whether the total data length is known, the datagram is no longer
+            than it may be, and every 8-octet block up to it is marked
+            received.
 
-        A datagram longer than the data buffer cannot be held, so it is never
-        complete. Checking ``RCVBT`` alone does not show that: slicing it past
-        its end stops silently, so the blocks past the buffer would read as
-        received (:issue:`1566`).
+        A datagram is no longer than ``_MAX_LENGTH`` with its header, as
+        :meth:`_header_overhead` counts it: IPv4's Total Length counts the
+        whole header, and IPv6's Payload Length every header but the fixed one.
+        A longer datagram cannot be declared, so it is never complete, and
+        Linux's ``ip_frag_reasm`` and ``ip6_frag_reasm`` reject it too
+        (:issue:`1585`). A fragment with Total Length 0 declares no length, so
+        a buffer it has grown past that bounds the datagram by its own length
+        alone (:issue:`1555`). Checking ``RCVBT`` does not show either bound:
+        slicing it past its end stops silently, so the blocks past the buffer
+        would read as received (:issue:`1566`).
 
         """
         TDL = buf.TDL
-        return 0 <= TDL <= len(buf.datagram) and all(buf.RCVBT[:(TDL + 7) // 8])
+        if len(buf.datagram) > _MAX_LENGTH:
+            limit = len(buf.datagram)
+        else:
+            limit = _MAX_LENGTH - self._header_overhead(len(buf.header))
+        return 0 <= TDL <= limit and all(buf.RCVBT[:(TDL + 7) // 8])
 
     @staticmethod
     def _detect_conflicts(rcvbt: 'bytearray', tdl: 'int', datagram: 'bytearray', payload: 'bytearray',
@@ -291,23 +327,30 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
             already genuinely received.
 
         :rfc:`791` marks receipt in 8-octet blocks (``RCVBT``), coarser than
-        the octet granularity a conflict needs: every fragment but the last is
-        required to be a multiple of 8 octets, and a fragment's ``FO`` is
-        *always* a multiple of 8 -- it is wire-encoded in 8-octet units -- so a
-        non-final fragment's range is always exactly block-aligned. The only
-        block that can be *partially* real is therefore the one holding the
-        final fragment's own tail: the ``RCVBT`` update in :meth:`reassembly`
-        sets that block's bit across its full 8 octets even though only the
-        octets up to ``tdl`` were ever actually written, the rest still being
-        ``datagram``'s zero-fill.
+        the octet granularity a conflict needs, so an octet is compared only if
+        its block is marked. A fragment's ``FO`` is *always* a multiple of 8 --
+        it is wire-encoded in 8-octet units -- and the ``RCVBT`` update in
+        :meth:`reassembly` marks the blocks a fragment fills whole. Only the
+        final fragment, held in full, also marks its partial last block, across
+        its full 8 octets even though only the octets up to ``tdl`` were ever
+        actually written, the rest still being ``datagram``'s zero-fill.
 
         So once ``tdl`` is known, an octet at or past it is excluded here
         regardless of its block's bit -- comparing it would manufacture a
         conflict against a byte nothing ever really sent, over a distinction
         :meth:`~pcapkit.foundation.reassembly.ip.IP.submit` does not need
         anyway, since it never reports a payload past ``tdl``. Before ``tdl``
-        is known (``tdl < 0``), every set ``rcvbt`` bit came from a non-final,
-        block-aligned fragment and is exact on its own, with nothing to clip.
+        is known (``tdl < 0``), every set ``rcvbt`` bit came from a non-final
+        fragment's whole block and is exact on its own, with nothing to clip.
+
+        Any other partial last block -- a non-final, truncated or clipped
+        fragment's -- is written but left clear (:issue:`1567`), so its octets
+        are deliberately not compared: a later fragment that overwrites them
+        records no conflict, whether or not it agrees (:issue:`1585`). Telling
+        which octets of a clear block were written would take receipt state per
+        octet, which ``RCVBT`` does not keep. Linux never compares a non-final
+        fragment's partial block either: it trims an IPv4 one to a multiple of
+        8 (``ip_frag_queue``) and drops an IPv6 one (``ip6_frag_queue``).
 
         """
         conflicts = []  # type: list[tuple[int, int]]
