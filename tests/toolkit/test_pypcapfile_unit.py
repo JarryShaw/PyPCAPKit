@@ -150,6 +150,80 @@ def ipv6_frame(packet: bytes) -> FakeEthernet:
 #: A TCP segment with a full header and a payload.
 TCP_SEGMENT = wire.tcp(b'payload', seq=1, syn=True)
 
+#: An IPv6 jumbogram carrying :data:`TCP_SEGMENT`: a Payload Length of 0, and a
+#: Hop-by-Hop Options header whose Jumbo Payload option gives the real one (RFC 2675).
+JUMBOGRAM = (wire.ipv6(b'', nxt=0)
+             + bytes([6, 0, 0xC2, 4]) + (8 + len(TCP_SEGMENT)).to_bytes(4, 'big') + TCP_SEGMENT)
+
+#: TPIDs of the 802.1Q customer tag and the 802.1ad service tag.
+C_TAG, S_TAG = 0x8100, 0x88A8
+
+
+def vlan_tags(ethertype: int, *tpids: int) -> bytes:
+    """The octets after the first TPID of an Ethernet frame tagged once per ``tpids``.
+
+    That is, each tag's control information and the EtherType after it -- the
+    next tag's TPID, or ``ethertype`` after the last tag.
+
+    """
+    return b''.join((100 + number).to_bytes(2, 'big') + kind.to_bytes(2, 'big')
+                    for number, kind in enumerate((*tpids[1:], ethertype)))
+
+
+def tagged(packet: bytes, ethertype: int, *tpids: int) -> bytes:
+    """A raw Ethernet frame carrying ``packet`` behind one VLAN tag per ``tpids``."""
+    return wire.ethernet(vlan_tags(ethertype, *tpids) + packet, tpids[0])
+
+
+def tagged_frame(packet: bytes, ethertype: int, *tpids: int) -> FakeEthernet:
+    """A tagged frame as PyPCAPFile leaves it: type the first TPID, payload hex-encoded."""
+    frame = FakeEthernet(binascii.hexlify(vlan_tags(ethertype, *tpids) + packet))
+    frame.type = tpids[0]
+    return frame
+
+
+def fake_ip_decoder() -> dict[str, types.ModuleType]:
+    """Stand-in modules for :mod:`pcapfile.protocols.network.ip`, for :data:`sys.modules`.
+
+    Their ``IP`` records what it was given, and refuses what is not an IPv4
+    header of at least 20 octets as the real decoder does.
+
+    """
+    class IP:
+        """Stand-in for :class:`pcapfile.protocols.network.ip.IP`."""
+
+        calls: list = []
+
+        def __init__(self, packet: bytes, layers: int = 0) -> None:
+            self.calls.append((packet, layers))
+            if packet[0] >> 4 != 4 or packet[0] & 0x0F <= 4:
+                raise AssertionError('not an IPv4 packet.')
+            struct.unpack('!BBHHHBBHII', packet[:20])
+
+    modules = {name: types.ModuleType(name) for name in (
+        'pcapfile', 'pcapfile.protocols', 'pcapfile.protocols.network',
+        'pcapfile.protocols.network.ip')}
+    modules['pcapfile.protocols.network.ip'].IP = IP
+    return modules
+
+
+def data_offset(segment: bytes, words: int) -> bytes:
+    """``segment``, a TCP segment, with its Data Offset set to ``words``."""
+    return segment[:12] + bytes([words << 4 | segment[12] & 0x0F]) + segment[13:]
+
+
+def total_length(packet: bytes, value: int) -> bytes:
+    """``packet``, an IPv4 packet with no options, with its Total Length set to ``value``."""
+    header = bytearray(packet[:20])
+    header[2:4], header[10:12] = value.to_bytes(2, 'big'), b'\x00\x00'
+    header[10:12] = wire.checksum(bytes(header)).to_bytes(2, 'big')
+    return bytes(header) + packet[20:]
+
+
+def tunnel(packet: bytes, protocol: int, **fields) -> FakeEthernet:
+    """An IPv4 frame tunnelling ``packet``, as PyPCAPFile decodes it: payload hex-encoded."""
+    return FakeEthernet(FakeIP(binascii.hexlify(packet), p=protocol, **fields))
+
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class PyPCAPFileToolkitTests(unittest.TestCase):
@@ -392,10 +466,35 @@ class PyPCAPFileToolkitTests(unittest.TestCase):
             ('not tcp', make_packet(FakeEthernet(FakeIP(b'x' * 40, p=17)))),
             ('too short', make_packet(FakeEthernet(FakeIP(b'short')))),
             ('already decoded', make_packet(FakeEthernet(FakeIP(object())))),
+            # data from mid-datagram, which only looks like a TCP header (#1576)
+            ('later fragment', make_packet(FakeEthernet(FakeIP(make_tcp(b'x' * 20), off=185)))),
         ):
             with self.subTest(case=label):
                 self.assertIsNone(tcp_reassembly(packet, count=1))
                 self.assertIsNone(tcp_traceflow(packet, data_link=LinkType.ETHERNET, count=1))
+
+    def test_transport_takes_the_first_fragment_to_the_total_length(self) -> None:
+        from pcapkit.toolkit.pypcapfile import _transport
+
+        segment = make_tcp(b'x')
+        for label, ipv4, want in (
+            # #1577: octets past the Total Length, e.g. Ethernet padding, are not payload
+            ('padded', FakeIP(binascii.hexlify(segment + bytes(5)), len=20 + len(segment)), segment),
+            ('options, padded',
+             FakeIP(binascii.hexlify(segment + bytes(3)), hl=6, len=24 + len(segment)), segment),
+            ('total length 0, as TSO leaves it',
+             FakeIP(binascii.hexlify(segment + b'more'), len=0), segment + b'more'),
+            ('total length past the capture', FakeIP(binascii.hexlify(segment), len=200), segment),
+            ('total length shorter than the header', FakeIP(binascii.hexlify(segment), len=12), None),
+            ('total length cuts the tcp header short', FakeIP(binascii.hexlify(segment), len=30), None),
+            # #1576: a later fragment carries no TCP header, however it looks
+            ('last fragment', FakeIP(binascii.hexlify(segment), off=1), None),
+            ('later fragment, more to follow',
+             FakeIP(binascii.hexlify(segment), off=185, flags=0b001), None),
+            ('first fragment', FakeIP(binascii.hexlify(segment), flags=0b001), segment),
+        ):
+            with self.subTest(case=label):
+                self.assertEqual(_transport(ipv4), want)
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -449,10 +548,10 @@ class PyPCAPFileTCPOverIPv6Tests(unittest.TestCase):
         # Two remembered at most: the third capture pushes the first out, so the
         # first warns a second time -- repeated, never omitted -- while the
         # third is still remembered.
-        with mock.patch.object(toolkit, 'IPV6_TCP_WARNED_LIMIT', 2), \
-                mock.patch.object(toolkit, '_ipv6_tcp_warned', type(toolkit._ipv6_tcp_warned)()):
+        with mock.patch.object(toolkit, 'TCP_WARNED_LIMIT', 2), \
+                mock.patch.object(toolkit, '_tcp_warned', type(toolkit._tcp_warned)()):
             messages = self.decline(first, second, third, first_again, third_again)
-            self.assertEqual(len(toolkit._ipv6_tcp_warned), 2)
+            self.assertEqual(len(toolkit._tcp_warned), 2)
         self.assertEqual([message.split(':')[0] for message in messages],
                          ['Frame 1', 'Frame 2', 'Frame 3', 'Frame 4'])
 
@@ -541,6 +640,268 @@ class PyPCAPFileTCPOverIPv6Tests(unittest.TestCase):
                 packet = make_packet(b'')
                 packet.header = value
                 self.assertEqual(_capture_of(packet), (id(value), value))
+
+
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class PyPCAPFileEncapsulatedTCPTests(unittest.TestCase):
+    """TCP behind VLAN tags or in IP tunnels is read or warned about. C.f. #1537."""
+
+    decline = PyPCAPFileTCPOverIPv6Tests.decline
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def test_vlan_tagged_tcp_over_ipv6_warns(self) -> None:
+        hop_by_hop = bytes([6, 0]) + b'\x01\x04' + bytes(4)
+        for label, frame in (
+            ('802.1Q', tagged_frame(wire.ipv6(TCP_SEGMENT, nxt=6), 0x86DD, C_TAG)),
+            ('802.1ad', tagged_frame(wire.ipv6(TCP_SEGMENT, nxt=6), 0x86DD, S_TAG)),
+            ('QinQ', tagged_frame(wire.ipv6(TCP_SEGMENT, nxt=6), 0x86DD, S_TAG, C_TAG)),
+            ('two customer tags', tagged_frame(wire.ipv6(TCP_SEGMENT, nxt=6), 0x86DD, C_TAG, C_TAG)),
+            ('802.1Q, hop-by-hop', tagged_frame(wire.ipv6(hop_by_hop + TCP_SEGMENT, nxt=0), 0x86DD,
+                                                C_TAG)),
+        ):
+            with self.subTest(case=label):
+                messages = self.decline(make_packet(frame))
+                self.assertEqual(len(messages), 1, messages)
+                self.assertTrue(messages[0].startswith('Frame 1: TCP over IPv6 is left out'),
+                                messages)
+
+    def test_tunnelled_tcp_warns(self) -> None:
+        tcp4, tcp6 = wire.ipv4(TCP_SEGMENT, proto=6), wire.ipv6(TCP_SEGMENT, nxt=6)
+        hop_by_hop = bytes([6, 0]) + b'\x01\x04' + bytes(4)
+        for label, frame in (
+            ('4in4', tunnel(tcp4, 4)),
+            ('6in4', tunnel(tcp6, 41)),
+            ('6in6', ipv6_frame(wire.ipv6(tcp6, nxt=41))),
+            ('4in6', ipv6_frame(wire.ipv6(tcp4, nxt=4))),
+            ('4in4in4', tunnel(wire.ipv4(tcp4, proto=4), 4)),
+            ('6in4in6', ipv6_frame(wire.ipv6(wire.ipv4(tcp6, proto=41), nxt=4))),
+            ('outer first fragment', tunnel(tcp4, 4, flags=0b001)),
+            ('inner ipv4 options', tunnel(make_ipv4(TCP_SEGMENT, options=b'\x01\x01\x01\x00'), 4)),
+            ('inner first fragment', tunnel(wire.ipv4(TCP_SEGMENT, proto=6, mf=True), 4)),
+            ('inner total length 0', tunnel(total_length(tcp4, 0), 4)),
+            ('outer padded', tunnel(tcp4 + bytes(6), 4, len=20 + len(tcp4))),
+            ('inner hop-by-hop', tunnel(wire.ipv6(hop_by_hop + TCP_SEGMENT, nxt=0), 41)),
+            ('tunnel behind hop-by-hop',
+             ipv6_frame(wire.ipv6(bytes([41, 0]) + b'\x01\x04' + bytes(4) + tcp6, nxt=0))),
+            ('6in6 behind 802.1Q', tagged_frame(wire.ipv6(tcp6, nxt=41), 0x86DD, C_TAG)),
+            ('4in6 behind QinQ', tagged_frame(wire.ipv6(tcp4, nxt=4), 0x86DD, S_TAG, C_TAG)),
+            # the default engine's TCP parser accepts these headers
+            ('tcp options', tunnel(wire.ipv4(make_tcp(b'x', options=b'\x02\x04\x05\xb4'), proto=6), 4)),
+            ('an unknown tcp option', tunnel(wire.ipv4(make_tcp(b'x', options=b'\xfe\x04\x00\x00'),
+                                                       proto=6), 4)),
+            ('inner ipv6 jumbogram', tunnel(JUMBOGRAM, 41)),
+            ('outer ipv4 option', tunnel(tcp4, 4, hl=6, opt=b'\x94\x04\x00\x00')),  # router alert
+        ):
+            with self.subTest(case=label):
+                messages = self.decline(make_packet(frame))
+                self.assertEqual(len(messages), 1, messages)
+                self.assertTrue(messages[0].startswith('Frame 1: TCP tunnelled in IP'), messages)
+                self.assertIn("'pypcapfile' decodes no tunnel", messages[0])
+
+    def test_no_warning_where_the_default_engine_finds_no_tcp(self) -> None:
+        tcp4, tcp6 = wire.ipv4(TCP_SEGMENT, proto=6), wire.ipv6(TCP_SEGMENT, nxt=6)
+        arp = b'\x00\x01\x08\x00' + bytes(24)
+        decoded = tagged_frame(b'', 0x86DD, C_TAG)
+        decoded.payload = object()  # a decoder PyPCAPFile does not have yet
+        cut_short = FakeEthernet(binascii.hexlify(b'\x00\x64\x86'))  # three octets of a tag
+        cut_short.type = C_TAG
+        for label, frame in (
+            ('not tunnelled', FakeEthernet(FakeIP(b'x' * 40, p=17))),
+            ('tunnelled udp', tunnel(wire.ipv4(wire.udp(b'x'), proto=17), 4)),
+            ('gre', tunnel(bytes(4) + tcp4, 47)),
+            ('ipv4 payload decoded', FakeEthernet(FakeIP(object(), p=4))),
+            # a later fragment's data is a slice of the payload, not a header
+            ('outer later fragment', tunnel(tcp4, 4, off=3)),
+            ('inner later fragment', tunnel(wire.ipv4(TCP_SEGMENT, proto=6, offset=8), 4)),
+            ('inner ipv6 later fragment', tunnel(wire.ipv6_fragment(TCP_SEGMENT, offset=8, nxt=6), 41)),
+            ('inner not version 4', tunnel(b'\x65' + tcp4[1:], 4)),
+            ('inner header under 20 octets', tunnel(b'\x44' + tcp4[1:], 4)),
+            ('inner header overruns the packet', tunnel(b'\x4f' + tcp4[1:], 4)),
+            ('inner ipv4 truncated', tunnel(tcp4[:19], 4)),
+            ('inner ipv6 truncated', tunnel(tcp6[:39], 41)),
+            ('inner tcp truncated', tunnel(wire.ipv4(TCP_SEGMENT[:19], proto=6), 4)),
+            # the Total Length ends the packet inside the TCP header, though more was captured
+            ('inner total length cuts the tcp header short', tunnel(total_length(tcp4, 30), 4)),
+            ('outer total length cuts the tunnel short', tunnel(tcp4, 4, len=40)),
+            ('inner payload length cuts the tcp header short',
+             tunnel(tcp6[:4] + (10).to_bytes(2, 'big') + tcp6[6:], 41)),
+            # a Payload Length of 0 with no Jumbo Payload option leaves no payload
+            ('inner payload length 0, no jumbo option', tunnel(tcp6[:4] + b'\x00\x00' + tcp6[6:], 41)),
+            ('ipv6 payload length 0, no jumbo option', ipv6_frame(tcp6[:4] + b'\x00\x00' + tcp6[6:])),
+            # in a tunnel, a header the default engine's TCP parser rejects is no TCP
+            ('tunnelled data offset past the capture',
+             tunnel(wire.ipv4(data_offset(TCP_SEGMENT, 9), proto=6), 4)),
+            ('tunnelled data offset past the inner total length',
+             tunnel(total_length(wire.ipv4(make_tcp(b'', options=b'\x02\x04\x05\xb4'), proto=6), 40)
+                    + bytes(8), 4)),
+            ('tunnelled data offset 4', tunnel(wire.ipv4(data_offset(TCP_SEGMENT, 4), proto=6), 4)),
+            # nor is one whose Data Offset is under 5 words, over IPv6 alone too
+            ('ipv6 data offset 4', ipv6_frame(wire.ipv6(data_offset(TCP_SEGMENT, 4), nxt=6))),
+            ('802.1Q, ipv6 data offset 0', tagged_frame(wire.ipv6(data_offset(TCP_SEGMENT, 0), nxt=6),
+                                                        0x86DD, C_TAG)),
+            ('inner esp', ipv6_frame(wire.ipv6(wire.ipv6(bytes(8) + TCP_SEGMENT, nxt=50), nxt=41))),
+            ('tunnel header overruns the frame',
+             ipv6_frame(wire.ipv6(bytes([41, 200]) + bytes(6) + tcp6, nxt=0))),
+            ('802.1Q, then arp', tagged_frame(arp, 0x0806, C_TAG)),
+            ('802.1Q, payload decoded', decoded),
+            ('802.1Q cut short', cut_short),
+            # 0x9100 is a pre-standard QinQ TPID, which the default engine does not dissect
+            ('0x9100 tag', tagged_frame(tcp6, 0x86DD, 0x9100)),
+        ):
+            with self.subTest(case=label):
+                self.assertEqual(self.decline(make_packet(frame)), [])
+
+    def test_network_decodes_the_ipv4_behind_the_tags(self) -> None:
+        from unittest import mock
+
+        from pcapkit.toolkit.pypcapfile import _network
+
+        packet = wire.ipv4(TCP_SEGMENT, proto=6)
+        with mock.patch.dict('sys.modules', fake_ip_decoder()) as modules:
+            IP = modules['pcapfile.protocols.network.ip'].IP
+            ipv4 = _network(make_packet(tagged_frame(packet, 0x0800, S_TAG, C_TAG)))
+            self.assertIsInstance(ipv4, IP)
+            self.assertEqual(IP.calls, [(packet, 0)])  # every tag stripped, network layer only
+
+    def test_malformed_ipv4_behind_tags_warns_once_per_frame(self) -> None:
+        # As PyPCAPFile._decode warns of an untagged frame it cannot decode,
+        # however many adapters then fetch the tagged frame's network layer.
+        from unittest import mock
+
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.toolkit.pypcapfile import ipv4_reassembly, tcp_reassembly, tcp_traceflow
+        from pcapkit.utilities.warnings import AttributeWarning
+
+        bad = tagged_frame(b'\x44' + wire.ipv4(TCP_SEGMENT, proto=6)[1:], 0x0800, C_TAG)  # IHL 4
+        other = FakeEthernet(FakeIP(b'x' * 40, p=17, flags=0b010))  # decoded, nothing to warn of
+        packets = [make_packet(frame) for frame in (bad, bad, other, bad)]
+        for packet in packets[1:]:
+            packet.header = packets[0].header  # one capture
+        with mock.patch.dict('sys.modules', fake_ip_decoder()), \
+                warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            for count, packet in enumerate(packets, start=1):
+                self.assertIsNone(ipv4_reassembly(packet, count=count))
+                self.assertIsNone(tcp_reassembly(packet, count=count))
+                self.assertIsNone(tcp_traceflow(packet, data_link=LinkType.ETHERNET, count=count))
+        messages = [str(item.message) for item in caught if issubclass(item.category, AttributeWarning)]
+        self.assertEqual(messages, [
+            f"Frame {count}: <LinkType.ETHERNET: 1> decoding failed (AssertionError('not an IPv4 "
+            "packet.')); frame left undecoded" for count in (1, 2, 4)
+        ])
+
+    def test_tcp_over_ipv6_the_tcp_parser_rejects_still_warns(self) -> None:
+        # Over IPv6, unlike in a tunnel, the default engine reads such a header
+        # out of the raw octets its TCP parser leaves.
+        for label, frame in (
+            ('data offset past the capture', ipv6_frame(wire.ipv6(data_offset(TCP_SEGMENT, 9), nxt=6))),
+            ('option of length 0', ipv6_frame(wire.ipv6(make_tcp(b'x', options=b'\x02\x00\x05\xb4'),
+                                                        nxt=6))),
+            ('jumbogram', ipv6_frame(JUMBOGRAM)),
+        ):
+            with self.subTest(case=label):
+                messages = self.decline(make_packet(frame))
+                self.assertEqual(len(messages), 1, messages)
+                self.assertTrue(messages[0].startswith('Frame 1: TCP over IPv6'), messages)
+
+    def test_malformed_tunnelled_tcp_the_header_walk_cannot_see_into_still_warns(self) -> None:
+        # The residual _upper_layer documents: the default engine rejects these
+        # options, and so finds no TCP, but nothing short of dissecting the frame
+        # would show that -- the warning errs on the side of being given.
+        tcp4 = wire.ipv4(TCP_SEGMENT, proto=6)
+        for label, frame in (
+            ('tunnelled tcp option of length 0',
+             tunnel(wire.ipv4(make_tcp(b'x', options=b'\x02\x00\x05\xb4'), proto=6), 4)),
+            ('tunnelled tcp option past its area',
+             ipv6_frame(wire.ipv6(wire.ipv6(make_tcp(b'x', options=b'\x08\x0a\x00\x00'), nxt=6), nxt=41))),
+            ('outer ipv4 option', tunnel(tcp4, 4, hl=6, opt=b'\x94\x02\x00\x00')),  # router alert, length 2
+        ):
+            with self.subTest(case=label):
+                messages = self.decline(make_packet(frame))
+                self.assertEqual(len(messages), 1, messages)
+                self.assertTrue(messages[0].startswith('Frame 1: TCP tunnelled in IP'), messages)
+
+    def test_detection_leaves_the_warnings_filters_and_the_logger_alone(self) -> None:
+        # The warnings filters and the logger are process-wide state of the
+        # caller's: telling a frame apart must neither change them nor reset
+        # what they have already seen.
+        import logging
+
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.toolkit.pypcapfile import tcp_reassembly, tcp_traceflow
+
+        logger = logging.getLogger('pcapkit')
+        level = logger.level
+        frames = (ipv6_frame(wire.ipv6(wire.ipv6(data_offset(TCP_SEGMENT, 9), nxt=6), nxt=41)),
+                  tunnel(wire.ipv4(make_tcp(b'x', options=b'\x02\x00\x05\xb4'), proto=6), 4),
+                  ipv6_frame(wire.ipv6(TCP_SEGMENT, nxt=6)))
+
+        def user_warning() -> None:
+            warnings.warn('a warning of the caller', UserWarning)
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('default')
+            filters = list(warnings.filters)
+            user_warning()
+            # the adapters called as the engine calls them, with nothing between
+            for count, frame in enumerate(frames, start=1):
+                packet = make_packet(frame)
+                tcp_reassembly(packet, count=count)
+                tcp_traceflow(packet, data_link=LinkType.ETHERNET, count=count)
+                self.assertEqual(warnings.filters, filters)
+                self.assertEqual(logger.level, level)
+            user_warning()  # the same call site, so the 'default' action shows it only once
+        self.assertEqual([str(item.message) for item in caught if item.category is UserWarning],
+                         ['a warning of the caller'])
+
+    def test_each_frame_is_walked_once_per_adapter_call(self) -> None:
+        # Declining costs one header walk per frame and adapter, however the
+        # frame is malformed: nothing is retried or dissected again.
+        from unittest import mock
+
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.protocols.protocol import ProtocolBase
+        from pcapkit.toolkit import pypcapfile as toolkit
+
+        built = []  # type: list[str]
+        init = ProtocolBase.__init__
+
+        def spy_init(this, *args, **kwargs):
+            built.append(type(this).__name__)
+            return init(this, *args, **kwargs)
+
+        cut = wire.ipv6(wire.ipv6(make_tcp(b'', options=b'\x02\x04\x05\xb4'), nxt=6), nxt=41)[:-4]
+        packets = [make_packet(ipv6_frame(cut)) for _ in range(10)]  # a TCP header cut short in a tunnel
+        for packet in packets[1:]:
+            packet.header = packets[0].header  # one capture, which never warns
+        with mock.patch.object(toolkit, '_upper_layer', wraps=toolkit._upper_layer) as walk, \
+                mock.patch.object(ProtocolBase, '__init__', spy_init), \
+                warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            for count, packet in enumerate(packets, start=1):
+                self.assertIsNone(toolkit.tcp_reassembly(packet, count=count))
+                self.assertIsNone(toolkit.tcp_traceflow(packet, data_link=LinkType.ETHERNET, count=count))
+        self.assertEqual([str(item.message) for item in caught], [])
+        # the outer IPv6 header and the inner one, per frame and adapter ...
+        self.assertEqual(walk.call_count, 2 * 2 * len(packets))
+        # ... and no protocol of the default engine's dissected along the way
+        self.assertEqual(built, [])
+
+    def test_each_kind_warns_once_per_capture(self) -> None:
+        frames = (ipv6_frame(wire.ipv6(TCP_SEGMENT, nxt=6)),
+                  ipv6_frame(wire.ipv6(wire.ipv6(TCP_SEGMENT, nxt=6), nxt=41)),
+                  tagged_frame(wire.ipv6(TCP_SEGMENT, nxt=6), 0x86DD, C_TAG),
+                  tunnel(wire.ipv4(TCP_SEGMENT, proto=6), 4))
+        packets = [make_packet(frame) for frame in frames]
+        for packet in packets[1:]:
+            packet.header = packets[0].header  # all four frames of one capture
+
+        messages = self.decline(*packets)
+        self.assertEqual(len(messages), 2, messages)
+        self.assertTrue(messages[0].startswith('Frame 1: TCP over IPv6'), messages)
+        self.assertTrue(messages[1].startswith('Frame 2: TCP tunnelled in IP'), messages)
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -720,6 +1081,251 @@ class PyPCAPFileToolkitAgainstRealDecodersTests(unittest.TestCase):
                         self.assertEqual(len(extractor.reassembly.tcp), 1)
                     finally:
                         close_extractor(extractor)
+
+    def test_network_decodes_behind_vlan_tags_as_untagged(self) -> None:
+        from pcapfile.protocols.linklayer.ethernet import Ethernet
+
+        from pcapkit.toolkit.pypcapfile import _ipv4_2dict, _maybe_unhex, _network
+
+        packet = make_ipv4(make_tcp(b'body'), options=b'\x94\x04\x00\x00')
+        untagged = Ethernet(wire.ethernet(packet, 0x0800), 1).payload
+        want = _ipv4_2dict(untagged), _maybe_unhex(bytes(untagged.payload))
+        for label, tpids in (('802.1Q', (C_TAG,)), ('802.1ad', (S_TAG,)), ('QinQ', (S_TAG, C_TAG)),
+                             ('two customer tags', (C_TAG, C_TAG))):
+            with self.subTest(case=label):
+                ipv4 = _network(make_packet(Ethernet(tagged(packet, 0x0800, *tpids), 1)))
+                self.assertEqual(type(ipv4).__name__, 'IP')
+                self.assertEqual((_ipv4_2dict(ipv4), _maybe_unhex(bytes(ipv4.payload))), want)
+
+        for label, frame, undecoded in (
+            ('802.1Q, then ipv6', tagged(wire.ipv6(TCP_SEGMENT, nxt=6), 0x86DD, C_TAG), False),
+            ('802.1Q, then not ipv4', tagged(b'\x65' + packet[1:], 0x0800, C_TAG), True),
+            ('802.1Q, then a truncated ipv4 header', tagged(packet[:19], 0x0800, C_TAG), True),
+            ('802.1Q cut short', wire.ethernet(b'\x00\x64\x08', C_TAG), False),
+            ('0x9100 tag', tagged(packet, 0x0800, 0x9100), False),
+        ):
+            with self.subTest(case=label), warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter('always')
+                self.assertIsNone(_network(make_packet(Ethernet(frame, 1)), 7))
+                self.assertEqual([str(item.message).split(' decoding failed')[0] for item in caught],
+                                 ['Frame 7: <LinkType.ETHERNET: 1>'] if undecoded else [])
+
+    def test_engine_warns_alike_of_tagged_and_untagged_ipv4_it_cannot_decode(self) -> None:
+        from pcapkit import extract
+
+        bad = b'\x44' + wire.ipv4(TCP_SEGMENT, proto=6)[1:]  # IHL 4
+        frames = (wire.ethernet(bad, 0x0800), tagged(bad, 0x0800, S_TAG, C_TAG),
+                  wire.ethernet(wire.ipv4(TCP_SEGMENT, proto=6), 0x0800))
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, 'undecodable.pcap')
+            with open(path, 'wb') as file:
+                file.write(wire.pcap([(1, number, frame) for number, frame in enumerate(frames)]))
+            with warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter('always')
+                extractor = extract(fin=path, nofile=True, engine='pypcapfile', reassembly=True,
+                                    ipv4=True, tcp=True, trace=True,
+                                    trace_fout=os.path.join(tmp, 'trace'), trace_format='json')
+            try:
+                self.assertEqual(extractor._exnam, 'pypcapfile')
+                messages = [str(item.message) for item in caught if 'decoding failed' in str(item.message)]
+                # one each, the untagged from the engine and the tagged from the toolkit,
+                # in the same words after the frame number
+                self.assertEqual([message.split(': ', 1)[0] for message in messages],
+                                 ['Frame 1', 'Frame 2'])
+                self.assertEqual(messages[0].split(': ', 1)[1], messages[1].split(': ', 1)[1])
+                self.assertEqual([tuple(flow.index) for flow in extractor.trace.tcp], [(3,)])
+            finally:
+                close_extractor(extractor)
+
+    #: What :meth:`read_both` compares between the two engines.
+    ASPECTS = ('ipv4', 'tcp', 'trace', 'ipv4 datagrams', 'tcp datagrams', 'flows')
+
+    def read(self, engine: str, path: str, tracedir: str) -> dict:
+        """Every field ``engine`` hands IPv4 and TCP reassembly and TCP flow tracing for ``path``.
+
+        Inputs are keyed by frame number, and a trace input leaves out ``frame``,
+        the engine's own frame object -- as in ``test_engine_agreement_runtime``.
+
+        """
+        from unittest import mock
+
+        from pcapkit import extract
+        from pcapkit.foundation.reassembly.reassembly import ReassemblyBase
+        from pcapkit.foundation.traceflow.traceflow import TraceFlowBase
+
+        seen = {'ipv4': {}, 'tcp': {}, 'trace': {}}  # type: dict
+        reassemble, trace = ReassemblyBase.__call__, TraceFlowBase.__call__
+
+        def fields(packet, skip=()):
+            return {key: bytes(value) if isinstance(value, bytearray) else value
+                    for key, value in packet.items() if key not in skip}
+
+        def spy_reassembly(this, packet):
+            seen[type(this).__name__.lower()][packet.num] = fields(packet)
+            return reassemble(this, packet)
+
+        def spy_trace(this, packet):
+            seen['trace'][packet.index] = fields(packet, ('frame',))
+            return trace(this, packet)
+
+        with warnings.catch_warnings(record=True) as caught, \
+                mock.patch.object(ReassemblyBase, '__call__', spy_reassembly), \
+                mock.patch.object(TraceFlowBase, '__call__', spy_trace):
+            warnings.simplefilter('always')
+            extractor = extract(fin=path, nofile=True, engine=engine, reassembly=True,
+                                ipv4=True, ipv6=False, tcp=True, trace=True,
+                                trace_fout=tracedir, trace_format='json')
+        try:
+            self.assertEqual(extractor._exnam, engine)
+            self.assertEqual([str(item.message) for item in caught
+                              if 'left out' in str(item.message)], [])
+            for kind in ('ipv4', 'tcp'):
+                seen[f'{kind} datagrams'] = [fields(datagram, ('packet',))
+                                             for datagram in getattr(extractor.reassembly, kind)]
+            seen['flows'] = [(flow.label, tuple(flow.index)) for flow in extractor.trace.tcp]
+        finally:
+            close_extractor(extractor)
+        return seen
+
+    def read_both(self, frames) -> tuple[dict, dict]:
+        """:meth:`read` a capture of ``frames`` with ``pypcapfile``, then with ``default``."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, 'capture.pcap')
+            with open(path, 'wb') as file:
+                file.write(wire.pcap([(1, number, frame) for number, frame in enumerate(frames)]))
+            return (self.read('pypcapfile', path, os.path.join(tmp, 'pypcapfile')),
+                    self.read('default', path, os.path.join(tmp, 'default')))
+
+    def test_vlan_tagged_ipv4_agrees_with_the_default_engine(self) -> None:
+        datagram = wire.udp(b'u' * 24)
+        frames = (
+            tagged(wire.ipv4(wire.tcp(b'hello', seq=100, syn=True), proto=6), 0x0800, C_TAG),
+            tagged(wire.ipv4(wire.tcp(b'ok', seq=500, ack=106, sport=9, dport=40000),
+                             proto=6, reverse=True), 0x0800, C_TAG),
+            tagged(wire.ipv4(wire.tcp(b'world', seq=106, ack=501), proto=6), 0x0800, S_TAG, C_TAG),
+            tagged(wire.ipv4(wire.tcp(b'!', seq=111, ack=501), proto=6), 0x0800, C_TAG, C_TAG),
+            tagged(wire.ipv4(wire.tcp(b'bye', seq=112, ack=501, fin=True), proto=6), 0x0800, S_TAG),
+            wire.ethernet(wire.ipv4(wire.tcp(b'late', seq=115, ack=501), proto=6), 0x0800),
+            # an IPv4 datagram in two tagged fragments, for IPv4 reassembly
+            tagged(wire.ipv4(datagram[:16], proto=17, mf=True, ident=0x99), 0x0800, C_TAG),
+            tagged(wire.ipv4(datagram[16:], proto=17, offset=16, ident=0x99), 0x0800, S_TAG, C_TAG),
+            # IPv4 and TCP options, on a flow of their own
+            tagged(make_ipv4(make_tcp(b'opts', options=b'\x02\x04\x05\xb4'),
+                             options=b'\x94\x04\x00\x00'), 0x0800, C_TAG),
+        )
+        mine, theirs = self.read_both(frames)
+
+        self.assertEqual(sorted(mine['tcp']), [1, 2, 3, 4, 5, 6, 9])
+        self.assertEqual(sorted(mine['ipv4']), [1, 2, 3, 4, 5, 6, 7, 8, 9])
+        self.assertIn(datagram, [bytes(item['payload']) for item in mine['ipv4 datagrams']])
+        self.assertEqual(len(mine['flows']), 2)
+        for aspect in self.ASPECTS:
+            with self.subTest(aspect=aspect):
+                self.assertEqual(mine[aspect], theirs[aspect])
+
+    def test_later_fragment_is_not_read_as_tcp(self) -> None:
+        # C.f. #1576: a SYN, then later fragments whose data merely looks like a
+        # TCP header -- untagged and tagged -- and a first fragment, which does
+        # carry one.
+        data = b'A' * 20 + b'B' * 20
+        frames = (
+            wire.ethernet(wire.ipv4(wire.tcp(b'', seq=0, syn=True), proto=6, df=True), 0x0800),
+            wire.ethernet(wire.ipv4(data, proto=6, offset=1480, ident=9), 0x0800),
+            tagged(wire.ipv4(data, proto=6, offset=8, mf=True, ident=10), 0x0800, C_TAG),
+            wire.ethernet(wire.ipv4(wire.tcp(b'first', seq=1, ack=1), proto=6, mf=True, ident=11),
+                          0x0800),
+        )
+        mine, theirs = self.read_both(frames)
+
+        self.assertEqual(sorted(mine['tcp']), [1, 4])
+        for aspect in self.ASPECTS:
+            with self.subTest(aspect=aspect):
+                self.assertEqual(mine[aspect], theirs[aspect])
+
+    def test_tcp_payload_ends_at_the_total_length(self) -> None:
+        # C.f. #1577: Ethernet padding past the Total Length is not TCP payload.
+        frames = (
+            wire.ethernet(wire.ipv4(wire.tcp(b'x', seq=100, ack=1), proto=6), 0x0800) + bytes(5),
+            tagged(wire.ipv4(wire.tcp(b'y', seq=101, ack=1), proto=6), 0x0800, C_TAG) + bytes(1),
+            # 0, as TCP segmentation offload leaves it: the rest of the frame
+            wire.ethernet(total_length(wire.ipv4(wire.tcp(b'tso', seq=102, ack=1), proto=6), 0),
+                          0x0800),
+            # shorter than the header: no payload at all
+            wire.ethernet(total_length(wire.ipv4(wire.tcp(b'bogus', seq=105, ack=1), proto=6), 12),
+                          0x0800),
+            # past the end of the capture: what was captured
+            wire.ethernet(total_length(wire.ipv4(wire.tcp(b'cut', seq=105, ack=1), proto=6), 200),
+                          0x0800),
+        )
+        mine, theirs = self.read_both(frames)
+
+        self.assertEqual(sorted(mine['tcp']), [1, 2, 3, 5])
+        self.assertEqual([mine['tcp'][number]['payload'] for number in (1, 2, 3, 5)],
+                         [b'x', b'y', b'tso', b'cut'])
+        for aspect in self.ASPECTS:
+            with self.subTest(aspect=aspect):
+                self.assertEqual(mine[aspect], theirs[aspect])
+
+    def test_engine_does_not_warn_of_tunnelled_tcp_headers_the_default_engine_rejects(self) -> None:
+        from pcapkit import extract
+
+        tcp4 = wire.ipv4(TCP_SEGMENT, proto=6)
+        syn = make_tcp(b'', flags=0x02, options=b'\x02\x04\x05\xb4')
+        frames = (
+            # a tunnelled SYN whose options the snapshot length cut off
+            wire.ethernet(wire.ipv6(wire.ipv6(syn, nxt=6), nxt=41), 0x86DD)[:-2],
+            # a tunnelled TCP header with a Data Offset under 5 words
+            wire.ethernet(wire.ipv4(wire.ipv4(data_offset(TCP_SEGMENT, 4), proto=6), proto=4), 0x0800),
+            wire.ethernet(wire.ipv4(tcp4, proto=4), 0x0800),
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, 'tunnels.pcap')
+            with open(path, 'wb') as file:
+                file.write(wire.pcap([(1, number, frame) for number, frame in enumerate(frames)]))
+            with warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter('always')
+                extractor = extract(fin=path, nofile=True, engine='pypcapfile', reassembly=True,
+                                    tcp=True, trace=True, trace_fout=os.path.join(tmp, 'trace'),
+                                    trace_format='json')
+            try:
+                self.assertEqual(extractor._exnam, 'pypcapfile')
+                self.assertEqual([str(item.message).split(': ', 1)[0] for item in caught
+                                  if 'left out' in str(item.message)], ['Frame 3'])
+            finally:
+                close_extractor(extractor)
+
+    def test_engine_warns_once_per_capture_on_tunnelled_tcp(self) -> None:
+        from pcapkit import extract
+
+        tcp4, tcp6 = wire.ipv4(TCP_SEGMENT, proto=6), wire.ipv6(TCP_SEGMENT, nxt=6)
+        frames = (
+            wire.ethernet(tcp4, 0x0800),
+            wire.ethernet(wire.ipv4(tcp4, proto=4), 0x0800),
+            wire.ethernet(wire.ipv4(tcp6, proto=41), 0x0800),
+            wire.ethernet(wire.ipv6(tcp6, nxt=41), 0x86DD),
+            tagged(tcp6, 0x86DD, C_TAG),
+            tagged(wire.ipv4(tcp4, proto=4), 0x0800, C_TAG),
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, 'tunnels.pcap')
+            with open(path, 'wb') as file:
+                file.write(wire.pcap([(1, number, frame) for number, frame in enumerate(frames)]))
+
+            with warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter('always')
+                extractor = extract(fin=path, nofile=True, engine='pypcapfile',
+                                    reassembly=True, tcp=True, trace=True,
+                                    trace_fout=os.path.join(tmp, 'trace'), trace_format='json')
+            try:
+                messages = [str(item.message) for item in caught
+                            if 'left out' in str(item.message)]
+                self.assertEqual(extractor._exnam, 'pypcapfile')
+                self.assertEqual(len(messages), 2, messages)
+                self.assertTrue(messages[0].startswith('Frame 2: TCP tunnelled in IP'), messages)
+                self.assertTrue(messages[1].startswith('Frame 5: TCP over IPv6'), messages)
+                self.assertEqual([tuple(flow.index) for flow in extractor.trace.tcp], [(1,)])
+            finally:
+                close_extractor(extractor)
 
 
 if __name__ == '__main__':
