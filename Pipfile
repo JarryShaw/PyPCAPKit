@@ -14,7 +14,8 @@ tbtrim = "~=0.3.1"
 pypcapkit = {editable = true,path = "."}
 pyshark = "*"
 dpkt = "*"
-scapy = "*"
+# The floor and marker match the Scapy extra in pyproject.toml (#1572).
+scapy = {version = ">=2.6.0",markers = "python_version >= '3.7'"}
 cryptography = "*"
 # NB: ``pypcap`` is deliberately absent. It builds a C extension against
 # libpcap, so listing it here would break ``pipenv install --dev`` -- and even

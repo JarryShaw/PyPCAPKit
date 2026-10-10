@@ -1055,6 +1055,20 @@ class DependencyRequirementTests(unittest.TestCase):
             with self.subTest(absent=absent):
                 self.assertFalse(_dependency_gates.provided_by(declared['dev'], absent))
 
+    def test_scapy_is_floored_at_the_first_release_main_passes_on(self) -> None:
+        """#1572: ``Scapy`` and ``dev`` both require ``scapy>=2.6.0``.
+
+        On 2.5.0 ``main`` reads a PCAP-NG nanosecond interface as microseconds and
+        ``packet2dict`` reports DNS records and field order differently; 2.6.0, the
+        next release, fixes all three. The marker is ``PCAP_CT``'s courtesy: 2.6.0
+        needs Python 3.7, above this project's ``requires-python`` floor.
+
+        """
+        declared = _dependency_gates.declared_requirements()
+        floor = "scapy>=2.6.0; python_version >= '3.7'"
+        self.assertEqual([requirement.text for requirement in declared['Scapy']], [floor])
+        self.assertIn(floor, [requirement.text for requirement in declared['dev']])
+
     def test_the_core_dependencies_are_read_from_project_not_build_system(self) -> None:
         """``[build-system] requires`` also holds ``setuptools``; this is not it."""
         core = _dependency_gates.declared_requirements()[_dependency_gates.CORE]
