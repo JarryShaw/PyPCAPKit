@@ -11,6 +11,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
 """
 import binascii
+import ctypes
 import struct
 import sys
 from typing import TYPE_CHECKING, cast
@@ -20,13 +21,14 @@ from pcapkit.corekit.io import NamedStream
 from pcapkit.foundation.engines.engine import EngineBase
 from pcapkit.foundation.reassembly import ReassemblyManager
 from pcapkit.utilities.exceptions import FormatError, stacklevel
-from pcapkit.utilities.warnings import AttributeWarning, warn
+from pcapkit.utilities.warnings import AttributeWarning, ProtocolWarning, warn
 
 __all__ = ['PyPCAPFile']
 
 if TYPE_CHECKING:
     from typing import Any, Callable, Iterator, Optional
 
+    from pcapfile.structs import __pcap_header__ as PCAPFileHeader
     from pcapfile.structs import pcap_packet as PCAPFilePacket
 
     from pcapkit.foundation.extraction import Extractor
@@ -41,6 +43,9 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
 
     * reads PCAP savefiles only, raising
       :exc:`~pcapkit.utilities.exceptions.FormatError` on PCAP-NG,
+    * reads the savefile's records itself, into `PyPCAPFile`_'s own packet
+      objects, as `PyPCAPFile`_ 0.12.0 drops records the ``default`` engine
+      reads -- see :meth:`_read_records`,
     * disables IPv6 reassembly, warning as it does so, while leaving IPv4 and
       TCP reassembly and TCP flow tracing in place, and
     * leaves TCP over IPv6 out of TCP reassembly and flow tracing, with one
@@ -157,14 +162,17 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
         as :mod:`pcapfile` and :attr:`self._extmp <PyPCAPFile._extmp>`
         as an iterator over the lazily generated savefile packets.
 
-        The savefile is loaded with ``layers=0``. Per :func:`pcapfile.savefile
-        ._read_a_packet`, that does *not* hand back each frame's bytes verbatim --
-        it hexlifies the whole frame into ASCII text and stops there, exactly as it
-        would for any layer at which it runs out of layers left to descend. It is
-        :meth:`_decode` that un-hexlifies and then decodes each frame to
-        :attr:`LAYERS` depth using :func:`pcapfile.linklayer.clookup` -- the very
-        call :mod:`pcapfile` makes internally. Doing it this way round is what
-        lets the link layer type be inspected (and reported on) *before* the
+        :func:`pcapfile.savefile.load_savefile` loads and validates the savefile
+        header. The records are then read by :meth:`_read_records`, not by the
+        packet generator it returns, which drops records (see there). Like
+        :func:`pcapfile.savefile._read_a_packet` with ``layers=0``,
+        :meth:`_read_records` does *not* hand back each frame's bytes verbatim --
+        it hexlifies the whole frame into ASCII text and stops there, exactly as
+        :mod:`pcapfile` does for any layer at which it runs out of layers left to
+        descend. It is :meth:`_decode` that un-hexlifies and then decodes each
+        frame to :attr:`LAYERS` depth using :func:`pcapfile.linklayer.clookup` --
+        the very call :mod:`pcapfile` makes internally. Doing it this way round is
+        what lets the link layer type be inspected (and reported on) *before* the
         first frame is decoded.
 
         Warns:
@@ -204,9 +212,8 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
             warn("'Extractor(engine=pypcapfile)' object does not support IPv6 reassembly; "
                  "so 'ipv6=True' will be ignored", AttributeWarning, stacklevel=stacklevel())
 
-        sfile = pcapfile.savefile.load_savefile(
-            NamedStream(ext._ifile, ext._ifnm), layers=0, lazy=True,
-        )
+        stream = NamedStream(ext._ifile, ext._ifnm)
+        sfile = pcapfile.savefile.load_savefile(stream, layers=0, lazy=True)
         self._dlink = Enum_LinkType.get(sfile.header.ll_type)
         self._declf = self._get_decoder(sfile.header.ll_type)
 
@@ -218,7 +225,7 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
             )  # pylint: disable=logging-fstring-interpolation
 
         # extract & analyse file
-        self._extmp = iter(sfile.packets)
+        self._extmp = self._read_records(stream, sfile.header)
 
     def read_frame(self) -> 'PCAPFilePacket':
         """Read frames with PyPCAPFile engine.
@@ -312,6 +319,62 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
             return None
         return decoder
 
+    def _read_records(self, file: 'NamedStream',
+                      header: 'PCAPFileHeader') -> 'Iterator[PCAPFilePacket]':
+        """Read the savefile's records, as the ``default`` engine reads them.
+
+        :func:`pcapfile.savefile._read_a_packet` (pypcapfile 0.12.0) drops
+        records the ``default`` engine reads, in two ways:
+
+        * It picks the byte order of each record header by testing
+          ``hdrp[0].byteorder == 'big'`` -- :class:`bytes` against :class:`str`,
+          never true on Python 3. A big-endian record header is unpacked
+          little-endian, its byte-swapped capture length overruns the file, and
+          the savefile ends at its first record (#1512).
+        * It ends the savefile at any record whose frame data is empty or shorter
+          than its capture length, so a zero-length record drops itself and every
+          record after it, and a truncated final record is dropped (#1571).
+
+        This reads each record in the byte order of the header :mod:`pcapfile`
+        loaded, into the :class:`pcapfile.structs.pcap_packet` that function
+        builds with ``layers=0`` -- the frame hexlified, pointing at the
+        savefile's own header -- so :meth:`_decode` and
+        :mod:`pcapkit.toolkit.pypcapfile` see what :mod:`pcapfile` hands them.
+        It stops where :class:`~pcapkit.protocols.misc.pcap.frame.Frame` stops,
+        at a tail too short for a record header, and keeps a record whose capture
+        length runs past the data as that does: the capture length as declared,
+        the octets present as the frame.
+
+        Args:
+            file: The savefile, just past its header, where
+                :func:`pcapfile.savefile.load_savefile` leaves it.
+            header: The savefile header :mod:`pcapfile` loaded.
+
+        Yields:
+            Undecoded savefile packets, one per record.
+
+        Warns:
+            ProtocolWarning: If a record's capture length runs past the data.
+
+        """
+        order = '>' if header.byteorder == b'big' else '<'
+        hdrp = ctypes.pointer(header)
+        number = 0
+        while True:
+            number += 1
+            record = file.read(16)
+            if len(record) < 16:
+                return
+            timestamp, timestamp_us, capture_len, packet_len = struct.unpack(f'{order}IIII', record)
+            data = file.read(capture_len)
+            if len(data) < capture_len:
+                warn(f'PCAP: [Frame {number}] captured length {capture_len} runs past the data, '
+                     f'which holds {len(data)} octet(s); kept as captured',
+                     ProtocolWarning, stacklevel=stacklevel())
+            yield cast('PCAPFilePacket', self._expkg.structs.pcap_packet(
+                hdrp, timestamp, timestamp_us, capture_len, packet_len, binascii.hexlify(data),
+            ))
+
     def _decode(self, packet: 'PCAPFilePacket', frnum: 'int') -> 'PCAPFilePacket':
         """Decode a raw savefile packet down to :attr:`LAYERS` depth.
 
@@ -327,7 +390,7 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
 
         Returns:
             The decoded packet, or ``packet`` unchanged when it could not be
-            decoded.
+            decoded, or holds no octets at all.
 
         Warns:
             AttributeWarning: If :mod:`pcapfile` could not decode the frame, e.g.
@@ -335,7 +398,9 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
                 the extraction, but it should not pass silently either.
 
         """
-        if self._declf is None:
+        # A zero-length record holds nothing to decode, which is not a decoding
+        # failure: the ``default`` engine reads one without a warning too.
+        if self._declf is None or not packet.packet:
             return packet
 
         try:

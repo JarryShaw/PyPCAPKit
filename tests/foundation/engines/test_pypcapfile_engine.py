@@ -4,7 +4,9 @@ The engine is exercised against stand-ins for :func:`pcapfile.savefile.load_save
 and :func:`pcapfile.linklayer.clookup`, so that the routing decisions -- format
 gating, the IPv6 capability gap, per-frame decoding and its failure path, output,
 reassembly, tracing, storage -- are covered whether or not `pypcapfile`_ is
-installed. End-to-end agreement with the ``default`` engine lives in
+installed. One test runs the real `pypcapfile`_ where it imports, over savefiles
+built in memory, to pin the engine's record reader to the ``default`` engine's
+reading in both byte orders (#1512, #1571). End-to-end agreement with the ``default`` engine lives in
 :mod:`tests.foundation.engines.test_new_engine_parity`.
 
 .. _pypcapfile: https://github.com/kisom/pypcapfile
@@ -13,8 +15,11 @@ installed. End-to-end agreement with the ``default`` engine lives in
 from __future__ import annotations
 
 import binascii
+import ctypes
+import importlib
 import importlib.util
 import io
+import itertools
 import struct
 import sys
 import types
@@ -71,12 +76,79 @@ class FakePacket:
         self.packet = packet
 
 
+class FakeHeader(ctypes.Structure):
+    """Stand-in for :class:`pcapfile.structs.__pcap_header__`.
+
+    A :mod:`ctypes` structure, like the real one, so that a packet can point at
+    it and its ``byteorder`` reads back as :class:`bytes`, as the real one does.
+
+    """
+
+    _fields_ = [('ll_type', ctypes.c_uint), ('byteorder', ctypes.c_char_p),
+                ('ns_resolution', ctypes.c_bool)]
+
+
+class UnreadPackets:
+    """Stand-in for the packet generator :func:`pcapfile.savefile.load_savefile`
+    returns, which pypcapfile 0.12.0 drops records from (#1512, #1571): the engine
+    reads the records itself, so taking this is a failure."""
+
+    def __iter__(self):
+        raise AssertionError("the engine took pcapfile's packet generator, which drops records")
+
+
 class FakeSaveFile:
     """Stand-in for :class:`pcapfile.savefile.pcap_savefile`."""
 
-    def __init__(self, packets, ll_type: int = 1, ns_resolution: bool = False) -> None:
-        self.header = types.SimpleNamespace(ll_type=ll_type, ns_resolution=ns_resolution)
-        self.packets = packets
+    def __init__(self, ll_type: int = 1, ns_resolution: bool = False,
+                 byteorder: bytes = b'little') -> None:
+        self.header = FakeHeader(ll_type=ll_type, byteorder=byteorder, ns_resolution=ns_resolution)
+        self.packets = UnreadPackets()
+
+
+#: Savefile magic numbers, by ``(byte order, nanosecond)``.
+MAGIC = {('little', False): b'\xd4\xc3\xb2\xa1', ('big', False): b'\xa1\xb2\xc3\xd4',
+         ('little', True): b'\x4d\x3c\xb2\xa1', ('big', True): b'\xa1\xb2\x3c\x4d'}
+
+
+def build_savefile(records, *, byteorder: str, nanosecond: bool = False,
+                   tail: bytes = b'') -> bytes:
+    """A PCAP savefile of ``(seconds, fraction, frame, original length)`` records,
+    then ``tail``. A distinct original length makes a swapped field show."""
+    order = '<' if byteorder == 'little' else '>'
+    out = [MAGIC[byteorder, nanosecond] + struct.pack(f'{order}HHiIII', 2, 4, 0, 0, 0xFFFF, 1)]
+    for seconds, fraction, frame, length in records:
+        out.append(struct.pack(f'{order}IIII', seconds, fraction, len(frame), length) + frame)
+    return b''.join(out) + tail
+
+
+def reference_records(data: bytes) -> list:
+    """Every record of a savefile, read with :mod:`struct` alone, as the ``default``
+    engine reads them: to a tail too short for a record header, keeping a record
+    whose capture length runs past the data as ``(seconds, fraction, captured
+    length, original length, the octets present)``."""
+    byteorder, _ = next(key for key, magic in MAGIC.items() if magic == data[:4])
+    order = '<' if byteorder == 'little' else '>'
+    records, offset = [], 24
+    while len(data) - offset >= 16:
+        seconds, fraction, incl, orig = struct.unpack_from(f'{order}IIII', data, offset)
+        records.append((seconds, fraction, incl, orig, data[offset + 16:offset + 16 + incl]))
+        offset += 16 + incl
+    return records
+
+
+def _importable(*modules: str) -> bool:
+    for module in modules:
+        try:
+            importlib.import_module(module)
+        except ImportError:
+            return False
+    return True
+
+
+#: ``pypcapfile`` 0.12.0 installs on Python 3.12 and newer but cannot import
+#: there (see :class:`PyPCAPFilePythonCeilingTests`), hence an import test.
+HAS_PYPCAPFILE = _importable('pcapfile.savefile', 'pcapfile.linklayer', 'pcapfile.structs')
 
 
 class FakeDecoded:
@@ -129,7 +201,7 @@ class PyPCAPFileEngineTests(unittest.TestCase):
         from pcapkit.foundation.engines.pypcapfile import PyPCAPFile
 
         if savefile is None:
-            savefile = FakeSaveFile([FakePacket(None, 1, 500000, 7, 7, HEXLIFIED_FRAME)])
+            savefile = FakeSaveFile()
 
         engine = PyPCAPFile.__new__(PyPCAPFile)
         engine._expkg = types.SimpleNamespace(
@@ -252,6 +324,193 @@ class PyPCAPFileEngineTests(unittest.TestCase):
         self.assertIn('ETHERNET:Raw', printer.call_args.args[0])
 
     ##########################################################################
+    # Records (#1512, #1571).
+    ##########################################################################
+
+    def reading(self, data: bytes, decoder=FakeDecoded):
+        """An engine run over the savefile ``data``, its header loaded as
+        :func:`pcapfile.savefile.load_savefile` loads it: the first 24 octets
+        read, and the byte order and resolution recorded."""
+        (byteorder, nanosecond), = (key for key, magic in MAGIC.items() if magic == data[:4])
+        savefile = FakeSaveFile(byteorder=byteorder.encode(), ns_resolution=nanosecond)
+        extractor, _ = self.make_extractor(_ifile=io.BytesIO(data), _flag_q=True,
+                                           magic_number=data[:4])
+        engine = self.engine(extractor, savefile=savefile, decoder=decoder)
+
+        def load_savefile(stream, layers, lazy):
+            stream.read(24)
+            return savefile
+
+        engine._expkg.savefile.load_savefile = mock.Mock(side_effect=load_savefile)
+        engine.run()
+        return engine, savefile.header
+
+    def frames(self, engine) -> 'tuple[list, list]':
+        """Every frame ``engine`` reads, and the warnings it gives on the way."""
+        frames = []
+        with mock.patch('pcapkit.foundation.engines.pypcapfile.warn') as warn:
+            while True:
+                try:
+                    frames.append(engine.read_frame())
+                except StopIteration:
+                    return frames, [call.args for call in warn.call_args_list]
+
+    @staticmethod
+    def octets(frame) -> bytes:
+        """The frame octets a packet carries, decoded or not."""
+        if isinstance(frame.packet, FakeDecoded):
+            return frame.packet.raw
+        return binascii.unhexlify(frame.packet)
+
+    def test_records_are_read_in_the_header_byte_order(self) -> None:
+        records = [(1500000000, 123456, b'first-frame', 11),
+                   (1500000001, 654321, b'second', 1200)]
+        for byteorder in ('little', 'big'):
+            with self.subTest(byteorder=byteorder):
+                engine, header = self.reading(build_savefile(records, byteorder=byteorder))
+                frames, warned = self.frames(engine)
+
+                self.assertEqual(warned, [])
+                self.assertEqual(len(frames), 2)
+                self.assertEqual(engine._extractor._frnum, 2)
+                for frame, (seconds, fraction, raw, length) in zip(frames, records):
+                    self.assertEqual((frame.timestamp, frame.timestamp_us), (seconds, fraction))
+                    self.assertEqual((frame.capture_len, frame.packet_len), (len(raw), length))
+                    # handed to the decoder as pcapfile hands over a frame:
+                    # hexlified, then un-hexlified by _decode
+                    self.assertIsInstance(frame.packet, FakeDecoded)
+                    self.assertEqual(frame.packet.raw, raw)
+                    # and pointing at the savefile's own header, as pcapfile's do
+                    self.assertEqual(ctypes.addressof(frame.header.contents),
+                                     ctypes.addressof(header))
+
+    def test_a_nanosecond_savefile_keeps_its_resolution(self) -> None:
+        from pcapkit.toolkit.pypcapfile import packet2timestamp
+
+        for byteorder in ('little', 'big'):
+            with self.subTest(byteorder=byteorder):
+                engine, _ = self.reading(build_savefile([(1500000000, 123456789, b'frame', 5)],
+                                                        byteorder=byteorder, nanosecond=True))
+                (frame,), _ = self.frames(engine)
+                self.assertEqual(frame.timestamp_us, 123456789)
+                self.assertEqual(packet2timestamp(frame),
+                                 1500000000 + 123456789 / 1_000_000_000)
+
+    def test_a_zero_length_record_is_read_and_left_undecoded(self) -> None:
+        """pcapfile ends the savefile at a zero-length record (#1571); the ``default``
+        engine reads it, and every record after it, without a warning."""
+        cases = {
+            'middle': [(1, 0, b'first', 5), (2, 0, b'', 0), (3, 0, b'third', 5)],
+            'first': [(1, 0, b'', 0), (2, 0, b'second', 6), (3, 0, b'third', 5)],
+        }
+        for (case, records), byteorder in itertools.product(cases.items(), ('little', 'big')):
+            with self.subTest(case=case, byteorder=byteorder):
+                decoder = mock.Mock(side_effect=FakeDecoded)
+                engine, _ = self.reading(build_savefile(records, byteorder=byteorder),
+                                         decoder=decoder)
+                frames, warned = self.frames(engine)
+
+                self.assertEqual([self.octets(frame) for frame in frames],
+                                 [raw for _, _, raw, _ in records])
+                self.assertEqual([frame.timestamp for frame in frames], [1, 2, 3])
+                self.assertEqual(warned, [])
+                # nothing to decode, so the decoder never sees the empty frame
+                self.assertEqual(decoder.call_count, 2)
+                self.assertNotIn(b'', [call.args[0] for call in decoder.call_args_list])
+
+    def test_a_truncated_final_record_is_kept_as_captured(self) -> None:
+        """pcapfile drops a final record whose capture length runs past the data
+        (#1571); the ``default`` engine keeps it, as declared, with the octets that
+        are there, and warns."""
+        from pcapkit.utilities.warnings import ProtocolWarning
+
+        for byteorder in ('little', 'big'):
+            with self.subTest(byteorder=byteorder):
+                order = '<' if byteorder == 'little' else '>'
+                tail = struct.pack(f'{order}IIII', 3, 4, 50, 60) + b'only-ten..'
+                engine, _ = self.reading(build_savefile([(1, 2, b'whole', 5)],
+                                                        byteorder=byteorder, tail=tail))
+                frames, warned = self.frames(engine)
+
+                self.assertEqual([self.octets(frame) for frame in frames],
+                                 [b'whole', b'only-ten..'])
+                self.assertEqual((frames[1].capture_len, frames[1].packet_len), (50, 60))
+                self.assertEqual(len(warned), 1)
+                message, category = warned[0][:2]
+                self.assertIs(category, ProtocolWarning)
+                self.assertIn('[Frame 2] captured length 50 runs past the data, '
+                              'which holds 10 octet(s)', message)
+
+    def test_a_tail_too_short_for_a_record_header_ends_the_savefile(self) -> None:
+        for byteorder in ('little', 'big'):
+            with self.subTest(byteorder=byteorder):
+                engine, _ = self.reading(build_savefile([(1, 2, b'whole', 5)],
+                                                        byteorder=byteorder, tail=b'\x00' * 15))
+                frames, warned = self.frames(engine)
+                self.assertEqual([self.octets(frame) for frame in frames], [b'whole'])
+                self.assertEqual(warned, [])
+
+    @unittest.skipUnless(HAS_PYPCAPFILE, 'pypcapfile not installed, or not importable here')
+    def test_records_agree_with_the_default_engine_against_the_real_pcapfile(self) -> None:
+        """Against the real :mod:`pcapfile`, in both byte orders and resolutions:
+        the engine reads every record :func:`reference_records` reads, field for
+        field and octet for octet, into :mod:`pcapfile`'s own packet objects --
+        including the records pypcapfile 0.12.0 drops (#1512, #1571)."""
+        import pcapfile.linklayer
+        import pcapfile.savefile
+        import pcapfile.structs
+
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.corekit.io import NamedStream
+        from pcapkit.foundation.engines.pypcapfile import PyPCAPFile
+        from tests.foundation import _roundtrip as wire
+
+        def frame(n: int) -> bytes:
+            return wire.ethernet(wire.ipv4(wire.udp(wire.payload_pattern(9 + n, n))), 0x0800)
+
+        def fields(packet) -> tuple:
+            return (packet.timestamp, packet.timestamp_us, packet.capture_len,
+                    packet.packet_len, binascii.unhexlify(packet.packet))
+
+        whole = [(1500000000 + n, 1000 * n + 7, frame(n), len(frame(n))) for n in range(3)]
+        cases = {
+            'whole': (whole, b''),
+            'zero-length middle record': ([whole[0], (1500000001, 0, b'', 0), whole[2]], b''),
+            'zero-length first record': ([(1500000000, 0, b'', 0)] + whole[1:], b''),
+            'truncated final record': (whole[:2], None),
+        }
+        for (case, (records, tail)), byteorder, nanosecond in itertools.product(
+                cases.items(), ('little', 'big'), (False, True)):
+            with self.subTest(case=case, byteorder=byteorder, nanosecond=nanosecond):
+                if tail is None:  # the last record's header promises 4 octets more than follow
+                    order = '<' if byteorder == 'little' else '>'
+                    length = len(frame(2)) + 4
+                    tail = struct.pack(f'{order}IIII', 1500000002, 9, length, length) + frame(2)
+                data = build_savefile(records, byteorder=byteorder, nanosecond=nanosecond,
+                                      tail=tail)
+                extractor, _ = self.make_extractor(_ifile=io.BytesIO(data), _flag_q=True,
+                                                   magic_number=data[:4])
+                engine = PyPCAPFile.__new__(PyPCAPFile)
+                engine._expkg = pcapfile
+                engine._extmp = None
+                engine._extractor = extractor
+                engine.run()
+                self.assertEqual(engine.dlink, LinkType.ETHERNET)
+                with mock.patch('pcapkit.foundation.engines.pypcapfile.warn'):
+                    packets = list(engine._extmp)
+
+                self.assertEqual([fields(packet) for packet in packets], reference_records(data))
+                for packet in packets:
+                    self.assertIsInstance(packet, pcapfile.structs.pcap_packet)
+                    self.assertIs(packet.header[0].ns_resolution, nanosecond)
+
+        # where pcapfile reads a savefile whole, its packets are the engine's
+        data = build_savefile(whole, byteorder='little')
+        expected = pcapfile.savefile.load_savefile(NamedStream(io.BytesIO(data), 'whole.pcap'),
+                                                   layers=0).packets
+        self.assertEqual([fields(packet) for packet in expected], reference_records(data))
+
+    ##########################################################################
     # read_frame()
     ##########################################################################
 
@@ -260,9 +519,12 @@ class PyPCAPFileEngineTests(unittest.TestCase):
             packets = [FakePacket(types.SimpleNamespace(ns_resolution=False),
                                   1, 500000, 7, 7, HEXLIFIED_FRAME)]
         extractor, sink = self.make_extractor(**overrides)
-        engine = self.engine(extractor, savefile=FakeSaveFile(iter(packets)), decoder=decoder)
+        engine = self.engine(extractor, decoder=decoder)
         with mock.patch('pcapkit.foundation.engines.pypcapfile.warn'):
             engine.run()
+        # read_frame() is under test here, not the record reader, so it is
+        # handed these packets as if read from the savefile
+        engine._extmp = iter(packets)
         return extractor, sink, engine
 
     def test_read_frame_decodes_to_layers_depth_and_routes_output(self) -> None:

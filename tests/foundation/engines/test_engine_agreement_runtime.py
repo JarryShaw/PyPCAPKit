@@ -365,15 +365,6 @@ class TestEngineAgreement(harness.RoundTripBase):
                'Extractor swaps the format with a FormatWarning '
                '(pcapkit/foundation/extraction.py:1439-1443)',
             'FLOWS', 'file of ', tuple(f'{capture}/pypcapfile/flows' for capture in TRACED_IPV4_ONLY_PCAP)),
-        Gap(1512, 'the pypcapfile engine reads no frame from a big-endian PCAP, without a warning: '
-               'pcapfile.savefile.load_savefile (pypcapfile 0.12.0) yields no packets for one, '
-               'and the engine iterates that empty list (pcapkit/foundation/engines/'
-               'pypcapfile.py:235, :249)',
-            ('FRAMES', 'RECORDS', 'INPUTS', 'DATAGRAMS'),
-            ('0 frames != 3', '0 timestamps != 3', 'frame 1: missing', '0 datagrams != 3'),
-            tuple(f'{capture}/pypcapfile/{aspect}'
-                  for capture in ('big_endian.pcap', 'big_endian_nanosecond.pcap')
-                  for aspect in ('frames', 'timestamps', 'ipv4', 'datagrams'))),
         Gap(1502, 'the default engine does not dissect LINKTYPE_RAW (101) frames, which scapy reads '
                'as IPv4: neither Frame.__proto__ nor PCAPNG.__proto__ registers LinkType.RAW '
                '(pcapkit/protocols/misc/pcap/frame.py:90, pcapkit/protocols/misc/pcapng.py:699), '

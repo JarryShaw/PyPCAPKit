@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ctypes
 import importlib.util
 import sys
 import types
@@ -52,12 +53,27 @@ class FakePacket:
         self.packet = packet
 
 
+class FakeHeader(ctypes.Structure):
+    """Stand-in for :class:`pcapfile.structs.__pcap_header__`, a :mod:`ctypes`
+    structure that the engine's packets point at, as the real one is."""
+
+    _fields_ = [('ll_type', ctypes.c_uint), ('byteorder', ctypes.c_char_p),
+                ('ns_resolution', ctypes.c_bool)]
+
+
 class FakeSaveFile:
     """Stand-in for :class:`pcapfile.savefile.pcap_savefile`."""
 
     def __init__(self) -> None:
-        self.header = types.SimpleNamespace(ll_type=1, ns_resolution=False)
+        self.header = FakeHeader(ll_type=1, byteorder=b'little', ns_resolution=False)
         self.packets = [FakePacket(None, 1, 500000, 7, 7, b'payload')]
+
+
+def fake_load_savefile(stream, *args, **kwargs) -> FakeSaveFile:
+    """Stand-in for :func:`pcapfile.savefile.load_savefile`, which reads the
+    24-octet savefile header and leaves the records to be read after it."""
+    stream.read(24)
+    return FakeSaveFile()
 
 
 class FakeDecoded:
@@ -354,7 +370,7 @@ class EngineConstantTests(unittest.TestCase):
 
         package = types.ModuleType('pcapfile')
         savefile = types.ModuleType('pcapfile.savefile')
-        savefile.load_savefile = lambda *a, **kw: FakeSaveFile()  # type: ignore[attr-defined]
+        savefile.load_savefile = fake_load_savefile               # type: ignore[attr-defined]
         linklayer = types.ModuleType('pcapfile.linklayer')
         linklayer.clookup = lambda linktype: FakeDecoded          # type: ignore[attr-defined]
         structs = types.ModuleType('pcapfile.structs')
