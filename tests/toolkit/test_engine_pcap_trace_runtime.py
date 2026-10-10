@@ -147,16 +147,14 @@ class EnginePCAPTraceTests(unittest.TestCase):
                 flows.append((flow.label, tuple(flow.index), file.read()))
         return flows
 
-    def _assert_same_files(self, fin: 'str', *, nanosecond: 'bool', labels: 'bool' = True,
+    def _assert_same_files(self, fin: 'str', *, nanosecond: 'bool',
                            caught: 'list | None' = None) -> None:
         base = self._flows('default', fin, nanosecond=nanosecond)
         self.assertTrue(base)
         for engine in ENGINES:
             with self.subTest(engine=engine):
                 flows = self._flows(engine, fin, nanosecond=nanosecond, caught=caught)
-                if labels:
-                    self.assertEqual([flow[:2] for flow in flows], [flow[:2] for flow in base])
-                self.assertEqual([flow[1] for flow in flows], [flow[1] for flow in base])
+                self.assertEqual([flow[:2] for flow in flows], [flow[:2] for flow in base])
                 for (label, _, mine), (_, _, theirs) in zip(flows, base):
                     self.assertEqual(mine[:4], MAGIC[nanosecond], label)
                     self.assertEqual(mine, theirs, label)
@@ -175,15 +173,31 @@ class EnginePCAPTraceTests(unittest.TestCase):
 
     def test_a_nanosecond_pcap_keeps_its_resolution(self) -> None:
         # The record fraction stays in the capture's own resolution, as the default
-        # engine's does. Labels are left out: dpkt's Decimal timestamp spells them
-        # with nine places (#1501).
+        # engine's does. The labels agree too: the flow tracer is handed a float,
+        # not the Decimal dpkt reads a nanosecond PCAP's timestamp as (#1501).
         header, _ = _records(sample_path('tcp.pcap'))
         for case, extra in EXTRA_NS.items():
             fin = _write(os.path.join(self.tmp, f'{case}.pcap'), MAGIC[True] + header[4:],
                          self._nanosecond_records(extra))
             for nanosecond in (False, True):
                 with self.subTest(case=case, nanosecond=nanosecond):
-                    self._assert_same_files(fin, nanosecond=nanosecond, labels=False)
+                    self._assert_same_files(fin, nanosecond=nanosecond)
+
+    @unittest.skipUnless(HAS_DPKT, 'dpkt not installed')
+    def test_a_raw_ip_link_type_traces_as_the_default_engine(self) -> None:
+        # With the Ethernet header stripped, dpkt reads each frame as a bare IP or
+        # IP6, which names no ``ip`` or ``ip6`` layer, so it traced nothing (#1548).
+        # Every frame is kept, IPv6 ones under LINKTYPE_IPV4 included.
+        for capture, linktype in (('tcp.pcap', 228), ('http6.cap', 229)):
+            header, records = _records(sample_path(capture))
+            fin = _write(os.path.join(self.tmp, f'raw-{linktype}.pcap'),
+                         header[:20] + struct.pack('<I', linktype),
+                         [[ts_sec, ts_usec, orig_len - 14, octets[14:]]
+                          for ts_sec, ts_usec, orig_len, octets in records])
+            with self.subTest(capture=capture, linktype=linktype):
+                base = self._flows('default', fin)
+                self.assertTrue(base)
+                self.assertEqual(self._flows('dpkt', fin), base)
 
     def test_a_nanosecond_pcapng_keeps_its_resolution(self) -> None:
         # ``if_tsresol=9``: an unaligned timestamp must keep its sub-microsecond

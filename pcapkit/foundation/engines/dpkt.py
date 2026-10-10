@@ -32,9 +32,11 @@ if TYPE_CHECKING:
 
     from pcapkit.foundation.engines.pcapng import Context
     from pcapkit.foundation.extraction import Extractor
+    from pcapkit.protocols.data.misc.pcapng import IF_TSResolOption as Data_IF_TSResolOption
     from pcapkit.protocols.data.misc.pcapng import \
         InterfaceDescriptionBlock as Data_InterfaceDescriptionBlock
     from pcapkit.protocols.data.misc.pcapng import SectionHeaderBlock as Data_SectionHeaderBlock
+    from pcapkit.protocols.data.misc.pcapng import SimplePacketBlock as Data_SimplePacketBlock
 
     Reader = Union[PCAPReader, 'PCAPNGReader']
 
@@ -55,8 +57,11 @@ class PCAPNGReader:
     ``if_tsresol`` and ``if_tsoffset`` from the interface it names. Packet
     blocks are still decoded by `DPKT`_.
 
-    As :class:`dpkt.pcapng.Reader` does, it yields Enhanced Packet Blocks and
-    (obsolete) Packet Blocks only, and skips every other block.
+    It yields Enhanced Packet Blocks, (obsolete) Packet Blocks and Simple Packet
+    Blocks, and skips every other block. :class:`dpkt.pcapng.Reader` skips the
+    Simple Packet Block too, and `DPKT`_ has no type for one, so that block is
+    parsed with :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` as well
+    (:issue:`1520`).
 
     .. _DPKT: https://dpkt.readthedocs.io
 
@@ -123,6 +128,8 @@ class PCAPNGReader:
                 self._ctx.interfaces.append(cast('Data_InterfaceDescriptionBlock', idb.info))
             elif block_type in (Enum_BlockType.Enhanced_Packet_Block, Enum_BlockType.Packet_Block):
                 yield self._read_packet(buf, block_type, byteorder == 'little')
+            elif block_type == Enum_BlockType.Simple_Packet_Block:
+                yield self._read_simple(buf)
 
     def _read_packet(self, buf: 'bytes', block_type: 'int',
                      little: 'bool') -> 'tuple[float, bytes]':
@@ -176,6 +183,46 @@ class PCAPNGReader:
         self._linktype = interface.linktype
         return (Timestamp(float(timestamp), timestamp, resolution, pkt.pkt_len),  # pylint: disable=no-member
                 pkt.pkt_data)
+
+    def _read_simple(self, buf: 'bytes') -> 'tuple[float, bytes]':
+        """Decode a Simple Packet Block, against the section's first interface.
+
+        `DPKT`_ has no type for this block, so it is parsed by
+        :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`, as for the default
+        engine: the packet data is ``min(original_len, snaplen)`` octets, with
+        the snaplen of interface 0.
+
+        Args:
+            buf: Whole block, as read from the file.
+
+        Returns:
+            Timestamp and packet data, as :meth:`_read_packet` returns them. A
+            Simple Packet Block carries no timestamp, so the packet is dated at
+            the UNIX epoch, as the default engine dates it; the original length
+            is the block's own.
+
+        Raises:
+            FormatError: If the section describes no interface. A Simple Packet
+                Block names none, so it refers to the first (Section 4.4 of the
+                PCAP-NG specification).
+
+        """
+        from pcapkit.protocols.misc.pcapng import PCAPNG as P_PCAPNG
+        from pcapkit.toolkit.dpkt import Timestamp  # isort:skip
+
+        if not self._ctx.interfaces:
+            raise FormatError('PCAP-NG: [SPB] section has no interface description block')
+        interface = self._ctx.interfaces[0]
+        block = P_PCAPNG(buf, num=0, sct=self._sect, ctx=self._ctx)
+        spb = cast('Data_SimplePacketBlock', block.info)
+
+        tsresol = cast('Optional[Data_IF_TSResolOption]',
+                       interface.options.get(Enum_OptionType.if_tsresol))
+        resolution = 1_000_000 if tsresol is None else tsresol.resolution
+
+        self._linktype = interface.linktype
+        return (Timestamp(0.0, decimal.Decimal(0), resolution, spb.original_len),
+                bytes(spb.packet))
 
 
 def _pcap_reader() -> 'Type[PCAPReader]':
@@ -258,10 +305,9 @@ class DPKT(EngineBase['DPKTPacket']):
     :class:`dpkt.pcapng.Reader`, so each packet takes the link type and the
     timestamp resolution and offset of the interface it was captured on.
 
-    Like `DPKT`_'s reader, it yields Enhanced Packet Blocks and (obsolete)
-    Packet Blocks only, and skips every other block without a warning -- the
-    Simple Packet Block included. A packet carried in a Simple Packet Block is
-    therefore missing from this engine's output; the default engine reads it.
+    It reads every packet block the default engine reads -- the Enhanced, the
+    Simple and the (obsolete) Packet Block -- and skips every other block
+    without a warning. `DPKT`_'s own reader skips the Simple Packet Block too.
 
     .. _DPKT: https://dpkt.readthedocs.io
 

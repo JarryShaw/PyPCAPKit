@@ -216,6 +216,84 @@ class DPKTToolkitTests(unittest.TestCase):
         self.assertIsNone(toolkit.tcp_traceflow(types.SimpleNamespace(ip=raw_ip), 1.0,
                                                 data_link=LinkType.ETHERNET, count=1))
 
+    def test_every_adapter_hands_on_a_float_timestamp(self) -> None:
+        # dpkt reads a nanosecond PCAP's timestamp as a Decimal; reassembly and
+        # flow tracing get a float from every engine, so from this one too (#1501)
+        import decimal
+
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.toolkit import dpkt as toolkit
+
+        exact = decimal.Decimal('1500000000.123456789')
+        stamp = toolkit.DecimalTimestamp(exact, 1_000_000_000, 70)
+        packet = self._make_ipv4_tcp_packet()
+        toolkit.attach_timestamp(packet, stamp)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            results = {
+                'ipv4': toolkit.ipv4_reassembly(self._make_ipv4_tcp_packet(fragmented=True),
+                                                stamp, count=1),
+                'ipv6': toolkit.ipv6_reassembly(types.SimpleNamespace(ip6=FakeIPv6(FakeFragment())),
+                                                stamp, count=1),
+                'tcp': toolkit.tcp_reassembly(packet, stamp, count=1),
+                'trace': toolkit.tcp_traceflow(packet, stamp, data_link=LinkType.ETHERNET, count=1),
+            }
+        for adapter, data in results.items():
+            with self.subTest(adapter=adapter):
+                assert data is not None
+                self.assertIs(type(data.timestamp), float)
+                self.assertEqual(data.timestamp, float(exact))
+
+        # the PCAP frame record still carries every nanosecond
+        record = results['trace'].frame  # type: ignore[union-attr]
+        self.assertEqual(record.time_epoch, exact)
+        self.assertEqual((record.frame_info.ts_sec, record.frame_info.ts_usec,
+                          record.frame_info.orig_len), (1500000000, 123456789, 70))
+
+    def test_a_bare_ip_packet_is_its_own_network_layer(self) -> None:
+        # On a raw-IP link type dpkt reads a frame as a bare IP or IP6, which
+        # names no ``ip`` or ``ip6`` layer, so every adapter returned None (#1548)
+        import dpkt
+
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.toolkit import dpkt as toolkit
+
+        def bare(layer):  # type: ignore[no-untyped-def]
+            octets = bytes(layer)
+            packet = type(layer)(octets)
+            toolkit.attach_buffer(packet, octets)
+            return packet
+
+        def fields(data):  # type: ignore[no-untyped-def]
+            return {key: value for key, value in data.items() if key != 'frame'}
+
+        framed = self._make_ipv4_tcp_packet()
+        toolkit.attach_buffer(framed, bytes(framed))
+        ipv4 = bare(framed.ip)
+        self.assertEqual(fields(toolkit.tcp_reassembly(ipv4, 1.0, count=1)),
+                         fields(toolkit.tcp_reassembly(framed, 1.0, count=1)))
+        self.assertEqual(
+            fields(toolkit.tcp_traceflow(ipv4, 1.0, data_link=LinkType.IPV4, count=1)),
+            fields(toolkit.tcp_traceflow(framed, 1.0, data_link=LinkType.IPV4, count=1)))
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            fragment = self._make_ipv4_tcp_packet(fragmented=True)
+            self.assertEqual(toolkit.ipv4_reassembly(bare(fragment.ip), 1.0, count=1),
+                             toolkit.ipv4_reassembly(fragment, 1.0, count=1))
+        self.assertIsNone(toolkit.ipv6_reassembly(ipv4, 1.0, count=1))
+
+        ipv6 = bare(dpkt.ip6.IP6(
+            src=ip_address('2001:db8::1').packed, dst=ip_address('2001:db8::2').packed,
+            nxt=44, hlim=64, plen=8 + 20,
+            # Fragment header: offset 0, More Fragments set, Identification 99
+            data=struct.pack('>BBHI', IP_PROTO_EXPERIMENTAL, 0, 1, 99) + bytes(20),
+        ))
+        reassembled = toolkit.ipv6_reassembly(ipv6, 1.0, count=1)
+        assert reassembled is not None
+        self.assertEqual((reassembled.bufid[2], reassembled.mf, bytes(reassembled.payload)),
+                         (99, True, bytes(20)))
+        self.assertIsNone(toolkit.ipv4_reassembly(ipv6, 1.0, count=1))
+
     def test_tcp_helpers_cover_ipv6_and_data_payload_fallback(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.toolkit import dpkt as toolkit
