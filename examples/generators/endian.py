@@ -11,8 +11,9 @@ little-endian runner the branch was never taken and reading the host's order
 instead of the file's produced the right answer anyway.
 
 That is how GitHub issue #605 survived: ``Frame.unpack`` seeded the byte order
-under the key ``bytesorder`` where ``byteorder_callback`` in
-:file:`pcapkit/protocols/schema/misc/pcap/frame.py` reads ``byteorder``, so the
+under the key ``bytesorder`` where ``byteorder_callback`` -- then in
+:file:`pcapkit/protocols/schema/misc/pcap/frame.py`, now in
+:file:`pcapkit/protocols/schema/misc/byteorder.py` -- reads ``byteorder``, so the
 lookup always missed and always fell back to :data:`sys.byteorder`. Reading a
 big-endian capture then byte-swapped ``ts_sec``, ``ts_usec``, ``incl_len`` and
 ``orig_len`` -- and because ``incl_len`` is the payload length, the first record

@@ -113,6 +113,14 @@ def discover_address_typed_switches() -> 'set[tuple[str, str, str]]':
                 source = inspect.getsource(field._selector)
             except (OSError, TypeError):  # pragma: no cover
                 continue
+            # a selector may only bind a shared helper's parameters, as the
+            # HOPOPT and IPv6-Opts ones do (#1519), so read what it calls too
+            code, scope = field._selector.__code__, field._selector.__globals__
+            for owner in (scope.get(name) for name in code.co_names):
+                if inspect.ismodule(owner):
+                    source += ''.join(inspect.getsource(getattr(owner, name))
+                                      for name in code.co_names
+                                      if inspect.isfunction(getattr(owner, name, None)))
             if any(name in source for name in
                    ('IPv4AddressField', 'IPv6AddressField',
                     'IPv4InterfaceField', 'IPv6InterfaceField')):
