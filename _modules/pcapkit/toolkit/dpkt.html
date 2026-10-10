@@ -554,8 +554,9 @@
 <span class="sd">    resolution and its original length would be lost between the reader and</span>
 <span class="sd">    :func:`packet2frame`. The engine's readers yield a :class:`Timestamp` or a</span>
 <span class="sd">    :class:`DecimalTimestamp` instead, which *is* the value `DPKT`_ yields --</span>
-<span class="sd">    so reassembly and flow labels see exactly what they did before -- and also</span>
-<span class="sd">    carries those three.</span>
+<span class="sd">    so a stored frame's timestamp is exactly what it was before -- and also</span>
+<span class="sd">    carries those three. Reassembly and flow tracing are handed a plain</span>
+<span class="sd">    :obj:`float` of it, as by every other engine (:issue:`1501`).</span>
 
 <span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
 
@@ -868,6 +869,30 @@
     <span class="k">return</span> <span class="n">packet2bytes</span><span class="p">(</span><span class="n">layer</span><span class="p">),</span> <span class="kc">False</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[IP | IP6]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Fetch the network layer of a DPKT packet.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: DPKT packet, i.e. the outermost layer.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The packet itself if it is an IPv4 or IPv6 packet, as `DPKT`_ reads every</span>
+<span class="sd">        frame of a raw-IP link type (:issue:`1548`); otherwise the IPv4 or IPv6</span>
+<span class="sd">        payload of its link layer, which `DPKT`_ names ``ip`` or ``ip6`` -- a</span>
+<span class="sd">        bare IP packet names neither -- or :data:`None` if it has none.</span>
+
+<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
+
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">dpkt</span>  <span class="c1"># isort:skip</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="p">(</span><span class="n">dpkt</span><span class="o">.</span><span class="n">ip</span><span class="o">.</span><span class="n">IP</span><span class="p">,</span> <span class="n">dpkt</span><span class="o">.</span><span class="n">ip6</span><span class="o">.</span><span class="n">IP6</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="n">packet</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="s1">'ip'</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IP'</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">ip</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="s1">'ip6'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="ipv6_hdr_len">
 <a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.dpkt.ipv6_hdr_len">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">ipv6_hdr_len</span><span class="p">(</span><span class="n">ipv6</span><span class="p">:</span> <span class="s1">'IP6'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
@@ -966,7 +991,9 @@
 <span class="sd">            than on the packet, so it is passed in -- as :func:`tcp_traceflow`</span>
 <span class="sd">            does. A caller holding only a frame can read it back with</span>
 <span class="sd">            :func:`packet2timestamp`, which is where</span>
-<span class="sd">            :class:`~pcapkit.foundation.engines.dpkt.DPKT` leaves it.</span>
+<span class="sd">            :class:`~pcapkit.foundation.engines.dpkt.DPKT` leaves it. Handed on</span>
+<span class="sd">            as a :obj:`float`, as every engine's adapters do, though `DPKT`_ reads</span>
+<span class="sd">            a nanosecond PCAP's as a :class:`~decimal.Decimal` (:issue:`1501`).</span>
 <span class="sd">        count: Packet index. If not provided, default to ``-1``.</span>
 
 <span class="sd">    Returns:</span>
@@ -991,7 +1018,9 @@
 <span class="sd">        :class:`pcapkit.foundation.reassembly.ipv4.IPv4`</span>
 
 <span class="sd">    """</span>
-    <span class="n">ipv4</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="s1">'ip'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># type: Optional[IP]</span>
+    <span class="n">network</span> <span class="o">=</span> <span class="n">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+    <span class="c1"># an IPv6 layer is the one with extension headers, as in ``_wire_hdr_len``</span>
+    <span class="n">ipv4</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="s1">'extension_hdrs'</span><span class="p">)</span> <span class="k">else</span> <span class="n">network</span>
     <span class="k">if</span> <span class="n">ipv4</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">df</span><span class="p">:</span>     <span class="c1"># dismiss not fragmented packet</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -1021,7 +1050,7 @@
             <span class="n">tl</span><span class="o">=</span><span class="n">ipv4</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>                                        <span class="c1"># total length, header includes</span>
             <span class="n">header</span><span class="o">=</span><span class="n">wire</span><span class="p">[:</span><span class="n">ihl</span><span class="p">],</span>                                  <span class="c1"># raw bytes type header</span>
             <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">wire</span><span class="p">[</span><span class="n">ihl</span><span class="p">:]),</span>                      <span class="c1"># raw bytearray type payload</span>
-            <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span><span class="p">,</span>                                <span class="c1"># capture timestamp</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span>                         <span class="c1"># capture timestamp</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span>
     <span class="k">return</span> <span class="kc">None</span></div>
@@ -1038,6 +1067,7 @@
 <span class="sd">        packet: DPKT packet.</span>
 <span class="sd">        timestamp: Capture timestamp of the packet, which drives the reassembly</span>
 <span class="sd">            timeout; :func:`packet2timestamp` reads it back off a stored frame.</span>
+<span class="sd">            Handed on as a :obj:`float`, as for :func:`ipv4_reassembly`.</span>
 <span class="sd">        count: Packet index. If not provided, default to ``-1``.</span>
 
 <span class="sd">    Returns:</span>
@@ -1062,7 +1092,8 @@
 <span class="sd">        :class:`pcapkit.foundation.reassembly.ipv6.IPv6`</span>
 
 <span class="sd">    """</span>
-    <span class="n">ipv6</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="s1">'ip6'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># type: Optional[IP6]</span>
+    <span class="n">network</span> <span class="o">=</span> <span class="n">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+    <span class="n">ipv6</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IP6'</span><span class="p">,</span> <span class="n">network</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="s1">'extension_hdrs'</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">ipv6</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">ipv6_frag</span> <span class="o">=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">extension_hdrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">44</span><span class="p">)</span>  <span class="c1"># type: Optional[IP6FragmentHeader]</span>
         <span class="k">if</span> <span class="n">ipv6_frag</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>       <span class="c1"># dismiss not fragmented packet</span>
@@ -1105,7 +1136,7 @@
             <span class="n">tl</span><span class="o">=</span><span class="n">hdr_len</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span>                           <span class="c1"># total length, header includes</span>
             <span class="n">header</span><span class="o">=</span><span class="n">wire</span><span class="p">[:</span><span class="n">hdr_len</span><span class="p">],</span>                               <span class="c1"># raw bytes type header before IPv6-Frag</span>
             <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span>                          <span class="c1"># raw bytearray type payload after IPv6-Frag</span>
-            <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span><span class="p">,</span>                                 <span class="c1"># capture timestamp</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span>                          <span class="c1"># capture timestamp</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span>
     <span class="k">return</span> <span class="kc">None</span></div>
@@ -1122,6 +1153,7 @@
 <span class="sd">        packet: DPKT packet.</span>
 <span class="sd">        timestamp: Capture timestamp of the packet, which drives the reassembly</span>
 <span class="sd">            timeout; :func:`packet2timestamp` reads it back off a stored frame.</span>
+<span class="sd">            Handed on as a :obj:`float`, as for :func:`ipv4_reassembly`.</span>
 <span class="sd">        count: Packet index. If not provided, default to ``-1``.</span>
 
 <span class="sd">    Returns:</span>
@@ -1145,11 +1177,8 @@
 <span class="sd">        :class:`pcapkit.foundation.reassembly.tcp.TCP`</span>
 
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="s1">'ip'</span><span class="p">):</span>
-        <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IP'</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">ip</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="s1">'ip6'</span><span class="p">):</span>
-        <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IP6'</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">ip6</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
+    <span class="n">ip</span> <span class="o">=</span> <span class="n">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ip</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="n">tcp</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="s1">'tcp'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># type: Optional[TCP]</span>
@@ -1178,7 +1207,7 @@
             <span class="n">first</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>                                      <span class="c1"># first sequence number of payload</span>
             <span class="n">last</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">seq</span> <span class="o">+</span> <span class="n">raw_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>                         <span class="c1"># last sequence number of payload</span>
             <span class="nb">len</span><span class="o">=</span><span class="n">raw_len</span><span class="p">,</span>                                        <span class="c1"># payload length, header excludes</span>
-            <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span><span class="p">,</span>                                <span class="c1"># capture timestamp</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span>                         <span class="c1"># capture timestamp</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span>
     <span class="k">return</span> <span class="kc">None</span></div>
@@ -1193,7 +1222,10 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        packet: DPKT packet.</span>
-<span class="sd">        timestamp: Timestamp of the packet.</span>
+<span class="sd">        timestamp: Timestamp of the packet, handed on as a :obj:`float`, as for</span>
+<span class="sd">            :func:`ipv4_reassembly`. The PCAP frame record is built from the</span>
+<span class="sd">            exact timestamp attached by :func:`attach_timestamp`, if any; see</span>
+<span class="sd">            :func:`packet2frame`.</span>
 <span class="sd">        data_link: Data link layer protocol (from global header).</span>
 <span class="sd">        count: Packet index. If not provided, default to ``-1``.</span>
 
@@ -1218,11 +1250,8 @@
 <span class="sd">        :class:`pcapkit.foundation.traceflow.tcp.TCP`</span>
 
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="s1">'ip'</span><span class="p">):</span>
-        <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IP'</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">ip</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="s1">'ip6'</span><span class="p">):</span>
-        <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IP6'</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">ip6</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
+    <span class="n">ip</span> <span class="o">=</span> <span class="n">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ip</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="n">tcp</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="s1">'tcp'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># type: Optional[TCP]</span>
@@ -1243,7 +1272,7 @@
             <span class="n">dst</span><span class="o">=</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">dst</span><span class="p">),</span>                           <span class="c1"># destination IP</span>
             <span class="n">srcport</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">sport</span><span class="p">,</span>                                          <span class="c1"># TCP source port</span>
             <span class="n">dstport</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">dport</span><span class="p">,</span>                                          <span class="c1"># TCP destination port</span>
-            <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span><span class="p">,</span>                                        <span class="c1"># timestamp</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span>                                 <span class="c1"># timestamp</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>                                                <span class="c1"># TCP sequence number</span>
             <span class="n">ack</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">ack</span><span class="p">,</span>                                                <span class="c1"># TCP acknowledgement number</span>
             <span class="n">header</span><span class="o">=</span><span class="n">wire</span><span class="p">[:</span><span class="n">tcp</span><span class="o">.</span><span class="n">off</span> <span class="o">*</span> <span class="mi">4</span><span class="p">],</span>                                  <span class="c1"># raw bytes type header</span>

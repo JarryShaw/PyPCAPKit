@@ -513,6 +513,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumLookup</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.strings</span><span class="w"> </span><span class="kn">import</span> <span class="n">DecodedString</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiInfo</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.version</span><span class="w"> </span><span class="kn">import</span> <span class="n">VersionInfo</span>
@@ -3056,7 +3057,9 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_SystemdJournalExportBlock</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-            <span class="n">data</span><span class="o">=</span><span class="p">()</span> <span class="k">if</span> <span class="n">kept</span> <span class="k">else</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">entries</span><span class="p">),</span>  <span class="c1"># type: ignore[arg-type]</span>
+            <span class="c1"># NOTE: each entry as an OrderedMultiInfo, which ``Info`` does not</span>
+            <span class="c1"># do for a mapping held in a tuple (:issue:`1484`).</span>
+            <span class="n">data</span><span class="o">=</span><span class="p">()</span> <span class="k">if</span> <span class="n">kept</span> <span class="k">else</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">OrderedMultiInfo</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span> <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">),</span>  <span class="c1"># type: ignore[arg-type]</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">kept</span><span class="p">:</span>
             <span class="n">data</span><span class="o">.</span><span class="n">__update__</span><span class="p">([(</span><span class="s1">'entry_raw'</span><span class="p">,</span> <span class="n">entries</span><span class="p">[</span><span class="mi">0</span><span class="p">])])</span>
@@ -4815,7 +4818,9 @@
 
 <span class="sd">        """</span>
         <span class="n">secrets</span> <span class="o">=</span> <span class="n">Data_TLSKeyLog</span><span class="p">(</span>
-            <span class="n">entries</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">entries</span><span class="p">,</span>
+            <span class="c1"># NOTE: each label's entries as an OrderedMultiInfo, which ``Info``</span>
+            <span class="c1"># does not do for a mapping held in a dict (:issue:`1484`).</span>
+            <span class="n">entries</span><span class="o">=</span><span class="p">{</span><span class="n">label</span><span class="p">:</span> <span class="n">OrderedMultiInfo</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">entry</span><span class="p">)</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">entries</span><span class="o">.</span><span class="n">items</span><span class="p">()},</span>
         <span class="p">)</span>
         <span class="c1"># NOTE: the log text is kept as well, since :attr:`entries` holds</span>
         <span class="c1"># neither its comments nor the order of its lines, and a rebuild writes</span>
@@ -7405,7 +7410,8 @@
                 <span class="k">return</span> <span class="n">Schema_TLSKeyLog</span><span class="p">(</span>
                     <span class="n">data</span><span class="o">=</span><span class="n">text</span><span class="p">,</span>
                 <span class="p">)</span>
-            <span class="n">entries</span> <span class="o">=</span> <span class="n">secrets</span><span class="o">.</span><span class="n">entries</span>
+            <span class="c1"># NOTE: each an OrderedMultiInfo, which is an OrderedMultiDict.</span>
+            <span class="n">entries</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'dict[Enum_TLSKeyLabel, OrderedMultiDict[bytes, bytes]]'</span><span class="p">,</span> <span class="n">secrets</span><span class="o">.</span><span class="n">entries</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">entries</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">entries</span> <span class="o">=</span> <span class="p">{}</span>

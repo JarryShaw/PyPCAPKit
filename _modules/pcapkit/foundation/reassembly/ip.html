@@ -603,11 +603,14 @@
         <span class="c1"># the header of the fragment at offset zero is the reassembled datagram's</span>
         <span class="n">header</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span> <span class="k">if</span> <span class="n">FO</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rectify_header</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">header</span><span class="p">,</span> <span class="n">BUFID</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
 
-        <span class="c1"># initialise buffer with BUFID</span>
+        <span class="c1"># initialise buffer with BUFID; ``RCVBT`` holds one entry per 8-octet</span>
+        <span class="c1"># block of the data buffer, its partial last block included -- 8191</span>
+        <span class="c1"># covered octets 0 to 65527 only, so a fragment reaching octet 65528,</span>
+        <span class="c1"># e.g. at the largest Fragment Offset, indexed past it (:issue:`1565`)</span>
         <span class="k">if</span> <span class="n">BUFID</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span> <span class="o">=</span> <span class="n">Buffer</span><span class="p">(</span>
                 <span class="n">TDL</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>                              <span class="c1"># Total Data Length</span>
-                <span class="n">RCVBT</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="mi">8191</span><span class="p">),</span>              <span class="c1"># Fragment Received Bit Table</span>
+                <span class="n">RCVBT</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="mi">8192</span><span class="p">),</span>              <span class="c1"># Fragment Received Bit Table</span>
                 <span class="n">index</span><span class="o">=</span><span class="p">[],</span>                           <span class="c1"># index record</span>
                 <span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">,</span>                      <span class="c1"># header buffer</span>
                 <span class="n">datagram</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="mi">65535</span><span class="p">),</span>          <span class="c1"># data buffer</span>
@@ -628,8 +631,34 @@
         <span class="c1"># octets the capture actually holds can be written: a snaplen-truncated</span>
         <span class="c1"># fragment carries fewer, and anything past the declared length is not</span>
         <span class="c1"># fragment data. The data buffer is preallocated, so the write is also</span>
-        <span class="c1"># clipped to it -- its length never changes.</span>
-        <span class="n">length</span> <span class="o">=</span> <span class="n">TL</span> <span class="o">-</span> <span class="n">IHL</span>
+        <span class="c1"># clipped to it.</span>
+        <span class="c1">#</span>
+        <span class="c1"># A Total Length of 0 declares nothing. It is what TCP segmentation</span>
+        <span class="c1"># offload leaves in a capture taken on the sending host, and the</span>
+        <span class="c1"># datagram then runs to the end of the captured frame -- which is the</span>
+        <span class="c1"># payload every adapter hands over (:issue:`1547`). Wireshark ("presumed</span>
+        <span class="c1"># TSO") substitutes that length for the field before it reassembles</span>
+        <span class="c1"># anything, and so does this, whatever **MF** and the offset say: an</span>
+        <span class="c1"># unfragmented one is then whole rather than ``-IHL`` octets long</span>
+        <span class="c1"># (:issue:`1555`). Linux's BIG TCP zeroes the field precisely because</span>
+        <span class="c1"># the datagram outgrows the 65535 octets it can declare, so the buffer</span>
+        <span class="c1"># grows to hold such a datagram rather than clipping it, ``RCVBT`` in</span>
+        <span class="c1"># step with it.</span>
+        <span class="c1">#</span>
+        <span class="c1"># With nothing declared, a snaplen cut cannot be seen in the length.</span>
+        <span class="c1"># A fragment with **MF** set must carry a multiple of 8 octets, so its</span>
+        <span class="c1"># partial last block is a cut and is left unmarked below. Any other cut</span>
+        <span class="c1"># -- an unfragmented frame's, or a final fragment's -- cannot be told</span>
+        <span class="c1"># from a whole one, since the frame's original length is not part of</span>
+        <span class="c1"># the input, and the datagram comes out ``COMPLETE`` but short.</span>
+        <span class="k">if</span> <span class="n">TL</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span>
+            <span class="n">extent</span> <span class="o">=</span> <span class="n">FO</span> <span class="o">+</span> <span class="n">length</span>
+            <span class="k">if</span> <span class="n">extent</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">datagram</span><span class="p">):</span>
+                <span class="n">buf</span><span class="o">.</span><span class="n">datagram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">extent</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">datagram</span><span class="p">)))</span>
+                <span class="n">buf</span><span class="o">.</span><span class="n">RCVBT</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">bytes</span><span class="p">((</span><span class="n">extent</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">RCVBT</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="n">TL</span> <span class="o">-</span> <span class="n">IHL</span>
         <span class="n">held</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">payload</span><span class="p">),</span> <span class="n">length</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">datagram</span><span class="p">)</span> <span class="o">-</span> <span class="n">FO</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
         <span class="n">payload</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">payload</span><span class="p">[:</span><span class="n">held</span><span class="p">]</span>
 
@@ -656,9 +685,11 @@
         <span class="c1"># Set RCVBT bits (in 8 octets) for the blocks this fragment actually</span>
         <span class="c1"># filled. A fragment held in full marks its last block even when it is</span>
         <span class="c1"># short, as the final fragment's is; a truncated one leaves its partial</span>
-        <span class="c1"># last block clear, since the octets after the cut are a real hole.</span>
+        <span class="c1"># last block clear, since the octets after the cut are a real hole --</span>
+        <span class="c1"># as does a non-final fragment with Total Length 0, whose partial last</span>
+        <span class="c1"># block can only be a cut.</span>
         <span class="n">start</span> <span class="o">=</span> <span class="n">FO</span> <span class="o">//</span> <span class="mi">8</span>
-        <span class="k">if</span> <span class="n">held</span> <span class="o">==</span> <span class="n">length</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">held</span> <span class="o">==</span> <span class="n">length</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">TL</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">MF</span><span class="p">):</span>
             <span class="n">stop</span> <span class="o">=</span> <span class="p">(</span><span class="n">FO</span> <span class="o">+</span> <span class="n">held</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">stop</span> <span class="o">=</span> <span class="p">(</span><span class="n">FO</span> <span class="o">+</span> <span class="n">held</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span>
@@ -669,7 +700,7 @@
         <span class="c1"># get total data length (header excludes); it stays ``-1`` until the</span>
         <span class="c1"># fragment with MF clear has arrived, and ``0`` is a valid length</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">MF</span><span class="p">:</span>
-            <span class="n">buf</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">TDL</span><span class="o">=</span><span class="n">TL</span> <span class="o">-</span> <span class="n">IHL</span> <span class="o">+</span> <span class="n">FO</span><span class="p">)</span>
+            <span class="n">buf</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">TDL</span><span class="o">=</span><span class="n">length</span> <span class="o">+</span> <span class="n">FO</span><span class="p">)</span>
         <span class="n">TDL</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">TDL</span>
 
         <span class="c1"># when datagram is reassembled in whole</span>

@@ -503,7 +503,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">dictdumper.tree</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">InfoDict</span><span class="p">,</span> <span class="n">MultiDict</span><span class="p">,</span> <span class="n">OrderedMultiDict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiDict</span><span class="p">,</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoValueType</span><span class="p">,</span> <span class="n">NullType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnsupportedCall</span>
@@ -880,8 +880,71 @@
             <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="nb">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s1">''</span><span class="p">))[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">key</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">fields</span><span class="p">(</span><span class="n">info</span><span class="p">:</span> <span class="s1">'Info | MultiDict[Any, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[Any, Any]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return the fields of ``info`` as the :class:`dict` the writer is handed.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            info: The fields, as an :class:`~pcapkit.corekit.infoclass.Info` or</span>
+<span class="sd">                as the :class:`~pcapkit.corekit.multidict.OrderedMultiDict` its</span>
+<span class="sd">                :meth:`~pcapkit.corekit.infoclass.Info.to_dict` returns.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            One entry per field, in order, with its key escaped as</span>
+<span class="sd">            :func:`escape_key` does. A field held once maps to its value; a field</span>
+<span class="sd">            held more than once, such as a repeated IPv6 extension header, maps</span>
+<span class="sd">            to the :class:`list` of all its values, in order (GitHub issue</span>
+<span class="sd">            :issue:`1484`). The values are left as they are, so each comes back</span>
+<span class="sd">            through :meth:`DictDumper.object_hook` when written.</span>
+
+<span class="sd">        """</span>
+        <span class="n">pairs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+        <span class="n">counts</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">(</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">pairs</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[Any, Any]</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">pairs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">counts</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">escape_key</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># NOTE: read by indexing, so that a model overriding it is</span>
+                <span class="c1"># honoured -- the traceflow and reassembly models resolve a</span>
+                <span class="c1"># deferred ``packet`` there.</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">escape_key</span><span class="p">(</span><span class="n">key</span><span class="p">)]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="c1">#: Whether the writer is handed the fields of an</span>
+    <span class="c1">#: :class:`~pcapkit.corekit.infoclass.Info` rather than the object itself:</span>
+    <span class="c1">#: every writer but the ones :mod:`pcapkit.dumpkit` defines for internal</span>
+    <span class="c1">#: use, i.e. :class:`~pcapkit.dumpkit.pcap.PCAPIO`, which takes the frame,</span>
+    <span class="c1">#: and :class:`~pcapkit.dumpkit.null.NotImplementedIO`.</span>
+    <span class="n">takes_fields</span> <span class="o">=</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">DumperBase</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">Dumper</span><span class="p">)</span>
+
     <span class="k">class</span><span class="w"> </span><span class="nc">DictDumper</span><span class="p">(</span><span class="n">output</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Customised :class:`~dictdumper.dumper.Dumper` object."""</span>
+
+        <span class="k">if</span> <span class="n">takes_fields</span><span class="p">:</span>
+            <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+<span class="w">                </span><span class="sd">"""Dump a new block.</span>
+
+<span class="sd">                Args:</span>
+<span class="sd">                    self: Dumper instance.</span>
+<span class="sd">                    value: Content to be dumped.</span>
+<span class="sd">                    name: Name of the block.</span>
+
+<span class="sd">                Returns:</span>
+<span class="sd">                    The dumper itself.</span>
+
+<span class="sd">                Notes:</span>
+<span class="sd">                    An :class:`~pcapkit.corekit.infoclass.Info`, or the</span>
+<span class="sd">                    :class:`~pcapkit.corekit.multidict.MultiDict` its</span>
+<span class="sd">                    :meth:`~pcapkit.corekit.infoclass.Info.to_dict` returns, is</span>
+<span class="sd">                    written as the :class:`dict` :func:`fields` makes of it, so</span>
+<span class="sd">                    that a repeated field keeps every value. The writer walks</span>
+<span class="sd">                    the block it is handed without calling</span>
+<span class="sd">                    :meth:`object_hook` on it, only on what it holds.</span>
+
+<span class="sd">                """</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">MultiDict</span><span class="p">)):</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">fields</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
 
         <span class="c1">#: Objects :meth:`_append_fallback` is expanding, by :func:`id` -- the</span>
         <span class="c1">#: one being written and every one enclosing it.</span>
@@ -914,17 +977,23 @@
 <span class="sd">                :func:`escape_key` instead. An</span>
 <span class="sd">                :class:`~pcapkit.corekit.multidict.OrderedMultiDict` becomes a</span>
 <span class="sd">                :class:`list` of single-key :class:`dict` objects, each of</span>
-<span class="sd">                which comes back through the :class:`dict` branch. An</span>
-<span class="sd">                :class:`~pcapkit.corekit.multidict.InfoDict`, the fields of an</span>
-<span class="sd">                :class:`~pcapkit.corekit.infoclass.Info`, takes that branch</span>
-<span class="sd">                directly, so it is written with one value per key.</span>
+<span class="sd">                which comes back through the :class:`dict` branch, and so</span>
+<span class="sd">                does an :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo`,</span>
+<span class="sd">                the option lists an :class:`~pcapkit.corekit.infoclass.Info`</span>
+<span class="sd">                holds. An :class:`~pcapkit.corekit.infoclass.Info` itself</span>
+<span class="sd">                becomes the :class:`dict` of its fields that :func:`fields`</span>
+<span class="sd">                returns, holding every value of a repeated field.</span>
 
 <span class="sd">            """</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">):</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>  <span class="c1"># type: Any</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">):</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Schema</span><span class="p">)):</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">Info</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">MultiDict</span><span class="p">):</span>
+                <span class="c1"># NOTE: a MultiInfo or OrderedMultiInfo, though an Info, is</span>
+                <span class="c1"># an option list, and is written by the branches below.</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">fields</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">,</span>
                                 <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Network</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Network</span><span class="p">)):</span>
@@ -935,7 +1004,7 @@
                 <span class="n">result</span> <span class="o">=</span> <span class="s1">'&lt;NULL&gt;'</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">NoValueType</span><span class="p">):</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="s1">'&lt;NO_VALUE&gt;'</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">OrderedMultiDict</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">InfoDict</span><span class="p">):</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">OrderedMultiDict</span><span class="p">):</span>
                 <span class="c1"># NOTE: one single-key mapping per entry, in insertion order --</span>
                 <span class="c1"># i.e. wire order for the option lists -- since a mapping keyed</span>
                 <span class="c1"># by name could only gather the repeats of a key under its first</span>
@@ -946,7 +1015,7 @@
                     <span class="p">{</span><span class="n">render_enum</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">,</span> <span class="n">aenum</span><span class="o">.</span><span class="n">Enum</span><span class="p">))</span> <span class="k">else</span> <span class="n">key</span><span class="p">:</span> <span class="n">val</span><span class="p">}</span>
                     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">o</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="p">]</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">MultiDict</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">InfoDict</span><span class="p">):</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">MultiDict</span><span class="p">):</span>
                 <span class="c1"># NOTE: a :class:`MultiDict` keeps no order across keys, only</span>
                 <span class="c1"># among the values of each, so grouping by key loses nothing.</span>
                 <span class="n">temp</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>  <span class="c1"># type: DefaultDict[str, list[Any]]</span>

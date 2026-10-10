@@ -614,25 +614,6 @@ for more operational information.</p>
 <span id="dpkt-support"></span><h2>DPKT Support<a class="headerlink" href="#module-pcapkit.foundation.engines.dpkt" title="Link to this heading">¶</a></h2>
 <p>This module contains the implementation for <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a> engine
 support, as is used by <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction.Extractor</span></code></a>.</p>
-<div class="admonition important">
-<p class="admonition-title">Important</p>
-<p>On PCAP-NG, <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a> yields <strong>Enhanced Packet Blocks and (obsolete) Packet
-Blocks only</strong>. <code class="docutils literal notranslate"><span class="pre">dpkt.pcapng.Reader.__iter__</span></code> skips every other block type
-without a warning (<code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">just</span> <span class="pre">ignore</span> <span class="pre">other</span> <span class="pre">blocks</span></code>, as of <code class="docutils literal notranslate"><span class="pre">dpkt</span></code> 1.9.8), and
-<a class="reference internal" href="#pcapkit.foundation.engines.dpkt.PCAPNGReader" title="pcapkit.foundation.engines.dpkt.PCAPNGReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNGReader</span></code></a>, which this engine
-reads PCAP-NG with, keeps that block set. It includes the <strong>Simple Packet
-Block</strong>, which carries a packet just as an Enhanced Packet Block does. Such packets are silently missing from this
-engine’s output, and the frames after them are numbered as if they had never
-been captured.</p>
-<p>Reading <code class="file docutils literal notranslate"><span class="pre">examples/captures/test.pcapng</span></code> – four Enhanced Packet Blocks
-and one Simple Packet Block, across two sections – this engine gives four
-frames where the default engine and
-<a class="reference internal" href="#pcapkit.foundation.engines.scapy.Scapy" title="pcapkit.foundation.engines.scapy.Scapy"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scapy</span></code></a> give five; the missing one is
-frame 4, the Simple Packet Block. The second Section Header Block is not the
-cause: the Enhanced Packet Block after it is read. This is a limitation of
-<a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a>, not of <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, so read a capture that may contain Simple
-Packet Blocks with the default engine instead.</p>
-</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p><code class="docutils literal notranslate"><span class="pre">dpkt.pcapng.Reader</span></code> reads only the <strong>first</strong> Interface Description Block
@@ -641,6 +622,11 @@ packet. This engine therefore reads PCAP-NG with
 <a class="reference internal" href="#pcapkit.foundation.engines.dpkt.PCAPNGReader" title="pcapkit.foundation.engines.dpkt.PCAPNGReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNGReader</span></code></a> instead, which
 resolves each packet’s link type, <code class="docutils literal notranslate"><span class="pre">if_tsresol</span></code> and <code class="docutils literal notranslate"><span class="pre">if_tsoffset</span></code> from
 the interface it names, in its own section (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1379">#1379</a>).</p>
+<p><code class="docutils literal notranslate"><span class="pre">dpkt.pcapng.Reader</span></code> also skips Simple Packet Blocks, which <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a> has no
+type for; <a class="reference internal" href="#pcapkit.foundation.engines.dpkt.PCAPNGReader" title="pcapkit.foundation.engines.dpkt.PCAPNGReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNGReader</span></code></a> reads them
+through <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s own <a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG" title="pcapkit.protocols.misc.pcapng.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a>
+and, since the block carries no timestamp, dates them 0, as the default
+engine does (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1520">#1520</a>).</p>
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.dpkt.DPKT">
@@ -650,10 +636,9 @@ the interface it names, in its own section (<a class="extlink-issue reference ex
 <p>A PCAP-NG file is read by <a class="reference internal" href="#pcapkit.foundation.engines.dpkt.PCAPNGReader" title="pcapkit.foundation.engines.dpkt.PCAPNGReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNGReader</span></code></a> rather than by
 <code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.pcapng.Reader</span></code>, so each packet takes the link type and the
 timestamp resolution and offset of the interface it was captured on.</p>
-<p>Like <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a>’s reader, it yields Enhanced Packet Blocks and (obsolete)
-Packet Blocks only, and skips every other block without a warning – the
-Simple Packet Block included. A packet carried in a Simple Packet Block is
-therefore missing from this engine’s output; the default engine reads it.</p>
+<p>It reads every packet block the default engine reads – the Enhanced, the
+Simple and the (obsolete) Packet Block – and skips every other block
+without a warning. <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a>’s own reader skips the Simple Packet Block too.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>extractor</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a></span>) – <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> instance.</p>
@@ -743,8 +728,11 @@ own <a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit
 of the current section, and resolves every packet’s link type,
 <code class="docutils literal notranslate"><span class="pre">if_tsresol</span></code> and <code class="docutils literal notranslate"><span class="pre">if_tsoffset</span></code> from the interface it names. Packet
 blocks are still decoded by <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a>.</p>
-<p>As <code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.pcapng.Reader</span></code> does, it yields Enhanced Packet Blocks and
-(obsolete) Packet Blocks only, and skips every other block.</p>
+<p>It yields Enhanced Packet Blocks, (obsolete) Packet Blocks and Simple Packet
+Blocks, and skips every other block. <code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.pcapng.Reader</span></code> skips the
+Simple Packet Block too, and <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a> has no type for one, so that block is
+parsed with <a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG" title="pcapkit.protocols.misc.pcapng.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a> as well
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1520">#1520</a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>file</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]</span>) – Source PCAP-NG stream, positioned at its first Section Header Block.</p>

@@ -493,6 +493,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv6.smf_dpd_mode</span><span class="w"> </span><span class="kn">import</span> <span class="n">SMFDPDMode</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv6.tagger_id</span><span class="w"> </span><span class="kn">import</span> <span class="n">TaggerID</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiInfo</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -537,7 +538,7 @@
     <span class="c1">#: Header extension length.</span>
     <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: IPv6-Opts options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>

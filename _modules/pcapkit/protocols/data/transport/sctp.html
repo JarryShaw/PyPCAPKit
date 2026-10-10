@@ -489,6 +489,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.sctp.chunk</span><span class="w"> </span><span class="kn">import</span> <span class="n">Chunk</span> <span class="k">as</span> <span class="n">ChunkType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.sctp.parameter</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parameter</span> <span class="k">as</span> <span class="n">ParameterType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.sctp.payload_protocol_identifier</span><span class="w"> </span><span class="kn">import</span> <span class="n">PayloadProtocolIdentifier</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiInfo</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
 
     <span class="n">IPAddress</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span><span class="p">]</span>
@@ -1015,7 +1016,7 @@
     <span class="c1">#: Initial transmission sequence number.</span>
     <span class="n">init_tsn</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Optional and variable-length parameters.</span>
-    <span class="n">parameters</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[ParameterType, Parameter]'</span>
+    <span class="n">parameters</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[ParameterType, Parameter]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'ChunkType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">init_tag</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">a_rwnd</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">outbound_streams</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">inbound_streams</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">init_tsn</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[ParameterType, Parameter]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
@@ -1041,7 +1042,7 @@
     <span class="c1">#: Initial transmission sequence number.</span>
     <span class="n">init_tsn</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Optional and variable-length parameters.</span>
-    <span class="n">parameters</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[ParameterType, Parameter]'</span>
+    <span class="n">parameters</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[ParameterType, Parameter]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'ChunkType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">init_tag</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">a_rwnd</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">outbound_streams</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">inbound_streams</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">init_tsn</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[ParameterType, Parameter]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
@@ -1083,7 +1084,7 @@
     <span class="c1">#: Raw chunk flags, kept as received.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Heartbeat information parameters.</span>
-    <span class="n">parameters</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[ParameterType, Parameter]'</span>
+    <span class="n">parameters</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[ParameterType, Parameter]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'ChunkType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[ParameterType, Parameter]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
@@ -1099,7 +1100,7 @@
     <span class="c1">#: Raw chunk flags, kept as received.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Heartbeat information parameters.</span>
-    <span class="n">parameters</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[ParameterType, Parameter]'</span>
+    <span class="n">parameters</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[ParameterType, Parameter]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'ChunkType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[ParameterType, Parameter]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
@@ -1115,7 +1116,7 @@
     <span class="c1">#: Chunk flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'TBitFlags'</span>
     <span class="c1">#: Zero or more error causes.</span>
-    <span class="n">error</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[CauseCode, ErrorCause]'</span>
+    <span class="n">error</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[CauseCode, ErrorCause]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'ChunkType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'TBitFlags'</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[CauseCode, ErrorCause]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
@@ -1161,7 +1162,7 @@
     <span class="c1">#: Raw chunk flags, kept as received.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: One or more error causes.</span>
-    <span class="n">error</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[CauseCode, ErrorCause]'</span>
+    <span class="n">error</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[CauseCode, ErrorCause]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'ChunkType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[CauseCode, ErrorCause]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
@@ -1227,7 +1228,7 @@
     <span class="c1">#: Checksum, as a CRC32c over the whole packet with this field zeroed.</span>
     <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Chunks.</span>
-    <span class="n">chunks</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[ChunkType, Chunk]'</span>
+    <span class="n">chunks</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[ChunkType, Chunk]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Octets captured after the last whole chunk, present only when there</span>

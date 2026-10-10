@@ -500,6 +500,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv4.tos_thr</span><span class="w"> </span><span class="kn">import</span> <span class="n">ToSThroughput</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv4.ts_flag</span><span class="w"> </span><span class="kn">import</span> <span class="n">TSFlag</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiInfo</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -602,7 +603,7 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Options, present only when the header carries any.</span>
-        <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[OptionNumber, Option]'</span>
+        <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[OptionNumber, Option]'</span>
         <span class="c1">#: Octets after the End of Option List, present along with ``options``.</span>
         <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span>
         <span class="c1">#: Octets captured past the Total Length, present only when there are any.</span>
@@ -736,7 +737,7 @@
     <span class="c1">#: Flag.</span>
     <span class="n">flag</span><span class="p">:</span> <span class="s1">'TSFlag'</span>
     <span class="c1">#: Timestamp data, i.e. the slots before the pointer.</span>
-    <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'tuple[timedelta | int, ...] | OrderedMultiDict[IPv4Address, timedelta | int]'</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'tuple[timedelta | int, ...] | OrderedMultiInfo[IPv4Address, timedelta | int]'</span>
     <span class="c1">#: Slots at or beyond the pointer, as raw 32-bit words.</span>
     <span class="n">remaining</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span>
     <span class="c1">#: Trailing octets that do not make up a whole 32-bit slot.</span>

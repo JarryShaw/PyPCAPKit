@@ -490,7 +490,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tcp.flags</span><span class="w"> </span><span class="kn">import</span> <span class="n">Flags</span> <span class="k">as</span> <span class="n">TCP_Flags</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tcp.mp_tcp_option</span><span class="w"> </span><span class="kn">import</span> <span class="n">MPTCPOption</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tcp.option</span><span class="w"> </span><span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">OptionNumber</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiInfo</span>
 
     <span class="n">IPAddress</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span><span class="p">]</span>
 
@@ -577,7 +577,7 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: TCP options.</span>
-        <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[OptionNumber, Option]'</span>
+        <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[OptionNumber, Option]'</span>
         <span class="c1">#: Octets of the option area after the End of Option List option.</span>
         <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span>
         <span class="c1">#: Connection control flags.</span>

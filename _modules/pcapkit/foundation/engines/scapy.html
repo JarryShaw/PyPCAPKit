@@ -510,10 +510,11 @@
 <span class="sd">       warnings.filterwarnings('ignore', category=CryptographyDeprecationWarning)</span>
 
 <span class="sd">"""</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">struct</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">EngineBase</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">stacklevel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">VersionError</span><span class="p">,</span> <span class="n">stacklevel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">warn</span>
 
@@ -531,23 +532,64 @@
 <span class="c1">#: :data:`pcapkit.utilities.logging.logger`.</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
+<span class="c1">#: The private methods of :class:`scapy.utils.PcapNgReader` that</span>
+<span class="c1">#: :func:`_reader_type` overrides.</span>
+<span class="n">_READER_HOOKS</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'_read_block'</span><span class="p">,</span> <span class="s1">'_read_block_shb'</span><span class="p">,</span> <span class="s1">'_read_block_idb'</span><span class="p">,</span> <span class="s1">'_check_interface_id'</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_read_tsoffset</span><span class="p">(</span><span class="n">options</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">endian</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Read the ``if_tsoffset`` of a PCAP-NG Interface Description Block (#1549).</span>
+
+<span class="sd">    Read here rather than by `Scapy`_'s ``_read_options``, whose result differs</span>
+<span class="sd">    by version: keyed by option code in 2.7 and 2.8, and in 2.5 by name, with</span>
+<span class="sd">    only ``tsresol`` and ``comment`` kept.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        options: The block's options area.</span>
+<span class="sd">        endian: :mod:`struct` byte order of the section, ``'&lt;'`` or ``'&gt;'``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The offset (option 14), a signed count of seconds; 0 without one.</span>
+
+<span class="sd">    .. _Scapy: https://scapy.net</span>
+
+<span class="sd">    """</span>
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">options</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">code</span><span class="p">,</span> <span class="n">length</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">endian</span><span class="si">}</span><span class="s1">HH'</span><span class="p">,</span> <span class="n">options</span><span class="p">[:</span><span class="mi">4</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">code</span><span class="p">:</span>  <span class="c1"># opt_endofopt</span>
+            <span class="k">break</span>
+        <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="mi">14</span> <span class="ow">and</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">8</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">options</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">12</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">endian</span><span class="si">}</span><span class="s1">q'</span><span class="p">,</span> <span class="n">options</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">12</span><span class="p">])[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="mi">4</span> <span class="o">+</span> <span class="n">length</span> <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="n">length</span> <span class="o">%</span> <span class="mi">4</span><span class="p">):]</span>
+    <span class="k">return</span> <span class="mi">0</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_reader_type</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s1">'Type[PcapReader]'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""A :class:`scapy.utils.PcapReader` that stamps each packet with its resolution.</span>
+<span class="w">    </span><span class="sd">"""A :class:`scapy.utils.PcapReader` that stamps each packet with its interface.</span>
 
 <span class="sd">    `Scapy`_'s readers convert a record's timestamp to a :class:`~decimal.Decimal`</span>
 <span class="sd">    and drop the resolution it was counted in, and an exact count of microseconds</span>
 <span class="sd">    comes out with the same digits whether the capture counted microseconds or</span>
-<span class="sd">    nanoseconds. The PCAP frame record of a packet needs that resolution, so these</span>
-<span class="sd">    subclasses attach it with :func:`pcapkit.toolkit.scapy.attach_resolution`:</span>
-<span class="sd">    from the global header of a PCAP, and from the interface of each PCAP-NG</span>
-<span class="sd">    packet block, which :meth:`~scapy.utils.RawPcapNgReader._read_block` is the</span>
-<span class="sd">    last place to see.</span>
+<span class="sd">    nanoseconds. They drop the link type too, once it has picked the packet's</span>
+<span class="sd">    first layer, and a layer does not name its link type: a raw IPv4 packet's is</span>
+<span class="sd">    :class:`~scapy.layers.inet.IP` (#1517). The PCAP frame record and the flow</span>
+<span class="sd">    tracing input of a packet need both, so these subclasses attach them with</span>
+<span class="sd">    :func:`pcapkit.toolkit.scapy.attach_resolution` and</span>
+<span class="sd">    :func:`pcapkit.toolkit.scapy.attach_linktype`: from the global header of a</span>
+<span class="sd">    PCAP, and from the interface of each PCAP-NG packet block, which</span>
+<span class="sd">    :meth:`~scapy.utils.RawPcapNgReader._read_block` is the last place to see.</span>
 
 <span class="sd">    The PCAP-NG subclass also starts each section with no interfaces, as the</span>
 <span class="sd">    PCAP-NG specification defines a section: an interface ID counts the Interface</span>
 <span class="sd">    Description Blocks of its own section only. `Scapy`_'s reader keeps appending</span>
 <span class="sd">    to one table across Section Header Blocks, so a later section's interface 0</span>
 <span class="sd">    resolved to the first section's, with its link type and resolution (#1522).</span>
+
+<span class="sd">    And it dates two kinds of packet as the default engine does. A Simple Packet</span>
+<span class="sd">    Block has no timestamp, and `Scapy`_ leaves its packet with the time it was</span>
+<span class="sd">    built, so it is set to 0 (#1503). `Scapy`_ ignores an interface's</span>
+<span class="sd">    ``if_tsoffset``, the seconds to add to each of its timestamps, so the</span>
+<span class="sd">    subclass reads it and adds it (#1549).</span>
 
 <span class="sd">    Built when called, so that importing this module does not import `Scapy`_,</span>
 <span class="sd">    and so that it always subclasses the :class:`scapy.utils.PcapReader` of the</span>
@@ -556,12 +598,23 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        A reader type, which opens a PCAP-NG file as its PCAP-NG alternative.</span>
 
+<span class="sd">    Raises:</span>
+<span class="sd">        VersionError: If :class:`scapy.utils.PcapNgReader` lacks a method in</span>
+<span class="sd">            :data:`_READER_HOOKS`, which these subclasses override.</span>
+
 <span class="sd">    .. _Scapy: https://scapy.net</span>
 
 <span class="sd">    """</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">PcapNgReader</span><span class="p">,</span> <span class="n">PcapReader</span>  <span class="c1"># isort:skip</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">EDecimal</span><span class="p">,</span> <span class="n">PcapNgReader</span><span class="p">,</span> <span class="n">PcapReader</span>  <span class="c1"># isort:skip</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.scapy</span><span class="w"> </span><span class="kn">import</span> <span class="n">attach_resolution</span>  <span class="c1"># isort:skip</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.scapy</span><span class="w"> </span><span class="kn">import</span> <span class="n">attach_linktype</span><span class="p">,</span> <span class="n">attach_resolution</span>  <span class="c1"># isort:skip</span>
+
+    <span class="c1"># The PCAP-NG hooks overridden below are private to Scapy. One renamed away</span>
+    <span class="c1"># would leave its fix unapplied without a word, so a missing one is an error.</span>
+    <span class="n">missing</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">_READER_HOOKS</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">PcapNgReader</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">))]</span>
+    <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">VersionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"scapy.utils.PcapNgReader has no </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span><span class="si">}</span><span class="s2">, which the Scapy "</span>
+                           <span class="s2">"engine's reader overrides; this Scapy version is not supported"</span><span class="p">)</span>
 
     <span class="k">class</span><span class="w"> </span><span class="nc">_Closing</span><span class="p">:</span>
         <span class="c1"># ``sniff`` closes the reader at the end of the file, and the engine closes</span>
@@ -578,6 +631,7 @@
         <span class="k">def</span><span class="w"> </span><span class="nf">read_packet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ScapyPacket'</span><span class="p">:</span>
             <span class="n">packet</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">read_packet</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="n">attach_resolution</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="mi">1_000_000_000</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nano</span> <span class="k">else</span> <span class="mi">1_000_000</span><span class="p">)</span>
+            <span class="n">attach_linktype</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">linktype</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">packet</span>
 
     <span class="k">class</span><span class="w"> </span><span class="nc">_PcapNgReader</span><span class="p">(</span><span class="n">_Closing</span><span class="p">,</span> <span class="n">PcapNgReader</span><span class="p">):</span>
@@ -585,21 +639,55 @@
         <span class="n">alternative</span> <span class="o">=</span> <span class="n">_PcapReader</span>
 
         <span class="n">_resolution</span> <span class="o">=</span> <span class="mi">1_000_000</span>
+        <span class="c1"># each set from the packet block last read, before ``read_packet`` reads it</span>
+        <span class="n">_linktype</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="n">_timed</span><span class="p">:</span> <span class="s1">'bool'</span>
+        <span class="n">_offset</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="n">_interface</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="c1">#: ``if_tsoffset`` of each interface of the section, by interface ID.</span>
+        <span class="c1">#: Kept here: what Scapy keeps of an interface differs by version.</span>
+        <span class="n">_offsets</span><span class="p">:</span> <span class="s1">'list[int]'</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">_read_block_shb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_read_block_shb</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="c1"># a new section: its interface IDs restart from 0 (#1522)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">interfaces</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_offsets</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_read_block_idb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_read_block_idb</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="c1"># appended once Scapy has appended the interface, so the IDs match</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_offsets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_read_tsoffset</span><span class="p">(</span><span class="n">block</span><span class="p">[</span><span class="mi">8</span><span class="p">:],</span> <span class="bp">self</span><span class="o">.</span><span class="n">endian</span><span class="p">))</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_check_interface_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">intid</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+            <span class="c1"># Each packet block's reader checks its interface ID here, a Simple</span>
+            <span class="c1"># Packet Block's as 0, and the metadata it returns does not keep it.</span>
+            <span class="c1"># Scapy 2.8 skips the block when this returns false, and before 2.8</span>
+            <span class="c1"># it raises instead, so the result must be passed through. A block</span>
+            <span class="c1"># it rejects is never returned, so its ID is never read.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span> <span class="o">=</span> <span class="n">intid</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_check_interface_id</span><span class="p">(</span><span class="n">intid</span><span class="p">)</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">_read_block</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
             <span class="n">block</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_read_block</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_resolution</span> <span class="o">=</span> <span class="n">block</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tsresol</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_linktype</span> <span class="o">=</span> <span class="n">block</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">linktype</span>
+                <span class="c1"># ``None`` for a Simple Packet Block, which has no timestamp (#1503)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_timed</span> <span class="o">=</span> <span class="n">block</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tshigh</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_offsets</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="p">]</span>
             <span class="k">return</span> <span class="n">block</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">read_packet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ScapyPacket'</span><span class="p">:</span>
             <span class="n">packet</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">read_packet</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="n">attach_resolution</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolution</span><span class="p">)</span>
+            <span class="n">attach_linktype</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_linktype</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timed</span><span class="p">:</span>
+                <span class="c1"># no timestamp at all, which the default engine reads as 0, where</span>
+                <span class="c1"># Scapy leaves the time the packet was built (#1503)</span>
+                <span class="n">packet</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">EDecimal</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span><span class="p">:</span>
+                <span class="n">packet</span><span class="o">.</span><span class="n">time</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span>  <span class="c1"># if_tsoffset (#1549)</span>
             <span class="k">return</span> <span class="n">packet</span>
 
     <span class="k">return</span> <span class="n">_PcapReader</span>

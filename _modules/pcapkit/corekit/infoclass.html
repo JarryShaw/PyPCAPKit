@@ -478,13 +478,17 @@
 <span class="sd">.. module:: pcapkit.corekit.infoclass</span>
 
 <span class="sd">:mod:`pcapkit.corekit.infoclass` contains :obj:`dict` like class</span>
-<span class="sd">:class:`~pcapkit.corekit.infoclass.Info` only, which is originally</span>
+<span class="sd">:class:`~pcapkit.corekit.infoclass.Info`, which is originally</span>
 <span class="sd">designed to work alike :func:`dataclasses.dataclass` as introduced</span>
-<span class="sd">in :pep:`557`.</span>
+<span class="sd">in :pep:`557`, and the immutable multi-mapping classes</span>
+<span class="sd">:class:`~pcapkit.corekit.infoclass.MultiInfo` and</span>
+<span class="sd">:class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` that a finalised</span>
+<span class="sd">:class:`~pcapkit.corekit.infoclass.Info` holds its option lists in.</span>
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">abc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections.abc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
@@ -493,7 +497,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumLookup</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">InfoDict</span><span class="p">,</span> <span class="n">MultiDict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiDict</span><span class="p">,</span> <span class="n">OrderedMultiDict</span><span class="p">,</span> <span class="n">iter_multi_items</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">final</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">InfoError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">InfoWarning</span><span class="p">,</span> <span class="n">warn</span>
@@ -503,8 +507,9 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Self</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Info'</span><span class="p">,</span> <span class="s1">'info_final'</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Info'</span><span class="p">,</span> <span class="s1">'info_final'</span><span class="p">,</span> <span class="s1">'MultiInfo'</span><span class="p">,</span> <span class="s1">'OrderedMultiInfo'</span><span class="p">]</span>
 
+<span class="n">KT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'KT'</span><span class="p">)</span>
 <span class="n">VT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'VT'</span><span class="p">)</span>
 <span class="n">ST</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'ST'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">'Type[Info]'</span><span class="p">)</span>
 
@@ -622,8 +627,10 @@
 
     <span class="c1"># NOTE: We only generate ``__init__`` method for subclasses of the</span>
     <span class="c1"># ``Info`` class, rather than itself, plus that such class does not</span>
-    <span class="c1"># override the ``__init__`` method of the meta class.</span>
-    <span class="k">if</span> <span class="s1">'__init__'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span> <span class="ow">and</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Info</span><span class="p">:</span>
+    <span class="c1"># override the ``__init__`` method of the meta class. A multi-mapping</span>
+    <span class="c1"># :class:`Info` (:class:`_MultiInfo`) declares no fields and keeps the</span>
+    <span class="c1"># mapping constructor it inherits (:issue:`1484`).</span>
+    <span class="k">if</span> <span class="s1">'__init__'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span> <span class="ow">and</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Info</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">_MultiInfo</span><span class="p">):</span>
         <span class="n">args_</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
         <span class="n">dict_</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
 
@@ -952,6 +959,11 @@
         <span class="c1"># value and records the new one in :attr:`__multi__`. Anything else</span>
         <span class="c1"># replaces the values held.</span>
 
+        <span class="c1"># NOTE: A :class:`MultiDict` or :class:`OrderedMultiDict` held as a</span>
+        <span class="c1"># *value* -- the option lists the parsers build -- is stored as a</span>
+        <span class="c1"># :class:`MultiInfo` or :class:`OrderedMultiInfo`, so that a finalised</span>
+        <span class="c1"># instance holds no mutable mapping (:issue:`1484`).</span>
+
         <span class="vm">__name__</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
 
         <span class="n">multi_iter</span> <span class="o">=</span> <span class="p">()</span>  <span class="c1"># type: Iterable[tuple[str, Any]]</span>
@@ -969,7 +981,7 @@
             <span class="n">new_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'_</span><span class="si">{</span><span class="vm">__name__</span><span class="si">}{</span><span class="n">key</span><span class="si">}</span><span class="s1">'</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__builtin__</span> <span class="k">else</span> <span class="n">key</span>
             <span class="k">if</span> <span class="n">new_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span> <span class="ow">and</span> <span class="n">new_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__excluded__</span><span class="p">:</span>
                 <span class="n">anchor</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">))</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__multi__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">anchor</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">new_key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__multi__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">anchor</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">new_key</span><span class="p">,</span> <span class="n">_freeze</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span>
 
@@ -998,7 +1010,7 @@
 
             <span class="c1"># if isinstance(key, str):</span>
             <span class="c1">#     key = re.sub(r'\W', '_', key)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">_freeze</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
     <span class="fm">__init__</span> <span class="o">=</span> <span class="n">__update__</span>
 
@@ -1020,7 +1032,9 @@
                 <span class="k">continue</span>
 
             <span class="n">out_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map_reverse__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Info</span><span class="p">):</span>
+            <span class="c1"># NOTE: a multi-mapping :class:`Info`, i.e. an option list, is</span>
+            <span class="c1"># written out in full, as the multi-mapping it is.</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Info</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">_MultiInfo</span><span class="p">):</span>
                 <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">out_key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">(...)'</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">out_key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
@@ -1096,6 +1110,12 @@
 <span class="sd">        such nested values. A key without such an annotation keeps the mapping</span>
 <span class="sd">        as is -- see :meth:`to_dict`.</span>
 
+<span class="sd">        Every :class:`~pcapkit.corekit.multidict.MultiDict` or</span>
+<span class="sd">        :class:`~pcapkit.corekit.multidict.OrderedMultiDict` value is stored</span>
+<span class="sd">        as a :class:`MultiInfo` or :class:`OrderedMultiInfo` respectively, or</span>
+<span class="sd">        as the subclass of either that the key's annotation names, such as</span>
+<span class="sd">        :class:`~pcapkit.protocols.data.application.httpv2.Settings`.</span>
+
 <span class="sd">        The rebuild is as unchecked as the rest of this method: a mapping whose</span>
 <span class="sd">        keys are not the nested class's own is accepted and becomes an instance</span>
 <span class="sd">        carrying those keys, exactly as a direct call to the nested class's own</span>
@@ -1111,28 +1131,44 @@
         <span class="bp">self</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">dict_</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">info_cls</span><span class="p">)</span> <span class="ow">in</span> <span class="n">_nested_info_types</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">info_cls</span><span class="p">)</span> <span class="ow">in</span> <span class="n">_nested_types</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Info</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">info_cls</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">_rebuild</span><span class="p">(</span><span class="n">info_cls</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
             <span class="k">for</span> <span class="n">values</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__multi__</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
                 <span class="k">for</span> <span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="p">(</span><span class="n">rkey</span><span class="p">,</span> <span class="n">rvalue</span><span class="p">))</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="n">rkey</span> <span class="o">==</span> <span class="n">key</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rvalue</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rvalue</span><span class="p">,</span> <span class="n">Info</span><span class="p">):</span>
-                        <span class="n">values</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">rkey</span><span class="p">,</span> <span class="n">info_cls</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">rvalue</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">rkey</span> <span class="o">==</span> <span class="n">key</span><span class="p">:</span>
+                        <span class="n">values</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">rkey</span><span class="p">,</span> <span class="n">_rebuild</span><span class="p">(</span><span class="n">info_cls</span><span class="p">,</span> <span class="n">rvalue</span><span class="p">))</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
 
 <div class="viewcode-block" id="Info.to_dict">
 <a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.Info.to_dict">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'InfoDict[str, VT]'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'OrderedMultiDict[str, VT]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Convert :class:`Info` into :obj:`dict`.</span>
 
-<span class="sd">        The :obj:`dict` is an :class:`~pcapkit.corekit.multidict.InfoDict`. A key</span>
-<span class="sd">        held more than once -- as given by a</span>
+<span class="sd">        The :obj:`dict` is an</span>
+<span class="sd">        :class:`~pcapkit.corekit.multidict.OrderedMultiDict` of the fields, in</span>
+<span class="sd">        order -- a :class:`_OrderedMultiDict`, i.e. one whose ``!=`` is the</span>
+<span class="sd">        negation of its ``==``, so two equal exports compare ``!=``</span>
+<span class="sd">        :data:`False`. A key held more than once -- as given by a</span>
 <span class="sd">        :class:`~pcapkit.corekit.multidict.MultiDict` to :meth:`from_dict`, e.g.</span>
-<span class="sd">        a repeated IPv6 extension header -- keeps every value for</span>
-<span class="sd">        ``items(multi=True)``, while the :obj:`dict` interface sees the first.</span>
+<span class="sd">        a repeated IPv6 extension header -- keeps every value, in place, for</span>
+<span class="sd">        ``items(multi=True)`` and :meth:`~pcapkit.corekit.multidict.MultiDict.getlist`,</span>
+<span class="sd">        while indexing sees the first. A nested :class:`Info` becomes its own</span>
+<span class="sd">        :meth:`to_dict`: an :class:`~pcapkit.corekit.multidict.OrderedMultiDict`</span>
+<span class="sd">        for a field model or an :class:`OrderedMultiInfo`, and a</span>
+<span class="sd">        :class:`~pcapkit.corekit.multidict.MultiDict` for a :class:`MultiInfo`;</span>
+<span class="sd">        the values those two hold are not converted.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            ``dict(result)``, ``{**result}`` and :func:`json.dumps` see the</span>
+<span class="sd">            *first* value of each key only, and silently drop the rest of a</span>
+<span class="sd">            repeated key; read every value with ``items(multi=True)`` or</span>
+<span class="sd">            :meth:`~pcapkit.corekit.multidict.MultiDict.getlist`. The result</span>
+<span class="sd">            compares equal to another</span>
+<span class="sd">            :class:`~pcapkit.corekit.multidict.MultiDict` only, never to a</span>
+<span class="sd">            plain :obj:`dict`.</span>
 
 <span class="sd">        Important:</span>
 <span class="sd">            We only convert nested :class:`Info` objects into :obj:`dict` if</span>
@@ -1147,10 +1183,12 @@
 <span class="sd">            any other key -- every key of a bare :class:`Info`, and annotations</span>
 <span class="sd">            naming a type imported only under :data:`~typing.TYPE_CHECKING` --</span>
 <span class="sd">            the conversion is one-way, and the nested value comes back as the</span>
-<span class="sd">            :class:`~pcapkit.corekit.multidict.InfoDict` it was written as.</span>
+<span class="sd">            :class:`OrderedMultiInfo` that :meth:`from_dict` stores the</span>
+<span class="sd">            :class:`~pcapkit.corekit.multidict.OrderedMultiDict` it was</span>
+<span class="sd">            written as in.</span>
 
 <span class="sd">        """</span>
-        <span class="n">dict_</span> <span class="o">=</span> <span class="n">InfoDict</span><span class="p">()</span>  <span class="c1"># type: InfoDict[str, Any]</span>
+        <span class="n">dict_</span> <span class="o">=</span> <span class="n">_OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: OrderedMultiDict[str, Any]</span>
         <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__items_multi</span><span class="p">():</span>
             <span class="n">out_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map_reverse__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Info</span><span class="p">):</span>
@@ -1172,8 +1210,337 @@
 
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_ne</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Any, Any]'</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s1">'object'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``self != other``, as the negation of ``self == other``.</span>
+
+<span class="sd">    The ``__ne__`` that :class:`_OrderedMultiDict` and :class:`OrderedMultiInfo`</span>
+<span class="sd">    add to Werkzeug's :class:`~pcapkit.corekit.multidict.OrderedMultiDict`. A</span>
+<span class="sd">    :data:`NotImplemented` from ``__eq__`` is passed on, so that Python asks</span>
+<span class="sd">    ``other`` in turn, exactly as it does for ``==``.</span>
+
+<span class="sd">    """</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">NotImplemented</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">result</span>
+    <span class="k">return</span> <span class="ow">not</span> <span class="n">result</span>
+
+
+<div class="viewcode-block" id="_OrderedMultiDict">
+<a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass._OrderedMultiDict">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">_OrderedMultiDict</span><span class="p">(</span><span class="n">OrderedMultiDict</span><span class="p">[</span><span class="n">KT</span><span class="p">,</span> <span class="n">VT</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">"""The :class:`~pcapkit.corekit.multidict.OrderedMultiDict` that :meth:`Info.to_dict` returns.</span>
+
+<span class="sd">    It adds one method, :meth:`__ne__` (:func:`_ne`). The</span>
+<span class="sd">    :mod:`~pcapkit.corekit.multidict` classes are Werkzeug's, kept verbatim,</span>
+<span class="sd">    and Werkzeug's :class:`~pcapkit.corekit.multidict.OrderedMultiDict`</span>
+<span class="sd">    defines ``__eq__`` but no ``__ne__``: ``!=`` falls back to :obj:`dict`'s,</span>
+<span class="sd">    which compares the internal buckets, so two equal exports compared</span>
+<span class="sd">    ``!=`` as well as ``==`` -- and, since ``__eq__`` compares the values with</span>
+<span class="sd">    ``!=``, two exports holding a nested export compared unequal</span>
+<span class="sd">    (:issue:`1484`). Its copies, deep copies and pickles stay of this class, as</span>
+<span class="sd">    Werkzeug's build them from ``type(self)``, and :meth:`__repr__` writes it as</span>
+<span class="sd">    the :class:`~pcapkit.corekit.multidict.OrderedMultiDict` it is.</span>
+
+<span class="sd">    """</span>
+
+    <span class="fm">__ne__</span> <span class="o">=</span> <span class="n">_ne</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">OrderedMultiDict</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">(</span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span><span class="si">!r}</span><span class="s1">)'</span></div>
+
+
+
+<div class="viewcode-block" id="_MultiInfo">
+<a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass._MultiInfo">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">_MultiInfo</span><span class="p">(</span><span class="n">Info</span><span class="p">[</span><span class="n">VT</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">KT</span><span class="p">,</span> <span class="n">VT</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">"""An :class:`Info` that holds its values as a multi-mapping.</span>
+
+<span class="sd">    The common base of :class:`MultiInfo` and :class:`OrderedMultiInfo`. Each</span>
+<span class="sd">    of those also derives from the :mod:`~pcapkit.corekit.multidict` class it</span>
+<span class="sd">    is named after, *after* :class:`Info`, so it is an :class:`Info` --</span>
+<span class="sd">    :func:`isinstance` holds, and it inherits :meth:`Info.__new__`'s</span>
+<span class="sd">    finalisation, :meth:`Info.from_dict`, :meth:`Info.__init_subclass__` and</span>
+<span class="sd">    :attr:`Info.__additional__`/:attr:`Info.__excluded__` -- while its values</span>
+<span class="sd">    live in the multi-mapping rather than in :attr:`~object.__dict__`.</span>
+
+<span class="sd">    That is the whole carve-out from :class:`Info`, and it is confined to this</span>
+<span class="sd">    class and the two below it:</span>
+
+<span class="sd">    * :meth:`__new__` gives the multi-mapping its empty storage, and</span>
+<span class="sd">      :meth:`__update__` *adds* every pair to it, so that the inherited</span>
+<span class="sd">      :meth:`Info.from_dict` builds one; :func:`info_final` generates no</span>
+<span class="sd">      ``__init__`` for such a class (it has no declared fields);</span>
+<span class="sd">    * :meth:`__setattr__` admits the multi-mapping's own bookkeeping, and</span>
+<span class="sd">      only while one of those two is writing;</span>
+<span class="sd">    * every mutator of the multi-mapping raises</span>
+<span class="sd">      :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`, as assignment to</span>
+<span class="sd">      an :class:`Info` does;</span>
+<span class="sd">    * :meth:`to_dict` exports the plain multi-mapping, so that</span>
+<span class="sd">      ``cls.from_dict(info.to_dict()) == info``;</span>
+<span class="sd">    * :class:`MultiInfo` and :class:`OrderedMultiInfo` bind the mapping</span>
+<span class="sd">      protocol back to their multi-mapping class, which :class:`Info` and</span>
+<span class="sd">      :class:`~collections.abc.Mapping` precede in the MRO.</span>
+
+<span class="sd">    A key also reads as an attribute, giving its first value: a :obj:`str` key</span>
+<span class="sd">    by its name, an :class:`~enum.Enum` key by its member name. A name the</span>
+<span class="sd">    class itself defines, such as ``items``, is a method and not a key.</span>
+
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="bp">self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="c1"># NOTE: the multi-mapping class's own ``__init__``, which follows Info</span>
+        <span class="c1"># and Mapping in the MRO, gives the empty storage -- including</span>
+        <span class="c1"># OrderedMultiDict's bucket chain -- for ``__update__`` to add to.</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__writing</span><span class="p">():</span>  <span class="c1"># pylint: disable=protected-access</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>  <span class="c1"># pylint: disable=bad-super-call</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mapping</span><span class="p">:</span> <span class="s1">'Optional[Mapping[Any, Any] | Iterable[tuple[Any, Any]]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=line-too-long,super-init-not-called</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">mapping</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__post_init__</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__update__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">'Optional[Mapping[Any, Any] | Iterable[tuple[Any, Any]]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                   <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+        <span class="c1"># NOTE: every pair is *added*, as the multi-mapping's own constructor</span>
+        <span class="c1"># and ``update`` do: a mapping's list values count as one pair each,</span>
+        <span class="c1"># and a MultiDict gives every value of each key.</span>
+        <span class="n">pairs</span> <span class="o">=</span> <span class="p">()</span> <span class="k">if</span> <span class="n">dict_</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">iter_multi_items</span><span class="p">(</span><span class="n">dict_</span><span class="p">)</span>  <span class="c1"># type: Iterable[tuple[Any, Any]]</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__writing</span><span class="p">():</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">pairs</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+                <span class="nb">super</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>  <span class="c1"># type: ignore[misc] # pylint: disable=bad-super-call,no-member</span>
+
+    <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__writing</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Iterator[None]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Admit attribute writes, for the multi-mapping's own bookkeeping."""</span>
+        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'_MultiInfo__open'</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">yield</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'_MultiInfo__open'</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+        <span class="c1"># NOTE: only reached for a name that is not a real attribute, so a key</span>
+        <span class="c1"># named like a method is read by indexing instead, as for :class:`Info`.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'__'</span><span class="p">)</span> <span class="ow">and</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">'__'</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="nb">dict</span><span class="o">.</span><span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">dict</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># type: ignore[arg-type,var-annotated]</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">)</span> <span class="ow">and</span> <span class="n">key</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[index]</span>
+        <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1"> object has no attribute </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1">'</span><span class="p">,</span>
+                              <span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'_MultiInfo__open'</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="s2">"can't set attribute"</span><span class="p">)</span>
+        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_immutable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'NoReturn'</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1"> object is immutable'</span><span class="p">)</span>
+
+    <span class="fm">__setitem__</span> <span class="o">=</span> <span class="fm">__delitem__</span> <span class="o">=</span> <span class="fm">__ior__</span> <span class="o">=</span> <span class="n">_immutable</span>
+    <span class="n">add</span> <span class="o">=</span> <span class="n">setlist</span> <span class="o">=</span> <span class="n">setdefault</span> <span class="o">=</span> <span class="n">setlistdefault</span> <span class="o">=</span> <span class="n">update</span> <span class="o">=</span> <span class="n">_immutable</span>
+    <span class="n">pop</span> <span class="o">=</span> <span class="n">popitem</span> <span class="o">=</span> <span class="n">poplist</span> <span class="o">=</span> <span class="n">popitemlist</span> <span class="o">=</span> <span class="n">clear</span> <span class="o">=</span> <span class="n">_immutable</span>
+    <span class="n">__setstate__</span> <span class="o">=</span> <span class="n">_immutable</span></div>
+
+
+
+<div class="viewcode-block" id="MultiInfo">
+<a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.MultiInfo">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MultiInfo</span><span class="p">(</span><span class="n">_MultiInfo</span><span class="p">[</span><span class="n">KT</span><span class="p">,</span> <span class="n">VT</span><span class="p">],</span> <span class="n">MultiDict</span><span class="p">[</span><span class="n">KT</span><span class="p">,</span> <span class="n">VT</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">"""An immutable :class:`~pcapkit.corekit.multidict.MultiDict` that is an :class:`Info`.</span>
+
+<span class="sd">    It holds every value of a key, as a</span>
+<span class="sd">    :class:`~pcapkit.corekit.multidict.MultiDict` does, but refuses every</span>
+<span class="sd">    mutation, as :class:`Info` does, with</span>
+<span class="sd">    :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` (see</span>
+<span class="sd">    :class:`_MultiInfo` for how it is both).</span>
+
+<span class="sd">    A finalised :class:`Info` holds every</span>
+<span class="sd">    :class:`~pcapkit.corekit.multidict.MultiDict` value as one of these, and</span>
+<span class="sd">    :meth:`to_dict` -- its own and its holder's -- turns it back into a</span>
+<span class="sd">    :class:`~pcapkit.corekit.multidict.MultiDict`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        mapping: The initial value, as for</span>
+<span class="sd">            :class:`~pcapkit.corekit.multidict.MultiDict`.</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1"># NOTE: :class:`Info` and :class:`~collections.abc.Mapping` precede</span>
+    <span class="c1"># MultiDict in the MRO, so the mapping protocol is bound back to MultiDict's</span>
+    <span class="c1"># own (``__len__``, ``__contains__`` and ``__str__`` are those of</span>
+    <span class="c1"># :obj:`dict` and :obj:`object`). ``__eq__`` and ``__ne__`` are defined</span>
+    <span class="c1"># below instead.</span>
+    <span class="fm">__getitem__</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="o">.</span><span class="fm">__getitem__</span>  <span class="c1"># type: ignore[assignment]</span>
+    <span class="fm">__iter__</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="o">.</span><span class="fm">__iter__</span>  <span class="c1"># type: ignore[assignment]</span>
+    <span class="fm">__len__</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="o">.</span><span class="fm">__len__</span>
+    <span class="fm">__contains__</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="o">.</span><span class="fm">__contains__</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="s1">'__reversed__'</span><span class="p">):</span>  <span class="c1"># pragma: no branch -- Python 3.8 and up</span>
+        <span class="fm">__reversed__</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="o">.</span><span class="fm">__reversed__</span>
+    <span class="fm">__hash__</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore[assignment]</span>
+    <span class="fm">__repr__</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="o">.</span><span class="fm">__repr__</span>
+    <span class="fm">__str__</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="o">.</span><span class="fm">__str__</span>
+    <span class="n">__copy__</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="o">.</span><span class="n">__copy__</span>  <span class="c1"># type: ignore[assignment]</span>
+    <span class="n">keys</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="o">.</span><span class="n">keys</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="o">.</span><span class="n">items</span>  <span class="c1"># type: ignore[assignment]</span>
+    <span class="n">get</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="o">.</span><span class="n">get</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s1">'object'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+        <span class="c1"># NOTE: MultiDict's ``__eq__`` is :obj:`dict`'s, which compares the</span>
+        <span class="c1"># internal storage, so against an OrderedMultiDict -- whose values sit</span>
+        <span class="c1"># in buckets -- it answered False where the OrderedMultiDict, asked the</span>
+        <span class="c1"># other way round, answered True. The ordered side decides, as it does</span>
+        <span class="c1"># for a bare MultiDict, which Python asks it first for being its</span>
+        <span class="c1"># subclass (:issue:`1484`).</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">OrderedMultiDict</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">NotImplemented</span>
+        <span class="k">return</span> <span class="n">MultiDict</span><span class="o">.</span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s1">'object'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+        <span class="c1"># NOTE: the inverse of :meth:`__eq__`, with the ordered side's</span>
+        <span class="c1"># ``__eq__`` asked directly rather than its ``__ne__``: Werkzeug's</span>
+        <span class="c1"># OrderedMultiDict has none, and dict's compares the internal storage.</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">OrderedMultiDict</span><span class="p">):</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="o">.</span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">NotImplemented</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">result</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="n">result</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flat</span><span class="p">:</span> <span class="s1">'Optional[bool]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return the contents as a plain mapping.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            flat: If omitted, a plain :class:`~pcapkit.corekit.multidict.MultiDict`</span>
+<span class="sd">                of every value, as :meth:`Info.to_dict` writes this object.</span>
+<span class="sd">                Otherwise :meth:`MultiDict.to_dict</span>
+<span class="sd">                &lt;pcapkit.corekit.multidict.MultiDict.to_dict&gt;`'s :obj:`dict`, of</span>
+<span class="sd">                the first value of each key if :obj:`True`, or of the</span>
+<span class="sd">                :obj:`list` of them if :obj:`False`.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">flat</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">MultiDict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">MultiDict</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flat</span><span class="p">)</span>  <span class="c1"># type: ignore[call-overload]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">listvalues</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Iterator[list[VT]]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return an iterator of the :obj:`list` of all values of each key.</span>
+
+<span class="sd">        Each :obj:`list` is a copy: :meth:`MultiDict.listvalues</span>
+<span class="sd">        &lt;pcapkit.corekit.multidict.MultiDict.listvalues&gt;` hands out the lists it</span>
+<span class="sd">        keeps the values in, through which they could be changed.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">values</span> <span class="k">for</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lists</span><span class="p">())</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__reduce_ex__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[type, tuple[list[tuple[KT, VT]]]]'</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">)),)</span></div>
+
+
+
+<div class="viewcode-block" id="OrderedMultiInfo">
+<a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.OrderedMultiInfo">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">OrderedMultiInfo</span><span class="p">(</span><span class="n">_MultiInfo</span><span class="p">[</span><span class="n">KT</span><span class="p">,</span> <span class="n">VT</span><span class="p">],</span> <span class="n">OrderedMultiDict</span><span class="p">[</span><span class="n">KT</span><span class="p">,</span> <span class="n">VT</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">"""An immutable :class:`~pcapkit.corekit.multidict.OrderedMultiDict` that is an :class:`Info`.</span>
+
+<span class="sd">    As :class:`MultiInfo`, but keeping the order of every value across keys, as</span>
+<span class="sd">    an :class:`~pcapkit.corekit.multidict.OrderedMultiDict` does -- i.e. wire</span>
+<span class="sd">    order for an option list.</span>
+
+<span class="sd">    A finalised :class:`Info` holds every</span>
+<span class="sd">    :class:`~pcapkit.corekit.multidict.OrderedMultiDict` value as one of these,</span>
+<span class="sd">    and :meth:`to_dict` -- its own and its holder's -- turns it back into an</span>
+<span class="sd">    :class:`~pcapkit.corekit.multidict.OrderedMultiDict`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        mapping: The initial value, as for</span>
+<span class="sd">            :class:`~pcapkit.corekit.multidict.OrderedMultiDict`.</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1"># NOTE: as for :class:`MultiInfo`, the mapping protocol is bound back to</span>
+    <span class="c1"># OrderedMultiDict's own. ``__ne__`` is not: OrderedMultiDict has none, and</span>
+    <span class="c1"># dict's compares the internal buckets, so two equal option lists compared</span>
+    <span class="c1"># ``!=`` as well as ``==``. It is :func:`_ne`, as for the exports</span>
+    <span class="c1"># (:issue:`1484`).</span>
+    <span class="fm">__getitem__</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="fm">__getitem__</span>  <span class="c1"># type: ignore[assignment]</span>
+    <span class="fm">__iter__</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="fm">__iter__</span>  <span class="c1"># type: ignore[assignment]</span>
+    <span class="fm">__len__</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="fm">__len__</span>
+    <span class="fm">__contains__</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="fm">__contains__</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="s1">'__reversed__'</span><span class="p">):</span>  <span class="c1"># pragma: no branch -- Python 3.8 and up</span>
+        <span class="fm">__reversed__</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="fm">__reversed__</span>
+    <span class="fm">__eq__</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="fm">__eq__</span>
+    <span class="fm">__ne__</span> <span class="o">=</span> <span class="n">_ne</span>
+    <span class="fm">__hash__</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="fm">__repr__</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="fm">__repr__</span>
+    <span class="fm">__str__</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="fm">__str__</span>
+    <span class="n">__copy__</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="n">__copy__</span>  <span class="c1"># type: ignore[assignment]</span>
+    <span class="n">keys</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="n">keys</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="n">items</span>  <span class="c1"># type: ignore[assignment]</span>
+    <span class="n">get</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="n">get</span>  <span class="c1"># type: ignore[assignment]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flat</span><span class="p">:</span> <span class="s1">'Optional[bool]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return the contents as a plain mapping.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            flat: If omitted, a plain</span>
+<span class="sd">                :class:`~pcapkit.corekit.multidict.OrderedMultiDict` of every</span>
+<span class="sd">                value, in order, as :meth:`Info.to_dict` writes this object --</span>
+<span class="sd">                the same :class:`_OrderedMultiDict` it returns.</span>
+<span class="sd">                Otherwise :meth:`MultiDict.to_dict</span>
+<span class="sd">                &lt;pcapkit.corekit.multidict.MultiDict.to_dict&gt;`'s :obj:`dict`, of</span>
+<span class="sd">                the first value of each key if :obj:`True`, or of the</span>
+<span class="sd">                :obj:`list` of them if :obj:`False`.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">flat</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_OrderedMultiDict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flat</span><span class="p">)</span>  <span class="c1"># type: ignore[call-overload]</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_freeze</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return ``value`` as stored in a finalised :class:`Info`.</span>
+
+<span class="sd">    A :class:`~pcapkit.corekit.multidict.OrderedMultiDict` becomes an</span>
+<span class="sd">    :class:`OrderedMultiInfo`, and any other</span>
+<span class="sd">    :class:`~pcapkit.corekit.multidict.MultiDict` a :class:`MultiInfo`. Either</span>
+<span class="sd">    already immutable, and every other value, is returned as it is.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">_MultiInfo</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">MultiDict</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">value</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">OrderedMultiDict</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">OrderedMultiInfo</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">MultiInfo</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_rebuild</span><span class="p">(</span><span class="n">info_cls</span><span class="p">:</span> <span class="s1">'Type[Info]'</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Rebuild ``value`` into ``info_cls``, the class annotated for its key, unless it is one.</span>
+
+<span class="sd">    A multi-mapping counts as a plain mapping here, even as the</span>
+<span class="sd">    :class:`OrderedMultiInfo` that :meth:`Info.__update__` stored an exported</span>
+<span class="sd">    :class:`Info` as.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">info_cls</span><span class="p">,</span> <span class="n">_MultiInfo</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">MultiDict</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">info_cls</span><span class="p">:</span>  <span class="c1"># type: ignore[comparison-overlap,unreachable] # pylint: disable=unidiomatic-typecheck</span>
+            <span class="k">return</span> <span class="n">info_cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Info</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">_MultiInfo</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="n">info_cls</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">value</span>
+
+
 <span class="c1">#: Name of the per-class attribute :func:`_nested_info_types` caches its answer in.</span>
 <span class="n">_NESTED_INFO_CACHE</span> <span class="o">=</span> <span class="s1">'__nested_info_types__'</span>
+
+<span class="c1">#: Name of the per-class attribute :func:`_nested_types` caches its answer in.</span>
+<span class="n">_NESTED_CACHE</span> <span class="o">=</span> <span class="s1">'__nested_types__'</span>
 
 <span class="c1">#: :pep:`604` union type, i.e. the origin of ``int | None``. It is absent below</span>
 <span class="c1">#: Python 3.10, where only :data:`typing.Optional` spells a union, and is the</span>
@@ -1190,13 +1557,17 @@
 <span class="sd">    :data:`~typing.Optional` of a single :class:`Info` subclass counts as that</span>
 <span class="sd">    subclass. A parametrised generic such as ``list[Packet]`` does not: the</span>
 <span class="sd">    value it describes is a container, and :meth:`Info.from_dict` has nothing</span>
-<span class="sd">    to rebuild it from.</span>
+<span class="sd">    to rebuild it from. A :class:`MultiInfo` or :class:`OrderedMultiInfo`</span>
+<span class="sd">    subclass is an :class:`Info` subclass too, so that :meth:`Info.from_dict`</span>
+<span class="sd">    restores e.g. :class:`~pcapkit.protocols.data.application.httpv2.Settings`</span>
+<span class="sd">    from the :class:`~pcapkit.corekit.multidict.OrderedMultiDict` that</span>
+<span class="sd">    :meth:`Info.to_dict` writes it as.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        hint: Resolved type annotation.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        The :class:`Info` subclass the annotation names, or :data:`None`.</span>
+<span class="sd">        The class the annotation names, or :data:`None`.</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        Both guards below are load-bearing on Python 3.9 and 3.10, where a</span>
@@ -1231,6 +1602,32 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_nested_info_types</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="s1">'Type[Info]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Type[Info]]'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Map the keys of ``cls`` annotated with an :class:`Info` subclass to it.</span>
 
+<span class="sd">    It is :func:`_nested_types` less the multi-mapping classes</span>
+<span class="sd">    (:class:`_MultiInfo`), and cached alongside.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        cls: Info class.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Mapping of key names to the :class:`Info` subclass annotated for them.</span>
+
+<span class="sd">    """</span>
+    <span class="n">cached</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_NESTED_INFO_CACHE</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cached</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">cached</span>
+
+    <span class="n">nested</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">_nested_types</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+              <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">_MultiInfo</span><span class="p">)}</span>  <span class="c1"># type: dict[str, Type[Info]]</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">_NESTED_INFO_CACHE</span><span class="p">,</span> <span class="n">nested</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">nested</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_nested_types</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="s1">'Type[Info]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Type[Info]]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Map the keys of ``cls`` annotated with a class :meth:`Info.from_dict` rebuilds to it.</span>
+
+<span class="sd">    Such a class is an :class:`Info`, :class:`MultiInfo` or</span>
+<span class="sd">    :class:`OrderedMultiInfo` subclass, as :func:`_as_info_type` reads it.</span>
+
 <span class="sd">    Each annotation is resolved on its own, in the namespace of the module and</span>
 <span class="sd">    the class that declared it, so one that cannot be resolved at runtime (e.g.</span>
 <span class="sd">    a name imported only under :data:`~typing.TYPE_CHECKING`) is skipped rather</span>
@@ -1240,7 +1637,7 @@
 <span class="sd">        cls: Info class.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Mapping of key names to the :class:`Info` subclass annotated for them.</span>
+<span class="sd">        Mapping of key names to the class annotated for them.</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        The answer is cached in ``cls``'s own ``__dict__``, read back from</span>
@@ -1261,7 +1658,7 @@
 <span class="sd">        not arise in this package costs far more than it saves.</span>
 
 <span class="sd">    """</span>
-    <span class="n">cached</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_NESTED_INFO_CACHE</span><span class="p">)</span>
+    <span class="n">cached</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_NESTED_CACHE</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">cached</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">cached</span>
 
@@ -1291,7 +1688,7 @@
             <span class="k">if</span> <span class="n">info_cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">nested</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">info_cls</span>
 
-    <span class="nb">setattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">_NESTED_INFO_CACHE</span><span class="p">,</span> <span class="n">nested</span><span class="p">)</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">_NESTED_CACHE</span><span class="p">,</span> <span class="n">nested</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">nested</span>
 </pre></div>
         </article>

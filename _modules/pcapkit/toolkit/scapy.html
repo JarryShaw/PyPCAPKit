@@ -539,7 +539,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">'attach_resolution'</span><span class="p">,</span> <span class="s1">'packet2chain'</span><span class="p">,</span> <span class="s1">'packet2dict'</span><span class="p">,</span> <span class="s1">'packet2frame'</span><span class="p">,</span>
+    <span class="s1">'attach_linktype'</span><span class="p">,</span> <span class="s1">'attach_resolution'</span><span class="p">,</span> <span class="s1">'packet2chain'</span><span class="p">,</span> <span class="s1">'packet2dict'</span><span class="p">,</span> <span class="s1">'packet2frame'</span><span class="p">,</span>
     <span class="s1">'ipv4_reassembly'</span><span class="p">,</span> <span class="s1">'ipv6_reassembly'</span><span class="p">,</span> <span class="s1">'tcp_reassembly'</span><span class="p">,</span> <span class="s1">'tcp_traceflow'</span>
 <span class="p">]</span>
 
@@ -548,7 +548,13 @@
 <span class="c1">#: second, by :func:`attach_resolution`.</span>
 <span class="n">RESOLUTION_ATTR</span> <span class="o">=</span> <span class="s1">'__pcapkit_resolution__'</span>
 
+<span class="c1">#: Attribute a packet's data link type is stashed under, as the capture's</span>
+<span class="c1">#: ``LINKTYPE_*`` number, by :func:`attach_linktype`.</span>
+<span class="n">LINKTYPE_ATTR</span> <span class="o">=</span> <span class="s1">'__pcapkit_linktype__'</span>
 
+
+<div class="viewcode-block" id="attach_resolution">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.scapy.attach_resolution">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">attach_resolution</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">resolution</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Stash the timestamp resolution of a packet's capture on the packet.</span>
 
@@ -558,7 +564,23 @@
 <span class="sd">            header's, or the PCAP-NG interface's the packet was captured on.</span>
 
 <span class="sd">    """</span>
-    <span class="nb">setattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">RESOLUTION_ATTR</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">RESOLUTION_ATTR</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="attach_linktype">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.scapy.attach_linktype">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">attach_linktype</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">linktype</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Stash the data link type of a packet's capture on the packet.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: Scapy packet.</span>
+<span class="sd">        linktype: ``LINKTYPE_*`` number: the PCAP global header's, or the</span>
+<span class="sd">            PCAP-NG interface's the packet was captured on.</span>
+
+<span class="sd">    """</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">LINKTYPE_ATTR</span><span class="p">,</span> <span class="n">linktype</span><span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="packet2chain">
@@ -636,6 +658,8 @@
 
 
 
+<div class="viewcode-block" id="packet2frame">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.scapy.packet2frame">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">packet2frame</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'FrameRecord'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Report a Scapy packet to the flow tracer, with its PCAP frame record.</span>
 
@@ -686,7 +710,8 @@
         <span class="n">ts_usec</span><span class="o">=</span><span class="n">ts_usec</span><span class="p">,</span>
         <span class="n">incl_len</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">octets</span><span class="p">),</span>
         <span class="n">orig_len</span><span class="o">=</span><span class="n">orig_len</span><span class="p">,</span>
-    <span class="p">),</span> <span class="n">time_epoch</span><span class="o">=</span><span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">epoch</span><span class="p">))</span>
+    <span class="p">),</span> <span class="n">time_epoch</span><span class="o">=</span><span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">epoch</span><span class="p">))</span></div>
+
 
 
 <div class="viewcode-block" id="ipv4_reassembly">
@@ -898,27 +923,36 @@
         <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IP'</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'IP'</span><span class="p">])</span> <span class="k">if</span> <span class="s1">'IP'</span> <span class="ow">in</span> <span class="n">packet</span> <span class="k">else</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6'</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'IPv6'</span><span class="p">])</span>
         <span class="n">tcp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'TCP'</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'TCP'</span><span class="p">])</span>
 
-        <span class="c1"># NOTE: no default here, deliberately. ``get()`` with no default</span>
-        <span class="c1"># raises on an unresolvable name rather than minting one (#775).</span>
-        <span class="c1"># NULL and RAW are genuine DLTs -- BSD loopback and raw IP</span>
-        <span class="c1"># framing, respectively -- each meant to go with its own handler</span>
-        <span class="c1"># protocol class, so neither is an honest stand-in for "unknown link</span>
-        <span class="c1"># type" and this must not paper over the miss with either. An</span>
-        <span class="c1"># IP-rooted Scapy packet's ``(IP()/TCP()).name`` is ``'IP'``, which is</span>
-        <span class="c1"># not a LinkType member name, and raises. Note the asymmetry, which</span>
-        <span class="c1"># is not a choice made here: an IPv6-rooted packet's name uppercases to</span>
-        <span class="c1"># ``'IPV6'``, which *is* a member (``LinkType.IPV6``, 229), so it</span>
-        <span class="c1"># resolves silently -- to a DLT the caller never chose. Only the v4 name</span>
-        <span class="c1"># happens to miss. The ``KeyError``</span>
-        <span class="c1"># from :meth:`LinkType.get` is caught and re-raised as</span>
-        <span class="c1"># :exc:`~pcapkit.utilities.exceptions.MissingKeyError` -- this</span>
-        <span class="c1"># package's own house exception for a lookup miss -- rather than</span>
-        <span class="c1"># letting it escape this public function.</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">protocol</span> <span class="o">=</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">MissingKeyError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+        <span class="c1"># NOTE: the link type of the interface the packet was read from, which</span>
+        <span class="c1"># :class:`~pcapkit.foundation.engines.scapy.Scapy` attaches with</span>
+        <span class="c1"># :func:`attach_linktype` -- not one inferred from the first layer,</span>
+        <span class="c1"># which a raw IPv4 interface's packets share with no link type (#1517).</span>
+        <span class="n">linktype</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">LINKTYPE_ATTR</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">linktype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">protocol</span> <span class="o">=</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">linktype</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># A packet built by hand carries none, so it is looked up by its</span>
+            <span class="c1"># first layer's name -- with no default, deliberately. ``get()``</span>
+            <span class="c1"># with no default raises on an unresolvable name rather than minting</span>
+            <span class="c1"># one (#775). NULL and RAW are genuine DLTs -- BSD loopback and raw</span>
+            <span class="c1"># IP framing, respectively -- each meant to go with its own handler</span>
+            <span class="c1"># protocol class, so neither is an honest stand-in for "unknown link</span>
+            <span class="c1"># type" and this must not paper over the miss with either. An</span>
+            <span class="c1"># IP-rooted Scapy packet's ``(IP()/TCP()).name`` is ``'IP'``, which</span>
+            <span class="c1"># is not a LinkType member name, and raises. Note the asymmetry,</span>
+            <span class="c1"># which is not a choice made here: an IPv6-rooted packet's name</span>
+            <span class="c1"># uppercases to ``'IPV6'``, which *is* a member (``LinkType.IPV6``,</span>
+            <span class="c1"># 229), so it resolves silently -- to a DLT the caller never chose.</span>
+            <span class="c1"># Only the v4 name happens to miss. The ``KeyError`` from</span>
+            <span class="c1"># :meth:`LinkType.get` is caught and re-raised as</span>
+            <span class="c1"># :exc:`~pcapkit.utilities.exceptions.MissingKeyError` -- this</span>
+            <span class="c1"># package's own house exception for a lookup miss -- rather than</span>
+            <span class="c1"># letting it escape this public function.</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">protocol</span> <span class="o">=</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">MissingKeyError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">TF_TCP_Packet</span><span class="p">(</span>  <span class="c1"># type: ignore[type-var]</span>
             <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span>                                   <span class="c1"># data link type</span>

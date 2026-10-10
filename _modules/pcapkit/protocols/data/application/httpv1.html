@@ -485,6 +485,7 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.http.method</span><span class="w"> </span><span class="kn">import</span> <span class="n">Method</span> <span class="k">as</span> <span class="n">Enum_Method</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.http.status_code</span><span class="w"> </span><span class="kn">import</span> <span class="n">StatusCode</span> <span class="k">as</span> <span class="n">Enum_StatusCode</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiInfo</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv1</span><span class="w"> </span><span class="kn">import</span> <span class="n">Type</span> <span class="k">as</span> <span class="n">HTTP_Type</span>
 
@@ -505,7 +506,7 @@
     <span class="c1">#: HTTP receipt.</span>
     <span class="n">receipt</span><span class="p">:</span> <span class="s1">'Header'</span>
     <span class="c1">#: HTTP header.</span>
-    <span class="n">header</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[str, str]'</span>
+    <span class="n">header</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[str, str]'</span>
     <span class="c1">#: HTTP body.</span>
     <span class="n">body</span><span class="p">:</span> <span class="s1">'Any'</span>
     <span class="c1">#: HTTP field lines as received, CRLF excluded and ``obs-fold``</span>

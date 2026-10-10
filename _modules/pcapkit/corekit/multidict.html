@@ -485,19 +485,17 @@
 
 <span class="sd">"""</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">collections.abc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">MissingKeyError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">Any</span><span class="p">,</span> <span class="n">ItemsView</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">KeysView</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span>
-                        <span class="n">SupportsIndex</span><span class="p">,</span> <span class="n">ValuesView</span><span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">SupportsIndex</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'MultiDict'</span><span class="p">,</span> <span class="s1">'OrderedMultiDict'</span><span class="p">,</span> <span class="s1">'InfoDict'</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'MultiDict'</span><span class="p">,</span> <span class="s1">'OrderedMultiDict'</span><span class="p">]</span>
 
 <span class="c1">###############################################################################</span>
 <span class="c1"># Type variables</span>
@@ -1164,88 +1162,6 @@
             <span class="n">bucket</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">key</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">buckets</span><span class="p">]</span></div>
-
-
-
-<div class="viewcode-block" id="InfoDict">
-<a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.InfoDict">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">InfoDict</span><span class="p">(</span><span class="n">OrderedMultiDict</span><span class="p">[</span><span class="n">_KT</span><span class="p">,</span> <span class="n">_VT</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">"""The :class:`OrderedMultiDict` that :meth:`Info.to_dict</span>
-<span class="sd">    &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;` returns.</span>
-
-<span class="sd">    It is the fields of an :class:`~pcapkit.corekit.infoclass.Info` as a mapping:</span>
-<span class="sd">    through the :obj:`dict` interface it holds one value per key, the first, so</span>
-<span class="sd">    :mod:`json`, :mod:`plistlib` and the dumpers see a plain mapping. A field the</span>
-<span class="sd">    :class:`~pcapkit.corekit.infoclass.Info` holds more than once, such as a</span>
-<span class="sd">    repeated IPv6 extension header, keeps every value, in order, for</span>
-<span class="sd">    ``items(multi=True)``.</span>
-
-<span class="sd">    That sets it apart from an :class:`OrderedMultiDict` held as a field *value*,</span>
-<span class="sd">    e.g. a list of options, which the dumpers write as one entry per value.</span>
-
-<span class="sd">    Note:</span>
-<span class="sd">        Unlike :class:`OrderedMultiDict`, :meth:`keys`, :meth:`values` and</span>
-<span class="sd">        :meth:`items` return views, and it compares like a :obj:`dict`: equal to</span>
-<span class="sd">        a mapping with the same keys -- in any order -- when each key holds the</span>
-<span class="sd">        one value the mapping has, or the same values as another</span>
-<span class="sd">        :class:`MultiDict`.</span>
-
-<span class="sd">    """</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">MultiDict</span><span class="p">):</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">other</span><span class="p">):</span>
-                <span class="k">return</span> <span class="kc">False</span>
-            <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">getlist</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">==</span> <span class="n">values</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lists</span><span class="p">())</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">other</span><span class="p">):</span>
-                <span class="k">return</span> <span class="kc">False</span>
-            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lists</span><span class="p">():</span>
-                <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">other</span> <span class="ow">or</span> <span class="n">values</span> <span class="o">!=</span> <span class="p">[</span><span class="n">other</span><span class="p">[</span><span class="n">key</span><span class="p">]]:</span>
-                    <span class="k">return</span> <span class="kc">False</span>
-            <span class="k">return</span> <span class="kc">True</span>
-        <span class="k">return</span> <span class="bp">NotImplemented</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
-        <span class="c1"># NOTE: :obj:`dict` defines its own ``__ne__``, which compares the</span>
-        <span class="c1"># internal buckets rather than negating :meth:`__eq__`.</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">NotImplemented</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">result</span>
-        <span class="k">return</span> <span class="ow">not</span> <span class="n">result</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Iterator[_KT]'</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
-
-<div class="viewcode-block" id="InfoDict.keys">
-<a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.InfoDict.keys">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'KeysView[_KT]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
-<span class="w">        </span><span class="sd">"""Return a view of the keys, each once, as :meth:`dict.keys` does."""</span>
-        <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">KeysView</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="InfoDict.values">
-<a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.InfoDict.values">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ValuesView[_VT]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
-<span class="w">        </span><span class="sd">"""Return a view of the first value of each key, as :meth:`dict.values` does."""</span>
-        <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ValuesView</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="InfoDict.items">
-<a class="viewcode-back" href="../../../pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.InfoDict.items">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">multi</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ItemsView[_KT, _VT] | Iterator[tuple[_KT, _VT]]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=line-too-long</span>
-<span class="w">        </span><span class="sd">"""Return the ``(key, value)`` pairs.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            multi: If set to :obj:`True`, an iterator with a pair for each value</span>
-<span class="sd">                of each key, in insertion order. Otherwise a view of the pairs</span>
-<span class="sd">                of the first value of each key, as :meth:`dict.items` returns.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">multi</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ItemsView</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
-</div>
 
 </pre></div>
         </article>

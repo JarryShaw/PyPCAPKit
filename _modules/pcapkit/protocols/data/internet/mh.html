@@ -537,6 +537,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.mh.upn_reason</span><span class="w"> </span><span class="kn">import</span> \
         <span class="n">UpdateNotificationReason</span> <span class="k">as</span> <span class="n">Enum_UpdateNotificationReason</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiInfo</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">FastBindingAcknowledgmentStatus</span><span class="p">,</span>
                                                <span class="n">IPv6AddressPrefixCode</span><span class="p">,</span> <span class="n">LMAAddressCode</span><span class="p">,</span>
@@ -651,7 +652,7 @@
     <span class="c1">#: apart from :attr:`MH.reserved`, the reserved octet of the fixed header.</span>
     <span class="n">msg_reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
@@ -671,7 +672,7 @@
     <span class="c1">#: Home init cookie.</span>
     <span class="n">cookie</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
@@ -692,7 +693,7 @@
     <span class="c1">#: Care-of init cookie.</span>
     <span class="n">cookie</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
@@ -714,7 +715,7 @@
     <span class="c1">#: Home keygen token.</span>
     <span class="n">token</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
@@ -736,7 +737,7 @@
     <span class="c1">#: Care-of keygen token.</span>
     <span class="n">token</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
@@ -782,7 +783,7 @@
     <span class="c1">#: Lifetime.</span>
     <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span>
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
@@ -823,7 +824,7 @@
     <span class="c1">#: Lifetime.</span>
     <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span>
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
@@ -848,7 +849,7 @@
     <span class="c1">#: Home address.</span>
     <span class="n">home</span><span class="p">:</span> <span class="s1">'IPv6Address'</span>
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
@@ -879,7 +880,7 @@
     <span class="c1">#: the units of 4 seconds the binding messages use.</span>
     <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span>
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
@@ -911,7 +912,7 @@
     <span class="c1">#: the units of 4 seconds the binding messages use.</span>
     <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span>
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
@@ -932,7 +933,7 @@
     <span class="c1">#: from :attr:`MH.reserved`, the reserved octet of the fixed header.</span>
     <span class="n">msg_reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
@@ -976,7 +977,7 @@
     <span class="c1">#: Code.</span>
     <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_HandoverInitiateStatus'</span>
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
@@ -1006,7 +1007,7 @@
     <span class="c1">#: Code.</span>
     <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_HandoverACKStatus'</span>
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
@@ -1032,7 +1033,7 @@
     <span class="c1">#: Sequence number.</span>
     <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
@@ -1054,7 +1055,7 @@
     <span class="c1">#: run home agent discovery instead.</span>
     <span class="n">addresses</span><span class="p">:</span> <span class="s1">'tuple[IPv6Address, ...]'</span>
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
@@ -1092,7 +1093,7 @@
     <span class="c1">#: Reserved bits, i.e. the 13 bits after the ``G`` flag.</span>
     <span class="n">flags_reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
@@ -1118,7 +1119,7 @@
     <span class="c1">#: the units of 4 seconds the binding messages use.</span>
     <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span>
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
@@ -1147,7 +1148,7 @@
     <span class="c1">#: Lifetime, in seconds.</span>
     <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span>
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
@@ -1174,7 +1175,7 @@
     <span class="c1">#: Reserved bits, i.e. the 14 bits after the ``D`` flag.</span>
     <span class="n">flags_reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
@@ -1198,7 +1199,7 @@
     <span class="c1">#: from :attr:`MH.reserved`, the reserved octet of the fixed header.</span>
     <span class="n">msg_reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
@@ -1231,7 +1232,7 @@
     <span class="c1">#: Reserved bits, i.e. the seven bits after the ``A`` flag.</span>
     <span class="n">flags_reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
@@ -1254,7 +1255,7 @@
     <span class="c1">#: from :attr:`MH.reserved`, the reserved octet of the fixed header.</span>
     <span class="n">msg_reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
@@ -1277,7 +1278,7 @@
     <span class="c1">#: Reserved bits, i.e. the seven bits after the ``I`` flag.</span>
     <span class="n">flags_reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Mobility options.</span>
-    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[Enum_Option, Option]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
@@ -1562,7 +1563,7 @@
     <span class="c1">#: Public key (ASN.1 encoded).</span>
     <span class="n">public_key</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Extension fields.</span>
-    <span class="n">extensions</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_CGAExtension, CGAExtension]'</span>
+    <span class="n">extensions</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[Enum_CGAExtension, CGAExtension]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">modifier</span><span class="p">:</span> <span class="s1">'Enum_CGAType'</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">collision_count</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">public_key</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
@@ -2304,7 +2305,7 @@
     <span class="c1">#: Status.</span>
     <span class="n">status</span><span class="p">:</span> <span class="s1">'Enum_FlowIDStatus'</span>
     <span class="c1">#: Sub-options.</span>
-    <span class="n">suboptions</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_FlowIDSuboption, FlowIdentificationSuboption]'</span>
+    <span class="n">suboptions</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[Enum_FlowIDSuboption, FlowIdentificationSuboption]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">fid</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">fid_pri</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
@@ -2567,7 +2568,7 @@
 <span class="w">    </span><span class="sd">"""Data model for MH Access Network Identifier option."""</span>
 
     <span class="c1">#: Sub-options.</span>
-    <span class="n">suboptions</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_ANISuboption, ANISuboption]'</span>
+    <span class="n">suboptions</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[Enum_ANISuboption, ANISuboption]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
@@ -2587,7 +2588,7 @@
     <span class="c1">#: Reserved bits, i.e. the 31 bits after the ``M`` flag.</span>
     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Traffic selector sub-options.</span>
-    <span class="n">selector</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_FlowIDSuboption, FlowIdentificationSuboption]'</span>
+    <span class="n">selector</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[Enum_FlowIDSuboption, FlowIdentificationSuboption]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
@@ -2820,7 +2821,7 @@
     <span class="c1">#: The three reserved octets, as captured.</span>
     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Quality-of-service attributes.</span>
-    <span class="n">attributes</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_QoSAttribute, QoSAttribute]'</span>
+    <span class="n">attributes</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[Enum_QoSAttribute, QoSAttribute]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">sr_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">dscp</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
@@ -2963,7 +2964,7 @@
 <span class="w">    </span><span class="sd">"""Data model for MH LMA-Controlled MAG Parameters option."""</span>
 
     <span class="c1">#: Sub-options.</span>
-    <span class="n">suboptions</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_LMAControlledMAGSuboption, LMAControlledMAGSuboption]'</span>
+    <span class="n">suboptions</span><span class="p">:</span> <span class="s1">'OrderedMultiInfo[Enum_LMAControlledMAGSuboption, LMAControlledMAGSuboption]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
