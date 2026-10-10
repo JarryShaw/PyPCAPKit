@@ -136,11 +136,14 @@ jobs:
         # `--dist load` is pinned explicitly rather than left to default: a
         # future change to xdist's own default, or someone "optimising" to
         # `loadfile`/`loadscope`, cannot silently change how this suite is
-        # distributed. The coverage leg runs the identical selection.
+        # distributed. The coverage leg runs the identical selection. The
+        # durations table and JUnit file are #1538's per-test timings, uploaded
+        # by the last step of this job.
         env:
           COVERAGE: ${{ matrix.coverage }}
         run: |
           set -- -q -n auto --dist load \
+            --durations=30 --durations-min=1.0 --junitxml="$RUNNER_TEMP/junit.xml" \
             --ignore=tests/integration \
             --ignore-glob='*_runtime.py' \
             --ignore-glob='*_regression.py'
@@ -268,6 +271,19 @@ jobs:
           path: coverage-comment/coverage-summary.json
           retention-days: 7
 
+      # #1538: the weekly CI Timing review (ci-timing.yml) reads this from the
+      # newest push runs. One artifact per leg, so the name carries the version.
+      # `continue-on-error` because the file is only diagnostic: an artifact
+      # service outage must not fail a leg that `Required checks passed` needs.
+      - name: Upload test timings
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        uses: actions/upload-artifact@v7
+        with:
+          name: junit-unit-${{ matrix.python-version }}
+          path: ${{ runner.temp }}/junit.xml
+          retention-days: 14
+
   integration:
     name: Integration Python ${{ matrix.python-version }}
     if: ${{ inputs.gate-only != true && needs.changes.outputs.code != 'false' }}
@@ -380,7 +396,18 @@ jobs:
             exit 1
           fi
           echo "Fixture-dependent selection: $selection"
-          python -m pytest -q -n auto --dist load $selection
+          python -m pytest -q -n auto --dist load \
+            --durations=30 --durations-min=1.0 --junitxml="$RUNNER_TEMP/junit.xml" $selection
+
+      # See the `test` job's step of the same name.
+      - name: Upload test timings
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        uses: actions/upload-artifact@v7
+        with:
+          name: junit-integration-${{ matrix.python-version }}
+          path: ${{ runner.temp }}/junit.xml
+          retention-days: 14
 
   # Per-engine coverage for the third-party capture engines (#845): every
   # (Python version, engine) pair is checked, and a failure -- or a correctly

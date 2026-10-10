@@ -390,3 +390,25 @@ metadata that changes as work moves, and a link to them goes stale the way a lin
 number does; the changelog's ``:issue:`` and ``:pr:`` roles are the durable trail.
 The repository wiki is disabled -- contributor documentation lives on these pages.
 
+CI Timing Review
+~~~~~~~~~~~~~~~~
+
+CI time is reviewed on a schedule rather than when it starts to hurt, at the owner's
+request on :issue:`1538`, because the suite's run time grows faster than its test count:
+measured there, the tests grew by about a third while test time grew by about 90%.
+:file:`.github/workflows/ci-timing.yml` reports every Monday; what it measures and the
+thresholds are on :doc:`../workflows`.
+
+*  **The owner reads the Monday summary.** Warnings are annotations on it. A run fails,
+   which is what sends the email, on a HARD threshold or when it could not read the API
+   or crashed; its annotation says which.
+*  **A HARD failure gets an issue** labelled ``ci``, with the run's ``ci-timing-report``
+   artifact attached and the summary's slowest-module table pasted in. The cap
+   thresholds are set to fire with about two weeks to spare.
+*  **Re-baseline after a shape change.** When a merged ``ci`` pull request changes a
+   job's shape or selection -- a leg added, split or moved -- dispatch the workflow, so
+   the next week compares like with like.
+*  **Monthly, refresh the measured figures** quoted in :file:`unit-tests.yml`'s
+   comments that the report shows to be stale -- the coverage leg's headroom, the
+   ordering cells' timings and their step cap's rationale.
+

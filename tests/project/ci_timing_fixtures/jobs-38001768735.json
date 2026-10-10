@@ -1,0 +1,316 @@
+{
+ "total_count": 8,
+ "jobs": [
+  {
+   "id": 114061264509,
+   "run_id": 38001768735,
+   "run_attempt": 1,
+   "name": "Classify changed files",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-10-09T22:55:12Z",
+   "started_at": "2026-10-09T22:57:40Z",
+   "completed_at": "2026-10-09T22:57:46Z",
+   "runner_name": "GitHub Actions 1000093333",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "steps": [
+    {
+     "number": 1,
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-09T22:57:41Z",
+     "completed_at": "2026-10-09T22:57:42Z"
+    },
+    {
+     "number": 3,
+     "name": "Classify the diff",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-09T22:57:43Z",
+     "completed_at": "2026-10-09T22:57:44Z"
+    }
+   ]
+  },
+  {
+   "id": 114061987271,
+   "run_id": 38001768735,
+   "run_attempt": 1,
+   "name": "Integration Python 3.14",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-10-09T22:57:46Z",
+   "started_at": "2026-10-09T23:05:19Z",
+   "completed_at": "2026-10-09T23:07:59Z",
+   "runner_name": "GitHub Actions 1000093397",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "steps": [
+    {
+     "number": 1,
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-09T23:05:20Z",
+     "completed_at": "2026-10-09T23:05:20Z"
+    },
+    {
+     "number": 7,
+     "name": "Run full test suite",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-09T23:05:38Z",
+     "completed_at": "2026-10-09T23:07:57Z"
+    }
+   ]
+  },
+  {
+   "id": 114061987279,
+   "run_id": 38001768735,
+   "run_attempt": 1,
+   "name": "Python 3.11",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-10-09T22:57:46Z",
+   "started_at": "2026-10-09T22:58:44Z",
+   "completed_at": "2026-10-09T23:05:39Z",
+   "runner_name": "GitHub Actions 1000093343",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "steps": [
+    {
+     "number": 1,
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-09T22:58:45Z",
+     "completed_at": "2026-10-09T22:58:46Z"
+    },
+    {
+     "number": 4,
+     "name": "Install package and test dependencies",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-09T22:58:51Z",
+     "completed_at": "2026-10-09T22:59:20Z"
+    },
+    {
+     "number": 7,
+     "name": "Run unit tests",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-09T22:59:20Z",
+     "completed_at": "2026-10-09T23:05:37Z"
+    },
+    {
+     "number": 8,
+     "name": "Report coverage",
+     "status": "completed",
+     "conclusion": "skipped",
+     "started_at": "2026-10-09T23:05:37Z",
+     "completed_at": "2026-10-09T23:05:37Z"
+    }
+   ]
+  },
+  {
+   "id": 114061987291,
+   "run_id": 38001768735,
+   "run_attempt": 1,
+   "name": "Python 3.10",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-10-09T22:57:46Z",
+   "started_at": "2026-10-09T23:00:06Z",
+   "completed_at": "2026-10-09T23:07:11Z",
+   "runner_name": "GitHub Actions 1000093358",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "steps": [
+    {
+     "number": 1,
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-09T23:00:07Z",
+     "completed_at": "2026-10-09T23:00:08Z"
+    },
+    {
+     "number": 4,
+     "name": "Install package and test dependencies",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-09T23:00:13Z",
+     "completed_at": "2026-10-09T23:00:42Z"
+    },
+    {
+     "number": 7,
+     "name": "Run unit tests",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-09T23:00:42Z",
+     "completed_at": "2026-10-09T23:07:09Z"
+    },
+    {
+     "number": 8,
+     "name": "Report coverage",
+     "status": "completed",
+     "conclusion": "skipped",
+     "started_at": "2026-10-09T23:07:09Z",
+     "completed_at": "2026-10-09T23:07:09Z"
+    }
+   ]
+  },
+  {
+   "id": 114061987374,
+   "run_id": 38001768735,
+   "run_attempt": 1,
+   "name": "Python 3.13",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-10-09T22:57:46Z",
+   "started_at": "2026-10-09T23:12:19Z",
+   "completed_at": "2026-10-09T23:19:01Z",
+   "runner_name": "GitHub Actions 1000093467",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "steps": [
+    {
+     "number": 1,
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-09T23:12:19Z",
+     "completed_at": "2026-10-09T23:12:20Z"
+    },
+    {
+     "number": 4,
+     "name": "Install package and test dependencies",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-09T23:12:22Z",
+     "completed_at": "2026-10-09T23:12:52Z"
+    },
+    {
+     "number": 7,
+     "name": "Run unit tests",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-09T23:12:52Z",
+     "completed_at": "2026-10-09T23:18:59Z"
+    },
+    {
+     "number": 8,
+     "name": "Report coverage",
+     "status": "completed",
+     "conclusion": "skipped",
+     "started_at": "2026-10-09T23:18:59Z",
+     "completed_at": "2026-10-09T23:18:59Z"
+    }
+   ]
+  },
+  {
+   "id": 114061987436,
+   "run_id": 38001768735,
+   "run_attempt": 1,
+   "name": "Python 3.14",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-10-09T22:57:46Z",
+   "started_at": "2026-10-09T23:17:22Z",
+   "completed_at": "2026-10-09T23:29:50Z",
+   "runner_name": "GitHub Actions 1000093514",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "steps": [
+    {
+     "number": 1,
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-09T23:17:23Z",
+     "completed_at": "2026-10-09T23:17:24Z"
+    },
+    {
+     "number": 4,
+     "name": "Install package and test dependencies",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-09T23:17:26Z",
+     "completed_at": "2026-10-09T23:18:04Z"
+    },
+    {
+     "number": 7,
+     "name": "Run unit tests",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-09T23:18:05Z",
+     "completed_at": "2026-10-09T23:29:19Z"
+    },
+    {
+     "number": 8,
+     "name": "Report coverage",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-09T23:29:19Z",
+     "completed_at": "2026-10-09T23:29:46Z"
+    }
+   ]
+  },
+  {
+   "id": 114061988445,
+   "run_id": 38001768735,
+   "run_attempt": 1,
+   "name": "Project tests (docs-only)",
+   "status": "completed",
+   "conclusion": "skipped",
+   "created_at": "2026-10-09T22:57:46Z",
+   "started_at": "2026-10-09T22:57:46Z",
+   "completed_at": "2026-10-09T22:57:46Z",
+   "runner_name": null,
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "steps": []
+  },
+  {
+   "id": 114070699437,
+   "run_id": 38001768735,
+   "run_attempt": 1,
+   "name": "Required checks passed",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-10-09T23:29:51Z",
+   "started_at": "2026-10-09T23:34:56Z",
+   "completed_at": "2026-10-09T23:35:00Z",
+   "runner_name": "GitHub Actions 1000093648",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "steps": [
+    {
+     "number": 1,
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-09T23:34:57Z",
+     "completed_at": "2026-10-09T23:34:57Z"
+    },
+    {
+     "number": 2,
+     "name": "Check every required job succeeded",
+     "status": "completed",
+     "conclusion": "success",
+     "started_at": "2026-10-09T23:34:57Z",
+     "completed_at": "2026-10-09T23:34:57Z"
+    }
+   ]
+  }
+ ]
+}

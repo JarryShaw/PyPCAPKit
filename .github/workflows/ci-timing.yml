@@ -1,0 +1,100 @@
+name: CI Timing
+
+# The periodic CI-duration review #1538 asked for. util/ci_timing.py reads the
+# last week of Unit Tests, Compat, Lint, CodeQL and Pages runs through the API,
+# writes a report to the job summary and to an artifact, and fails the run when a
+# HARD threshold fires (status 1; 2 and 3 are an unreadable API and a crash, each
+# annotated as such). GitHub emails a scheduled workflow's failures to whoever
+# last edited its cron line, so the owner hears about it with no `issues: write`.
+# docs/source/contributing/workflows.rst has the thresholds and why each sits
+# where it does; conventions/process.rst has what to do when one fires.
+#
+# Deliberately not a `workflow_run` on Unit Tests: that would add a job per run
+# to a runner pool already measured saturated at 20 concurrent jobs.
+on:
+  schedule:
+    # Mondays 07:23 UTC: off the hour, where GitHub delays scheduled runs most,
+    # and clear of Saturday's 02:00-10:00 crons and Project Status at 00:37.
+    - cron: '23 7 * * 1'
+  workflow_dispatch:
+    inputs:
+      days:
+        description: Window in days.
+        type: number
+        default: 7
+      concurrency_hours:
+        description: Also measure the runner pool over this many hours, at one API call per run (0 = off).
+        type: number
+        default: 0
+
+# Read-only: the runs, jobs and artifacts need `actions: read`, the workflow
+# files at each run's sha need `contents: read`. GITHUB_TOKEN allows 1,000 API
+# requests an hour per repository; a default run uses about 600.
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: ci-timing
+  cancel-in-progress: false
+
+jobs:
+  report:
+    name: CI timing report
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v7
+
+      # Nothing is installed: the script is standard library only.
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+
+      # The newest earlier run that uploaded a report, so a week whose run failed
+      # on a HARD threshold is still next week's baseline. A first run, or one
+      # after 90 days without a report, has none and says so.
+      - name: Fetch the previous report as the baseline
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -u
+          mkdir -p prev
+          for id in $(gh run list -R "$REPO" --workflow ci-timing.yml --limit 10 --json databaseId -q '.[].databaseId'); do
+            [ "$id" = "$RUN_ID" ] && continue
+            if gh run download "$id" -R "$REPO" -n ci-timing-report -D prev 2>/dev/null; then
+              echo "Baseline: run $id"
+              exit 0
+            fi
+          done
+          echo "::notice title=No baseline::No earlier ci-timing-report artifact was found, so the week-over-week checks are skipped."
+
+      - name: Report CI timing
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          DAYS: ${{ inputs.days || 7 }}
+          CONCURRENCY_HOURS: ${{ inputs.concurrency_hours || 0 }}
+        run: |
+          status=0
+          python util/ci_timing.py --repo "$REPO" --days "$DAYS" \
+            --concurrency-hours "$CONCURRENCY_HOURS" --baseline prev/report.json \
+            --out report.json --summary report.md || status=$?
+          if [ -f report.md ]; then
+            cat report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+          exit "$status"
+
+      # 90 days, so the trend is a series of weekly reports rather than one.
+      - name: Upload the report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: ci-timing-report
+          path: |
+            report.json
+            report.md
+          retention-days: 90
