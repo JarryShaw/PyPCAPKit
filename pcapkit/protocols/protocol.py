@@ -2154,35 +2154,29 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             The lookup itself is :meth:`self._lookup_registry
             <ProtocolBase._lookup_registry>`, so a miss does not grow the shared
             registry. What this adds is the next-layer-specific resolution step:
-            a registered code may hold a
+            the entry found -- registered, or the fallback -- may be a
             :class:`~pcapkit.corekit.module.ModuleDescriptor` rather than a
-            class, and importing it is written back so the import happens once.
+            class, and it is resolved to the class it names.
 
-            That write-back is deliberately confined to a *hit*. Memoising the
-            fallback's resolution under ``proto`` would be exactly the insertion
+            Nothing is written back, on a hit or a miss. A miss has no key to
+            write under, and recording one would be exactly the insertion
             :meth:`self._lookup_registry <ProtocolBase._lookup_registry>` exists
-            to avoid.
+            to avoid. A hit memoised under ``proto`` would retain a class that
+            :func:`importlib.reload` then makes stale, and would make parsing
+            mutate a registry shared by the whole process (:issue:`1559`). The
+            same holds for a memo in ``registry``'s default factory or in a cache
+            beside the registry (:issue:`421`, :issue:`425`, :issue:`555`).
 
-            So a miss resolves its fallback descriptor again on every frame, and
-            what keeps that affordable is :attr:`ModuleDescriptor.klass
+            So every lookup resolves its descriptor again, and what keeps that
+            affordable is :attr:`ModuleDescriptor.klass
             <pcapkit.corekit.module.ModuleDescriptor.klass>` reading
             :data:`sys.modules` instead of re-entering
-            :func:`importlib.import_module` (:issue:`574`). Memoising the
-            resolved class instead, whether under ``proto``, in ``registry``'s
-            default factory, or in a cache beside the registry, would retain a
-            class that :func:`importlib.reload` then makes stale (:issue:`421`,
-            :issue:`425`, :issue:`555`).
+            :func:`importlib.import_module` (:issue:`574`).
 
         """
         protocol = ProtocolBase._lookup_registry(registry, proto)
         if isinstance(protocol, ModuleDescriptor):
-            klass = protocol.klass
-            # a descriptor can also come back from the default factory, and that
-            # one has no key to memoise under -- writing it back would recreate
-            # the insertion-on-miss this exists to avoid
-            if proto in registry:
-                registry[proto] = klass  # update mapping upon import
-            return klass
+            return protocol.klass
         return protocol
 
     def _decode_next_layer(self, dict_: '_PT', proto: 'int', length: 'Optional[int]' = None, *,

@@ -59,14 +59,14 @@ class ModuleDescriptor(collections.namedtuple('ModuleDescriptor', ['module', 'na
             The module is read from :data:`sys.modules` first, and
             :func:`importlib.import_module` is entered only when it is not
             loaded yet. That matters because this property is on a *per-frame*
-            dispatch path: a next layer code nobody registered falls back to a
-            :class:`ModuleDescriptor` for
-            :class:`~pcapkit.protocols.misc.raw.Raw` which
-            :meth:`ProtocolBase._lookup_next_layer
+            dispatch path: :meth:`ProtocolBase._lookup_next_layer
             <pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer>`
-            deliberately does not write back, so every unrecognised frame
-            resolves the same descriptor again -- 48 of the 52 resolutions an
-            extraction of :file:`many_interfaces.pcapng` performs.
+            deliberately writes no resolved class back, so every next layer
+            lookup resolves its descriptor again -- the one registered for the
+            code, or the fallback for :class:`~pcapkit.protocols.misc.raw.Raw`
+            when nobody registered it. An extraction of
+            :file:`many_interfaces.pcapng` performs 296 resolutions, 48 of them
+            fallbacks (:issue:`1559`).
             :func:`~importlib.import_module` keeps real per-call work for an
             already-imported module (locks, :class:`~importlib.machinery.ModuleSpec`
             checks, the ``fromlist`` walk), so each repeat costs ~436 ns
