@@ -201,6 +201,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/interface/misc.html">Auxiliary Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -3600,6 +3601,8 @@
           <li><a href="pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.MPTCPDSS.ack">(pcapkit.protocols.schema.transport.tcp.MPTCPDSS attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.TCP.ack">(pcapkit.protocols.schema.transport.tcp.TCP attribute)</a>
+</li>
+          <li><a href="pcapkit/toolkit/builtin.html#pcapkit.toolkit.pcap.TCPSegment.ack">(pcapkit.toolkit.pcap.TCPSegment attribute)</a>
 </li>
         </ul></li>
         <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.parameter.Parameter.ACK_DATA">ACK_DATA (pcapkit.const.hip.parameter.Parameter attribute)</a>
@@ -13704,14 +13707,14 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.dic_aida">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.dicom">dicom (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.dicom">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.dicom_iscl">dicom_iscl (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -14864,6 +14867,8 @@
           <li><a href="pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.TCP.dstport">(pcapkit.protocols.schema.transport.tcp.TCP attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/transport/udp.html#pcapkit.protocols.schema.transport.udp.UDP.dstport">(pcapkit.protocols.schema.transport.udp.UDP attribute)</a>
+</li>
+          <li><a href="pcapkit/toolkit/builtin.html#pcapkit.toolkit.pcap.TCPSegment.dstport">(pcapkit.toolkit.pcap.TCPSegment attribute)</a>
 </li>
         </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.dsx_agent">dsx_agent (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
@@ -17874,6 +17879,8 @@
 </li>
           <li><a href="pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.Flags.fin">(pcapkit.protocols.schema.transport.tcp.Flags attribute)</a>
 </li>
+          <li><a href="pcapkit/toolkit/builtin.html#pcapkit.toolkit.pcap.TCPSegment.fin">(pcapkit.toolkit.pcap.TCPSegment attribute)</a>
+</li>
         </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.find">find (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
@@ -20698,6 +20705,8 @@
 </li>
           <li><a href="pcapkit/protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame.header">(pcapkit.protocols.misc.pcap.frame.Frame property)</a>
 </li>
+          <li><a href="pcapkit/toolkit/builtin.html#pcapkit.toolkit.pcap.TCPSegment.header">(pcapkit.toolkit.pcap.TCPSegment attribute)</a>
+</li>
         </ul></li>
         <li><a href="pcapkit/const/http.html#pcapkit.const.http.setting.Setting.HEADER_TABLE_SIZE">HEADER_TABLE_SIZE (pcapkit.const.http.setting.Setting attribute)</a>
 </li>
@@ -21019,14 +21028,14 @@
           <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.HIPTransportModeParameter">(class in pcapkit.protocols.schema.internet.hip)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.hiq">hiq (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.hiq">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.hislip">hislip (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 </li>
         <li><a href="pcapkit/const/ftp.html#pcapkit.const.ftp.command.FEATCode.hist">hist (pcapkit.const.ftp.command.FEATCode attribute)</a>
@@ -23539,10 +23548,10 @@
           <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.BindingReregistrationControlSuboption.initial_retransmission">(pcapkit.protocols.schema.internet.mh.BindingReregistrationControlSuboption attribute)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/http.html#pcapkit.const.http.setting.Setting.INITIAL_WINDOW_SIZE">INITIAL_WINDOW_SIZE (pcapkit.const.http.setting.Setting attribute)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/ngap.html#pcapkit.const.ngap.procedure_code.ProcedureCode.InitialContextSetup">InitialContextSetup (pcapkit.const.ngap.procedure_code.ProcedureCode attribute)</a>
 </li>
         <li><a href="pcapkit/const/ngap.html#pcapkit.const.ngap.procedure_code.ProcedureCode.InitialUEMessage">InitialUEMessage (pcapkit.const.ngap.procedure_code.ProcedureCode attribute)</a>
@@ -24097,6 +24106,8 @@
           <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.NS_DNSIP4AddrOption.ip">(pcapkit.protocols.schema.misc.pcapng.NS_DNSIP4AddrOption attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.NS_DNSIP6AddrOption.ip">(pcapkit.protocols.schema.misc.pcapng.NS_DNSIP6AddrOption attribute)</a>
+</li>
+          <li><a href="pcapkit/toolkit/builtin.html#pcapkit.toolkit.pcap.TCPSegment.ip">(pcapkit.toolkit.pcap.TCPSegment attribute)</a>
 </li>
         </ul></li>
         <li><a href="pcapkit/const/arp.html#pcapkit.const.arp.hardware.Hardware.IP_and_ARP_over_ISO_7816_3">IP_and_ARP_over_ISO_7816_3 (pcapkit.const.arp.hardware.Hardware attribute)</a>
@@ -30352,6 +30363,8 @@
           <li><a href="pcapkit/interface/core.html#module-pcapkit.interface.core">pcapkit.interface.core</a>
 </li>
           <li><a href="pcapkit/interface/misc.html#module-pcapkit.interface.misc">pcapkit.interface.misc</a>
+</li>
+          <li><a href="pcapkit/interface/registry.html#module-pcapkit.interface.registry">pcapkit.interface.registry</a>
 </li>
           <li><a href="pcapkit/protocols/index.html#module-pcapkit.protocols">pcapkit.protocols</a>
 </li>
@@ -37871,6 +37884,8 @@
 </li>
           <li><a href="pcapkit/protocols/transport/udp.html#pcapkit.protocols.schema.transport.udp.UDP.payload">(pcapkit.protocols.schema.transport.udp.UDP attribute)</a>
 </li>
+          <li><a href="pcapkit/toolkit/builtin.html#pcapkit.toolkit.pcap.TCPSegment.payload">(pcapkit.toolkit.pcap.TCPSegment attribute)</a>
+</li>
         </ul></li>
         <li><a href="pcapkit/const/sctp.html#pcapkit.const.sctp.chunk.Chunk.Payload_Data">Payload_Data (pcapkit.const.sctp.chunk.Chunk attribute)</a>
 </li>
@@ -39468,6 +39483,13 @@
 </li>
         </ul></li>
         <li>
+    pcapkit.interface.registry
+
+        <ul>
+          <li><a href="pcapkit/interface/registry.html#module-pcapkit.interface.registry">module</a>
+</li>
+        </ul></li>
+        <li>
     pcapkit.protocols
 
         <ul>
@@ -40550,6 +40572,8 @@
           <li><a href="pcapkit/vendor/ftp.html#module-pcapkit.vendor.ftp">module</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     pcapkit.vendor.ftp.command
 
@@ -40557,8 +40581,6 @@
           <li><a href="pcapkit/vendor/ftp.html#module-pcapkit.vendor.ftp.command">module</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     pcapkit.vendor.ftp.return_code
 
@@ -47960,12 +47982,12 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.reserved_5786">reserved_5786 (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.reserved_5787">reserved_5787 (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.reserved_5794">reserved_5794 (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.reserved_5798">reserved_5798 (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.reserved_5820">reserved_5820 (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
@@ -48678,6 +48700,10 @@
         </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.restconf_ch_tls">restconf_ch_tls (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 </li>
+        <li><a href="pcapkit/interface/registry.html#pcapkit.interface.registry.restore_shipped">restore_shipped() (in module pcapkit.interface.registry)</a>
+</li>
+        <li><a href="pcapkit/interface/registry.html#pcapkit.interface.registry.restore_shipped_dumper">restore_shipped_dumper() (in module pcapkit.interface.registry)</a>
+</li>
         <li><a href="pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.data.internet.hopopt.DFFFlags.ret">ret (pcapkit.protocols.data.internet.hopopt.DFFFlags attribute)</a>
 
         <ul>
@@ -48930,7 +48956,7 @@
 </li>
           <li><a href="pcapkit/toolkit/3rdparty.html#index-6">RFC 2460 Section 4.4</a>
 </li>
-          <li><a href="pcapkit/toolkit/3rdparty.html#index-0">RFC 2460 Section 4.5</a>, <a href="pcapkit/toolkit/3rdparty.html#index-1">[1]</a>, <a href="pcapkit/toolkit/3rdparty.html#index-2">[2]</a>, <a href="pcapkit/toolkit/builtin.html#index-0">[3]</a>, <a href="pcapkit/toolkit/builtin.html#index-1">[4]</a>
+          <li><a href="pcapkit/toolkit/3rdparty.html#index-0">RFC 2460 Section 4.5</a>, <a href="pcapkit/toolkit/3rdparty.html#index-1">[1]</a>, <a href="pcapkit/toolkit/3rdparty.html#index-2">[2]</a>, <a href="pcapkit/toolkit/builtin.html#index-0">[3]</a>, <a href="pcapkit/toolkit/builtin.html#index-2">[4]</a>
 </li>
           <li><a href="pcapkit/toolkit/3rdparty.html#index-5">RFC 2460 Section 4.6</a>
 </li>
@@ -50006,6 +50032,8 @@
 </li>
           <li><a href="changelog/1.5.0.html#index-4">RFC 9293</a>, <a href="contributing/pep.html#index-54">[1]</a>, <a href="pcapkit/const/reg.html#index-41">[2]</a>, <a href="pcapkit/const/tcp.html#index-12">[3]</a>, <a href="pcapkit/const/tcp.html#index-13">[4]</a>, <a href="pcapkit/const/tcp.html#index-14">[5]</a>, <a href="pcapkit/const/tcp.html#index-48">[6]</a>, <a href="pcapkit/const/tcp.html#index-49">[7]</a>, <a href="pcapkit/const/tcp.html#index-50">[8]</a>, <a href="pcapkit/const/tcp.html#index-54">[9]</a>, <a href="pcapkit/const/tcp.html#index-55">[10]</a>, <a href="pcapkit/const/tcp.html#index-56">[11]</a>, <a href="pcapkit/const/tcp.html#index-57">[12]</a>, <a href="pcapkit/const/tcp.html#index-58">[13]</a>, <a href="pcapkit/const/tcp.html#index-59">[14]</a>
 </li>
+          <li><a href="pcapkit/toolkit/builtin.html#index-1">RFC 9293 Section 3.1</a>
+</li>
           <li><a href="pcapkit/foundation/reassembly/ip/ip.html#index-7">RFC 9293 Section 3.10</a>, <a href="pcapkit/foundation/reassembly/ip/ipv4.html#index-1">[1]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-4">[2]</a>, <a href="pcapkit/foundation/reassembly/tcp.html#index-5">[3]</a>, <a href="pcapkit/foundation/reassembly/tcp.html#index-8">[4]</a>
 </li>
           <li><a href="pcapkit/foundation/reassembly/tcp.html#index-1">RFC 9293 Section 3.4</a>
@@ -50770,6 +50798,8 @@
 </li>
           <li><a href="pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.Flags.rst">(pcapkit.protocols.schema.transport.tcp.Flags attribute)</a>
 </li>
+          <li><a href="pcapkit/toolkit/builtin.html#pcapkit.toolkit.pcap.TCPSegment.rst">(pcapkit.toolkit.pcap.TCPSegment attribute)</a>
+</li>
         </ul></li>
         <li><a href="pcapkit/const/http.html#pcapkit.const.http.frame.Frame.RST_STREAM">RST_STREAM (pcapkit.const.http.frame.Frame attribute)</a>
 </li>
@@ -51271,6 +51301,8 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.samd">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/interface/registry.html#pcapkit.interface.registry.same_entry">same_entry() (in module pcapkit.interface.registry)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.samsung_disc">samsung_disc (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.samsung_unidex">samsung_unidex (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
@@ -52357,6 +52389,8 @@
           <li><a href="pcapkit/protocols/link/l2tpv2.html#pcapkit.protocols.schema.link.l2tp.FlagsType.seq">(pcapkit.protocols.schema.link.l2tp.FlagsType attribute)</a>
 </li>
           <li><a href="pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.TCP.seq">(pcapkit.protocols.schema.transport.tcp.TCP attribute)</a>
+</li>
+          <li><a href="pcapkit/toolkit/builtin.html#pcapkit.toolkit.pcap.TCPSegment.seq">(pcapkit.toolkit.pcap.TCPSegment attribute)</a>
 </li>
         </ul></li>
         <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.parameter.Parameter.SEQ_DATA">SEQ_DATA (pcapkit.const.hip.parameter.Parameter attribute)</a>
@@ -54510,6 +54544,8 @@
 </li>
           <li><a href="pcapkit/protocols/transport/udp.html#pcapkit.protocols.schema.transport.udp.UDP.srcport">(pcapkit.protocols.schema.transport.udp.UDP attribute)</a>
 </li>
+          <li><a href="pcapkit/toolkit/builtin.html#pcapkit.toolkit.pcap.TCPSegment.srcport">(pcapkit.toolkit.pcap.TCPSegment attribute)</a>
+</li>
         </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.srdp">srdp (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
@@ -56000,6 +56036,8 @@
 </li>
           <li><a href="pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.Flags.syn">(pcapkit.protocols.schema.transport.tcp.Flags attribute)</a>
 </li>
+          <li><a href="pcapkit/toolkit/builtin.html#pcapkit.toolkit.pcap.TCPSegment.syn">(pcapkit.toolkit.pcap.TCPSegment attribute)</a>
+</li>
         </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.synapse">synapse (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
@@ -56775,6 +56813,8 @@
           <li><a href="pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.scapy.tcp_reassembly">(in module pcapkit.toolkit.scapy)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/toolkit/builtin.html#pcapkit.toolkit.pcap.tcp_segment">tcp_segment() (in module pcapkit.toolkit.pcap)</a>
+</li>
         <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.EPB_FlagsOption.tcp_segmentation_offloaded">tcp_segmentation_offloaded (pcapkit.protocols.data.misc.pcapng.EPB_FlagsOption attribute)</a>
 
         <ul>
@@ -56821,6 +56861,8 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.tcpnethaspsrv">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/toolkit/builtin.html#pcapkit.toolkit.pcap.TCPSegment">TCPSegment (class in pcapkit.toolkit.pcap)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.td_postman">td_postman (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>

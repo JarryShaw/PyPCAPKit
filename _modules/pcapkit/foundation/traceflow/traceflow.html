@@ -202,6 +202,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -721,14 +722,14 @@
 <span class="sd">            ext: file extension</span>
 
 <span class="sd">        """</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
-            <span class="n">_restore_shipped_dumper</span><span class="p">,</span> <span class="n">_same_entry</span><span class="p">)</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.interface.registry</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+            <span class="n">restore_shipped_dumper</span><span class="p">,</span> <span class="n">same_entry</span><span class="p">)</span>
 
         <span class="n">shipped</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_shipped_output</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">format</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">shipped</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">dumper</span> <span class="o">!=</span> <span class="n">shipped</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
             <span class="n">dumper</span> <span class="o">=</span> <span class="n">dumper</span><span class="o">.</span><span class="n">klass</span>
-        <span class="k">if</span> <span class="n">shipped</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_same_entry</span><span class="p">(</span><span class="n">shipped</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dumper</span><span class="p">):</span>
-            <span class="n">_restore_shipped_dumper</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__output__</span><span class="p">,</span> <span class="nb">format</span><span class="p">,</span> <span class="n">shipped</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">shipped</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">same_entry</span><span class="p">(</span><span class="n">shipped</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dumper</span><span class="p">):</span>
+            <span class="n">restore_shipped_dumper</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__output__</span><span class="p">,</span> <span class="nb">format</span><span class="p">,</span> <span class="n">shipped</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'dumper must be a class, not </span><span class="si">{</span><span class="n">dumper</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>

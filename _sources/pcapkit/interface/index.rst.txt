@@ -11,12 +11,15 @@ designed to help and simplify the usage of :mod:`pcapkit`.
 
    core
    misc
+   registry
 
 For wrapper interface functions and constants, please
 refer to the documentation of :mod:`pcapkit.interface.core`
 module, where the core interfaces are defined. And for the
 auxiliary interfaces, please refer to the documentation
 of :mod:`pcapkit.interface.misc` module.
+The helpers the registrars share live in the
+:mod:`pcapkit.interface.registry` module.
 
 .. note::
 
@@ -68,4 +71,10 @@ Following is a table of all interfaces defined in this module:
 |                  |                     | :data:`pcapkit.interface.core.PyPCAPFile`  |
 +------------------+---------------------+--------------------------------------------+
 | Miscellaneous    | :func:`pcapkit.interface.misc.follow_tcp_stream`                 |
++------------------+---------------------+--------------------------------------------+
+|                  | :func:`pcapkit.interface.registry.same_entry`                    |
++                  +---------------------+--------------------------------------------+
+| Registry Helpers | :func:`pcapkit.interface.registry.restore_shipped`               |
++                  +---------------------+--------------------------------------------+
+|                  | :func:`pcapkit.interface.registry.restore_shipped_dumper`        |
 +------------------+---------------------+--------------------------------------------+

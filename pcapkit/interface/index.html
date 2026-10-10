@@ -209,6 +209,7 @@
 <li class="toctree-l2 current has-children current-page"><a class="current reference internal" href="#">User Interface</a><input aria-label="Toggle navigation of User Interface" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="misc.html">Auxiliary Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -507,13 +508,16 @@ designed to help and simplify the usage of <a class="reference internal" href=".
 <li class="toctree-l2"><a class="reference internal" href="misc.html#data-models">Data Models</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="registry.html">Registry Helpers</a></li>
 </ul>
 </div>
 <p>For wrapper interface functions and constants, please
 refer to the documentation of <a class="reference internal" href="core.html#module-pcapkit.interface.core" title="pcapkit.interface.core"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.interface.core</span></code></a>
 module, where the core interfaces are defined. And for the
 auxiliary interfaces, please refer to the documentation
-of <a class="reference internal" href="misc.html#module-pcapkit.interface.misc" title="pcapkit.interface.misc"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.interface.misc</span></code></a> module.</p>
+of <a class="reference internal" href="misc.html#module-pcapkit.interface.misc" title="pcapkit.interface.misc"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.interface.misc</span></code></a> module.
+The helpers the registrars share live in the
+<a class="reference internal" href="registry.html#module-pcapkit.interface.registry" title="pcapkit.interface.registry"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.interface.registry</span></code></a> module.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Should you would like to have additional interfaces defined,
@@ -573,6 +577,13 @@ submit a pull request. Your contribution is highly appreciated.</p>
 </tr>
 <tr class="row-odd"><td><p>Miscellaneous</p></td>
 <td colspan="2"><p><a class="reference internal" href="misc.html#pcapkit.interface.misc.follow_tcp_stream" title="pcapkit.interface.misc.follow_tcp_stream"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.interface.misc.follow_tcp_stream()</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td rowspan="3"><p>Registry Helpers</p></td>
+<td colspan="2"><p><a class="reference internal" href="registry.html#pcapkit.interface.registry.same_entry" title="pcapkit.interface.registry.same_entry"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.interface.registry.same_entry()</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td colspan="2"><p><a class="reference internal" href="registry.html#pcapkit.interface.registry.restore_shipped" title="pcapkit.interface.registry.restore_shipped"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.interface.registry.restore_shipped()</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td colspan="2"><p><a class="reference internal" href="registry.html#pcapkit.interface.registry.restore_shipped_dumper" title="pcapkit.interface.registry.restore_shipped_dumper"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.interface.registry.restore_shipped_dumper()</span></code></a></p></td>
 </tr>
 </tbody>
 </table>

@@ -202,6 +202,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -491,7 +492,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">Data_Frame</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameInfo</span> <span class="k">as</span> <span class="n">Data_FrameInfo</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.pcap</span><span class="w"> </span><span class="kn">import</span> <span class="n">_tcp_segment</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.pcap</span><span class="w"> </span><span class="kn">import</span> <span class="n">tcp_segment</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
@@ -645,7 +646,7 @@
 <span class="sd">        :class:`pcapkit.foundation.reassembly.tcp.TCP`</span>
 
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">segment</span> <span class="o">:=</span> <span class="n">_tcp_segment</span><span class="p">(</span><span class="n">frame</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">segment</span> <span class="o">:=</span> <span class="n">tcp_segment</span><span class="p">(</span><span class="n">frame</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">raw_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">segment</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span>
         <span class="n">frame_info</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Packet'</span><span class="p">,</span> <span class="n">frame</span><span class="o">.</span><span class="n">info</span><span class="p">)</span>
 
@@ -697,7 +698,7 @@
 <span class="sd">        :class:`pcapkit.foundation.traceflow.tcp.TCP`</span>
 
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">segment</span> <span class="o">:=</span> <span class="n">_tcp_segment</span><span class="p">(</span><span class="n">frame</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">segment</span> <span class="o">:=</span> <span class="n">tcp_segment</span><span class="p">(</span><span class="n">frame</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">frame_info</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Packet'</span><span class="p">,</span> <span class="n">frame</span><span class="o">.</span><span class="n">info</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">TF_TCP_Packet</span><span class="p">(</span>  <span class="c1"># type: ignore[type-var]</span>
             <span class="n">protocol</span><span class="o">=</span><span class="n">frame</span><span class="o">.</span><span class="n">linktype</span><span class="p">,</span>                      <span class="c1"># data link type from global header</span>

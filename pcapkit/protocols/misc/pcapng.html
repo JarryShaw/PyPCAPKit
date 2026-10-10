@@ -209,6 +209,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../interface/misc.html">Auxiliary Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -911,7 +912,9 @@ an unresolved module descriptor counts as different from the
 class it names; handing back the stored entry, or a descriptor
 equal to it, is a silent no-op that keeps it. This registry is separate from the PCAP one, so
 <a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.register_linktype" title="pcapkit.foundation.registry.protocols.register_linktype"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_linktype()</span></code></a>
-writing to both cannot make either warn about the other.</p>
+writing to both cannot make either warn about the other. See
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.register</span></code> for the
+shipped descriptor a restore puts back (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1504">#1504</a>).</p>
 </dd>
 </dl>
 </dd></dl>

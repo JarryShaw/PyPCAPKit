@@ -209,6 +209,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="pcapkit/interface/index.html">User Interface</a><input aria-label="Toggle navigation of User Interface" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/interface/core.html">Core Interface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/interface/misc.html">Auxiliary Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/interface/registry.html">Registry Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="pcapkit/foundation/index.html">Library Foundation</a><input aria-label="Toggle navigation of Library Foundation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -986,9 +987,13 @@ requires Python <strong>3.11 or older</strong> until 0.12.1 is published.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Only the four engines above carry extra constraints. <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> itself and
-its <code class="docutils literal notranslate"><span class="pre">default</span></code>, <code class="docutils literal notranslate"><span class="pre">dpkt</span></code> and <code class="docutils literal notranslate"><span class="pre">scapy</span></code> engines need nothing further –
-<code class="docutils literal notranslate"><span class="pre">dpkt</span></code> 1.9.8 and <code class="docutils literal notranslate"><span class="pre">scapy</span></code> 2.7.0 were both measured reading a capture on
-Python 3.14.</p>
+its <code class="docutils literal notranslate"><span class="pre">default</span></code>, <code class="docutils literal notranslate"><span class="pre">dpkt</span></code> and <code class="docutils literal notranslate"><span class="pre">scapy</span></code> engines need nothing beyond their
+<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> – <code class="docutils literal notranslate"><span class="pre">dpkt</span></code> 1.9.8 and <code class="docutils literal notranslate"><span class="pre">scapy</span></code> 2.7.0 were both measured
+reading a capture on Python 3.14. The <code class="docutils literal notranslate"><span class="pre">scapy</span></code> engine needs <strong>scapy 2.6.0 or
+newer</strong>, which the <code class="docutils literal notranslate"><span class="pre">Scapy</span></code> extra requires: 2.5.0 can drop a PCAP-NG
+interface’s timestamp resolution, reading nanoseconds as microseconds
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1572">#1572</a>). <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> does not check the version at run time, so
+upgrade a scapy installed some other way.</p>
 </div>
 <p>For CLI usage, you will need to install the optional packages:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>pypcapkit<span class="o">[</span>cli<span class="o">]</span>
