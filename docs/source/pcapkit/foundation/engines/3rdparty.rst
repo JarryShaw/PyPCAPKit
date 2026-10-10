@@ -64,26 +64,6 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
 .. _DPKT: https://dpkt.readthedocs.io
 
-.. important::
-
-   On PCAP-NG, `DPKT`_ yields **Enhanced Packet Blocks and (obsolete) Packet
-   Blocks only**. ``dpkt.pcapng.Reader.__iter__`` skips every other block type
-   without a warning (``# just ignore other blocks``, as of ``dpkt`` 1.9.8), and
-   :class:`~pcapkit.foundation.engines.dpkt.PCAPNGReader`, which this engine
-   reads PCAP-NG with, keeps that block set. It includes the **Simple Packet
-   Block**, which carries a packet just as an Enhanced Packet Block does. Such packets are silently missing from this
-   engine's output, and the frames after them are numbered as if they had never
-   been captured.
-
-   Reading :file:`examples/captures/test.pcapng` -- four Enhanced Packet Blocks
-   and one Simple Packet Block, across two sections -- this engine gives four
-   frames where the default engine and
-   :class:`~pcapkit.foundation.engines.scapy.Scapy` give five; the missing one is
-   frame 4, the Simple Packet Block. The second Section Header Block is not the
-   cause: the Enhanced Packet Block after it is read. This is a limitation of
-   `DPKT`_, not of :mod:`pcapkit`, so read a capture that may contain Simple
-   Packet Blocks with the default engine instead.
-
 .. note::
 
    ``dpkt.pcapng.Reader`` reads only the **first** Interface Description Block
@@ -92,6 +72,12 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    :class:`~pcapkit.foundation.engines.dpkt.PCAPNGReader` instead, which
    resolves each packet's link type, ``if_tsresol`` and ``if_tsoffset`` from
    the interface it names, in its own section (:issue:`1379`).
+
+   ``dpkt.pcapng.Reader`` also skips Simple Packet Blocks, which `DPKT`_ has no
+   type for; :class:`~pcapkit.foundation.engines.dpkt.PCAPNGReader` reads them
+   through :mod:`pcapkit`'s own :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`
+   and, since the block carries no timestamp, dates them 0, as the default
+   engine does (:issue:`1520`).
 
 .. autoclass:: pcapkit.foundation.engines.dpkt.DPKT
    :no-members:

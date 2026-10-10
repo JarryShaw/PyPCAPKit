@@ -81,8 +81,9 @@ class RecordTimestamp:
     resolution and its original length would be lost between the reader and
     :func:`packet2frame`. The engine's readers yield a :class:`Timestamp` or a
     :class:`DecimalTimestamp` instead, which *is* the value `DPKT`_ yields --
-    so reassembly and flow labels see exactly what they did before -- and also
-    carries those three.
+    so a stored frame's timestamp is exactly what it was before -- and also
+    carries those three. Reassembly and flow tracing are handed a plain
+    :obj:`float` of it, as by every other engine (:issue:`1501`).
 
     .. _DPKT: https://dpkt.readthedocs.io
 
@@ -395,6 +396,30 @@ def _layer2bytes(packet: 'Packet', layer: 'Packet') -> 'tuple[bytes, bool]':
     return packet2bytes(layer), False
 
 
+def _network(packet: 'Packet') -> 'Optional[IP | IP6]':
+    """Fetch the network layer of a DPKT packet.
+
+    Args:
+        packet: DPKT packet, i.e. the outermost layer.
+
+    Returns:
+        The packet itself if it is an IPv4 or IPv6 packet, as `DPKT`_ reads every
+        frame of a raw-IP link type (:issue:`1548`); otherwise the IPv4 or IPv6
+        payload of its link layer, which `DPKT`_ names ``ip`` or ``ip6`` -- a
+        bare IP packet names neither -- or :data:`None` if it has none.
+
+    .. _DPKT: https://dpkt.readthedocs.io
+
+    """
+    import dpkt  # isort:skip
+
+    if isinstance(packet, (dpkt.ip.IP, dpkt.ip6.IP6)):
+        return packet
+    if hasattr(packet, 'ip'):
+        return cast('IP', packet.ip)
+    return getattr(packet, 'ip6', None)
+
+
 def ipv6_hdr_len(ipv6: 'IP6') -> 'int':
     """Calculate length of headers before IPv6 Fragment header.
 
@@ -482,7 +507,9 @@ def ipv4_reassembly(packet: 'Packet', timestamp: 'float', *,
             than on the packet, so it is passed in -- as :func:`tcp_traceflow`
             does. A caller holding only a frame can read it back with
             :func:`packet2timestamp`, which is where
-            :class:`~pcapkit.foundation.engines.dpkt.DPKT` leaves it.
+            :class:`~pcapkit.foundation.engines.dpkt.DPKT` leaves it. Handed on
+            as a :obj:`float`, as every engine's adapters do, though `DPKT`_ reads
+            a nanosecond PCAP's as a :class:`~decimal.Decimal` (:issue:`1501`).
         count: Packet index. If not provided, default to ``-1``.
 
     Returns:
@@ -507,7 +534,9 @@ def ipv4_reassembly(packet: 'Packet', timestamp: 'float', *,
         :class:`pcapkit.foundation.reassembly.ipv4.IPv4`
 
     """
-    ipv4 = getattr(packet, 'ip', None)  # type: Optional[IP]
+    network = _network(packet)
+    # an IPv6 layer is the one with extension headers, as in ``_wire_hdr_len``
+    ipv4 = None if hasattr(network, 'extension_hdrs') else network
     if ipv4 is not None:
         if ipv4.df:     # dismiss not fragmented packet
             return None
@@ -537,7 +566,7 @@ def ipv4_reassembly(packet: 'Packet', timestamp: 'float', *,
             tl=ipv4.len,                                        # total length, header includes
             header=wire[:ihl],                                  # raw bytes type header
             payload=bytearray(wire[ihl:]),                      # raw bytearray type payload
-            timestamp=timestamp,                                # capture timestamp
+            timestamp=float(timestamp),                         # capture timestamp
         )
         return data
     return None
@@ -551,6 +580,7 @@ def ipv6_reassembly(packet: 'Packet', timestamp: 'float', *,
         packet: DPKT packet.
         timestamp: Capture timestamp of the packet, which drives the reassembly
             timeout; :func:`packet2timestamp` reads it back off a stored frame.
+            Handed on as a :obj:`float`, as for :func:`ipv4_reassembly`.
         count: Packet index. If not provided, default to ``-1``.
 
     Returns:
@@ -575,7 +605,8 @@ def ipv6_reassembly(packet: 'Packet', timestamp: 'float', *,
         :class:`pcapkit.foundation.reassembly.ipv6.IPv6`
 
     """
-    ipv6 = getattr(packet, 'ip6', None)  # type: Optional[IP6]
+    network = _network(packet)
+    ipv6 = cast('IP6', network) if hasattr(network, 'extension_hdrs') else None
     if ipv6 is not None:
         ipv6_frag = ipv6.extension_hdrs.get(44)  # type: Optional[IP6FragmentHeader]
         if ipv6_frag is None:       # dismiss not fragmented packet
@@ -618,7 +649,7 @@ def ipv6_reassembly(packet: 'Packet', timestamp: 'float', *,
             tl=hdr_len + len(payload),                           # total length, header includes
             header=wire[:hdr_len],                               # raw bytes type header before IPv6-Frag
             payload=bytearray(payload),                          # raw bytearray type payload after IPv6-Frag
-            timestamp=timestamp,                                 # capture timestamp
+            timestamp=float(timestamp),                          # capture timestamp
         )
         return data
     return None
@@ -632,6 +663,7 @@ def tcp_reassembly(packet: 'Packet', timestamp: 'float', *,
         packet: DPKT packet.
         timestamp: Capture timestamp of the packet, which drives the reassembly
             timeout; :func:`packet2timestamp` reads it back off a stored frame.
+            Handed on as a :obj:`float`, as for :func:`ipv4_reassembly`.
         count: Packet index. If not provided, default to ``-1``.
 
     Returns:
@@ -655,11 +687,8 @@ def tcp_reassembly(packet: 'Packet', timestamp: 'float', *,
         :class:`pcapkit.foundation.reassembly.tcp.TCP`
 
     """
-    if hasattr(packet, 'ip'):
-        ip = cast('IP', packet.ip)
-    elif hasattr(packet, 'ip6'):
-        ip = cast('IP6', packet.ip6)
-    else:
+    ip = _network(packet)
+    if ip is None:
         return None
 
     tcp = getattr(ip, 'tcp', None)  # type: Optional[TCP]
@@ -688,7 +717,7 @@ def tcp_reassembly(packet: 'Packet', timestamp: 'float', *,
             first=tcp.seq,                                      # first sequence number of payload
             last=tcp.seq + raw_len - 1,                         # last sequence number of payload
             len=raw_len,                                        # payload length, header excludes
-            timestamp=timestamp,                                # capture timestamp
+            timestamp=float(timestamp),                         # capture timestamp
         )
         return data
     return None
@@ -700,7 +729,10 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
 
     Args:
         packet: DPKT packet.
-        timestamp: Timestamp of the packet.
+        timestamp: Timestamp of the packet, handed on as a :obj:`float`, as for
+            :func:`ipv4_reassembly`. The PCAP frame record is built from the
+            exact timestamp attached by :func:`attach_timestamp`, if any; see
+            :func:`packet2frame`.
         data_link: Data link layer protocol (from global header).
         count: Packet index. If not provided, default to ``-1``.
 
@@ -725,11 +757,8 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
         :class:`pcapkit.foundation.traceflow.tcp.TCP`
 
     """
-    if hasattr(packet, 'ip'):
-        ip = cast('IP', packet.ip)
-    elif hasattr(packet, 'ip6'):
-        ip = cast('IP6', packet.ip6)
-    else:
+    ip = _network(packet)
+    if ip is None:
         return None
 
     tcp = getattr(ip, 'tcp', None)  # type: Optional[TCP]
@@ -750,7 +779,7 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
             dst=ipaddress.ip_address(ip.dst),                           # destination IP
             srcport=tcp.sport,                                          # TCP source port
             dstport=tcp.dport,                                          # TCP destination port
-            timestamp=timestamp,                                        # timestamp
+            timestamp=float(timestamp),                                 # timestamp
             seq=tcp.seq,                                                # TCP sequence number
             ack=tcp.ack,                                                # TCP acknowledgement number
             header=wire[:tcp.off * 4],                                  # raw bytes type header

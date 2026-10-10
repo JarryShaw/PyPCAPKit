@@ -374,19 +374,6 @@ class TestEngineAgreement(harness.RoundTripBase):
             tuple(f'{capture}/pypcapfile/{aspect}'
                   for capture in ('big_endian.pcap', 'big_endian_nanosecond.pcap')
                   for aspect in ('frames', 'timestamps', 'ipv4', 'datagrams'))),
-        Gap(1501, 'the dpkt engine hands reassembly the Decimal timestamp dpkt reads from a '
-               'nanosecond PCAP (pcapkit/foundation/engines/dpkt.py:309), where every other '
-               'engine hands it a float (pcapkit/toolkit/pcap.py:73)',
-            'INPUTS', "timestamp Decimal('1500000000.123456789') != 1500000000.1234567",
-            ('big_endian_nanosecond.pcap/dpkt/ipv4',)),
-        Gap(1520, "pcapkit's own PCAPNGReader for the dpkt engine yields only Enhanced and "
-               'obsolete Packet Blocks, so a Simple Packet Block is dropped and every later '
-               'frame shifts by one (pcapkit/foundation/engines/dpkt.py:124)',
-            ('FRAMES', 'RECORDS', 'INPUTS', 'DATAGRAMS'),
-            ('4 frames != 5', 'frame 4: ', '2 datagrams != 3'),
-            ('test.pcapng/dpkt/frames', 'test.pcapng/dpkt/timestamps', 'test.pcapng/dpkt/octets',
-             'test.pcapng/dpkt/ipv4',
-             'test.pcapng/dpkt/datagrams')),
         Gap(1502, 'the default engine does not dissect LINKTYPE_RAW (101) frames, which scapy reads '
                'as IPv4: neither Frame.__proto__ nor PCAPNG.__proto__ registers LinkType.RAW '
                '(pcapkit/protocols/misc/pcap/frame.py:90, pcapkit/protocols/misc/pcapng.py:699), '
