@@ -359,8 +359,20 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         # octets, and parsing the next layer from none would default-fill a
         # header that was never captured, which ``from_data`` then rebuilds
         # (:issue:`1167`). A zero length makes it a ``NoPayload`` instead.
+        #
+        # A Total Length of 0 is what TCP segmentation offload leaves in a
+        # capture taken on the sending host: the payload is then the rest of
+        # the captured frame, with no trailer, as Wireshark ("presumed TSO") and
+        # dpkt read it. Any other Total Length shorter than the header is
+        # Wireshark's "Bogus IP length", which it dissects no further: no
+        # payload, and the octets after the header are the trailer, as they are
+        # for a Total Length equal to the header's. Either way the rebuild
+        # writes the Total Length back as it was (:issue:`1547`).
         if len(self) > ipv4.hdr_len:
-            _plen = ipv4.len - ipv4.hdr_len
+            if ipv4.len == 0:
+                _plen = len(self) - ipv4.hdr_len
+            else:
+                _plen = max(ipv4.len - ipv4.hdr_len, 0)
         else:
             _plen = 0
 

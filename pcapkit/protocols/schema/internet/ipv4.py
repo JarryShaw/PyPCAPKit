@@ -732,8 +732,12 @@ class IPv4(Schema):
     )
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: pkt.get('__option_padding__', 0))
-    #: Payload.
-    payload: 'bytes' = PayloadField(length=lambda pkt: pkt['length'] - pkt['vihl']['ihl'] * 4)
+    #: Payload. A Total Length of 0, as TCP segmentation offload leaves it in a
+    #: capture taken on the sending host, takes the rest of the data and leaves
+    #: no trailer; any other Total Length shorter than the header leaves the
+    #: payload empty and the rest to the trailer (:issue:`1547`).
+    payload: 'bytes' = PayloadField(length=lambda pkt: (
+        -1 if pkt['length'] == 0 else max(pkt['length'] - pkt['vihl']['ihl'] * 4, 0)))
     #: Octets captured past the Total Length, such as Ethernet minimum-frame
     #: padding. A :class:`~pcapkit.corekit.fields.misc.PayloadField` with no
     #: length takes whatever the payload leaves on unpack and writes its value
