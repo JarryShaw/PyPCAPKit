@@ -165,12 +165,6 @@ class TestExtensionHeaderChainAgreement(harness.RoundTripBase):
         Gap(1609, 'tshark dissects up to about 496 extension headers, so finds the TCP past '
                   'EXTENSION_HEADER_LIMIT, carried in IPv4 or IPv6; at 1,000 it gives up and agrees',
             'INPUTS', 'extra, default has none', ('ipv4-33/pyshark/trace', 'ipv6-33/pyshark/trace')),
-        Gap(1606, 'dpkt and scapy dissect no IPv6 extension header carried in IPv4 '
-                  '(dpkt keeps the payload of IPv4 protocol 60 as bytes, scapy as Raw), so find no '
-                  'TCP behind one, where the default engine reads past it at any length up to '
-                  'EXTENSION_HEADER_LIMIT',
-            'INPUTS', 'missing, default has', ('ipv4-30/dpkt/*', 'ipv4-32/dpkt/*',
-                                               'ipv4-30/scapy/*', 'ipv4-32/scapy/*')),
     )
 
     @classmethod
