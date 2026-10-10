@@ -27,6 +27,13 @@ The counts are the same in development mode as outside it:
 the log record carries, never how many records there are. Constructing a warning
 class is not an act of reporting one -- it emits nothing and has no side effects.
 
+A next layer captured shorter than its length hint is parsed on trial, and
+replaced with :class:`~pcapkit.protocols.misc.raw.Raw` when its header was not
+captured. The trial's warnings are held back by
+:class:`~pcapkit.utilities.warnings.hold_warnings`: a replaced layer's are dropped
+on both channels, since they describe a layer the result does not have, and a kept
+layer's are reported as above when the trial ends (:issue:`1580`).
+
 Silencing pcapkit Warnings
 --------------------------
 
