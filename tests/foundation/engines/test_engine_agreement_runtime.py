@@ -19,12 +19,14 @@ the same capture:
     hands the reassembler, keyed by frame number -- every field;
 ``trace``
     every :class:`~pcapkit.foundation.traceflow.data.tcp.Packet` handed to the
-    flow tracer, keyed by frame number -- every field but ``frame``, which is
-    the engine's own frame object;
+    flow tracer, keyed by frame number -- every field except ``frame``, which
+    is the engine's own frame object, and except ``header`` and ``payload`` for
+    an engine in :data:`NO_TCP_OCTETS`;
 ``datagrams``
     every reassembled datagram, every field but the lazily parsed ``packet``;
 ``flows``
-    every traced flow's label and index, and the octets of its PCAP file.
+    every traced flow's label and index, and the octets of its PCAP file unless
+    the engine is in :data:`JSON_TRACE`.
 
 The inputs are captured by wrapping :meth:`ReassemblyBase.__call__
 <pcapkit.foundation.reassembly.reassembly.ReassemblyBase.__call__>` and
@@ -79,6 +81,20 @@ ASPECTS = ('frames', 'timestamps', 'octets', 'ipv4', 'ipv6', 'tcp', 'trace', 'da
 NO_OCTETS = {
     'pyshark': 'pyshark reports dissected fields, not the frame octets',
     'pypcapfile': 'the pypcapfile engine replaces the frame octets with decoded layers',
+}
+#: Engines whose flow-tracing input carries no TCP octets, and why. Their ``trace``
+#: comparison leaves out ``header`` and ``payload`` and compares every other field.
+NO_TCP_OCTETS = {
+    'pyshark': 'pyshark reports dissected fields, not the octets behind them, so tcp_traceflow '
+               "hands the tracer empty ones and Extractor refuses trace_analyse for it "
+               '(pcapkit/foundation/extraction.py:1446-1455; ruling on #1507)',
+}
+#: Engines whose flow files are JSON whatever ``trace_format`` asks for, and why. Their
+#: ``flows`` comparison checks each flow's label and frame indices, not the file's octets.
+JSON_TRACE = {
+    'pyshark': 'pyshark cannot supply the frame bytes a PCAP trace needs, so Extractor writes '
+               "JSON with a FormatWarning (pcapkit/foundation/extraction.py:1440-1444; ruling "
+               'on #1507)',
 }
 #: Captures with at least one TCP flow, measured on ``00d232890``.
 TRACED = ('http.pcap', 'http6.cap', 'in.pcap', 'many_interfaces.pcapng', 'options-tcp.pcap',
@@ -205,6 +221,12 @@ def _run(engine: 'str', capture: 'str') -> '_Run':
     return _RUNS[key]
 
 
+def _without_tcp_octets(inputs: 'dict[int, Any]') -> 'dict[int, Any]':
+    """``trace`` inputs without ``header`` and ``payload``, per :data:`NO_TCP_OCTETS`."""
+    return {number: [{key: value for key, value in packet.items() if key not in ('header', 'payload')}
+                     for packet in packets] for number, packets in inputs.items()}
+
+
 def _first_difference(got: 'dict[int, Any]', want: 'dict[int, Any]') -> 'Optional[str]':
     for number in sorted(set(got) | set(want)):
         if number not in got:
@@ -251,7 +273,10 @@ def compare(engine: 'str', capture: 'str', aspect: 'str') -> 'Outcome':
             return Outcome('RECORDS', f'{len(mine)} {aspect} != {len(theirs)}')
         return Outcome('OK')
     if aspect in run.inputs:
-        diff = _first_difference(run.inputs[aspect], base.inputs[aspect])
+        mine, theirs = run.inputs[aspect], base.inputs[aspect]
+        if aspect == 'trace' and engine in NO_TCP_OCTETS:
+            mine, theirs = _without_tcp_octets(mine), _without_tcp_octets(theirs)
+        diff = _first_difference(mine, theirs)
         return Outcome('INPUTS', diff) if diff else Outcome('OK')
     if aspect == 'datagrams':
         kinds = [kind for kind in ('ipv4', 'ipv6', 'tcp') if run.datagrams[kind] is not None]
@@ -273,6 +298,8 @@ def compare(engine: 'str', capture: 'str', aspect: 'str') -> 'Outcome':
         if [f[:2] for f in run.flows] != [f[:2] for f in base.flows]:
             return Outcome('FLOWS', f'flows {[f[:2] for f in run.flows]!r:.200} != '
                                     f'{[f[:2] for f in base.flows]!r:.200}')
+        if engine in JSON_TRACE:
+            return Outcome('OK')
         for (label, _, mine), (_, _, theirs) in zip(run.flows, base.flows):
             if mine != theirs:
                 return Outcome('FLOWS', f'{label}: file of {len(mine)} octets != {len(theirs)} '
@@ -311,11 +338,6 @@ class TestEngineAgreement(harness.RoundTripBase):
             tuple(f'{capture}/pypcapfile/{aspect}'
                   for capture in ('http6.cap', 'stream.pcap', 'tcp.pcap', 'test.pcap')
                   for aspect in ('tcp', 'trace', 'datagrams', 'flows'))),
-        Gap(1514, "the pyshark engine raises ValueError on the first TCP frame it traces: "
-               'tcp_traceflow reads the flags with bool(int(tcp.flags_syn)) (pcapkit/toolkit/'
-               "pyshark.py:415-417), and tshark 4.x reports them as 'True' and 'False'",
-            'ERROR', "ValueError: invalid literal for int() with base 10: ",
-            tuple(f'{capture}/pyshark/*' for capture in TRACED)),
         Gap(1515, 'the pyshark engine counts a Systemd Journal Export Block as a frame: tshark '
                'numbers it as one, and read_frame takes every tshark frame '
                '(pcapkit/foundation/engines/pyshark.py:245-248)',
