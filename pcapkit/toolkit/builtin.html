@@ -640,11 +640,13 @@ flow tracing (<a class="reference internal" href="../foundation/traceflow/tcp.ht
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.toolkit.pcap.TCPSegment" title="pcapkit.toolkit.pcap.TCPSegment"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCPSegment</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The fields of the TCP layer if <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> parsed one. Otherwise, the
-fields of the fixed 20-octet TCP header (<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.1"><strong>RFC 9293 Section 3.1</strong></a>) if the
-IP payload is a <a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> the TCP parser
-rejected, of protocol TCP, from a datagram that is not a later fragment,
-with at least those 20 octets captured; else <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p>
+<dd class="field-odd"><p>The fields of the TCP layer if <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> parsed one, with those of
+the IP layer that carries it – in a tunnel, the innermost
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1581">#1581</a>). Otherwise, the fields of the fixed 20-octet TCP header
+(<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.1"><strong>RFC 9293 Section 3.1</strong></a>) if the payload of the innermost IP layer is a
+<a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> the TCP parser rejected, of
+protocol TCP, from a datagram that is not a later fragment, with at
+least those 20 octets captured; else <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p>
 </dd>
 </dl>
 <div class="admonition note">
@@ -654,9 +656,10 @@ past the captured octets, and the TCP parser rejects such a header by
 design (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1404">#1404</a>), so the segment arrives as
 <a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>. The ports, numbers and flags
 are all in the fixed header, so the segment still belongs to its flow,
-as it does for <code class="xref py py-mod docutils literal notranslate"><span class="pre">dpkt</span></code>, <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.html#module-scapy" title="(in Scapy v2.8.0.post3)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scapy</span></code></a> and Wireshark (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1518">#1518</a>).
+as it does for <code class="xref py py-mod docutils literal notranslate"><span class="pre">dpkt</span></code>, <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.html#module-scapy" title="(in Scapy v2.8.0.post4)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scapy</span></code></a> and Wireshark (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1518">#1518</a>).
 The header and payload are then the captured octets either side of the
-Data Offset.</p>
+Data Offset. Inside a tunnel, this holds of the IP layer carrying the
+segment, as it does without one.</p>
 </div>
 </dd></dl>
 
@@ -669,7 +672,7 @@ Data Offset.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.toolkit.pcap.TCPSegment.ip">
 <span class="sig-name descname"><span class="pre">ip</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.IPv4" title="pcapkit.protocols.data.internet.ipv4.IPv4"><span class="pre">IPv4</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../protocols/internet/ipv6.html#pcapkit.protocols.data.internet.ipv6.IPv6" title="pcapkit.protocols.data.internet.ipv6.IPv6"><span class="pre">IPv6</span></a></span><a class="headerlink" href="#pcapkit.toolkit.pcap.TCPSegment.ip" title="Link to this definition">¶</a></dt>
-<dd><p>Info of the IP layer carrying the segment.</p>
+<dd><p>Info of the IP layer carrying the segment, the innermost one in a tunnel.</p>
 </dd></dl>
 
 <dl class="py attribute">

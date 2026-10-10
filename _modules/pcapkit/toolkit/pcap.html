@@ -494,7 +494,11 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">IP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TCP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP</span> <span class="k">as</span> <span class="n">Protocol_IP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.null</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
@@ -507,8 +511,6 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6_frag</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Frag</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'ipv4_reassembly'</span><span class="p">,</span> <span class="s1">'ipv6_reassembly'</span><span class="p">,</span> <span class="s1">'tcp_reassembly'</span><span class="p">,</span> <span class="s1">'tcp_traceflow'</span><span class="p">,</span>
            <span class="s1">'tcp_segment'</span><span class="p">,</span> <span class="s1">'TCPSegment'</span><span class="p">]</span>
@@ -523,7 +525,7 @@
 
 <span class="sd">    """</span>
 
-    <span class="c1">#: Info of the IP layer carrying the segment.</span>
+    <span class="c1">#: Info of the IP layer carrying the segment, the innermost one in a tunnel.</span>
     <span class="n">ip</span><span class="p">:</span> <span class="s1">'Data_IPv4 | Data_IPv6'</span>
     <span class="c1">#: TCP source port.</span>
     <span class="n">srcport</span><span class="p">:</span> <span class="s1">'int'</span>
@@ -546,6 +548,38 @@
 
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_carrier</span><span class="p">(</span><span class="n">frame</span><span class="p">:</span> <span class="s1">'ProtocolBase'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Optional[IPv4 | IPv6], Optional[TCP]]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Fetch the TCP layer of a frame and the IP layer that carries it.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        frame: PCAP frame or PCAP-NG block.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The IPv4 or IPv6 layer nearest above the frame's TCP layer, and that TCP</span>
+<span class="sd">        layer; with no TCP layer, the last IPv4 or IPv6 layer of the frame and</span>
+<span class="sd">        :data:`None`. With no IP layer, neither.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The nearest IP layer is the innermost one of an IP-in-IP tunnel</span>
+<span class="sd">        (:rfc:`2003`, :rfc:`2473`, :rfc:`4213`), whose addresses are the TCP</span>
+<span class="sd">        endpoints', as in Wireshark's TCP conversations; the outermost, which</span>
+<span class="sd">        ``frame['IP']`` finds, is the tunnel's (:issue:`1581`). It is found by</span>
+<span class="sd">        walking down from the outermost, so the headers between them do not</span>
+<span class="sd">        intervene: IPv6 dissects its own extension headers, and an AH or other</span>
+<span class="sd">        header inside IPv4 is a layer of its own but not an IP layer.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="s1">'IP'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+    <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv4 | IPv6'</span><span class="p">,</span> <span class="n">frame</span><span class="p">[</span><span class="s1">'IP'</span><span class="p">])</span>
+    <span class="n">layer</span> <span class="o">=</span> <span class="n">ip</span><span class="o">.</span><span class="n">payload</span>
+    <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="p">(</span><span class="n">NoPayload</span><span class="p">,</span> <span class="n">TCP</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">Protocol_IP</span><span class="p">):</span>
+            <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv4 | IPv6'</span><span class="p">,</span> <span class="n">layer</span><span class="p">)</span>
+        <span class="n">layer</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">payload</span>
+    <span class="k">return</span> <span class="n">ip</span><span class="p">,</span> <span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'TCP'</span><span class="p">,</span> <span class="n">frame</span><span class="p">[</span><span class="s1">'TCP'</span><span class="p">])</span> <span class="k">if</span> <span class="s1">'TCP'</span> <span class="ow">in</span> <span class="n">frame</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="tcp_segment">
 <a class="viewcode-back" href="../../../pcapkit/toolkit/builtin.html#pcapkit.toolkit.pcap.tcp_segment">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">tcp_segment</span><span class="p">(</span><span class="n">frame</span><span class="p">:</span> <span class="s1">'ProtocolBase'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[TCPSegment]'</span><span class="p">:</span>
@@ -558,11 +592,13 @@
 <span class="sd">        frame: PCAP frame or PCAP-NG block.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        The fields of the TCP layer if :mod:`pcapkit` parsed one. Otherwise, the</span>
-<span class="sd">        fields of the fixed 20-octet TCP header (:rfc:`9293#section-3.1`) if the</span>
-<span class="sd">        IP payload is a :class:`~pcapkit.protocols.misc.raw.Raw` the TCP parser</span>
-<span class="sd">        rejected, of protocol TCP, from a datagram that is not a later fragment,</span>
-<span class="sd">        with at least those 20 octets captured; else :data:`None`.</span>
+<span class="sd">        The fields of the TCP layer if :mod:`pcapkit` parsed one, with those of</span>
+<span class="sd">        the IP layer that carries it -- in a tunnel, the innermost</span>
+<span class="sd">        (:issue:`1581`). Otherwise, the fields of the fixed 20-octet TCP header</span>
+<span class="sd">        (:rfc:`9293#section-3.1`) if the payload of the innermost IP layer is a</span>
+<span class="sd">        :class:`~pcapkit.protocols.misc.raw.Raw` the TCP parser rejected, of</span>
+<span class="sd">        protocol TCP, from a datagram that is not a later fragment, with at</span>
+<span class="sd">        least those 20 octets captured; else :data:`None`.</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        A capture snapped inside the TCP header leaves a Data Offset that runs</span>
@@ -572,14 +608,17 @@
 <span class="sd">        are all in the fixed header, so the segment still belongs to its flow,</span>
 <span class="sd">        as it does for :mod:`dpkt`, :mod:`scapy` and Wireshark (:issue:`1518`).</span>
 <span class="sd">        The header and payload are then the captured octets either side of the</span>
-<span class="sd">        Data Offset.</span>
+<span class="sd">        Data Offset. Inside a tunnel, this holds of the IP layer carrying the</span>
+<span class="sd">        segment, as it does without one.</span>
 
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="s1">'TCP'</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
-        <span class="n">tcp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'TCP'</span><span class="p">,</span> <span class="n">frame</span><span class="p">[</span><span class="s1">'TCP'</span><span class="p">])</span>
+    <span class="n">ip</span><span class="p">,</span> <span class="n">tcp</span> <span class="o">=</span> <span class="n">_carrier</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ip</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">tcp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">tcp_info</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">info</span>
         <span class="k">return</span> <span class="n">TCPSegment</span><span class="p">(</span>
-            <span class="n">ip</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'IPv4 | IPv6'</span><span class="p">,</span> <span class="n">frame</span><span class="p">[</span><span class="s1">'IP'</span><span class="p">])</span><span class="o">.</span><span class="n">info</span><span class="p">,</span>
+            <span class="n">ip</span><span class="o">=</span><span class="n">ip</span><span class="o">.</span><span class="n">info</span><span class="p">,</span>
             <span class="n">srcport</span><span class="o">=</span><span class="n">tcp_info</span><span class="o">.</span><span class="n">srcport</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
             <span class="n">dstport</span><span class="o">=</span><span class="n">tcp_info</span><span class="o">.</span><span class="n">dstport</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">tcp_info</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
@@ -591,9 +630,6 @@
             <span class="n">payload</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">packet</span><span class="o">.</span><span class="n">payload</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">if</span> <span class="s1">'IP'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">None</span>
-    <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv4 | IPv6'</span><span class="p">,</span> <span class="n">frame</span><span class="p">[</span><span class="s1">'IP'</span><span class="p">])</span>
     <span class="n">ip_info</span> <span class="o">=</span> <span class="n">ip</span><span class="o">.</span><span class="n">info</span>
     <span class="n">raw</span> <span class="o">=</span> <span class="n">ip</span><span class="o">.</span><span class="n">payload</span>
     <span class="c1"># NOTE: a Raw with no error is one the caller asked for, by stopping the</span>

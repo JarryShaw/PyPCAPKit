@@ -547,6 +547,17 @@
 <span class="c1">#: .. _DPKT: https://dpkt.readthedocs.io</span>
 <span class="n">BUFFER_ATTR</span> <span class="o">=</span> <span class="s1">'__pcapkit_buffer__'</span>
 
+<span class="c1">#: IP protocol numbers of the IP-in-IP tunnels the default engine dissects</span>
+<span class="c1">#: (see :attr:`Internet.__proto__</span>
+<span class="c1">#: &lt;pcapkit.protocols.internet.internet.Internet.__proto__&gt;`), over IPv4 and</span>
+<span class="c1">#: IPv6 alike: IPv4 (protocol 4, :rfc:`2003`) and IPv6 (protocol 41,</span>
+<span class="c1">#: :rfc:`2473` and :rfc:`4213`). `DPKT`_ also decodes an IPv4 packet's</span>
+<span class="c1">#: protocol 0 as IPv4, its ``IP_PROTO_IP``, where the default engine reads an</span>
+<span class="c1">#: IPv6 Hop-by-Hop Options header, so :func:`_tcp_carrier` does not enter it.</span>
+<span class="c1">#:</span>
+<span class="c1">#: .. _DPKT: https://dpkt.readthedocs.io</span>
+<span class="n">IP_TUNNELS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv4</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6</span><span class="p">)))</span>
+
 
 <span class="k">class</span><span class="w"> </span><span class="nc">RecordTimestamp</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""A record's capture timestamp, with what a PCAP frame record needs of it.</span>
@@ -895,6 +906,44 @@
     <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="s1">'ip6'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_tcp_carrier</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Optional[IP | IP6], Optional[TCP]]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Fetch the IP layer of a DPKT packet that carries its TCP segment, and the segment.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: DPKT packet, i.e. the outermost layer.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The innermost IPv4 or IPv6 packet of the network layer (see</span>
+<span class="sd">        :func:`_network`) and of the IP-in-IP tunnels it carries, and its</span>
+<span class="sd">        :class:`dpkt.tcp.TCP` payload, if it has one; else :data:`None` for the</span>
+<span class="sd">        latter, and for both with no network layer. A tunnel is a packet whose</span>
+<span class="sd">        protocol, or for IPv6 the next header after its extension headers, is</span>
+<span class="sd">        one of the :data:`IP_TUNNELS`.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        `DPKT`_ decodes an IPv4 or IPv6 packet inside another (:rfc:`2003`,</span>
+<span class="sd">        :rfc:`2473`, :rfc:`4213`) as its ``data``. The TCP endpoints are the</span>
+<span class="sd">        innermost packet's addresses, as for the default engine</span>
+<span class="sd">        (:func:`pcapkit.toolkit.pcap.tcp_segment`); the outer ones are the</span>
+<span class="sd">        tunnel's (:issue:`1581`).</span>
+
+<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
+
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">dpkt</span>  <span class="c1"># isort:skip</span>
+
+    <span class="n">ip</span> <span class="o">=</span> <span class="n">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ip</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+    <span class="k">while</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="s1">'p'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">in</span> <span class="n">IP_TUNNELS</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="n">dpkt</span><span class="o">.</span><span class="n">ip</span><span class="o">.</span><span class="n">IP</span><span class="p">,</span> <span class="n">dpkt</span><span class="o">.</span><span class="n">ip6</span><span class="o">.</span><span class="n">IP6</span><span class="p">)):</span>
+        <span class="n">ip</span> <span class="o">=</span> <span class="n">ip</span><span class="o">.</span><span class="n">data</span>
+
+    <span class="n">tcp</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="s1">'tcp'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># type: Optional[TCP]</span>
+    <span class="k">if</span> <span class="n">tcp</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="s1">'data'</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s1">'TCP'</span><span class="p">:</span>
+        <span class="n">tcp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'TCP'</span><span class="p">,</span> <span class="n">ip</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ip</span><span class="p">,</span> <span class="n">tcp</span>
+
+
 <div class="viewcode-block" id="ipv6_hdr_len">
 <a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.dpkt.ipv6_hdr_len">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">ipv6_hdr_len</span><span class="p">(</span><span class="n">ipv6</span><span class="p">:</span> <span class="s1">'IP6'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
@@ -1162,7 +1211,8 @@
 <span class="sd">        Data for TCP reassembly.</span>
 
 <span class="sd">        * If the ``packet`` can be used for TCP reassembly. A packet can be reassembled</span>
-<span class="sd">          if it contains TCP layer (:class:`dpkt.tcp.TCP`).</span>
+<span class="sd">          if it contains TCP layer (:class:`dpkt.tcp.TCP`), keyed by the IP packet that</span>
+<span class="sd">          carries it -- in an IP-in-IP tunnel, the innermost (see :func:`_tcp_carrier`).</span>
 <span class="sd">        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP</span>
 <span class="sd">          reassembly (:term:`reasm.tcp.packet`) will be returned; otherwise, returns :data:`None`.</span>
 
@@ -1179,14 +1229,8 @@
 <span class="sd">        :class:`pcapkit.foundation.reassembly.tcp.TCP`</span>
 
 <span class="sd">    """</span>
-    <span class="n">ip</span> <span class="o">=</span> <span class="n">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">ip</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">None</span>
-
-    <span class="n">tcp</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="s1">'tcp'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># type: Optional[TCP]</span>
-    <span class="k">if</span> <span class="n">tcp</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="s1">'data'</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s1">'TCP'</span><span class="p">:</span>
-        <span class="n">tcp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'TCP'</span><span class="p">,</span> <span class="n">ip</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">tcp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">ip</span><span class="p">,</span> <span class="n">tcp</span> <span class="o">=</span> <span class="n">_tcp_carrier</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">tcp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">flags</span> <span class="o">=</span> <span class="nb">bin</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">flags</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
         <span class="n">wire</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_layer2bytes</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">tcp</span><span class="p">)</span>
         <span class="n">raw_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>                                 <span class="c1"># payload length, header excludes</span>
@@ -1235,7 +1279,8 @@
 <span class="sd">        Data for TCP reassembly.</span>
 
 <span class="sd">        * If the ``packet`` can be used for TCP flow tracing. A packet can be reassembled</span>
-<span class="sd">          if it contains TCP layer (:class:`dpkt.tcp.TCP`).</span>
+<span class="sd">          if it contains TCP layer (:class:`dpkt.tcp.TCP`), keyed by the IP packet that</span>
+<span class="sd">          carries it -- in an IP-in-IP tunnel, the innermost (see :func:`_tcp_carrier`).</span>
 <span class="sd">        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP</span>
 <span class="sd">          flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.</span>
 
@@ -1252,14 +1297,8 @@
 <span class="sd">        :class:`pcapkit.foundation.traceflow.tcp.TCP`</span>
 
 <span class="sd">    """</span>
-    <span class="n">ip</span> <span class="o">=</span> <span class="n">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">ip</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">None</span>
-
-    <span class="n">tcp</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="s1">'tcp'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># type: Optional[TCP]</span>
-    <span class="k">if</span> <span class="n">tcp</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="s1">'data'</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s1">'TCP'</span><span class="p">:</span>
-        <span class="n">tcp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'TCP'</span><span class="p">,</span> <span class="n">ip</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">tcp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">ip</span><span class="p">,</span> <span class="n">tcp</span> <span class="o">=</span> <span class="n">_tcp_carrier</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">tcp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">flags</span> <span class="o">=</span> <span class="nb">bin</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">flags</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
         <span class="n">wire</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_layer2bytes</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">tcp</span><span class="p">)</span>
 

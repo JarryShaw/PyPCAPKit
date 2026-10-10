@@ -493,7 +493,7 @@
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">decimal</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
@@ -933,6 +933,34 @@
 
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_carrier</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Any, Any]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Fetch the TCP layer of a PyShark packet and the IP layer that carries it.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: PyShark packet.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The ``ip`` or ``ipv6`` layer nearest above the packet's first ``tcp``</span>
+<span class="sd">        layer, and that TCP layer; :data:`None` for either the packet lacks.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The nearest is the innermost IP layer of an IP-in-IP tunnel</span>
+<span class="sd">        (:rfc:`2003`, :rfc:`2473`, :rfc:`4213`), whose addresses are the TCP</span>
+<span class="sd">        endpoints', as for the default engine</span>
+<span class="sd">        (:func:`pcapkit.toolkit.pcap.tcp_segment`). ``packet.ip`` is the first</span>
+<span class="sd">        ``ip`` layer instead, which is the tunnel's (:issue:`1581`).</span>
+
+<span class="sd">    """</span>
+    <span class="n">ip</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Any</span>
+    <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">packet</span><span class="o">.</span><span class="n">layers</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">layer_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">'tcp'</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ip</span><span class="p">,</span> <span class="n">layer</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'ip'</span><span class="p">,</span> <span class="s1">'ipv6'</span><span class="p">):</span>
+            <span class="n">ip</span> <span class="o">=</span> <span class="n">layer</span>
+    <span class="k">return</span> <span class="n">ip</span><span class="p">,</span> <span class="kc">None</span>
+
+
 <div class="viewcode-block" id="tcp_traceflow">
 <a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pyshark.tcp_traceflow">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">tcp_traceflow</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'TF_TCP_Packet | None'</span><span class="p">:</span>
@@ -948,7 +976,8 @@
 <span class="sd">        Data for TCP flow tracing.</span>
 
 <span class="sd">        * If the ``packet`` can be used for TCP flow tracing. A packet can be reassembled</span>
-<span class="sd">          if it contains TCP layer.</span>
+<span class="sd">          if it contains TCP layer, keyed by the IP layer that carries it -- in an</span>
+<span class="sd">          IP-in-IP tunnel, the innermost (see :func:`_carrier`).</span>
 <span class="sd">        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP</span>
 <span class="sd">          flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.</span>
 
@@ -962,15 +991,8 @@
 <span class="sd">        :class:`pcapkit.foundation.traceflow.tcp.TCP`</span>
 
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="s1">'IP'</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
-        <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Packet'</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">ip</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="s1">'IPv6'</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
-        <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Packet'</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">ipv6</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">None</span>
-
-    <span class="k">if</span> <span class="s1">'TCP'</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
-        <span class="n">tcp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Packet'</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">tcp</span><span class="p">)</span>
+    <span class="n">ip</span><span class="p">,</span> <span class="n">tcp</span> <span class="o">=</span> <span class="n">_carrier</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">tcp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="c1"># NOTE: the link type is keyed on ``frame.encap_type`` -- Wireshark's</span>
         <span class="c1"># internal ``WTAP_ENCAP_*`` number -- through</span>

@@ -601,8 +601,8 @@ tracing, and PCAP savefiles on disk only</p></td>
 <td><p>no IPv6 decoder, hence no IPv6 reassembly – disabled with an
 <a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a>, and
 <a class="reference internal" href="../../toolkit/3rdparty.html#pcapkit.toolkit.pypcapfile.ipv6_reassembly" title="pcapkit.toolkit.pypcapfile.ipv6_reassembly"><code class="xref py py-func docutils literal notranslate"><span class="pre">ipv6_reassembly()</span></code></a> raises;
-TCP over IPv6, and TCP tunnelled in IP (e.g. 6in4, 4in4), are
-left out of TCP reassembly and flow tracing, each with an
+TCP over IPv6, tunnelled in IP (e.g. 6in4) or not, is left
+out of TCP reassembly and flow tracing, with an
 <a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a> once
 per capture; IPv4 behind 802.1Q/802.1ad VLAN tags is read as
 it is untagged; PCAP savefiles only, otherwise
