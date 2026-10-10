@@ -139,7 +139,12 @@ crypto = [ "cryptography>=3.4" ]
 NGAP = [ "pycrate" ]
 # for normal users
 DPKT = [ "dpkt" ]
-Scapy = [ "scapy" ]
+# The floor is measured, #1572: on scapy 2.5.0 a PCAP-NG interface's
+# ``if_tsresol`` is lost after a comment option without a newline, so a
+# nanosecond interface reads as microseconds, and ``packet2dict`` reports DNS
+# records and field order differently. 2.6.0, the next release, fixes all three.
+# It needs Python 3.7, hence the marker, as ``PCAP_CT``'s below.
+Scapy = [ "scapy>=2.6.0; python_version >= '3.7'" ]
 PyShark = [ "pyshark" ]
 # pypcap ships no wheels, so this compiles a C extension against libpcap and
 # needs both its headers and its shared library present; deliberately kept out
@@ -255,7 +260,8 @@ all = [ "emoji", "cryptography>=3.4", "pycrate" ]
 # and it is not a place to add ``pypcap``/``pcap-ct`` just to silence a
 # finding CI has already decided to carry as advisory.
 dev = [
-    "dpkt", "scapy", "pyshark",
+    # scapy: the same floor and marker as the Scapy extra above, #1572
+    "dpkt", "scapy>=2.6.0; python_version >= '3.7'", "pyshark",
     # same marker and reasoning as the PyPCAPFile extra above and the old
     # ``all``: on 3.12+ the package installs cleanly and is then unusable, so
     # the marker keeps the resolver from fetching something that could never
