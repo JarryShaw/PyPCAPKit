@@ -75,7 +75,7 @@ if TYPE_CHECKING:
     HeldWarning = Tuple[Union[str, Warning], Type[Warning], Optional[FrameType]]
 
 __all__ = [
-    'warn',
+    'warn', 'hold_warnings',
 
     # UserWarning
     'BaseWarning',
