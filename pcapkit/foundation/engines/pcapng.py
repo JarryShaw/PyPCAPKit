@@ -407,9 +407,12 @@ class PCAPNG(EngineBase[P_PCAPNG]):
         argument when parsing a Simple Packet Block (SPB).
 
         Notes:
-            If there is no interface, return ``0xFFFF_FFFF_FFFF_FFFF``.
+            If there is no interface, or interface 0's snaplen is zero, which
+            means no limit, return ``0xFFFF_FFFF_FFFF_FFFF``. A zero passed
+            through reads as a limit of no octets, and the block's padding
+            then becomes packet data (:issue:`1558`).
 
         """
-        if self._ctx.interfaces:
+        if self._ctx.interfaces and self._ctx.interfaces[0].snaplen:
             return self._ctx.interfaces[0].snaplen
         return 0xFFFF_FFFF_FFFF_FFFF

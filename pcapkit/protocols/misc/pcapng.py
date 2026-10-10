@@ -181,8 +181,7 @@ from pcapkit.protocols.schema.misc.pcapng import ZigBeeNWKKey as Schema_ZigBeeNW
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.compat import StrEnum, localcontext
 from pcapkit.utilities.exceptions import (BaseError, EnumValueError, FormatError, ProtocolError,
-                                          RegistryError, StreamEOFError, UnsupportedCall,
-                                          stacklevel)
+                                          StreamEOFError, UnsupportedCall, stacklevel)
 from pcapkit.utilities.warnings import (AttributeWarning, DeprecatedFormatWarning, ProtocolWarning,
                                         RegistryWarning, warn)
 
@@ -1016,24 +1015,20 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                 class it names; handing back the stored entry, or a descriptor
                 equal to it, is a silent no-op that keeps it. This registry is separate from the PCAP one, so
                 :func:`~pcapkit.foundation.registry.protocols.register_linktype`
-                writing to both cannot make either warn about the other.
+                writing to both cannot make either warn about the other. See
+                :meth:`ProtocolBase.register
+                <pcapkit.protocols.protocol.ProtocolBase.register>` for the
+                shipped descriptor a restore puts back (:issue:`1504`).
 
         """
         incumbent = cls.__proto__.get(code)
-        if incumbent is not None and (incumbent is protocol or (
-                isinstance(incumbent, ModuleDescriptor) and isinstance(protocol, ModuleDescriptor)
-                and incumbent == protocol)):
+        entry = cls._next_layer_entry(code, protocol)
+        if entry is None:
             return
-        if isinstance(protocol, ModuleDescriptor):
-            protocol = protocol.klass
-        if not isinstance(protocol, type):
-            raise RegistryError(f'protocol must be a class, not {protocol!r}')
-        if not issubclass(protocol, ProtocolBase):
-            raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
-        if incumbent is not None and incumbent is not protocol:
+        if incumbent is not None and incumbent is not entry:
             warn(f'protocol {code} already registered, overwriting '
-                 f'{incumbent!r} with {protocol!r}', RegistryWarning)
-        cls.__proto__[code] = protocol
+                 f'{incumbent!r} with {entry!r}', RegistryWarning)
+        cls.__proto__[code] = entry
 
     @classmethod
     def register_block(cls, code: 'Enum_BlockType', meth: 'str | tuple[BlockParser, BlockConstructor]') -> 'None':
@@ -1204,6 +1199,11 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                 interfaces = getattr(self._ctx, 'interfaces', None)
                 if interfaces and interfaces[0].snaplen:
                     packet.setdefault('snaplen', interfaces[0].snaplen)
+            # NOTE: A zero snaplen handed in, e.g. interface 0's passed through,
+            # means no limit as well; kept, it reads as a limit of no octets and
+            # the block's padding becomes packet data (:issue:`1558`).
+            if 'snaplen' in packet and not packet['snaplen']:
+                del packet['snaplen']
             self.__header__ = cast('Schema_PCAPNG', self.__schema__.unpack(self._file, length, packet))  # type: ignore[call-arg,misc]
 
         data = self.read(length, **kwargs)

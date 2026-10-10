@@ -404,17 +404,7 @@ class TestRegistrySymmetry(harness.RoundTripBase):
     """Override then restore leaves every registry exactly as shipped."""
 
     STATUSES = ('RAISED', 'CHANGED')
-    KNOWN_FAILURES = (
-        Gap(1504, 'restoring a shipped PCAPNG.__proto__ entry over an override stores the class '
-               'it names, not the shipped ModuleDescriptor: PCAPNG.register resolves a '
-               'descriptor unequal to the incumbent (pcapkit/protocols/misc/pcapng.py:1027) '
-               'instead of sharing ProtocolBase._next_layer_entry, as the other layers do',
-            'CHANGED', ("PCAPNG.__proto__[<LinkType.ETHERNET: 1>] "
-                        "ModuleDescriptor(module='pcapkit.protocols.",),
-            tuple(f'{name}/{variant}/dispatch'
-                  for name in ('register_linktype', 'register_pcapng')
-                  for variant in ('override', 'override-same-name', 'restore-by-name'))),
-    )
+    KNOWN_FAILURES = ()  # type: tuple[Gap, ...]
 
     def setUp(self) -> None:
         super().setUp()

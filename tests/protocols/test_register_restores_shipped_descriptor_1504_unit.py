@@ -2,18 +2,15 @@
 """GitHub issue #1504: restoring a shipped dispatch entry puts back its descriptor.
 
 :meth:`ProtocolBase.register <pcapkit.protocols.protocol.ProtocolBase.register>`
-and its ``Link``, ``Internet``, ``Transport`` (``TCP``, ``UDP``), ``SCTP`` and
-``Frame`` overrides resolved a :class:`~pcapkit.corekit.module.ModuleDescriptor`
-argument to its class before storing it. The #1364 guard returns early only when
-the argument equals the *incumbent*, so after an override, handing back the
-shipped descriptor stored the class it names: the round trip did not close, and
-the restore imported the module the entry was meant to defer. A descriptor equal
-to the one a code shipped with is now matched before it is resolved, and the
-shipped object itself is stored.
-
-``PCAPNG.register`` has the same defect and is not covered here; it stays
-recorded under ``Gap(1504, ...)`` in
-:file:`tests/foundation/registry/test_registry_symmetry_unit.py`.
+and its ``Link``, ``Internet``, ``Transport`` (``TCP``, ``UDP``), ``SCTP``,
+``Frame`` and ``PCAPNG`` overrides resolved a
+:class:`~pcapkit.corekit.module.ModuleDescriptor` argument to its class before
+storing it. The #1364 guard returns early only when the argument equals the
+*incumbent*, so after an override, handing back the shipped descriptor stored
+the class it names: the round trip did not close, and the restore imported the
+module the entry was meant to defer. A descriptor equal to the one a code
+shipped with is now matched before it is resolved, and the shipped object itself
+is stored.
 
 Every registry is process-wide, so each case runs under
 :func:`unittest.mock.patch.dict`. Classes are imported inside each test, after
@@ -46,6 +43,7 @@ SITES = (
      'pcapkit.const.sctp.payload_protocol_identifier:PayloadProtocolIdentifier.'
      'PayloadProtocolIdentifier_3GPP_NG_Application_Protocol'),
     ('pcapkit.protocols.misc.pcap.frame', 'Frame', 'pcapkit.const.reg.linktype:LinkType.ETHERNET'),
+    ('pcapkit.protocols.misc.pcapng', 'PCAPNG', 'pcapkit.const.reg.linktype:LinkType.ETHERNET'),
 )
 
 #: A code no site ships an entry under.
