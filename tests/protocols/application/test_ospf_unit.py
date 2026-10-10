@@ -12,7 +12,7 @@ import types
 import unittest
 from unittest import mock
 
-from tests._support import purge_modules, reimport_once_per_class
+from tests._support import reimport_once_per_class
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -26,9 +26,6 @@ class DummyData(dict):
 class OSPFUnitTests(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
-
-    def tearDown(self) -> None:
-        purge_modules(['pcapkit'])
 
     def test_ospf_index_is_its_transtype_and_make_data_preserves_header(self) -> None:
         from pcapkit.const.ospf.packet import Packet
