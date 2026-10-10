@@ -46,6 +46,7 @@ from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.data import FrameRecord
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
 from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
+from pcapkit.protocols.schema.internet.ipv6 import jumbo_payload_length
 from pcapkit.utilities.compat import ModuleNotFoundError  # pylint: disable=redefined-builtin
 from pcapkit.utilities.exceptions import MissingKeyError, ModuleNotFound, stacklevel
 from pcapkit.utilities.warnings import ScapyWarning, warn
@@ -226,6 +227,80 @@ def packet2frame(packet: 'Packet') -> 'FrameRecord':
     ), time_epoch=decimal.Decimal(epoch))
 
 
+def _within_datagrams(layer: 'Packet') -> 'bytes':
+    """Return the octets from ``layer`` on that lie inside every IP datagram carrying it.
+
+    Args:
+        layer: A layer of a dissected Scapy packet.
+
+    Returns:
+        The octets of ``layer`` and everything after it, up to the nearest end
+        that the Total Length or Payload Length of an IP layer above it declares.
+
+    Note:
+        When `Scapy`_ dissects an IP layer, it files whatever follows the
+        datagram's declared length as a :class:`~scapy.packet.Padding` layer --
+        an Ethernet frame's padding up to its 60-octet minimum, or a trailer
+        such as an FCS -- and ``bytes()`` of *any* layer above that one ends
+        with it. Those octets are no part of the datagram, and the default
+        engine never hands them over (:issue:`1584`), so they are cut off here
+        by the default engine's rules: an IPv4 Total Length of zero, as TCP
+        segmentation offload leaves, runs the datagram to the end of the frame
+        (:issue:`1547`), and an IPv6 Payload Length of zero gives way to a
+        Jumbo Payload option (:issue:`1434`). The latter is not left to Scapy,
+        which reads that option's length in host byte order and adds the
+        Hop-by-Hop Options header to it a second time.
+
+        Every IP layer above ``layer`` bounds it, not only the nearest, as each
+        bounds what the default engine hands the next: a datagram tunnelled in
+        IP may declare more than the one carrying it holds, or nothing at all.
+
+    """
+    from scapy.layers.inet import IP
+    from scapy.layers.inet6 import IPv6
+
+    data = bytes(layer)
+    end = len(data)
+    carrier = layer.underlayer if data else None
+    while carrier is not None:
+        length = None
+        if isinstance(carrier, IPv6):
+            if carrier.plen is not None:    # it is until a packet built by hand is built
+                # a zero is a jumbogram's, or else it declares nothing
+                length = carrier.plen or jumbo_payload_length(carrier.nh, bytes(carrier.payload)) or 0
+        elif isinstance(carrier, IP) and carrier.len:   # a zero is TSO's
+            length = max(carrier.len - carrier.ihl * 4, 0)
+        if length is not None:
+            # ``bytes()`` of a layer spans it and every layer after it, padding
+            # included, so the difference is the octets between the end of the
+            # IP header and ``layer``
+            end = min(end, max(length - (len(carrier.payload) - len(data)), 0))
+        carrier = carrier.underlayer
+    return data[:end]
+
+
+def _tcp_segment(tcp: 'TCP') -> 'tuple[bytes, bytes] | None':
+    """Split the TCP segment ``tcp`` heads into its header and its payload.
+
+    Args:
+        tcp: TCP layer of a dissected Scapy packet.
+
+    Returns:
+        The header, as many octets as the Data Offset counts, and the payload
+        after it, up to the end of the datagrams that carry the segment, c.f.
+        ``_within_datagrams()``; or :data:`None` if the datagrams hold fewer
+        than the 20 octets of the fixed header, or the Data Offset counts fewer
+        (:rfc:`9293#section-3.1`), since the default engine then reads no
+        segment at all.
+
+    """
+    segment = _within_datagrams(tcp)
+    hdr_len = tcp.dataofs * 4
+    if len(segment) < 20 or hdr_len < 20:
+        return None
+    return segment[:hdr_len], segment[hdr_len:]
+
+
 def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Address] | None':
     """Make data for IPv4 reassembly.
 
@@ -271,6 +346,10 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
             mf=bool(ipv4.flags.MF),                    # more fragment flag
             tl=ipv4.len,                               # total length, header includes
             header=bytes(ipv4)[:ipv4.ihl * 4],         # raw bytes type header
+            # NOTE: this keeps the octets past the Total Length, as the default
+            # engine's adapter does, since the reassembly machinery cuts the
+            # payload at ``tl - ihl`` itself. :func:`ipv6_reassembly` derives
+            # its ``tl`` from the payload, so it has to cut them (:issue:`1584`).
             payload=bytearray(bytes(ipv4.payload)),    # raw bytearray type payload
             timestamp=float(packet.time),              # capture timestamp
         )
@@ -316,7 +395,9 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
         # the Fragment header, which is the only part of the header the
         # reassembled packet keeps (:rfc:`8200#section-4.5`).
         hdr_len = len(ipv6) - len(ipv6_frag)
-        payload = bytearray(bytes(ipv6_frag.payload))
+        # the fragment's data stops at the Payload Length, so neither it nor
+        # ``tl`` below counts the frame's trailer (:issue:`1584`)
+        payload = bytearray(_within_datagrams(ipv6_frag.payload))
 
         data = IP_Packet(
             bufid=(
@@ -358,7 +439,8 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
         Data for TCP reassembly.
 
         * If the ``packet`` can be used for TCP reassembly. A packet can be reassembled
-          if it contains TCP layer (:class:`scapy.layers.inet.TCP`).
+          if it contains TCP layer (:class:`scapy.layers.inet.TCP`) whose fixed header
+          lies inside its datagram, and whose Data Offset counts at least that header.
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
           reassembly (:term:`reasm.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
@@ -375,8 +457,11 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
 
     if 'TCP' in packet:
         tcp = cast('TCP', packet['TCP'])
+        if (segment := _tcp_segment(tcp)) is None:
+            return None
+        header, payload = segment
 
-        raw_len = len(tcp.payload)                  # payload length, header excludes
+        raw_len = len(payload)                      # payload length, header excludes
         data = TCP_Packet(
             bufid=(
                 ipaddress.ip_address(ip.src),       # source IP address
@@ -390,8 +475,8 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
             syn=bool(tcp.flags.S),                  # synchronise flag
             fin=bool(tcp.flags.F),                  # finish flag
             rst=bool(tcp.flags.R),                  # reset connection flag
-            header=bytes(tcp)[:tcp.dataofs * 4],    # raw bytes type header
-            payload=bytearray(bytes(tcp.payload)),  # raw bytearray type payload
+            header=header,                          # raw bytes type header
+            payload=bytearray(payload),             # raw bytearray type payload
             first=tcp.seq,                          # first sequence number of payload
             last=tcp.seq + raw_len - 1,             # last sequence number of payload
             len=raw_len,                            # payload length, header excludes
@@ -412,7 +497,8 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
         Data for TCP reassembly.
 
         * If the ``packet`` can be used for TCP flow tracing. A packet can be reassembled
-          if it contains TCP layer (:class:`scapy.layers.inet.TCP`).
+          if it contains TCP layer (:class:`scapy.layers.inet.TCP`), on the terms
+          :func:`tcp_reassembly` sets.
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
           flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
@@ -423,6 +509,9 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
     if 'TCP' in packet:
         ip = cast('IP', packet['IP']) if 'IP' in packet else cast('IPv6', packet['IPv6'])
         tcp = cast('TCP', packet['TCP'])
+        if (segment := _tcp_segment(tcp)) is None:
+            return None
+        header, payload = segment
 
         # NOTE: the link type of the interface the packet was read from, which
         # :class:`~pcapkit.foundation.engines.scapy.Scapy` attaches with
@@ -475,8 +564,8 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
             timestamp=float(packet.time),                        # capture timestamp
             seq=tcp.seq,                                         # TCP sequence number
             ack=tcp.ack,                                         # TCP acknowledgement number
-            header=bytes(tcp)[:tcp.dataofs * 4],                 # raw bytes type header
-            payload=bytearray(bytes(tcp.payload)),               # raw bytearray type payload
+            header=header,                                       # raw bytes type header
+            payload=bytearray(payload),                          # raw bytearray type payload
         )
         return data
     return None
