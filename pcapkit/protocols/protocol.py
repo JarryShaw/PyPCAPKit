@@ -50,7 +50,7 @@ from pcapkit.utilities.decorators import beholder, seekset
 from pcapkit.utilities.exceptions import (BaseError, ProtocolError, ProtocolNotFound,
                                           ProtocolNotImplemented, RegistryError, StructError,
                                           UnsupportedCall)
-from pcapkit.utilities.warnings import RegistryWarning, UnknownFieldWarning, hold_warnings, warn
+from pcapkit.utilities.warnings import HoldWarnings, RegistryWarning, UnknownFieldWarning, warn
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
@@ -2319,7 +2319,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         """
         captured = min(length, len(file_))
-        with hold_warnings(_short_of_hint(klass, captured)) as held:
+        with HoldWarnings(_short_of_hint(klass, captured)) as held:
             next_ = klass(file_, length, **kwargs)  # type: ignore[abstract]
 
             length_hint = getattr(next_, '__length_hint__', None)

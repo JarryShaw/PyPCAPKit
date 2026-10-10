@@ -12,7 +12,7 @@ Packet Block, an obsolete Packet Block and a PCAP record cut the same way warned
 the same, in either byte order.
 
 A next layer captured shorter than its length hint is now parsed under
-:class:`~pcapkit.utilities.warnings.hold_warnings`, and its warnings are dropped
+:class:`~pcapkit.utilities.warnings.HoldWarnings`, and its warnings are dropped
 with the layer. A layer that is kept reports them from the caller's line when its
 trial ends, inside the same guard -- so under an ``error`` filter every chain is
 the one parsed holding nothing -- and a cut header that stays in the chain still
@@ -74,7 +74,7 @@ FRAMES = (
 
 
 class _HoldNothing:
-    """A stand-in for :class:`hold_warnings` that holds nothing, as before #1580."""
+    """A stand-in for :class:`HoldWarnings` that holds nothing, as before #1580."""
 
     discard = False
 
@@ -227,24 +227,24 @@ class TestTrialParseWarnings(unittest.TestCase):
         from pcapkit.protocols.link.ethernet import Ethernet
         from pcapkit.protocols.misc.raw import Raw
         from pcapkit.protocols.protocol import ProtocolBase
-        from pcapkit.utilities.warnings import SchemaWarning, hold_warnings, warn
+        from pcapkit.utilities.warnings import HoldWarnings, SchemaWarning, warn
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            with hold_warnings():
+            with HoldWarnings():
                 warn('outer, before', SchemaWarning)
-                with hold_warnings() as inner:
+                with HoldWarnings() as inner:
                     warn('inner, discarded', SchemaWarning)
                     inner.discard = True
                 trial = ProtocolBase._parse_next_layer(Ethernet, bytes(10), 10)  # pylint: disable=protected-access
-                with hold_warnings():
+                with HoldWarnings():
                     warn('inner, kept', SchemaWarning)
-                with hold_warnings(False):
+                with HoldWarnings(False):
                     warn('held by nothing', SchemaWarning)
                 self.assertEqual(self._schema(caught), ['inner, kept', 'held by nothing'])
                 warn('outer, after', SchemaWarning)
-            with hold_warnings() as outer:
-                with hold_warnings():
+            with HoldWarnings() as outer:
+                with HoldWarnings():
                     warn('kept where the inner block is left', SchemaWarning)
                 warn('dropped with the outer block', SchemaWarning)
                 outer.discard = True
@@ -258,7 +258,7 @@ class TestTrialParseWarnings(unittest.TestCase):
         from pcapkit.protocols.link.ethernet import Ethernet
         from pcapkit.protocols.misc.raw import Raw
         from pcapkit.protocols.protocol import ProtocolBase, _short_of_hint
-        from pcapkit.utilities.warnings import hold_warnings
+        from pcapkit.utilities.warnings import HoldWarnings
 
         class NeedsAnInstance:
             """A hint that cannot be read from the class."""
@@ -273,7 +273,7 @@ class TestTrialParseWarnings(unittest.TestCase):
         frame = MACS + b'\x08\x00' + IPV4_TCP[:18]
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            with hold_warnings() as outer:
+            with HoldWarnings() as outer:
                 parsed = ProtocolBase._parse_next_layer(Ethernet, frame, len(frame))  # pylint: disable=protected-access
                 outer.discard = True
         self.assertEqual(str(parsed.protochain), 'Ethernet:Internet_Protocol_version_4')
@@ -304,7 +304,7 @@ class TestTrialParseWarnings(unittest.TestCase):
             return found
 
         held = chains()
-        with unittest.mock.patch.object(protocol_module, 'hold_warnings', _HoldNothing):
+        with unittest.mock.patch.object(protocol_module, 'HoldWarnings', _HoldNothing):
             reference = chains()
         self.assertEqual(len(held), sum(map(len, FRAMES)))
         self.assertEqual(held, reference)
@@ -335,7 +335,7 @@ class TestTrialParseWarnings(unittest.TestCase):
             return found
 
         held = reports()
-        with unittest.mock.patch.object(protocol_module, 'hold_warnings', _HoldNothing):
+        with unittest.mock.patch.object(protocol_module, 'HoldWarnings', _HoldNothing):
             reference = reports()
         for kept, every in zip(held, reference):
             remaining = iter(every)
@@ -344,7 +344,7 @@ class TestTrialParseWarnings(unittest.TestCase):
 
     def test_base_exception_is_let_through(self) -> None:
         """A :exc:`BaseException` leaves a block as itself, its held warnings dropped."""
-        from pcapkit.utilities.warnings import SchemaWarning, hold_warnings, warn
+        from pcapkit.utilities.warnings import HoldWarnings, SchemaWarning, warn
 
         for error in (KeyboardInterrupt, SystemExit, GeneratorExit):
             for action in ('error', 'always'):
@@ -352,19 +352,19 @@ class TestTrialParseWarnings(unittest.TestCase):
                     with warnings.catch_warnings(record=True) as caught:
                         warnings.simplefilter(action)
                         with self.assertRaises(error):
-                            with hold_warnings():
+                            with HoldWarnings():
                                 warn('held when the interrupt came', SchemaWarning)
                                 raise error()
                     self.assertEqual(caught, [])
 
     def test_hold_left_by_an_error_reports(self) -> None:
         """A block left by an exception reports what it held, discarded or not."""
-        from pcapkit.utilities.warnings import SchemaWarning, hold_warnings, warn
+        from pcapkit.utilities.warnings import HoldWarnings, SchemaWarning, warn
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
             with self.assertRaises(KeyError):
-                with hold_warnings() as held:
+                with HoldWarnings() as held:
                     warn('held, then an error', SchemaWarning)
                     held.discard = True
                     raise KeyError('mid-parse')
@@ -372,22 +372,22 @@ class TestTrialParseWarnings(unittest.TestCase):
 
     def test_held_frame_gone_is_reported_outside_pcapkit(self) -> None:
         """A level past the stack, with no frame to find again, still blames this file."""
-        from pcapkit.utilities.warnings import SchemaWarning, hold_warnings, warn
+        from pcapkit.utilities.warnings import HoldWarnings, SchemaWarning, warn
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            with hold_warnings():
+            with HoldWarnings():
                 warn('past the outermost frame', SchemaWarning, stacklevel=10 ** 6)
         self.assertEqual([(str(item.message), item.filename) for item in caught],
                          [('past the outermost frame', __file__)])
 
     def test_hold_is_local_to_its_context(self) -> None:
         """A warning reported in another context is not held by this one's block."""
-        from pcapkit.utilities.warnings import SchemaWarning, hold_warnings, warn
+        from pcapkit.utilities.warnings import HoldWarnings, SchemaWarning, warn
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            with hold_warnings() as held:
+            with HoldWarnings() as held:
                 contextvars.Context().run(warn, 'another context', SchemaWarning)
                 self.assertEqual(self._schema(caught), ['another context'])
                 held.discard = True
@@ -396,10 +396,10 @@ class TestTrialParseWarnings(unittest.TestCase):
     def test_hold_left_out_of_order(self) -> None:
         """A generator's block left out of order neither ends another block nor outlives itself."""
         import pcapkit.utilities.warnings as warnings_module
-        from pcapkit.utilities.warnings import SchemaWarning, hold_warnings, warn
+        from pcapkit.utilities.warnings import HoldWarnings, SchemaWarning, warn
 
         def generator() -> 'Any':
-            with hold_warnings():
+            with HoldWarnings():
                 warn('generator', SchemaWarning)
                 yield
 
@@ -409,14 +409,14 @@ class TestTrialParseWarnings(unittest.TestCase):
             # the generator's block is left while the caller's, opened after it, is open
             suspended = generator()
             next(suspended)
-            with hold_warnings() as caller:
+            with HoldWarnings() as caller:
                 next(suspended, None)
                 warn('caller, discarded', SchemaWarning)
                 caller.discard = True
             warn('after both', SchemaWarning)
 
             # the caller's block is left while the generator's, opened inside it, is open
-            with hold_warnings():
+            with HoldWarnings():
                 suspended = generator()
                 next(suspended)
             next(suspended, None)
@@ -427,12 +427,12 @@ class TestTrialParseWarnings(unittest.TestCase):
     def test_hold_left_in_a_copied_context(self) -> None:
         """A block left in a copy of its context unsets itself there, and is stepped over here."""
         import pcapkit.utilities.warnings as warnings_module
-        from pcapkit.utilities.warnings import SchemaWarning, hold_warnings, warn
+        from pcapkit.utilities.warnings import HoldWarnings, SchemaWarning, warn
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            with hold_warnings() as outer:
-                block = hold_warnings()
+            with HoldWarnings() as outer:
+                block = HoldWarnings()
                 block.__enter__()  # pylint: disable=unnecessary-dunder-call
                 contextvars.copy_context().run(block.__exit__, None, None, None)
                 warn('held by the outer block', SchemaWarning)
@@ -467,6 +467,20 @@ class TestTrialParseWarnings(unittest.TestCase):
         unrelated = [item for item in caught if item.category is _unrelated_warning.UnrelatedWarning]
         self.assertEqual(len(unrelated), 1)
         self.assertEqual(self._schema(caught), TCP_CUT_MESSAGES)
+
+    def test_hold_class_is_named_in_camel_case(self) -> None:
+        """The class is ``HoldWarnings`` (#1599); it never shipped lowercase, so no alias is kept."""
+        import pcapkit.protocols.protocol as protocol_module
+        import pcapkit.utilities.warnings as warnings_module
+        from pcapkit.utilities.warnings import HoldWarnings
+
+        self.assertEqual(HoldWarnings.__name__, 'HoldWarnings')
+        self.assertIs(protocol_module.HoldWarnings, HoldWarnings)
+        self.assertIn('HoldWarnings', warnings_module.__all__)
+        self.assertNotIn('hold_warnings', warnings_module.__all__)
+        for module in (warnings_module, protocol_module):
+            with self.subTest(module=module.__name__):
+                self.assertFalse(hasattr(module, 'hold_warnings'))
 
 
 if __name__ == '__main__':

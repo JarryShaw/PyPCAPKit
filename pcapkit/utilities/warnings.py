@@ -51,7 +51,7 @@ Note that all of the above governs the :mod:`warnings` channel only. The
 ``pcapkit`` logger is configured separately, e.g. with
 ``logging.getLogger('pcapkit').setLevel(logging.ERROR)``.
 
-The one exception is a parse :mod:`pcapkit` runs on trial: :class:`hold_warnings`
+The one exception is a parse :mod:`pcapkit` runs on trial: :class:`HoldWarnings`
 holds back its warnings, on both channels, until the parse is kept, and drops
 them if it is discarded (:issue:`1580`).
 
@@ -70,12 +70,12 @@ if TYPE_CHECKING:
 
     from typing_extensions import Self
 
-    #: A warning held back by :class:`hold_warnings`: its message, its category,
+    #: A warning held back by :class:`HoldWarnings`: its message, its category,
     #: and the frame it is attributed to, if that frame could be found.
     HeldWarning = Tuple[Union[str, Warning], Type[Warning], Optional[FrameType]]
 
 __all__ = [
-    'warn',
+    'warn', 'HoldWarnings',
 
     # UserWarning
     'BaseWarning',
@@ -98,11 +98,11 @@ __all__ = [
 #: :data:`pcapkit.utilities.logging.logger`.
 logger = get_logger(__name__)
 
-#: The innermost open :class:`hold_warnings` block, or :data:`None` outside any.
+#: The innermost open :class:`HoldWarnings` block, or :data:`None` outside any.
 #: A context variable rather than a global, so that a parse in another thread or
 #: task is neither held nor released by this one.
 _HELD = contextvars.ContextVar(
-    'pcapkit_held_warnings', default=None)  # type: contextvars.ContextVar[Optional[hold_warnings]]
+    'pcapkit_held_warnings', default=None)  # type: contextvars.ContextVar[Optional[HoldWarnings]]
 
 
 def warn(message: 'Union[str, Warning]', category: 'Type[Warning]',
@@ -132,7 +132,7 @@ def warn(message: 'Union[str, Warning]', category: 'Type[Warning]',
         how to silence either channel.
 
     Note:
-        Inside a :class:`hold_warnings` block the warning is held back instead,
+        Inside a :class:`HoldWarnings` block the warning is held back instead,
         with the frame it is attributed to, and reported from there only if the
         block keeps it.
 
@@ -167,7 +167,7 @@ def warn(message: 'Union[str, Warning]', category: 'Type[Warning]',
     warnings.warn(message, category, stacklevel)
 
 
-def _open_block(block: 'Optional[hold_warnings]') -> 'Optional[hold_warnings]':
+def _open_block(block: 'Optional[HoldWarnings]') -> 'Optional[HoldWarnings]':
     """The innermost open block from ``block`` outwards.
 
     Args:
@@ -186,7 +186,7 @@ def _open_block(block: 'Optional[hold_warnings]') -> 'Optional[hold_warnings]':
 
 def _replay(message: 'Union[str, Warning]', category: 'Type[Warning]',
             target: 'Optional[FrameType]') -> 'None':
-    """Report a warning :class:`hold_warnings` held back, as :func:`warn` would have.
+    """Report a warning :class:`HoldWarnings` held back, as :func:`warn` would have.
 
     Args:
         message: Warning message.
@@ -214,7 +214,7 @@ def _replay(message: 'Union[str, Warning]', category: 'Type[Warning]',
     warnings.warn(message, category, level)
 
 
-class hold_warnings:  # pylint: disable=invalid-name
+class HoldWarnings:
     """Hold back the warnings a parse reports until it is known to be kept.
 
     Args:
@@ -268,8 +268,8 @@ class hold_warnings:  # pylint: disable=invalid-name
         self.holding = hold
 
         self._held = []  # type: List[HeldWarning]
-        self._outer = None  # type: Optional[hold_warnings]
-        self._token = None  # type: Optional[contextvars.Token[Optional[hold_warnings]]]
+        self._outer = None  # type: Optional[HoldWarnings]
+        self._token = None  # type: Optional[contextvars.Token[Optional[HoldWarnings]]]
         self._open = False
 
     def __enter__(self) -> 'Self':

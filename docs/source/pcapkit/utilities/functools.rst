@@ -43,5 +43,5 @@ Error Handling Utilities
 
 .. autofunction:: pcapkit.utilities.warnings.warn
 
-.. autoclass:: pcapkit.utilities.warnings.hold_warnings
+.. autoclass:: pcapkit.utilities.warnings.HoldWarnings
    :members: discard, holding
