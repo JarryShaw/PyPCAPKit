@@ -43,7 +43,11 @@ refusal as the reason: ``pypcap``, ``pcap_ct`` and ``pypcapfile`` reject PCAP-NG
 with a :exc:`~pcapkit.utilities.exceptions.FormatError`, and an engine that
 declines reassembly or flow tracing, or one protocol of it, warns and leaves it
 unset (``pypcap`` and ``pcap_ct`` decline both, ``pyshark`` reassembly,
-``pypcapfile`` IPv6). Any other exception is an ``ERROR``.
+``pypcapfile`` IPv6). ``pypcapfile`` also warns when a capture carries TCP over
+IPv6, which it leaves out of TCP reassembly and flow tracing: on such a capture
+its ``tcp`` and ``trace`` inputs and TCP ``datagrams`` are compared with the
+``default`` engine's over IPv4 only, and its ``flows`` skip. Any other exception
+is an ``ERROR``.
 
 This module reads generated captures, so it is in the fixture-dependent tier
 (see :mod:`tests._tiers`) and runs after ``make samples``.
@@ -53,6 +57,7 @@ This module reads generated captures, so it is in the fixture-dependent tier
 from __future__ import annotations
 
 import importlib.util
+import ipaddress
 import os
 import tempfile
 import unittest
@@ -140,9 +145,11 @@ class _Run:
         from pcapkit import extract
         from pcapkit.foundation.reassembly.reassembly import ReassemblyBase
         from pcapkit.foundation.traceflow.traceflow import TraceFlowBase
-        from pcapkit.utilities.warnings import EngineWarning
+        from pcapkit.utilities.warnings import AttributeWarning, EngineWarning
 
         self.fallback = None  # type: Optional[str]
+        #: The ``pypcapfile`` toolkit's warning that it leaves TCP over IPv6 out.
+        self.tcp_declined = None  # type: Optional[str]
         self.inputs = {'ipv4': {}, 'ipv6': {}, 'tcp': {}, 'trace': {}}  # type: dict[str, dict[int, Any]]
         inputs = self.inputs
         reassemble, trace = ReassemblyBase.__call__, TraceFlowBase.__call__
@@ -158,7 +165,8 @@ class _Run:
         with warnings.catch_warnings(), tempfile.TemporaryDirectory() as tracedir, \
                 mock.patch.object(ReassemblyBase, '__call__', spy_reassembly), \
                 mock.patch.object(TraceFlowBase, '__call__', spy_trace), \
-                mock.patch('pcapkit.foundation.extraction.warn') as warn:
+                mock.patch('pcapkit.foundation.extraction.warn') as warn, \
+                mock.patch('pcapkit.toolkit.pypcapfile.warn') as toolkit_warn:
             warnings.simplefilter('ignore')
             fallen = []  # type: list[str]
             try:
@@ -176,6 +184,7 @@ class _Run:
             if fallen or extractor._exnam != engine:  # pylint: disable=protected-access
                 self.fallback = '; '.join(fallen) or f'ran as {extractor._exnam}'  # pylint: disable=protected-access
                 return
+            self.tcp_declined = '; '.join(self._fallen(toolkit_warn, AttributeWarning)) or None
             self.length = extractor.length
             self.records = [_record(engine, frame) for frame in extractor.frame]
             # An engine that declines a protocol says so with a warning and leaves
@@ -255,6 +264,25 @@ def _first_difference(got: 'dict[int, Any]', want: 'dict[int, Any]') -> 'Optiona
     return None
 
 
+def _over_ipv4(record: 'dict[str, Any]') -> 'bool':
+    """Whether a TCP trace or reassembly input, or a TCP datagram, is over IPv4."""
+    if 'src' in record:
+        address = record['src']
+    elif 'bufid' in record:
+        address = record['bufid'][0]
+    else:
+        address = record['id'].src[0]
+    return isinstance(address, ipaddress.IPv4Address)
+
+
+def _ipv4_only(base: '_Run', aspect: 'str') -> 'Any':
+    """``base``'s ``tcp`` or ``trace`` inputs, or its TCP datagrams, over IPv4 only."""
+    if aspect == 'datagrams':
+        return [datagram for datagram in base.datagrams['tcp'] if _over_ipv4(datagram)]
+    return {number: records for number, records in base.inputs[aspect].items()
+            if _over_ipv4(records[0])}
+
+
 def compare(engine: 'str', capture: 'str', aspect: 'str') -> 'Outcome':
     run = _run(engine, capture)
     if run.fallback is not None:
@@ -263,6 +291,8 @@ def compare(engine: 'str', capture: 'str', aspect: 'str') -> 'Outcome':
         if 'reads PCAP savefiles only' in run.error:  # a documented refusal, not a reading
             return Outcome('SKIP', f'{engine} refuses {capture}: {run.error}')
         return Outcome('ERROR', run.error)
+    if run.tcp_declined is not None and aspect == 'flows':  # the rest narrow to IPv4 below
+        return Outcome('SKIP', f'{engine} warns: {run.tcp_declined}')
     base = _run('default', capture)
     if aspect in ('ipv4', 'ipv6', 'tcp') and run.datagrams[aspect] is None:
         return Outcome('SKIP', f'{engine} declines {aspect} reassembly')
@@ -285,6 +315,8 @@ def compare(engine: 'str', capture: 'str', aspect: 'str') -> 'Outcome':
         return Outcome('OK')
     if aspect in run.inputs:
         mine, theirs = run.inputs[aspect], base.inputs[aspect]
+        if run.tcp_declined is not None and aspect in ('tcp', 'trace'):
+            theirs = _ipv4_only(base, aspect)
         if aspect == 'trace' and engine in NO_TCP_OCTETS:
             mine, theirs = _without_tcp_octets(mine), _without_tcp_octets(theirs)
         diff = _first_difference(mine, theirs)
@@ -295,6 +327,8 @@ def compare(engine: 'str', capture: 'str', aspect: 'str') -> 'Outcome':
             return Outcome('SKIP', f'{engine} declines reassembly')
         for kind in kinds:
             mine, theirs = run.datagrams[kind], base.datagrams[kind]
+            if kind == 'tcp' and run.tcp_declined is not None:
+                theirs = _ipv4_only(base, 'datagrams')
             if mine != theirs:
                 if len(mine) != len(theirs):
                     return Outcome('DATAGRAMS', f'{kind}: {len(mine)} datagrams != {len(theirs)}')
@@ -340,15 +374,6 @@ class TestEngineAgreement(harness.RoundTripBase):
             tuple(f'{capture}/pypcapfile/{aspect}'
                   for capture in ('big_endian.pcap', 'big_endian_nanosecond.pcap')
                   for aspect in ('frames', 'timestamps', 'ipv4', 'datagrams'))),
-        Gap(1513, 'the pypcapfile engine leaves TCP over IPv6 out of TCP reassembly and flow '
-               'tracing, without a warning: _network returns None for any frame that is not '
-               'IPv4 (pcapkit/toolkit/pypcapfile.py:262), so tcp_reassembly (:540) and '
-               'tcp_traceflow (:603) skip it; only IPv6 reassembly is declined with a warning '
-               '(pcapkit/foundation/engines/pypcapfile.py:229)',
-            ('INPUTS', 'DATAGRAMS', 'FLOWS'), ('missing, default has', 'tcp: ', 'flows ['),
-            tuple(f'{capture}/pypcapfile/{aspect}'
-                  for capture in ('http6.cap', 'stream.pcap', 'tcp.pcap', 'test.pcap')
-                  for aspect in ('tcp', 'trace', 'datagrams', 'flows'))),
         Gap(1501, 'the dpkt engine hands reassembly the Decimal timestamp dpkt reads from a '
                'nanosecond PCAP (pcapkit/foundation/engines/dpkt.py:309), where every other '
                'engine hands it a float (pcapkit/toolkit/pcap.py:73)',

@@ -14,13 +14,18 @@ claim being made and a stand-in cannot check it.
 from __future__ import annotations
 
 import binascii
+import ctypes
 import importlib.util
 import ipaddress
+import os
 import struct
+import tempfile
 import types
 import unittest
+import warnings
 
-from tests._support import reimport_once_per_class
+from tests._support import close_extractor, reimport_once_per_class
+from tests.foundation import _roundtrip as wire
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -133,6 +138,17 @@ def make_packet(layer, *, timestamp: int = 1511106545, timestamp_us: int = 47171
         packet_len=packet_len,
         packet=layer,
     )
+
+
+def ipv6_frame(packet: bytes) -> FakeEthernet:
+    """An Ethernet frame carrying IPv6, as PyPCAPFile leaves it: payload hex-encoded."""
+    frame = FakeEthernet(binascii.hexlify(packet))
+    frame.type = 0x86DD
+    return frame
+
+
+#: A TCP segment with a full header and a payload.
+TCP_SEGMENT = wire.tcp(b'payload', seq=1, syn=True)
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -383,6 +399,151 @@ class PyPCAPFileToolkitTests(unittest.TestCase):
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class PyPCAPFileTCPOverIPv6Tests(unittest.TestCase):
+    """TCP over IPv6 is left out, with one warning per capture. C.f. #1513."""
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def decline(self, *packets) -> list[str]:
+        """Feed ``packets`` to both TCP adapters, frame 1 first; return their warnings."""
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.toolkit.pypcapfile import tcp_reassembly, tcp_traceflow
+        from pcapkit.utilities.warnings import AttributeWarning
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            for count, packet in enumerate(packets, start=1):
+                self.assertIsNone(tcp_reassembly(packet, count=count))
+                self.assertIsNone(tcp_traceflow(packet, data_link=LinkType.ETHERNET, count=count))
+        return [str(item.message) for item in caught if issubclass(item.category, AttributeWarning)]
+
+    def test_tcp_over_ipv6_warns_once_per_capture(self) -> None:
+        first, second = (make_packet(ipv6_frame(wire.ipv6(TCP_SEGMENT, nxt=6))) for _ in range(2))
+        second.header = first.header  # both frames of one capture
+
+        with self.assertLogs('pcapkit', level='WARNING') as logs:
+            messages = self.decline(first, second)
+        self.assertEqual(len(messages), 1, messages)
+        self.assertTrue(messages[0].startswith('Frame 1: TCP over IPv6 is left out'), messages)
+        self.assertIn("'pypcapfile' has no IPv6 decoder", messages[0])
+        self.assertEqual(len(logs.records), 1)
+
+    def test_interleaved_captures_each_warn_once(self) -> None:
+        one, other, one_again, other_again = (
+            make_packet(ipv6_frame(wire.ipv6(TCP_SEGMENT, nxt=6))) for _ in range(4))
+        one_again.header, other_again.header = one.header, other.header
+
+        messages = self.decline(one, other, one_again, other_again)
+        self.assertEqual([message.split(':')[0] for message in messages], ['Frame 1', 'Frame 2'])
+
+    def test_the_oldest_capture_is_forgotten_beyond_the_limit(self) -> None:
+        from unittest import mock
+
+        from pcapkit.toolkit import pypcapfile as toolkit
+
+        first, second, third, first_again, third_again = (
+            make_packet(ipv6_frame(wire.ipv6(TCP_SEGMENT, nxt=6))) for _ in range(5))
+        first_again.header, third_again.header = first.header, third.header
+
+        # Two remembered at most: the third capture pushes the first out, so the
+        # first warns a second time -- repeated, never omitted -- while the
+        # third is still remembered.
+        with mock.patch.object(toolkit, 'IPV6_TCP_WARNED_LIMIT', 2), \
+                mock.patch.object(toolkit, '_ipv6_tcp_warned', type(toolkit._ipv6_tcp_warned)()):
+            messages = self.decline(first, second, third, first_again, third_again)
+            self.assertEqual(len(toolkit._ipv6_tcp_warned), 2)
+        self.assertEqual([message.split(':')[0] for message in messages],
+                         ['Frame 1', 'Frame 2', 'Frame 3', 'Frame 4'])
+
+    def test_tcp_behind_extension_headers_warns(self) -> None:
+        hop_by_hop = bytes([6, 0]) + b'\x01\x04' + bytes(4)        # PadN, 8 octets
+        long_hop_by_hop = bytes([6, 1]) + b'\x01\x0c' + bytes(12)  # PadN, 16 octets
+        options_then_routing = bytes([43, 0]) + b'\x01\x04' + bytes(4) + bytes([6, 0]) + bytes(6)
+        auth = struct.pack('!BBHII', 6, 4, 0, 0x100, 1) + bytes(12)  # (4 + 2) * 4 octets
+        mobility = bytes([6, 1]) + bytes(14)          # payload proto, 16 octets
+        hip = bytes([6, 4, 0x01, 0x21]) + bytes(36)   # next header, 40 octets
+        shim6 = bytes([6, 0]) + bytes(6)              # next header, 8 octets
+        for label, packet in (
+            ('hop-by-hop', wire.ipv6(hop_by_hop + TCP_SEGMENT, nxt=0)),
+            ('16-octet hop-by-hop', wire.ipv6(long_hop_by_hop + TCP_SEGMENT, nxt=0)),
+            ('destination options, routing', wire.ipv6(options_then_routing + TCP_SEGMENT, nxt=60)),
+            ('authentication header', wire.ipv6(auth + TCP_SEGMENT, nxt=51)),
+            ('first fragment', wire.ipv6_fragment(TCP_SEGMENT, mf=True, nxt=6)),
+            ('mobility', wire.ipv6(mobility + TCP_SEGMENT, nxt=135)),
+            ('hip', wire.ipv6(hip + TCP_SEGMENT, nxt=139)),
+            ('shim6', wire.ipv6(shim6 + TCP_SEGMENT, nxt=140)),
+            ('hop-by-hop, mobility', wire.ipv6(bytes([135, 0]) + bytes(6) + mobility + TCP_SEGMENT,
+                                               nxt=0)),
+            ('first fragment, shim6', wire.ipv6_fragment(shim6 + TCP_SEGMENT, mf=True, nxt=140)),
+        ):
+            with self.subTest(case=label):
+                messages = self.decline(make_packet(ipv6_frame(packet)))
+                self.assertEqual(len(messages), 1, messages)
+
+    def test_no_warning_without_tcp_over_ipv6(self) -> None:
+        arp = FakeEthernet(binascii.hexlify(b'\x00\x01\x08\x00' + bytes(24)))
+        arp.type = 0x0806
+        decoded = ipv6_frame(b'')
+        decoded.payload = object()  # a decoder PyPCAPFile does not have yet
+        for label, layer in (
+            ('undecoded link', b'raw'),
+            ('arp', arp),
+            ('ipv6 payload decoded', decoded),
+            ('icmpv6', ipv6_frame(wire.ipv6(b'\x80\x00' + bytes(6), nxt=58))),
+            ('udp', ipv6_frame(wire.ipv6(wire.udp(b'x'), nxt=17))),
+            ('esp', ipv6_frame(wire.ipv6(b'\x00\x00\x01\x00' + bytes(4) + TCP_SEGMENT, nxt=50))),
+            # the header's own length runs to the end of the packet, so nothing
+            # follows it -- as in options-internet.pcap's HIP frames
+            ('hip filling the packet', ipv6_frame(wire.ipv6(bytes([6, 6, 0x01, 0x21]) + bytes(52),
+                                                            nxt=139))),
+            ('mobility, no next header', ipv6_frame(wire.ipv6(bytes([59, 0]) + bytes(6)
+                                                              + TCP_SEGMENT, nxt=135))),
+            ('experimental 253', ipv6_frame(wire.ipv6(bytes([6, 0]) + bytes(6) + TCP_SEGMENT,
+                                                      nxt=253))),
+            ('truncated ipv6 header', ipv6_frame(wire.ipv6(b'', nxt=6)[:39])),
+            ('truncated extension header', ipv6_frame(wire.ipv6(b'\x06\x00\x01', nxt=0))),
+            ('truncated tcp header', ipv6_frame(wire.ipv6(TCP_SEGMENT[:19], nxt=6))),
+            ('extension header overruns the frame',
+             ipv6_frame(wire.ipv6(bytes([6, 200]) + bytes(6) + TCP_SEGMENT, nxt=0))),
+            # a later fragment's data is a slice of the payload, not a header,
+            # even when it happens to look like one
+            ('later fragment', ipv6_frame(wire.ipv6_fragment(TCP_SEGMENT, offset=8, nxt=6))),
+            ('later fragment, shim6',
+             ipv6_frame(wire.ipv6_fragment(bytes([6, 0]) + bytes(6) + TCP_SEGMENT, offset=8,
+                                           nxt=140))),
+            ('first fragment, then a later one', ipv6_frame(wire.ipv6_fragment(
+                struct.pack('!BBHI', 6, 0, 8, 7) + TCP_SEGMENT, mf=True, nxt=44))),
+        ):
+            with self.subTest(case=label):
+                self.assertEqual(self.decline(make_packet(layer)), [])
+
+    def test_capture_of_keys_a_ctypes_header_by_its_address(self) -> None:
+        from pcapkit.toolkit.pypcapfile import _capture_of
+
+        header, other = ctypes.c_int(1), ctypes.c_int(2)
+        # Every read of a ``ctypes`` pointer field builds a new pointer object,
+        # so the key must not be the pointer's identity.
+        one, same = make_packet(b''), make_packet(b'')
+        one.header, same.header = ctypes.pointer(header), ctypes.pointer(header)
+        another = make_packet(b'')
+        another.header = ctypes.pointer(other)
+
+        key, anchor = _capture_of(one)
+        self.assertIs(anchor, one.header)
+        self.assertEqual(key, ctypes.addressof(header))
+        self.assertEqual(_capture_of(same)[0], key)
+        self.assertNotEqual(_capture_of(another)[0], key)
+
+        for label, value in (('null pointer', ctypes.POINTER(ctypes.c_int)()),
+                             ('stand-in list', [types.SimpleNamespace(ns_resolution=False)])):
+            with self.subTest(case=label):
+                packet = make_packet(b'')
+                packet.header = value
+                self.assertEqual(_capture_of(packet), (id(value), value))
+
+
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 @unittest.skipUnless(HAS_PYPCAPFILE, 'pypcapfile not installed or not importable')
 class PyPCAPFileToolkitAgainstRealDecodersTests(unittest.TestCase):
     """Tests that need :mod:`pcapfile`'s own decoders to be meaningful."""
@@ -523,6 +684,42 @@ class PyPCAPFileToolkitAgainstRealDecodersTests(unittest.TestCase):
         info = _ethernet2dict(Ethernet(frame))
         self.assertEqual(info['dst'], '01:00:5e:01:03:03')
         self.assertEqual(info['src'], '00:0c:29:3f:1a:07')
+
+    def test_engine_warns_once_per_capture_on_tcp_over_ipv6(self) -> None:
+        from pcapkit import extract
+
+        # One IPv4 TCP frame, then two IPv6 TCP frames and an IPv6 UDP one. The
+        # engine builds a new ``pcap_packet`` per frame, so this also checks that
+        # the real savefile header keys one capture -- see ``_capture_of``.
+        frames = (
+            wire.ethernet(wire.ipv4(TCP_SEGMENT, proto=6), 0x0800),
+            wire.ethernet(wire.ipv6(TCP_SEGMENT, nxt=6), 0x86DD),
+            wire.ethernet(wire.ipv6(wire.tcp(b'more', seq=8, ack=1), nxt=6), 0x86DD),
+            wire.ethernet(wire.ipv6(wire.udp(b'x'), nxt=17), 0x86DD),
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, 'mixed.pcap')
+            with open(path, 'wb') as file:
+                file.write(wire.pcap([(1, number, frame) for number, frame in enumerate(frames)]))
+
+            for read in ('first', 'second'):  # reading it again is another capture
+                with self.subTest(read=read), warnings.catch_warnings(record=True) as caught:
+                    warnings.simplefilter('always')
+                    extractor = extract(fin=path, nofile=True, engine='pypcapfile',
+                                        reassembly=True, tcp=True, trace=True,
+                                        trace_fout=os.path.join(tmp, read), trace_format='json')
+                    try:
+                        messages = [str(item.message) for item in caught
+                                    if 'TCP over IPv6' in str(item.message)]
+                        self.assertEqual(extractor._exnam, 'pypcapfile')
+                        self.assertEqual(len(messages), 1, messages)
+                        self.assertTrue(messages[0].startswith('Frame 2: '), messages)
+                        # ...while the IPv4 frame is still reassembled and traced
+                        self.assertEqual([tuple(flow.index) for flow in extractor.trace.tcp],
+                                         [(1,)])
+                        self.assertEqual(len(extractor.reassembly.tcp), 1)
+                    finally:
+                        close_extractor(extractor)
 
 
 if __name__ == '__main__':
