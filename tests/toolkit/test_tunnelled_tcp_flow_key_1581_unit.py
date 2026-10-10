@@ -246,15 +246,14 @@ class TunnelledTCPFlowKeyTests(unittest.TestCase):
         self.assertEqual(sorted(base['trace']), list(range(1, len(frames) + 1)))
 
     def test_tunnelled_first_fragments_agree_with_the_default_engine(self) -> None:
-        # Not for pyshark: tshark reassembles IP fragments, so dissects no TCP in
-        # a first fragment, tunnelled or not.
+        # pyshark too, since it turns tshark's IP reassembly off (#1612)
         segment = wire.tcp(b'payload', seq=7, ack=1)
         frames = [
             # the tunnel's first fragment, then the inner datagram's
             frame(ip(4, ip(4, segment, *INNER[4][1], 6), *OUTER[4], 4, mf=True)),
             frame(ip(4, ip(4, segment, *INNER[4][1], 6, mf=True), *OUTER[4], 4)),
         ]
-        base = self.agree(frames, ('dpkt', 'scapy'))
+        base = self.agree(frames)
         self.assertEqual(sorted(base['trace']), [1, 2])
 
     def test_the_default_engine_reads_the_inner_header(self) -> None:
