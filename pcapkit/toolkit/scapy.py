@@ -47,6 +47,7 @@ from pcapkit.foundation.traceflow.data.data import FrameRecord
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
 from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
 from pcapkit.protocols.schema.internet.ipv6 import jumbo_payload_length
+from pcapkit.toolkit.pypcapfile import _default_accepts
 from pcapkit.utilities.compat import ModuleNotFoundError  # pylint: disable=redefined-builtin
 from pcapkit.utilities.exceptions import MissingKeyError, ModuleNotFound, stacklevel
 from pcapkit.utilities.warnings import ScapyWarning, warn
@@ -301,6 +302,36 @@ def _tcp_segment(tcp: 'TCP') -> 'tuple[bytes, bytes] | None':
     return segment[:hdr_len], segment[hdr_len:]
 
 
+def _ipv4_accepted(ipv4: 'IP') -> 'bool':
+    """Test if the default engine reads a Scapy IPv4 layer as an IPv4 layer.
+
+    Args:
+        ipv4: IPv4 layer of a dissected Scapy packet.
+
+    Returns:
+        :data:`False` if the default engine's IPv4 parser rejects its header --
+        its version is not 4, its IHL is below 5 or runs past the captured
+        octets, or its options are ones the parser rejects (:issue:`1607`) --
+        as the default engine then dissects nothing past it; else :data:`True`.
+
+    Note:
+        `Scapy`_ dissects what an IPv4 EtherType or tunnel carries as IPv4
+        whatever its version or IHL, and never checks its options, so the
+        header is asked of the parser itself, as the pypcapfile engine asks it
+        (see :func:`pcapkit.toolkit.pypcapfile._default_accepts`). Its octets
+        are those `Scapy`_ dissected the layer from, which ``bytes()`` gives
+        back as they were, as far as the IHL goes, and no fewer than the 20 of
+        the fixed header, as the default engine reads at least those. A header
+        of version 4 with an IHL of 5 is not parsed: `Scapy`_ dissects none
+        shorter than 20 octets, and the parser checks nothing else of one.
+
+    """
+    if ipv4.version == 4 and ipv4.ihl == 5:
+        return True
+    octets = bytes(ipv4)
+    return _default_accepts('IPv4', octets[:max((octets[0] & 0x0F) * 4, 20)])
+
+
 def _carrier(layer: 'Packet') -> 'IP | IPv6 | None':
     """Fetch the IP layer that carries ``layer``.
 
@@ -310,7 +341,8 @@ def _carrier(layer: 'Packet') -> 'IP | IPv6 | None':
     Returns:
         The nearest :class:`~scapy.layers.inet.IP` or
         :class:`~scapy.layers.inet6.IPv6` layer above ``layer``, or
-        :data:`None` if there is none.
+        :data:`None` if there is none, or the default engine rejects the
+        header of an IPv4 layer above it (see :func:`_ipv4_accepted`).
 
     Note:
         The nearest is the innermost IP layer of an IP-in-IP tunnel
@@ -326,9 +358,14 @@ def _carrier(layer: 'Packet') -> 'IP | IPv6 | None':
     from scapy.layers.inet import IP
     from scapy.layers.inet6 import IPv6
 
-    carrier = layer.underlayer
-    while carrier is not None and not isinstance(carrier, (IP, IPv6)):
-        carrier = carrier.underlayer
+    carrier = None  # type: IP | IPv6 | None
+    above = layer.underlayer
+    while above is not None:
+        if isinstance(above, IP) and not _ipv4_accepted(above):
+            return None
+        if carrier is None and isinstance(above, (IP, IPv6)):
+            carrier = above
+        above = above.underlayer
     return carrier
 
 
@@ -343,7 +380,8 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
         Data for IPv4 reassembly.
 
         * If the ``packet`` can be used for IPv4 reassembly. A packet can be reassembled
-          if it contains IPv4 layer (:class:`scapy.layers.inet.IP`) and the **DF**
+          if it contains IPv4 layer (:class:`scapy.layers.inet.IP`) whose header the
+          default engine accepts (see :func:`_ipv4_accepted`), and the **DF**
           (:attr:`scapy.layers.inet.IP.flags.DF`) flag is :data:`False`.
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv4
           reassembly (:term:`reasm.ipv4.packet`) will be returned; otherwise, returns :data:`None`.
@@ -355,6 +393,8 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
     if 'IP' in packet:
         ipv4 = cast('IP', packet['IP'])
         if ipv4.flags.DF:       # dismiss not fragmented packet
+            return None
+        if not _ipv4_accepted(ipv4):
             return None
 
         data = IP_Packet(
@@ -471,9 +511,9 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
 
         * If the ``packet`` can be used for TCP reassembly. A packet can be reassembled
           if it contains TCP layer (:class:`scapy.layers.inet.TCP`) whose fixed header
-          lies inside its datagram, and whose Data Offset counts at least that header.
-          It is keyed by the IP layer that carries it -- in an IP-in-IP tunnel, the
-          innermost (see :func:`_carrier`).
+          lies inside its datagram, and whose Data Offset counts at least that header,
+          behind no IPv4 header the default engine rejects. It is keyed by the IP layer
+          that carries it -- in an IP-in-IP tunnel, the innermost (see :func:`_carrier`).
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
           reassembly (:term:`reasm.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
