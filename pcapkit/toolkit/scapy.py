@@ -301,6 +301,37 @@ def _tcp_segment(tcp: 'TCP') -> 'tuple[bytes, bytes] | None':
     return segment[:hdr_len], segment[hdr_len:]
 
 
+def _carrier(layer: 'Packet') -> 'IP | IPv6 | None':
+    """Fetch the IP layer that carries ``layer``.
+
+    Args:
+        layer: A layer of a dissected Scapy packet.
+
+    Returns:
+        The nearest :class:`~scapy.layers.inet.IP` or
+        :class:`~scapy.layers.inet6.IPv6` layer above ``layer``, or
+        :data:`None` if there is none.
+
+    Note:
+        The nearest is the innermost IP layer of an IP-in-IP tunnel
+        (:rfc:`2003`, :rfc:`2473`, :rfc:`4213`), whose addresses are the TCP
+        endpoints', as for the default engine
+        (:func:`pcapkit.toolkit.pcap.tcp_segment`). ``packet['IP']`` finds the
+        outermost IPv4 layer instead, which is the tunnel's, or with IPv4
+        carried in IPv6 the inner one (:issue:`1581`). The extension header
+        layers `Scapy`_ dissects between an IP layer and its payload are not
+        IP layers, so are stepped over.
+
+    """
+    from scapy.layers.inet import IP
+    from scapy.layers.inet6 import IPv6
+
+    carrier = layer.underlayer
+    while carrier is not None and not isinstance(carrier, (IP, IPv6)):
+        carrier = carrier.underlayer
+    return carrier
+
+
 def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Address] | None':
     """Make data for IPv4 reassembly.
 
@@ -441,6 +472,8 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
         * If the ``packet`` can be used for TCP reassembly. A packet can be reassembled
           if it contains TCP layer (:class:`scapy.layers.inet.TCP`) whose fixed header
           lies inside its datagram, and whose Data Offset counts at least that header.
+          It is keyed by the IP layer that carries it -- in an IP-in-IP tunnel, the
+          innermost (see :func:`_carrier`).
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
           reassembly (:term:`reasm.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
@@ -448,16 +481,9 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
         :class:`pcapkit.foundation.reassembly.tcp.TCP`
 
     """
-    if 'IP' in packet:
-        ip = cast('IP', packet['IP'])
-    elif 'IPv6' in packet:
-        ip = cast('IPv6', packet['IPv6'])
-    else:
-        return None
-
     if 'TCP' in packet:
         tcp = cast('TCP', packet['TCP'])
-        if (segment := _tcp_segment(tcp)) is None:
+        if (ip := _carrier(tcp)) is None or (segment := _tcp_segment(tcp)) is None:
             return None
         header, payload = segment
 
@@ -507,9 +533,8 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
 
     """
     if 'TCP' in packet:
-        ip = cast('IP', packet['IP']) if 'IP' in packet else cast('IPv6', packet['IPv6'])
         tcp = cast('TCP', packet['TCP'])
-        if (segment := _tcp_segment(tcp)) is None:
+        if (ip := _carrier(tcp)) is None or (segment := _tcp_segment(tcp)) is None:
             return None
         header, payload = segment
 

@@ -74,6 +74,10 @@ class FakePySharkPacket:
             self.tcp = self.layers[2]
         else:
             self.layers = self.layers[:2]
+        if not ip:
+            # PyShark tests a packet for a layer by its ``layers``, so a packet
+            # with no IP layer has none there either
+            del self.layers[1]
         if not ether:
             # #775 tier 1 regression coverage: drop the Ethernet layer so
             # ``layers[0]`` -- what ``tcp_traceflow`` feeds the lookup -- is the

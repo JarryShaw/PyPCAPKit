@@ -20,8 +20,9 @@ cannot be used for it.
    from "this frame carries no IPv6 fragment".
 
    For the same reason :func:`tcp_reassembly` and :func:`tcp_traceflow` see TCP
-   over IPv4 only, and decline a frame carrying TCP over IPv6. That loss is not
-   silent: it is reported with one
+   over IPv4 only, and decline a frame carrying TCP over IPv6 -- TCP whose
+   innermost IP layer is IPv6, tunnelled in IP (e.g. 6in4, 6in6) or not. That
+   loss is not silent: it is reported with one
    :exc:`~pcapkit.utilities.warnings.AttributeWarning` per capture, on its first
    such frame, rather than one per frame.
 
@@ -30,16 +31,16 @@ cannot be used for it.
    :data:`VLAN_TAGS`), however deeply stacked, and decodes the IPv4 packet
    behind them with `PyPCAPFile`_'s own decoder. TCP and IPv4 reassembly and TCP
    flow tracing therefore see a tagged IPv4 frame as they see an untagged one.
-   Nor does it decode a tunnel, and TCP carried in IPv4 or IPv6 that is itself
-   carried in IP (e.g. 4in4, 6in4, 6in6) is left out with an
-   :exc:`~pcapkit.utilities.warnings.AttributeWarning` of its own, once per
-   capture. Either warning follows the default engine's own rules for where it
-   finds TCP, read off the raw headers, with one stated exception for a
-   malformed tunnelled frame (see :func:`_upper_layer`). IPv4 carried in IPv6
-   (4in6) still reaches :func:`ipv4_reassembly`, which the default engine
-   gives the first IPv4 layer of a frame (see :func:`_ipv4_in_ipv6`), and TCP
-   behind AH or an IPv6 extension header inside IPv4 is read past them (see
-   :func:`_transport`).
+   Nor does it decode a tunnel, so :func:`_innermost` steps through the IPv4
+   and IPv6 packets carried in IP (e.g. 4in4, 4in6) to the innermost, and
+   decodes it with the same decoder if it is IPv4: the TCP it carries is read
+   and keyed by its addresses, as the default engine keys it, not by the
+   tunnel's (:issue:`1581`). The warning follows the default engine's own rules
+   for where it finds TCP, read off the raw headers (see :func:`_upper_layer`).
+   IPv4 carried in IPv6 (4in6) also reaches :func:`ipv4_reassembly`, which the
+   default engine gives the first IPv4 layer of a frame (see
+   :func:`_ipv4_in_ipv6`), and TCP behind AH or an IPv6 extension header inside
+   IPv4 is read past them (see :func:`_transport`).
 
    `PyPCAPFile`_ checks neither that an IPv4 header was captured whole nor its
    options, and the default engine rejects a header that fails either check, so
@@ -165,12 +166,12 @@ IPV6_EXTENSION_HEADERS = frozenset((
 ))
 
 #: The warning :func:`_decline_tcp` gives for each kind of TCP that
-#: :func:`_left_out` finds this engine cannot read.
+#: :func:`_left_out` finds this engine cannot read. TCP tunnelled in IP is no
+#: kind of its own: the innermost IP layer carrying it is read if it is IPv4,
+#: and is TCP over IPv6 otherwise (see :func:`_innermost`, :issue:`1581`).
 TCP_LEFT_OUT = {
     'ipv6': "TCP over IPv6 is left out of TCP reassembly and flow tracing, as 'pypcapfile' "
             'has no IPv6 decoder',
-    'tunnel': 'TCP tunnelled in IP (IPv4 or IPv6 carried in IPv4 or IPv6) is left out of TCP '
-              "reassembly and flow tracing, as 'pypcapfile' decodes no tunnel",
 }
 
 #: How many warnings :func:`_decline_tcp` remembers having given, each for one
@@ -561,10 +562,10 @@ def _ipv4_in_ipv6(packet: 'Packet') -> 'Optional[IP]':
     Note:
         `PyPCAPFile`_ has no IPv6 decoder, so leaves the IPv4 inside undecoded.
         This is for :func:`ipv4_reassembly` alone, which the default engine
-        gives the first IPv4 layer of a frame however deep. TCP inside it is
-        tunnelled, so is still left out (see :func:`_left_out`), and nor does
-        an IPv4 packet that will not decode warn: `PyPCAPFile`_ never decodes
-        IPv6, so has nothing to warn of.
+        gives the first IPv4 layer of a frame however deep; TCP is keyed by the
+        innermost instead (see :func:`_innermost`). Nor does an IPv4 packet that
+        will not decode warn: `PyPCAPFile`_ never decodes IPv6, so has nothing
+        to warn of.
 
     .. _PyPCAPFile: https://github.com/kisom/pypcapfile
 
@@ -579,12 +580,29 @@ def _ipv4_in_ipv6(packet: 'Packet') -> 'Optional[IP]':
         upper = _upper_layer(6, upper[1])
     if upper is None or upper[0] != Enum_TransType.IPv4:
         return None
+    return _decode_ipv4(upper[1])
 
+
+def _decode_ipv4(data: 'bytes') -> 'Optional[IP]':
+    """Decode an IPv4 packet that `PyPCAPFile`_ left undecoded inside another IP packet.
+
+    Args:
+        data: Raw octets from the IPv4 header on, as far as the IP packet
+            carrying it goes (see :func:`_upper_layer`).
+
+    Returns:
+        The packet, decoded as :func:`_network` decodes one behind VLAN tags, or
+        :data:`None` if it will not decode or the default engine rejects its
+        header (see :func:`_ipv4_accepted`), which then dissects nothing past it.
+
+    .. _PyPCAPFile: https://github.com/kisom/pypcapfile
+
+    """
     # NOTE: imported only once there is something to decode, as in :func:`_network`.
     from pcapfile.protocols.network.ip import IP  # isort:skip
 
     try:
-        ipv4 = IP(upper[1], 0)
+        ipv4 = IP(data, 0)
     except (struct.error, AssertionError, ValueError, IndexError, KeyError):
         return None
     return ipv4 if _ipv4_accepted(ipv4) else None
@@ -690,17 +708,16 @@ def _upper_layer(version: 'int', data: 'bytes') -> 'Optional[tuple[int, bytes]]'
 
     Note:
         Each of these rules is the default engine's own, as are the ones
-        :func:`_left_out` applies to the TCP header, so that the warning
-        :func:`_decline_tcp` gives fires on the frames the default engine finds
-        TCP in. This reads only as far as the upper-layer protocol number and
-        decodes nothing, so it does not see every reason the default engine has
-        to leave octets undissected: an option in a tunnelled IPv4 header or an
-        extension header option it rejects, which leaves the header raw, or TCP
-        options it rejects, which in a tunnel leave the segment raw. (The outer
-        IPv4 header is checked, see :func:`_ipv4_accepted`.) A malformed tunnelled
-        frame like that is warned of all the same, though the default engine
-        finds no TCP in it either -- a warning that errs on the side of being
-        given, rather than a dissection of every such frame to settle it.
+        :func:`_left_out` applies to the TCP header, so that :func:`_innermost`
+        stops at the IP layer the default engine finds TCP in, and the warning
+        :func:`_decline_tcp` gives fires on the frames it finds TCP over IPv6 in.
+        This reads only as far as the upper-layer protocol number and decodes
+        nothing, so it does not see an IPv6 extension header option the default
+        engine rejects, which leaves the header raw. Every IPv4 header on the
+        way is checked by :func:`_innermost` (see :func:`_ipv4_accepted`), and a
+        TCP header the default engine's TCP parser rejects directly over its IP
+        layer, tunnelled or not, it still reads out of the raw octets left
+        behind (:func:`pcapkit.toolkit.pcap.tcp_segment`).
 
     """
     if version == 4:
@@ -738,57 +755,89 @@ def _upper_layer(version: 'int', data: 'bytes') -> 'Optional[tuple[int, bytes]]'
     return nxt, data[offset:]
 
 
-def _left_out(packet: 'Packet', ipv4: 'Optional[IP]') -> 'Optional[str]':
-    """Name the TCP a PyPCAPFile frame carries that this engine cannot read.
+def _innermost(packet: 'Packet', count: 'int' = -1) -> 'tuple[Optional[IP], Optional[tuple[int, bytes]]]':
+    """Fetch the innermost IP layer of a PyPCAPFile frame, the one carrying its TCP.
 
     Args:
-        packet: PyPCAPFile packet, which :func:`_transport` found no TCP segment in.
-        ipv4: Its IPv4 layer, as :func:`_network` fetches it.
+        packet: PyPCAPFile packet.
+        count: Packet index, for the warning :func:`_network` gives.
 
     Returns:
-        ``'ipv6'`` if the frame is IPv6 carrying TCP, directly or behind
-        extension headers; ``'tunnel'`` if it is IPv4 or IPv6 carrying TCP in one
-        or more of the :data:`IP_TUNNELS`; otherwise :data:`None`. Either may be
-        behind VLAN tags (see :func:`_untag`), and each IP header is stepped over
-        as :func:`_upper_layer` does. An ESP payload cannot be seen into, so does
-        not count.
+        The innermost IPv4 packet and :data:`None`, if the innermost IP layer is
+        IPv4; :data:`None` and the upper-layer protocol and octets of the
+        innermost IPv6 packet, as :func:`_upper_layer` gives them, if it is
+        IPv6; otherwise neither.
 
-        The TCP header has to be at least :data:`TCP_MIN_HEADER_LEN` octets
-        long, as its Data Offset gives it, with that many captured. In a tunnel,
-        the whole of the header its Data Offset gives has to be there too, as far
-        as the inner IP packet's own length: the default engine's TCP parser
-        rejects one cut short, e.g. by the snapshot length, and only directly
-        over IPv6 does it then read the segment out of the raw octets left
-        behind (:func:`pcapkit.toolkit.pcap.tcp_segment`, :issue:`1518`).
+        The outermost IP layer is the IPv4 packet :func:`_network` fetches, or
+        an IPv6 packet, behind VLAN tags (see :func:`_untag`) or not. Each IPv4
+        or IPv6 packet one of them carries in the :data:`IP_TUNNELS`, directly
+        or behind the headers :func:`_upper_layer` steps over, is the next, as
+        deep as they go. An IPv4 packet in a tunnel is decoded by
+        :func:`_decode_ipv4`, and one it does not decode ends the walk with
+        neither, as the default engine then dissects no TCP past it.
+
+    Note:
+        The default engine keys a TCP segment by the IP layer nearest above it
+        (:func:`pcapkit.toolkit.pcap.tcp_segment`), which in a tunnel is the
+        innermost, so the TCP endpoints are its addresses and not the tunnel's
+        (:issue:`1581`).
 
     """
-    if ipv4 is not None:  # read by PyPCAPFile, so only a tunnel can hide TCP
+    ipv4 = _network(packet, count)
+    if ipv4 is not None:
         # a later fragment has no upper-layer header, see ``_upper_layer``
         if (ipv4.off or (ipv4.p not in IP_TUNNELS and ipv4.p not in IPV4_EXTENSION_HEADERS)
                 or not _is_raw(ipv4.payload)):
-            return None
+            return ipv4, None
         upper = _past_extension_headers(ipv4.p, _ipv4_payload(ipv4))  # type: Optional[tuple[int, bytes]]
-        if upper is None or upper[0] not in IP_TUNNELS:
-            return None
     else:
         link = packet.packet
         untagged = None if _is_raw(link) else _untag(link)
         if untagged is None or untagged[0] != Enum_EtherType.Internet_Protocol_version_6:
-            return None
+            return None, None
         upper = _upper_layer(6, untagged[1])
 
-    kind = 'ipv6'
     while upper is not None and upper[0] in IP_TUNNELS:
-        upper, kind = _upper_layer(IP_TUNNELS[upper[0]], upper[1]), 'tunnel'
+        version, data = IP_TUNNELS[upper[0]], upper[1]
+        upper = _upper_layer(version, data)
+        if version == 6:
+            ipv4 = None
+        elif (ipv4 := _decode_ipv4(data)) is None:
+            return None, None
+    if ipv4 is not None:
+        return ipv4, None
+    return None, upper
+
+
+def _left_out(upper: 'Optional[tuple[int, bytes]]') -> 'Optional[str]':
+    """Name the TCP a PyPCAPFile frame carries that this engine cannot read.
+
+    Args:
+        upper: The upper-layer protocol and octets of the frame's innermost IP
+            layer, if that is IPv6, as :func:`_innermost` gives them.
+
+    Returns:
+        ``'ipv6'`` if they are a TCP header, i.e. the frame carries TCP over
+        IPv6, directly or behind extension headers, tunnelled in IP or not;
+        otherwise :data:`None`. An ESP payload cannot be seen into, so does not
+        count.
+
+        The TCP header has to be at least :data:`TCP_MIN_HEADER_LEN` octets
+        long, as its Data Offset gives it, with that many captured. The rest of
+        the header need not be: the default engine's TCP parser rejects one cut
+        short, e.g. by the snapshot length, and then reads the segment out of
+        the raw octets left behind (:func:`pcapkit.toolkit.pcap.tcp_segment`,
+        :issue:`1518`).
+
+    """
     if upper is None or upper[0] != Enum_TransType.TCP:
         return None
     segment = upper[1]
     if len(segment) < TCP_MIN_HEADER_LEN:
         return None
-    header = (segment[12] >> 4) * 4  # the Data Offset, in octets
-    if header < TCP_MIN_HEADER_LEN or (kind == 'tunnel' and header > len(segment)):
+    if (segment[12] >> 4) * 4 < TCP_MIN_HEADER_LEN:  # the Data Offset, in octets
         return None
-    return kind
+    return 'ipv6'
 
 
 def _capture_of(packet: 'Packet') -> 'tuple[int, Any]':
@@ -819,12 +868,13 @@ def _capture_of(packet: 'Packet') -> 'tuple[int, Any]':
         return id(anchor), anchor
 
 
-def _decline_tcp(packet: 'Packet', ipv4: 'Optional[IP]', count: 'int') -> 'None':
+def _decline_tcp(packet: 'Packet', upper: 'Optional[tuple[int, bytes]]', count: 'int') -> 'None':
     """Warn that a frame carrying TCP this engine cannot read is left out.
 
     Args:
         packet: PyPCAPFile packet, which :func:`_transport` found no TCP segment in.
-        ipv4: Its IPv4 layer, as :func:`_network` fetches it.
+        upper: The upper-layer protocol and octets of its innermost IP layer, if
+            that is IPv6, as :func:`_innermost` gives them.
         count: Packet index.
 
     Warns:
@@ -842,7 +892,7 @@ def _decline_tcp(packet: 'Packet', ipv4: 'Optional[IP]', count: 'int') -> 'None'
     key, anchor = _capture_of(packet)
     if all((key, kind) in _tcp_warned for kind in TCP_LEFT_OUT):
         return
-    kind = _left_out(packet, ipv4)
+    kind = _left_out(upper)
     if kind is None or (key, kind) in _tcp_warned:
         return
 
@@ -1149,9 +1199,9 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
         * If the ``packet`` can be used for TCP reassembly. A packet can be reassembled
           if it contains an IPv4 layer carrying a TCP segment, directly or behind AH or
           IPv6 extension headers, and behind 802.1Q or 802.1ad VLAN tags or not (see
-          :func:`_transport`);
-          TCP over IPv6 cannot be, as `PyPCAPFile`_ has no IPv6 decoder,
-          and nor can TCP tunnelled in IP, as it decodes no tunnel.
+          :func:`_transport`). In an IP-in-IP tunnel the IPv4 layer is the innermost
+          IP layer, whose addresses key the segment (see :func:`_innermost`); TCP over
+          IPv6, tunnelled or not, cannot be, as `PyPCAPFile`_ has no IPv6 decoder.
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
           reassembly (:term:`reasm.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
@@ -1160,11 +1210,11 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
             IPv4 address.
 
     Warns:
-        AttributeWarning: If ``packet`` carries TCP over IPv6, or tunnelled in IP,
-            which is left out, and is the first such frame of its capture to
+        AttributeWarning: If ``packet`` carries TCP over IPv6, tunnelled in IP or
+            not, which is left out, and is the first such frame of its capture to
             reach either :func:`tcp_reassembly` or :func:`tcp_traceflow`. The
             rest of that capture's such frames are left out without another
-            warning; each of the two kinds warns once of its own.
+            warning.
 
     See Also:
         :class:`pcapkit.foundation.reassembly.tcp.TCP`
@@ -1172,9 +1222,9 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
     .. _PyPCAPFile: https://github.com/kisom/pypcapfile
 
     """
-    ipv4 = _network(packet, count)
+    ipv4, upper = _innermost(packet, count)
     if ipv4 is None or (segment := _transport(ipv4)) is None:
-        _decline_tcp(packet, ipv4, count)
+        _decline_tcp(packet, upper, count)
         return None
 
     # NOTE: imported only once there is something to decode, so that declining a
@@ -1222,9 +1272,9 @@ def tcp_traceflow(packet: 'Packet', *, data_link: 'Enum_LinkType',
         * If the ``packet`` can be used for TCP flow tracing. A packet can be traced
           if it contains an IPv4 layer carrying a TCP segment, directly or behind AH or
           IPv6 extension headers, and behind 802.1Q or 802.1ad VLAN tags or not (see
-          :func:`_transport`);
-          TCP over IPv6 cannot be, as `PyPCAPFile`_ has no IPv6 decoder,
-          and nor can TCP tunnelled in IP, as it decodes no tunnel.
+          :func:`_transport`). In an IP-in-IP tunnel the IPv4 layer is the innermost
+          IP layer, whose addresses key the segment (see :func:`_innermost`); TCP over
+          IPv6, tunnelled or not, cannot be, as `PyPCAPFile`_ has no IPv6 decoder.
         * If the ``packet`` can be traced, then the :obj:`dict` mapping of data for TCP
           flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
@@ -1233,11 +1283,11 @@ def tcp_traceflow(packet: 'Packet', *, data_link: 'Enum_LinkType',
             IPv4 address.
 
     Warns:
-        AttributeWarning: If ``packet`` carries TCP over IPv6, or tunnelled in IP,
-            which is left out, and is the first such frame of its capture to
+        AttributeWarning: If ``packet`` carries TCP over IPv6, tunnelled in IP or
+            not, which is left out, and is the first such frame of its capture to
             reach either :func:`tcp_reassembly` or :func:`tcp_traceflow`. The
             rest of that capture's such frames are left out without another
-            warning; each of the two kinds warns once of its own.
+            warning.
 
     See Also:
         :class:`pcapkit.foundation.traceflow.tcp.TCP`
@@ -1245,9 +1295,9 @@ def tcp_traceflow(packet: 'Packet', *, data_link: 'Enum_LinkType',
     .. _PyPCAPFile: https://github.com/kisom/pypcapfile
 
     """
-    ipv4 = _network(packet, count)
+    ipv4, upper = _innermost(packet, count)
     if ipv4 is None or (segment := _transport(ipv4)) is None:
-        _decline_tcp(packet, ipv4, count)
+        _decline_tcp(packet, upper, count)
         return None
 
     # NOTE: imported only once there is something to decode, so that declining a

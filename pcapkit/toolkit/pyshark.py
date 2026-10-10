@@ -18,7 +18,7 @@ cannot be used for it.
 """
 import decimal
 import ipaddress
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
@@ -455,6 +455,34 @@ def packet2dict(packet: 'Packet') -> 'dict[str, Any]':
     return dict_
 
 
+def _carrier(packet: 'Packet') -> 'tuple[Any, Any]':
+    """Fetch the TCP layer of a PyShark packet and the IP layer that carries it.
+
+    Args:
+        packet: PyShark packet.
+
+    Returns:
+        The ``ip`` or ``ipv6`` layer nearest above the packet's first ``tcp``
+        layer, and that TCP layer; :data:`None` for either the packet lacks.
+
+    Note:
+        The nearest is the innermost IP layer of an IP-in-IP tunnel
+        (:rfc:`2003`, :rfc:`2473`, :rfc:`4213`), whose addresses are the TCP
+        endpoints', as for the default engine
+        (:func:`pcapkit.toolkit.pcap.tcp_segment`). ``packet.ip`` is the first
+        ``ip`` layer instead, which is the tunnel's (:issue:`1581`).
+
+    """
+    ip = None  # type: Any
+    for layer in packet.layers:
+        name = layer.layer_name.lower()
+        if name == 'tcp':
+            return ip, layer
+        if name in ('ip', 'ipv6'):
+            ip = layer
+    return ip, None
+
+
 def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | None':
     """Trace packet flow for TCP.
 
@@ -468,7 +496,8 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
         Data for TCP flow tracing.
 
         * If the ``packet`` can be used for TCP flow tracing. A packet can be reassembled
-          if it contains TCP layer.
+          if it contains TCP layer, keyed by the IP layer that carries it -- in an
+          IP-in-IP tunnel, the innermost (see :func:`_carrier`).
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
           flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
@@ -482,15 +511,8 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
         :class:`pcapkit.foundation.traceflow.tcp.TCP`
 
     """
-    if 'IP' in packet:
-        ip = cast('Packet', packet.ip)
-    elif 'IPv6' in packet:
-        ip = cast('Packet', packet.ipv6)
-    else:
-        return None
-
-    if 'TCP' in packet:
-        tcp = cast('Packet', packet.tcp)
+    ip, tcp = _carrier(packet)
+    if ip is not None and tcp is not None:
 
         # NOTE: the link type is keyed on ``frame.encap_type`` -- Wireshark's
         # internal ``WTAP_ENCAP_*`` number -- through

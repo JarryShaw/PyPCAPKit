@@ -19,7 +19,11 @@ from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
+from pcapkit.protocols.internet.ip import IP as Protocol_IP
+from pcapkit.protocols.misc.null import NoPayload
 from pcapkit.protocols.misc.raw import Raw
+from pcapkit.protocols.protocol import ProtocolBase
+from pcapkit.protocols.transport.tcp import TCP
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
@@ -32,8 +36,6 @@ if TYPE_CHECKING:
     from pcapkit.protocols.internet.ipv6 import IPv6
     from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
     from pcapkit.protocols.misc.pcap import Frame
-    from pcapkit.protocols.protocol import ProtocolBase
-    from pcapkit.protocols.transport.tcp import TCP
 
 __all__ = ['ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow',
            'tcp_segment', 'TCPSegment']
@@ -46,7 +48,7 @@ class TCPSegment(NamedTuple):
 
     """
 
-    #: Info of the IP layer carrying the segment.
+    #: Info of the IP layer carrying the segment, the innermost one in a tunnel.
     ip: 'Data_IPv4 | Data_IPv6'
     #: TCP source port.
     srcport: 'int'
@@ -68,6 +70,38 @@ class TCPSegment(NamedTuple):
     payload: 'bytes'
 
 
+def _carrier(frame: 'ProtocolBase') -> 'tuple[Optional[IPv4 | IPv6], Optional[TCP]]':
+    """Fetch the TCP layer of a frame and the IP layer that carries it.
+
+    Args:
+        frame: PCAP frame or PCAP-NG block.
+
+    Returns:
+        The IPv4 or IPv6 layer nearest above the frame's TCP layer, and that TCP
+        layer; with no TCP layer, the last IPv4 or IPv6 layer of the frame and
+        :data:`None`. With no IP layer, neither.
+
+    Note:
+        The nearest IP layer is the innermost one of an IP-in-IP tunnel
+        (:rfc:`2003`, :rfc:`2473`, :rfc:`4213`), whose addresses are the TCP
+        endpoints', as in Wireshark's TCP conversations; the outermost, which
+        ``frame['IP']`` finds, is the tunnel's (:issue:`1581`). It is found by
+        walking down from the outermost, so the headers between them do not
+        intervene: IPv6 dissects its own extension headers, and an AH or other
+        header inside IPv4 is a layer of its own but not an IP layer.
+
+    """
+    if 'IP' not in frame:
+        return None, None
+    ip = cast('IPv4 | IPv6', frame['IP'])
+    layer = ip.payload
+    while isinstance(layer, ProtocolBase) and not isinstance(layer, (NoPayload, TCP)):
+        if isinstance(layer, Protocol_IP):
+            ip = cast('IPv4 | IPv6', layer)
+        layer = layer.payload
+    return ip, (cast('TCP', frame['TCP']) if 'TCP' in frame else None)
+
+
 def tcp_segment(frame: 'ProtocolBase') -> 'Optional[TCPSegment]':
     """The TCP segment ``frame`` carries, or :data:`None` if it carries none.
 
@@ -78,11 +112,13 @@ def tcp_segment(frame: 'ProtocolBase') -> 'Optional[TCPSegment]':
         frame: PCAP frame or PCAP-NG block.
 
     Returns:
-        The fields of the TCP layer if :mod:`pcapkit` parsed one. Otherwise, the
-        fields of the fixed 20-octet TCP header (:rfc:`9293#section-3.1`) if the
-        IP payload is a :class:`~pcapkit.protocols.misc.raw.Raw` the TCP parser
-        rejected, of protocol TCP, from a datagram that is not a later fragment,
-        with at least those 20 octets captured; else :data:`None`.
+        The fields of the TCP layer if :mod:`pcapkit` parsed one, with those of
+        the IP layer that carries it -- in a tunnel, the innermost
+        (:issue:`1581`). Otherwise, the fields of the fixed 20-octet TCP header
+        (:rfc:`9293#section-3.1`) if the payload of the innermost IP layer is a
+        :class:`~pcapkit.protocols.misc.raw.Raw` the TCP parser rejected, of
+        protocol TCP, from a datagram that is not a later fragment, with at
+        least those 20 octets captured; else :data:`None`.
 
     Note:
         A capture snapped inside the TCP header leaves a Data Offset that runs
@@ -92,14 +128,17 @@ def tcp_segment(frame: 'ProtocolBase') -> 'Optional[TCPSegment]':
         are all in the fixed header, so the segment still belongs to its flow,
         as it does for :mod:`dpkt`, :mod:`scapy` and Wireshark (:issue:`1518`).
         The header and payload are then the captured octets either side of the
-        Data Offset.
+        Data Offset. Inside a tunnel, this holds of the IP layer carrying the
+        segment, as it does without one.
 
     """
-    if 'TCP' in frame:
-        tcp = cast('TCP', frame['TCP'])
+    ip, tcp = _carrier(frame)
+    if ip is None:
+        return None
+    if tcp is not None:
         tcp_info = tcp.info
         return TCPSegment(
-            ip=cast('IPv4 | IPv6', frame['IP']).info,
+            ip=ip.info,
             srcport=tcp_info.srcport.port,
             dstport=tcp_info.dstport.port,
             seq=tcp_info.seq,
@@ -111,9 +150,6 @@ def tcp_segment(frame: 'ProtocolBase') -> 'Optional[TCPSegment]':
             payload=tcp.packet.payload,
         )
 
-    if 'IP' not in frame:
-        return None
-    ip = cast('IPv4 | IPv6', frame['IP'])
     ip_info = ip.info
     raw = ip.payload
     # NOTE: a Raw with no error is one the caller asked for, by stopping the

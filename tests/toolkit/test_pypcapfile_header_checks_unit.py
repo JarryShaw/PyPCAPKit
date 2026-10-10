@@ -240,18 +240,24 @@ class PyPCAPFileHeaderCheckTests(unittest.TestCase):
         pypcapfile.tcp_traceflow(packet, data_link=LinkType.ETHERNET, count=1)
         self.assertEqual(pypcapfile._default_extension_header.cache_info().misses, 2)
 
-    def test_tunnelled_tcp_behind_ah_warns(self) -> None:
+    def test_tunnelled_tcp_behind_ah_is_found(self) -> None:
+        # C.f. #1581: a tunnel behind AH or an IPv6 extension header in IPv4 is
+        # walked into, and the TCP read from the innermost IPv4 layer.
+        from pcapkit.toolkit.pypcapfile import _innermost, _transport
+
         tcp4 = wire.ipv4(base.TCP_SEGMENT, proto=6)
-        for label, frame in (
-            ('4in4 behind ah', base.tunnel(base.ah(4) + tcp4, 51)),
-            ('6in4 behind ah', base.tunnel(base.ah(41) + wire.ipv6(base.TCP_SEGMENT, nxt=6), 51)),
-            ('4in4, inner ah', base.tunnel(wire.ipv4(base.ah(6) + base.TCP_SEGMENT, proto=51), 4)),
-            ('4in4 behind destination options', base.tunnel(base.options_header(4) + tcp4, 60)),
+        inner_ah = wire.ipv4(base.ah(6) + base.TCP_SEGMENT, proto=51)
+        for label, frame, inner in (
+            ('4in4 behind ah', base.tunnel(base.ah(4) + tcp4, 51), tcp4),
+            ('4in4, inner ah', base.tunnel(inner_ah, 4), inner_ah),
+            ('4in4 behind destination options', base.tunnel(base.options_header(4) + tcp4, 60), tcp4),
         ):
-            with self.subTest(case=label):
-                messages = self.decline(base.make_packet(frame))
-                self.assertEqual(len(messages), 1, messages)
-                self.assertTrue(messages[0].startswith('Frame 1: TCP tunnelled in IP'), messages)
+            with self.subTest(case=label), mock.patch.dict('sys.modules', base.fake_ip_decoder()) as modules:
+                IP = modules['pcapfile.protocols.network.ip'].IP
+                ipv4, _ = _innermost(base.make_packet(frame))
+                self.assertIsInstance(ipv4, IP)
+                self.assertEqual(IP.calls, [(inner, 0)])
+                self.assertEqual(_transport(ipv4), base.TCP_SEGMENT)
 
 
 if __name__ == '__main__':

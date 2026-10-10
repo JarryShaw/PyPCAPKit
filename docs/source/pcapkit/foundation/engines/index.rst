@@ -92,8 +92,8 @@ offers, and the ones that cannot say so rather than quietly doing less:
 | :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile`      | no IPv6 decoder, hence no IPv6 reassembly -- disabled with an |
 |                                                                 | :class:`~pcapkit.utilities.warnings.AttributeWarning`, and    |
 |                                                                 | :func:`~pcapkit.toolkit.pypcapfile.ipv6_reassembly` raises;   |
-|                                                                 | TCP over IPv6, and TCP tunnelled in IP (e.g. 6in4, 4in4), are |
-|                                                                 | left out of TCP reassembly and flow tracing, each with an     |
+|                                                                 | TCP over IPv6, tunnelled in IP (e.g. 6in4) or not, is left    |
+|                                                                 | out of TCP reassembly and flow tracing, with an               |
 |                                                                 | :class:`~pcapkit.utilities.warnings.AttributeWarning` once    |
 |                                                                 | per capture; IPv4 behind 802.1Q/802.1ad VLAN tags is read as  |
 |                                                                 | it is untagged; PCAP savefiles only, otherwise                |
