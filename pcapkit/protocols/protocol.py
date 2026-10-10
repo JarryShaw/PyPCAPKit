@@ -945,8 +945,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         :meth:`register` and the :class:`~pcapkit.protocols.link.link.Link`,
         :class:`~pcapkit.protocols.internet.internet.Internet`,
         :class:`~pcapkit.protocols.transport.transport.Transport`,
-        :class:`~pcapkit.protocols.transport.sctp.SCTP` and
-        :class:`~pcapkit.protocols.misc.pcap.frame.Frame` overrides share this;
+        :class:`~pcapkit.protocols.transport.sctp.SCTP`,
+        :class:`~pcapkit.protocols.misc.pcap.frame.Frame` and
+        :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` overrides share this;
         each still warns and stores for itself.
 
         Arguments:
