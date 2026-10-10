@@ -522,6 +522,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameInfo</span> <span class="k">as</span> <span class="n">Data_FrameInfo</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">jumbo_payload_length</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.pypcapfile</span><span class="w"> </span><span class="kn">import</span> <span class="n">_default_accepts</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="ne">ModuleNotFoundError</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">MissingKeyError</span><span class="p">,</span> <span class="n">ModuleNotFound</span><span class="p">,</span> <span class="n">stacklevel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScapyWarning</span><span class="p">,</span> <span class="n">warn</span>
@@ -791,6 +792,36 @@
     <span class="k">return</span> <span class="n">segment</span><span class="p">[:</span><span class="n">hdr_len</span><span class="p">],</span> <span class="n">segment</span><span class="p">[</span><span class="n">hdr_len</span><span class="p">:]</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_ipv4_accepted</span><span class="p">(</span><span class="n">ipv4</span><span class="p">:</span> <span class="s1">'IP'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Test if the default engine reads a Scapy IPv4 layer as an IPv4 layer.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ipv4: IPv4 layer of a dissected Scapy packet.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        :data:`False` if the default engine's IPv4 parser rejects its header --</span>
+<span class="sd">        its version is not 4, its IHL is below 5 or runs past the captured</span>
+<span class="sd">        octets, or its options are ones the parser rejects (:issue:`1607`) --</span>
+<span class="sd">        as the default engine then dissects nothing past it; else :data:`True`.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        `Scapy`_ dissects what an IPv4 EtherType or tunnel carries as IPv4</span>
+<span class="sd">        whatever its version or IHL, and never checks its options, so the</span>
+<span class="sd">        header is asked of the parser itself, as the pypcapfile engine asks it</span>
+<span class="sd">        (see :func:`pcapkit.toolkit.pypcapfile._default_accepts`). Its octets</span>
+<span class="sd">        are those `Scapy`_ dissected the layer from, which ``bytes()`` gives</span>
+<span class="sd">        back as they were, as far as the IHL goes, and no fewer than the 20 of</span>
+<span class="sd">        the fixed header, as the default engine reads at least those. A header</span>
+<span class="sd">        of version 4 with an IHL of 5 is not parsed: `Scapy`_ dissects none</span>
+<span class="sd">        shorter than 20 octets, and the parser checks nothing else of one.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="mi">4</span> <span class="ow">and</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">ihl</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="n">octets</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">ipv4</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_default_accepts</span><span class="p">(</span><span class="s1">'IPv4'</span><span class="p">,</span> <span class="n">octets</span><span class="p">[:</span><span class="nb">max</span><span class="p">((</span><span class="n">octets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0x0F</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">20</span><span class="p">)])</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_carrier</span><span class="p">(</span><span class="n">layer</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IP | IPv6 | None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Fetch the IP layer that carries ``layer``.</span>
 
@@ -800,7 +831,8 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        The nearest :class:`~scapy.layers.inet.IP` or</span>
 <span class="sd">        :class:`~scapy.layers.inet6.IPv6` layer above ``layer``, or</span>
-<span class="sd">        :data:`None` if there is none.</span>
+<span class="sd">        :data:`None` if there is none, or the default engine rejects the</span>
+<span class="sd">        header of an IPv4 layer above it (see :func:`_ipv4_accepted`).</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        The nearest is the innermost IP layer of an IP-in-IP tunnel</span>
@@ -816,9 +848,14 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.layers.inet</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.layers.inet6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span>
 
-    <span class="n">carrier</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">underlayer</span>
-    <span class="k">while</span> <span class="n">carrier</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">carrier</span><span class="p">,</span> <span class="p">(</span><span class="n">IP</span><span class="p">,</span> <span class="n">IPv6</span><span class="p">)):</span>
-        <span class="n">carrier</span> <span class="o">=</span> <span class="n">carrier</span><span class="o">.</span><span class="n">underlayer</span>
+    <span class="n">carrier</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: IP | IPv6 | None</span>
+    <span class="n">above</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">underlayer</span>
+    <span class="k">while</span> <span class="n">above</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">above</span><span class="p">,</span> <span class="n">IP</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_ipv4_accepted</span><span class="p">(</span><span class="n">above</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">carrier</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">above</span><span class="p">,</span> <span class="p">(</span><span class="n">IP</span><span class="p">,</span> <span class="n">IPv6</span><span class="p">)):</span>
+            <span class="n">carrier</span> <span class="o">=</span> <span class="n">above</span>
+        <span class="n">above</span> <span class="o">=</span> <span class="n">above</span><span class="o">.</span><span class="n">underlayer</span>
     <span class="k">return</span> <span class="n">carrier</span>
 
 
@@ -835,7 +872,8 @@
 <span class="sd">        Data for IPv4 reassembly.</span>
 
 <span class="sd">        * If the ``packet`` can be used for IPv4 reassembly. A packet can be reassembled</span>
-<span class="sd">          if it contains IPv4 layer (:class:`scapy.layers.inet.IP`) and the **DF**</span>
+<span class="sd">          if it contains IPv4 layer (:class:`scapy.layers.inet.IP`) whose header the</span>
+<span class="sd">          default engine accepts (see :func:`_ipv4_accepted`), and the **DF**</span>
 <span class="sd">          (:attr:`scapy.layers.inet.IP.flags.DF`) flag is :data:`False`.</span>
 <span class="sd">        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv4</span>
 <span class="sd">          reassembly (:term:`reasm.ipv4.packet`) will be returned; otherwise, returns :data:`None`.</span>
@@ -847,6 +885,8 @@
     <span class="k">if</span> <span class="s1">'IP'</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
         <span class="n">ipv4</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IP'</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'IP'</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DF</span><span class="p">:</span>       <span class="c1"># dismiss not fragmented packet</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_ipv4_accepted</span><span class="p">(</span><span class="n">ipv4</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">IP_Packet</span><span class="p">(</span>
@@ -969,9 +1009,9 @@
 
 <span class="sd">        * If the ``packet`` can be used for TCP reassembly. A packet can be reassembled</span>
 <span class="sd">          if it contains TCP layer (:class:`scapy.layers.inet.TCP`) whose fixed header</span>
-<span class="sd">          lies inside its datagram, and whose Data Offset counts at least that header.</span>
-<span class="sd">          It is keyed by the IP layer that carries it -- in an IP-in-IP tunnel, the</span>
-<span class="sd">          innermost (see :func:`_carrier`).</span>
+<span class="sd">          lies inside its datagram, and whose Data Offset counts at least that header,</span>
+<span class="sd">          behind no IPv4 header the default engine rejects. It is keyed by the IP layer</span>
+<span class="sd">          that carries it -- in an IP-in-IP tunnel, the innermost (see :func:`_carrier`).</span>
 <span class="sd">        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP</span>
 <span class="sd">          reassembly (:term:`reasm.tcp.packet`) will be returned; otherwise, returns :data:`None`.</span>
 

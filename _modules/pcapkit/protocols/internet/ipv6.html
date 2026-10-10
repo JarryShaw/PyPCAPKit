@@ -510,6 +510,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiDict</span><span class="p">,</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.protochain</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoChain</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span> <span class="k">as</span> <span class="n">Data_IPv6</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">EXTENSION_HEADER_LIMIT</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span> <span class="k">as</span> <span class="n">Schema_IPv6</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">jumbo_payload_length</span>
@@ -1024,7 +1025,7 @@
 
         <span class="n">hdr_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span>       <span class="c1"># header length</span>
         <span class="n">raw_len</span> <span class="o">=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">payload</span> <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">length</span>  <span class="c1"># payload length</span>
-        <span class="n">_protos</span> <span class="o">=</span> <span class="p">[]</span>                <span class="c1"># ProtoChain buffer</span>
+        <span class="n">_protos</span> <span class="o">=</span> <span class="p">[]</span>                <span class="c1"># type: list[ProtocolBase] # ProtoChain buffer</span>
         <span class="n">_exthdr</span> <span class="o">=</span> <span class="p">[]</span>                <span class="c1"># (parser class, info) per extension header</span>
         <span class="n">split</span> <span class="o">=</span> <span class="kc">None</span>                <span class="c1"># type: Optional[tuple[int, int]] # at first Fragment header</span>
         <span class="n">opaque</span> <span class="o">=</span> <span class="kc">False</span>              <span class="c1"># walk ended at a non-zero Fragment Offset</span>
@@ -1035,6 +1036,15 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">ex_proto</span> <span class="o">=</span> <span class="n">Enum_ExtensionHeader</span><span class="p">(</span><span class="n">proto</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="c1"># NOTE: At most :data:`EXTENSION_HEADER_LIMIT</span>
+            <span class="c1"># &lt;pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT&gt;`</span>
+            <span class="c1"># headers are walked, as at most that many are dissected after any</span>
+            <span class="c1"># other layer. This header and the rest are then the upper layer,</span>
+            <span class="c1"># which :meth:`_import_next_layer` keeps raw, with one warning</span>
+            <span class="c1"># (:issue:`1604`).</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">_protos</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">EXTENSION_HEADER_LIMIT</span><span class="p">:</span>
                 <span class="k">break</span>
 
             <span class="c1"># # directly break when No Next Header occurs</span>
@@ -1140,6 +1150,7 @@
         <span class="c1"># of a slice of UDP payload (:issue:`1545`). Reassembly takes</span>
         <span class="c1"># ``fragment`` above, which this leaves as it was.</span>
         <span class="n">ipv6_exthdr</span> <span class="o">=</span> <span class="n">ProtoChain</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="n">_protos</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exthdr_depth</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">_protos</span><span class="p">)</span>  <span class="c1"># the headers the upper layer follows</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">ipv6</span><span class="p">,</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">opaque</span> <span class="k">else</span> <span class="n">proto</span><span class="p">,</span> <span class="n">raw_len</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">,</span>
                                           <span class="n">ipv6_exthdr</span><span class="o">=</span><span class="n">ipv6_exthdr</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span></div>
 
@@ -1184,10 +1195,15 @@
 <span class="sd">            ends after it -- see :attr:`__generic_ext_codes__`'s docstring for</span>
 <span class="sd">            the full distinction.</span>
 
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-            <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Type[ProtocolBase]'</span>
+<span class="sd">            The upper layer past a walk cut at :data:`EXTENSION_HEADER_LIMIT</span>
+<span class="sd">            &lt;pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT&gt;` is the</span>
+<span class="sd">            next extension header, and is kept raw with one</span>
+<span class="sd">            :exc:`~pcapkit.utilities.warnings.ProtocolWarning`, as in</span>
+<span class="sd">            :meth:`Internet._import_next_layer</span>
+<span class="sd">            &lt;pcapkit.protocols.internet.internet.Internet._import_next_layer&gt;`</span>
+<span class="sd">            (:issue:`1604`).</span>
 
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">payload</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">file_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">get_payload</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1195,19 +1211,11 @@
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="nb">min</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.null</span><span class="w"> </span><span class="kn">import</span> \
-                <span class="n">NoPayload</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sigterm</span><span class="p">:</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> \
-                <span class="n">Raw</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">protocol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__proto__</span><span class="p">,</span> <span class="n">proto</span><span class="p">)</span>
-
+        <span class="n">protocol</span><span class="p">,</span> <span class="n">extra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_layer_class</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">extension</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">next_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_next_layer</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">,</span>
                                            <span class="n">alias</span><span class="o">=</span><span class="n">proto</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exlayer</span><span class="p">,</span>
-                                           <span class="n">protocol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exproto</span><span class="p">,</span> <span class="n">__context__</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exctx</span><span class="p">)</span>
+                                           <span class="n">protocol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exproto</span><span class="p">,</span> <span class="n">__context__</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exctx</span><span class="p">,</span> <span class="o">**</span><span class="n">extra</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6_ext</span><span class="w"> </span><span class="kn">import</span> \
                 <span class="n">IPv6_Ext</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>

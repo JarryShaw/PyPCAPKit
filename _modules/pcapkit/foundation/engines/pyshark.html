@@ -583,6 +583,29 @@
     <span class="c1">#: event loop exists instead of quietly creating one.</span>
     <span class="n">PYTHON_CEILING</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">14</span><span class="p">)</span>
 
+    <span class="c1">#: :program:`tshark` preferences :meth:`run` overrides, through</span>
+    <span class="c1">#: ``pyshark``'s ``override_prefs``: IPv4 and IPv6 reassembly off. tshark</span>
+    <span class="c1">#: reassembles fragments by default and dissects what the datagram carries</span>
+    <span class="c1">#: at the frame that completes it, so TCP was traced at the last fragment.</span>
+    <span class="c1">#: The default engine reads each frame as captured, TCP from a first</span>
+    <span class="c1">#: fragment (:issue:`1612`), and pcapkit's own reassembly is disabled on</span>
+    <span class="c1">#: this engine.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: Turning tshark's off also changes its TCP analysis, which is not</span>
+    <span class="c1">#: confined to fragments. Measured with tshark 4.6.9: tshark sizes a</span>
+    <span class="c1">#: fragmented segment from its first fragment alone, so its sequence</span>
+    <span class="c1">#: analysis sees a gap after it. Later frames of that stream, fragments or</span>
+    <span class="c1">#: not, then gain ``tcp.analysis.lost_segment``, and their other</span>
+    <span class="c1">#: ``tcp.analysis`` fields, ``tcp.completeness``, ``tcp.time_delta`` and</span>
+    <span class="c1">#: ``tcp.stream.*.contiguity_count`` change. Those fields reach the frame</span>
+    <span class="c1">#: records :func:`~pcapkit.toolkit.pyshark.packet2dict` builds. But</span>
+    <span class="c1">#: :func:`~pcapkit.toolkit.pyshark.tcp_traceflow` reads none of them, so</span>
+    <span class="c1">#: flow tracing is unaffected. The 23 captures under</span>
+    <span class="c1">#: :file:`examples/captures` carry no fragmented TCP. On them, every field</span>
+    <span class="c1">#: of every frame is the same either way, except the first and last</span>
+    <span class="c1">#: fragments of the one fragmented UDP datagram in :file:`ipv6.pcap`.</span>
+    <span class="n">OVERRIDE_PREFS</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'ip.defragment'</span><span class="p">:</span> <span class="s1">'FALSE'</span><span class="p">,</span> <span class="s1">'ipv6.defragment'</span><span class="p">:</span> <span class="s1">'FALSE'</span><span class="p">}</span>  <span class="c1"># type: dict[str, str]</span>
+
     <span class="c1">##########################################################################</span>
     <span class="c1"># Class methods.</span>
     <span class="c1">##########################################################################</span>
@@ -696,7 +719,8 @@
 
 <span class="sd">        This method assigns :attr:`self._expkg &lt;PyShark._expkg&gt;`</span>
 <span class="sd">        as :mod:`pyshark` and :attr:`self._extmp &lt;PyShark._extmp&gt;`</span>
-<span class="sd">        as an iterator from :class:`pyshark.FileCapture`.</span>
+<span class="sd">        as an iterator from :class:`pyshark.FileCapture`, with</span>
+<span class="sd">        :program:`tshark`'s IP reassembly off (:attr:`OVERRIDE_PREFS`).</span>
 
 <span class="sd">        The global header is parsed and dumped first, by</span>
 <span class="sd">        :meth:`self.extractor.record_header &lt;pcapkit.foundation.extraction.Extractor.record_header&gt;`.</span>
@@ -749,7 +773,8 @@
 
         <span class="c1"># extract &amp; analyse file</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'pyshark: opening </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ifnm</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span><span class="o">.</span><span class="n">FileCapture</span><span class="p">(</span><span class="n">ext</span><span class="o">.</span><span class="n">_ifnm</span><span class="p">,</span> <span class="n">keep_packets</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span><span class="o">.</span><span class="n">FileCapture</span><span class="p">(</span><span class="n">ext</span><span class="o">.</span><span class="n">_ifnm</span><span class="p">,</span> <span class="n">keep_packets</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                              <span class="n">override_prefs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">OVERRIDE_PREFS</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="PyShark.read_frame">

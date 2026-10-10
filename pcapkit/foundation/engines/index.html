@@ -582,7 +582,10 @@ offers, and the ones that cannot say so rather than quietly doing less:</p>
 <tbody>
 <tr class="row-even"><td><p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pyshark.PyShark" title="pcapkit.foundation.engines.pyshark.PyShark"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyShark</span></code></a></p></td>
 <td><p>no reassembly – disabled with an
-<a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a></p></td>
+<a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a>, and
+<strong class="program">tshark</strong>’s own IP reassembly is turned off, so a
+fragmented datagram is read frame by frame, as the built-in
+engine reads it</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="3rdparty.html#pcapkit.foundation.engines.pypcap.PyPCAP" title="pcapkit.foundation.engines.pypcap.PyPCAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAP</span></code></a></p></td>
 <td><p>no protocol dissection at all, hence no reassembly and no

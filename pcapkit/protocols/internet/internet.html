@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/internet/internet.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.internet.internet contains Internet, which is a base class for internet layer protocols, eg. AH, IPsec, IPv4, IPv6, IPX, and etc." />
-<meta name="description" content="pcapkit.protocols.internet.internet contains Internet, which is a base class for internet layer protocols, eg. AH, IPsec, IPv4, IPv6, IPX, and etc." />
+<meta property="og:description" content="pcapkit.protocols.internet.internet contains Internet, which is a base class for internet layer protocols, eg. AH, IPsec, IPv4, IPv6, IPX, and etc. Extension Header Chains: A chain of IPv6 extensio..." />
+<meta name="description" content="pcapkit.protocols.internet.internet contains Internet, which is a base class for internet layer protocols, eg. AH, IPsec, IPv4, IPv6, IPX, and etc. Extension Header Chains: A chain of IPv6 extensio..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="IP - Internet Protocol" href="ip.html"><link rel="prev" title="Internet Layer" href="index.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -185,7 +185,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
@@ -484,7 +484,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
@@ -655,6 +655,72 @@ is included when <a class="reference internal" href="../../corekit/infoclass.htm
 <dd class="field-odd"><p>Instance of next layer.</p>
 </dd>
 </dl>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>An IPv6 extension header past <a class="reference internal" href="#pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT" title="pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a> in a
+row is not dissected: it and the rest of the packet are kept as
+<a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, with one
+<a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.ProtocolWarning" title="pcapkit.utilities.warnings.ProtocolWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolWarning</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1604">#1604</a>).
+Each header dissects the next one from here, so the chain’s depth
+is handed to the next layer, c.f. <a class="reference internal" href="#pcapkit.protocols.internet.internet.Internet._next_layer_class" title="pcapkit.protocols.internet.internet.Internet._next_layer_class"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_next_layer_class()</span></code></a>.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.internet.Internet._next_layer_class">
+<span class="sig-name descname"><span class="pre">_next_layer_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/internet.html#Internet._next_layer_class"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.internet.Internet._next_layer_class" title="Link to this definition">¶</a></dt>
+<dd><p>Pick the class the next layer is parsed with.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>proto</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – next layer protocol index</p></li>
+<li><p><strong>file_</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – payload of the current layer</p></li>
+<li><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – valid (<em>non-padding</em>) length</p></li>
+<li><p><strong>extension</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – if is extension header, c.f. <a class="reference internal" href="#pcapkit.protocols.internet.internet.Internet._next_exthdr_depth" title="pcapkit.protocols.internet.internet.Internet._next_exthdr_depth"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_next_exthdr_depth()</span></code></a></p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>], <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../misc/null.html#pcapkit.protocols.misc.null.NoPayload" title="pcapkit.protocols.misc.null.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a> if there is
+nothing to parse; <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> if the
+parse stops at this layer, or the next layer is an IPv6 extension
+header past <a class="reference internal" href="#pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT" title="pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a> in a row; otherwise the
+class registered for <code class="docutils literal notranslate"><span class="pre">proto</span></code>. With it, the keywords only that next
+layer is constructed with: the warning given, as <code class="docutils literal notranslate"><span class="pre">error</span></code>, or the
+next layer’s place in its chain, as <code class="docutils literal notranslate"><span class="pre">_exthdr_depth</span></code>.</p>
+</dd>
+<dt class="field-even">Warns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ProtocolWarning</strong> – If the next layer is past
+<a class="reference internal" href="#pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT" title="pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1604">#1604</a>).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.internet.Internet._next_exthdr_depth">
+<span class="sig-name descname"><span class="pre">_next_exthdr_depth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/internet.html#Internet._next_exthdr_depth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.internet.Internet._next_exthdr_depth" title="Link to this definition">¶</a></dt>
+<dd><p>Place the next layer in its chain of IPv6 extension headers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>proto</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – next layer protocol index</p></li>
+<li><p><strong>extension</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – if the next layer is parsed as an extension header by
+<a class="reference internal" href="ipv6.html#pcapkit.protocols.internet.ipv6.IPv6" title="pcapkit.protocols.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a>’s walk, which
+counts the chain itself, c.f. <a class="reference internal" href="ipv6.html#pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer" title="pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6._decode_next_layer</span></code></a></p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>One more than <a class="reference internal" href="#pcapkit.protocols.internet.internet.Internet._exthdr_depth" title="pcapkit.protocols.internet.internet.Internet._exthdr_depth"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_exthdr_depth</span></code></a> if <code class="docutils literal notranslate"><span class="pre">proto</span></code> names an IPv6
+extension header, or <code class="docutils literal notranslate"><span class="pre">0</span></code> if it names none, so that another layer
+between two headers starts a new chain. Past
+<a class="reference internal" href="#pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT" title="pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a>, the next layer is left raw.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -676,8 +742,52 @@ c.f. <a class="reference internal" href="#pcapkit.protocols.internet.internet.In
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.internet.Internet._exthdr_depth">
+<span class="sig-name descname"><span class="pre">_exthdr_depth</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#pcapkit.protocols.internet.internet.Internet._exthdr_depth" title="Link to this definition">¶</a></dt>
+<dd><p>How many IPv6 extension headers in a row the next layer follows:
+this layer’s place in such a chain, or how many headers
+<a class="reference internal" href="ipv6.html#pcapkit.protocols.internet.ipv6.IPv6" title="pcapkit.protocols.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a> walked, else <code class="docutils literal notranslate"><span class="pre">0</span></code>, c.f.
+<a class="reference internal" href="#pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT" title="pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a> and <a class="reference internal" href="#pcapkit.protocols.internet.internet.Internet._next_exthdr_depth" title="pcapkit.protocols.internet.internet.Internet._next_exthdr_depth"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_next_exthdr_depth()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
+</dd>
+</dl>
 </dd></dl>
 
+</dd></dl>
+
+<section id="extension-header-chains">
+<h2>Extension Header Chains<a class="headerlink" href="#extension-header-chains" title="Link to this heading">¶</a></h2>
+<p>A chain of IPv6 extension headers is dissected to at most
+<a class="reference internal" href="#pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT" title="pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a> headers in
+a row, whether it follows IPv6 or another layer such as IPv4. What follows is
+kept as <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, with one
+<a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.ProtocolWarning" title="pcapkit.utilities.warnings.ProtocolWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolWarning</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1604">#1604</a>). The
+<code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code> toolkit stops at the same depth. The <code class="docutils literal notranslate"><span class="pre">dpkt</span></code>, <code class="docutils literal notranslate"><span class="pre">scapy</span></code> and
+<code class="docutils literal notranslate"><span class="pre">pyshark</span></code> engines leave the walk to their own parsers, which do not stop
+there, so they may still find the upper layer past it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1609">#1609</a>).</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.internet.</span></span><span class="sig-name descname"><span class="pre">EXTENSION_HEADER_LIMIT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32</span></span><a class="headerlink" href="#pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT" title="Link to this definition">¶</a></dt>
+<dd><p>Most IPv6 extension headers dissected in one chain, i.e. one after another
+with no other layer between them (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1604">#1604</a>). The walk stops there, and
+what follows the last of them is kept as
+<a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, with one
+<a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.ProtocolWarning" title="pcapkit.utilities.warnings.ProtocolWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolWarning</span></code></a>. That holds whether the
+chain follows IPv6, which walks it in a loop
+(<a class="reference internal" href="ipv6.html#pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer" title="pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6._decode_next_layer</span></code></a>), or another
+layer such as IPv4, where each header dissects the next one itself
+(<a class="reference internal" href="#pcapkit.protocols.internet.internet.Internet._import_next_layer" title="pcapkit.protocols.internet.internet.Internet._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Internet._import_next_layer()</span></code></a>). The toolkit adapters that walk a
+chain themselves stop at the same depth.</p>
+<p><span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.1"><strong>RFC 8200 Section 4.1</strong></a> allows each extension header at most once, and the
+Destination Options header at most twice, so no compliant chain gets close.
+Without the bound, a chain dissected header by header stops wherever
+Python’s recursion limit falls, which depends on the interpreter.</p>
+</dd></dl>
+
+</section>
 </section>
 
         </article>
@@ -723,8 +833,27 @@ c.f. <a class="reference internal" href="#pcapkit.protocols.internet.internet.In
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Base Protocol</a><ul>
+<li><a class="reference internal" href="#extension-header-chains">Extension Header Chains</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

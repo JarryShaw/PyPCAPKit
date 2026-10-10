@@ -548,6 +548,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">IP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TCP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">EXTENSION_HEADER_LIMIT</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv4</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4</span> <span class="k">as</span> <span class="n">Protocol_IPv4</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">jumbo_payload_length</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">Protocol_TCP</span>
@@ -1140,7 +1141,10 @@
 <span class="sd">        default engine leaves one of them undissected. An AH is</span>
 <span class="sd">        ``(Payload Length + 2) * 4`` octets long (:rfc:`4302#section-2.2`), and</span>
 <span class="sd">        no shorter than :data:`AH_HEADER_LEN`; any other is read by</span>
-<span class="sd">        :func:`_default_extension_header` (:issue:`1597`).</span>
+<span class="sd">        :func:`_default_extension_header` (:issue:`1597`). Past</span>
+<span class="sd">        :data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT`</span>
+<span class="sd">        of them in a row, the default engine leaves the rest undissected too</span>
+<span class="sd">        (:issue:`1604`).</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        Inside IPv4, the default engine decodes what an IPv6 Fragment header</span>
@@ -1149,7 +1153,11 @@
 <span class="sd">        they are there.</span>
 
 <span class="sd">    """</span>
+    <span class="n">depth</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">while</span> <span class="n">protocol</span> <span class="ow">in</span> <span class="n">IPV4_EXTENSION_HEADERS</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">depth</span> <span class="o">==</span> <span class="n">EXTENSION_HEADER_LIMIT</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">depth</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="n">protocol</span> <span class="o">==</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">AH</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">AH_HEADER_LEN</span> <span class="k">else</span> <span class="mi">0</span>
             <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="n">AH_HEADER_LEN</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
@@ -1185,7 +1193,9 @@
 <span class="sd">        Fragment header as if that header were not there. A later fragment of</span>
 <span class="sd">        either has no upper-layer header, since from its offset on it carries a</span>
 <span class="sd">        slice of the payload (:rfc:`791#section-3.2`, :rfc:`8200#section-4.5`).</span>
-<span class="sd">        Nor does a truncated header or header chain.</span>
+<span class="sd">        Nor does a truncated header or header chain, or a chain of more than</span>
+<span class="sd">        :data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT`</span>
+<span class="sd">        extension headers (:issue:`1604`).</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        Each of these rules is the default engine's own, as are the ones</span>
@@ -1218,10 +1228,11 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">extent</span><span class="p">:</span>
         <span class="n">extent</span> <span class="o">=</span> <span class="n">jumbo_payload_length</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">IPV6_HEADER_LEN</span><span class="p">:])</span> <span class="ow">or</span> <span class="mi">0</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:</span><span class="n">IPV6_HEADER_LEN</span> <span class="o">+</span> <span class="n">extent</span><span class="p">]</span>
-    <span class="n">nxt</span><span class="p">,</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="n">IPV6_HEADER_LEN</span>
+    <span class="n">nxt</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">depth</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="n">IPV6_HEADER_LEN</span><span class="p">,</span> <span class="mi">0</span>
     <span class="k">while</span> <span class="n">nxt</span> <span class="ow">in</span> <span class="n">IPV6_EXTENSION_HEADERS</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">offset</span> <span class="o">+</span> <span class="mi">8</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">depth</span> <span class="o">==</span> <span class="n">EXTENSION_HEADER_LIMIT</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">offset</span> <span class="o">+</span> <span class="mi">8</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">depth</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="n">nxt</span> <span class="o">==</span> <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">IPv6_Frag</span><span class="p">:</span>  <span class="c1"># fixed length, second octet reserved</span>
             <span class="k">if</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">'!H'</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">offset</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">3</span><span class="p">:</span>  <span class="c1"># a later fragment</span>
                 <span class="k">return</span> <span class="kc">None</span>

@@ -1056,6 +1056,8 @@
 </li>
         <li><a href="pcapkit/corekit/enum.html#id1">_extend() (pcapkit.corekit.enum.EnumRegistry class method)</a>, <a href="pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry._extend">[1]</a>
 </li>
+        <li><a href="pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet._exthdr_depth">_exthdr_depth (pcapkit.protocols.internet.internet.Internet attribute)</a>
+</li>
         <li><a href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT._extmp">_extmp (pcapkit.foundation.engines.dpkt.DPKT attribute)</a>
 
         <ul>
@@ -1856,10 +1858,10 @@
 </li>
         <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_os">_make_option_if_os() (pcapkit.protocols.misc.pcapng.PCAPNG method)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_rxspeed">_make_option_if_rxspeed() (pcapkit.protocols.misc.pcapng.PCAPNG method)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_speed">_make_option_if_speed() (pcapkit.protocols.misc.pcapng.PCAPNG method)</a>
 </li>
         <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_tsoffset">_make_option_if_tsoffset() (pcapkit.protocols.misc.pcapng.PCAPNG method)</a>
@@ -2313,6 +2315,10 @@
         <li><a href="pcapkit/corekit/fields/field.html#pcapkit.corekit.fields.field.FieldBase._name">_name (pcapkit.corekit.fields.field.FieldBase attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol._next">_next (pcapkit.protocols.protocol.Protocol attribute)</a>
+</li>
+        <li><a href="pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet._next_exthdr_depth">_next_exthdr_depth() (pcapkit.protocols.internet.internet.Internet method)</a>
+</li>
+        <li><a href="pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet._next_layer_class">_next_layer_class() (pcapkit.protocols.internet.internet.Internet method)</a>
 </li>
         <li><a href="pcapkit/foundation/engines/builtin.html#pcapkit.foundation.engines.pcap.PCAP._nnsec">_nnsec (pcapkit.foundation.engines.pcap.PCAP attribute)</a>
 </li>
@@ -16236,14 +16242,14 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.entextmed">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.entextnetwk">entextnetwk (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.entextnetwk">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.entextxid">entextxid (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -17218,6 +17224,8 @@
         <li><a href="pcapkit/const/ngap.html#pcapkit.const.ngap.protocol_ie.ProtocolIE.ExtendedTAISliceSupportList">ExtendedTAISliceSupportList (pcapkit.const.ngap.protocol_ie.ProtocolIE attribute)</a>
 </li>
         <li><a href="pcapkit/const/ngap.html#pcapkit.const.ngap.protocol_ie.ProtocolIE.ExtendedUEIdentityIndexValue">ExtendedUEIdentityIndexValue (pcapkit.const.ngap.protocol_ie.ProtocolIE attribute)</a>
+</li>
+        <li><a href="pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT">EXTENSION_HEADER_LIMIT (in module pcapkit.protocols.internet.internet)</a>
 </li>
         <li><a href="pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6.extension_headers">extension_headers (pcapkit.protocols.internet.ipv6.IPv6 property)</a>
 </li>
@@ -48062,10 +48070,10 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.reserved_5787">reserved_5787 (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.reserved_5794">reserved_5794 (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.reserved_5798">reserved_5798 (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.reserved_5820">reserved_5820 (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
@@ -49773,6 +49781,8 @@
           <li><a href="pcapkit/protocols/internet/ipv6.html#index-1">RFC 8200 Section 3</a>
 </li>
           <li><a href="pcapkit/vendor/ipv6.html#index-0">RFC 8200 Section 4</a>
+</li>
+          <li><a href="pcapkit/protocols/internet/internet.html#index-0">RFC 8200 Section 4.1</a>
 </li>
           <li><a href="pcapkit/protocols/internet/hopopt.html#index-19">RFC 8200 Section 4.2</a>, <a href="pcapkit/protocols/internet/hopopt.html#index-21">[1]</a>, <a href="pcapkit/protocols/internet/hopopt.html#index-3">[2]</a>, <a href="pcapkit/protocols/internet/ipv6_option.html#index-0">[3]</a>, <a href="pcapkit/protocols/internet/ipv6_option.html#index-1">[4]</a>, <a href="pcapkit/protocols/internet/ipv6_opts.html#index-19">[5]</a>, <a href="pcapkit/protocols/internet/ipv6_opts.html#index-21">[6]</a>, <a href="pcapkit/protocols/internet/ipv6_opts.html#index-3">[7]</a>
 </li>

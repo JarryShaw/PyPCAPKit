@@ -498,6 +498,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameRecord</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameInfo</span> <span class="k">as</span> <span class="n">Data_FrameInfo</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.pypcapfile</span><span class="w"> </span><span class="kn">import</span> <span class="n">_default_accepts</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -906,6 +907,36 @@
     <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="s1">'ip6'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_ipv4_accepted</span><span class="p">(</span><span class="n">ipv4</span><span class="p">:</span> <span class="s1">'IP'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Test if the default engine reads a DPKT IPv4 packet as an IPv4 layer.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ipv4: DPKT IPv4 packet.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        :data:`False` if the default engine's IPv4 parser rejects its header --</span>
+<span class="sd">        its version is not 4, its options are ones the parser rejects, or its</span>
+<span class="sd">        IHL runs past the captured octets (:issue:`1607`) -- as the default</span>
+<span class="sd">        engine then dissects nothing past it; else :data:`True`.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        `DPKT`_ decodes what an IPv4 EtherType or tunnel carries as IPv4</span>
+<span class="sd">        whatever its version, and never checks its options, so the header is</span>
+<span class="sd">        asked of the parser itself, as the pypcapfile engine asks it (see</span>
+<span class="sd">        :func:`pcapkit.toolkit.pypcapfile._default_accepts`). Its octets are the</span>
+<span class="sd">        fields as `DPKT`_ read them and the options as captured, which is</span>
+<span class="sd">        exact. A header of version 4 with no options is not parsed: `DPKT`_</span>
+<span class="sd">        decodes none shorter than 20 octets or with an IHL below 5, and the</span>
+<span class="sd">        parser checks nothing else of one.</span>
+
+<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">v</span> <span class="o">==</span> <span class="mi">4</span> <span class="ow">and</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hl</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="n">_default_accepts</span><span class="p">(</span><span class="s1">'IPv4'</span><span class="p">,</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">pack_hdr</span><span class="p">()</span> <span class="o">+</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">opts</span><span class="p">))</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_tcp_carrier</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Optional[IP | IP6], Optional[TCP]]'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Fetch the IP layer of a DPKT packet that carries its TCP segment, and the segment.</span>
 
@@ -916,9 +947,11 @@
 <span class="sd">        The innermost IPv4 or IPv6 packet of the network layer (see</span>
 <span class="sd">        :func:`_network`) and of the IP-in-IP tunnels it carries, and its</span>
 <span class="sd">        :class:`dpkt.tcp.TCP` payload, if it has one; else :data:`None` for the</span>
-<span class="sd">        latter, and for both with no network layer. A tunnel is a packet whose</span>
-<span class="sd">        protocol, or for IPv6 the next header after its extension headers, is</span>
-<span class="sd">        one of the :data:`IP_TUNNELS`.</span>
+<span class="sd">        latter, and for both with no network layer, or if the default engine</span>
+<span class="sd">        rejects the header of an IPv4 packet on the way (see</span>
+<span class="sd">        :func:`_ipv4_accepted`). A tunnel is a packet whose protocol, or for</span>
+<span class="sd">        IPv6 the next header after its extension headers, is one of the</span>
+<span class="sd">        :data:`IP_TUNNELS`.</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        `DPKT`_ decodes an IPv4 or IPv6 packet inside another (:rfc:`2003`,</span>
@@ -935,7 +968,11 @@
     <span class="n">ip</span> <span class="o">=</span> <span class="n">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">ip</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
-    <span class="k">while</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="s1">'p'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">in</span> <span class="n">IP_TUNNELS</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="n">dpkt</span><span class="o">.</span><span class="n">ip</span><span class="o">.</span><span class="n">IP</span><span class="p">,</span> <span class="n">dpkt</span><span class="o">.</span><span class="n">ip6</span><span class="o">.</span><span class="n">IP6</span><span class="p">)):</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="n">dpkt</span><span class="o">.</span><span class="n">ip</span><span class="o">.</span><span class="n">IP</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_ipv4_accepted</span><span class="p">(</span><span class="n">ip</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="s1">'p'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">IP_TUNNELS</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="n">dpkt</span><span class="o">.</span><span class="n">ip</span><span class="o">.</span><span class="n">IP</span><span class="p">,</span> <span class="n">dpkt</span><span class="o">.</span><span class="n">ip6</span><span class="o">.</span><span class="n">IP6</span><span class="p">)):</span>
+            <span class="k">break</span>
         <span class="n">ip</span> <span class="o">=</span> <span class="n">ip</span><span class="o">.</span><span class="n">data</span>
 
     <span class="n">tcp</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="s1">'tcp'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># type: Optional[TCP]</span>
@@ -1051,7 +1088,8 @@
 <span class="sd">        Data for IPv4 reassembly.</span>
 
 <span class="sd">        * If the ``packet`` can be used for IPv4 reassembly. A packet can be reassembled</span>
-<span class="sd">          if it contains IPv4 layer (:class:`dpkt.ip.IP`) and the **DF** (:attr:`dpkt.ip.IP.df`)</span>
+<span class="sd">          if it contains IPv4 layer (:class:`dpkt.ip.IP`) whose header the default engine</span>
+<span class="sd">          accepts (see :func:`_ipv4_accepted`), and the **DF** (:attr:`dpkt.ip.IP.df`)</span>
 <span class="sd">          flag is :data:`False`.</span>
 <span class="sd">        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv4</span>
 <span class="sd">          reassembly (:term:`reasm.ipv4.packet`) will be returned; otherwise, returns :data:`None`.</span>
@@ -1072,7 +1110,7 @@
     <span class="n">network</span> <span class="o">=</span> <span class="n">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
     <span class="c1"># an IPv6 layer is the one with extension headers, as in ``_wire_hdr_len``</span>
     <span class="n">ipv4</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="s1">'extension_hdrs'</span><span class="p">)</span> <span class="k">else</span> <span class="n">network</span>
-    <span class="k">if</span> <span class="n">ipv4</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">ipv4</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_ipv4_accepted</span><span class="p">(</span><span class="n">ipv4</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">df</span><span class="p">:</span>     <span class="c1"># dismiss not fragmented packet</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="c1"># internet header length, in octets -- ``IP.hl`` counts 32-bit words and</span>
@@ -1212,7 +1250,8 @@
 
 <span class="sd">        * If the ``packet`` can be used for TCP reassembly. A packet can be reassembled</span>
 <span class="sd">          if it contains TCP layer (:class:`dpkt.tcp.TCP`), keyed by the IP packet that</span>
-<span class="sd">          carries it -- in an IP-in-IP tunnel, the innermost (see :func:`_tcp_carrier`).</span>
+<span class="sd">          carries it -- in an IP-in-IP tunnel, the innermost (see :func:`_tcp_carrier`)</span>
+<span class="sd">          -- and behind no IPv4 header the default engine rejects.</span>
 <span class="sd">        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP</span>
 <span class="sd">          reassembly (:term:`reasm.tcp.packet`) will be returned; otherwise, returns :data:`None`.</span>
 
@@ -1280,7 +1319,8 @@
 
 <span class="sd">        * If the ``packet`` can be used for TCP flow tracing. A packet can be reassembled</span>
 <span class="sd">          if it contains TCP layer (:class:`dpkt.tcp.TCP`), keyed by the IP packet that</span>
-<span class="sd">          carries it -- in an IP-in-IP tunnel, the innermost (see :func:`_tcp_carrier`).</span>
+<span class="sd">          carries it -- in an IP-in-IP tunnel, the innermost (see :func:`_tcp_carrier`)</span>
+<span class="sd">          -- and behind no IPv4 header the default engine rejects.</span>
 <span class="sd">        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP</span>
 <span class="sd">          flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.</span>
 
