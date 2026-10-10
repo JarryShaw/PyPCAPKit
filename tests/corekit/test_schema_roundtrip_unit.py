@@ -141,15 +141,16 @@ def _strings(fn: 'Any', depth: 'int' = 0, out: 'Optional[set[str]]' = None) -> '
     code = getattr(fn, '__code__', None)
     if depth > 4 or code is None:
         return out
-    stack = [code]
+    stack, names = [code], set()  # type: list[Any], set[str]
     while stack:
         current = stack.pop()
-        out.update(current.co_names)
+        names.update(current.co_names)
         for const in current.co_consts:
             if isinstance(const, str):
                 out.add(const)
             elif hasattr(const, 'co_consts'):
                 stack.append(const)
+    out.update(names)
     for cell in getattr(fn, '__closure__', None) or ():
         try:
             value = cell.cell_contents
@@ -157,6 +158,14 @@ def _strings(fn: 'Any', depth: 'int' = 0, out: 'Optional[set[str]]' = None) -> '
             continue
         if callable(value):
             _strings(value, depth + 1, out)
+    # a callback may only bind a shared helper's parameters, as the HOPOPT and
+    # IPv6-Opts ones do (#1519), so read what it calls through a module too
+    scope = getattr(fn, '__globals__', {})
+    for owner in {id(module): module for module in (scope.get(name) for name in names)
+                  if inspect.ismodule(module)}.values():
+        for name in names:
+            if inspect.isfunction(getattr(owner, name, None)):
+                _strings(getattr(owner, name), depth + 1, out)
     return out
 
 

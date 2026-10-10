@@ -20,6 +20,7 @@ internet layer, with detailed implementation and methods.
    ipv6_opts
    ipv6_route
    hopopt
+   ipv6_option
    ipsec
    ah
    esp

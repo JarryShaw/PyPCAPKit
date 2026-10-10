@@ -220,8 +220,15 @@ Type Stubs
 Auxiliary Functions
 ~~~~~~~~~~~~~~~~~~~
 
+The option helpers are shared with
+:mod:`~pcapkit.protocols.schema.internet.ipv6_opts` and documented in
+:mod:`pcapkit.protocols.schema.internet.ipv6_option`. The functions below bind
+them to this module's error prefix and option schemas;
+:func:`~pcapkit.protocols.schema.internet.ipv6_option.rpl_opt_sub_tlv_len` and
+:func:`~pcapkit.protocols.schema.internet.ipv6_option.pad_opt_data_len` are
+used unchanged.
+
 .. autofunction:: pcapkit.protocols.schema.internet.hopopt.mpl_opt_seed_id_len
-.. autofunction:: pcapkit.protocols.schema.internet.hopopt.pad_opt_data_len
 .. autofunction:: pcapkit.protocols.schema.internet.hopopt.calipso_pad_len
 .. autofunction:: pcapkit.protocols.schema.internet.hopopt.mpl_opt_pad_len
 

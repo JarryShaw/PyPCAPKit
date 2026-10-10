@@ -567,7 +567,7 @@ def nested_packet_context(packet: 'dict[str, Any]') -> 'dict[str, Any]':
         reserved ``__packet__`` key, for a callback that needs to name the
         outer schema specifically rather than whichever schema happens to
         declare a given field -- see
-        :func:`pcapkit.protocols.schema.misc.pcapng.packet_byteorder` and
+        :func:`pcapkit.protocols.schema.misc.byteorder.packet_byteorder` and
         :meth:`~pcapkit.protocols.schema.misc.pcapng.BlockType.post_process`
         for why that distinction matters, and note that both already
         hand-roll this exact fallback and so are unaffected by (and do not

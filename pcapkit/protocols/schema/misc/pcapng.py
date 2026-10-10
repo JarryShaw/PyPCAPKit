@@ -7,7 +7,6 @@ import collections
 import collections.abc
 import io
 import struct
-import sys
 from typing import TYPE_CHECKING, Any, cast
 
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
@@ -27,6 +26,7 @@ from pcapkit.corekit.fields.numbers import (EnumField, Int32Field, Int64Field, N
 from pcapkit.corekit.fields.strings import (BitField, BytesField, DecodedString, PaddingField,
                                             StringField)
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
+from pcapkit.protocols.schema.misc.byteorder import byteorder_callback, packet_byteorder
 from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
 from pcapkit.utilities.exceptions import FieldValueError, ProtocolError, stacklevel
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
@@ -168,38 +168,6 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         symbol_error: int
 
 
-def packet_byteorder(packet: 'dict[str, Any]') -> 'Literal["big", "little"]':
-    """Byte order declared for the section that ``packet`` belongs to.
-
-    A nested schema is handed its parent's packet data under a ``__packet__``
-    key (see :meth:`SchemaField.pack
-    <pcapkit.corekit.fields.misc.SchemaField.pack>`), so the section byte order
-    may live one level up.
-
-    Args:
-        packet: Packet data.
-
-    Returns:
-        Byte order of the enclosing section, falling back to the host byte
-        order when the packet data declares none.
-
-    """
-    if 'byteorder' not in packet and '__packet__' in packet:
-        return packet['__packet__'].get('byteorder', sys.byteorder)
-    return packet.get('byteorder', sys.byteorder)
-
-
-def byteorder_callback(field: 'NumberField', packet: 'dict[str, Any]') -> 'None':
-    """Update byte order of PCAP-NG file.
-
-    Args:
-        field: Field instance.
-        packet: Packet data.
-
-    """
-    field._byteorder = packet_byteorder(packet)
-
-
 def shb_byteorder_callback(field: 'NumberField', packet: 'dict[str, Any]') -> 'None':
     """Update byte order of PCAP-NG file for SHB.
 
@@ -208,7 +176,8 @@ def shb_byteorder_callback(field: 'NumberField', packet: 'dict[str, Any]') -> 'N
     the first SHB of a file has no section context by construction, and a later
     one would otherwise inherit the *previous* section's byte order. The magic
     is therefore also written back as ``packet['byteorder']``, which is what the
-    SHB's own options -- read by :func:`byteorder_callback`, after this field --
+    SHB's own options -- read by
+    :func:`~pcapkit.protocols.schema.misc.byteorder.byteorder_callback`, after this field --
     resolve their byte order from.
 
     A Section Header Block of 12 octets has no room for the magic, and its
