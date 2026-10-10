@@ -485,6 +485,7 @@
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">binascii</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ctypes</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">struct</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
@@ -494,13 +495,14 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">EngineBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReassemblyManager</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FormatError</span><span class="p">,</span> <span class="n">stacklevel</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">warn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'PyPCAPFile'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Optional</span>
 
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapfile.structs</span><span class="w"> </span><span class="kn">import</span> <span class="n">__pcap_header__</span> <span class="k">as</span> <span class="n">PCAPFileHeader</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapfile.structs</span><span class="w"> </span><span class="kn">import</span> <span class="n">pcap_packet</span> <span class="k">as</span> <span class="n">PCAPFilePacket</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
@@ -517,6 +519,9 @@
 
 <span class="sd">    * reads PCAP savefiles only, raising</span>
 <span class="sd">      :exc:`~pcapkit.utilities.exceptions.FormatError` on PCAP-NG,</span>
+<span class="sd">    * reads the savefile's records itself, into `PyPCAPFile`_'s own packet</span>
+<span class="sd">      objects, as `PyPCAPFile`_ 0.12.0 drops records the ``default`` engine</span>
+<span class="sd">      reads -- see :meth:`_read_records`,</span>
 <span class="sd">    * disables IPv6 reassembly, warning as it does so, while leaving IPv4 and</span>
 <span class="sd">      TCP reassembly and TCP flow tracing in place, and</span>
 <span class="sd">    * leaves TCP over IPv6 out of TCP reassembly and flow tracing, with one</span>
@@ -638,14 +643,17 @@
 <span class="sd">        as :mod:`pcapfile` and :attr:`self._extmp &lt;PyPCAPFile._extmp&gt;`</span>
 <span class="sd">        as an iterator over the lazily generated savefile packets.</span>
 
-<span class="sd">        The savefile is loaded with ``layers=0``. Per :func:`pcapfile.savefile</span>
-<span class="sd">        ._read_a_packet`, that does *not* hand back each frame's bytes verbatim --</span>
-<span class="sd">        it hexlifies the whole frame into ASCII text and stops there, exactly as it</span>
-<span class="sd">        would for any layer at which it runs out of layers left to descend. It is</span>
-<span class="sd">        :meth:`_decode` that un-hexlifies and then decodes each frame to</span>
-<span class="sd">        :attr:`LAYERS` depth using :func:`pcapfile.linklayer.clookup` -- the very</span>
-<span class="sd">        call :mod:`pcapfile` makes internally. Doing it this way round is what</span>
-<span class="sd">        lets the link layer type be inspected (and reported on) *before* the</span>
+<span class="sd">        :func:`pcapfile.savefile.load_savefile` loads and validates the savefile</span>
+<span class="sd">        header. The records are then read by :meth:`_read_records`, not by the</span>
+<span class="sd">        packet generator it returns, which drops records (see there). Like</span>
+<span class="sd">        :func:`pcapfile.savefile._read_a_packet` with ``layers=0``,</span>
+<span class="sd">        :meth:`_read_records` does *not* hand back each frame's bytes verbatim --</span>
+<span class="sd">        it hexlifies the whole frame into ASCII text and stops there, exactly as</span>
+<span class="sd">        :mod:`pcapfile` does for any layer at which it runs out of layers left to</span>
+<span class="sd">        descend. It is :meth:`_decode` that un-hexlifies and then decodes each</span>
+<span class="sd">        frame to :attr:`LAYERS` depth using :func:`pcapfile.linklayer.clookup` --</span>
+<span class="sd">        the very call :mod:`pcapfile` makes internally. Doing it this way round is</span>
+<span class="sd">        what lets the link layer type be inspected (and reported on) *before* the</span>
 <span class="sd">        first frame is decoded.</span>
 
 <span class="sd">        Warns:</span>
@@ -685,9 +693,8 @@
             <span class="n">warn</span><span class="p">(</span><span class="s2">"'Extractor(engine=pypcapfile)' object does not support IPv6 reassembly; "</span>
                  <span class="s2">"so 'ipv6=True' will be ignored"</span><span class="p">,</span> <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
 
-        <span class="n">sfile</span> <span class="o">=</span> <span class="n">pcapfile</span><span class="o">.</span><span class="n">savefile</span><span class="o">.</span><span class="n">load_savefile</span><span class="p">(</span>
-            <span class="n">NamedStream</span><span class="p">(</span><span class="n">ext</span><span class="o">.</span><span class="n">_ifile</span><span class="p">,</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ifnm</span><span class="p">),</span> <span class="n">layers</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">lazy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="n">stream</span> <span class="o">=</span> <span class="n">NamedStream</span><span class="p">(</span><span class="n">ext</span><span class="o">.</span><span class="n">_ifile</span><span class="p">,</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ifnm</span><span class="p">)</span>
+        <span class="n">sfile</span> <span class="o">=</span> <span class="n">pcapfile</span><span class="o">.</span><span class="n">savefile</span><span class="o">.</span><span class="n">load_savefile</span><span class="p">(</span><span class="n">stream</span><span class="p">,</span> <span class="n">layers</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">lazy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span> <span class="o">=</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sfile</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">ll_type</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_declf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_decoder</span><span class="p">(</span><span class="n">sfile</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">ll_type</span><span class="p">)</span>
 
@@ -699,7 +706,7 @@
             <span class="p">)</span>  <span class="c1"># pylint: disable=logging-fstring-interpolation</span>
 
         <span class="c1"># extract &amp; analyse file</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">sfile</span><span class="o">.</span><span class="n">packets</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_records</span><span class="p">(</span><span class="n">stream</span><span class="p">,</span> <span class="n">sfile</span><span class="o">.</span><span class="n">header</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="PyPCAPFile.read_frame">
@@ -800,6 +807,65 @@
         <span class="k">return</span> <span class="n">decoder</span></div>
 
 
+<div class="viewcode-block" id="PyPCAPFile._read_records">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._read_records">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_records</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'NamedStream'</span><span class="p">,</span>
+                      <span class="n">header</span><span class="p">:</span> <span class="s1">'PCAPFileHeader'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Iterator[PCAPFilePacket]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read the savefile's records, as the ``default`` engine reads them.</span>
+
+<span class="sd">        :func:`pcapfile.savefile._read_a_packet` (pypcapfile 0.12.0) drops</span>
+<span class="sd">        records the ``default`` engine reads, in two ways:</span>
+
+<span class="sd">        * It picks the byte order of each record header by testing</span>
+<span class="sd">          ``hdrp[0].byteorder == 'big'`` -- :class:`bytes` against :class:`str`,</span>
+<span class="sd">          never true on Python 3. A big-endian record header is unpacked</span>
+<span class="sd">          little-endian, its byte-swapped capture length overruns the file, and</span>
+<span class="sd">          the savefile ends at its first record (#1512).</span>
+<span class="sd">        * It ends the savefile at any record whose frame data is empty or shorter</span>
+<span class="sd">          than its capture length, so a zero-length record drops itself and every</span>
+<span class="sd">          record after it, and a truncated final record is dropped (#1571).</span>
+
+<span class="sd">        This reads each record in the byte order of the header :mod:`pcapfile`</span>
+<span class="sd">        loaded, into the :class:`pcapfile.structs.pcap_packet` that function</span>
+<span class="sd">        builds with ``layers=0`` -- the frame hexlified, pointing at the</span>
+<span class="sd">        savefile's own header -- so :meth:`_decode` and</span>
+<span class="sd">        :mod:`pcapkit.toolkit.pypcapfile` see what :mod:`pcapfile` hands them.</span>
+<span class="sd">        It stops where :class:`~pcapkit.protocols.misc.pcap.frame.Frame` stops,</span>
+<span class="sd">        at a tail too short for a record header, and keeps a record whose capture</span>
+<span class="sd">        length runs past the data as that does: the capture length as declared,</span>
+<span class="sd">        the octets present as the frame.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            file: The savefile, just past its header, where</span>
+<span class="sd">                :func:`pcapfile.savefile.load_savefile` leaves it.</span>
+<span class="sd">            header: The savefile header :mod:`pcapfile` loaded.</span>
+
+<span class="sd">        Yields:</span>
+<span class="sd">            Undecoded savefile packets, one per record.</span>
+
+<span class="sd">        Warns:</span>
+<span class="sd">            ProtocolWarning: If a record's capture length runs past the data.</span>
+
+<span class="sd">        """</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="s1">'&gt;'</span> <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">byteorder</span> <span class="o">==</span> <span class="sa">b</span><span class="s1">'big'</span> <span class="k">else</span> <span class="s1">'&lt;'</span>
+        <span class="n">hdrp</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+        <span class="n">number</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">number</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">record</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">record</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">16</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="n">timestamp</span><span class="p">,</span> <span class="n">timestamp_us</span><span class="p">,</span> <span class="n">capture_len</span><span class="p">,</span> <span class="n">packet_len</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">order</span><span class="si">}</span><span class="s1">IIII'</span><span class="p">,</span> <span class="n">record</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">capture_len</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">capture_len</span><span class="p">:</span>
+                <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP: [Frame </span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s1">] captured length </span><span class="si">{</span><span class="n">capture_len</span><span class="si">}</span><span class="s1"> runs past the data, '</span>
+                     <span class="sa">f</span><span class="s1">'which holds </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s1"> octet(s); kept as captured'</span><span class="p">,</span>
+                     <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+            <span class="k">yield</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'PCAPFilePacket'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span><span class="o">.</span><span class="n">structs</span><span class="o">.</span><span class="n">pcap_packet</span><span class="p">(</span>
+                <span class="n">hdrp</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">timestamp_us</span><span class="p">,</span> <span class="n">capture_len</span><span class="p">,</span> <span class="n">packet_len</span><span class="p">,</span> <span class="n">binascii</span><span class="o">.</span><span class="n">hexlify</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+            <span class="p">))</span></div>
+
+
 <div class="viewcode-block" id="PyPCAPFile._decode">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._decode">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'PCAPFilePacket'</span><span class="p">,</span> <span class="n">frnum</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'PCAPFilePacket'</span><span class="p">:</span>
@@ -817,7 +883,7 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            The decoded packet, or ``packet`` unchanged when it could not be</span>
-<span class="sd">            decoded.</span>
+<span class="sd">            decoded, or holds no octets at all.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            AttributeWarning: If :mod:`pcapfile` could not decode the frame, e.g.</span>
@@ -825,7 +891,9 @@
 <span class="sd">                the extraction, but it should not pass silently either.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_declf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># A zero-length record holds nothing to decode, which is not a decoding</span>
+        <span class="c1"># failure: the ``default`` engine reads one without a warning too.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_declf</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">packet</span><span class="o">.</span><span class="n">packet</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">packet</span>
 
         <span class="k">try</span><span class="p">:</span>

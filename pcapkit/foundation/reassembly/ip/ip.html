@@ -503,14 +503,16 @@ origin, using the <span class="target" id="index-0"></span><a class="rfc referen
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>strict</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – if <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, report a datagram that is not completely
-reassembled as the tuple of its received runs; otherwise as one
-contiguous payload, its holes zero-filled – or, while the total
-length is unknown, only the prefix up to the first hole. Receipt
-is tracked in 8-octet blocks, so the partial last block of a
-snaplen-truncated fragment is not counted as received: it is left
-out of the runs and ends the prefix, but once the total length is
-known the contiguous payload keeps its real octets, with only the
-rest of the hole zero-filled</p></li>
+reassembled as the tuple of its received runs, empty if none was;
+otherwise as one contiguous payload, its holes zero-filled – or,
+while the total length is unknown, only the prefix up to the first
+hole. Receipt is tracked in 8-octet blocks, and only the final
+fragment’s partial last block counts as received – a non-final
+fragment’s, or a snaplen-truncated or buffer-clipped fragment’s,
+does not: it is left out of the runs and ends the prefix, but once
+the total length is known the contiguous payload keeps its real
+octets, with only the rest of the hole zero-filled. A datagram
+longer than the data buffer is never complete</p></li>
 <li><p><strong>store</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – if store reassembled datagram in memory, i.e.,
 <a class="reference internal" href="../reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._dtgram</span></code></a>
 (if not, datagram will be discarded after callback)</p></li>

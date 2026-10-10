@@ -483,10 +483,12 @@
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.pcapng.block_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">BlockType</span> <span class="k">as</span> <span class="n">Enum_BlockType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span><span class="p">,</span> <span class="n">info_final</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeekableReader</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.dumpkit.pcap</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAPIO</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">EngineBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAPNG</span> <span class="k">as</span> <span class="n">P_PCAPNG</span>
@@ -501,7 +503,7 @@
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAPNG</span> <span class="k">as</span> <span class="n">Data_PCAPNG</span>
@@ -585,6 +587,27 @@
         <span class="sa">b</span><span class="s1">'</span><span class="se">\x0a\x0d\x0d\x0a</span><span class="s1">'</span><span class="p">,</span>
     <span class="p">)</span>
 
+    <span class="c1">#: A section header block's Byte-Order Magic, mapped to the byte order it</span>
+    <span class="c1">#: declares for its section.</span>
+    <span class="n">BYTE_ORDER_MAGIC</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="sa">b</span><span class="s1">'</span><span class="se">\x1a\x2b\x3c\x4d</span><span class="s1">'</span><span class="p">:</span> <span class="s1">'big'</span><span class="p">,</span>
+        <span class="sa">b</span><span class="s1">'</span><span class="se">\x4d\x3c\x2b\x1a</span><span class="s1">'</span><span class="p">:</span> <span class="s1">'little'</span><span class="p">,</span>
+    <span class="p">}</span>  <span class="c1"># type: dict[bytes, Literal['big', 'little']]</span>
+
+    <span class="c1">#: Block types mapped to the octets their fixed fields span, Block Type and</span>
+    <span class="c1">#: both copies of Block Total Length included; any other block spans 12.</span>
+    <span class="n">BLOCK_MINIMUM</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Section_Header_Block</span><span class="p">:</span> <span class="mi">28</span><span class="p">,</span>
+        <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Interface_Description_Block</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+        <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Packet_Block</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
+        <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Simple_Packet_Block</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+        <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Interface_Statistics_Block</span><span class="p">:</span> <span class="mi">24</span><span class="p">,</span>
+        <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Enhanced_Packet_Block</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
+        <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Decryption_Secrets_Block</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+        <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Custom_Block_that_rewriters_can_copy_into_new_files</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+        <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Custom_Block_that_rewriters_should_not_copy_into_new_files</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+    <span class="p">}</span>  <span class="c1"># type: dict[int, int]</span>
+
     <span class="c1">#: Block types that carry a captured packet, mapped to the tag used when</span>
     <span class="c1">#: reporting them. Parsing any of them resolves the interface the packet was</span>
     <span class="c1">#: captured on, so the enclosing section must describe at least one</span>
@@ -637,6 +660,7 @@
 <span class="sd">        """</span>
         <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bound_read_ahead</span><span class="p">()</span>
         <span class="n">shb</span> <span class="o">=</span> <span class="n">P_PCAPNG</span><span class="p">(</span><span class="n">ext</span><span class="o">.</span><span class="n">_ifile</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sct</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ctx</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">shb</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Section_Header_Block</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [SHB] invalid block type: </span><span class="si">{</span><span class="n">shb</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
@@ -686,6 +710,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_check_packet_block_context</span><span class="p">()</span>
 
             <span class="c1"># read next block</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bound_read_ahead</span><span class="p">()</span>
             <span class="n">block</span> <span class="o">=</span> <span class="n">P_PCAPNG</span><span class="p">(</span><span class="n">ext</span><span class="o">.</span><span class="n">_ifile</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">sct</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx_list</span><span class="p">),</span>
                              <span class="n">ctx</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_exlyr</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_exptl</span><span class="p">,</span>
                              <span class="n">__context__</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_exctx</span><span class="p">,</span>
@@ -852,12 +877,74 @@
 <span class="sd">            not have a whole block type field left to read.</span>
 
 <span class="sd">        """</span>
-        <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>
-
-        <span class="n">buffer</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">peek</span><span class="p">(</span><span class="mi">4</span><span class="p">)[:</span><span class="mi">4</span><span class="p">]</span>
+        <span class="n">buffer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_peek</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">section</span><span class="o">.</span><span class="n">byteorder</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_peek</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read the next ``size`` octets of the input without consuming them.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            size: Number of octets wanted.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The octets, fewer than ``size`` only at the end of the input.</span>
+
+<span class="sd">        ``peek`` makes at most one read, which a pipe may answer short of ``size``</span>
+<span class="sd">        mid-capture, so a short answer is read again and the position put back</span>
+<span class="sd">        (:issue:`1586`).</span>
+
+<span class="sd">        """</span>
+        <span class="n">ifile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span><span class="o">.</span><span class="n">_ifile</span>  <span class="c1"># pylint: disable=protected-access</span>
+
+        <span class="n">buffer</span> <span class="o">=</span> <span class="n">ifile</span><span class="o">.</span><span class="n">peek</span><span class="p">(</span><span class="n">size</span><span class="p">)[:</span><span class="n">size</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">:</span>
+            <span class="n">position</span> <span class="o">=</span> <span class="n">ifile</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+            <span class="n">buffer</span> <span class="o">=</span> <span class="n">ifile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+            <span class="n">ifile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">buffer</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_bound_read_ahead</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Have a non-seekable input read ahead to the end of the next block, no further.</span>
+
+<span class="sd">        A block is measured, and then parsed, from as far as</span>
+<span class="sd">        :meth:`SeekableReader.seek &lt;pcapkit.corekit.io.SeekableReader.seek&gt;` reads</span>
+<span class="sd">        ahead, so the read has to cover all the block's parse reads, however long --</span>
+<span class="sd">        the buffer grows to hold them. A read past that waits, on a live capture, for</span>
+<span class="sd">        the blocks after: a buffer's worth held each block back until that much more</span>
+<span class="sd">        had arrived (:issue:`1586`). A bogus length is read as far as the stream goes,</span>
+<span class="sd">        which is as far as a file read goes too.</span>
+
+<span class="sd">        How far is enough is the block's Total Length, in the section's byte order</span>
+<span class="sd">        or, for a section header block, the one its Byte-Order Magic declares. Two</span>
+<span class="sd">        kinds of block are parsed past it, and so are read as far as from a file:</span>
+<span class="sd">        one shorter than its own fixed fields, or not a whole number of words,</span>
+<span class="sd">        keeps the buffer's worth; a Decryption Secrets Block reads as far as its</span>
+<span class="sd">        Secrets Length runs.</span>
+
+<span class="sd">        """</span>
+        <span class="c1"># pylint: disable=protected-access</span>
+        <span class="n">ifile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span><span class="o">.</span><span class="n">_ifile</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ifile</span><span class="p">,</span> <span class="n">SeekableReader</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="n">ifile</span><span class="o">.</span><span class="n">_buffer_size</span>
+
+        <span class="n">head</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_peek</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">head</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">MAGIC_NUMBER</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">byteorder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">BYTE_ORDER_MAGIC</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">head</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">12</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">byteorder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">section</span><span class="o">.</span><span class="n">byteorder</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">byteorder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">head</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="n">block_type</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">head</span><span class="p">[:</span><span class="mi">4</span><span class="p">],</span> <span class="n">byteorder</span><span class="p">)</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">head</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">8</span><span class="p">],</span> <span class="n">byteorder</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">length</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">BLOCK_MINIMUM</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">block_type</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span> <span class="ow">and</span> <span class="n">length</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">size</span> <span class="o">=</span> <span class="n">length</span>
+                <span class="k">if</span> <span class="n">block_type</span> <span class="o">==</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Decryption_Secrets_Block</span><span class="p">:</span>
+                    <span class="n">secrets</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_peek</span><span class="p">(</span><span class="mi">16</span><span class="p">)[</span><span class="mi">12</span><span class="p">:</span><span class="mi">16</span><span class="p">],</span> <span class="n">byteorder</span><span class="p">)</span>
+                    <span class="n">size</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="mi">20</span> <span class="o">+</span> <span class="n">secrets</span> <span class="o">+</span> <span class="o">-</span><span class="n">secrets</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">ifile</span><span class="o">.</span><span class="n">_read_ahead_size</span> <span class="o">=</span> <span class="n">size</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_packet_block_context</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Reject a packet block in a section that describes no interface.</span>

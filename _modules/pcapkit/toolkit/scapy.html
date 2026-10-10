@@ -520,6 +520,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameRecord</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameInfo</span> <span class="k">as</span> <span class="n">Data_FrameInfo</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">jumbo_payload_length</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="ne">ModuleNotFoundError</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">MissingKeyError</span><span class="p">,</span> <span class="n">ModuleNotFound</span><span class="p">,</span> <span class="n">stacklevel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScapyWarning</span><span class="p">,</span> <span class="n">warn</span>
@@ -715,6 +716,80 @@
 
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_within_datagrams</span><span class="p">(</span><span class="n">layer</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the octets from ``layer`` on that lie inside every IP datagram carrying it.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        layer: A layer of a dissected Scapy packet.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The octets of ``layer`` and everything after it, up to the nearest end</span>
+<span class="sd">        that the Total Length or Payload Length of an IP layer above it declares.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        When `Scapy`_ dissects an IP layer, it files whatever follows the</span>
+<span class="sd">        datagram's declared length as a :class:`~scapy.packet.Padding` layer --</span>
+<span class="sd">        an Ethernet frame's padding up to its 60-octet minimum, or a trailer</span>
+<span class="sd">        such as an FCS -- and ``bytes()`` of *any* layer above that one ends</span>
+<span class="sd">        with it. Those octets are no part of the datagram, and the default</span>
+<span class="sd">        engine never hands them over (:issue:`1584`), so they are cut off here</span>
+<span class="sd">        by the default engine's rules: an IPv4 Total Length of zero, as TCP</span>
+<span class="sd">        segmentation offload leaves, runs the datagram to the end of the frame</span>
+<span class="sd">        (:issue:`1547`), and an IPv6 Payload Length of zero gives way to a</span>
+<span class="sd">        Jumbo Payload option (:issue:`1434`). The latter is not left to Scapy,</span>
+<span class="sd">        which reads that option's length in host byte order and adds the</span>
+<span class="sd">        Hop-by-Hop Options header to it a second time.</span>
+
+<span class="sd">        Every IP layer above ``layer`` bounds it, not only the nearest, as each</span>
+<span class="sd">        bounds what the default engine hands the next: a datagram tunnelled in</span>
+<span class="sd">        IP may declare more than the one carrying it holds, or nothing at all.</span>
+
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.layers.inet</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.layers.inet6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">carrier</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">underlayer</span> <span class="k">if</span> <span class="n">data</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="k">while</span> <span class="n">carrier</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">carrier</span><span class="p">,</span> <span class="n">IPv6</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">carrier</span><span class="o">.</span><span class="n">plen</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>    <span class="c1"># it is until a packet built by hand is built</span>
+                <span class="c1"># a zero is a jumbogram's, or else it declares nothing</span>
+                <span class="n">length</span> <span class="o">=</span> <span class="n">carrier</span><span class="o">.</span><span class="n">plen</span> <span class="ow">or</span> <span class="n">jumbo_payload_length</span><span class="p">(</span><span class="n">carrier</span><span class="o">.</span><span class="n">nh</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">carrier</span><span class="o">.</span><span class="n">payload</span><span class="p">))</span> <span class="ow">or</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">carrier</span><span class="p">,</span> <span class="n">IP</span><span class="p">)</span> <span class="ow">and</span> <span class="n">carrier</span><span class="o">.</span><span class="n">len</span><span class="p">:</span>   <span class="c1"># a zero is TSO's</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">carrier</span><span class="o">.</span><span class="n">len</span> <span class="o">-</span> <span class="n">carrier</span><span class="o">.</span><span class="n">ihl</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># ``bytes()`` of a layer spans it and every layer after it, padding</span>
+            <span class="c1"># included, so the difference is the octets between the end of the</span>
+            <span class="c1"># IP header and ``layer``</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">length</span> <span class="o">-</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">carrier</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)),</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="n">carrier</span> <span class="o">=</span> <span class="n">carrier</span><span class="o">.</span><span class="n">underlayer</span>
+    <span class="k">return</span> <span class="n">data</span><span class="p">[:</span><span class="n">end</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_tcp_segment</span><span class="p">(</span><span class="n">tcp</span><span class="p">:</span> <span class="s1">'TCP'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[bytes, bytes] | None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Split the TCP segment ``tcp`` heads into its header and its payload.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        tcp: TCP layer of a dissected Scapy packet.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The header, as many octets as the Data Offset counts, and the payload</span>
+<span class="sd">        after it, up to the end of the datagrams that carry the segment, c.f.</span>
+<span class="sd">        ``_within_datagrams()``; or :data:`None` if the datagrams hold fewer</span>
+<span class="sd">        than the 20 octets of the fixed header, or the Data Offset counts fewer</span>
+<span class="sd">        (:rfc:`9293#section-3.1`), since the default engine then reads no</span>
+<span class="sd">        segment at all.</span>
+
+<span class="sd">    """</span>
+    <span class="n">segment</span> <span class="o">=</span> <span class="n">_within_datagrams</span><span class="p">(</span><span class="n">tcp</span><span class="p">)</span>
+    <span class="n">hdr_len</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">dataofs</span> <span class="o">*</span> <span class="mi">4</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">20</span> <span class="ow">or</span> <span class="n">hdr_len</span> <span class="o">&lt;</span> <span class="mi">20</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">segment</span><span class="p">[:</span><span class="n">hdr_len</span><span class="p">],</span> <span class="n">segment</span><span class="p">[</span><span class="n">hdr_len</span><span class="p">:]</span>
+
+
 <div class="viewcode-block" id="ipv4_reassembly">
 <a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.scapy.ipv4_reassembly">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">ipv4_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IP_Packet[IPv4Address] | None'</span><span class="p">:</span>
@@ -762,6 +837,10 @@
             <span class="n">mf</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">MF</span><span class="p">),</span>                    <span class="c1"># more fragment flag</span>
             <span class="n">tl</span><span class="o">=</span><span class="n">ipv4</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>                               <span class="c1"># total length, header includes</span>
             <span class="n">header</span><span class="o">=</span><span class="nb">bytes</span><span class="p">(</span><span class="n">ipv4</span><span class="p">)[:</span><span class="n">ipv4</span><span class="o">.</span><span class="n">ihl</span> <span class="o">*</span> <span class="mi">4</span><span class="p">],</span>         <span class="c1"># raw bytes type header</span>
+            <span class="c1"># NOTE: this keeps the octets past the Total Length, as the default</span>
+            <span class="c1"># engine's adapter does, since the reassembly machinery cuts the</span>
+            <span class="c1"># payload at ``tl - ihl`` itself. :func:`ipv6_reassembly` derives</span>
+            <span class="c1"># its ``tl`` from the payload, so it has to cut them (:issue:`1584`).</span>
             <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">payload</span><span class="p">)),</span>    <span class="c1"># raw bytearray type payload</span>
             <span class="n">timestamp</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">time</span><span class="p">),</span>              <span class="c1"># capture timestamp</span>
         <span class="p">)</span>
@@ -810,7 +889,9 @@
         <span class="c1"># the Fragment header, which is the only part of the header the</span>
         <span class="c1"># reassembled packet keeps (:rfc:`8200#section-4.5`).</span>
         <span class="n">hdr_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ipv6</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">ipv6_frag</span><span class="p">)</span>
-        <span class="n">payload</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">ipv6_frag</span><span class="o">.</span><span class="n">payload</span><span class="p">))</span>
+        <span class="c1"># the fragment's data stops at the Payload Length, so neither it nor</span>
+        <span class="c1"># ``tl`` below counts the frame's trailer (:issue:`1584`)</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">_within_datagrams</span><span class="p">(</span><span class="n">ipv6_frag</span><span class="o">.</span><span class="n">payload</span><span class="p">))</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">IP_Packet</span><span class="p">(</span>
             <span class="n">bufid</span><span class="o">=</span><span class="p">(</span>
@@ -855,7 +936,8 @@
 <span class="sd">        Data for TCP reassembly.</span>
 
 <span class="sd">        * If the ``packet`` can be used for TCP reassembly. A packet can be reassembled</span>
-<span class="sd">          if it contains TCP layer (:class:`scapy.layers.inet.TCP`).</span>
+<span class="sd">          if it contains TCP layer (:class:`scapy.layers.inet.TCP`) whose fixed header</span>
+<span class="sd">          lies inside its datagram, and whose Data Offset counts at least that header.</span>
 <span class="sd">        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP</span>
 <span class="sd">          reassembly (:term:`reasm.tcp.packet`) will be returned; otherwise, returns :data:`None`.</span>
 
@@ -872,8 +954,11 @@
 
     <span class="k">if</span> <span class="s1">'TCP'</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
         <span class="n">tcp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'TCP'</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'TCP'</span><span class="p">])</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">segment</span> <span class="o">:=</span> <span class="n">_tcp_segment</span><span class="p">(</span><span class="n">tcp</span><span class="p">))</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">header</span><span class="p">,</span> <span class="n">payload</span> <span class="o">=</span> <span class="n">segment</span>
 
-        <span class="n">raw_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span>                  <span class="c1"># payload length, header excludes</span>
+        <span class="n">raw_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>                      <span class="c1"># payload length, header excludes</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">TCP_Packet</span><span class="p">(</span>
             <span class="n">bufid</span><span class="o">=</span><span class="p">(</span>
                 <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">src</span><span class="p">),</span>       <span class="c1"># source IP address</span>
@@ -887,8 +972,8 @@
             <span class="n">syn</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">S</span><span class="p">),</span>                  <span class="c1"># synchronise flag</span>
             <span class="n">fin</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">F</span><span class="p">),</span>                  <span class="c1"># finish flag</span>
             <span class="n">rst</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">R</span><span class="p">),</span>                  <span class="c1"># reset connection flag</span>
-            <span class="n">header</span><span class="o">=</span><span class="nb">bytes</span><span class="p">(</span><span class="n">tcp</span><span class="p">)[:</span><span class="n">tcp</span><span class="o">.</span><span class="n">dataofs</span> <span class="o">*</span> <span class="mi">4</span><span class="p">],</span>    <span class="c1"># raw bytes type header</span>
-            <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">payload</span><span class="p">)),</span>  <span class="c1"># raw bytearray type payload</span>
+            <span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">,</span>                          <span class="c1"># raw bytes type header</span>
+            <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span>             <span class="c1"># raw bytearray type payload</span>
             <span class="n">first</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>                          <span class="c1"># first sequence number of payload</span>
             <span class="n">last</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">seq</span> <span class="o">+</span> <span class="n">raw_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>             <span class="c1"># last sequence number of payload</span>
             <span class="nb">len</span><span class="o">=</span><span class="n">raw_len</span><span class="p">,</span>                            <span class="c1"># payload length, header excludes</span>
@@ -912,7 +997,8 @@
 <span class="sd">        Data for TCP reassembly.</span>
 
 <span class="sd">        * If the ``packet`` can be used for TCP flow tracing. A packet can be reassembled</span>
-<span class="sd">          if it contains TCP layer (:class:`scapy.layers.inet.TCP`).</span>
+<span class="sd">          if it contains TCP layer (:class:`scapy.layers.inet.TCP`), on the terms</span>
+<span class="sd">          :func:`tcp_reassembly` sets.</span>
 <span class="sd">        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP</span>
 <span class="sd">          flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.</span>
 
@@ -923,6 +1009,9 @@
     <span class="k">if</span> <span class="s1">'TCP'</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
         <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IP'</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'IP'</span><span class="p">])</span> <span class="k">if</span> <span class="s1">'IP'</span> <span class="ow">in</span> <span class="n">packet</span> <span class="k">else</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6'</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'IPv6'</span><span class="p">])</span>
         <span class="n">tcp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'TCP'</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'TCP'</span><span class="p">])</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">segment</span> <span class="o">:=</span> <span class="n">_tcp_segment</span><span class="p">(</span><span class="n">tcp</span><span class="p">))</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">header</span><span class="p">,</span> <span class="n">payload</span> <span class="o">=</span> <span class="n">segment</span>
 
         <span class="c1"># NOTE: the link type of the interface the packet was read from, which</span>
         <span class="c1"># :class:`~pcapkit.foundation.engines.scapy.Scapy` attaches with</span>
@@ -975,8 +1064,8 @@
             <span class="n">timestamp</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">time</span><span class="p">),</span>                        <span class="c1"># capture timestamp</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>                                         <span class="c1"># TCP sequence number</span>
             <span class="n">ack</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">ack</span><span class="p">,</span>                                         <span class="c1"># TCP acknowledgement number</span>
-            <span class="n">header</span><span class="o">=</span><span class="nb">bytes</span><span class="p">(</span><span class="n">tcp</span><span class="p">)[:</span><span class="n">tcp</span><span class="o">.</span><span class="n">dataofs</span> <span class="o">*</span> <span class="mi">4</span><span class="p">],</span>                 <span class="c1"># raw bytes type header</span>
-            <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">payload</span><span class="p">)),</span>               <span class="c1"># raw bytearray type payload</span>
+            <span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">,</span>                                       <span class="c1"># raw bytes type header</span>
+            <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span>                          <span class="c1"># raw bytearray type payload</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span>
     <span class="k">return</span> <span class="kc">None</span></div>

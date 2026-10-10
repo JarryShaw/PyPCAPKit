@@ -502,6 +502,10 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'SeekableReader'</span><span class="p">,</span> <span class="s1">'PeekableStream'</span><span class="p">,</span> <span class="s1">'NamedStream'</span><span class="p">]</span>
 
+<span class="c1">#: Most octets :class:`SeekableReader` asks of its stream in one read. A read</span>
+<span class="c1">#: allocates what it asks for up front, so a record's bogus length is read in pieces.</span>
+<span class="n">_READ_CHUNK</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">20</span>
+
 
 <div class="viewcode-block" id="SeekableReader">
 <a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader">[docs]</a>
@@ -550,6 +554,9 @@
         <span class="n">_buffer_set</span><span class="p">:</span> <span class="s1">'int'</span>
         <span class="c1">#: Buffer current position.</span>
         <span class="n">_buffer_cur</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="c1">#: Octets :meth:`seek` reads past the position to find the end of the stream;</span>
+        <span class="c1">#: the buffer size by default.</span>
+        <span class="n">_read_ahead_size</span><span class="p">:</span> <span class="s1">'int'</span>
 
         <span class="c1">#: Path to save buffer.</span>
         <span class="n">_buffer_path</span><span class="p">:</span> <span class="s1">'str'</span>
@@ -585,6 +592,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">getbuffer</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span> <span class="o">=</span> <span class="n">buffer_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_read_ahead_size</span> <span class="o">=</span> <span class="n">buffer_size</span>
 
         <span class="k">if</span> <span class="n">buffer_save</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">buffer_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -625,6 +633,82 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="o">-</span><span class="n">buf_len</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_END</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span><span class="p">[</span><span class="n">old_ptr</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span><span class="p">]</span> <span class="o">=</span> <span class="n">buf</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_fill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">minimum</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+              <span class="n">keep</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read up to ``size`` octets from the stream into the buffer, and return them.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            size: Octets to ask for; negative reads to the end of the stream.</span>
+<span class="sd">            minimum: Octets to keep reading for; ``size`` if omitted.</span>
+<span class="sd">            keep: Position the buffer must still hold afterwards; it grows rather than</span>
+<span class="sd">                slide past it.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The octets read, fewer than ``minimum`` only once the stream has ended.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            One read may return fewer octets than asked for at any point -- a pipe hands</span>
+<span class="sd">            over what has been written so far, a raw stream what one system call returned</span>
+<span class="sd">            -- and only an empty one means the stream has ended. Taking the first answer</span>
+<span class="sd">            for all there is ended a capture at a chunk boundary (:issue:`1586`), so this</span>
+<span class="sd">            reads until ``minimum`` octets are in hand. Past that it does not wait:</span>
+<span class="sd">            ``read1``, where the stream has it, returns what is already there. A</span>
+<span class="sd">            non-blocking stream's :obj:`None` stops the reading. No one read asks for</span>
+<span class="sd">            more than ``_READ_CHUNK`` octets, so a bogus length read from a record allocates</span>
+<span class="sd">            only what the stream actually holds.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">size</span><span class="p">)</span> <span class="ow">or</span> <span class="sa">b</span><span class="s1">''</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_write_buffer</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">buf</span>
+
+        <span class="n">minimum</span> <span class="o">=</span> <span class="n">size</span> <span class="k">if</span> <span class="n">minimum</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">minimum</span>
+        <span class="n">read</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="p">,</span> <span class="s1">'read1'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">read</span><span class="p">)</span>
+
+        <span class="n">chunks</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[bytes]</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">chunk</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">size</span> <span class="o">-</span> <span class="n">count</span><span class="p">,</span> <span class="n">_READ_CHUNK</span><span class="p">))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">chunk</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+            <span class="n">count</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;=</span> <span class="n">minimum</span><span class="p">:</span>
+                <span class="k">break</span>
+
+        <span class="n">buf</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">chunks</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">keep</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">span</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span> <span class="o">-</span> <span class="nb">max</span><span class="p">(</span><span class="n">keep</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">span</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_truncate_buffer</span><span class="p">(</span><span class="n">span</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write_buffer</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">buf</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_ahead</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read the stream to :attr:`_read_ahead_size` octets past the position.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            How far the stream has been read: that many octets past the position, or the</span>
+<span class="sd">            end of the stream if it ended first. :meth:`seek` takes this as the end.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The buffer slides forward to make the room, so after this only the last</span>
+<span class="sd">            ``_buffer_size`` less ``_read_ahead_size`` octets before the position can still</span>
+<span class="sd">            be sought back to -- none, at the default -- unless ``buffer_save`` keeps them.</span>
+<span class="sd">            It grows instead of sliding past the position itself, so a record longer than</span>
+<span class="sd">            the buffer is held whole, as its reader seeks back to its first octet; a bogus</span>
+<span class="sd">            length grows it only as far as the stream goes. A live stream holds the reader</span>
+<span class="sd">            here until the octets arrive, which is why the engines set</span>
+<span class="sd">            :attr:`_read_ahead_size` to the record they are about to read.</span>
+
+<span class="sd">        """</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span>
+        <span class="n">want</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_ahead_size</span> <span class="o">-</span> <span class="n">end</span>
+        <span class="k">if</span> <span class="n">want</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">end</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fill</span><span class="p">(</span><span class="n">want</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_tell</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">end</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_seek_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Point the buffer at the current stream position, and say how much it can serve.</span>
@@ -706,7 +790,10 @@
 <span class="sd">        read-only and non-blocking streams."""</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span></div>
+        <span class="c1"># NOTE: a stream its owner has closed already has nothing to flush, and asking</span>
+        <span class="c1"># raises -- out of :meth:`close` too, which a finaliser can only print.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="p">,</span> <span class="s1">'closed'</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="SeekableReader.isatty">
@@ -843,21 +930,30 @@
 <span class="sd">            the window, it holds with a saved buffer as well, which is exempt from the window</span>
 <span class="sd">            check and would otherwise return a negative position as if the seek had worked.</span>
 
-<span class="sd">        """</span>
-        <span class="c1"># NOTE: we mark the end of buffer content to the end of buffer</span>
-        <span class="c1"># so that it may trigger the IO to read more data to fill in</span>
-        <span class="c1"># the content.</span>
-        <span class="n">buf_end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span>
-        <span class="c1">#buf_end = self._buffer_set + self._buffer_cur</span>
+<span class="sd">            A non-seekable stream has no end until it is over, so :data:`~io.SEEK_END` is</span>
+<span class="sd">            as far as :meth:`_read_ahead` reads past the position: ``_read_ahead_size``</span>
+<span class="sd">            octets, a buffer's worth by default, or to the real end if that comes first.</span>
+<span class="sd">            The frame readers measure what is left this way, and the engines set that size</span>
+<span class="sd">            to the next record, so a record is measured whole, however long. The end used to</span>
+<span class="sd">            be the buffer's far edge, which once the buffer has filled is just how far the</span>
+<span class="sd">            stream has been read, so the first record ending there was taken for the end of</span>
+<span class="sd">            the capture (:issue:`1586`). The read slides the buffer, so a position before</span>
+<span class="sd">            the one :data:`~io.SEEK_END` was sought from may then be refused, as</span>
+<span class="sd">            :meth:`_read_ahead` says.</span>
 
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">whence</span> <span class="o">==</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">:</span>
             <span class="n">target</span> <span class="o">=</span> <span class="n">offset</span>
         <span class="k">elif</span> <span class="n">whence</span> <span class="o">==</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_CUR</span><span class="p">:</span>
             <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">+</span> <span class="n">offset</span>
         <span class="k">elif</span> <span class="n">whence</span> <span class="o">==</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_END</span><span class="p">:</span>
-            <span class="n">target</span> <span class="o">=</span> <span class="n">buf_end</span> <span class="o">+</span> <span class="n">offset</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_ahead</span><span class="p">()</span> <span class="o">+</span> <span class="n">offset</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">SeekError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid whence (</span><span class="si">{</span><span class="n">whence</span><span class="si">}</span><span class="s1">, should be </span><span class="si">{</span><span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">io</span><span class="o">.</span><span class="n">SEEK_CUR</span><span class="si">}</span><span class="s1"> or </span><span class="si">{</span><span class="n">io</span><span class="o">.</span><span class="n">SEEK_END</span><span class="si">}</span><span class="s1">)'</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: the buffer's far edge, read after :meth:`_read_ahead` has slid it, is how far</span>
+        <span class="c1"># a seek may go unwarned. It is not the end of the stream.</span>
+        <span class="n">buf_end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span>
 
         <span class="k">if</span> <span class="n">target</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">SeekError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'negative seek value </span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
@@ -869,9 +965,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">=</span> <span class="n">target</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">&gt;</span> <span class="n">buf_end</span><span class="p">:</span>
-                <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'seek beyond the end of the buffer: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_tell</span><span class="si">}</span><span class="s1"> &gt; </span><span class="si">{</span><span class="n">buf_end</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span>
-                     <span class="n">SeekWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+            <span class="n">ended</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">tmp_end</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span><span class="p">):</span>
                 <span class="c1"># NOTE: if we do need to seek beyond the existing contents,</span>
                 <span class="c1"># then we'll do a quick read to make up the contents; the</span>
@@ -879,11 +973,23 @@
                 <span class="c1"># the size of the content to be read, whichever is larger.</span>
                 <span class="c1"># However, the length to fill must not be larger than the</span>
                 <span class="c1"># buffer size itself.</span>
-                <span class="n">tmp_len</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">-</span> <span class="n">tmp_end</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span> <span class="o">//</span> <span class="mi">4</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">=</span> <span class="n">tmp_end</span>
+                <span class="c1">#</span>
+                <span class="c1"># The gap is waited for and the rest is not, and the position is</span>
+                <span class="c1"># the target, or the end of the stream if that comes first -- not</span>
+                <span class="c1"># wherever an over-asking read happened to stop (:issue:`1586`).</span>
+                <span class="n">tmp_gap</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">-</span> <span class="n">tmp_end</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span><span class="p">)</span>
+                <span class="n">tmp_len</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">tmp_gap</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span> <span class="o">//</span> <span class="mi">4</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span><span class="p">)</span>
 
-                <span class="n">tmp_buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read1</span><span class="p">(</span><span class="n">tmp_len</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">=</span> <span class="n">tmp_end</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">tmp_buf</span><span class="p">)</span>
+                <span class="n">tmp_buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fill</span><span class="p">(</span><span class="n">tmp_len</span><span class="p">,</span> <span class="n">tmp_gap</span><span class="p">)</span>
+                <span class="n">ended</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tmp_buf</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tmp_gap</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tell</span><span class="p">,</span> <span class="n">tmp_end</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">tmp_buf</span><span class="p">))</span>
+            <span class="c1"># NOTE: past a stream that ended inside the buffer, this is the silent seek past</span>
+            <span class="c1"># the end of a file, which a frame reader makes over a record the capture cut</span>
+            <span class="c1"># short. A seek that went past the buffer's edge, or stopped short of a target</span>
+            <span class="c1"># beyond it, is still warned of.</span>
+            <span class="k">if</span> <span class="n">target</span> <span class="o">&gt;</span> <span class="n">buf_end</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">ended</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">&lt;=</span> <span class="n">buf_end</span><span class="p">):</span>
+                <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'seek beyond the end of the buffer: </span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s1"> &gt; </span><span class="si">{</span><span class="n">buf_end</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span>
+                     <span class="n">SeekWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># NOTE: only a saved buffer reaches here -- the refusal above has already</span>
@@ -1035,9 +1141,11 @@
         <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">size</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
 
+        <span class="c1"># NOTE: both reads from the stream go through :meth:`_fill`, which keeps reading</span>
+        <span class="c1"># past a short answer, as :meth:`io.BufferedIOBase.read` is specified to: a short</span>
+        <span class="c1"># result here means the end of the stream, and the frame readers take it so.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span><span class="p">:</span>
-            <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_write_buffer</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+            <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fill</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span><span class="p">:</span>
                 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_path</span><span class="p">,</span> <span class="s1">'rb'</span><span class="p">)</span> <span class="k">as</span> <span class="n">temp_file</span><span class="p">:</span>
@@ -1052,9 +1160,7 @@
 
             <span class="n">size_rem</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
             <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span><span class="n">size_rem</span> <span class="o">:=</span> <span class="n">size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">buf_tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">size_rem</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_write_buffer</span><span class="p">(</span><span class="n">buf_tmp</span><span class="p">)</span>
-                <span class="n">buf</span> <span class="o">+=</span> <span class="n">buf_tmp</span>
+                <span class="n">buf</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fill</span><span class="p">(</span><span class="n">size_rem</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">buf</span></div>

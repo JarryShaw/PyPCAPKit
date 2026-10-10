@@ -525,7 +525,13 @@
 <span class="sd">``pcapkit`` logger is configured separately, e.g. with</span>
 <span class="sd">``logging.getLogger('pcapkit').setLevel(logging.ERROR)``.</span>
 
+<span class="sd">The one exception is a parse :mod:`pcapkit` runs on trial: :class:`hold_warnings`</span>
+<span class="sd">holds back its warnings, on both channels, until the parse is kept, and drops</span>
+<span class="sd">them if it is discarded (:issue:`1580`).</span>
+
 <span class="sd">"""</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">contextvars</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -533,7 +539,14 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">VERBOSE</span><span class="p">,</span> <span class="n">get_logger</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">types</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameType</span><span class="p">,</span> <span class="n">TracebackType</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Self</span>
+
+    <span class="c1">#: A warning held back by :class:`hold_warnings`: its message, its category,</span>
+    <span class="c1">#: and the frame it is attributed to, if that frame could be found.</span>
+    <span class="n">HeldWarning</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="ne">Warning</span><span class="p">],</span> <span class="n">Type</span><span class="p">[</span><span class="ne">Warning</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">FrameType</span><span class="p">]]</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">'warn'</span><span class="p">,</span>
@@ -558,6 +571,12 @@
 <span class="c1">#: logging.Logger: Module-level logger, a child of the package-wide</span>
 <span class="c1">#: :data:`pcapkit.utilities.logging.logger`.</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="c1">#: The innermost open :class:`hold_warnings` block, or :data:`None` outside any.</span>
+<span class="c1">#: A context variable rather than a global, so that a parse in another thread or</span>
+<span class="c1">#: task is neither held nor released by this one.</span>
+<span class="n">_HELD</span> <span class="o">=</span> <span class="n">contextvars</span><span class="o">.</span><span class="n">ContextVar</span><span class="p">(</span>
+    <span class="s1">'pcapkit_held_warnings'</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>  <span class="c1"># type: contextvars.ContextVar[Optional[hold_warnings]]</span>
 
 
 <div class="viewcode-block" id="warn">
@@ -588,6 +607,11 @@
 <span class="sd">        :mod:`pcapkit.utilities.warnings` for the emission model in full, and for</span>
 <span class="sd">        how to silence either channel.</span>
 
+<span class="sd">    Note:</span>
+<span class="sd">        Inside a :class:`hold_warnings` block the warning is held back instead,</span>
+<span class="sd">        with the frame it is attributed to, and reported from there only if the</span>
+<span class="sd">        block keeps it.</span>
+
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">stacklevel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># Computed here, so the level is already relative to *this* frame, which</span>
@@ -602,9 +626,162 @@
         <span class="c1"># whole exercise exists to skip past.</span>
         <span class="n">stacklevel</span> <span class="o">+=</span> <span class="mi">1</span>
 
+    <span class="n">block</span> <span class="o">=</span> <span class="n">_open_block</span><span class="p">(</span><span class="n">_HELD</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">block</span><span class="o">.</span><span class="n">holding</span><span class="p">:</span>
+        <span class="c1"># Level 1 is this frame, so the frame named is ``stacklevel - 1`` out.</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">currentframe</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">stacklevel</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">f_back</span>
+        <span class="n">block</span><span class="o">.</span><span class="n">_held</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">message</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">target</span><span class="p">))</span>  <span class="c1"># pylint: disable=protected-access</span>
+        <span class="k">del</span> <span class="n">target</span>
+        <span class="k">return</span>
+
     <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="n">VERBOSE</span><span class="p">,</span> <span class="n">stack_info</span><span class="o">=</span><span class="n">VERBOSE</span><span class="p">,</span>
                    <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">)</span>
     <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">stacklevel</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_open_block</span><span class="p">(</span><span class="n">block</span><span class="p">:</span> <span class="s1">'Optional[hold_warnings]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[hold_warnings]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The innermost open block from ``block`` outwards.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        block: Block to start from, usually the one :data:`_HELD` names.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ``block``, or the nearest block enclosing it that is still open. A block</span>
+<span class="sd">        is left closed but still named only when it was left out of order, or in</span>
+<span class="sd">        another context, where it could not unset itself in this one.</span>
+
+<span class="sd">    """</span>
+    <span class="k">while</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">block</span><span class="o">.</span><span class="n">_open</span><span class="p">:</span>  <span class="c1"># pylint: disable=protected-access</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">_outer</span>  <span class="c1"># pylint: disable=protected-access</span>
+    <span class="k">return</span> <span class="n">block</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_replay</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="s1">'Union[str, Warning]'</span><span class="p">,</span> <span class="n">category</span><span class="p">:</span> <span class="s1">'Type[Warning]'</span><span class="p">,</span>
+            <span class="n">target</span><span class="p">:</span> <span class="s1">'Optional[FrameType]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Report a warning :class:`hold_warnings` held back, as :func:`warn` would have.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message: Warning message.</span>
+<span class="sd">        category: Warning category.</span>
+<span class="sd">        target: Frame the warning was attributed to when it was held.</span>
+
+<span class="sd">    The warning is attributed to ``target`` again, found by walking out from this</span>
+<span class="sd">    frame. ``target`` lies outside the parse that held it whenever its level came</span>
+<span class="sd">    from :func:`~pcapkit.utilities.exceptions.stacklevel`, and so is still on the</span>
+<span class="sd">    stack; were it not, the level is computed afresh. It is reported here and</span>
+<span class="sd">    now, not held again by an enclosing block.</span>
+
+<span class="sd">    """</span>
+    <span class="n">level</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># this frame, as both consumers below count it</span>
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">currentframe</span><span class="p">()</span>
+    <span class="k">while</span> <span class="n">frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">target</span><span class="p">:</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_back</span>
+        <span class="n">level</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">found</span> <span class="o">=</span> <span class="n">frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="k">del</span> <span class="n">frame</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">found</span><span class="p">:</span>
+        <span class="n">level</span> <span class="o">=</span> <span class="n">stacklevel_calculator</span><span class="p">()</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="n">VERBOSE</span><span class="p">,</span> <span class="n">stack_info</span><span class="o">=</span><span class="n">VERBOSE</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">level</span><span class="p">)</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="hold_warnings">
+<a class="viewcode-back" href="../../../pcapkit/utilities/functools.html#pcapkit.utilities.warnings.hold_warnings">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">hold_warnings</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-name</span>
+<span class="w">    </span><span class="sd">"""Hold back the warnings a parse reports until it is known to be kept.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        hold: Hold the warnings reported inside the block. When false, they are</span>
+<span class="sd">            reported at once instead, even inside an enclosing block that holds.</span>
+
+<span class="sd">    Every :func:`warn` call inside the block is held, with the frame it is</span>
+<span class="sd">    attributed to. On leaving the block they are reported in order, with the</span>
+<span class="sd">    same message and category and attributed to the same frame on both</span>
+<span class="sd">    channels, unless :attr:`discard` was set, in which case they are dropped. A</span>
+<span class="sd">    block left by an :exc:`Exception` reports them whatever :attr:`discard`</span>
+<span class="sd">    says; one left by any other :exc:`BaseException` -- :exc:`KeyboardInterrupt`,</span>
+<span class="sd">    :exc:`SystemExit`, :exc:`GeneratorExit` -- drops them, so that a filter</span>
+<span class="sd">    turning them into errors cannot replace it.</span>
+
+<span class="sd">    The line named is the frame's line when the block is left. For the frame</span>
+<span class="sd">    :func:`~pcapkit.utilities.exceptions.stacklevel` names -- the caller of</span>
+<span class="sd">    :mod:`pcapkit`, still inside that call -- it is the line named when held.</span>
+
+<span class="sd">    Blocks nest, and each reports what it keeps when it is left, never handing</span>
+<span class="sd">    it to an enclosing block. Under a filter turning warnings into errors, the</span>
+<span class="sd">    error is then raised where the block that kept them is left -- the end of</span>
+<span class="sd">    the trial parse, inside the guard it was raised in when nothing was held.</span>
+
+<span class="sd">    :meth:`ProtocolBase._parse_next_layer</span>
+<span class="sd">    &lt;pcapkit.protocols.protocol.ProtocolBase._parse_next_layer&gt;` uses this for the</span>
+<span class="sd">    trial parse it replaces with :class:`~pcapkit.protocols.misc.raw.Raw` when the</span>
+<span class="sd">    header was not captured: the warnings describe a layer the result does not</span>
+<span class="sd">    have (:issue:`1580`).</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Nothing here touches :data:`warnings.filters` or a module's</span>
+<span class="sd">        ``__warningregistry__``; :func:`warnings.catch_warnings` would, which is</span>
+<span class="sd">        what made unrelated warnings re-fire up to v1.4.1 (see</span>
+<span class="sd">        :class:`BaseWarning`).</span>
+
+<span class="sd">        A block left while one opened inside it is still open -- a generator</span>
+<span class="sd">        suspended inside its own block -- stays in place for that one, which</span>
+<span class="sd">        steps over it when it is left. While it is suspended, though, the</span>
+<span class="sd">        generator's block holds its caller's warnings too: a context variable</span>
+<span class="sd">        follows the thread, not the frame.</span>
+
+<span class="sd">    """</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'discard'</span><span class="p">,</span> <span class="s1">'holding'</span><span class="p">,</span> <span class="s1">'_held'</span><span class="p">,</span> <span class="s1">'_outer'</span><span class="p">,</span> <span class="s1">'_token'</span><span class="p">,</span> <span class="s1">'_open'</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hold</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+        <span class="c1">#: Drop the held warnings on leaving the block, rather than report them.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">discard</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1">#: Whether warnings reported inside the block are held.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">holding</span> <span class="o">=</span> <span class="n">hold</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_held</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: List[HeldWarning]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_outer</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[hold_warnings]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_token</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[contextvars.Token[Optional[hold_warnings]]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_open</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_held</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_outer</span> <span class="o">=</span> <span class="n">_HELD</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_token</span> <span class="o">=</span> <span class="n">_HELD</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_open</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">:</span> <span class="s1">'Optional[Type[BaseException]]'</span><span class="p">,</span>
+                 <span class="n">exc_value</span><span class="p">:</span> <span class="s1">'Optional[BaseException]'</span><span class="p">,</span>
+                 <span class="n">traceback</span><span class="p">:</span> <span class="s1">'Optional[TracebackType]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+        <span class="n">token</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_token</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="c1"># a block opened inside this one and still open -- a suspended generator's</span>
+        <span class="c1"># -- stays in place, and steps over this one when it is left in turn</span>
+        <span class="n">innermost</span> <span class="o">=</span> <span class="n">_open_block</span><span class="p">(</span><span class="n">_HELD</span><span class="o">.</span><span class="n">get</span><span class="p">())</span> <span class="ow">is</span> <span class="bp">self</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_open</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">innermost</span> <span class="ow">and</span> <span class="n">token</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">_HELD</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>  <span class="c1"># left in a copy of the context it was entered in</span>
+                <span class="n">_HELD</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_outer</span><span class="p">)</span>
+            <span class="n">outer</span> <span class="o">=</span> <span class="n">_open_block</span><span class="p">(</span><span class="n">_HELD</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">outer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_HELD</span><span class="o">.</span><span class="n">get</span><span class="p">():</span>
+                <span class="n">_HELD</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">outer</span><span class="p">)</span>
+
+        <span class="n">held</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_held</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_held</span><span class="p">,</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">discard</span> <span class="ow">and</span> <span class="n">exc_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">exc_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">exc_type</span><span class="p">,</span> <span class="ne">Exception</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="k">for</span> <span class="n">message</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">held</span><span class="p">:</span>
+            <span class="n">_replay</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span></div>
 
 
 

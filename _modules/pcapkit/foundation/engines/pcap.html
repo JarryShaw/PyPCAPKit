@@ -482,8 +482,10 @@
 <span class="sd">support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.</span>
 
 <span class="sd">"""</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeekableReader</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">EngineBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap.header</span><span class="w"> </span><span class="kn">import</span> <span class="n">Header</span>
@@ -638,6 +640,7 @@
         <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>
 
         <span class="c1"># read frame header</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bound_read_ahead</span><span class="p">()</span>
         <span class="n">frame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">ext</span><span class="o">.</span><span class="n">_ifile</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_gbhdr</span><span class="o">.</span><span class="n">info</span><span class="p">,</span>
                       <span class="n">layer</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_exlyr</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_exptl</span><span class="p">,</span> <span class="n">nanosecond</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_nnsec</span><span class="p">,</span>
                       <span class="n">__context__</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_exctx</span><span class="p">)</span>
@@ -688,7 +691,38 @@
 
         <span class="c1"># return frame record</span>
         <span class="k">return</span> <span class="n">frame</span></div>
-</div>
+
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Utilities.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_bound_read_ahead</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Have a non-seekable input read ahead to the end of the next record, no further.</span>
+
+<span class="sd">        A record is measured by reading ahead (see :meth:`SeekableReader.seek</span>
+<span class="sd">        &lt;pcapkit.corekit.io.SeekableReader.seek&gt;`), and then read again from its first</span>
+<span class="sd">        octet. A read past it waits, on a live capture, for the records after: a</span>
+<span class="sd">        buffer's worth held each frame back until that much more had arrived. A read</span>
+<span class="sd">        short of it lets a record longer than the buffer slide out of it before it is</span>
+<span class="sd">        read again (:issue:`1586`). So the read covers the record header and the</span>
+<span class="sd">        ``incl_len`` octets it declares, in the global header's byte order -- as far as</span>
+<span class="sd">        the stream goes, for a bogus length, which is as far as a file read goes too.</span>
+
+<span class="sd">        """</span>
+        <span class="c1"># pylint: disable=protected-access</span>
+        <span class="n">ifile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span><span class="o">.</span><span class="n">_ifile</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ifile</span><span class="p">,</span> <span class="n">SeekableReader</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="n">position</span> <span class="o">=</span> <span class="n">ifile</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+        <span class="n">head</span> <span class="o">=</span> <span class="n">ifile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
+        <span class="n">ifile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
+
+        <span class="n">size</span> <span class="o">=</span> <span class="mi">16</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">head</span><span class="p">)</span> <span class="o">==</span> <span class="mi">16</span><span class="p">:</span>
+            <span class="n">size</span> <span class="o">+=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">head</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">12</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gbhdr</span><span class="o">.</span><span class="n">byteorder</span><span class="p">)</span>
+        <span class="n">ifile</span><span class="o">.</span><span class="n">_read_ahead_size</span> <span class="o">=</span> <span class="n">size</span></div>
 
 </pre></div>
         </article>

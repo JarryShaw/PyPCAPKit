@@ -511,14 +511,16 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        strict: if :data:`True`, report a datagram that is not completely</span>
-<span class="sd">            reassembled as the tuple of its received runs; otherwise as one</span>
-<span class="sd">            contiguous payload, its holes zero-filled -- or, while the total</span>
-<span class="sd">            length is unknown, only the prefix up to the first hole. Receipt</span>
-<span class="sd">            is tracked in 8-octet blocks, so the partial last block of a</span>
-<span class="sd">            snaplen-truncated fragment is not counted as received: it is left</span>
-<span class="sd">            out of the runs and ends the prefix, but once the total length is</span>
-<span class="sd">            known the contiguous payload keeps its real octets, with only the</span>
-<span class="sd">            rest of the hole zero-filled</span>
+<span class="sd">            reassembled as the tuple of its received runs, empty if none was;</span>
+<span class="sd">            otherwise as one contiguous payload, its holes zero-filled -- or,</span>
+<span class="sd">            while the total length is unknown, only the prefix up to the first</span>
+<span class="sd">            hole. Receipt is tracked in 8-octet blocks, and only the final</span>
+<span class="sd">            fragment's partial last block counts as received -- a non-final</span>
+<span class="sd">            fragment's, or a snaplen-truncated or buffer-clipped fragment's,</span>
+<span class="sd">            does not: it is left out of the runs and ends the prefix, but once</span>
+<span class="sd">            the total length is known the contiguous payload keeps its real</span>
+<span class="sd">            octets, with only the rest of the hole zero-filled. A datagram</span>
+<span class="sd">            longer than the data buffer is never complete</span>
 <span class="sd">        store: if store reassembled datagram in memory, i.e.,</span>
 <span class="sd">            :attr:`self._dtgram &lt;pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram&gt;`</span>
 <span class="sd">            (if not, datagram will be discarded after callback)</span>
@@ -646,12 +648,12 @@
         <span class="c1"># grows to hold such a datagram rather than clipping it, ``RCVBT`` in</span>
         <span class="c1"># step with it.</span>
         <span class="c1">#</span>
-        <span class="c1"># With nothing declared, a snaplen cut cannot be seen in the length.</span>
-        <span class="c1"># A fragment with **MF** set must carry a multiple of 8 octets, so its</span>
-        <span class="c1"># partial last block is a cut and is left unmarked below. Any other cut</span>
-        <span class="c1"># -- an unfragmented frame's, or a final fragment's -- cannot be told</span>
-        <span class="c1"># from a whole one, since the frame's original length is not part of</span>
-        <span class="c1"># the input, and the datagram comes out ``COMPLETE`` but short.</span>
+        <span class="c1"># With nothing declared, a snaplen cut cannot be seen in the length. A</span>
+        <span class="c1"># non-final fragment's cut still shows, as a partial last block, which</span>
+        <span class="c1"># is left unmarked below. Any other cut -- an unfragmented frame's, or</span>
+        <span class="c1"># a final fragment's -- cannot be told from a whole one, since the</span>
+        <span class="c1"># frame's original length is not part of the input, and the datagram</span>
+        <span class="c1"># comes out ``COMPLETE`` but short.</span>
         <span class="k">if</span> <span class="n">TL</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span>
             <span class="n">extent</span> <span class="o">=</span> <span class="n">FO</span> <span class="o">+</span> <span class="n">length</span>
@@ -684,13 +686,23 @@
         <span class="n">buf</span><span class="o">.</span><span class="n">datagram</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]</span> <span class="o">=</span> <span class="n">payload</span>
 
         <span class="c1"># Set RCVBT bits (in 8 octets) for the blocks this fragment actually</span>
-        <span class="c1"># filled. A fragment held in full marks its last block even when it is</span>
-        <span class="c1"># short, as the final fragment's is; a truncated one leaves its partial</span>
-        <span class="c1"># last block clear, since the octets after the cut are a real hole --</span>
-        <span class="c1"># as does a non-final fragment with Total Length 0, whose partial last</span>
-        <span class="c1"># block can only be a cut.</span>
+        <span class="c1"># filled. Only the final fragment, held in full, marks a partial last</span>
+        <span class="c1"># block: the octets after its end are past the datagram's. Every other</span>
+        <span class="c1"># partial last block is left clear, as a hole --</span>
+        <span class="c1">#</span>
+        <span class="c1"># * a truncated fragment's, since the octets after the cut are missing.</span>
+        <span class="c1">#   That includes one clipped by the data buffer's end, whose octets</span>
+        <span class="c1">#   past it cannot be held, so it counts as cut there (:issue:`1566`).</span>
+        <span class="c1"># * a non-final fragment's. :rfc:`791#section-3.2` and</span>
+        <span class="c1">#   :rfc:`8200#section-4.5` make every fragment but the last carry a</span>
+        <span class="c1">#   multiple of 8 octets, so one that ends mid-block was cut or is</span>
+        <span class="c1">#   malformed, and nobody sent the rest of its block. Marking it would</span>
+        <span class="c1">#   complete the datagram with zeros in their place. This is the only</span>
+        <span class="c1">#   way a cut shows when the length is not declared: under Total</span>
+        <span class="c1">#   Length 0, and on IPv6, whose adapters derive it from the captured</span>
+        <span class="c1">#   payload (:issue:`1567`).</span>
         <span class="n">start</span> <span class="o">=</span> <span class="n">FO</span> <span class="o">//</span> <span class="mi">8</span>
-        <span class="k">if</span> <span class="n">held</span> <span class="o">==</span> <span class="n">length</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">TL</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">MF</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">held</span> <span class="o">==</span> <span class="n">length</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">MF</span><span class="p">:</span>
             <span class="n">stop</span> <span class="o">=</span> <span class="p">(</span><span class="n">FO</span> <span class="o">+</span> <span class="n">held</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">stop</span> <span class="o">=</span> <span class="p">(</span><span class="n">FO</span> <span class="o">+</span> <span class="n">held</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span>
@@ -702,16 +714,33 @@
         <span class="c1"># fragment with MF clear has arrived, and ``0`` is a valid length</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">MF</span><span class="p">:</span>
             <span class="n">buf</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">TDL</span><span class="o">=</span><span class="n">length</span> <span class="o">+</span> <span class="n">FO</span><span class="p">)</span>
-        <span class="n">TDL</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">TDL</span>
 
         <span class="c1"># when datagram is reassembled in whole</span>
-        <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">stop</span> <span class="o">=</span> <span class="p">(</span><span class="n">TDL</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span>
-        <span class="k">if</span> <span class="n">TDL</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">RCVBT</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_complete</span><span class="p">(</span><span class="n">buf</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">BUFID</span><span class="p">),</span> <span class="n">bufid</span><span class="o">=</span><span class="n">BUFID</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="p">)</span></div>
 
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_is_complete</span><span class="p">(</span><span class="n">buf</span><span class="p">:</span> <span class="s1">'Buffer[_AT]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Tell whether a buffer holds its whole datagram.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            buf: buffer to check</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Whether the total data length is known, fits the data buffer, and</span>
+<span class="sd">            every 8-octet block up to it is marked received.</span>
+
+<span class="sd">        A datagram longer than the data buffer cannot be held, so it is never</span>
+<span class="sd">        complete. Checking ``RCVBT`` alone does not show that: slicing it past</span>
+<span class="sd">        its end stops silently, so the blocks past the buffer would read as</span>
+<span class="sd">        received (:issue:`1566`).</span>
+
+<span class="sd">        """</span>
+        <span class="n">TDL</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">TDL</span>
+        <span class="k">return</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">TDL</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">datagram</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">RCVBT</span><span class="p">[:(</span><span class="n">TDL</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span><span class="p">])</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_detect_conflicts</span><span class="p">(</span><span class="n">rcvbt</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span> <span class="n">tdl</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">datagram</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span>
@@ -812,9 +841,7 @@
         <span class="n">datagram</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">datagram</span>
         <span class="n">conflict</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">conflict</span><span class="p">)</span>
 
-        <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">stop</span> <span class="o">=</span> <span class="p">(</span><span class="n">TDL</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span>
-        <span class="n">flag</span> <span class="o">=</span> <span class="n">checked</span> <span class="ow">or</span> <span class="p">(</span><span class="n">TDL</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">RCVBT</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]))</span>
+        <span class="n">flag</span> <span class="o">=</span> <span class="n">checked</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_complete</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Datagram[_AT]]</span>
 
         <span class="c1"># How completely this datagram came out, and why it stopped. Derived once,</span>
@@ -842,23 +869,24 @@
             <span class="c1"># the last run may reach the end of the bit table</span>
             <span class="k">if</span> <span class="n">byte</span><span class="p">:</span>
                 <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">byte</span><span class="p">))</span>
-            <span class="c1"># strip empty packets</span>
-            <span class="k">if</span> <span class="n">data</span> <span class="ow">or</span> <span class="n">header</span><span class="p">:</span>
-                <span class="n">packet</span> <span class="o">=</span> <span class="n">Datagram</span><span class="p">(</span>
-                    <span class="n">completed</span><span class="o">=</span><span class="n">completion</span><span class="p">,</span>
-                    <span class="nb">id</span><span class="o">=</span><span class="n">DatagramID</span><span class="p">(</span>
-                        <span class="n">src</span><span class="o">=</span><span class="n">bufid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                        <span class="n">dst</span><span class="o">=</span><span class="n">bufid</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                        <span class="nb">id</span><span class="o">=</span><span class="n">bufid</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
-                        <span class="n">proto</span><span class="o">=</span><span class="n">bufid</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
-                    <span class="p">),</span>
-                    <span class="n">index</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">index</span><span class="p">),</span>
-                    <span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">,</span>
-                    <span class="n">payload</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
-                    <span class="n">packet</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                    <span class="n">conflict</span><span class="o">=</span><span class="n">conflict</span><span class="p">,</span>
-                <span class="p">)</span>
-                <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+            <span class="c1"># Report it even with no run received, its payload ``()``, as</span>
+            <span class="c1"># ``strict=False`` reports it with an empty payload: ``index``</span>
+            <span class="c1"># still says which frames were its fragments (:issue:`1566`).</span>
+            <span class="n">packet</span> <span class="o">=</span> <span class="n">Datagram</span><span class="p">(</span>
+                <span class="n">completed</span><span class="o">=</span><span class="n">completion</span><span class="p">,</span>
+                <span class="nb">id</span><span class="o">=</span><span class="n">DatagramID</span><span class="p">(</span>
+                    <span class="n">src</span><span class="o">=</span><span class="n">bufid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="n">dst</span><span class="o">=</span><span class="n">bufid</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                    <span class="nb">id</span><span class="o">=</span><span class="n">bufid</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                    <span class="n">proto</span><span class="o">=</span><span class="n">bufid</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+                <span class="p">),</span>
+                <span class="n">index</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">index</span><span class="p">),</span>
+                <span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">,</span>
+                <span class="n">payload</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+                <span class="n">packet</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">conflict</span><span class="o">=</span><span class="n">conflict</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
         <span class="c1"># if datagram is reassembled in whole -- or if it is not, and ``strict``</span>
         <span class="c1"># asked for one contiguous payload rather than the received runs</span>
         <span class="k">else</span><span class="p">:</span>

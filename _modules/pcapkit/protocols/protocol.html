@@ -524,7 +524,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">ProtocolNotFound</span><span class="p">,</span>
                                           <span class="n">ProtocolNotImplemented</span><span class="p">,</span> <span class="n">RegistryError</span><span class="p">,</span> <span class="n">StructError</span><span class="p">,</span>
                                           <span class="n">UnsupportedCall</span><span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">UnknownFieldWarning</span><span class="p">,</span> <span class="n">warn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">UnknownFieldWarning</span><span class="p">,</span> <span class="n">hold_warnings</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">StdlibEnum</span>
@@ -861,6 +861,31 @@
     <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">._make_data returned keyword(s) that no signature of '</span>
          <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> declares, so they are discarded: </span><span class="si">{</span><span class="n">listed</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span>
          <span class="n">UnknownFieldWarning</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_short_of_hint</span><span class="p">(</span><span class="n">klass</span><span class="p">:</span> <span class="s1">'Type[ProtocolBase]'</span><span class="p">,</span> <span class="n">captured</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Tell whether ``captured`` octets may be too few for a ``klass`` header.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        klass: Next layer protocol class.</span>
+<span class="sd">        captured: Octets captured for it.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Whether a next layer of ``klass`` parsed from ``captured`` octets may be</span>
+<span class="sd">        replaced with :class:`~pcapkit.protocols.misc.raw.Raw` by</span>
+<span class="sd">        :meth:`ProtocolBase._parse_next_layer`, and so has its warnings held.</span>
+
+<span class="sd">    The hint is read from the class, before there is an instance to ask, which</span>
+<span class="sd">    is enough for every protocol shipped: each returns a constant. A hint that</span>
+<span class="sd">    needs an instance raises here instead, and the layer counts as short, which</span>
+<span class="sd">    only means its warnings are held until the parse is known to be kept.</span>
+
+<span class="sd">    """</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">hint</span> <span class="o">=</span> <span class="n">klass</span><span class="o">.</span><span class="fm">__length_hint__</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'ProtocolBase'</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># pylint: disable=broad-except</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="n">hint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">captured</span> <span class="o">&lt;</span> <span class="n">hint</span>
 
 
 <div class="viewcode-block" id="ProtocolMeta">
@@ -2762,13 +2787,24 @@
 <span class="sd">            form rather than the shortest. A next layer that reports no hint is</span>
 <span class="sd">            kept as parsed.</span>
 
-<span class="sd">        """</span>
-        <span class="n">next_</span> <span class="o">=</span> <span class="n">klass</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[abstract]</span>
+<span class="sd">            The warnings of a parse that may be replaced are held until it is</span>
+<span class="sd">            known whether it is. They are dropped when it is, since they describe</span>
+<span class="sd">            a header the result does not have -- ``packet length &lt; 0`` twice for</span>
+<span class="sd">            an Ethernet frame of 10 octets (:issue:`1580`) -- and reported as the</span>
+<span class="sd">            parse ends when it is kept, still inside the guard that catches them</span>
+<span class="sd">            under an ``error`` filter. A layer kept with its header cut short</span>
+<span class="sd">            still warns. A layer captured at least as long as its hint cannot be</span>
+<span class="sd">            replaced, and is parsed holding nothing, even inside one that holds.</span>
 
+<span class="sd">        """</span>
         <span class="n">captured</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_</span><span class="p">))</span>
-        <span class="n">length_hint</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">next_</span><span class="p">,</span> <span class="s1">'__length_hint__'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="n">hint</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">length_hint</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">length_hint</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">hint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">captured</span> <span class="o">&lt;</span> <span class="n">hint</span> <span class="ow">and</span> <span class="n">captured</span> <span class="o">&lt;</span> <span class="n">next_</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">hold_warnings</span><span class="p">(</span><span class="n">_short_of_hint</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="n">captured</span><span class="p">))</span> <span class="k">as</span> <span class="n">held</span><span class="p">:</span>
+            <span class="n">next_</span> <span class="o">=</span> <span class="n">klass</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[abstract]</span>
+
+            <span class="n">length_hint</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">next_</span><span class="p">,</span> <span class="s1">'__length_hint__'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">hint</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">length_hint</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">length_hint</span><span class="p">()</span>
+            <span class="n">held</span><span class="o">.</span><span class="n">discard</span> <span class="o">=</span> <span class="n">hint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">captured</span> <span class="o">&lt;</span> <span class="n">hint</span> <span class="ow">and</span> <span class="n">captured</span> <span class="o">&lt;</span> <span class="n">next_</span><span class="o">.</span><span class="n">length</span>
+        <span class="k">if</span> <span class="n">held</span><span class="o">.</span><span class="n">discard</span><span class="p">:</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
             <span class="n">next_</span> <span class="o">=</span> <span class="n">Raw</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">next_</span>

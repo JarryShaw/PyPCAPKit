@@ -1897,8 +1897,13 @@
         <span class="c1"># will not be moved after reading; however, the returned bytes object</span>
         <span class="c1"># may not be exactly 4 bytes, so we use [:4] to get the first 4 bytes</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">peek</span><span class="p">(</span><span class="mi">4</span><span class="p">)[:</span><span class="mi">4</span><span class="p">]</span>
-        <span class="c1">#self._magic = self._ifile.read(4)  # magic number</span>
-        <span class="c1">#self._ifile.seek(0, os.SEEK_SET)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_magic</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="c1"># NOTE: ``peek`` makes at most one read of the stream, which a pipe or a</span>
+            <span class="c1"># raw stream may answer with fewer than four octets, so a short peek is</span>
+            <span class="c1"># not a short file. Read them instead, and seek back (:issue:`1586`).</span>
+            <span class="n">position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>    <span class="c1"># start extraction</span></div>
 

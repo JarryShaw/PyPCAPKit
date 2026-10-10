@@ -1847,10 +1847,10 @@
 </li>
         <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_speed">_make_option_if_speed() (pcapkit.protocols.misc.pcapng.PCAPNG method)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_tsoffset">_make_option_if_tsoffset() (pcapkit.protocols.misc.pcapng.PCAPNG method)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_tsresol">_make_option_if_tsresol() (pcapkit.protocols.misc.pcapng.PCAPNG method)</a>
 </li>
         <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_txspeed">_make_option_if_txspeed() (pcapkit.protocols.misc.pcapng.PCAPNG method)</a>
@@ -3070,6 +3070,8 @@
         <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._read_record_ipv6">_read_record_ipv6() (pcapkit.protocols.misc.pcapng.PCAPNG method)</a>
 </li>
         <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._read_record_unknown">_read_record_unknown() (pcapkit.protocols.misc.pcapng.PCAPNG method)</a>
+</li>
+        <li><a href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._read_records">_read_records() (pcapkit.foundation.engines.pypcapfile.PyPCAPFile method)</a>
 </li>
         <li><a href="pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP._read_sctp_causes">_read_sctp_causes() (pcapkit.protocols.transport.sctp.SCTP method)</a>
 </li>
@@ -13911,6 +13913,8 @@
         </ul></li>
         <li><a href="pcapkit/const/sctp.html#pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier.Discard">Discard (pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier attribute)</a>
 </li>
+        <li><a href="pcapkit/utilities/functools.html#pcapkit.utilities.warnings.hold_warnings.discard">discard (pcapkit.utilities.warnings.hold_warnings attribute)</a>
+</li>
         <li><a href="pcapkit/const/ipv6.html#pcapkit.const.ipv6.option_action.OptionAction.discard_icmp_any">discard_icmp_any (pcapkit.const.ipv6.option_action.OptionAction attribute)</a>
 </li>
         <li><a href="pcapkit/const/ipv6.html#pcapkit.const.ipv6.option_action.OptionAction.discard_icmp_unicast">discard_icmp_unicast (pcapkit.const.ipv6.option_action.OptionAction attribute)</a>
@@ -21028,14 +21032,14 @@
           <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.HIPTransportModeParameter">(class in pcapkit.protocols.schema.internet.hip)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.hiq">hiq (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.hiq">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.hislip">hislip (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 </li>
         <li><a href="pcapkit/const/ftp.html#pcapkit.const.ftp.command.FEATCode.hist">hist (pcapkit.const.ftp.command.FEATCode attribute)</a>
@@ -21188,6 +21192,10 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.hnmp">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/utilities/functools.html#pcapkit.utilities.warnings.hold_warnings">hold_warnings (class in pcapkit.utilities.warnings)</a>
+</li>
+        <li><a href="pcapkit/utilities/functools.html#pcapkit.utilities.warnings.hold_warnings.holding">holding (pcapkit.utilities.warnings.hold_warnings attribute)</a>
+</li>
         <li><a href="pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.HoleDescriptor">HoleDescriptor (class in pcapkit.foundation.reassembly.data.tcp)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.transtype.TransType.Homa">Homa (pcapkit.const.reg.transtype.TransType attribute)</a>
@@ -49648,7 +49656,7 @@
 </li>
           <li><a href="pcapkit/const/reg.html#index-63">RFC 7868</a>
 </li>
-          <li><a href="changelog/1.5.0.html#index-5">RFC 791</a>, <a href="contributing/pep.html#index-28">[1]</a>, <a href="contributing/pep.html#index-33">[2]</a>, <a href="contributing/pep.html#index-53">[3]</a>, <a href="pcapkit/const/ipv4.html#index-0">[4]</a>, <a href="pcapkit/const/ipv4.html#index-1">[5]</a>, <a href="pcapkit/const/ipv4.html#index-3">[6]</a>, <a href="pcapkit/const/ipv4.html#index-4">[7]</a>, <a href="pcapkit/const/ipv4.html#index-6">[8]</a>, <a href="pcapkit/const/ipv4.html#index-7">[9]</a>, <a href="pcapkit/const/ipv4.html#index-9">[10]</a>, <a href="pcapkit/foundation/reassembly/index.html#index-0">[11]</a>, <a href="pcapkit/foundation/reassembly/ip/index.html#index-0">[12]</a>, <a href="pcapkit/foundation/reassembly/ip/index.html#index-2">[13]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-0">[14]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-6">[15]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv4.html#index-0">[16]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-3">[17]</a>, <a href="pcapkit/foundation/reassembly/reassembly.html#index-0">[18]</a>, <a href="pcapkit/foundation/reassembly/tcp.html#index-4">[19]</a>, <a href="pcapkit/protocols/internet/ip.html#index-0">[20]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-0">[21]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-1">[22]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-10">[23]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-12">[24]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-2">[25]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-23">[26]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-3">[27]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-6">[28]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-7">[29]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-9">[30]</a>
+          <li><a href="changelog/1.5.0.html#index-5">RFC 791</a>, <a href="contributing/pep.html#index-28">[1]</a>, <a href="contributing/pep.html#index-33">[2]</a>, <a href="contributing/pep.html#index-53">[3]</a>, <a href="pcapkit/const/ipv4.html#index-0">[4]</a>, <a href="pcapkit/const/ipv4.html#index-1">[5]</a>, <a href="pcapkit/const/ipv4.html#index-3">[6]</a>, <a href="pcapkit/const/ipv4.html#index-4">[7]</a>, <a href="pcapkit/const/ipv4.html#index-6">[8]</a>, <a href="pcapkit/const/ipv4.html#index-7">[9]</a>, <a href="pcapkit/const/ipv4.html#index-9">[10]</a>, <a href="pcapkit/foundation/reassembly/index.html#index-0">[11]</a>, <a href="pcapkit/foundation/reassembly/ip/index.html#index-0">[12]</a>, <a href="pcapkit/foundation/reassembly/ip/index.html#index-2">[13]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-0">[14]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-6">[15]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv4.html#index-0">[16]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-4">[17]</a>, <a href="pcapkit/foundation/reassembly/reassembly.html#index-0">[18]</a>, <a href="pcapkit/foundation/reassembly/tcp.html#index-4">[19]</a>, <a href="pcapkit/protocols/internet/ip.html#index-0">[20]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-0">[21]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-1">[22]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-10">[23]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-12">[24]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-2">[25]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-23">[26]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-3">[27]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-6">[28]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-7">[29]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-9">[30]</a>
 </li>
           <li><a href="pcapkit/foundation/reassembly/ip/index.html#index-3">RFC 791 Section 3.2</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-1">[1]</a>
 </li>
@@ -49700,7 +49708,7 @@
 </li>
           <li><a href="contributing/pep.html#index-52">RFC 8200 Section 4.4</a>, <a href="pcapkit/protocols/internet/ipv6_route.html#index-10">[1]</a>, <a href="pcapkit/protocols/internet/ipv6_route.html#index-2">[2]</a>
 </li>
-          <li><a href="contributing/conventions/extension-header-subclassing.html#index-6">RFC 8200 Section 4.5</a>, <a href="contributing/conventions/extension-header-subclassing.html#index-8">[1]</a>, <a href="contributing/pep.html#index-35">[2]</a>, <a href="contributing/pep.html#index-36">[3]</a>, <a href="pcapkit/foundation/extraction.html#index-1">[4]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-2">[5]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-4">[6]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-5">[7]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv4.html#index-3">[8]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-0">[9]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-1">[10]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-2">[11]</a>, <a href="pcapkit/foundation/reassembly/reassembly.html#index-2">[12]</a>, <a href="pcapkit/foundation/reassembly/tcp.html#index-7">[13]</a>, <a href="pcapkit/protocols/internet/esp.html#index-2">[14]</a>, <a href="pcapkit/protocols/internet/ipv6_frag.html#index-1">[15]</a>
+          <li><a href="contributing/conventions/extension-header-subclassing.html#index-6">RFC 8200 Section 4.5</a>, <a href="contributing/conventions/extension-header-subclassing.html#index-8">[1]</a>, <a href="contributing/pep.html#index-35">[2]</a>, <a href="contributing/pep.html#index-36">[3]</a>, <a href="pcapkit/foundation/extraction.html#index-1">[4]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-2">[5]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-4">[6]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-5">[7]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv4.html#index-3">[8]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-0">[9]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-1">[10]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-2">[11]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-3">[12]</a>, <a href="pcapkit/foundation/reassembly/reassembly.html#index-2">[13]</a>, <a href="pcapkit/foundation/reassembly/tcp.html#index-7">[14]</a>, <a href="pcapkit/protocols/internet/esp.html#index-2">[15]</a>, <a href="pcapkit/protocols/internet/ipv6_frag.html#index-1">[16]</a>
 </li>
           <li><a href="pcapkit/protocols/internet/esp.html#index-12">RFC 8221</a>, <a href="pcapkit/protocols/internet/esp.html#index-13">[1]</a>, <a href="pcapkit/protocols/internet/esp.html#index-14">[2]</a>, <a href="pcapkit/protocols/internet/esp.html#index-20">[3]</a>, <a href="pcapkit/protocols/internet/esp.html#index-7">[4]</a>
 </li>
@@ -50034,7 +50042,7 @@
 </li>
           <li><a href="pcapkit/toolkit/builtin.html#index-1">RFC 9293 Section 3.1</a>
 </li>
-          <li><a href="pcapkit/foundation/reassembly/ip/ip.html#index-7">RFC 9293 Section 3.10</a>, <a href="pcapkit/foundation/reassembly/ip/ipv4.html#index-1">[1]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-4">[2]</a>, <a href="pcapkit/foundation/reassembly/tcp.html#index-5">[3]</a>, <a href="pcapkit/foundation/reassembly/tcp.html#index-8">[4]</a>
+          <li><a href="pcapkit/foundation/reassembly/ip/ip.html#index-7">RFC 9293 Section 3.10</a>, <a href="pcapkit/foundation/reassembly/ip/ipv4.html#index-1">[1]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-5">[2]</a>, <a href="pcapkit/foundation/reassembly/tcp.html#index-5">[3]</a>, <a href="pcapkit/foundation/reassembly/tcp.html#index-8">[4]</a>
 </li>
           <li><a href="pcapkit/foundation/reassembly/tcp.html#index-1">RFC 9293 Section 3.4</a>
 </li>

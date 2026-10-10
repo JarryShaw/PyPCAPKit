@@ -605,6 +605,14 @@ timer expires: {
 <p>Because completion frees the buffer (<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html#section-3.2"><strong>RFC 791 Section 3.2</strong></a>), a fragment that
 arrives after its datagram has completed opens a new buffer, which is later
 reported as a separate incomplete datagram; this is intended (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1507">#1507</a>).</p>
+<p>Two departures from the procedure above:</p>
+<ul class="simple">
+<li><p>Only the final fragment’s partial last <code class="docutils literal notranslate"><span class="pre">RCVBT</span></code> block is set. A non-final
+fragment carries a multiple of 8 octets, so one ending mid-block was cut or
+is malformed, and setting its last block would complete the datagram with
+octets nobody sent (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1567">#1567</a>).</p></li>
+<li><p>A datagram longer than the data buffer is never complete (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1566">#1566</a>).</p></li>
+</ul>
 </section>
 </section>
 

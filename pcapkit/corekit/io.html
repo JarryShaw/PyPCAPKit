@@ -716,6 +716,16 @@ with <code class="docutils literal notranslate"><span class="pre">buffer_save=Tr
 the two distinguishable, and, being a property of the position rather than of
 the window, it holds with a saved buffer as well, which is exempt from the window
 check and would otherwise return a negative position as if the seek had worked.</p>
+<p>A non-seekable stream has no end until it is over, so <code class="xref py py-data docutils literal notranslate"><span class="pre">SEEK_END</span></code> is
+as far as <code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_ahead()</span></code> reads past the position: <code class="docutils literal notranslate"><span class="pre">_read_ahead_size</span></code>
+octets, a buffer’s worth by default, or to the real end if that comes first.
+The frame readers measure what is left this way, and the engines set that size
+to the next record, so a record is measured whole, however long. The end used to
+be the buffer’s far edge, which once the buffer has filled is just how far the
+stream has been read, so the first record ending there was taken for the end of
+the capture (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1586">#1586</a>). The read slides the buffer, so a position before
+the one <code class="xref py py-data docutils literal notranslate"><span class="pre">SEEK_END</span></code> was sought from may then be refused, as
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_ahead()</span></code> says.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>

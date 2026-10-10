@@ -500,11 +500,11 @@ support, as is used by <a class="reference internal" href="../extraction.html#pc
 layer registries – <code class="docutils literal notranslate"><span class="pre">conf.l2types</span></code> and the <code class="docutils literal notranslate"><span class="pre">bind_layers</span></code> payload table,
 both of which exist only as import side effects of the layer modules.
 Importing a narrower submodule leaves them empty, and
-<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.utils.html#scapy.utils.PcapReader" title="(in Scapy v2.8.0.post2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PcapReader</span></code></a> then returns every frame as one opaque
-<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Raw" title="(in Scapy v2.8.0.post2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> layer without raising, so the engine would dissect
+<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.utils.html#scapy.utils.PcapReader" title="(in Scapy v2.8.0.post3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PcapReader</span></code></a> then returns every frame as one opaque
+<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Raw" title="(in Scapy v2.8.0.post3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> layer without raising, so the engine would dissect
 nothing and say so only on <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stderr" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stderr</span></code></a>. See <a class="reference internal" href="#pcapkit.foundation.engines.scapy.Scapy.__init__" title="pcapkit.foundation.engines.scapy.Scapy.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Scapy.__init__()</span></code></a> for
 why naming the layer modules individually is not a cheaper route.</p>
-<p>One side effect: <code class="xref py py-mod docutils literal notranslate"><span class="pre">scapy.all</span></code> loads <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.dcerpc.html#module-scapy.layers.dcerpc" title="(in Scapy v2.8.0.post2)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scapy.layers.dcerpc</span></code></a>, which
+<p>One side effect: <code class="xref py py-mod docutils literal notranslate"><span class="pre">scapy.all</span></code> loads <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.dcerpc.html#module-scapy.layers.dcerpc" title="(in Scapy v2.8.0.post3)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scapy.layers.dcerpc</span></code></a>, which
 reaches <a class="reference external" href="https://scapy.net">Scapy</a>’s TLS layer and there triggers a
 <code class="docutils literal notranslate"><span class="pre">CryptographyDeprecationWarning</span></code> from <code class="xref py py-mod docutils literal notranslate"><span class="pre">cryptography</span></code> about
 finite-field Diffie-Hellman. It concerns a key-exchange code path
@@ -557,9 +557,9 @@ category (see <a class="reference internal" href="../../utilities/warnings.html#
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.scapy.Scapy.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/scapy.html#Scapy.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.scapy.Scapy.run" title="Link to this definition">¶</a></dt>
-<dd><p>Call <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html#scapy.sendrecv.sniff" title="(in Scapy v2.8.0.post2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scapy.sendrecv.sniff()</span></code></a> to extract PCAP files.</p>
+<dd><p>Call <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html#scapy.sendrecv.sniff" title="(in Scapy v2.8.0.post3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scapy.sendrecv.sniff()</span></code></a> to extract PCAP files.</p>
 <p>This method assigns <a class="reference internal" href="#pcapkit.foundation.engines.scapy.Scapy._extmp" title="pcapkit.foundation.engines.scapy.Scapy._extmp"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._extmp</span></code></a> as an iterator
-from <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html#scapy.sendrecv.sniff" title="(in Scapy v2.8.0.post2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scapy.sendrecv.sniff()</span></code></a>, reached through
+from <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html#scapy.sendrecv.sniff" title="(in Scapy v2.8.0.post3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scapy.sendrecv.sniff()</span></code></a>, reached through
 <a class="reference internal" href="#pcapkit.foundation.engines.scapy.Scapy._expkg" title="pcapkit.foundation.engines.scapy.Scapy._expkg"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._expkg</span></code></a> – which <a class="reference internal" href="#pcapkit.foundation.engines.scapy.Scapy.__init__" title="pcapkit.foundation.engines.scapy.Scapy.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__init__()</span></code></a> binds to
 <code class="xref py py-mod docutils literal notranslate"><span class="pre">scapy.all</span></code>, since that is the import that populates the layer
 registries <code class="docutils literal notranslate"><span class="pre">sniff</span></code> needs to dissect anything.</p>
@@ -583,7 +583,7 @@ protocol implementations.</p>
 <dd><p>Read frames with Scapy engine.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Parsed frame instance.</p>
@@ -1658,7 +1658,11 @@ TCP and UDP and nothing else. IPv6 reassembly is therefore unavailable and is
 disabled – with an <a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a> –
 when requested; IPv4 and TCP reassembly and TCP flow tracing remain
 available. PCAP-NG is rejected with a
-<a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FormatError</span></code></a>.</p>
+<a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FormatError</span></code></a>. <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> 0.12.0 drops
+every record of a big-endian savefile, every record from a zero-length one
+on, and a truncated final record, so the engine reads the records itself,
+into <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a>’s own packet objects – see
+<a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._read_records" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._read_records"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_records()</span></code></a>.</p>
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile.PyPCAPFile">
@@ -1671,6 +1675,9 @@ no PCAP-NG support. Consequently this engine</p>
 <ul class="simple">
 <li><p>reads PCAP savefiles only, raising
 <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FormatError</span></code></a> on PCAP-NG,</p></li>
+<li><p>reads the savefile’s records itself, into <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a>’s own packet
+objects, as <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> 0.12.0 drops records the <code class="docutils literal notranslate"><span class="pre">default</span></code> engine
+reads – see <a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._read_records" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._read_records"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_records()</span></code></a>,</p></li>
 <li><p>disables IPv6 reassembly, warning as it does so, while leaving IPv4 and
 TCP reassembly and TCP flow tracing in place, and</p></li>
 <li><p>leaves TCP over IPv6 out of TCP reassembly and flow tracing, with one
@@ -1754,14 +1761,17 @@ installed <code class="xref py py-mod docutils literal notranslate"><span class=
 <p>This method assigns <a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._expkg" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._expkg"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._expkg</span></code></a>
 as <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> and <a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._extmp" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._extmp"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._extmp</span></code></a>
 as an iterator over the lazily generated savefile packets.</p>
-<p>The savefile is loaded with <code class="docutils literal notranslate"><span class="pre">layers=0</span></code>. Per <code class="xref py py-func docutils literal notranslate"><span class="pre">pcapfile.savefile</span>
-<span class="pre">._read_a_packet()</span></code>, that does <em>not</em> hand back each frame’s bytes verbatim –
-it hexlifies the whole frame into ASCII text and stops there, exactly as it
-would for any layer at which it runs out of layers left to descend. It is
-<a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._decode" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._decode"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_decode()</span></code></a> that un-hexlifies and then decodes each frame to
-<a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile.LAYERS" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile.LAYERS"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LAYERS</span></code></a> depth using <code class="xref py py-func docutils literal notranslate"><span class="pre">pcapfile.linklayer.clookup()</span></code> – the very
-call <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> makes internally. Doing it this way round is what
-lets the link layer type be inspected (and reported on) <em>before</em> the
+<p><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapfile.savefile.load_savefile()</span></code> loads and validates the savefile
+header. The records are then read by <a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._read_records" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._read_records"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_records()</span></code></a>, not by the
+packet generator it returns, which drops records (see there). Like
+<code class="xref py py-func docutils literal notranslate"><span class="pre">pcapfile.savefile._read_a_packet()</span></code> with <code class="docutils literal notranslate"><span class="pre">layers=0</span></code>,
+<a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._read_records" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._read_records"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_records()</span></code></a> does <em>not</em> hand back each frame’s bytes verbatim –
+it hexlifies the whole frame into ASCII text and stops there, exactly as
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> does for any layer at which it runs out of layers left to
+descend. It is <a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._decode" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._decode"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_decode()</span></code></a> that un-hexlifies and then decodes each
+frame to <a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile.LAYERS" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile.LAYERS"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LAYERS</span></code></a> depth using <code class="xref py py-func docutils literal notranslate"><span class="pre">pcapfile.linklayer.clookup()</span></code> –
+the very call <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> makes internally. Doing it this way round is
+what lets the link layer type be inspected (and reported on) <em>before</em> the
 first frame is decoded.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
@@ -1855,6 +1865,48 @@ tracing is possible.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._read_records">
+<span class="sig-prename descclassname"><span class="pre">PyPCAPFile.</span></span><span class="sig-name descname"><span class="pre">_read_records</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pypcapfile.html#PyPCAPFile._read_records"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._read_records" title="Link to this definition">¶</a></dt>
+<dd><p>Read the savefile’s records, as the <code class="docutils literal notranslate"><span class="pre">default</span></code> engine reads them.</p>
+<p><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapfile.savefile._read_a_packet()</span></code> (pypcapfile 0.12.0) drops
+records the <code class="docutils literal notranslate"><span class="pre">default</span></code> engine reads, in two ways:</p>
+<ul class="simple">
+<li><p>It picks the byte order of each record header by testing
+<code class="docutils literal notranslate"><span class="pre">hdrp[0].byteorder</span> <span class="pre">==</span> <span class="pre">'big'</span></code> – <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> against <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>,
+never true on Python 3. A big-endian record header is unpacked
+little-endian, its byte-swapped capture length overruns the file, and
+the savefile ends at its first record (#1512).</p></li>
+<li><p>It ends the savefile at any record whose frame data is empty or shorter
+than its capture length, so a zero-length record drops itself and every
+record after it, and a truncated final record is dropped (#1571).</p></li>
+</ul>
+<p>This reads each record in the byte order of the header <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code>
+loaded, into the <code class="xref py py-class docutils literal notranslate"><span class="pre">pcapfile.structs.pcap_packet</span></code> that function
+builds with <code class="docutils literal notranslate"><span class="pre">layers=0</span></code> – the frame hexlified, pointing at the
+savefile’s own header – so <a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._decode" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._decode"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_decode()</span></code></a> and
+<a class="reference internal" href="../../toolkit/3rdparty.html#module-pcapkit.toolkit.pypcapfile" title="pcapkit.toolkit.pypcapfile"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pypcapfile</span></code></a> see what <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> hands them.
+It stops where <a class="reference internal" href="../../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame" title="pcapkit.protocols.misc.pcap.frame.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code></a> stops,
+at a tail too short for a record header, and keeps a record whose capture
+length runs past the data as that does: the capture length as declared,
+the octets present as the frame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../corekit/io.html#pcapkit.corekit.io.NamedStream" title="pcapkit.corekit.io.NamedStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">NamedStream</span></code></a></span>) – The savefile, just past its header, where
+<code class="xref py py-func docutils literal notranslate"><span class="pre">pcapfile.savefile.load_savefile()</span></code> leaves it.</p></li>
+<li><p><strong>header</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">__pcap_header__</span></code></span>) – The savefile header <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> loaded.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><p>Undecoded savefile packets, one per record.</p>
+</dd>
+<dt class="field-odd">Warns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ProtocolWarning</strong> – If a record’s capture length runs past the data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._decode">
 <span class="sig-prename descclassname"><span class="pre">PyPCAPFile.</span></span><span class="sig-name descname"><span class="pre">_decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frnum</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pypcapfile.html#PyPCAPFile._decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._decode" title="Link to this definition">¶</a></dt>
 <dd><p>Decode a raw savefile packet down to <a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile.LAYERS" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile.LAYERS"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LAYERS</span></code></a> depth.</p>
@@ -1875,7 +1927,7 @@ bytes.</p></li>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The decoded packet, or <code class="docutils literal notranslate"><span class="pre">packet</span></code> unchanged when it could not be
-decoded.</p>
+decoded, or holds no octets at all.</p>
 </dd>
 <dt class="field-even">Warns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>AttributeWarning</strong> – If <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> could not decode the frame, e.g.

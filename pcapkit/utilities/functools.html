@@ -735,6 +735,68 @@ frame outside <a class="reference internal" href="../index.html#module-pcapkit" 
 <p><a class="reference internal" href="warnings.html#module-pcapkit.utilities.warnings" title="pcapkit.utilities.warnings"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings</span></code></a> for the emission model in full, and for
 how to silence either channel.</p>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Inside a <a class="reference internal" href="#pcapkit.utilities.warnings.hold_warnings" title="pcapkit.utilities.warnings.hold_warnings"><code class="xref py py-class docutils literal notranslate"><span class="pre">hold_warnings</span></code></a> block the warning is held back instead,
+with the frame it is attributed to, and reported from there only if the
+block keeps it.</p>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.utilities.warnings.hold_warnings">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.warnings.</span></span><span class="sig-name descname"><span class="pre">hold_warnings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/warnings.html#hold_warnings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.warnings.hold_warnings" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Hold back the warnings a parse reports until it is known to be kept.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>hold</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Hold the warnings reported inside the block. When false, they are
+reported at once instead, even inside an enclosing block that holds.</p>
+</dd>
+</dl>
+<p>Every <a class="reference internal" href="#pcapkit.utilities.warnings.warn" title="pcapkit.utilities.warnings.warn"><code class="xref py py-func docutils literal notranslate"><span class="pre">warn()</span></code></a> call inside the block is held, with the frame it is
+attributed to. On leaving the block they are reported in order, with the
+same message and category and attributed to the same frame on both
+channels, unless <a class="reference internal" href="#pcapkit.utilities.warnings.hold_warnings.discard" title="pcapkit.utilities.warnings.hold_warnings.discard"><code class="xref py py-attr docutils literal notranslate"><span class="pre">discard</span></code></a> was set, in which case they are dropped. A
+block left by an <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#Exception" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">Exception</span></code></a> reports them whatever <a class="reference internal" href="#pcapkit.utilities.warnings.hold_warnings.discard" title="pcapkit.utilities.warnings.hold_warnings.discard"><code class="xref py py-attr docutils literal notranslate"><span class="pre">discard</span></code></a>
+says; one left by any other <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#BaseException" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BaseException</span></code></a> – <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyboardInterrupt" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyboardInterrupt</span></code></a>,
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#SystemExit" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemExit</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#GeneratorExit" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">GeneratorExit</span></code></a> – drops them, so that a filter
+turning them into errors cannot replace it.</p>
+<p>The line named is the frame’s line when the block is left. For the frame
+<a class="reference internal" href="#pcapkit.utilities.exceptions.stacklevel" title="pcapkit.utilities.exceptions.stacklevel"><code class="xref py py-func docutils literal notranslate"><span class="pre">stacklevel()</span></code></a> names – the caller of
+<a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, still inside that call – it is the line named when held.</p>
+<p>Blocks nest, and each reports what it keeps when it is left, never handing
+it to an enclosing block. Under a filter turning warnings into errors, the
+error is then raised where the block that kept them is left – the end of
+the trial parse, inside the guard it was raised in when nothing was held.</p>
+<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase._parse_next_layer</span></code> uses this for the
+trial parse it replaces with <a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> when the
+header was not captured: the warnings describe a layer the result does not
+have (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1580">#1580</a>).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Nothing here touches <code class="xref py py-data docutils literal notranslate"><span class="pre">warnings.filters</span></code> or a module’s
+<code class="docutils literal notranslate"><span class="pre">__warningregistry__</span></code>; <code class="xref py py-func docutils literal notranslate"><span class="pre">warnings.catch_warnings()</span></code> would, which is
+what made unrelated warnings re-fire up to v1.4.1 (see
+<a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.BaseWarning" title="pcapkit.utilities.warnings.BaseWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseWarning</span></code></a>).</p>
+<p>A block left while one opened inside it is still open – a generator
+suspended inside its own block – stays in place for that one, which
+steps over it when it is left. While it is suspended, though, the
+generator’s block holds its caller’s warnings too: a context variable
+follows the thread, not the frame.</p>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.utilities.warnings.hold_warnings.discard">
+<span class="sig-name descname"><span class="pre">discard</span></span><a class="headerlink" href="#pcapkit.utilities.warnings.hold_warnings.discard" title="Link to this definition">¶</a></dt>
+<dd><p>Drop the held warnings on leaving the block, rather than report them.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.utilities.warnings.hold_warnings.holding">
+<span class="sig-name descname"><span class="pre">holding</span></span><a class="headerlink" href="#pcapkit.utilities.warnings.hold_warnings.holding" title="Link to this definition">¶</a></dt>
+<dd><p>Whether warnings reported inside the block are held.</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>
