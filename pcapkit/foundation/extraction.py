@@ -1431,13 +1431,12 @@ class Extractor(Generic[_P]):
             # <pcapkit.foundation.traceflow.traceflow.TraceFlowBase.__init__>`
             # itself substitutes ``'pcap'`` for ``None``.
             #
-            # DPKT and Scapy belong on this list too: their adapters build the frame
-            # with ``packet2dict`` exactly as the other two do, so both crash the
-            # same way. The guard is written from what the adapters produce, not
-            # from which engines are seen to crash, because an engine that
-            # dissects nothing never feeds the tracer and so hides the defect
-            # rather than avoiding it (#406).
-            if (self._exnam in ('dpkt', 'scapy', 'pyshark', 'pypcapfile')
+            # The guard is written from what the adapters produce, not from which
+            # engines are seen to crash, because an engine that dissects nothing
+            # never feeds the tracer and so hides the defect rather than avoiding
+            # it (#406). DPKT and Scapy are off the list because their adapters
+            # build a PCAP frame record from the captured octets (#1507).
+            if (self._exnam in ('pyshark', 'pypcapfile')
                     and trace_format in ('pcap', 'cap', None)):
                 warn(f"'Extractor(engine={self._exnam})' does not support 'trace_format={trace_format}'; "
                      "using 'trace_format=\"json\"' instead", FormatWarning, stacklevel=stacklevel())

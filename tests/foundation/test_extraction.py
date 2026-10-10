@@ -1086,13 +1086,13 @@ class ExtractorTests(unittest.TestCase):
         self.addCleanup(extractor._ifile.close)
         return extractor, warn
 
-    def test_pcap_trace_format_is_replaced_for_every_dict_frame_engine(self) -> None:
-        # The flow-tracing adapters of these four engines report each frame as a
+    def test_pcap_trace_format_is_replaced_only_for_dict_frame_engines(self) -> None:
+        # The flow-tracing adapters of PyShark and PyPCAPFile report each frame as a
         # plain dict, which the PCAP trace dumper cannot re-serialise: it reaches for
         # ``frame.packet`` and raises AttributeError from
-        # pcapkit.dumpkit.pcap.PCAPIO._append_value. DPKT and Scapy were once left
-        # off this list even though ``packet2dict`` builds their frames exactly as it
-        # builds the other two's.
+        # pcapkit.dumpkit.pcap.PCAPIO._append_value. DPKT and Scapy build a PCAP
+        # frame record from the captured octets instead (#1507), so their 'pcap' is
+        # kept, silently.
         #
         # ``None`` is asserted alongside 'pcap' and 'cap' because TraceFlow.__init__
         # substitutes 'pcap' for it, so an unset format routes to the same dumper.
@@ -1110,6 +1110,10 @@ class ExtractorTests(unittest.TestCase):
                         traced, warn = self._traced(temp, tag, engine=engine,
                                                     trace_format=trace_format)
 
+                        if engine in ('dpkt', 'scapy'):
+                            self.assertEqual(traced._trace.tcp._fdpext, '.pcap')
+                            warn.assert_not_called()
+                            continue
                         self.assertEqual(traced._trace.tcp._fdpext, '.json')
                         warn.assert_called_once()
                         message = warn.call_args.args[0]
@@ -1152,11 +1156,12 @@ class ExtractorTests(unittest.TestCase):
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class DictFrameTraceEndToEndTests(unittest.TestCase):
-    """A traced extraction on a dict-frame engine must complete, not crash.
+    """A traced extraction on the DPKT engine must write PCAP, not crash.
 
-    The constructor-level cases above prove the format was substituted; this proves
-    the substitution is *sufficient* -- the tracer runs, the dumper is handed the
-    mapping and writes it. Before the guard covered DPKT, this raised
+    The constructor-level cases above prove the format is kept; this proves the
+    adapter's frame record is *sufficient* -- the tracer runs, the dumper is handed
+    the record and writes it. Before #1507 the adapter built a :obj:`dict`, the
+    format was swapped for JSON, and before that guard this raised
     ``AttributeError: 'dict' object has no attribute 'packet'`` from
     :meth:`pcapkit.dumpkit.pcap.PCAPIO._append_value`.
 
@@ -1166,23 +1171,15 @@ class DictFrameTraceEndToEndTests(unittest.TestCase):
     orthogonal -- it suppresses the *frame* output, not the trace output, so it
     neither causes nor prevents the crash.
 
-    Only DPKT is exercised end to end. Scapy's adapter produces the same mapping and
-    is covered by the constructor cases, but reaching its dumper needs the L2 link
-    types registered -- measured: with only :mod:`scapy.sendrecv` imported, as the
-    engine does today, every frame of ``in.pcap`` dissects as ``Raw``, no TCP layer
-    is found and the tracer is never fed (#406). Importing :mod:`scapy.all` to force
-    it is a *global and irreversible* change to ``scapy.conf``: measured on
-    ``in.pcap``, frames 3-5 gain a TCP layer afterwards. That would silently
-    invalidate the Scapy case in :mod:`tests.interface.test_misc`, which asserts the
-    opposite, depending on which of the two ran first. So it is deliberately not done
-    here.
+    Only DPKT is exercised here; both engines' traced files are byte-compared with
+    the default engine's in :mod:`tests.toolkit.test_engine_pcap_trace_runtime`.
     """
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
     @unittest.skipUnless(HAS_DPKT, 'dpkt not installed')
-    def test_dpkt_traced_extraction_writes_flows_instead_of_crashing(self) -> None:
+    def test_dpkt_traced_extraction_writes_pcap_flows(self) -> None:
         import pcapkit
 
         for trace_format in ('pcap', 'cap', None):
@@ -1199,26 +1196,23 @@ class DictFrameTraceEndToEndTests(unittest.TestCase):
                         )
 
                     # The engine that ran is the one asked for -- a fallback to the
-                    # default engine would not exercise the dict-frame path at all.
+                    # default engine would not exercise the DPKT adapter at all.
                     self.assertEqual(type(extraction.engine).__engine_name__, 'DPKT')
                     self.assertTrue(extraction.trace.tcp,
                                     'no TCP flow was traced, so the dumper never ran '
                                     'and this test proves nothing')
 
                     # Each traced flow named a file, and every one of them exists and
-                    # holds the JSON the substituted format produces.
+                    # is a PCAP file, written from the frame records (#1507).
                     written = sorted(path for path in flows.rglob('*') if path.is_file())
                     self.assertTrue(written)
                     for path in written:
-                        self.assertEqual(path.suffix, '.json')
-                        self.assertGreater(path.stat().st_size, 0)
+                        self.assertEqual(path.suffix, '.pcap')
+                        self.assertIn(path.read_bytes()[:4], (b'\xd4\xc3\xb2\xa1', b'\xa1\xb2\xc3\xd4'))
+                        self.assertGreater(path.stat().st_size, 24)
 
-                    self.assertTrue(
-                        any('json' in str(w.message) for w in caught
-                            if w.category.__name__ == 'FormatWarning'),
-                        'the format substitution was not announced',
-                    )
-
+                    self.assertEqual([str(w.message) for w in caught
+                                      if w.category.__name__ == 'FormatWarning'], [])
 
 if __name__ == '__main__':
     unittest.main()

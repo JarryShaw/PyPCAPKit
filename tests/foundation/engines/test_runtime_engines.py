@@ -227,9 +227,13 @@ class ThirdPartyEngineTests(unittest.TestCase):
 
         extractor, sink = make_extractor(_exlyr='link', _flag_v=True)
         engine = DPKT(extractor)
+        # A PCAP is read through the engine's :class:`dpkt.pcap.Reader` subclass,
+        # which keeps each record's original length (#1507).
         pcap_reader = FakeReader()
-        with mock.patch.object(engine._expkg.pcap, 'Reader', return_value=pcap_reader):
+        reader_type = mock.Mock(return_value=pcap_reader)
+        with mock.patch('pcapkit.foundation.engines.dpkt._pcap_reader', return_value=reader_type):
             engine.run()
+        reader_type.assert_called_once_with(extractor._ifile)
         self.assertIs(engine._extmp, pcap_reader)
         self.assertTrue(callable(extractor._vfunc))
         extractor.record_header.assert_called_once_with()
@@ -247,7 +251,8 @@ class ThirdPartyEngineTests(unittest.TestCase):
         clean_extractor, _ = make_extractor(_flag_v=False)
         clean_engine = DPKT(clean_extractor)
         clean_reader = FakeReader()
-        with mock.patch.object(clean_engine._expkg.pcap, 'Reader', return_value=clean_reader):
+        with mock.patch('pcapkit.foundation.engines.dpkt._pcap_reader',
+                        return_value=mock.Mock(return_value=clean_reader)):
             clean_engine.run()
         self.assertIs(clean_engine._extmp, clean_reader)
 
@@ -345,19 +350,29 @@ class ThirdPartyEngineTests(unittest.TestCase):
         from pcapkit.foundation.engines.scapy import Scapy
 
         packet = object()
+
+        # The engine opens the capture through its own reader, which stamps each
+        # packet with its timestamp resolution (#1507), and hands it to ``sniff``
+        # under the file's name. ``sniff`` closes it at the end of the file, and the
+        # engine closes it once more in case ``sniff`` raised first; the reader
+        # makes the second close a no-op.
+        def run(engine: 'Scapy') -> None:
+            reader = mock.Mock()
+            reader_type = mock.Mock(return_value=reader)
+            with mock.patch('pcapkit.foundation.engines.scapy._reader_type', return_value=reader_type), \
+                    mock.patch.object(engine._expkg, 'sniff', return_value=[packet]) as sniff:
+                engine.run()
+            reader_type.assert_called_once_with('capture.pcap')
+            sniff.assert_called_once_with(opened_socket={reader: 'capture.pcap'})
+            reader.close.assert_called_once_with()
+
         extractor, sink = make_extractor(_exptl='tcp', _flag_v=True)
-        engine = Scapy(extractor)
-        with mock.patch.object(engine._expkg, 'sniff', return_value=[packet]) as sniff:
-            engine.run()
-        sniff.assert_called_once_with(offline='capture.pcap')
+        run(Scapy(extractor))
         self.assertTrue(callable(extractor._vfunc))
         extractor.record_header.assert_called_once_with()
 
         clean_extractor, _ = make_extractor(_flag_v=False)
-        clean_engine = Scapy(clean_extractor)
-        with mock.patch.object(clean_engine._expkg, 'sniff', return_value=[packet]) as sniff:
-            clean_engine.run()
-        sniff.assert_called_once_with(offline='capture.pcap')
+        run(Scapy(clean_extractor))
 
         extractor, sink = make_extractor(_flag_f=False)
         engine = Scapy(extractor)

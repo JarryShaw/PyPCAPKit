@@ -47,15 +47,78 @@ from pcapkit.utilities.warnings import AttributeWarning, warn
 __all__ = ['Scapy']
 
 if TYPE_CHECKING:
-    from typing import Iterator
+    from typing import Any, Iterator, Type
 
     from scapy.packet import Packet as ScapyPacket
+    from scapy.utils import PcapReader
 
     from pcapkit.foundation.extraction import Extractor
 
 #: logging.Logger: Module-level logger, a child of the package-wide
 #: :data:`pcapkit.utilities.logging.logger`.
 logger = get_logger(__name__)
+
+def _reader_type() -> 'Type[PcapReader]':
+    """A :class:`scapy.utils.PcapReader` that stamps each packet with its resolution.
+
+    `Scapy`_'s readers convert a record's timestamp to a :class:`~decimal.Decimal`
+    and drop the resolution it was counted in, and an exact count of microseconds
+    comes out with the same digits whether the capture counted microseconds or
+    nanoseconds. The PCAP frame record of a packet needs that resolution, so these
+    subclasses attach it with :func:`pcapkit.toolkit.scapy.attach_resolution`:
+    from the global header of a PCAP, and from the interface of each PCAP-NG
+    packet block, which :meth:`~scapy.utils.RawPcapNgReader._read_block` is the
+    last place to see.
+
+    Built when called, so that importing this module does not import `Scapy`_,
+    and so that it always subclasses the :class:`scapy.utils.PcapReader` of the
+    moment.
+
+    Returns:
+        A reader type, which opens a PCAP-NG file as its PCAP-NG alternative.
+
+    .. _Scapy: https://scapy.net
+
+    """
+    from scapy.utils import PcapNgReader, PcapReader  # isort:skip
+
+    from pcapkit.toolkit.scapy import attach_resolution  # isort:skip
+
+    class _Closing:
+        # ``sniff`` closes the reader at the end of the file, and the engine closes
+        # it again in case ``sniff`` raised first; only the first close is real,
+        # since closing a gzip reader twice raises
+        _closed = False
+
+        def close(self) -> 'None':
+            if not self._closed:
+                self._closed = True
+                super().close()  # type: ignore[misc]
+
+    class _PcapReader(_Closing, PcapReader):
+        def read_packet(self, *args: 'Any', **kwargs: 'Any') -> 'ScapyPacket':
+            packet = super().read_packet(*args, **kwargs)
+            attach_resolution(packet, 1_000_000_000 if self.nano else 1_000_000)
+            return packet
+
+    class _PcapNgReader(_Closing, PcapNgReader):
+        # the metaclass makes this ``_PcapReader``'s alternative in turn
+        alternative = _PcapReader
+
+        _resolution = 1_000_000
+
+        def _read_block(self, *args: 'Any', **kwargs: 'Any') -> 'Any':
+            block = super()._read_block(*args, **kwargs)
+            if block is not None:
+                self._resolution = block[1].tsresol
+            return block
+
+        def read_packet(self, *args: 'Any', **kwargs: 'Any') -> 'ScapyPacket':
+            packet = super().read_packet(*args, **kwargs)
+            attach_resolution(packet, self._resolution)
+            return packet
+
+    return _PcapReader
 
 
 class Scapy(EngineBase['ScapyPacket']):
@@ -179,7 +242,18 @@ class Scapy(EngineBase['ScapyPacket']):
 
         # extract & analyse file
         logger.debug('scapy: sniffing %s', ext._ifnm)
-        self._extmp = iter(self._expkg.sniff(offline=ext._ifnm))
+        # NOTE: the reader is opened here rather than by ``sniff(offline=...)`` so
+        # that every packet carries its capture's timestamp resolution, which
+        # Scapy's own readers discard (#1507). Labelled with the file name, as
+        # ``offline=`` labels it, so ``Packet.sniffed_on`` is unchanged. ``sniff``
+        # closes it at the end of the file, as it closes the reader ``offline=``
+        # opens; it is closed here as well in case ``sniff`` raised first, which
+        # the reader takes as a no-op once closed.
+        reader = _reader_type()(ext._ifnm)
+        try:
+            self._extmp = iter(self._expkg.sniff(opened_socket={reader: ext._ifnm}))
+        finally:
+            reader.close()
 
     def read_frame(self) -> 'ScapyPacket':
         """Read frames with Scapy engine.

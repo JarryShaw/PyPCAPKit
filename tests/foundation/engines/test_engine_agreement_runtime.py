@@ -287,14 +287,12 @@ class TestEngineAgreement(harness.RoundTripBase):
 
     STATUSES = ('ERROR', 'FRAMES', 'RECORDS', 'INPUTS', 'DATAGRAMS', 'FLOWS')
     KNOWN_FAILURES = (
-        Gap(1507, "the dpkt, scapy and pypcapfile engines write every flow as JSON when asked "
-               "for trace_format='pcap': their tcp_traceflow adapters build the frame with "
-               'packet2dict (pcapkit/toolkit/dpkt.py:600, pcapkit/toolkit/scapy.py:363, '
-               'pcapkit/toolkit/pypcapfile.py:620), which PCAPIO cannot write, so Extractor '
-               'swaps the format with a FormatWarning (pcapkit/foundation/extraction.py:1440-1444)',
-            'FLOWS', 'file of ', tuple(f'{capture}/{engine}/flows' for engine in ('dpkt', 'scapy')
-                                       for capture in TRACED)
-            + tuple(f'{capture}/pypcapfile/flows' for capture in TRACED_IPV4_ONLY_PCAP)),
+        Gap(1507, "the pypcapfile engine writes every flow as JSON when asked for "
+               "trace_format='pcap': its tcp_traceflow adapter builds the frame with "
+               'packet2dict (pcapkit/toolkit/pypcapfile.py:620), which PCAPIO cannot write, so '
+               'Extractor swaps the format with a FormatWarning '
+               '(pcapkit/foundation/extraction.py:1439-1443)',
+            'FLOWS', 'file of ', tuple(f'{capture}/pypcapfile/flows' for capture in TRACED_IPV4_ONLY_PCAP)),
         Gap(1512, 'the pypcapfile engine reads no frame from a big-endian PCAP, without a warning: '
                'pcapfile.savefile.load_savefile (pypcapfile 0.12.0) yields no packets for one, '
                'and the engine iterates that empty list (pcapkit/foundation/engines/'
