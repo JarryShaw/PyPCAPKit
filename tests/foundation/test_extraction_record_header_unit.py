@@ -134,7 +134,9 @@ class PySharkHeaderStepTests(unittest.TestCase):
         return fmt, records
 
     def test_pcap_output_opens_with_the_global_header(self) -> None:
-        packet = types.SimpleNamespace(number='1')
+        # a packet record, as pyshark builds one: its frame layer carries frame.encap_type (#1515)
+        frame = types.SimpleNamespace(layer_name='frame', field_names=['encap_type'])
+        packet = types.SimpleNamespace(number='1', frame_info=frame, layers=[])
         fmt, records = self._run(sample_path('in.pcap'), [packet])
         self.assertEqual(fmt, 'json')
         self.assertEqual(list(records), ['Global Header', 'Frame 1'])

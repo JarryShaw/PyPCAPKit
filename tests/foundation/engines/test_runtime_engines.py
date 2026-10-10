@@ -432,8 +432,10 @@ class ThirdPartyEngineTests(unittest.TestCase):
         class FakeCapture:
             def __init__(self) -> None:
                 self.closed = False
-                self.packet = types.SimpleNamespace(number='7',
-                                                    frame_info=types.SimpleNamespace(protocols='eth:ip:tcp'))
+                # a packet record: its frame layer carries frame.encap_type (#1515)
+                frame = types.SimpleNamespace(layer_name='frame', field_names=['encap_type'],
+                                              protocols='eth:ip:tcp')
+                self.packet = types.SimpleNamespace(number='7', frame_info=frame, layers=[])
 
             def next(self):
                 return self.packet
@@ -466,8 +468,9 @@ class ThirdPartyEngineTests(unittest.TestCase):
             with mock.patch('pcapkit.toolkit.pyshark.tcp_traceflow', return_value='trace'):
                 packet = engine.read_frame()
         self.assertIs(packet, capture.packet)
-        self.assertEqual(extractor._frnum, 7)
-        self.assertEqual(sink.paths[-1], 'out/Frame 7.json')
+        # numbered by count, as the default engine numbers frames, not by tshark's '7'
+        self.assertEqual(extractor._frnum, 1)
+        self.assertEqual(sink.paths[-1], 'out/Frame 1.json')
         extractor._trace.tcp.assert_called_once_with('trace')
         self.assertEqual(extractor._frame, [packet])
 
@@ -480,7 +483,7 @@ class ThirdPartyEngineTests(unittest.TestCase):
         with mock.patch('pcapkit.toolkit.pyshark.packet2dict', return_value={'packet': True}):
             with mock.patch('pcapkit.toolkit.pyshark.tcp_traceflow', return_value=None):
                 self.assertIs(engine.read_frame(), capture.packet)
-        self.assertEqual(stream_sink.records[-1][1], 'Frame 7')
+        self.assertEqual(stream_sink.records[-1][1], 'Frame 1')
         stream_mode._trace.tcp.assert_not_called()
 
         disabled, _ = make_extractor(_flag_q=True, _flag_t=False, _flag_d=False)
