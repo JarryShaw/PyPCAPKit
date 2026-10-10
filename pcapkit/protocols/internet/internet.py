@@ -15,13 +15,15 @@ import collections
 import io
 from typing import TYPE_CHECKING, Generic, cast
 
+from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase
 from pcapkit.protocols.schema.schema import keep_short_read, replay_short_read
 from pcapkit.utilities.decorators import beholder
-from pcapkit.utilities.warnings import RegistryWarning, warn
+from pcapkit.utilities.exceptions import stacklevel
+from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
 if TYPE_CHECKING:
     from typing import IO, Any, Optional, Type
@@ -29,6 +31,24 @@ if TYPE_CHECKING:
     from typing_extensions import Literal, Self
 
 __all__ = ['Internet']
+
+#: Most IPv6 extension headers dissected in one chain, i.e. one after another
+#: with no other layer between them (:issue:`1604`). The walk stops there, and
+#: what follows the last of them is kept as
+#: :class:`~pcapkit.protocols.misc.raw.Raw`, with one
+#: :exc:`~pcapkit.utilities.warnings.ProtocolWarning`. That holds whether the
+#: chain follows IPv6, which walks it in a loop
+#: (:meth:`IPv6._decode_next_layer
+#: <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>`), or another
+#: layer such as IPv4, where each header dissects the next one itself
+#: (:meth:`Internet._import_next_layer`). The toolkit adapters that walk a
+#: chain themselves stop at the same depth.
+#:
+#: :rfc:`8200#section-4.1` allows each extension header at most once, and the
+#: Destination Options header at most twice, so no compliant chain gets close.
+#: Without the bound, a chain dissected header by header stops wherever
+#: Python's recursion limit falls, which depends on the interpreter.
+EXTENSION_HEADER_LIMIT = 32
 
 
 class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-method
@@ -118,6 +138,12 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
         },
     )
 
+    #: int: How many IPv6 extension headers in a row the next layer follows:
+    #: this layer's place in such a chain, or how many headers
+    #: :class:`~pcapkit.protocols.internet.ipv6.IPv6` walked, else ``0``, c.f.
+    #: :data:`EXTENSION_HEADER_LIMIT` and :meth:`_next_exthdr_depth`.
+    _exthdr_depth = 0
+
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -197,6 +223,10 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             file: Source packet stream.
             length: Length of packet data.
             extension: If the protocol is used as an IPv6 extension header.
+            _exthdr_depth (int): Where this layer is in a chain of IPv6
+                extension headers, counting from ``1``, or ``0`` if it is not
+                in one. Handed over by :meth:`_import_next_layer` while
+                parsing, c.f. :data:`EXTENSION_HEADER_LIMIT`.
             **kwargs: Arbitrary keyword arguments.
 
         Notes:
@@ -211,6 +241,9 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             (:issue:`1458`).
 
         """
+        # NOTE: Set before parsing, since parsing is what dissects the next layer.
+        self._exthdr_depth = cast('int', kwargs.pop('_exthdr_depth', 0))
+
         super().__post_init__(file, length, extension=extension, **kwargs)  # type: ignore[arg-type]
         keep_short_read(self)
 
@@ -236,6 +269,77 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
         _byte = self._read_unpack(size)
         _prot = Enum_TransType.get(_byte)
         return _prot
+
+    def _next_exthdr_depth(self, proto: 'Optional[int]', extension: 'bool' = False) -> 'int':
+        """Place the next layer in its chain of IPv6 extension headers.
+
+        Arguments:
+            proto: next layer protocol index
+            extension: if the next layer is parsed as an extension header by
+                :class:`~pcapkit.protocols.internet.ipv6.IPv6`'s walk, which
+                counts the chain itself, c.f. :meth:`IPv6._decode_next_layer
+                <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>`
+
+        Returns:
+            One more than :attr:`_exthdr_depth` if ``proto`` names an IPv6
+            extension header, or ``0`` if it names none, so that another layer
+            between two headers starts a new chain. Past
+            :data:`EXTENSION_HEADER_LIMIT`, the next layer is left raw.
+
+        """
+        if extension:
+            return 0
+        try:
+            Enum_ExtensionHeader(proto)
+        except ValueError:
+            return 0
+        return self._exthdr_depth + 1
+
+    def _next_layer_class(self, proto: 'Optional[int]', file_: 'bytes', length: 'int',
+                          extension: 'bool' = False) -> 'tuple[Type[ProtocolBase], dict[str, Any]]':
+        r"""Pick the class the next layer is parsed with.
+
+        Arguments:
+            proto: next layer protocol index
+            file\_: payload of the current layer
+            length: valid (*non-padding*) length
+            extension: if is extension header, c.f. :meth:`_next_exthdr_depth`
+
+        Returns:
+            :class:`~pcapkit.protocols.misc.null.NoPayload` if there is
+            nothing to parse; :class:`~pcapkit.protocols.misc.raw.Raw` if the
+            parse stops at this layer, or the next layer is an IPv6 extension
+            header past :data:`EXTENSION_HEADER_LIMIT` in a row; otherwise the
+            class registered for ``proto``. With it, the keywords only that next
+            layer is constructed with: the warning given, as ``error``, or the
+            next layer's place in its chain, as ``_exthdr_depth``.
+
+        Warns:
+            ProtocolWarning: If the next layer is past
+                :data:`EXTENSION_HEADER_LIMIT` (:issue:`1604`).
+
+        """
+        if min(length, len(file_)) == 0:
+            from pcapkit.protocols.misc.null import NoPayload  # isort: skip # pylint: disable=import-outside-toplevel
+            return NoPayload, {}
+        if self._sigterm:
+            from pcapkit.protocols.misc.raw import Raw  # isort: skip # pylint: disable=import-outside-toplevel
+            return Raw, {}
+
+        depth = self._next_exthdr_depth(proto, extension)
+        if depth > EXTENSION_HEADER_LIMIT:
+            from pcapkit.protocols.misc.raw import Raw  # isort: skip # pylint: disable=import-outside-toplevel
+
+            message = (f'{self.alias}: a chain of IPv6 extension headers reached the limit of '
+                       f'{EXTENSION_HEADER_LIMIT} headers; the rest of the packet, from Next '
+                       f'Header {int(cast("int", proto))}, is left undissected')
+            warn(message, ProtocolWarning, stacklevel=stacklevel())
+            return Raw, {'error': message}
+
+        protocol = self._lookup_next_layer(self.__proto__, cast('int', proto))
+        if depth and issubclass(protocol, Internet):
+            return protocol, {'_exthdr_depth': depth}
+        return protocol, {}
 
     def _decode_next_layer(self, dict_: '_PT', proto: 'Optional[int]' = None,  # pylint: disable=arguments-differ
                            length: 'Optional[int]' = None, *, packet: 'Optional[dict[str, Any]]' = None,
@@ -304,10 +408,15 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
         Returns:
             Instance of next layer.
 
-        """
-        if TYPE_CHECKING:
-            protocol: 'Type[ProtocolBase]'
+        Notes:
+            An IPv6 extension header past :data:`EXTENSION_HEADER_LIMIT` in a
+            row is not dissected: it and the rest of the packet are kept as
+            :class:`~pcapkit.protocols.misc.raw.Raw`, with one
+            :exc:`~pcapkit.utilities.warnings.ProtocolWarning` (:issue:`1604`).
+            Each header dissects the next one from here, so the chain's depth
+            is handed to the next layer, c.f. :meth:`_next_layer_class`.
 
+        """
         if payload is None:
             file_ = self.__header__.get_payload()
         else:
@@ -315,13 +424,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
         if length is None:
             length = len(file_)
 
-        if min(length, len(file_)) == 0:
-            from pcapkit.protocols.misc.null import NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel
-        elif self._sigterm:
-            from pcapkit.protocols.misc.raw import Raw as protocol  # isort: skip # pylint: disable=import-outside-toplevel
-        else:
-            protocol = self._lookup_next_layer(self.__proto__, proto)
-
+        protocol, extra = self._next_layer_class(proto, file_, length, extension)
         return self._parse_next_layer(protocol, file_, length, version=version, extension=extension,
                                       alias=proto, packet=packet, layer=self._exlayer,
-                                      protocol=self._exproto, __context__=self._exctx)
+                                      protocol=self._exproto, __context__=self._exctx, **extra)

@@ -73,6 +73,7 @@ from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
+from pcapkit.protocols.internet.internet import EXTENSION_HEADER_LIMIT
 from pcapkit.protocols.internet.ipv4 import IPv4 as Protocol_IPv4
 from pcapkit.protocols.schema.internet.ipv6 import jumbo_payload_length
 from pcapkit.protocols.transport.tcp import TCP as Protocol_TCP
@@ -659,7 +660,10 @@ def _past_extension_headers(protocol: 'int', data: 'bytes') -> 'Optional[tuple[i
         default engine leaves one of them undissected. An AH is
         ``(Payload Length + 2) * 4`` octets long (:rfc:`4302#section-2.2`), and
         no shorter than :data:`AH_HEADER_LEN`; any other is read by
-        :func:`_default_extension_header` (:issue:`1597`).
+        :func:`_default_extension_header` (:issue:`1597`). Past
+        :data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT`
+        of them in a row, the default engine leaves the rest undissected too
+        (:issue:`1604`).
 
     Note:
         Inside IPv4, the default engine decodes what an IPv6 Fragment header
@@ -668,7 +672,11 @@ def _past_extension_headers(protocol: 'int', data: 'bytes') -> 'Optional[tuple[i
         they are there.
 
     """
+    depth = 0
     while protocol in IPV4_EXTENSION_HEADERS:
+        if depth == EXTENSION_HEADER_LIMIT:
+            return None
+        depth += 1
         if protocol == Enum_TransType.AH:
             length = (data[1] + 2) * 4 if len(data) >= AH_HEADER_LEN else 0
             if length < AH_HEADER_LEN or len(data) < length:
@@ -704,7 +712,9 @@ def _upper_layer(version: 'int', data: 'bytes') -> 'Optional[tuple[int, bytes]]'
         Fragment header as if that header were not there. A later fragment of
         either has no upper-layer header, since from its offset on it carries a
         slice of the payload (:rfc:`791#section-3.2`, :rfc:`8200#section-4.5`).
-        Nor does a truncated header or header chain.
+        Nor does a truncated header or header chain, or a chain of more than
+        :data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT`
+        extension headers (:issue:`1604`).
 
     Note:
         Each of these rules is the default engine's own, as are the ones
@@ -737,10 +747,11 @@ def _upper_layer(version: 'int', data: 'bytes') -> 'Optional[tuple[int, bytes]]'
     if not extent:
         extent = jumbo_payload_length(data[6], data[IPV6_HEADER_LEN:]) or 0
     data = data[:IPV6_HEADER_LEN + extent]
-    nxt, offset = data[6], IPV6_HEADER_LEN
+    nxt, offset, depth = data[6], IPV6_HEADER_LEN, 0
     while nxt in IPV6_EXTENSION_HEADERS:
-        if len(data) < offset + 8:
+        if depth == EXTENSION_HEADER_LIMIT or len(data) < offset + 8:
             return None
+        depth += 1
         if nxt == Enum_ExtensionHeader.IPv6_Frag:  # fixed length, second octet reserved
             if struct.unpack_from('!H', data, offset + 2)[0] >> 3:  # a later fragment
                 return None
