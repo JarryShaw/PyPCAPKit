@@ -18539,8 +18539,8 @@ class TCP(AppType):
     #: [TCP] PKIX Certificate Management using CMS (CMC) [RFC 10003]
     pkix_cmc = 5318, 'pkix-cmc', TransportProtocol.tcp
 
-    #: - [TCP] Roughtime time synchronization [RFC-ietf-ntp-roughtime-19]
-    #: - [UDP] Roughtime time synchronization [RFC-ietf-ntp-roughtime-19]
+    #: - [TCP] Roughtime time synchronization [RFC 10049]
+    #: - [UDP] Roughtime time synchronization [RFC 10049]
     roughtime = 5319, 'roughtime', TransportProtocol.tcp
 
     #: [TCP] Webservices-based Zn interface of BSF

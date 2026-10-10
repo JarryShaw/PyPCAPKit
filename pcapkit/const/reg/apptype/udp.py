@@ -17991,8 +17991,8 @@ class UDP(AppType):
     #: [UDP] Reserved
     reserved_5318 = 5318, 'reserved', TransportProtocol.udp
 
-    #: - [TCP] Roughtime time synchronization [RFC-ietf-ntp-roughtime-19]
-    #: - [UDP] Roughtime time synchronization [RFC-ietf-ntp-roughtime-19]
+    #: - [TCP] Roughtime time synchronization [RFC 10049]
+    #: - [UDP] Roughtime time synchronization [RFC 10049]
     roughtime = 5319, 'roughtime', TransportProtocol.udp
 
     #: [UDP] Reserved
