@@ -111,7 +111,7 @@ class IPv6ExtensionRuntimeTests(unittest.TestCase):
         ipv6 = frame.payload.payload
         frag = list(ipv6.extension_headers.values())[0]
 
-        self.assertEqual(str(frame.protochain), 'Ethernet:IPv6:IPv6-Frag:UDP:Raw')
+        self.assertEqual(str(frame.protochain), 'Ethernet:IPv6:IPv6-Frag:Raw')
         # ``Data_IPv6_Frag.offset`` is in octets, matching ``Data_IPv4.offset``: the
         # on-wire field is 543 counts of 8 octets (:rfc:`8200#section-4.5`), i.e. the
         # 4344th octet of the fragmentable part, which with this fragment's 434
@@ -128,6 +128,32 @@ class IPv6ExtensionRuntimeTests(unittest.TestCase):
             _ = frag.protocol
         with self.assertRaises(UnsupportedCall):
             _ = frag.protochain
+
+    def test_ipv6_later_fragments_carry_raw_data(self) -> None:
+        # frames 14 to 16 are the later fragments of frame 13's UDP datagram:
+        # their data is a slice of it, with no UDP header (:rfc:`8200#section-4.5`)
+        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.misc.raw import Raw
+
+        extractor = self._extract('ipv6.pcap')
+        self.assertIn('UDP', extractor.frame[12])
+        for number, offset in ((14, 1448), (15, 2896), (16, 4344)):
+            with self.subTest(frame=number):
+                frame = extractor.frame[number - 1]
+                ipv6 = frame.payload.payload
+                frag = list(ipv6.extension_headers.values())[0]
+
+                self.assertEqual(frag.info.offset, offset)
+                self.assertNotIn('UDP', frame)
+                self.assertEqual(str(frame.protochain), 'Ethernet:IPv6:IPv6-Frag:Raw')
+                self.assertIs(type(ipv6.payload), Raw)
+                self.assertEqual(ipv6.payload.data, bytes(ipv6.info.fragment.payload))
+                self.assertEqual(ipv6.info.protocol.name, 'UDP')
+
+                self.assertEqual(IPv6.from_data(ipv6.info.to_dict()).data, ipv6.data)
+                self.assertEqual(Ethernet.from_data(frame.payload.info.to_dict()).data,
+                                 frame.payload.data)
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
