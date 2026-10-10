@@ -76,7 +76,10 @@ offers, and the ones that cannot say so rather than quietly doing less:
 | Engine                                                          | Gap, and how it is surfaced                                   |
 +=================================================================+===============================================================+
 | :class:`~pcapkit.foundation.engines.pyshark.PyShark`            | no reassembly -- disabled with an                             |
-|                                                                 | :class:`~pcapkit.utilities.warnings.AttributeWarning`         |
+|                                                                 | :class:`~pcapkit.utilities.warnings.AttributeWarning`, and    |
+|                                                                 | :program:`tshark`'s own IP reassembly is turned off, so a     |
+|                                                                 | fragmented datagram is read frame by frame, as the built-in   |
+|                                                                 | engine reads it                                               |
 +-----------------------------------------------------------------+---------------------------------------------------------------+
 | :class:`~pcapkit.foundation.engines.pypcap.PyPCAP`              | no protocol dissection at all, hence no reassembly and no     |
 |                                                                 | flow tracing -- both disabled with an                         |

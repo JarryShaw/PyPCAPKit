@@ -1,12 +1,49 @@
 from __future__ import annotations
 
 import importlib.util
+import os
+import tempfile
+import types
 import unittest
+import warnings
+from typing import TYPE_CHECKING
+from unittest import mock
 
-from tests._support import reimport_once_per_class
+from tests._support import close_extractor, reimport_once_per_class
+from tests.foundation import _roundtrip as wire
+
+if TYPE_CHECKING:
+    from typing import Any, Callable
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
+
+#: The ``tcp`` fields tshark 4.6.9 reports for a TCP header it cannot dissect
+#: whole, by PyShark name, nested fields left out (#1611). Measured with ``tshark
+#: -T pdml`` on an IPv4 segment of 25 octets, carrying ``b'hello'``.
+PORTS = ('srcport', 'dstport', 'port')
+TO_FLAGS = PORTS + ('stream', 'completeness', 'short_segment', 'seq', 'seq_raw', 'ack', 'ack_raw',
+                    'hdr_len', 'flags', 'flags_reset', 'flags_syn', 'flags_fin')
+WINDOW = ('window_size_value', 'window_size', 'window_size_scalefactor')
+PARTIAL_HEADERS = {
+    # the dissection stops at ``tcp.hdr_len``: no ``tcp.ack``, no flags
+    'data offset 0 to 4': PORTS + ('stream', 'completeness', 'len', 'seq', 'seq_raw', 'hdr_len',
+                                   'bogus_header_length'),
+    # a header cut at octet k; below 4 there is no TCP layer at all
+    'cut at octets 4 to 13': PORTS,
+    'cut at octets 14 and 15': TO_FLAGS,
+    'cut at octets 16 and 17': TO_FLAGS + WINDOW,
+    'cut at octets 18 and 19': TO_FLAGS + WINDOW + ('checksum',),
+}
+#: The same, for a header captured whole, Data Offset 5.
+WHOLE_HEADER = PORTS + ('stream', 'completeness', 'len', 'seq', 'seq_raw', 'nxtseq', 'ack', 'ack_raw',
+                        'hdr_len', 'flags', 'flags_reset', 'flags_syn', 'flags_fin') + WINDOW + (
+                            'checksum', 'urgent_pointer', 'time_relative', 'time_delta', 'analysis',
+                            'payload')
+#: A value for each of those fields, as PyShark spells it.
+TCP_VALUES = {'srcport': '40000', 'dstport': '9', 'port': '40000', 'seq': '1', 'seq_raw': '101',
+              'ack': '1', 'ack_raw': '1', 'hdr_len': '20', 'flags_reset': 'False',
+              'flags_syn': 'False', 'flags_fin': 'False', 'urgent_pointer': '0'}
 
 
 class FakeLayer:
@@ -56,9 +93,10 @@ class FakePySharkPacket:
             # ``flags_reset`` is PyShark's spelling of Wireshark's
             # ``tcp.flags.reset``, the field the RST flag comes from. ``seq`` and
             # ``ack`` are reported as strings too, like every PyShark field.
+            # ``urgent_pointer`` marks a whole fixed header (#1611).
             FakeLayer('tcp', srcport='1234', dstport='80',
                       flags_syn='1', flags_fin='0', flags_reset='0',
-                      seq='101', ack='202'),
+                      seq='101', ack='202', urgent_pointer='0'),
         ]
         self._contains = set()
         if ip:
@@ -625,8 +663,6 @@ class PySharkTraceFieldTests(unittest.TestCase):
         packets trace as 1 and 2, never as tshark's ``packet.number``.
 
         """
-        import types
-
         from pcapkit.foundation.engines.pyshark import PyShark
 
         journal = FakePySharkPacket(ip=False, tcp=False)
@@ -740,6 +776,207 @@ class PySharkCommentedPacketTests(unittest.TestCase):
         with self.assertRaises(ProtocolError) as ctx:
             toolkit.tcp_traceflow(packet)
         self.assertEqual(str(ctx.exception), 'PyShark packet 12 has no frame layer')
+
+
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class PySharkFixedHeaderTests(unittest.TestCase):
+    """#1611: a TCP layer without a whole fixed header is not traced.
+
+    Reading a field tshark had not reported raised a bare :exc:`AttributeError`
+    and aborted the whole extraction. A header cut at octets 14 to 19 has every
+    field ``tcp_traceflow`` reads, so it was traced where the default engine
+    skips it.
+
+    """
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    @staticmethod
+    def packet(fields: 'tuple[str, ...]') -> FakePySharkPacket:
+        """A TCP packet whose ``tcp`` layer reports ``fields`` only."""
+        packet = FakePySharkPacket(encap_type='1')
+        packet.tcp = packet.layers[2] = FakeLayer('tcp', **{name: TCP_VALUES.get(name, '')
+                                                            for name in fields})
+        return packet
+
+    def test_a_partial_header_is_skipped(self) -> None:
+        from pcapkit.toolkit import pyshark as toolkit
+
+        for case, fields in PARTIAL_HEADERS.items():
+            with self.subTest(case=case):
+                self.assertIsNone(toolkit.tcp_traceflow(self.packet(fields), count=4))
+
+    def test_a_whole_header_is_traced(self) -> None:
+        from pcapkit.toolkit import pyshark as toolkit
+
+        data = toolkit.tcp_traceflow(self.packet(WHOLE_HEADER), count=4)
+        self.assertIsNotNone(data)
+        self.assertEqual((data.index, data.srcport, data.dstport, data.seq, data.ack),
+                         (4, 40000, 9, 101, 1))
+        self.assertEqual((data.syn, data.fin, data.rst), (False, False, False))
+
+
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class PySharkReassemblyPrefsTests(unittest.TestCase):
+    """#1612: the engine runs tshark with IPv4 and IPv6 reassembly off."""
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def test_run_turns_tshark_ip_reassembly_off(self) -> None:
+        from pcapkit.foundation.engines.pyshark import PyShark
+
+        file_capture = mock.Mock(return_value='capture')
+        extractor = types.SimpleNamespace(
+            _exlyr='none', _exptl='null', _exctx=None, _flag_r=False, _ipv4=False, _ipv6=False,
+            _tcp=True, _flag_v=False, _ifnm='in.pcap', record_header=mock.Mock())
+        engine = PyShark.__new__(PyShark)  # skip __init__, which imports pyshark
+        engine._extractor = extractor
+        engine._expkg = types.SimpleNamespace(FileCapture=file_capture)
+        engine.run()
+        file_capture.assert_called_once_with(
+            'in.pcap', keep_packets=False,
+            override_prefs={'ip.defragment': 'FALSE', 'ipv6.defragment': 'FALSE'})
+        self.assertEqual(engine._extmp, 'capture')
+
+
+def tcp_frame(version: int, segment: bytes, *, reverse: bool = False) -> bytes:
+    """An Ethernet frame of an IPv4 or IPv6 packet carrying the TCP ``segment``."""
+    if version == 4:
+        return wire.ethernet(wire.ipv4(segment, proto=6, reverse=reverse), 0x0800, reverse=reverse)
+    return wire.ethernet(wire.ipv6(segment, nxt=6, reverse=reverse), 0x86DD, reverse=reverse)
+
+
+def fragments(version: int, segment: bytes, ident: int, size: int = 24) -> 'list[bytes]':
+    """The TCP ``segment`` as one IPv4 or IPv6 datagram, cut into ``size``-octet fragments."""
+    frames = []
+    for offset in range(0, len(segment), size):
+        piece, more = segment[offset:offset + size], offset + size < len(segment)
+        if version == 4:
+            frames.append(wire.ethernet(wire.ipv4(piece, proto=6, ident=ident, offset=offset, mf=more),
+                                        0x0800))
+        else:
+            frames.append(wire.ethernet(wire.ipv6_fragment(piece, nxt=6, ident=ident, offset=offset,
+                                                           mf=more), 0x86DD))
+    return frames
+
+
+def read_trace(test: unittest.TestCase, engine: str, frames: 'list[bytes]') -> 'dict[str, Any]':
+    """Read ``frames`` with ``engine``, with TCP flow tracing on.
+
+    Returns:
+        The input flow tracing receives for each frame number -- every field but
+        ``frame``, ``header`` and ``payload``, which PyShark cannot supply -- and
+        the traced flows' labels and frames.
+
+    Skips ``test`` unless ``engine`` ran, which for PyShark needs ``pyshark``,
+    the ``tshark`` binary and Python 3.13 or older.
+
+    """
+    from pcapkit import extract
+    from pcapkit.foundation.traceflow.traceflow import TraceFlowBase
+
+    if engine != 'default' and importlib.util.find_spec(engine) is None:
+        test.skipTest(f'{engine} not installed')
+    trace = TraceFlowBase.__call__  # type: Callable[..., Any]
+    seen = {}  # type: dict[int, dict[str, Any]]
+
+    def spy(this: 'Any', packet: 'Any') -> 'Any':
+        seen[packet.index] = {key: value for key, value in packet.items()
+                              if key not in ('frame', 'header', 'payload')}
+        return trace(this, packet)
+
+    with tempfile.TemporaryDirectory() as tmp, warnings.catch_warnings(), \
+            mock.patch.object(TraceFlowBase, '__call__', spy):
+        warnings.simplefilter('ignore')
+        path = os.path.join(tmp, 'capture.pcap')
+        with open(path, 'wb') as file:
+            file.write(wire.pcap([(1, number, octets) for number, octets in enumerate(frames)]))
+        extractor = extract(fin=path, nofile=True, engine=engine, tcp=True, trace=True,
+                            trace_fout=os.path.join(tmp, 'trace'), trace_format='json')
+        try:
+            if extractor._exnam != engine:  # pylint: disable=protected-access
+                test.skipTest(f'{engine} did not run')
+            flows = [(flow.label, tuple(flow.index)) for flow in extractor.trace.tcp]
+        finally:
+            close_extractor(extractor)
+    return {'trace': seen, 'flows': flows}
+
+
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class PySharkTsharkTraceTests(unittest.TestCase):
+    """The PyShark engine traces what the default engine does, read by a real tshark.
+
+    Every capture is built here. Each test skips unless the PyShark engine runs.
+
+    """
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def agree(self, frames: 'list[bytes]') -> 'dict[str, Any]':
+        """Check PyShark traces ``frames`` as the default engine does, frame by frame."""
+        base = read_trace(self, 'default', frames)
+        seen = read_trace(self, 'pyshark', frames)
+        self.assertEqual(seen['trace'], base['trace'])
+        self.assertEqual(seen['flows'], base['flows'])
+        return base
+
+    def test_a_tcp_header_tshark_cannot_dissect_whole_is_skipped(self) -> None:
+        # #1611: one good flow, then a segment with each Data Offset, then the
+        # same segment cut at each octet of its header and at its end
+        segment = wire.tcp(b'hello', seq=101, ack=1, sport=50000)
+        for version in (4, 6):
+            with self.subTest(ip=version):
+                good = [tcp_frame(version, wire.tcp(b'', seq=100, syn=True)),
+                        tcp_frame(version, wire.tcp(b'hello', seq=101, ack=1)),
+                        tcp_frame(version, wire.tcp(b'', seq=106, ack=1, fin=True))]
+                offsets = [tcp_frame(version, segment[:12] + bytes([words << 4]) + segment[13:])
+                           for words in range(16)]
+                whole = tcp_frame(version, segment)
+                cuts = [whole[:len(whole) - len(segment) + octets] for octets in range(21)]
+                base = self.agree(good + offsets + cuts)
+                # frames 4-19 are Data Offsets 0-15, and 20-40 cuts at 0-20 octets
+                self.assertEqual(sorted(base['trace']), [1, 2, 3, *range(9, 20), 40])
+
+    def test_fragmented_tcp_is_traced_at_its_first_fragment(self) -> None:
+        # #1612: tshark traced it at the fragment that completes the datagram
+        for version in (4, 6):
+            with self.subTest(ip=version):
+                frames = []
+                for ident, sport in ((0x100, 40000), (0x101, 40001)):
+                    frames.append(tcp_frame(version, wire.tcp(b'', seq=100, syn=True, sport=sport)))
+                    frames += fragments(version, wire.tcp(wire.payload_pattern(60), seq=101, ack=1,
+                                                          sport=sport), ident)
+                base = self.agree(frames)
+                self.assertEqual([index for _, index in base['flows']], [(1, 2), (6, 7)])
+
+    def test_a_stream_around_fragmented_segments_is_traced_as_by_the_default_engine(self) -> None:
+        # #1612: with its IP reassembly off, tshark sizes a fragmented segment
+        # from its first fragment, so its sequence analysis flags a lost
+        # segment on the later frames of the stream. tcp_traceflow reads none
+        # of those analysis fields.
+        for version in (4, 6):
+            with self.subTest(ip=version):
+                frames = [
+                    tcp_frame(version, wire.tcp(b'', seq=100, syn=True)),
+                    tcp_frame(version, wire.tcp(b'', seq=500, ack=101, syn=True, sport=9, dport=40000),
+                              reverse=True),
+                    tcp_frame(version, wire.tcp(b'', seq=101, ack=501)),
+                    *fragments(version, wire.tcp(wire.payload_pattern(100), seq=101, ack=501), 0x100,
+                               size=32),
+                    tcp_frame(version, wire.tcp(b'', seq=501, ack=201, sport=9, dport=40000), reverse=True),
+                    tcp_frame(version, wire.tcp(b'abc', seq=201, ack=501)),
+                    tcp_frame(version, wire.tcp(b'', seq=501, ack=204, sport=9, dport=40000), reverse=True),
+                    *fragments(version, wire.tcp(wire.payload_pattern(100, seed=2), seq=204, ack=501), 0x101,
+                               size=32),
+                    tcp_frame(version, wire.tcp(b'xyz', seq=304, ack=501)),
+                    tcp_frame(version, wire.tcp(b'', seq=307, ack=501, fin=True)),
+                ]
+                base = self.agree(frames)
+                # every frame but the later fragments, 5-7 and 12-14
+                self.assertEqual(sorted(base['trace']), [1, 2, 3, 4, 8, 9, 10, 11, 15, 16])
 
 
 if __name__ == '__main__':

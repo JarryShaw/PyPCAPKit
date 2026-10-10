@@ -106,6 +106,29 @@ class PyShark(EngineBase['PySharkPacket']):
     #: event loop exists instead of quietly creating one.
     PYTHON_CEILING = (3, 14)
 
+    #: :program:`tshark` preferences :meth:`run` overrides, through
+    #: ``pyshark``'s ``override_prefs``: IPv4 and IPv6 reassembly off. tshark
+    #: reassembles fragments by default and dissects what the datagram carries
+    #: at the frame that completes it, so TCP was traced at the last fragment.
+    #: The default engine reads each frame as captured, TCP from a first
+    #: fragment (:issue:`1612`), and pcapkit's own reassembly is disabled on
+    #: this engine.
+    #:
+    #: Turning tshark's off also changes its TCP analysis, which is not
+    #: confined to fragments. Measured with tshark 4.6.9: tshark sizes a
+    #: fragmented segment from its first fragment alone, so its sequence
+    #: analysis sees a gap after it. Later frames of that stream, fragments or
+    #: not, then gain ``tcp.analysis.lost_segment``, and their other
+    #: ``tcp.analysis`` fields, ``tcp.completeness``, ``tcp.time_delta`` and
+    #: ``tcp.stream.*.contiguity_count`` change. Those fields reach the frame
+    #: records :func:`~pcapkit.toolkit.pyshark.packet2dict` builds. But
+    #: :func:`~pcapkit.toolkit.pyshark.tcp_traceflow` reads none of them, so
+    #: flow tracing is unaffected. The 23 captures under
+    #: :file:`examples/captures` carry no fragmented TCP. On them, every field
+    #: of every frame is the same either way, except the first and last
+    #: fragments of the one fragmented UDP datagram in :file:`ipv6.pcap`.
+    OVERRIDE_PREFS = {'ip.defragment': 'FALSE', 'ipv6.defragment': 'FALSE'}  # type: dict[str, str]
+
     ##########################################################################
     # Class methods.
     ##########################################################################
@@ -214,7 +237,8 @@ class PyShark(EngineBase['PySharkPacket']):
 
         This method assigns :attr:`self._expkg <PyShark._expkg>`
         as :mod:`pyshark` and :attr:`self._extmp <PyShark._extmp>`
-        as an iterator from :class:`pyshark.FileCapture`.
+        as an iterator from :class:`pyshark.FileCapture`, with
+        :program:`tshark`'s IP reassembly off (:attr:`OVERRIDE_PREFS`).
 
         The global header is parsed and dumped first, by
         :meth:`self.extractor.record_header <pcapkit.foundation.extraction.Extractor.record_header>`.
@@ -267,7 +291,8 @@ class PyShark(EngineBase['PySharkPacket']):
 
         # extract & analyse file
         logger.debug('pyshark: opening %s', ext._ifnm)
-        self._extmp = self._expkg.FileCapture(ext._ifnm, keep_packets=False)
+        self._extmp = self._expkg.FileCapture(ext._ifnm, keep_packets=False,
+                                              override_prefs=dict(self.OVERRIDE_PREFS))
 
     def read_frame(self) -> 'PySharkPacket':
         """Read frames with PyShark engine.

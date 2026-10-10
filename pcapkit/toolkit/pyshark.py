@@ -483,6 +483,36 @@ def _carrier(packet: 'Packet') -> 'tuple[Any, Any]':
     return ip, None
 
 
+def _has_fixed_header(tcp: 'Any') -> 'bool':
+    """Whether tshark dissected the whole fixed TCP header of a PyShark TCP layer.
+
+    Args:
+        tcp: PyShark TCP layer.
+
+    Returns:
+        Whether the layer carries ``tcp.urgent_pointer``.
+
+    Note:
+        The default engine traces a segment only if its 20-octet fixed header
+        (:rfc:`9293#section-3.1`) was captured and its Data Offset is at least
+        5 (:func:`pcapkit.toolkit.pcap.tcp_segment`). tshark omits fields in
+        both other cases, measured with tshark 4.6.9 (:issue:`1611`):
+
+        * a Data Offset below 5 stops the dissection at ``tcp.hdr_len``, so
+          ``tcp.ack`` and the ``tcp.flags`` fields are absent;
+        * a header cut at octet *k* keeps the fields that fit: no TCP layer
+          below 4, the ports only below 14, and no ``tcp.urgent_pointer``
+          below 20.
+
+        ``tcp.urgent_pointer`` covers octets 18 and 19, the last of the fixed
+        header. ``dissect_tcp`` in :file:`epan/dissectors/packet-tcp.c` adds
+        it unconditionally once the Data Offset check passes, in 2.6.0, 3.0.0
+        and 4.6.0, after every field :func:`tcp_traceflow` reads.
+
+    """
+    return 'urgent_pointer' in tcp.field_names
+
+
 def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | None':
     """Trace packet flow for TCP.
 
@@ -496,7 +526,8 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
         Data for TCP flow tracing.
 
         * If the ``packet`` can be used for TCP flow tracing. A packet can be reassembled
-          if it contains TCP layer, keyed by the IP layer that carries it -- in an
+          if it contains TCP layer with a whole fixed header (see
+          :func:`_has_fixed_header`), keyed by the IP layer that carries it -- in an
           IP-in-IP tunnel, the innermost (see :func:`_carrier`).
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
           flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.
@@ -512,7 +543,7 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
 
     """
     ip, tcp = _carrier(packet)
-    if ip is not None and tcp is not None:
+    if ip is not None and tcp is not None and _has_fixed_header(tcp):
 
         # NOTE: the link type is keyed on ``frame.encap_type`` -- Wireshark's
         # internal ``WTAP_ENCAP_*`` number -- through

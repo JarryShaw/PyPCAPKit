@@ -448,7 +448,8 @@ class ThirdPartyEngineTests(unittest.TestCase):
         engine = PyShark(extractor)
         with mock.patch.object(engine._expkg, 'FileCapture', return_value=capture) as file_capture:
             engine.run()
-        file_capture.assert_called_once_with('capture.pcap', keep_packets=False)
+        file_capture.assert_called_once_with('capture.pcap', keep_packets=False,
+                                             override_prefs=PyShark.OVERRIDE_PREFS)
         extractor.record_header.assert_called_once_with()
         self.assertFalse(extractor._flag_r)
         self.assertIsNone(extractor._reasm.ipv4)
