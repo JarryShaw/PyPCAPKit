@@ -37,6 +37,7 @@ from pcapkit.foundation.reassembly.reassembly import Reassembly, ReassemblyBase
 from pcapkit.foundation.traceflow import TraceFlowManager
 from pcapkit.foundation.traceflow.data import TraceFlowData
 from pcapkit.foundation.traceflow.traceflow import TraceFlow, TraceFlowBase
+from pcapkit.interface.registry import restore_shipped, restore_shipped_dumper, same_entry
 from pcapkit.utilities.exceptions import (CallableError, FileNotFound, FormatError, IterableError,
                                           RegistryError, UnsupportedCall, stacklevel)
 from pcapkit.utilities.logging import get_logger
@@ -93,93 +94,6 @@ __all__ = ['Extractor']
 logger = get_logger(__name__)
 
 _P = TypeVar('_P')
-
-
-def _same_entry(entry: 'Any', other: 'Any') -> 'bool':
-    """Tell whether two registry entries name the same class.
-
-    An entry is a class or a :class:`~pcapkit.corekit.module.ModuleDescriptor`.
-    Two descriptors are the same entry when they are equal, and a descriptor
-    and a class are when the descriptor names that class. The class is looked
-    up in :data:`sys.modules` rather than imported: a class someone holds has
-    its module loaded already, so a descriptor whose module is not loaded
-    cannot name it, and an optional engine that is not installed is never
-    imported to answer the question.
-
-    Arguments:
-        entry: registry entry
-        other: registry entry to compare against
-
-    Returns:
-        :data:`True` if both name the same class.
-
-    """
-    if entry is other:
-        return True
-    if isinstance(entry, ModuleDescriptor) and isinstance(other, ModuleDescriptor):
-        return entry == other
-    if isinstance(other, ModuleDescriptor):
-        entry, other = other, entry
-    if not isinstance(entry, ModuleDescriptor) or not isinstance(entry.name, str):
-        return False
-    module = sys.modules.get(entry.module)
-    return module is not None and getattr(module, entry.name, None) is other
-
-
-def _restore_shipped(registry: 'dict[str, Any]', key: 'str', shipped: 'Any', kind: 'str') -> 'None':
-    """Put the entry ``registry`` shipped with back under ``key``.
-
-    The public registrars call this when handed the built-in that shipped under
-    ``key``, so an override can be undone (:issue:`1363`). It stores the shipped
-    object itself, a descriptor if a descriptor shipped, and it is a silent
-    no-op when the incumbent already names the shipped class.
-
-    Arguments:
-        registry: registry to restore
-        key: registry key
-        shipped: entry the registry shipped with under ``key``
-        kind: entry kind, for the warning message
-
-    Warns:
-        RegistryWarning: If a different class is registered under ``key``; it
-            is overwritten.
-
-    """
-    incumbent = registry.get(key)
-    if incumbent is not None and _same_entry(shipped, incumbent):
-        return
-    if incumbent is not None:
-        warn(f'{kind} {key} already registered, overwriting', RegistryWarning)
-    registry[key] = shipped
-
-
-def _restore_shipped_dumper(registry: 'dict[str, Any]', format: 'str',  # pylint: disable=redefined-builtin
-                            shipped: 'tuple[Any, str | None]', ext: 'str') -> 'None':
-    """Put the dumper ``registry`` shipped with back under ``format``.
-
-    The ``__output__`` counterpart of :func:`_restore_shipped`: an entry is a
-    ``(dumper, ext)`` pair, so the shipped pair itself is stored when ``ext``
-    matches it, and the shipped dumper with the new ``ext`` otherwise. A
-    re-registration that only changes ``ext`` stays silent, as the dumper
-    registrars document.
-
-    Arguments:
-        registry: ``__output__`` registry to restore
-        format: format name
-        shipped: ``(dumper, ext)`` pair the registry shipped with under ``format``
-        ext: file extension
-
-    Warns:
-        RegistryWarning: If a different dumper is registered for ``format``;
-            it is overwritten.
-
-    """
-    incumbent = registry.get(format)
-    if incumbent is not None and not _same_entry(shipped[0], incumbent[0]):
-        warn(f'dumper {format} already registered, overwriting', RegistryWarning)
-    elif incumbent is not None and incumbent[1] == ext:
-        return
-    registry[format] = shipped if ext == shipped[1] else (shipped[0], ext)
 
 
 #: Engines whose library opens the input by *path*, ``Extractor._ifnm``, rather
@@ -526,8 +440,8 @@ class Extractor(Generic[_P]):
         shipped = cls._shipped_output.get(format)
         if isinstance(dumper, ModuleDescriptor) and (shipped is None or dumper != shipped[0]):
             dumper = dumper.klass
-        if shipped is not None and _same_entry(shipped[0], dumper):
-            _restore_shipped_dumper(cls.__output__, format, shipped, ext)
+        if shipped is not None and same_entry(shipped[0], dumper):
+            restore_shipped_dumper(cls.__output__, format, shipped, ext)
             return
         if not isinstance(dumper, type):
             raise RegistryError(f'dumper must be a class, not {dumper!r}')
@@ -579,8 +493,8 @@ class Extractor(Generic[_P]):
         shipped = cls._shipped_engine.get(name)
         if isinstance(engine, ModuleDescriptor) and engine != shipped:
             engine = engine.klass
-        if shipped is not None and _same_entry(shipped, engine):
-            _restore_shipped(cls.__engine__, name, shipped, 'engine')
+        if shipped is not None and same_entry(shipped, engine):
+            restore_shipped(cls.__engine__, name, shipped, 'engine')
             return
         if not isinstance(engine, type):
             raise RegistryError(f'engine must be a class, not {engine!r}')
@@ -665,8 +579,8 @@ class Extractor(Generic[_P]):
         shipped = cls._shipped_reassembly.get(protocol)
         if isinstance(reassembly, ModuleDescriptor) and reassembly != shipped:
             reassembly = reassembly.klass
-        if shipped is not None and _same_entry(shipped, reassembly):
-            _restore_shipped(cls.__reassembly__, protocol, shipped, 'reassembly')
+        if shipped is not None and same_entry(shipped, reassembly):
+            restore_shipped(cls.__reassembly__, protocol, shipped, 'reassembly')
             return
         if not isinstance(reassembly, type):
             raise RegistryError(f'reassembly must be a class, not {reassembly!r}')
@@ -746,8 +660,8 @@ class Extractor(Generic[_P]):
         shipped = cls._shipped_traceflow.get(protocol)
         if isinstance(traceflow, ModuleDescriptor) and traceflow != shipped:
             traceflow = traceflow.klass
-        if shipped is not None and _same_entry(shipped, traceflow):
-            _restore_shipped(cls.__traceflow__, protocol, shipped, 'traceflow')
+        if shipped is not None and same_entry(shipped, traceflow):
+            restore_shipped(cls.__traceflow__, protocol, shipped, 'traceflow')
             return
         if not isinstance(traceflow, type):
             raise RegistryError(f'traceflow must be a class, not {traceflow!r}')

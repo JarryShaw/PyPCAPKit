@@ -243,14 +243,14 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
             ext: file extension
 
         """
-        from pcapkit.foundation.extraction import (  # pylint: disable=import-outside-toplevel
-            _restore_shipped_dumper, _same_entry)
+        from pcapkit.interface.registry import (  # pylint: disable=import-outside-toplevel
+            restore_shipped_dumper, same_entry)
 
         shipped = cls._shipped_output.get(format)
         if isinstance(dumper, ModuleDescriptor) and (shipped is None or dumper != shipped[0]):
             dumper = dumper.klass
-        if shipped is not None and _same_entry(shipped[0], dumper):
-            _restore_shipped_dumper(cls.__output__, format, shipped, ext)
+        if shipped is not None and same_entry(shipped[0], dumper):
+            restore_shipped_dumper(cls.__output__, format, shipped, ext)
             return
         if not isinstance(dumper, type):
             raise RegistryError(f'dumper must be a class, not {dumper!r}')
