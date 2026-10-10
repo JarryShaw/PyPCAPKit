@@ -7,17 +7,24 @@ The PCAP engine passes all three from the input's global header to
 :class:`~pcapkit.dumpkit.pcap.PCAPIO` writes them back instead of the
 :class:`~pcapkit.protocols.misc.pcap.header.Header` defaults.
 
+:mod:`pcapkit` is imported inside each test, after
+:func:`~tests._support.reimport_once_per_class`, not at module load. Under
+plain :mod:`unittest` a sibling class leaves its own re-import in
+:data:`sys.modules`; the extractor resolves ``PCAPIO`` from there, and a
+load-time ``extract`` would test it against a stale ``DumperBase`` and hand
+the writer a :class:`dict` instead of the frame's info (#1523).
+
 """
 from __future__ import annotations
 
+import importlib
 import os
 import struct
 import tempfile
 import unittest
 import warnings
 
-from pcapkit.interface import extract
-from tests._support import sample_path
+from tests._support import purge_modules, reimport_once_per_class, sample_path
 
 #: Values that differ from every :class:`~pcapkit.protocols.misc.pcap.header.Header`
 #: default (``0``, ``0`` and ``262144``).
@@ -25,6 +32,8 @@ THISZONE, SIGFIGS, SNAPLEN = -3600, 7, 1514
 
 
 def _extract(fin: str, fout: str, **kwargs):
+    from pcapkit.interface import extract
+
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
         return extract(fin=fin, fout=fout, nofile=False, format='pcap', **kwargs)
@@ -44,6 +53,7 @@ def _with_header_fields(data: bytes) -> bytes:
 class PCAPOutputHeaderFieldsTests(unittest.TestCase):
 
     def setUp(self) -> None:
+        reimport_once_per_class(self)
         self.tmp = tempfile.TemporaryDirectory()  # pylint: disable=consider-using-with
         self.addCleanup(self.tmp.cleanup)
         self.input = os.path.join(self.tmp.name, 'in.pcap')
@@ -52,6 +62,14 @@ class PCAPOutputHeaderFieldsTests(unittest.TestCase):
 
     def test_whole_capture_round_trips_byte_identically(self) -> None:
         extractor = _extract(self.input, os.path.join(self.tmp.name, 'out'))
+        self.assertEqual(_read(extractor.output), _read(self.input))
+
+    def test_a_newer_import_left_by_a_sibling_is_the_one_used(self) -> None:
+        # What a sibling class leaves behind under plain unittest (#1523).
+        purge_modules(['pcapkit'])
+        live = importlib.import_module('pcapkit.foundation.extraction').Extractor
+        extractor = _extract(self.input, os.path.join(self.tmp.name, 'out'))
+        self.assertIs(type(extractor), live)
         self.assertEqual(_read(extractor.output), _read(self.input))
 
     def test_split_mode_headers_carry_the_fields(self) -> None:
