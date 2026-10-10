@@ -327,7 +327,8 @@ DEPENDENCY_GATE_EXCLUSIONS = {
             'engine can start.\n\n'
             "#751's dedicated engine-tests job now takes this: it installs PCAP_CT and a "
             'system libpcap (apt-get libpcap0.8) on its own PCAP_CT matrix cell, across '
-            'the same 3.10-3.14 (plus non-blocking 3.15) matrix -- rebuilt per #849 as one '
+            'the same 3.10-3.14 (plus non-blocking 3.15, main pushes only) matrix -- '
+            'rebuilt per #849 as one '
             'venv per (Python version, engine) pair rather than the one shared venv #751 '
             'first landed, so PCAP_CT is kept apart from PyPCAP by construction now, not '
             'merely by convention -- since pypcap and pcap-ct both install a top-level '
@@ -390,7 +391,7 @@ DEPENDENCY_GATE_EXCLUSIONS = {
             "side effect of installing everything together. #849's rebuild removes that "
             'shared venv: each matrix.engine cell now installs only "test" plus its own '
             'engine extra and runs only that engine\'s own explicit TEST_PATHS -- '
-            'tests/toolkit/test_dpkt_unit.py and five siblings, never tests/vendor/ -- so '
+            'tests/toolkit/test_scapy_unit.py and four siblings, never tests/vendor/ -- so '
             'no cell reaches these gates at all any more, let alone installs vendor for '
             'them. This is not a *new* gap this guard reports, because '
             ':func:`dependency_gate_gaps` only counts a job that reaches a gate without '
@@ -546,7 +547,7 @@ DEPENDENCY_GATE_EXCLUSIONS = {
             "one shared venv, closing this gap as a side effect: all 5 methods ran "
             "wherever engine-tests did. #849's rebuild removes that shared venv -- each "
             'matrix.engine cell now installs exactly one engine\'s own extra, so no cell '
-            'installs all three together any more, and none of the six explicit '
+            'installs all three together any more, and none of the five explicit '
             'TEST_PATHS lists names test_runtime_engines.py at all, so engine-tests no '
             'longer reaches this gate either. Like the HAS_SCAPY and HAS_VENDOR_DEPS '
             'entries above, this does not surface as a wider Gap -- a job that stops '
@@ -601,7 +602,7 @@ DEPENDENCY_GATE_EXCLUSIONS = {
             'tests/vendor/test_vendor_reg_apptype_generator_unit.py -- the ignore-shape '
             'leg and the whole-suite one. engine-tests used to be a third, back when its '
             "one shared venv mirrored test's ignore-shape exactly; #849's rebuild to one "
-            "explicit TEST_PATHS list per matrix.engine cell means none of the six now "
+            "explicit TEST_PATHS list per matrix.engine cell means none of the five now "
             'names tests/vendor/ at all, so engine-tests no longer reaches this gate and '
             'has dropped out of this entry\'s dark dict accordingly -- not widened or '
             'narrowed against a gap that is still there, but genuinely gone, the case '
@@ -1319,7 +1320,7 @@ def _engine_matrix_variants(name: 'str', section: 'str') -> 'Optional[tuple[Job,
     in its pytest step. Modelling that as one :class:`Job` with every engine's
     extra and a ``'whole-suite'`` selection -- the reading a single static
     install-line/selection pair would produce -- is exactly the false
-    confidence #745 exists to catch: it would credit the DPKT cell with
+    confidence #745 exists to catch: it would credit the Scapy cell with
     PyPCAP's install and credit every cell with reaching every other engine's
     tests. One :class:`Job` per engine, sharing this job's ``name``, is what
     :func:`dependency_gate_gaps`'s ``(flag, job.name)`` aggregation expects --

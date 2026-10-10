@@ -1646,7 +1646,7 @@ class DependencyGateCoverageTests(unittest.TestCase):
         # collect tests/vendor/ at all -- the same reason they are absent from
         # HAS_VENDOR_DEPS above. engine-tests (#849) no longer reaches it
         # either: each matrix.engine cell now runs an explicit TEST_PATHS list
-        # and none of the six names tests/vendor/ -- see the HAS_MYPY
+        # and none of the five names tests/vendor/ -- see the HAS_MYPY
         # exclusion's own reason for why that is a real, disclosed change
         # rather than a mistake here.
         for job in ('integration', 'pypcap-parity', 'engine-tests'):
@@ -1706,7 +1706,7 @@ class DependencyGateCoverageTests(unittest.TestCase):
             'the ignore-shape leg and the whole-suite one collect tests/project/; '
             'integration and pypcap-parity select by fixture tier and never reach it, '
             'the same reason they are absent from HAS_MYPY above. engine-tests (#849) '
-            'no longer reaches it either -- none of its six explicit TEST_PATHS lists '
+            'no longer reaches it either -- none of its five explicit TEST_PATHS lists '
             'names tests/project/, the same change that dropped it out of HAS_MYPY above')
 
         gaps = {(gap.flag, gap.job) for gap in _dependency_gates.dependency_gate_gaps()}
@@ -2020,7 +2020,8 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
         -- and, separately, engine-tests no longer reaches
         test_runtime_engines.py regardless (see the HAS_RUNTIME exclusion),
         so there is no longer a DPKT-via-engine-tests gap for this doctoring
-        to reopen. Four jobs, not five.
+        to reopen. Four jobs, not five. (#1538 later dropped that DPKT cell
+        outright: it ran only test_dpkt_unit.py, which ``test`` runs too.)
 
         """
         text = _dependency_gates.WORKFLOW.read_text(encoding='utf-8')
@@ -2337,20 +2338,20 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
 
         Commenting out one engine's ``EXTRA=`` arm -- rather than renaming it, which the
         new matrix-list-vs-case-arms equality check above would catch first, for a
-        different reason -- leaves DPKT declared in the ``engine:`` list and still
-        present in ``engine_paths`` (so the equality check sees the same six engines on
+        different reason -- leaves Scapy declared in the ``engine:`` list and still
+        present in ``engine_paths`` (so the equality check sees the same five engines on
         both sides and stays quiet), but with no ``EXTRA=`` arm of its own: exactly the
         shape the per-engine loop's own check exists for.
 
         """
-        doctored = doctored_workflow(self, 'DPKT) EXTRA=DPKT;', '# DPKT) EXTRA=DPKT;')
+        doctored = doctored_workflow(self, 'Scapy) EXTRA=Scapy;', '# Scapy) EXTRA=Scapy;')
 
         with self.assertRaises(AssertionError) as ctx:
             _dependency_gates.pytest_jobs(doctored)
 
         message = str(ctx.exception)
         self.assertIn('engine-tests', message)
-        self.assertIn('DPKT', message)
+        self.assertIn('Scapy', message)
 
     def test_a_commented_out_test_paths_arm_does_not_silently_win(self) -> None:
         """The relocated blocker the second cross-review flagged, not just commented on.
@@ -2364,17 +2365,20 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
         commented-out arm from being read as a live one.
 
         """
+        live = ('PyShark) TEST_PATHS="tests/toolkit/test_pyshark_unit.py '
+                'tests/foundation/engines/test_pyshark_engine.py" ;;')
         doctored = doctored_workflow(
             self,
-            'DPKT) TEST_PATHS="tests/toolkit/test_dpkt_unit.py" ;;',
-            'DPKT) TEST_PATHS="tests/toolkit/test_dpkt_unit.py" ;;\n'
-            '            # DPKT) TEST_PATHS="tests/toolkit/test_pypcap_unit.py" ;;',
+            live,
+            live + '\n'
+            '            # PyShark) TEST_PATHS="tests/toolkit/test_pypcap_unit.py" ;;',
         )
 
         jobs = _dependency_gates.pytest_jobs(doctored)
-        dpkt_jobs = [job for job in jobs if job.name == 'engine-tests' and 'DPKT' in job.extras]
-        self.assertEqual(len(dpkt_jobs), 1)
-        self.assertEqual(dpkt_jobs[0].paths, ('tests/toolkit/test_dpkt_unit.py',))
+        pyshark_jobs = [job for job in jobs if job.name == 'engine-tests' and 'PyShark' in job.extras]
+        self.assertEqual(len(pyshark_jobs), 1)
+        self.assertEqual(pyshark_jobs[0].paths, ('tests/toolkit/test_pyshark_unit.py',
+                                                 'tests/foundation/engines/test_pyshark_engine.py'))
 
     def test_the_undoctored_workflow_produces_no_unexplained_gap(self) -> None:
         """The control: the tests above fail for the doctoring, not by default."""

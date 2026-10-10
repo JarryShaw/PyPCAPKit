@@ -443,8 +443,8 @@ jobs:
   #                        ever starts building, the cell fails loudly.
   #
   # One job per engine loops over the six interpreters, each in a fresh venv,
-  # rather than one job per cell (6 Pythons x 6 engines): the queue, not the
-  # runners, is the bottleneck, and 36 jobs would each pay checkout, setup and
+  # rather than one job per cell (6 Pythons x 5 engines): the queue, not the
+  # runners, is the bottleneck, and 30 jobs would each pay checkout, setup and
   # apt for a minute of work. One job per *engine* rather than per Python
   # because the engine is what varies the environment: the apt packages
   # are per engine (installed once per job instead of six times), and pcap-ct
@@ -459,17 +459,17 @@ jobs:
   # the job summary.
   #
   # 3.15 is experimental-prerelease per #845's ruling: present so a regression
-  # is visible, but never blocking. It runs as its own step with step-level
-  # `continue-on-error: true`, so a 3.15 failure shows as a failed step and an
-  # error annotation while the job -- and `required-checks`, which reads this
-  # job's result -- stays green. The 3.10-3.14 cells share one step, and any
-  # one of them failing fails the job.
+  # is visible, but never blocking; since #1538 it runs on main pushes only.
+  # It is its own step with step-level `continue-on-error: true`, so a 3.15
+  # failure shows as a failed step and an error annotation while the job --
+  # and `required-checks`, which reads its result -- stays green. The 3.10-3.14
+  # cells share one step, and any one of them failing fails the job.
   #
-  # Scoped deliberately out (#845): per-engine integration
-  # coverage (needs regenerated captures, so it stays in aggregate in
-  # `integration` and `pypcap-parity`), and the multi-engine HAS_RUNTIME gate
-  # plus the incidental crypto/NGAP/vendor coverage the pre-#845 shared venv
-  # carried.
+  # Scoped deliberately out (#845): per-engine integration coverage (needs
+  # regenerated captures, so it stays in aggregate in `integration` and
+  # `pypcap-parity`), the multi-engine HAS_RUNTIME gate and the incidental
+  # crypto/NGAP/vendor coverage of the pre-#845 shared venv. #1538 dropped the
+  # DPKT cell: it ran only test_dpkt_unit.py, which `test` runs with DPKT.
   engine-tests:
     name: Engines (${{ matrix.engine }})
     if: ${{ inputs.gate-only != true && needs.changes.outputs.code != 'false' }}
@@ -486,7 +486,6 @@ jobs:
       fail-fast: false
       matrix:
         engine:
-          - DPKT
           - Scapy
           - PyShark
           - PyPCAPFile
@@ -731,7 +730,6 @@ jobs:
           # RAW_PKGS is an array, not a string, so PCAP_CT's two-package case
           # ("pcap-ct libpcap") reaches pip as two argv entries.
           case "$ENGINE" in
-            DPKT) EXTRA=DPKT; RAW_PKGS=(dpkt); IMPORT_NAME=dpkt ;;
             Scapy) EXTRA=Scapy; RAW_PKGS=(scapy); IMPORT_NAME=scapy ;;
             PyShark) EXTRA=PyShark; RAW_PKGS=(pyshark); IMPORT_NAME=pyshark ;;
             PyPCAPFile) EXTRA=PyPCAPFile; RAW_PKGS=(pypcapfile); IMPORT_NAME=pcapfile ;;
@@ -787,7 +785,6 @@ jobs:
           fi
 
           case "$ENGINE" in
-            DPKT) TEST_PATHS="tests/toolkit/test_dpkt_unit.py" ;;
             Scapy) TEST_PATHS="tests/toolkit/test_scapy_unit.py tests/foundation/engines/test_scapy_engine.py tests/protocols/transport/test_sctp_unit.py" ;;
             PyShark) TEST_PATHS="tests/toolkit/test_pyshark_unit.py tests/foundation/engines/test_pyshark_engine.py" ;;
             PyPCAPFile) TEST_PATHS="tests/toolkit/test_pypcapfile_unit.py tests/foundation/engines/test_pypcapfile_engine.py" ;;
@@ -834,8 +831,9 @@ jobs:
             exit 1
           fi
 
-      # Non-blocking by #845's ruling -- see this job's comment above.
+      # Non-blocking by #845, main pushes only by #1538 -- see this job's comment.
       - name: Run the 3.15 cell (experimental, non-blocking)
+        if: ${{ github.event_name != 'pull_request' }}
         shell: bash
         continue-on-error: true
         run: |
@@ -1191,10 +1189,12 @@ jobs:
   # maintainer's call to make separately from landing it.
   unittest-ordering:
     name: Plain unittest ordering (${{ matrix.label || matrix.leg }})
-    # Not on pull requests: it is not a required check, and its 11 cells
-    # would be a sixth of every PR push's jobs. It still runs on every push
-    # to main, which is the run that tests what actually lands.
-    if: ${{ inputs.gate-only != true && github.event_name != 'pull_request' }}
+    # Every push to main and no PR (#1052 item H): not required, and its 11
+    # cells would be a sixth of each PR push's jobs. `needs: [test]` (#1538)
+    # queues them behind this push's own legs; `!cancelled()` still runs them
+    # if `test` fails, so a red cell still fails the run that gates publishing.
+    if: ${{ !cancelled() && inputs.gate-only != true && github.event_name != 'pull_request' }}
+    needs: [test]
     runs-on: ubuntu-latest
     # 45, not 20: `timeout-minutes` is job-level, so it has to cover
     # checkout/setup/install (~39s) as well as the leg itself, and this is
