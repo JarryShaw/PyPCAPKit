@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 
     from pcapkit.const.http.method import Method as Enum_Method
     from pcapkit.const.http.status_code import StatusCode as Enum_StatusCode
+    from pcapkit.corekit.infoclass import OrderedMultiInfo
     from pcapkit.corekit.multidict import OrderedMultiDict
     from pcapkit.protocols.application.httpv1 import Type as HTTP_Type
 
@@ -30,7 +31,7 @@ class HTTP(Protocol):
     #: HTTP receipt.
     receipt: 'Header'
     #: HTTP header.
-    header: 'OrderedMultiDict[str, str]'
+    header: 'OrderedMultiInfo[str, str]'
     #: HTTP body.
     body: 'Any'
     #: HTTP field lines as received, CRLF excluded and ``obs-fold``

@@ -30,7 +30,7 @@ import dictdumper.plist
 import dictdumper.tree
 
 from pcapkit.corekit.infoclass import Info
-from pcapkit.corekit.multidict import InfoDict, MultiDict, OrderedMultiDict
+from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
 from pcapkit.corekit.sentinels import NoValueType, NullType
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.exceptions import UnsupportedCall
@@ -393,8 +393,71 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
             return json.dumps(format(key, ''))[1:-1]
         return key
 
+    def fields(info: 'Info | MultiDict[Any, Any]') -> 'dict[Any, Any]':
+        """Return the fields of ``info`` as the :class:`dict` the writer is handed.
+
+        Args:
+            info: The fields, as an :class:`~pcapkit.corekit.infoclass.Info` or
+                as the :class:`~pcapkit.corekit.multidict.OrderedMultiDict` its
+                :meth:`~pcapkit.corekit.infoclass.Info.to_dict` returns.
+
+        Returns:
+            One entry per field, in order, with its key escaped as
+            :func:`escape_key` does. A field held once maps to its value; a field
+            held more than once, such as a repeated IPv6 extension header, maps
+            to the :class:`list` of all its values, in order (GitHub issue
+            :issue:`1484`). The values are left as they are, so each comes back
+            through :meth:`DictDumper.object_hook` when written.
+
+        """
+        pairs = list(info.items(multi=True))
+        counts = collections.Counter(key for key, _ in pairs)
+        result = {}  # type: dict[Any, Any]
+        for key, val in pairs:
+            if counts[key] > 1:
+                result.setdefault(escape_key(key), []).append(val)
+            else:
+                # NOTE: read by indexing, so that a model overriding it is
+                # honoured -- the traceflow and reassembly models resolve a
+                # deferred ``packet`` there.
+                result[escape_key(key)] = info[key]
+        return result
+
+    #: Whether the writer is handed the fields of an
+    #: :class:`~pcapkit.corekit.infoclass.Info` rather than the object itself:
+    #: every writer but the ones :mod:`pcapkit.dumpkit` defines for internal
+    #: use, i.e. :class:`~pcapkit.dumpkit.pcap.PCAPIO`, which takes the frame,
+    #: and :class:`~pcapkit.dumpkit.null.NotImplementedIO`.
+    takes_fields = not issubclass(output, DumperBase) or issubclass(output, Dumper)
+
     class DictDumper(output):
         """Customised :class:`~dictdumper.dumper.Dumper` object."""
+
+        if takes_fields:
+            def __call__(self, value: 'Any', name: 'Optional[str]' = None) -> 'Any':
+                """Dump a new block.
+
+                Args:
+                    self: Dumper instance.
+                    value: Content to be dumped.
+                    name: Name of the block.
+
+                Returns:
+                    The dumper itself.
+
+                Notes:
+                    An :class:`~pcapkit.corekit.infoclass.Info`, or the
+                    :class:`~pcapkit.corekit.multidict.MultiDict` its
+                    :meth:`~pcapkit.corekit.infoclass.Info.to_dict` returns, is
+                    written as the :class:`dict` :func:`fields` makes of it, so
+                    that a repeated field keeps every value. The writer walks
+                    the block it is handed without calling
+                    :meth:`object_hook` on it, only on what it holds.
+
+                """
+                if isinstance(value, (Info, MultiDict)):
+                    value = fields(value)
+                return super().__call__(value, name)
 
         #: Objects :meth:`_append_fallback` is expanding, by :func:`id` -- the
         #: one being written and every one enclosing it.
@@ -427,17 +490,23 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                 :func:`escape_key` instead. An
                 :class:`~pcapkit.corekit.multidict.OrderedMultiDict` becomes a
                 :class:`list` of single-key :class:`dict` objects, each of
-                which comes back through the :class:`dict` branch. An
-                :class:`~pcapkit.corekit.multidict.InfoDict`, the fields of an
-                :class:`~pcapkit.corekit.infoclass.Info`, takes that branch
-                directly, so it is written with one value per key.
+                which comes back through the :class:`dict` branch, and so
+                does an :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo`,
+                the option lists an :class:`~pcapkit.corekit.infoclass.Info`
+                holds. An :class:`~pcapkit.corekit.infoclass.Info` itself
+                becomes the :class:`dict` of its fields that :func:`fields`
+                returns, holding every value of a repeated field.
 
             """
             if isinstance(o, decimal.Decimal):
                 result = str(o)  # type: Any
             elif isinstance(o, datetime.timedelta):
                 result = o.total_seconds()
-            elif isinstance(o, (Info, Schema)):
+            elif isinstance(o, Info) and not isinstance(o, MultiDict):
+                # NOTE: a MultiInfo or OrderedMultiInfo, though an Info, is
+                # an option list, and is written by the branches below.
+                result = fields(o)
+            elif isinstance(o, Schema):
                 result = o.to_dict()
             elif isinstance(o, (ipaddress.IPv4Address, ipaddress.IPv6Address,
                                 ipaddress.IPv4Network, ipaddress.IPv6Network)):
@@ -448,7 +517,7 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                 result = '<NULL>'
             elif isinstance(o, NoValueType):
                 result = '<NO_VALUE>'
-            elif isinstance(o, OrderedMultiDict) and not isinstance(o, InfoDict):
+            elif isinstance(o, OrderedMultiDict):
                 # NOTE: one single-key mapping per entry, in insertion order --
                 # i.e. wire order for the option lists -- since a mapping keyed
                 # by name could only gather the repeats of a key under its first
@@ -459,7 +528,7 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                     {render_enum(key) if isinstance(key, (enum.Enum, aenum.Enum)) else key: val}
                     for key, val in o.items(multi=True)
                 ]
-            elif isinstance(o, MultiDict) and not isinstance(o, InfoDict):
+            elif isinstance(o, MultiDict):
                 # NOTE: a :class:`MultiDict` keeps no order across keys, only
                 # among the values of each, so grouping by key loses nothing.
                 temp = collections.defaultdict(list)  # type: DefaultDict[str, list[Any]]

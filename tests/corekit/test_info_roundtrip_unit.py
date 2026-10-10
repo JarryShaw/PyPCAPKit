@@ -18,10 +18,15 @@ annotations and must come back:
   :class:`~pcapkit.protocols.data.data.Data` with ``__short_read__`` (#1465), every
   PCAP-NG block with ``__truncated_raw__`` (#1475).
 
-``to_dict()`` must also be an :class:`~pcapkit.corekit.multidict.InfoDict` at
-every level. :class:`InfoMechanicsTests` covers the shapes a synthesised
-instance does not: a key renamed because it shadows a method, ``Optional``
-nesting, and repeated nested values.
+``to_dict()`` must also be a plain
+:class:`~pcapkit.corekit.multidict.OrderedMultiDict` at every level, and the
+instance must hold no mutable multi-mapping: every
+:class:`~pcapkit.corekit.multidict.MultiDict` value is a
+:class:`~pcapkit.corekit.infoclass.MultiInfo` or
+:class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` (#1484).
+:class:`InfoMechanicsTests` covers the shapes a synthesised instance does not: a
+key renamed because it shadows a method, ``Optional`` nesting, and repeated
+nested values.
 
 A failing case is a defect and goes in ``KNOWN_FAILURES`` (see
 :mod:`tests.corekit._roundtrip`). Nothing imports :mod:`pcapkit` at module
@@ -132,22 +137,54 @@ def _structure(info: 'Any') -> 'Any':
 
 
 def _plain_dicts(value: 'Any', path: 'str' = '') -> 'list[str]':
-    """Paths in a ``to_dict()`` result of every mapping that should be an InfoDict.
+    """Paths in a ``to_dict()`` result of every mapping that is not a plain multi-mapping.
 
-    A nested :class:`Info` exports as an InfoDict. A
-    :class:`~pcapkit.corekit.multidict.MultiDict` held as a field value -- a
-    PCAP-NG block's ``records``, say -- is a value, not an export, and is kept.
+    A nested :class:`Info` exports as an
+    :class:`~pcapkit.corekit.multidict.OrderedMultiDict`, and so does an
+    :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo`; a
+    :class:`~pcapkit.corekit.infoclass.MultiInfo` exports as a
+    :class:`~pcapkit.corekit.multidict.MultiDict`. Neither ``*Info`` type, nor a
+    plain :obj:`dict`, may be left in the export.
 
     """
-    from pcapkit.corekit.multidict import InfoDict, MultiDict
+    from pcapkit.corekit.infoclass import MultiInfo, OrderedMultiInfo, _OrderedMultiDict
+    from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
 
-    if not isinstance(value, InfoDict):
+    if type(value) is not _OrderedMultiDict:
         return [f'{path or "<top>"}: {type(value).__module__}.{type(value).__qualname__}']
     found = []  # type: list[str]
     for key, item in value.items(multi=True):
-        if isinstance(item, InfoDict) or (isinstance(item, dict) and not isinstance(item, MultiDict)):
+        if isinstance(item, (MultiInfo, OrderedMultiInfo)) or (isinstance(item, dict) and not isinstance(item, MultiDict)):
+            found.append(f'{path}.{key}: {type(item).__module__}.{type(item).__qualname__}')
+        elif isinstance(item, OrderedMultiDict):
             found.extend(_plain_dicts(item, f'{path}.{key}'))
     return found
+
+
+def _mutable(info: 'Any') -> 'list[str]':
+    """Keys of ``info`` holding a mutable :class:`~pcapkit.corekit.multidict.MultiDict`."""
+    from pcapkit.corekit.infoclass import MultiInfo, OrderedMultiInfo
+    from pcapkit.corekit.multidict import MultiDict
+
+    return [key for key, value in info.items(multi=True)
+            if isinstance(value, MultiDict) and not isinstance(value, (MultiInfo, OrderedMultiInfo))]
+
+
+def canonical(value: 'Any') -> 'Any':
+    """``value`` with every multi-mapping in it turned into its class and pairs, recursively.
+
+    The exports are compared through this rather than with ``==``: an
+    :class:`~pcapkit.corekit.multidict.OrderedMultiDict` compares its values
+    with ``!=``, which for a nested one is the ``__ne__`` of :obj:`dict` and
+    compares the internal buckets, so two equal exports with a nested
+    :class:`Info` compare unequal.
+
+    """
+    from pcapkit.corekit.multidict import MultiDict
+
+    if isinstance(value, MultiDict):
+        return (type(value).__qualname__, [(key, canonical(item)) for key, item in value.items(multi=True)])
+    return value
 
 
 def check(info: 'Any') -> 'Outcome':
@@ -158,7 +195,10 @@ def check(info: 'Any') -> 'Outcome':
         return Outcome('TO_DICT', describe(exc))
     plain = _plain_dicts(exported)
     if plain:
-        return Outcome('TO_DICT', f'not an InfoDict: {plain}')
+        return Outcome('TO_DICT', f'not a plain OrderedMultiDict: {plain}')
+    mutable = _mutable(info)
+    if mutable:
+        return Outcome('TYPE', f'mutable multi-mapping held under {mutable!r}')
     try:
         rebuilt = type(info).from_dict(exported)
     except Exception as exc:  # pylint: disable=broad-except
@@ -169,7 +209,7 @@ def check(info: 'Any') -> 'Outcome':
         return Outcome('MULTI', f'{list(rebuilt.items(multi=True))!r} != {list(info.items(multi=True))!r}')
     if _structure(rebuilt) != _structure(info):
         return Outcome('TYPE', f'{_structure(rebuilt)!r} != {_structure(info)!r}')
-    if rebuilt.to_dict() != exported or list(rebuilt.to_dict().items(multi=True)) != list(exported.items(multi=True)):
+    if canonical(rebuilt.to_dict()) != canonical(exported):
         return Outcome('TO_DICT', 'to_dict() of the rebuilt instance differs')
     return OK
 

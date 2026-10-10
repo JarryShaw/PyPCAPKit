@@ -6,9 +6,10 @@ keyed the extension headers by name, so a second header of the same type
 overwrote the first and the dict rebuild silently came back shorter --
 Destination Options, Destination Options, UDP rebuilt 56 of 64 octets.
 
-``to_dict`` now returns an :class:`~pcapkit.corekit.multidict.InfoDict`: the
-:obj:`dict` interface, and so every dump, sees the first value of each key, and
-``items(multi=True)`` yields every header in wire order for the rebuild.
+``to_dict`` returns an :class:`~pcapkit.corekit.multidict.OrderedMultiDict`
+(#1484): indexing sees the first value of each key, and ``items(multi=True)``
+yields every header in wire order for the rebuild. The dumpers write every
+header too.
 
 Every case builds its own octets and reads no capture. Classes are imported
 inside each test, after :func:`~tests._support.reimport_once_per_class`.
@@ -65,12 +66,18 @@ CHAINS = {
 }
 
 
-def plain(value):  # type: ignore[no-untyped-def]
-    """``value`` with every :class:`InfoDict` in it turned into the :obj:`dict` of its first values."""
-    from pcapkit.corekit.multidict import InfoDict
+def canonical(value):  # type: ignore[no-untyped-def]
+    """``value`` with every multi-mapping in it turned into its class and pairs, recursively.
 
-    if isinstance(value, InfoDict):
-        return {key: plain(val) for key, val in value.items()}
+    Exports are compared through this: an
+    :class:`~pcapkit.corekit.multidict.OrderedMultiDict` compares its values
+    with ``!=``, which for a nested one compares its internal buckets.
+
+    """
+    from pcapkit.corekit.multidict import MultiDict
+
+    if isinstance(value, MultiDict):
+        return (type(value).__qualname__, [(key, canonical(val)) for key, val in value.items(multi=True)])
     return value
 
 
@@ -123,26 +130,24 @@ class TestToDictRepeatedExtensionHeader(unittest.TestCase):
                                  [ext.data for ext in ip6.extension_headers.values()])
 
     def test_to_dict_keeps_every_header_in_wire_order(self) -> None:
-        from pcapkit.corekit.multidict import InfoDict
+        from pcapkit.corekit.multidict import OrderedMultiDict
         from pcapkit.protocols.internet.ipv6 import IPv6
 
         for name in CHAINS:
             with self.subTest(chain=name):
                 ip6 = self.frame(name)[IPv6]
                 dict_ = ip6.info.to_dict()
-                self.assertIsInstance(dict_, InfoDict)
-                self.assertIsInstance(dict_, dict)
+                self.assertIsInstance(dict_, OrderedMultiDict)
 
-                parsed = [ext.info.to_dict() for ext in ip6.extension_headers.values()]
-                held = [val for _, val in dict_.items(multi=True) if val in parsed]
+                parsed = [canonical(ext.info.to_dict()) for ext in ip6.extension_headers.values()]
+                held = [canonical(val) for _, val in dict_.items(multi=True) if canonical(val) in parsed]
                 self.assertEqual(held, parsed)
 
-                # The dict interface, and so every dump, sees the first of each.
+                # Indexing sees the first of each.
                 first = {}  # type: dict[str, object]
                 for key, val in dict_.items(multi=True):
                     first.setdefault(key, val)
-                self.assertEqual(dict(dict_.items()), first)
-                self.assertEqual(json.dumps(dict_, default=str), json.dumps(plain(dict_), default=str))
+                self.assertEqual({key: dict_[key] for key in dict_}, first)
 
     def test_info_from_dict_keeps_the_repeats(self) -> None:
         from pcapkit.protocols.data.internet.ipv6 import IPv6 as Data_IPv6
@@ -155,33 +160,26 @@ class TestToDictRepeatedExtensionHeader(unittest.TestCase):
                 rebuilt = Data_IPv6.from_dict(dict_)
                 self.assertEqual([key for key, _ in rebuilt.items(multi=True)],
                                  [key for key, _ in dict_.items(multi=True)])
-                self.assertEqual(rebuilt.to_dict(), dict_)
-                self.assertEqual(list(rebuilt.to_dict().items(multi=True)), list(dict_.items(multi=True)))
+                self.assertEqual(canonical(rebuilt.to_dict()), canonical(dict_))
                 self.assertEqual(rebuilt, info)
 
-    def test_info_dict_behaves_like_a_dict(self) -> None:
+    def test_to_dict_is_a_plain_ordered_multi_dict(self) -> None:
         from pcapkit.corekit.infoclass import Info
-        from pcapkit.corekit.multidict import InfoDict, OrderedMultiDict
+        from pcapkit.corekit.multidict import OrderedMultiDict
 
         dict_ = Info(a=1, b=Info(c=2)).to_dict()
-        self.assertEqual(dict_, {'a': 1, 'b': {'c': 2}})
-        self.assertEqual({'b': {'c': 2}, 'a': 1}, dict_)
-        self.assertFalse(dict_ != {'a': 1, 'b': {'c': 2}})
-        self.assertNotEqual(dict_, {'a': 1})
-        self.assertEqual(dict(dict_), {'a': 1, 'b': {'c': 2}})
-        self.assertEqual({**dict_}, {'a': 1, 'b': {'c': 2}})
-        self.assertEqual(dict_.keys() & {'a', 'z'}, {'a'})
-        self.assertEqual(list(dict_.values())[0], 1)
-        self.assertEqual(len(dict_.items()), 2)
+        self.assertIsInstance(dict_, OrderedMultiDict)
+        self.assertIsInstance(dict_['b'], OrderedMultiDict)
+        self.assertEqual(dict_.to_dict(flat=True)['a'], 1)
+        self.assertEqual(list(dict_), ['a', 'b'])
 
         repeated = Info.from_dict(OrderedMultiDict([('a', 1), ('b', 2), ('a', 3)])).to_dict()
         self.assertEqual(list(repeated.items(multi=True)), [('a', 1), ('b', 2), ('a', 3)])
         self.assertEqual(repeated['a'], 1)
-        self.assertNotEqual(repeated, {'a': 1, 'b': 2})
-        self.assertTrue(repeated != {'a': 1, 'b': 2})
+        self.assertEqual(repeated.getlist('a'), [1, 3])
         for clone in (copy.copy(repeated), copy.deepcopy(repeated), pickle.loads(pickle.dumps(repeated))):  # nosec: B301
             with self.subTest(clone=clone):
-                self.assertIs(type(clone), InfoDict)
+                self.assertIs(type(clone), type(repeated))
                 self.assertEqual(list(clone.items(multi=True)), [('a', 1), ('b', 2), ('a', 3)])
 
     def test_info_copy_keeps_its_own_repeats(self) -> None:
@@ -199,22 +197,24 @@ class TestToDictRepeatedExtensionHeader(unittest.TestCase):
                 self.assertEqual(len(list(clone.items(multi=True))), len(before) + 1)
                 self.assertEqual(list(info.items(multi=True)), before)
 
-    def test_dumper_writes_the_dict_one_value_per_key(self) -> None:
+    def test_dumper_writes_every_header(self) -> None:
         import dictdumper.json
 
         from pcapkit.dumpkit.common import make_dumper
 
-        dict_ = self.frame('dst-route-dst').info.to_dict()
+        frame = self.frame('dst-route-dst')
         outputs = []
         with tempfile.TemporaryDirectory() as tmp:
-            for index, value in enumerate((dict_, plain(dict_))):
+            for index, value in enumerate((frame.info, frame.info.to_dict())):
                 path = os.path.join(tmp, f'{index}.json')
                 make_dumper(dictdumper.json.JSON)(path)(value, name='Frame 1')
                 with open(path, encoding='utf-8') as file:
-                    outputs.append(file.read())
-        self.assertEqual(outputs[0], outputs[1])
-        self.assertIn('"ipv6": {', outputs[0])
-
+                    outputs.append(json.load(file))
+        ipv6 = outputs[0]['Frame 1']['ethernet']['ipv6']
+        self.assertEqual(len(ipv6['opts']), 2)
+        self.assertIsInstance(ipv6['route'], dict)
+        # Handed the export, the dumper writes the top level the same way.
+        self.assertEqual(list(outputs[1]['Frame 1']), list(outputs[0]['Frame 1']))
 
 if __name__ == '__main__':
     unittest.main()

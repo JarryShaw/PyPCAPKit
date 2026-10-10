@@ -670,7 +670,9 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         reader.assert_called_once_with(6)
         self.assertEqual(ext_data.next, TransType.UDP)
         self.assertEqual(ext_data.length, 8)
-        self.assertIs(ext_data.options, empty_options)
+        # NOTE: held as the immutable OrderedMultiInfo of it (#1484).
+        self.assertEqual(type(ext_data.options).__name__, 'OrderedMultiInfo')
+        self.assertEqual(list(ext_data.options.items(multi=True)), list(empty_options.items(multi=True)))
 
         with mock.patch.object(proto, read_options, return_value=empty_options):
             with mock.patch.object(protocol_cls, '_decode_next_layer', return_value='decoded') as decode:

@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from pcapkit.const.hip.suite import Suite
     from pcapkit.const.hip.transport import Transport
     from pcapkit.const.reg.transtype import TransType
-    from pcapkit.corekit.multidict import OrderedMultiDict
+    from pcapkit.corekit.infoclass import OrderedMultiInfo
 
 __all__ = [
     'HIP', 'Control',
@@ -124,7 +124,7 @@ class HIP(Protocol):
 
     if TYPE_CHECKING:
         #: HIP parameters.
-        parameters: 'OrderedMultiDict[Enum_Parameter, Parameter]'
+        parameters: 'OrderedMultiInfo[Enum_Parameter, Parameter]'
 
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', packet_fixed: 'int', version: 'int', reserved: 'int', version_fixed: 'int', chksum: 'bytes', control: 'Control', shit: 'int', rhit: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 

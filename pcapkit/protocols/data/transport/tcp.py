@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from pcapkit.const.tcp.flags import Flags as TCP_Flags
     from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
     from pcapkit.const.tcp.option import Option as OptionNumber
-    from pcapkit.corekit.multidict import OrderedMultiDict
+    from pcapkit.corekit.infoclass import OrderedMultiInfo
 
     IPAddress = Union[IPv4Address, IPv6Address]
 
@@ -99,7 +99,7 @@ class TCP(Protocol):
 
     if TYPE_CHECKING:
         #: TCP options.
-        options: 'OrderedMultiDict[OptionNumber, Option]'
+        options: 'OrderedMultiInfo[OptionNumber, Option]'
         #: Octets of the option area after the End of Option List option.
         padding: 'bytes'
         #: Connection control flags.

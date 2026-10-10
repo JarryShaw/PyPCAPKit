@@ -1359,11 +1359,18 @@ class PCAPNGUnitTests(unittest.TestCase):
         tls_entries = {TLSKeyLabel.CLIENT_RANDOM: OrderedMultiDict([(b'random', b'secret')])}
         tls = TLSKeyLog(data='CLIENT_RANDOM 00 11')
         object.__setattr__(tls, 'entries', tls_entries)
-        self.assertIs(pcapng._read_secrets_tls(tls, block=block).entries, tls_entries)
+        # NOTE: held as immutable OrderedMultiInfo copies (#1484).
+        tls_read = pcapng._read_secrets_tls(tls, block=block).entries
+        self.assertEqual(list(tls_read), list(tls_entries))
+        self.assertEqual({type(entry).__name__ for entry in tls_read.values()}, {'OrderedMultiInfo'})
+        self.assertEqual([list(entry.items(multi=True)) for entry in tls_read.values()],
+                         [list(entry.items(multi=True)) for entry in tls_entries.values()])
         wg_entries = OrderedMultiDict([(WireGuardKeyLabel.PRESHARED_KEY, b'key')])
         wireguard = WireGuardKeyLog(data='PRESHARED_KEY = a2V5')
         object.__setattr__(wireguard, 'entries', wg_entries)
-        self.assertIs(pcapng._read_secrets_wireguard(wireguard, block=block).entries, wg_entries)
+        wg_read = pcapng._read_secrets_wireguard(wireguard, block=block).entries
+        self.assertEqual(type(wg_read).__name__, 'OrderedMultiInfo')
+        self.assertEqual(list(wg_read.items(multi=True)), list(wg_entries.items(multi=True)))
         self.assertEqual(pcapng._read_secrets_zigbee_nwk(
             ZigBeeNWKKey(key=b'\x01' * 16, panid=0x1234), block=block,
         ).pan_id, 0x1234)

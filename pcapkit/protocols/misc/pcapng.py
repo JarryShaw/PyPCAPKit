@@ -40,6 +40,7 @@ from pcapkit.const.pcapng.verdict_type import VerdictType as Enum_VerdictType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.enum import EnumLookup
 from pcapkit.corekit.fields.strings import DecodedString
+from pcapkit.corekit.infoclass import OrderedMultiInfo
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.version import VersionInfo
@@ -2498,7 +2499,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         data = Data_SystemdJournalExportBlock(
             type=header.type,
             length=schema.length,
-            data=() if kept else tuple(entries),  # type: ignore[arg-type]
+            # NOTE: each entry as an OrderedMultiInfo, which ``Info`` does not
+            # do for a mapping held in a tuple (:issue:`1484`).
+            data=() if kept else tuple(OrderedMultiInfo(entry) for entry in entries),  # type: ignore[arg-type]
         )
         if kept:
             data.__update__([('entry_raw', entries[0])])
@@ -4110,7 +4113,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         """
         secrets = Data_TLSKeyLog(
-            entries=schema.entries,
+            # NOTE: each label's entries as an OrderedMultiInfo, which ``Info``
+            # does not do for a mapping held in a dict (:issue:`1484`).
+            entries={label: OrderedMultiInfo(entry) for (label, entry) in schema.entries.items()},
         )
         # NOTE: the log text is kept as well, since :attr:`entries` holds
         # neither its comments nor the order of its lines, and a rebuild writes
@@ -6520,7 +6525,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                 return Schema_TLSKeyLog(
                     data=text,
                 )
-            entries = secrets.entries
+            # NOTE: each an OrderedMultiInfo, which is an OrderedMultiDict.
+            entries = cast('dict[Enum_TLSKeyLabel, OrderedMultiDict[bytes, bytes]]', secrets.entries)
 
         if entries is None:
             entries = {}

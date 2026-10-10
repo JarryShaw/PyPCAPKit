@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from pcapkit.const.sctp.chunk import Chunk as ChunkType
     from pcapkit.const.sctp.parameter import Parameter as ParameterType
     from pcapkit.const.sctp.payload_protocol_identifier import PayloadProtocolIdentifier
+    from pcapkit.corekit.infoclass import OrderedMultiInfo
     from pcapkit.corekit.multidict import OrderedMultiDict
 
     IPAddress = Union[IPv4Address, IPv6Address]
@@ -447,7 +448,7 @@ class INITChunk(Chunk):
     #: Initial transmission sequence number.
     init_tsn: 'int'
     #: Optional and variable-length parameters.
-    parameters: 'OrderedMultiDict[ParameterType, Parameter]'
+    parameters: 'OrderedMultiInfo[ParameterType, Parameter]'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'ChunkType', length: 'int', flags: 'bytes', init_tag: 'int', a_rwnd: 'int', outbound_streams: 'int', inbound_streams: 'int', init_tsn: 'int', parameters: 'OrderedMultiDict[ParameterType, Parameter]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
@@ -470,7 +471,7 @@ class INITACKChunk(Chunk):
     #: Initial transmission sequence number.
     init_tsn: 'int'
     #: Optional and variable-length parameters.
-    parameters: 'OrderedMultiDict[ParameterType, Parameter]'
+    parameters: 'OrderedMultiInfo[ParameterType, Parameter]'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'ChunkType', length: 'int', flags: 'bytes', init_tag: 'int', a_rwnd: 'int', outbound_streams: 'int', inbound_streams: 'int', init_tsn: 'int', parameters: 'OrderedMultiDict[ParameterType, Parameter]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
@@ -506,7 +507,7 @@ class HeartbeatChunk(Chunk):
     #: Raw chunk flags, kept as received.
     flags: 'bytes'
     #: Heartbeat information parameters.
-    parameters: 'OrderedMultiDict[ParameterType, Parameter]'
+    parameters: 'OrderedMultiInfo[ParameterType, Parameter]'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'ChunkType', length: 'int', flags: 'bytes', parameters: 'OrderedMultiDict[ParameterType, Parameter]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
@@ -519,7 +520,7 @@ class HeartbeatACKChunk(Chunk):
     #: Raw chunk flags, kept as received.
     flags: 'bytes'
     #: Heartbeat information parameters.
-    parameters: 'OrderedMultiDict[ParameterType, Parameter]'
+    parameters: 'OrderedMultiInfo[ParameterType, Parameter]'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'ChunkType', length: 'int', flags: 'bytes', parameters: 'OrderedMultiDict[ParameterType, Parameter]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
@@ -532,7 +533,7 @@ class AbortChunk(Chunk):
     #: Chunk flags.
     flags: 'TBitFlags'
     #: Zero or more error causes.
-    error: 'OrderedMultiDict[CauseCode, ErrorCause]'
+    error: 'OrderedMultiInfo[CauseCode, ErrorCause]'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'ChunkType', length: 'int', flags: 'TBitFlags', error: 'OrderedMultiDict[CauseCode, ErrorCause]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
@@ -569,7 +570,7 @@ class ErrorChunk(Chunk):
     #: Raw chunk flags, kept as received.
     flags: 'bytes'
     #: One or more error causes.
-    error: 'OrderedMultiDict[CauseCode, ErrorCause]'
+    error: 'OrderedMultiInfo[CauseCode, ErrorCause]'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'ChunkType', length: 'int', flags: 'bytes', error: 'OrderedMultiDict[CauseCode, ErrorCause]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
@@ -623,7 +624,7 @@ class SCTP(Protocol):
     #: Checksum, as a CRC32c over the whole packet with this field zeroed.
     chksum: 'bytes'
     #: Chunks.
-    chunks: 'OrderedMultiDict[ChunkType, Chunk]'
+    chunks: 'OrderedMultiInfo[ChunkType, Chunk]'
 
     if TYPE_CHECKING:
         #: Octets captured after the last whole chunk, present only when there

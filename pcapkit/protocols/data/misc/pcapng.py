@@ -55,6 +55,7 @@ if TYPE_CHECKING:
     from pcapkit.const.pcapng.secrets_type import SecretsType as Enum_SecretsType
     from pcapkit.const.pcapng.verdict_type import VerdictType as Enum_VerdictType
     from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+    from pcapkit.corekit.infoclass import MultiInfo, OrderedMultiInfo
     from pcapkit.corekit.multidict import OrderedMultiDict
     from pcapkit.corekit.version import VersionInfo
     from pcapkit.protocols.misc.pcapng import (PacketDirection, PacketReception, TLSKeyLabel,
@@ -155,7 +156,7 @@ class SectionHeaderBlock(PCAPNG):
     #: Section length.
     section_length: 'int'
     #: Options.
-    options: 'OrderedMultiDict[Enum_OptionType, Option]'
+    options: 'OrderedMultiInfo[Enum_OptionType, Option]'
 
     if TYPE_CHECKING:
         #: Octets after ``opt_endofopt``, as captured; present only when the
@@ -355,7 +356,7 @@ class InterfaceDescriptionBlock(PCAPNG):
     #: Snap length.
     snaplen: 'int'
     #: Options.
-    options: 'OrderedMultiDict[Enum_OptionType, Option]'
+    options: 'OrderedMultiInfo[Enum_OptionType, Option]'
 
     if TYPE_CHECKING:
         #: Reserved octets, as captured; present only when they are not all
@@ -494,7 +495,7 @@ class EnhancedPacketBlock(PCAPNG):
     #: Original packet length.
     original_len: 'int'
     #: Options.
-    options: 'OrderedMultiDict[Enum_OptionType, Option]'
+    options: 'OrderedMultiInfo[Enum_OptionType, Option]'
 
     if TYPE_CHECKING:
         #: Padding of the packet data to 32 bits, as captured; present only when
@@ -652,9 +653,9 @@ class NameResolutionBlock(PCAPNG):
     """Data model for PCAP-NG Name Resolution Block (NRB)."""
 
     #: Records.
-    records: 'OrderedMultiDict[Enum_RecordType, NameResolutionRecord]'
+    records: 'OrderedMultiInfo[Enum_RecordType, NameResolutionRecord]'
     #: Options.
-    options: 'OrderedMultiDict[Enum_OptionType, Option]'
+    options: 'OrderedMultiInfo[Enum_OptionType, Option]'
 
     def __post_init__(self) -> 'None':
         """Post-initialization handling."""
@@ -677,9 +678,9 @@ class NameResolutionBlock(PCAPNG):
         #: option area holds any (:issue:`1437`).
         padding_opts: 'bytes'
         #: Name resolution mapping (IP address -> name).
-        mapping: 'MultiDict[IPv4Address | IPv6Address, str]'
+        mapping: 'MultiInfo[IPv4Address | IPv6Address, str]'
         #: Name resolution mapping (name -> IP address).
-        reverse_mapping: 'MultiDict[str, IPv4Address | IPv6Address]'
+        reverse_mapping: 'MultiInfo[str, IPv4Address | IPv6Address]'
 
         def __init__(self, type: 'Enum_BlockType', length: 'int',
                      records: 'OrderedMultiDict[Enum_RecordType, NameResolutionRecord]',
@@ -780,7 +781,7 @@ class InterfaceStatisticsBlock(PCAPNG):
     #: Timestamp as in UNIX epoch (in seconds).
     timestamp_epoch: 'Decimal'
     #: Options.
-    options: 'OrderedMultiDict[Enum_OptionType, Option]'
+    options: 'OrderedMultiInfo[Enum_OptionType, Option]'
 
     if TYPE_CHECKING:
         #: Octets after ``opt_endofopt``, as captured; present only when the
@@ -796,7 +797,7 @@ class SystemdJournalExportBlock(PCAPNG):
     """Data model for PCAP-NG :manpage:`systemd(1)` Journal Export Block."""
 
     #: Journal entry.
-    data: 'tuple[OrderedMultiDict[str, str | bytes], ...]'
+    data: 'tuple[OrderedMultiInfo[str, str | bytes], ...]'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_BlockType', length: 'int',
@@ -823,7 +824,7 @@ class TLSKeyLog(DSBSecrets):
     """Data model for TLS key log DSB secrets."""
 
     #: TLS key log entries.
-    entries: 'dict[TLSKeyLabel, OrderedMultiDict[bytes, bytes]]'
+    entries: 'dict[TLSKeyLabel, OrderedMultiInfo[bytes, bytes]]'
 
     if TYPE_CHECKING:
         #: TLS key log text as the block carries it, comments and line order
@@ -838,7 +839,7 @@ class WireGuardKeyLog(DSBSecrets):
     """Data model for WireGuard key DSB secrets."""
 
     #: WireGuard Key Log entries.
-    entries: 'OrderedMultiDict[WireGuardKeyLabel, bytes]'
+    entries: 'OrderedMultiInfo[WireGuardKeyLabel, bytes]'
 
     if TYPE_CHECKING:
         #: WireGuard key log text as the block carries it, comments included.
@@ -887,7 +888,7 @@ class DecryptionSecretsBlock(PCAPNG):
     #: Secrets data.
     secrets_data: 'DSBSecrets'
     #: Options.
-    options: 'OrderedMultiDict[Enum_OptionType, Option]'
+    options: 'OrderedMultiInfo[Enum_OptionType, Option]'
 
     if TYPE_CHECKING:
         #: Padding of the secrets data to 32 bits, as captured; present only when
@@ -995,7 +996,7 @@ class PacketBlock(PCAPNG):
     #: Original packet length.
     original_len: 'int'
     #: Options.
-    options: 'OrderedMultiDict[Enum_OptionType, Option]'
+    options: 'OrderedMultiInfo[Enum_OptionType, Option]'
 
     if TYPE_CHECKING:
         #: Padding of the packet data to 32 bits, as captured; present only when
