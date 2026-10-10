@@ -400,7 +400,11 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    disabled -- with an :class:`~pcapkit.utilities.warnings.AttributeWarning` --
    when requested; IPv4 and TCP reassembly and TCP flow tracing remain
    available. PCAP-NG is rejected with a
-   :exc:`~pcapkit.utilities.exceptions.FormatError`.
+   :exc:`~pcapkit.utilities.exceptions.FormatError`. `PyPCAPFile`_ 0.12.0 drops
+   every record of a big-endian savefile, every record from a zero-length one
+   on, and a truncated final record, so the engine reads the records itself,
+   into `PyPCAPFile`_'s own packet objects -- see
+   :meth:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile._read_records`.
 
 .. autoclass:: pcapkit.foundation.engines.pypcapfile.PyPCAPFile
    :no-members:
@@ -427,6 +431,7 @@ Internal Definitions
 --------------------
 
 .. automethod:: pcapkit.foundation.engines.pypcapfile.PyPCAPFile._get_decoder
+.. automethod:: pcapkit.foundation.engines.pypcapfile.PyPCAPFile._read_records
 .. automethod:: pcapkit.foundation.engines.pypcapfile.PyPCAPFile._decode
 
 Backend Detection
