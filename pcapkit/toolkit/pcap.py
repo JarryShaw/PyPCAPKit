@@ -118,7 +118,9 @@ def tcp_segment(frame: 'ProtocolBase') -> 'Optional[TCPSegment]':
         (:rfc:`9293#section-3.1`) if the payload of the innermost IP layer is a
         :class:`~pcapkit.protocols.misc.raw.Raw` the TCP parser rejected, of
         protocol TCP, from a datagram that is not a later fragment, with at
-        least those 20 octets captured; else :data:`None`.
+        least those 20 octets captured; else :data:`None`. A segment past
+        :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT` is kept raw
+        without being parsed, not rejected, so it is not read (:issue:`1610`).
 
     Note:
         A capture snapped inside the TCP header leaves a Data Offset that runs
@@ -154,7 +156,10 @@ def tcp_segment(frame: 'ProtocolBase') -> 'Optional[TCPSegment]':
     raw = ip.payload
     # NOTE: a Raw with no error is one the caller asked for, by stopping the
     # dissection at a ``layer`` or ``protocol``, not a segment TCP rejected.
+    # Nor is one past FRAME_LAYER_LIMIT, which carries an error all the same:
+    # the frame is not dissected past it, so its TCP is not read (#1610).
     if (not isinstance(raw, Raw) or raw.info.error is None
+            or raw._past_layer_limit  # pylint: disable=protected-access
             or ip_info.protocol != Enum_TransType.TCP):
         return None
 

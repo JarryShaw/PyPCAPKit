@@ -417,6 +417,33 @@ Two traps for anyone benchmarking this library. ``reassembly=True`` and
 only the switch measures nothing; and timing several capture shapes in one
 process inflates them by up to 73%, so each shape wants its own interpreter.
 
+Recursive Dissection, With a Depth Limit
+----------------------------------------
+
+**Decided for now, open to revisit.** Each layer dissects the next from inside
+its own parse, so dissecting a frame recurses once per layer, at 9 to 12 Python
+frames a layer. Deep nesting -- IP in IP, stacked 802.1Q tags, long chains of
+IPv6 extension headers -- used to exhaust the recursion limit and leave the rest
+of the frame raw, silently, at a depth that varied with the interpreter and the
+caller's stack (:issue:`1604`, :issue:`1610`).
+
+Recursion stays, with a counted bound:
+:data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT` caps a frame at 64 layers,
+and :data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT` caps one
+chain of extension headers at 32. Past either, the rest stays
+:class:`~pcapkit.protocols.misc.raw.Raw`, with one
+:exc:`~pcapkit.utilities.warnings.ProtocolWarning`. Raising
+:func:`sys.setrecursionlimit` instead was rejected: it is process-wide, and the
+cut-off would still move with the caller's stack. The bound fits with room to
+spare, but not unlimited room. Under :program:`pytest` at the default limit of
+1,000, the costliest 64-layer frame needs a limit of 834 on Python 3.11 and 756
+on 3.14. That frame is IPv4 carrying a chain of 32 extension headers, then IPv4
+in IPv4 carrying 28 more, then TCP.
+
+An iterative model would need no such bound: a loop that dissects one layer and
+takes the next from it. It changes how every protocol hands over its payload,
+so it is a design of its own, and may replace the recursion in a future release.
+
 Logging Integration
 -------------------
 
