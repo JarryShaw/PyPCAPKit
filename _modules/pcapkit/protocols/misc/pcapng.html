@@ -240,6 +240,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/loopback.html">BSD Loopback Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
@@ -920,12 +921,20 @@
 
 <span class="sd">       * - Index</span>
 <span class="sd">         - Protocol</span>
+<span class="sd">       * - :attr:`pcapkit.const.reg.linktype.LinkType.NULL`</span>
+<span class="sd">         - :class:`pcapkit.protocols.link.loopback.Loopback`</span>
 <span class="sd">       * - :attr:`pcapkit.const.reg.linktype.LinkType.ETHERNET`</span>
 <span class="sd">         - :class:`pcapkit.protocols.link.ethernet.Ethernet`</span>
+<span class="sd">       * - :attr:`pcapkit.const.reg.linktype.LinkType.LOOP`</span>
+<span class="sd">         - :class:`pcapkit.protocols.link.loopback.Loopback`</span>
 <span class="sd">       * - :attr:`pcapkit.const.reg.linktype.LinkType.IPV4`</span>
 <span class="sd">         - :class:`pcapkit.protocols.internet.ipv4.IPv4`</span>
 <span class="sd">       * - :attr:`pcapkit.const.reg.linktype.LinkType.IPV6`</span>
 <span class="sd">         - :class:`pcapkit.protocols.internet.ipv6.IPv6`</span>
+
+<span class="sd">    :attr:`pcapkit.const.reg.linktype.LinkType.RAW` has no entry of its own:</span>
+<span class="sd">    its data is dispatched as ``IPV4`` or ``IPV6`` by the version nibble of</span>
+<span class="sd">    its first octet, see :meth:`_dispatch_linktype`.</span>
 
 <span class="sd">    The class currently supports parsing of the following block types, which</span>
 <span class="sd">    are registered in the :attr:`self.__block__ &lt;pcapkit.protocols.misc.pcapng.PCAPNG.__block__&gt;`</span>
@@ -1190,7 +1199,9 @@
     <span class="n">__proto__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw'</span><span class="p">,</span> <span class="s1">'Raw'</span><span class="p">),</span>
         <span class="p">{</span>
+            <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">NULL</span><span class="p">:</span>     <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.link'</span><span class="p">,</span> <span class="s1">'Loopback'</span><span class="p">),</span>
             <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ETHERNET</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.link'</span><span class="p">,</span> <span class="s1">'Ethernet'</span><span class="p">),</span>
+            <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">LOOP</span><span class="p">:</span>     <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.link'</span><span class="p">,</span> <span class="s1">'Loopback'</span><span class="p">),</span>
             <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV4</span><span class="p">:</span>     <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet'</span><span class="p">,</span> <span class="s1">'IPv4'</span><span class="p">),</span>
             <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV6</span><span class="p">:</span>     <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.internet'</span><span class="p">,</span> <span class="s1">'IPv6'</span><span class="p">),</span>
         <span class="p">},</span>
@@ -2616,7 +2627,11 @@
 <span class="sd">            We also added a new key ``protocols`` to ``dict_`` to store the</span>
 <span class="sd">            protocol chain of the current packet (frame).</span>
 
+<span class="sd">            ``proto`` is dispatched as :meth:`_dispatch_linktype` says, so</span>
+<span class="sd">            ``LINKTYPE_RAW`` data is read as IPv4 or IPv6 (:issue:`1502`).</span>
+
 <span class="sd">        """</span>
+        <span class="n">proto</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dispatch_linktype</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span>
         <span class="n">next_</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ProtocolBase'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_import_next_layer</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">))</span>  <span class="c1"># type: ignore[misc,call-arg,redundant-cast]</span>
         <span class="n">info</span><span class="p">,</span> <span class="n">chain</span> <span class="o">=</span> <span class="n">next_</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">next_</span><span class="o">.</span><span class="n">protochain</span>
 
@@ -2634,6 +2649,42 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_next</span> <span class="o">=</span> <span class="n">next_</span>  <span class="c1"># pylint: disable=attribute-defined-outside-init</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_protos</span> <span class="o">=</span> <span class="n">chain</span>  <span class="c1"># pylint: disable=attribute-defined-outside-init</span>
         <span class="k">return</span> <span class="n">dict_</span></div>
+
+
+<div class="viewcode-block" id="PCAPNG._dispatch_linktype">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._dispatch_linktype">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_dispatch_linktype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[int]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Link type a packet block's data is dispatched under.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            proto: link type of the interface the block was captured on</span>
+<span class="sd">            length: valid (*non-padding*) length</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            For :attr:`LinkType.RAW &lt;pcapkit.const.reg.linktype.LinkType.RAW&gt;`</span>
+<span class="sd">            data whose first octet carries IP version 4 or 6,</span>
+<span class="sd">            :attr:`LinkType.IPV4 &lt;pcapkit.const.reg.linktype.LinkType.IPV4&gt;` or</span>
+<span class="sd">            :attr:`LinkType.IPV6 &lt;pcapkit.const.reg.linktype.LinkType.IPV6&gt;`;</span>
+<span class="sd">            otherwise ``proto``.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            As :meth:`Frame._dispatch_linktype</span>
+<span class="sd">            &lt;pcapkit.protocols.misc.pcap.frame.Frame._dispatch_linktype&gt;` does</span>
+<span class="sd">            for PCAP: ``LINKTYPE_RAW`` (101) data is IPv4 or IPv6 by its version</span>
+<span class="sd">            nibble, an entry registered under ``RAW`` itself is used as it</span>
+<span class="sd">            stands, and data of any other version is kept as</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.raw.Raw` (:issue:`1502`).</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">proto</span> <span class="o">!=</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">RAW</span> <span class="ow">or</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">RAW</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__proto__</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">proto</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_payload</span><span class="p">()[:</span><span class="n">length</span><span class="p">]</span>
+        <span class="n">version</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span> <span class="k">if</span> <span class="n">data</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV4</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV6</span>
+        <span class="k">return</span> <span class="n">proto</span></div>
 
 
 <div class="viewcode-block" id="PCAPNG._read_block_unknown">

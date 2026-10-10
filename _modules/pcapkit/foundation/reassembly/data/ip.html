@@ -240,6 +240,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/loopback.html">BSD Loopback Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
@@ -610,14 +611,17 @@
     <span class="c1">#:</span>
     <span class="c1">#: :attr:`Buffer.RCVBT &lt;pcapkit.foundation.reassembly.data.ip.Buffer.RCVBT&gt;`</span>
     <span class="c1">#: only records receipt in 8-octet blocks, coarser than the octet</span>
-    <span class="c1">#: granularity a conflict needs. Every fragment but the last is required</span>
-    <span class="c1">#: to be block-aligned (and :attr:`Packet.fo` is *always* a multiple of 8,</span>
-    <span class="c1">#: being wire-encoded in 8-octet units), so the only block that can be</span>
-    <span class="c1">#: partially real is the one holding the final fragment's own tail -- and</span>
-    <span class="c1">#: a range reported here never extends past</span>
+    <span class="c1">#: granularity a conflict needs, and an octet is compared only if its</span>
+    <span class="c1">#: block is marked. :attr:`Packet.fo` is *always* a multiple of 8, being</span>
+    <span class="c1">#: wire-encoded in 8-octet units, and only the final fragment marks a</span>
+    <span class="c1">#: partial last block, so the only marked block that can be partially real</span>
+    <span class="c1">#: is the one holding the final fragment's own tail -- and a range reported</span>
+    <span class="c1">#: here never extends past</span>
     <span class="c1">#: :attr:`Buffer.TDL &lt;pcapkit.foundation.reassembly.data.ip.Buffer.TDL&gt;`</span>
     <span class="c1">#: for exactly that reason, even though a whole ``RCVBT`` block straddling</span>
-    <span class="c1">#: it reads as "received". See</span>
+    <span class="c1">#: it reads as "received". Any other partial last block -- a non-final,</span>
+    <span class="c1">#: truncated or clipped fragment's -- is left unmarked, so a later fragment</span>
+    <span class="c1">#: that overwrites its octets records no conflict. See</span>
     <span class="c1">#: :meth:`IP._detect_conflicts &lt;pcapkit.foundation.reassembly.ip.IP._detect_conflicts&gt;`.</span>
     <span class="n">conflict</span><span class="p">:</span> <span class="s1">'tuple[tuple[int, int], ...]'</span>
 

@@ -240,6 +240,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/link/loopback.html">BSD Loopback Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/link/s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
@@ -509,7 +510,16 @@
 <span class="sd">   :exc:`~pcapkit.utilities.warnings.AttributeWarning` of its own, once per</span>
 <span class="sd">   capture. Either warning follows the default engine's own rules for where it</span>
 <span class="sd">   finds TCP, read off the raw headers, with one stated exception for a</span>
-<span class="sd">   malformed tunnelled frame (see :func:`_upper_layer`).</span>
+<span class="sd">   malformed tunnelled frame (see :func:`_upper_layer`). IPv4 carried in IPv6</span>
+<span class="sd">   (4in6) still reaches :func:`ipv4_reassembly`, which the default engine</span>
+<span class="sd">   gives the first IPv4 layer of a frame (see :func:`_ipv4_in_ipv6`), and TCP</span>
+<span class="sd">   behind AH or an IPv6 extension header inside IPv4 is read past them (see</span>
+<span class="sd">   :func:`_transport`).</span>
+
+<span class="sd">   `PyPCAPFile`_ checks neither that an IPv4 header was captured whole nor its</span>
+<span class="sd">   options, and the default engine rejects a header that fails either check, so</span>
+<span class="sd">   such a header is left out of reassembly and flow tracing alike (see</span>
+<span class="sd">   :func:`_ipv4_accepted`).</span>
 
 <span class="sd">   Note also that `PyPCAPFile`_ decoders *replace* the payload bytes of the layer</span>
 <span class="sd">   they decode. :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile` therefore</span>
@@ -523,6 +533,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">binascii</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ctypes</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">struct</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
@@ -536,7 +547,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">IP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TCP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv4</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4</span> <span class="k">as</span> <span class="n">Protocol_IPv4</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">jumbo_payload_length</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">Protocol_TCP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">warn</span>
 
@@ -572,6 +585,26 @@
 
 <span class="c1">#: Length of the fixed IPv6 header, :rfc:`8200#section-3`.</span>
 <span class="n">IPV6_HEADER_LEN</span> <span class="o">=</span> <span class="mi">40</span>
+
+<span class="c1">#: Length of the fixed part of an IP Authentication Header (AH), before its</span>
+<span class="c1">#: Integrity Check Value, :rfc:`4302#section-2`. A Payload Length of ``0``</span>
+<span class="c1">#: declares a shorter header, which the default engine rejects.</span>
+<span class="n">AH_HEADER_LEN</span> <span class="o">=</span> <span class="mi">12</span>
+
+<span class="c1">#: IP protocol numbers of the headers :func:`_past_extension_headers` reads</span>
+<span class="c1">#: past inside IPv4, on to the protocol each one's Next Header field names, as</span>
+<span class="c1">#: the default engine does: it dispatches IPv4's protocol through the registry</span>
+<span class="c1">#: IPv6 uses (:attr:`Internet.__proto__</span>
+<span class="c1">#: &lt;pcapkit.protocols.internet.internet.Internet.__proto__&gt;`), and each of these</span>
+<span class="c1">#: parsers then decodes what its Next Header names. That is AH and the IPv6</span>
+<span class="c1">#: Hop-by-Hop Options, Routing, Fragment, Destination Options, Mobility and HIP</span>
+<span class="c1">#: headers. ESP is left out, as its Next Header is encrypted, and Shim6, whose</span>
+<span class="c1">#: parser refuses IPv4.</span>
+<span class="n">IPV4_EXTENSION_HEADERS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">((</span>
+    <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">HOPOPT</span><span class="p">,</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Route</span><span class="p">,</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Frag</span><span class="p">,</span>
+    <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">AH</span><span class="p">,</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Opts</span><span class="p">,</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">Mobility_Header</span><span class="p">,</span>
+    <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">HIP</span><span class="p">,</span>
+<span class="p">))</span>
 
 <span class="c1">#: EtherTypes of the VLAN tags :func:`_network` reads past: the 802.1Q customer</span>
 <span class="c1">#: tag and the 802.1ad service tag, which QinQ stacks. These are the two the</span>
@@ -861,6 +894,69 @@
     <span class="k">return</span> <span class="n">ethertype</span><span class="p">,</span> <span class="n">data</span>
 
 
+<span class="nd">@functools</span><span class="o">.</span><span class="n">lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_default_accepts</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Test if the default engine's parser accepts a header.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        name: ``'IPv4'`` or ``'TCP'``, the parser to ask.</span>
+<span class="sd">        header: The whole header, options included, and nothing after it.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        :data:`False` if the parser raises anything at all, as the default</span>
+<span class="sd">        engine then leaves the layer undissected (see</span>
+<span class="sd">        :func:`~pcapkit.utilities.decorators.beholder`); else :data:`True`.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        This is for the options, whose rules are the parser's and too many for</span>
+<span class="sd">        a header walk to follow, so it is asked only of a header that has some.</span>
+<span class="sd">        It is given the header alone and stops at its own layer, so nothing</span>
+<span class="sd">        past the header is dissected. What the parser logs and warns of, a</span>
+<span class="sd">        rejected header's :exc:`~pcapkit.utilities.exceptions.ProtocolError`</span>
+<span class="sd">        included, it logs and warns of as it does when the default engine reads</span>
+<span class="sd">        the same frame; neither the warnings filters nor the logger's level are</span>
+<span class="sd">        changed. The answer depends on the octets alone, so the last two are</span>
+<span class="sd">        remembered: the adapters each fetch a frame's layers in turn, and this</span>
+<span class="sd">        parses a frame's IPv4 and TCP headers once each between them.</span>
+
+<span class="sd">    """</span>
+    <span class="n">protocol</span> <span class="o">=</span> <span class="n">Protocol_IPv4</span> <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">'IPv4'</span> <span class="k">else</span> <span class="n">Protocol_TCP</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">protocol</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">),</span> <span class="n">protocol</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># as beholder does</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_ipv4_accepted</span><span class="p">(</span><span class="n">ipv4</span><span class="p">:</span> <span class="s1">'IP'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Test if the default engine reads a PyPCAPFile IPv4 packet as an IPv4 layer.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ipv4: PyPCAPFile IPv4 packet.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        :data:`False` if its header length (IHL) runs past the captured octets</span>
+<span class="sd">        (:issue:`1591`), or its options are ones the default engine's IPv4</span>
+<span class="sd">        parser rejects (:issue:`1596`); else :data:`True`.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        `PyPCAPFile`_ slices the header at its IHL however few octets there</span>
+<span class="sd">        are, and never checks the options. A header with none is not parsed:</span>
+<span class="sd">        all the default engine checks of one is that it is version 4, with an</span>
+<span class="sd">        IHL of at least 5 and 20 octets captured, and `PyPCAPFile`_'s decoder</span>
+<span class="sd">        refuses any other.</span>
+
+<span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hl</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">==</span> <span class="n">IPV4_HEADER_LEN</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">_maybe_unhex</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">opt</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">IPV4_HEADER_LEN</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">options</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hl</span> <span class="o">*</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">_default_accepts</span><span class="p">(</span><span class="s1">'IPv4'</span><span class="p">,</span> <span class="n">ipv4_header</span><span class="p">(</span><span class="n">ipv4</span><span class="p">))</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[IP]'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Fetch the decoded IPv4 layer of a PyPCAPFile packet, if any.</span>
 
@@ -872,7 +968,8 @@
 <span class="sd">        The decoded :class:`~pcapfile.protocols.network.ip.IP` layer, or</span>
 <span class="sd">        :data:`None` when the frame was not decoded that far -- which is the</span>
 <span class="sd">        case for every non-IPv4 frame, `PyPCAPFile`_ having no other network</span>
-<span class="sd">        layer decoder.</span>
+<span class="sd">        layer decoder -- or the default engine rejects its header (see</span>
+<span class="sd">        :func:`_ipv4_accepted`).</span>
 
 <span class="sd">    Warns:</span>
 <span class="sd">        AttributeWarning: If an IPv4 packet behind VLAN tags will not decode,</span>
@@ -901,7 +998,7 @@
 
     <span class="n">payload</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="s1">'payload'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s1">'IP'</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">payload</span>
+        <span class="k">return</span> <span class="n">payload</span> <span class="k">if</span> <span class="n">_ipv4_accepted</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="s1">'type'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">VLAN_TAGS</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
 
@@ -916,7 +1013,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapfile.protocols.network.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP</span>  <span class="c1"># isort:skip</span>
 
     <span class="k">try</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">IP</span><span class="p">(</span><span class="n">untagged</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">ipv4</span> <span class="o">=</span> <span class="n">IP</span><span class="p">(</span><span class="n">untagged</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
     <span class="k">except</span> <span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="ne">AssertionError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">IndexError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
         <span class="n">key</span><span class="p">,</span> <span class="n">anchor</span> <span class="o">=</span> <span class="n">_capture_of</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">_undecoded_last</span> <span class="ow">or</span> <span class="n">_undecoded_last</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">count</span><span class="p">):</span>
@@ -924,6 +1021,128 @@
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ETHERNET</span><span class="si">!r}</span><span class="s1"> decoding failed (</span><span class="si">{</span><span class="n">error</span><span class="si">!r}</span><span class="s1">); '</span>
                  <span class="s1">'frame left undecoded'</span><span class="p">,</span> <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
         <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">ipv4</span> <span class="k">if</span> <span class="n">_ipv4_accepted</span><span class="p">(</span><span class="n">ipv4</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_ipv4_in_ipv6</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[IP]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Fetch the IPv4 layer of a PyPCAPFile frame carrying IPv4 in IPv6 (4in6).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: PyPCAPFile packet.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The first IPv4 packet inside an IPv6 packet -- directly, behind</span>
+<span class="sd">        extension headers, or inside more IPv6 (6in6) -- decoded as</span>
+<span class="sd">        :func:`_network` decodes one behind VLAN tags, or :data:`None` if there</span>
+<span class="sd">        is none, it will not decode, or the default engine rejects its header</span>
+<span class="sd">        (see :func:`_ipv4_accepted`). The frame may be tagged (see</span>
+<span class="sd">        :func:`_untag`), and each IPv6 header is stepped over as</span>
+<span class="sd">        :func:`_upper_layer` does.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        `PyPCAPFile`_ has no IPv6 decoder, so leaves the IPv4 inside undecoded.</span>
+<span class="sd">        This is for :func:`ipv4_reassembly` alone, which the default engine</span>
+<span class="sd">        gives the first IPv4 layer of a frame however deep. TCP inside it is</span>
+<span class="sd">        tunnelled, so is still left out (see :func:`_left_out`), and nor does</span>
+<span class="sd">        an IPv4 packet that will not decode warn: `PyPCAPFile`_ never decodes</span>
+<span class="sd">        IPv6, so has nothing to warn of.</span>
+
+<span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
+
+<span class="sd">    """</span>
+    <span class="n">link</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">packet</span>
+    <span class="n">untagged</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">_is_raw</span><span class="p">(</span><span class="n">link</span><span class="p">)</span> <span class="k">else</span> <span class="n">_untag</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">untagged</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">untagged</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_6</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">upper</span> <span class="o">=</span> <span class="n">_upper_layer</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">untagged</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">while</span> <span class="n">upper</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">upper</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6</span><span class="p">:</span>
+        <span class="n">upper</span> <span class="o">=</span> <span class="n">_upper_layer</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">upper</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">upper</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">upper</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv4</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># NOTE: imported only once there is something to decode, as in :func:`_network`.</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapfile.protocols.network.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP</span>  <span class="c1"># isort:skip</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ipv4</span> <span class="o">=</span> <span class="n">IP</span><span class="p">(</span><span class="n">upper</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="ne">AssertionError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">IndexError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">ipv4</span> <span class="k">if</span> <span class="n">_ipv4_accepted</span><span class="p">(</span><span class="n">ipv4</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+
+
+<span class="nd">@functools</span><span class="o">.</span><span class="n">lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_default_extension_header</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[tuple[int, int]]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Read an extension header inside IPv4 with the default engine's own parser.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        protocol: The header's protocol number, one of</span>
+<span class="sd">            :data:`IPV4_EXTENSION_HEADERS` other than AH.</span>
+<span class="sd">        data: Raw octets from the header on, as far as the IPv4 packet goes.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The header's Next Header field and its length, or :data:`None` if the</span>
+<span class="sd">        default engine leaves it undissected: its parser raises anything at</span>
+<span class="sd">        all (see :func:`~pcapkit.utilities.decorators.beholder`), or fewer</span>
+<span class="sd">        octets were captured than the header needs.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The parser is the one the default engine dispatches ``protocol`` to</span>
+<span class="sd">        inside IPv4, called as it calls it, so its options, routing data,</span>
+<span class="sd">        message or parameters are checked as the default engine checks them.</span>
+<span class="sd">        It stops at its own layer, so nothing past the header is dissected, and</span>
+<span class="sd">        the last few answers are remembered, as in :func:`_default_accepts`,</span>
+<span class="sd">        which this logs and warns as.</span>
+
+<span class="sd">    """</span>
+    <span class="c1"># pylint: disable-next=protected-access</span>
+    <span class="n">klass</span> <span class="o">=</span> <span class="n">Protocol_IPv4</span><span class="o">.</span><span class="n">_lookup_next_layer</span><span class="p">(</span><span class="n">Protocol_IPv4</span><span class="o">.</span><span class="n">__proto__</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">Protocol_IPv4</span><span class="o">.</span><span class="n">_parse_next_layer</span><span class="p">(</span>  <span class="c1"># pylint: disable=protected-access</span>
+            <span class="n">klass</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">version</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">klass</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># as beholder does</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">nxt</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="s1">'next'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># none on a header cut short, read as raw octets</span>
+    <span class="k">if</span> <span class="n">nxt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">nxt</span><span class="p">),</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_past_extension_headers</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[tuple[int, bytes]]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Step over the headers at the head of an IPv4 payload that the default engine reads past.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        protocol: The IPv4 packet's protocol number.</span>
+<span class="sd">        data: Raw octets of its payload.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The protocol number after the last of the :data:`IPV4_EXTENSION_HEADERS`</span>
+<span class="sd">        and the octets from its header on -- ``protocol`` and ``data``</span>
+<span class="sd">        themselves if ``protocol`` is none of them -- or :data:`None` if the</span>
+<span class="sd">        default engine leaves one of them undissected. An AH is</span>
+<span class="sd">        ``(Payload Length + 2) * 4`` octets long (:rfc:`4302#section-2.2`), and</span>
+<span class="sd">        no shorter than :data:`AH_HEADER_LEN`; any other is read by</span>
+<span class="sd">        :func:`_default_extension_header` (:issue:`1597`).</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Inside IPv4, the default engine decodes what an IPv6 Fragment header</span>
+<span class="sd">        names whatever its offset, so a later fragment is read past too. Over</span>
+<span class="sd">        IPv6, :func:`_upper_layer` steps over these as the extension headers</span>
+<span class="sd">        they are there.</span>
+
+<span class="sd">    """</span>
+    <span class="k">while</span> <span class="n">protocol</span> <span class="ow">in</span> <span class="n">IPV4_EXTENSION_HEADERS</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">protocol</span> <span class="o">==</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">AH</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">AH_HEADER_LEN</span> <span class="k">else</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="n">AH_HEADER_LEN</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="n">protocol</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">length</span><span class="p">:]</span>
+            <span class="k">continue</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">_default_extension_header</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">header</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">protocol</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">header</span><span class="p">[</span><span class="mi">1</span><span class="p">]:]</span>
+    <span class="k">return</span> <span class="n">protocol</span><span class="p">,</span> <span class="n">data</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_upper_layer</span><span class="p">(</span><span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[tuple[int, bytes]]'</span><span class="p">:</span>
@@ -939,8 +1158,9 @@
 
 <span class="sd">        An IPv4 header must be version 4 with a header length of at least</span>
 <span class="sd">        :data:`IPV4_HEADER_LEN` octets, all of them captured, and what follows</span>
-<span class="sd">        it ends at its Total Length, as in :func:`_ipv4_payload`. An IPv6 packet</span>
-<span class="sd">        ends at its Payload Length or, where that is ``0``, at the Jumbo Payload</span>
+<span class="sd">        it ends at its Total Length, as in :func:`_ipv4_payload`, and is</span>
+<span class="sd">        followed past the headers :func:`_past_extension_headers` steps over.</span>
+<span class="sd">        An IPv6 packet ends at its Payload Length or, where that is ``0``, at the Jumbo Payload</span>
 <span class="sd">        Length a jumbogram's Hop-by-Hop Options header gives (:rfc:`2675`) --</span>
 <span class="sd">        lacking one, it has no payload -- and is followed past the extension headers in</span>
 <span class="sd">        :data:`IPV6_EXTENSION_HEADERS`; a first fragment is read past its</span>
@@ -955,9 +1175,10 @@
 <span class="sd">        :func:`_decline_tcp` gives fires on the frames the default engine finds</span>
 <span class="sd">        TCP in. This reads only as far as the upper-layer protocol number and</span>
 <span class="sd">        decodes nothing, so it does not see every reason the default engine has</span>
-<span class="sd">        to leave octets undissected: an IPv4 option or an extension header</span>
-<span class="sd">        option it rejects, which leaves the header raw, or TCP options it</span>
-<span class="sd">        rejects, which in a tunnel leave the segment raw. A malformed tunnelled</span>
+<span class="sd">        to leave octets undissected: an option in a tunnelled IPv4 header or an</span>
+<span class="sd">        extension header option it rejects, which leaves the header raw, or TCP</span>
+<span class="sd">        options it rejects, which in a tunnel leave the segment raw. (The outer</span>
+<span class="sd">        IPv4 header is checked, see :func:`_ipv4_accepted`.) A malformed tunnelled</span>
 <span class="sd">        frame like that is warned of all the same, though the default engine</span>
 <span class="sd">        finds no TCP in it either -- a warning that errs on the side of being</span>
 <span class="sd">        given, rather than a dissection of every such frame to settle it.</span>
@@ -972,7 +1193,7 @@
         <span class="k">if</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">'!H'</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="mi">6</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0x1FFF</span><span class="p">:</span>  <span class="c1"># a later fragment</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="n">total</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s1">'!H'</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="mi">2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="mi">9</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">ihl</span><span class="p">:</span><span class="nb">max</span><span class="p">(</span><span class="n">total</span><span class="p">,</span> <span class="n">ihl</span><span class="p">)]</span> <span class="k">if</span> <span class="n">total</span> <span class="k">else</span> <span class="n">data</span><span class="p">[</span><span class="n">ihl</span><span class="p">:]</span>
+        <span class="k">return</span> <span class="n">_past_extension_headers</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">9</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">ihl</span><span class="p">:</span><span class="nb">max</span><span class="p">(</span><span class="n">total</span><span class="p">,</span> <span class="n">ihl</span><span class="p">)]</span> <span class="k">if</span> <span class="n">total</span> <span class="k">else</span> <span class="n">data</span><span class="p">[</span><span class="n">ihl</span><span class="p">:])</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">IPV6_HEADER_LEN</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
@@ -1024,9 +1245,12 @@
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">ipv4</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># read by PyPCAPFile, so only a tunnel can hide TCP</span>
         <span class="c1"># a later fragment has no upper-layer header, see ``_upper_layer``</span>
-        <span class="k">if</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">off</span> <span class="ow">or</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">IP_TUNNELS</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">_is_raw</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">payload</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">off</span> <span class="ow">or</span> <span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">IP_TUNNELS</span> <span class="ow">and</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">IPV4_EXTENSION_HEADERS</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="ow">not</span> <span class="n">_is_raw</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">payload</span><span class="p">)):</span>
             <span class="k">return</span> <span class="kc">None</span>
-        <span class="n">upper</span> <span class="o">=</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="n">_ipv4_payload</span><span class="p">(</span><span class="n">ipv4</span><span class="p">)</span>  <span class="c1"># type: Optional[tuple[int, bytes]]</span>
+        <span class="n">upper</span> <span class="o">=</span> <span class="n">_past_extension_headers</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="n">_ipv4_payload</span><span class="p">(</span><span class="n">ipv4</span><span class="p">))</span>  <span class="c1"># type: Optional[tuple[int, bytes]]</span>
+        <span class="k">if</span> <span class="n">upper</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">upper</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">IP_TUNNELS</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">link</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">packet</span>
         <span class="n">untagged</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">_is_raw</span><span class="p">(</span><span class="n">link</span><span class="p">)</span> <span class="k">else</span> <span class="n">_untag</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
@@ -1145,19 +1369,39 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        The raw TCP segment, as far as the Total Length (see</span>
-<span class="sd">        :func:`_ipv4_payload`), or :data:`None` if the packet does not carry a</span>
-<span class="sd">        TCP payload long enough to hold a header. A later fragment carries none:</span>
-<span class="sd">        from its offset on, its data is a slice of the datagram's payload, with</span>
-<span class="sd">        no upper-layer header in it (:rfc:`791#section-3.2`, :issue:`1576`).</span>
+<span class="sd">        :func:`_ipv4_payload`), directly or behind AH or IPv6 extension headers</span>
+<span class="sd">        (see :func:`_past_extension_headers`, :issue:`1593`, :issue:`1597`), or</span>
+<span class="sd">        :data:`None` if the packet does</span>
+<span class="sd">        not carry a TCP header the default engine reads. A later fragment</span>
+<span class="sd">        carries none: from its offset on, its data is a slice of the datagram's</span>
+<span class="sd">        payload, with no upper-layer header in it (:rfc:`791#section-3.2`,</span>
+<span class="sd">        :issue:`1576`). Nor does a segment too short for a header, or whose Data</span>
+<span class="sd">        Offset is below 5 words (:issue:`1590`).</span>
+
+<span class="sd">        Behind those, the default engine reads TCP only as its TCP parser does, so</span>
+<span class="sd">        the whole of the header its Data Offset gives must be there, and any</span>
+<span class="sd">        options must be ones that parser accepts (see</span>
+<span class="sd">        :func:`_default_accepts`). Directly over IPv4 it reads a header the</span>
+<span class="sd">        parser rejects out of the raw octets left behind instead</span>
+<span class="sd">        (:func:`pcapkit.toolkit.pcap.tcp_segment`, :issue:`1518`).</span>
 
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">p</span> <span class="o">!=</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">TCP</span> <span class="ow">or</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">off</span><span class="p">:</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">p</span> <span class="o">!=</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">TCP</span> <span class="ow">and</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">IPV4_EXTENSION_HEADERS</span><span class="p">)</span> <span class="ow">or</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">off</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">_is_raw</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">payload</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
 
-    <span class="n">segment</span> <span class="o">=</span> <span class="n">_ipv4_payload</span><span class="p">(</span><span class="n">ipv4</span><span class="p">)</span>
+    <span class="n">upper</span> <span class="o">=</span> <span class="n">_past_extension_headers</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="n">_ipv4_payload</span><span class="p">(</span><span class="n">ipv4</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">upper</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">upper</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">TCP</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">segment</span> <span class="o">=</span> <span class="n">upper</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">TCP_MIN_HEADER_LEN</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="p">(</span><span class="n">segment</span><span class="p">[</span><span class="mi">12</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span>  <span class="c1"># the Data Offset, in octets</span>
+    <span class="k">if</span> <span class="n">header</span> <span class="o">&lt;</span> <span class="n">TCP_MIN_HEADER_LEN</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">p</span> <span class="o">!=</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">TCP</span> <span class="ow">and</span> <span class="p">(</span><span class="n">header</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+            <span class="n">header</span> <span class="o">&gt;</span> <span class="n">TCP_MIN_HEADER_LEN</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_default_accepts</span><span class="p">(</span><span class="s1">'TCP'</span><span class="p">,</span> <span class="n">segment</span><span class="p">[:</span><span class="n">header</span><span class="p">]))):</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">return</span> <span class="n">segment</span>
 
@@ -1321,7 +1565,10 @@
 
 <span class="sd">        * If the ``packet`` can be used for IPv4 reassembly. A packet can be reassembled</span>
 <span class="sd">          if it contains an IPv4 layer (:class:`pcapfile.protocols.network.ip.IP`), behind</span>
-<span class="sd">          802.1Q or 802.1ad VLAN tags or not, and the **DF** flag is :data:`False`.</span>
+<span class="sd">          802.1Q or 802.1ad VLAN tags or not, and the **DF** flag is :data:`False`. The</span>
+<span class="sd">          layer is the first IPv4 packet of the frame, as for the default engine: one</span>
+<span class="sd">          carried in IPv6 counts (see :func:`_ipv4_in_ipv6`), and one whose header the</span>
+<span class="sd">          default engine rejects does not (see :func:`_ipv4_accepted`).</span>
 <span class="sd">        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv4</span>
 <span class="sd">          reassembly (:term:`reasm.ipv4.packet`) will be returned; otherwise, returns :data:`None`.</span>
 
@@ -1334,6 +1581,8 @@
 
 <span class="sd">    """</span>
     <span class="n">ipv4</span> <span class="o">=</span> <span class="n">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ipv4</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ipv4</span> <span class="o">=</span> <span class="n">_ipv4_in_ipv6</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">ipv4</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">IPV4_FLAG_DF</span><span class="p">:</span>  <span class="c1"># dismiss not fragmented packet</span>
@@ -1393,8 +1642,10 @@
 <span class="sd">        Data for TCP reassembly.</span>
 
 <span class="sd">        * If the ``packet`` can be used for TCP reassembly. A packet can be reassembled</span>
-<span class="sd">          if it contains an IPv4 layer carrying a TCP segment, behind 802.1Q or 802.1ad</span>
-<span class="sd">          VLAN tags or not; TCP over IPv6 cannot be, as `PyPCAPFile`_ has no IPv6 decoder,</span>
+<span class="sd">          if it contains an IPv4 layer carrying a TCP segment, directly or behind AH or</span>
+<span class="sd">          IPv6 extension headers, and behind 802.1Q or 802.1ad VLAN tags or not (see</span>
+<span class="sd">          :func:`_transport`);</span>
+<span class="sd">          TCP over IPv6 cannot be, as `PyPCAPFile`_ has no IPv6 decoder,</span>
 <span class="sd">          and nor can TCP tunnelled in IP, as it decodes no tunnel.</span>
 <span class="sd">        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP</span>
 <span class="sd">          reassembly (:term:`reasm.tcp.packet`) will be returned; otherwise, returns :data:`None`.</span>
@@ -1426,7 +1677,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapfile.protocols.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span>  <span class="c1"># isort:skip</span>
 
     <span class="n">tcp</span> <span class="o">=</span> <span class="n">TCP</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
-    <span class="n">hdr_len</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">data_offset</span><span class="p">,</span> <span class="n">TCP_MIN_HEADER_LEN</span><span class="p">)</span>
+    <span class="n">hdr_len</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">data_offset</span>  <span class="c1"># at least TCP_MIN_HEADER_LEN, see ``_transport``</span>
     <span class="n">payload</span> <span class="o">=</span> <span class="n">segment</span><span class="p">[</span><span class="n">hdr_len</span><span class="p">:]</span>
 
     <span class="k">return</span> <span class="n">TCP_Packet</span><span class="p">(</span>
@@ -1467,8 +1718,10 @@
 <span class="sd">        Data for TCP flow tracing.</span>
 
 <span class="sd">        * If the ``packet`` can be used for TCP flow tracing. A packet can be traced</span>
-<span class="sd">          if it contains an IPv4 layer carrying a TCP segment, behind 802.1Q or 802.1ad</span>
-<span class="sd">          VLAN tags or not; TCP over IPv6 cannot be, as `PyPCAPFile`_ has no IPv6 decoder,</span>
+<span class="sd">          if it contains an IPv4 layer carrying a TCP segment, directly or behind AH or</span>
+<span class="sd">          IPv6 extension headers, and behind 802.1Q or 802.1ad VLAN tags or not (see</span>
+<span class="sd">          :func:`_transport`);</span>
+<span class="sd">          TCP over IPv6 cannot be, as `PyPCAPFile`_ has no IPv6 decoder,</span>
 <span class="sd">          and nor can TCP tunnelled in IP, as it decodes no tunnel.</span>
 <span class="sd">        * If the ``packet`` can be traced, then the :obj:`dict` mapping of data for TCP</span>
 <span class="sd">          flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.</span>
@@ -1500,7 +1753,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapfile.protocols.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span>  <span class="c1"># isort:skip</span>
 
     <span class="n">tcp</span> <span class="o">=</span> <span class="n">TCP</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
-    <span class="n">hdr_len</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">data_offset</span><span class="p">,</span> <span class="n">TCP_MIN_HEADER_LEN</span><span class="p">)</span>
+    <span class="n">hdr_len</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">data_offset</span>  <span class="c1"># at least TCP_MIN_HEADER_LEN, see ``_transport``</span>
     <span class="k">return</span> <span class="n">TF_TCP_Packet</span><span class="p">(</span>  <span class="c1"># type: ignore[type-var]</span>
         <span class="n">protocol</span><span class="o">=</span><span class="n">data_link</span><span class="p">,</span>                                 <span class="c1"># data link type from savefile header</span>
         <span class="n">index</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>                                        <span class="c1"># frame number</span>

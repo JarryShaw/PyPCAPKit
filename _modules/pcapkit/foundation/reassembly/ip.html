@@ -240,6 +240,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/loopback.html">BSD Loopback Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
@@ -503,6 +504,11 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'IP'</span><span class="p">]</span>
 
+<span class="c1">#: The most octets a 16-bit length field declares -- IPv4's Total Length, the</span>
+<span class="c1">#: header included, and IPv6's Payload Length, the fixed header excluded -- and</span>
+<span class="c1">#: so the length the data buffer is preallocated to.</span>
+<span class="n">_MAX_LENGTH</span> <span class="o">=</span> <span class="mi">65535</span>
+
 
 <div class="viewcode-block" id="IP">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.IP">[docs]</a>
@@ -520,7 +526,7 @@
 <span class="sd">            does not: it is left out of the runs and ends the prefix, but once</span>
 <span class="sd">            the total length is known the contiguous payload keeps its real</span>
 <span class="sd">            octets, with only the rest of the hole zero-filled. A datagram</span>
-<span class="sd">            longer than the data buffer is never complete</span>
+<span class="sd">            longer than its length field can declare is never complete</span>
 <span class="sd">        store: if store reassembled datagram in memory, i.e.,</span>
 <span class="sd">            :attr:`self._dtgram &lt;pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram&gt;`</span>
 <span class="sd">            (if not, datagram will be discarded after callback)</span>
@@ -558,6 +564,23 @@
 
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="n">header</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_header_overhead</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Count the header octets that a datagram's length field includes.</span>
+
+<span class="sd">        The base implementation counts them all, which is what IPv4 wants: its</span>
+<span class="sd">        Total Length is the header's length plus the data's</span>
+<span class="sd">        (:rfc:`791#section-3.1`). IPv6 overrides this, because its Payload</span>
+<span class="sd">        Length leaves out the fixed header (:rfc:`8200#section-3`).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            length: Length of the datagram's header.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            How many of those octets the length field counts.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">length</span>
 
 <div class="viewcode-block" id="IP.reassembly">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.IP.reassembly">[docs]</a>
@@ -616,7 +639,7 @@
                 <span class="n">RCVBT</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="mi">8192</span><span class="p">),</span>              <span class="c1"># Fragment Received Bit Table</span>
                 <span class="n">index</span><span class="o">=</span><span class="p">[],</span>                           <span class="c1"># index record</span>
                 <span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">,</span>                      <span class="c1"># header buffer</span>
-                <span class="n">datagram</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="mi">65535</span><span class="p">),</span>          <span class="c1"># data buffer</span>
+                <span class="n">datagram</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">_MAX_LENGTH</span><span class="p">),</span>    <span class="c1"># data buffer</span>
                 <span class="n">timestamp</span><span class="o">=</span><span class="n">TS</span><span class="p">,</span>                       <span class="c1"># first-arriving fragment's clock reading</span>
                 <span class="n">conflict</span><span class="o">=</span><span class="p">[],</span>                        <span class="c1"># conflicting octet ranges</span>
             <span class="p">)</span>
@@ -644,9 +667,12 @@
         <span class="c1"># anything, and so does this, whatever **MF** and the offset say: an</span>
         <span class="c1"># unfragmented one is then whole rather than ``-IHL`` octets long</span>
         <span class="c1"># (:issue:`1555`). Linux's BIG TCP zeroes the field precisely because</span>
-        <span class="c1"># the datagram outgrows the 65535 octets it can declare, so the buffer</span>
-        <span class="c1"># grows to hold such a datagram rather than clipping it, ``RCVBT`` in</span>
-        <span class="c1"># step with it.</span>
+        <span class="c1"># the datagram, header included, outgrows the 65535 octets it can</span>
+        <span class="c1"># declare -- and such a datagram never completes in a buffer of that</span>
+        <span class="c1"># length (:meth:`_is_complete`). So the buffer grows past it, to hold</span>
+        <span class="c1"># the datagram rather than clip it, ``RCVBT`` in step with it; it grows</span>
+        <span class="c1"># by an octet even when the data alone would fit, since its growing is</span>
+        <span class="c1"># what lifts the bound.</span>
         <span class="c1">#</span>
         <span class="c1"># With nothing declared, a snaplen cut cannot be seen in the length. A</span>
         <span class="c1"># non-final fragment's cut still shows, as a partial last block, which</span>
@@ -657,9 +683,10 @@
         <span class="k">if</span> <span class="n">TL</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span>
             <span class="n">extent</span> <span class="o">=</span> <span class="n">FO</span> <span class="o">+</span> <span class="n">length</span>
-            <span class="k">if</span> <span class="n">extent</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">datagram</span><span class="p">):</span>
-                <span class="n">buf</span><span class="o">.</span><span class="n">datagram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">extent</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">datagram</span><span class="p">)))</span>
-                <span class="n">buf</span><span class="o">.</span><span class="n">RCVBT</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">bytes</span><span class="p">((</span><span class="n">extent</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">RCVBT</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_header_overhead</span><span class="p">(</span><span class="n">IHL</span><span class="p">)</span> <span class="o">+</span> <span class="n">extent</span> <span class="o">&gt;</span> <span class="n">_MAX_LENGTH</span><span class="p">:</span>
+                <span class="n">size</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">extent</span><span class="p">,</span> <span class="n">_MAX_LENGTH</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">datagram</span><span class="p">))</span>
+                <span class="n">buf</span><span class="o">.</span><span class="n">datagram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">datagram</span><span class="p">)))</span>
+                <span class="n">buf</span><span class="o">.</span><span class="n">RCVBT</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">bytes</span><span class="p">((</span><span class="n">size</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">RCVBT</span><span class="p">)))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="n">TL</span> <span class="o">-</span> <span class="n">IHL</span>
         <span class="n">held</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">payload</span><span class="p">),</span> <span class="n">length</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">datagram</span><span class="p">)</span> <span class="o">-</span> <span class="n">FO</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
@@ -722,25 +749,35 @@
             <span class="p">)</span></div>
 
 
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_is_complete</span><span class="p">(</span><span class="n">buf</span><span class="p">:</span> <span class="s1">'Buffer[_AT]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_is_complete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">'Buffer[_AT]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Tell whether a buffer holds its whole datagram.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            buf: buffer to check</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Whether the total data length is known, fits the data buffer, and</span>
-<span class="sd">            every 8-octet block up to it is marked received.</span>
+<span class="sd">            Whether the total data length is known, the datagram is no longer</span>
+<span class="sd">            than it may be, and every 8-octet block up to it is marked</span>
+<span class="sd">            received.</span>
 
-<span class="sd">        A datagram longer than the data buffer cannot be held, so it is never</span>
-<span class="sd">        complete. Checking ``RCVBT`` alone does not show that: slicing it past</span>
-<span class="sd">        its end stops silently, so the blocks past the buffer would read as</span>
-<span class="sd">        received (:issue:`1566`).</span>
+<span class="sd">        A datagram is no longer than ``_MAX_LENGTH`` with its header, as</span>
+<span class="sd">        :meth:`_header_overhead` counts it: IPv4's Total Length counts the</span>
+<span class="sd">        whole header, and IPv6's Payload Length every header but the fixed one.</span>
+<span class="sd">        A longer datagram cannot be declared, so it is never complete, and</span>
+<span class="sd">        Linux's ``ip_frag_reasm`` and ``ip6_frag_reasm`` reject it too</span>
+<span class="sd">        (:issue:`1585`). A fragment with Total Length 0 declares no length, so</span>
+<span class="sd">        a buffer it has grown past that bounds the datagram by its own length</span>
+<span class="sd">        alone (:issue:`1555`). Checking ``RCVBT`` does not show either bound:</span>
+<span class="sd">        slicing it past its end stops silently, so the blocks past the buffer</span>
+<span class="sd">        would read as received (:issue:`1566`).</span>
 
 <span class="sd">        """</span>
         <span class="n">TDL</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">TDL</span>
-        <span class="k">return</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">TDL</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">datagram</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">RCVBT</span><span class="p">[:(</span><span class="n">TDL</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">datagram</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">_MAX_LENGTH</span><span class="p">:</span>
+            <span class="n">limit</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">datagram</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">limit</span> <span class="o">=</span> <span class="n">_MAX_LENGTH</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_header_overhead</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">header</span><span class="p">))</span>
+        <span class="k">return</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">TDL</span> <span class="o">&lt;=</span> <span class="n">limit</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">RCVBT</span><span class="p">[:(</span><span class="n">TDL</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span><span class="p">])</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_detect_conflicts</span><span class="p">(</span><span class="n">rcvbt</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span> <span class="n">tdl</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">datagram</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span>
@@ -770,23 +807,30 @@
 <span class="sd">            already genuinely received.</span>
 
 <span class="sd">        :rfc:`791` marks receipt in 8-octet blocks (``RCVBT``), coarser than</span>
-<span class="sd">        the octet granularity a conflict needs: every fragment but the last is</span>
-<span class="sd">        required to be a multiple of 8 octets, and a fragment's ``FO`` is</span>
-<span class="sd">        *always* a multiple of 8 -- it is wire-encoded in 8-octet units -- so a</span>
-<span class="sd">        non-final fragment's range is always exactly block-aligned. The only</span>
-<span class="sd">        block that can be *partially* real is therefore the one holding the</span>
-<span class="sd">        final fragment's own tail: the ``RCVBT`` update in :meth:`reassembly`</span>
-<span class="sd">        sets that block's bit across its full 8 octets even though only the</span>
-<span class="sd">        octets up to ``tdl`` were ever actually written, the rest still being</span>
-<span class="sd">        ``datagram``'s zero-fill.</span>
+<span class="sd">        the octet granularity a conflict needs, so an octet is compared only if</span>
+<span class="sd">        its block is marked. A fragment's ``FO`` is *always* a multiple of 8 --</span>
+<span class="sd">        it is wire-encoded in 8-octet units -- and the ``RCVBT`` update in</span>
+<span class="sd">        :meth:`reassembly` marks the blocks a fragment fills whole. Only the</span>
+<span class="sd">        final fragment, held in full, also marks its partial last block, across</span>
+<span class="sd">        its full 8 octets even though only the octets up to ``tdl`` were ever</span>
+<span class="sd">        actually written, the rest still being ``datagram``'s zero-fill.</span>
 
 <span class="sd">        So once ``tdl`` is known, an octet at or past it is excluded here</span>
 <span class="sd">        regardless of its block's bit -- comparing it would manufacture a</span>
 <span class="sd">        conflict against a byte nothing ever really sent, over a distinction</span>
 <span class="sd">        :meth:`~pcapkit.foundation.reassembly.ip.IP.submit` does not need</span>
 <span class="sd">        anyway, since it never reports a payload past ``tdl``. Before ``tdl``</span>
-<span class="sd">        is known (``tdl &lt; 0``), every set ``rcvbt`` bit came from a non-final,</span>
-<span class="sd">        block-aligned fragment and is exact on its own, with nothing to clip.</span>
+<span class="sd">        is known (``tdl &lt; 0``), every set ``rcvbt`` bit came from a non-final</span>
+<span class="sd">        fragment's whole block and is exact on its own, with nothing to clip.</span>
+
+<span class="sd">        Any other partial last block -- a non-final, truncated or clipped</span>
+<span class="sd">        fragment's -- is written but left clear (:issue:`1567`), so its octets</span>
+<span class="sd">        are deliberately not compared: a later fragment that overwrites them</span>
+<span class="sd">        records no conflict, whether or not it agrees (:issue:`1585`). Telling</span>
+<span class="sd">        which octets of a clear block were written would take receipt state per</span>
+<span class="sd">        octet, which ``RCVBT`` does not keep. Linux never compares a non-final</span>
+<span class="sd">        fragment's partial block either: it trims an IPv4 one to a multiple of</span>
+<span class="sd">        8 (``ip_frag_queue``) and drops an IPv6 one (``ip6_frag_queue``).</span>
 
 <span class="sd">        """</span>
         <span class="n">conflicts</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[tuple[int, int]]</span>

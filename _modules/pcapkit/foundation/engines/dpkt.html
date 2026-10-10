@@ -240,6 +240,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/loopback.html">BSD Loopback Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
@@ -485,6 +486,7 @@
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">decimal</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.pcapng.block_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">BlockType</span> <span class="k">as</span> <span class="n">Enum_BlockType</span>
@@ -778,6 +780,58 @@
     <span class="k">return</span> <span class="n">_Reader</span>
 
 
+<span class="nd">@functools</span><span class="o">.</span><span class="n">lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_loopback_protocol</span><span class="p">(</span><span class="n">base</span><span class="p">:</span> <span class="s1">'Type[DPKTPacket]'</span><span class="p">,</span> <span class="n">ip</span><span class="p">:</span> <span class="s1">'Type[DPKTPacket]'</span><span class="p">,</span> <span class="n">ip6</span><span class="p">:</span> <span class="s1">'Type[DPKTPacket]'</span><span class="p">,</span>
+                       <span class="n">linktype</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[DPKTPacket]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A :class:`dpkt.loopback.Loopback` that reads as the default engine's.</span>
+
+<span class="sd">    It reads the address family in the byte order</span>
+<span class="sd">    :func:`~pcapkit.protocols.link.loopback.family_byteorder` gives for</span>
+<span class="sd">    ``linktype`` -- network byte order for ``LINKTYPE_LOOP``, inferred for</span>
+<span class="sd">    ``LINKTYPE_NULL`` -- and dispatches on the same families as</span>
+<span class="sd">    :class:`~pcapkit.protocols.link.loopback.Loopback`. Unlike `DPKT`_'s own, it</span>
+<span class="sd">    names an IPv4 or IPv6 payload ``ip`` or ``ip6``, as</span>
+<span class="sd">    :class:`dpkt.ethernet.Ethernet` does and as :mod:`pcapkit.toolkit.dpkt`</span>
+<span class="sd">    looks for it, and keeps a payload of any other family as raw octets rather</span>
+<span class="sd">    than parsing it as Ethernet (:issue:`1574`).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        base: :class:`dpkt.loopback.Loopback` itself.</span>
+<span class="sd">        ip: :class:`dpkt.ip.IP`, the payload of family 2.</span>
+<span class="sd">        ip6: :class:`dpkt.ip6.IP6`, the payload of families 24, 28 and 30.</span>
+<span class="sd">        linktype: ``LINKTYPE_NULL`` or ``LINKTYPE_LOOP``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The packet type, built once per argument tuple rather than once per</span>
+<span class="sd">        packet. Every class it is built from is part of that key, so a reloaded</span>
+<span class="sd">        `DPKT`_ module gets a class of its own instead of one holding stale</span>
+<span class="sd">        classes.</span>
+
+<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
+
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">dpkt</span>  <span class="c1"># isort:skip</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.loopback</span><span class="w"> </span><span class="kn">import</span> <span class="n">family_byteorder</span>  <span class="c1"># isort:skip</span>
+
+    <span class="n">layers</span> <span class="o">=</span> <span class="p">{</span><span class="mi">2</span><span class="p">:</span> <span class="n">ip</span><span class="p">,</span> <span class="mi">24</span><span class="p">:</span> <span class="n">ip6</span><span class="p">,</span> <span class="mi">28</span><span class="p">:</span> <span class="n">ip6</span><span class="p">,</span> <span class="mi">30</span><span class="p">:</span> <span class="n">ip6</span><span class="p">}</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">Loopback</span><span class="p">(</span><span class="n">base</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""BSD loopback encapsulation."""</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">unpack</span><span class="p">(</span><span class="n">ext</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+            <span class="n">dpkt</span><span class="o">.</span><span class="n">dpkt</span><span class="o">.</span><span class="n">Packet</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">ext</span><span class="p">,</span> <span class="n">buf</span><span class="p">)</span>
+            <span class="n">family</span> <span class="o">=</span> <span class="n">buf</span><span class="p">[:</span><span class="n">ext</span><span class="o">.</span><span class="n">__hdr_len__</span><span class="p">]</span>
+            <span class="n">ext</span><span class="o">.</span><span class="n">family</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">family</span><span class="p">,</span> <span class="n">family_byteorder</span><span class="p">(</span><span class="n">family</span><span class="p">,</span> <span class="n">linktype</span><span class="p">))</span>
+            <span class="n">layer</span> <span class="o">=</span> <span class="n">layers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ext</span><span class="o">.</span><span class="n">family</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">layer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">payload</span> <span class="o">=</span> <span class="n">layer</span><span class="p">(</span><span class="n">buf</span><span class="p">[</span><span class="n">ext</span><span class="o">.</span><span class="n">__hdr_len__</span><span class="p">:])</span>
+                <span class="n">ext</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">payload</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">ext</span><span class="p">,</span> <span class="n">layer</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">payload</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Loopback</span>
+
+
 <div class="viewcode-block" id="DPKT">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">DPKT</span><span class="p">(</span><span class="n">EngineBase</span><span class="p">[</span><span class="s1">'DPKTPacket'</span><span class="p">]):</span>
@@ -921,7 +975,7 @@
         <span class="c1"># interface this packet was captured on, so ask only after reading it</span>
         <span class="n">timestamp</span><span class="p">,</span> <span class="n">pkt</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'tuple[float, bytes]'</span><span class="p">,</span> <span class="nb">next</span><span class="p">(</span><span class="n">reader</span><span class="p">))</span>
         <span class="n">linktype</span> <span class="o">=</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">datalink</span><span class="p">())</span>
-        <span class="n">protocol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_protocol</span><span class="p">(</span><span class="n">linktype</span><span class="p">)</span>
+        <span class="n">protocol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_protocol</span><span class="p">(</span><span class="n">linktype</span><span class="p">,</span> <span class="n">pkt</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">packet</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">pkt</span><span class="p">)</span>  <span class="c1"># type: DPKTPacket</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># pylint: disable=broad-except</span>
@@ -999,11 +1053,19 @@
     <span class="c1"># Utilities.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_get_protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">linktype</span><span class="p">:</span> <span class="s1">'Optional[Enum_LinkType]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[DPKTPacket]'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">linktype</span><span class="p">:</span> <span class="s1">'Optional[Enum_LinkType]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[DPKTPacket]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Returns the protocol for parsing the current packet.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            linktype: Link type code.</span>
+<span class="sd">            data: Octets of the current packet. ``LINKTYPE_RAW`` (101) carries</span>
+<span class="sd">                a bare IPv4 or IPv6 datagram, and only the version nibble of</span>
+<span class="sd">                its first octet tells which (:issue:`1502`).</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            ``LINKTYPE_NULL`` (0) and ``LINKTYPE_LOOP`` (108) are parsed with</span>
+<span class="sd">            :func:`_loopback_protocol` (:issue:`1574`).</span>
 
 <span class="sd">        """</span>
         <span class="n">dpkt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span>
@@ -1011,13 +1073,16 @@
 
         <span class="k">if</span> <span class="n">linktype</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">linktype</span> <span class="o">=</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">datalink</span><span class="p">())</span>
+        <span class="n">version</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span> <span class="k">if</span> <span class="n">data</span> <span class="k">else</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="n">linktype</span> <span class="o">==</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ETHERNET</span><span class="p">:</span>
             <span class="n">pkg</span> <span class="o">=</span> <span class="n">dpkt</span><span class="o">.</span><span class="n">ethernet</span><span class="o">.</span><span class="n">Ethernet</span>
-        <span class="k">elif</span> <span class="n">linktype</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV4</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">linktype</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV4</span> <span class="ow">or</span> <span class="p">(</span><span class="n">linktype</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">RAW</span> <span class="ow">and</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">4</span><span class="p">):</span>
             <span class="n">pkg</span> <span class="o">=</span> <span class="n">dpkt</span><span class="o">.</span><span class="n">ip</span><span class="o">.</span><span class="n">IP</span>
-        <span class="k">elif</span> <span class="n">linktype</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV6</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">linktype</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV6</span> <span class="ow">or</span> <span class="p">(</span><span class="n">linktype</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">RAW</span> <span class="ow">and</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">6</span><span class="p">):</span>
             <span class="n">pkg</span> <span class="o">=</span> <span class="n">dpkt</span><span class="o">.</span><span class="n">ip6</span><span class="o">.</span><span class="n">IP6</span>
+        <span class="k">elif</span> <span class="n">linktype</span><span class="o">.</span><span class="n">value</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">NULL</span><span class="p">,</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">LOOP</span><span class="p">):</span>
+            <span class="n">pkg</span> <span class="o">=</span> <span class="n">_loopback_protocol</span><span class="p">(</span><span class="n">dpkt</span><span class="o">.</span><span class="n">loopback</span><span class="o">.</span><span class="n">Loopback</span><span class="p">,</span> <span class="n">dpkt</span><span class="o">.</span><span class="n">ip</span><span class="o">.</span><span class="n">IP</span><span class="p">,</span> <span class="n">dpkt</span><span class="o">.</span><span class="n">ip6</span><span class="o">.</span><span class="n">IP6</span><span class="p">,</span> <span class="n">linktype</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="s1">'unrecognised link layer protocol; all analysis functions ignored'</span><span class="p">,</span>
                  <span class="n">DPKTWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>

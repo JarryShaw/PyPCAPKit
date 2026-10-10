@@ -247,6 +247,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/link/loopback.html">BSD Loopback Encapsulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../protocols/link/s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
@@ -512,7 +513,7 @@ fragment’s, or a snaplen-truncated or buffer-clipped fragment’s,
 does not: it is left out of the runs and ends the prefix, but once
 the total length is known the contiguous payload keeps its real
 octets, with only the rest of the hole zero-filled. A datagram
-longer than the data buffer is never complete</p></li>
+longer than its length field can declare is never complete</p></li>
 <li><p><strong>store</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – if store reassembled datagram in memory, i.e.,
 <a class="reference internal" href="../reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._dtgram</span></code></a>
 (if not, datagram will be discarded after callback)</p></li>
@@ -809,14 +810,17 @@ a clean datagram from a contested one, since a resolved conflict does
 not, on its own, leave a hole for <code class="docutils literal notranslate"><span class="pre">completed</span></code> to report.</p>
 <p><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Buffer.RCVBT" title="pcapkit.foundation.reassembly.data.ip.Buffer.RCVBT"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Buffer.RCVBT</span></code></a>
 only records receipt in 8-octet blocks, coarser than the octet
-granularity a conflict needs. Every fragment but the last is required
-to be block-aligned (and <a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Packet.fo" title="pcapkit.foundation.reassembly.data.ip.Packet.fo"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Packet.fo</span></code></a> is <em>always</em> a multiple of 8,
-being wire-encoded in 8-octet units), so the only block that can be
-partially real is the one holding the final fragment’s own tail – and
-a range reported here never extends past
+granularity a conflict needs, and an octet is compared only if its
+block is marked. <a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Packet.fo" title="pcapkit.foundation.reassembly.data.ip.Packet.fo"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Packet.fo</span></code></a> is <em>always</em> a multiple of 8, being
+wire-encoded in 8-octet units, and only the final fragment marks a
+partial last block, so the only marked block that can be partially real
+is the one holding the final fragment’s own tail – and a range reported
+here never extends past
 <a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Buffer.TDL" title="pcapkit.foundation.reassembly.data.ip.Buffer.TDL"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Buffer.TDL</span></code></a>
 for exactly that reason, even though a whole <code class="docutils literal notranslate"><span class="pre">RCVBT</span></code> block straddling
-it reads as “received”. See
+it reads as “received”. Any other partial last block – a non-final,
+truncated or clipped fragment’s – is left unmarked, so a later fragment
+that overwrites its octets records no conflict. See
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">IP._detect_conflicts</span></code>.</p>
 </dd></dl>
 
