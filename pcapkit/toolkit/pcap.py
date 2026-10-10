@@ -7,7 +7,9 @@
 :mod:`pcapkit.toolkit.pcap` contains the adapters for the PCAP format.
 The reassembly and flow tracing adapters return the data their
 :mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame
-cannot be used for it.
+cannot be used for it. The TCP adapters here and in
+:mod:`pcapkit.toolkit.pcapng` read the segment with
+:func:`~pcapkit.toolkit.pcap.tcp_segment`.
 
 """
 from typing import TYPE_CHECKING, NamedTuple, cast
@@ -33,11 +35,16 @@ if TYPE_CHECKING:
     from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.transport.tcp import TCP
 
-__all__ = ['ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow']
+__all__ = ['ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow',
+           'tcp_segment', 'TCPSegment']
 
 
-class _TCPSegment(NamedTuple):
-    """The fields of a TCP segment that the reassembly and flow tracing records take."""
+class TCPSegment(NamedTuple):
+    """The fields of a TCP segment that the reassembly and flow tracing records take.
+
+    :func:`tcp_segment` returns one.
+
+    """
 
     #: Info of the IP layer carrying the segment.
     ip: 'Data_IPv4 | Data_IPv6'
@@ -61,8 +68,11 @@ class _TCPSegment(NamedTuple):
     payload: 'bytes'
 
 
-def _tcp_segment(frame: 'ProtocolBase') -> 'Optional[_TCPSegment]':
+def tcp_segment(frame: 'ProtocolBase') -> 'Optional[TCPSegment]':
     """The TCP segment ``frame`` carries, or :data:`None` if it carries none.
+
+    The TCP reassembly and flow tracing adapters of this module and of
+    :mod:`pcapkit.toolkit.pcapng` all read the segment with this.
 
     Args:
         frame: PCAP frame or PCAP-NG block.
@@ -88,7 +98,7 @@ def _tcp_segment(frame: 'ProtocolBase') -> 'Optional[_TCPSegment]':
     if 'TCP' in frame:
         tcp = cast('TCP', frame['TCP'])
         tcp_info = tcp.info
-        return _TCPSegment(
+        return TCPSegment(
             ip=cast('IPv4 | IPv6', frame['IP']).info,
             srcport=tcp_info.srcport.port,
             dstport=tcp_info.dstport.port,
@@ -126,7 +136,7 @@ def _tcp_segment(frame: 'ProtocolBase') -> 'Optional[_TCPSegment]':
     if hdr_len < 20:
         return None
     flags = octets[13]
-    return _TCPSegment(
+    return TCPSegment(
         ip=ip_info,
         srcport=int.from_bytes(octets[0:2], 'big'),
         dstport=int.from_bytes(octets[2:4], 'big'),
@@ -270,7 +280,7 @@ def tcp_reassembly(frame: 'Frame') -> 'TCP_Packet | None':
         :class:`pcapkit.foundation.reassembly.tcp.TCP`
 
     """
-    if (segment := _tcp_segment(frame)) is not None:
+    if (segment := tcp_segment(frame)) is not None:
         raw_len = len(segment.payload)
         data = TCP_Packet(
             bufid=(
@@ -317,7 +327,7 @@ def tcp_traceflow(frame: 'Frame', *, data_link: 'LinkType') -> 'TF_TCP_Packet | 
         :class:`pcapkit.foundation.traceflow.tcp.TCP`
 
     """
-    if (segment := _tcp_segment(frame)) is not None:
+    if (segment := tcp_segment(frame)) is not None:
         data = TF_TCP_Packet(  # type: ignore[type-var]
             protocol=data_link,                      # data link type from global header
             index=frame.info.number,                 # frame number

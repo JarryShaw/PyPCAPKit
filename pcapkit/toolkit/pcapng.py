@@ -18,7 +18,7 @@ from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
 from pcapkit.protocols.data.misc.pcap.frame import Frame as Data_Frame
 from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
-from pcapkit.toolkit.pcap import _tcp_segment
+from pcapkit.toolkit.pcap import tcp_segment
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
@@ -164,7 +164,7 @@ def tcp_reassembly(frame: 'PCAPNG') -> 'TCP_Packet | None':
         :class:`pcapkit.foundation.reassembly.tcp.TCP`
 
     """
-    if (segment := _tcp_segment(frame)) is not None:
+    if (segment := tcp_segment(frame)) is not None:
         raw_len = len(segment.payload)
         frame_info = cast('Packet', frame.info)
 
@@ -213,7 +213,7 @@ def tcp_traceflow(frame: 'PCAPNG', *, nanosecond: 'bool' = False) -> 'TF_TCP_Pac
         :class:`pcapkit.foundation.traceflow.tcp.TCP`
 
     """
-    if (segment := _tcp_segment(frame)) is not None:
+    if (segment := tcp_segment(frame)) is not None:
         frame_info = cast('Packet', frame.info)
         data = TF_TCP_Packet(  # type: ignore[type-var]
             protocol=frame.linktype,                      # data link type from global header
