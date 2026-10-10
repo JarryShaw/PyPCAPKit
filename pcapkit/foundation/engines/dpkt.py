@@ -134,7 +134,11 @@ class PCAPNGReader:
             little: Whether the enclosing section is little-endian.
 
         Returns:
-            Timestamp in seconds since the UNIX epoch, and the packet data.
+            Timestamp in seconds since the UNIX epoch, and the packet data. The
+            timestamp is a :class:`~pcapkit.toolkit.dpkt.Timestamp`: the
+            :obj:`float` this reader always yielded, which also carries the exact
+            value, the interface's resolution and the packet's original length,
+            for the PCAP frame record of the packet (:issue:`1507`).
 
         Raises:
             FormatError: If the section describes no interface of the ID the
@@ -142,6 +146,8 @@ class PCAPNGReader:
 
         """
         import dpkt  # isort:skip
+
+        from pcapkit.toolkit.dpkt import Timestamp  # isort:skip
 
         if block_type == Enum_BlockType.Enhanced_Packet_Block:
             tag = 'EPB'
@@ -168,7 +174,81 @@ class PCAPNGReader:
             timestamp = decimal.Decimal(ticks) / resolution + offset
 
         self._linktype = interface.linktype
-        return float(timestamp), pkt.pkt_data
+        return (Timestamp(float(timestamp), timestamp, resolution, pkt.pkt_len),  # pylint: disable=no-member
+                pkt.pkt_data)
+
+
+def _pcap_reader() -> 'Type[PCAPReader]':
+    """A :class:`dpkt.pcap.Reader` that keeps each record's original length.
+
+    :class:`dpkt.pcap.Reader` parses every record header and then yields only
+    ``(timestamp, octets)``, so the record's original length and the file's
+    resolution are lost by the time a PCAP frame record of the packet is built
+    (:issue:`1507`). This subclass yields the same timestamp, as a
+    :class:`~pcapkit.toolkit.dpkt.Timestamp` or, for a nanosecond file, a
+    :class:`~pcapkit.toolkit.dpkt.DecimalTimestamp`, which carries the two.
+
+    Built when called, so that importing this module does not import `DPKT`_,
+    and so that it always subclasses the :class:`dpkt.pcap.Reader` of the moment.
+
+    Warns:
+        DPKTWarning: If this `DPKT`_'s reader lacks the attributes the loop reads
+            -- they are private, and ``dpkt`` is not pinned. The reader then runs
+            unchanged, and a traced PCAP record's original length is its captured
+            length.
+
+    Returns:
+        The reader type.
+
+    .. _DPKT: https://dpkt.readthedocs.io
+
+    """
+    import dpkt  # isort:skip
+
+    from pcapkit.toolkit.dpkt import DecimalTimestamp, Timestamp  # isort:skip
+
+    #: Attributes of :class:`dpkt.pcap.Reader` the loop below reads, as of dpkt 1.9.8.
+    private = ('_Reader__f', '_Reader__ph', '_divisor')
+
+    class _Reader(dpkt.pcap.Reader):  # type: ignore[name-defined,misc]
+        def __init__(self, fileobj: 'IO[bytes]') -> 'None':
+            super().__init__(fileobj)
+            missing = [name for name in private if not hasattr(self, name)]
+            #: Whether to read with :meth:`dpkt.pcap.Reader.__iter__` unchanged.
+            self._upstream = bool(missing)
+            if missing:
+                warn(f"dpkt {getattr(dpkt, '__version__', '(unknown version)')}: "
+                     f"'dpkt.pcap.Reader' has no {', '.join(repr(name) for name in missing)}; "
+                     "reading PCAP records without their original length, so a traced "
+                     'PCAP record gives its captured length instead', DPKTWarning,
+                     stacklevel=stacklevel())
+
+        # NOTE: the loop is :meth:`dpkt.pcap.Reader.__iter__`'s, over the stream
+        # and the record header type that method reads them through. A generator,
+        # so ``dpkt.pcap.Reader.__init__`` calling it runs none of it before
+        # :attr:`_upstream` is set.
+        def __iter__(self) -> 'Iterator[tuple[float, bytes]]':
+            if self._upstream:
+                yield from super().__iter__()
+                return
+
+            file, header = self._Reader__f, self._Reader__ph  # pylint: disable=no-member
+            nanosecond = isinstance(self._divisor, decimal.Decimal)
+            resolution = 1_000_000_000 if nanosecond else 1_000_000
+            while True:
+                buf = file.read(header.__hdr_len__)
+                if not buf:
+                    break
+                hdr = header(buf)
+                buf = file.read(hdr.caplen)
+                value = hdr.tv_sec + (hdr.tv_usec / self._divisor)
+                if nanosecond:
+                    yield DecimalTimestamp(value, resolution, hdr.len), buf
+                else:
+                    exact = decimal.Decimal(hdr.tv_sec) + decimal.Decimal(hdr.tv_usec) / resolution
+                    yield Timestamp(value, exact, resolution, hdr.len), buf
+
+    return _Reader
 
 
 class DPKT(EngineBase['DPKTPacket']):
@@ -276,7 +356,7 @@ class DPKT(EngineBase['DPKTPacket']):
 
         if ext.magic_number in PCAP.MAGIC_NUMBER:
             logger.debug('dpkt: reading %s as PCAP', ext._ifnm)
-            reader = dpkt.pcap.Reader(ext._ifile)
+            reader = _pcap_reader()(ext._ifile)
         elif ext.magic_number in PCAPNG.MAGIC_NUMBER:
             logger.debug('dpkt: reading %s as PCAP-NG', ext._ifnm)
             reader = PCAPNGReader(ext._ifile)

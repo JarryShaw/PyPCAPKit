@@ -5,14 +5,16 @@ from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import Info, info_final
 
-__all__ = ['TraceFlowData', 'Deferred', 'DeferredPacket']
+__all__ = ['TraceFlowData', 'Deferred', 'DeferredPacket', 'FrameRecord']
 
 if TYPE_CHECKING:
+    from decimal import Decimal
     from typing import Any, Optional
 
     from pcapkit.foundation.reassembly.data.tcp import Datagram as TCP_Datagram
     from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
     from pcapkit.foundation.traceflow.data.tcp import Index as TCP_Index
+    from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
 
 
 class Deferred:
@@ -139,6 +141,68 @@ class DeferredPacket:
         """
         self.__analyse__()
         return super().to_dict()  # type: ignore[misc] # pylint: disable=no-member
+
+
+class FrameRecord(dict):
+    """A frame as a third-party engine's flow tracing adapter reports it.
+
+    The mapping is the engine's own dissection of the frame, exactly as before, so
+    every trace format that takes a mapping writes it unchanged. Beside it, as
+    attributes the mapping does not show, it carries what the PCAP trace dumper
+    reads of a frame -- :meth:`PCAPIO._append_value
+    <pcapkit.dumpkit.pcap.PCAPIO._append_value>` takes ``packet``,
+    ``frame_info`` and ``time_epoch`` -- so ``trace_format='pcap'`` writes the
+    frame's record too (:issue:`1507`).
+
+    Args:
+        mapping: The engine's dissection of the frame.
+        packet: The frame's captured octets.
+        frame_info: The frame's PCAP record header.
+        time_epoch: The frame's exact UNIX timestamp.
+
+    """
+
+    __slots__ = ('packet', 'frame_info', 'time_epoch')
+
+    #: The frame's captured octets.
+    packet: 'bytes'
+    #: The frame's PCAP record header, with the fraction in the capture's own
+    #: resolution.
+    frame_info: 'Data_FrameInfo'
+    #: The frame's exact UNIX timestamp, from which
+    #: :meth:`PCAPIO._make_timestamp <pcapkit.dumpkit.pcap.PCAPIO._make_timestamp>`
+    #: tells which resolution ``frame_info.ts_usec`` is in. A
+    #: :class:`~decimal.Decimal`, since only that settles it exactly.
+    time_epoch: 'Decimal'
+
+    def __init__(self, mapping: 'dict[str, Any]', *, packet: 'bytes',
+                 frame_info: 'Data_FrameInfo', time_epoch: 'Decimal') -> 'None':
+        super().__init__(mapping)
+        self.packet = packet
+        self.frame_info = frame_info
+        self.time_epoch = time_epoch
+
+    def __reduce__(self) -> 'tuple[Any, ...]':
+        # NOTE: spelled out because a ``dict`` subclass with ``__slots__`` cannot
+        # be pickled with protocol 0 or 1 otherwise
+        return _frame_record, (dict(self), self.packet, self.frame_info, self.time_epoch)
+
+
+def _frame_record(mapping: 'dict[str, Any]', packet: 'bytes',
+                  frame_info: 'Data_FrameInfo', time_epoch: 'Decimal') -> 'FrameRecord':
+    """Rebuild a pickled :class:`FrameRecord`.
+
+    Args:
+        mapping: The engine's dissection of the frame.
+        packet: The frame's captured octets.
+        frame_info: The frame's PCAP record header.
+        time_epoch: The frame's exact UNIX timestamp.
+
+    Returns:
+        The frame record.
+
+    """
+    return FrameRecord(mapping, packet=packet, frame_info=frame_info, time_epoch=time_epoch)
 
 
 @info_final

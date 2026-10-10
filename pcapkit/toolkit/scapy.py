@@ -35,6 +35,7 @@ cannot be used for it.
    importing :mod:`scapy.all` in its constructor.
 
 """
+import decimal
 import ipaddress
 from typing import TYPE_CHECKING, cast
 
@@ -42,7 +43,9 @@ from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
+from pcapkit.foundation.traceflow.data.data import FrameRecord
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
+from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
 from pcapkit.utilities.compat import ModuleNotFoundError  # pylint: disable=redefined-builtin
 from pcapkit.utilities.exceptions import MissingKeyError, ModuleNotFound, stacklevel
 from pcapkit.utilities.warnings import ScapyWarning, warn
@@ -63,9 +66,26 @@ if TYPE_CHECKING:
     from scapy.packet import Packet
 
 __all__ = [
-    'packet2chain', 'packet2dict',
+    'attach_resolution', 'packet2chain', 'packet2dict', 'packet2frame',
     'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow'
 ]
+
+
+#: Attribute a packet's timestamp resolution is stashed under, in units per
+#: second, by :func:`attach_resolution`.
+RESOLUTION_ATTR = '__pcapkit_resolution__'
+
+
+def attach_resolution(packet: 'Packet', resolution: 'int') -> 'None':
+    """Stash the timestamp resolution of a packet's capture on the packet.
+
+    Args:
+        packet: Scapy packet.
+        resolution: Timestamp resolution, in units per second: the PCAP global
+            header's, or the PCAP-NG interface's the packet was captured on.
+
+    """
+    setattr(packet, RESOLUTION_ATTR, resolution)
 
 
 def packet2chain(packet: 'Packet') -> 'str':
@@ -135,6 +155,59 @@ def packet2dict(packet: 'Packet') -> 'dict[str, Any]':
         'packet': bytes(packet),
         packet.name: wrapper(packet),
     }
+
+
+def packet2frame(packet: 'Packet') -> 'FrameRecord':
+    """Report a Scapy packet to the flow tracer, with its PCAP frame record.
+
+    Args:
+        packet: Scapy packet.
+
+    Returns:
+        The :func:`packet2dict` mapping of the packet, which every trace format
+        but PCAP writes as it always has, carrying the octets `Scapy`_ dissected
+        the packet from, the PCAP record header the PCAP trace dumper writes, and
+        the exact timestamp it reads the header's resolution from.
+
+    Raises:
+        ModuleNotFound: If `Scapy`_ is not installed.
+
+    Note:
+        The octets are ``packet.original``, which `Scapy`_'s readers keep as read,
+        rather than ``bytes(packet)``, which rebuilds them. ``orig_len`` is
+        ``packet.wirelen``, the record's original length.
+
+        The fraction in ``frame_info.ts_usec`` is in the capture's own resolution,
+        as the default engine's is. That resolution is the one
+        :class:`~pcapkit.foundation.engines.scapy.Scapy` attaches with
+        :func:`attach_resolution`, never one guessed from the value: a
+        nanosecond count that is a whole number of microseconds has the same
+        digits as the microsecond count. A packet that carries none, e.g. one
+        built by hand, is taken to count microseconds.
+
+    """
+    if scapy is None:
+        raise ModuleNotFound("No module named 'scapy'", name='scapy')
+    mapping = packet2dict(packet)
+
+    original = getattr(packet, 'original', None)
+    octets = bytes(original) if isinstance(original, (bytes, bytearray)) else bytes(packet)
+    wirelen = getattr(packet, 'wirelen', None)
+    orig_len = len(octets) if wirelen is None else int(wirelen)
+
+    nanosecond = getattr(packet, RESOLUTION_ATTR, 1_000_000) > 1_000_000
+    stamp = packet.time
+    epoch = (decimal.Decimal(stamp) if isinstance(stamp, decimal.Decimal)
+             else round(decimal.Decimal(stamp), 9 if nanosecond else 6))
+    ts_sec = int(epoch)
+    ts_usec = int((epoch - ts_sec) * (1_000_000_000 if nanosecond else 1_000_000))
+
+    return FrameRecord(mapping, packet=octets, frame_info=Data_FrameInfo(
+        ts_sec=ts_sec,
+        ts_usec=ts_usec,
+        incl_len=len(octets),
+        orig_len=orig_len,
+    ), time_epoch=decimal.Decimal(epoch))
 
 
 def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Address] | None':
@@ -360,7 +433,7 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
         data = TF_TCP_Packet(  # type: ignore[type-var]
             protocol=protocol,                                   # data link type
             index=count,                                         # frame number
-            frame=packet2dict(packet),                           # extracted packet
+            frame=packet2frame(packet),                          # extracted packet
             syn=bool(tcp.flags.S),                               # TCP synchronise (SYN) flag
             fin=bool(tcp.flags.F),                               # TCP finish (FIN) flag
             rst=bool(tcp.flags.R),                               # TCP reset (RST) flag

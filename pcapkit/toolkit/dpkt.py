@@ -13,16 +13,20 @@ cannot be used for it.
 
 """
 import copy
+import decimal
 import ipaddress
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
+from pcapkit.foundation.traceflow.data.data import FrameRecord
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
+from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
 if TYPE_CHECKING:
+    from decimal import Decimal
     from ipaddress import IPv4Address, IPv6Address
     from typing import Any, Optional
 
@@ -34,8 +38,8 @@ if TYPE_CHECKING:
     from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 
 __all__ = [
-    'ipv6_hdr_len', 'attach_timestamp', 'packet2timestamp', 'attach_buffer', 'packet2bytes',
-    'packet2chain', 'packet2dict',
+    'RecordTimestamp', 'Timestamp', 'DecimalTimestamp', 'ipv6_hdr_len', 'attach_timestamp', 'packet2timestamp', 'attach_buffer', 'packet2bytes',
+    'packet2frame', 'packet2chain', 'packet2dict',
     'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow'
 ]
 
@@ -67,6 +71,87 @@ TIMESTAMP_ATTR = '__pcapkit_timestamp__'
 #:
 #: .. _DPKT: https://dpkt.readthedocs.io
 BUFFER_ATTR = '__pcapkit_buffer__'
+
+
+class RecordTimestamp:
+    """A record's capture timestamp, with what a PCAP frame record needs of it.
+
+    The readers :class:`~pcapkit.foundation.engines.dpkt.DPKT` uses yield
+    ``(timestamp, octets)`` and nothing else, so a record's exact timestamp, its
+    resolution and its original length would be lost between the reader and
+    :func:`packet2frame`. The engine's readers yield a :class:`Timestamp` or a
+    :class:`DecimalTimestamp` instead, which *is* the value `DPKT`_ yields --
+    so reassembly and flow labels see exactly what they did before -- and also
+    carries those three.
+
+    .. _DPKT: https://dpkt.readthedocs.io
+
+    """
+
+    __slots__ = ()
+
+    if TYPE_CHECKING:
+        #: Exact timestamp, in seconds since the UNIX epoch.
+        exact: 'Decimal'
+        #: Timestamp resolution of the record, in units per second.
+        resolution: 'int'
+        #: Original length of the packet, or :data:`None` if unknown.
+        orig_len: 'Optional[int]'
+
+
+class Timestamp(RecordTimestamp, float):
+    """A :obj:`float` capture timestamp; see :class:`RecordTimestamp`.
+
+    Args:
+        value: The timestamp, as `DPKT`_ yields it.
+        exact: Exact timestamp; ``value`` itself if not given.
+        resolution: Timestamp resolution of the record, in units per second.
+        orig_len: Original length of the packet, or :data:`None` if unknown.
+
+    .. _DPKT: https://dpkt.readthedocs.io
+
+    """
+
+    __slots__ = ('exact', 'resolution', 'orig_len')
+
+    def __new__(cls, value: 'Any' = 0.0, exact: 'Optional[Decimal]' = None,
+                resolution: 'int' = 1_000_000, orig_len: 'Optional[int]' = None) -> 'Timestamp':
+        self = super().__new__(cls, value)
+        self.exact = decimal.Decimal(float(self)) if exact is None else exact
+        self.resolution = resolution
+        self.orig_len = orig_len
+        return self
+
+    def __reduce__(self) -> 'tuple[Any, ...]':
+        return type(self), (float(self), self.exact, self.resolution, self.orig_len)
+
+
+class DecimalTimestamp(RecordTimestamp, decimal.Decimal):
+    """A :class:`~decimal.Decimal` capture timestamp; see :class:`RecordTimestamp`.
+
+    `DPKT`_ yields a :class:`~decimal.Decimal` for a nanosecond PCAP.
+
+    Args:
+        value: The timestamp, as `DPKT`_ yields it, which is exact.
+        resolution: Timestamp resolution of the record, in units per second.
+        orig_len: Original length of the packet, or :data:`None` if unknown.
+
+    .. _DPKT: https://dpkt.readthedocs.io
+
+    """
+
+    __slots__ = ('exact', 'resolution', 'orig_len')
+
+    def __new__(cls, value: 'Any' = '0', resolution: 'int' = 1_000_000_000,
+                orig_len: 'Optional[int]' = None) -> 'DecimalTimestamp':
+        self = super().__new__(cls, value)
+        self.exact = decimal.Decimal(self)
+        self.resolution = resolution
+        self.orig_len = orig_len
+        return self
+
+    def __reduce__(self) -> 'tuple[Any, ...]':
+        return type(self), (str(self), self.resolution, self.orig_len)
 
 
 def attach_timestamp(packet: 'Packet', timestamp: 'float') -> 'None':
@@ -143,6 +228,66 @@ def packet2bytes(packet: 'Packet') -> 'bytes':
     if buffer is not None:
         return cast('bytes', buffer)
     return cast('bytes', copy.deepcopy(packet).pack())
+
+
+def packet2frame(packet: 'Packet', timestamp: 'float | Decimal', *,
+                 data_link: 'Enum_LinkType') -> 'FrameRecord':
+    """Report a DPKT packet to the flow tracer, with its PCAP frame record.
+
+    Args:
+        packet: DPKT packet.
+        timestamp: Capture timestamp of the packet. The one attached by
+            :func:`attach_timestamp`, if any, is preferred, since it is the value
+            `DPKT`_'s reader yielded.
+        data_link: Data link type.
+
+    Returns:
+        The :func:`packet2dict` mapping of the packet, which every trace format
+        but PCAP writes as it always has, carrying the captured octets, from
+        :func:`packet2bytes`, the PCAP record header the PCAP trace dumper
+        writes, and the exact timestamp it reads the header's resolution from.
+
+    Note:
+        The fraction in ``frame_info.ts_usec`` is in the capture's own resolution,
+        as the default engine's is, and both it and ``orig_len`` come from the
+        reader: :class:`~pcapkit.foundation.engines.dpkt.DPKT` reads PCAP and
+        PCAP-NG alike into a :class:`RecordTimestamp`. A timestamp that is not one
+        -- a packet built by hand, or read by a ``dpkt`` whose reader the engine
+        could not extend -- is read as `DPKT`_ yields it: a
+        :class:`~decimal.Decimal` counts nanoseconds and a :obj:`float`
+        microseconds, and the octets are taken to be whole.
+
+    .. _DPKT: https://dpkt.readthedocs.io
+
+    """
+    stamp = getattr(packet, TIMESTAMP_ATTR, timestamp)
+    octets = packet2bytes(packet)
+    if isinstance(stamp, RecordTimestamp):
+        epoch, resolution, orig_len = stamp.exact, stamp.resolution, stamp.orig_len
+    elif isinstance(stamp, decimal.Decimal):
+        epoch, resolution, orig_len = stamp, 1_000_000_000, None
+    else:
+        epoch, resolution, orig_len = round(decimal.Decimal(stamp), 6), 1_000_000, None
+    ts_sec = int(epoch)
+    ts_usec = int((epoch - ts_sec) * (1_000_000_000 if resolution > 1_000_000 else 1_000_000))
+
+    # the mapping is exactly the one reported before #1507, plain value types
+    # included, so that the dict-capable trace formats write the same bytes
+    if isinstance(timestamp, float):
+        timestamp = float(timestamp)
+    elif isinstance(timestamp, decimal.Decimal):
+        timestamp = decimal.Decimal(timestamp)
+    return FrameRecord(
+        packet2dict(packet, timestamp, data_link=data_link),
+        packet=octets,
+        frame_info=Data_FrameInfo(
+            ts_sec=ts_sec,
+            ts_usec=ts_usec,
+            incl_len=len(octets),
+            orig_len=len(octets) if orig_len is None else orig_len,
+        ),
+        time_epoch=decimal.Decimal(epoch),
+    )
 
 
 def _ipv6_ext_hdrs(ipv6: 'IP6') -> 'list[Any]':
@@ -597,7 +742,7 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
         data = TF_TCP_Packet(  # type: ignore[type-var]
             protocol=data_link,                                         # data link type from global header
             index=count,                                                # frame number
-            frame=packet2dict(packet, timestamp, data_link=data_link),  # extracted packet
+            frame=packet2frame(packet, timestamp, data_link=data_link),  # extracted packet
             syn=bool(int(flags[6])),                                    # TCP synchronise (SYN) flag
             fin=bool(int(flags[7])),                                    # TCP finish (FIN) flag
             rst=bool(int(flags[5])),                                    # TCP reset (RST) flag

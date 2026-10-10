@@ -21,7 +21,7 @@ from pcapkit.foundation.engines.scapy import Scapy as Scapy_Engine
 from pcapkit.foundation.extraction import Extractor
 from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
 from pcapkit.utilities.exceptions import stacklevel
-from pcapkit.utilities.warnings import EngineWarning, FormatWarning, warn
+from pcapkit.utilities.warnings import EngineWarning, warn
 
 if TYPE_CHECKING:
     from typing import Any, Callable, Optional
@@ -114,30 +114,6 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
         warn(f'unsupported extraction engine: {engine}; fallback to default engine',
              EngineWarning, stacklevel=stacklevel())
         engine = None
-
-    # NOTE: the DPKT and Scapy engines hand their frames to the flow tracer as plain
-    # :obj:`dict`\\ s, which the PCAP trace dumper cannot re-serialise -- it reaches
-    # for ``frame.packet`` and dies with ``AttributeError: 'dict' object has no
-    # attribute 'packet'`` (#399). The tracer defaults an unset ``format`` to
-    # ``'pcap'``, so following a stream through either engine would crash *during
-    # extraction*, before the reassembly below ever runs.
-    #
-    # :class:`Extractor <pcapkit.foundation.extraction.Extractor>` guards both
-    # engines itself, so this is not what keeps the extraction alive -- it is
-    # what keeps it *quiet*. The two guards choose the same replacement format and so
-    # produce byte-identical traces; they differ only in when they complain. The
-    # Extractor warns for every substitution it makes, including the one nobody asked
-    # for, whereas here an unset ``format`` is not a request and is upgraded silently,
-    # and only an explicit but unusable one draws a warning -- with a message naming
-    # the engine's limitation rather than the ``trace_format=`` argument this function
-    # does not expose. Removing this therefore would not change any trace file, but it
-    # would make ``follow_tcp_stream(engine='dpkt')`` warn about a default the caller
-    # never chose.
-    if engine is not None and engine.lower() in ('dpkt', 'scapy') and format in ('pcap', 'cap', None):
-        if format is not None:
-            warn(f"extraction engine {engine} cannot write '{format}' trace files; "
-                 "using 'json' instead", FormatWarning, stacklevel=stacklevel())
-        format = 'json'
 
     extraction = Extractor(fin=fin, fout=None, format=None, auto=True, extension=extension,
                            store=True, files=False, nofile=True, verbose=verbose, engine=engine,
