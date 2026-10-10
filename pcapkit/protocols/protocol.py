@@ -50,7 +50,7 @@ from pcapkit.utilities.decorators import beholder, seekset
 from pcapkit.utilities.exceptions import (BaseError, ProtocolError, ProtocolNotFound,
                                           ProtocolNotImplemented, RegistryError, StructError,
                                           UnsupportedCall)
-from pcapkit.utilities.warnings import RegistryWarning, UnknownFieldWarning, warn
+from pcapkit.utilities.warnings import RegistryWarning, UnknownFieldWarning, hold_warnings, warn
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
@@ -387,6 +387,31 @@ def _check_construction_keywords(cls: 'type', kwargs: 'dict[str, Any]',
     warn(f'{cls.__name__}._make_data returned keyword(s) that no signature of '
          f'{cls.__name__} declares, so they are discarded: {listed}',
          UnknownFieldWarning)
+
+
+def _short_of_hint(klass: 'Type[ProtocolBase]', captured: 'int') -> 'bool':
+    """Tell whether ``captured`` octets may be too few for a ``klass`` header.
+
+    Args:
+        klass: Next layer protocol class.
+        captured: Octets captured for it.
+
+    Returns:
+        Whether a next layer of ``klass`` parsed from ``captured`` octets may be
+        replaced with :class:`~pcapkit.protocols.misc.raw.Raw` by
+        :meth:`ProtocolBase._parse_next_layer`, and so has its warnings held.
+
+    The hint is read from the class, before there is an instance to ask, which
+    is enough for every protocol shipped: each returns a constant. A hint that
+    needs an instance raises here instead, and the layer counts as short, which
+    only means its warnings are held until the parse is known to be kept.
+
+    """
+    try:
+        hint = klass.__length_hint__(cast('ProtocolBase', None))
+    except Exception:  # pylint: disable=broad-except
+        return True
+    return hint is not None and captured < hint
 
 
 class ProtocolMeta(abc.ABCMeta):
@@ -2283,13 +2308,24 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             form rather than the shortest. A next layer that reports no hint is
             kept as parsed.
 
-        """
-        next_ = klass(file_, length, **kwargs)  # type: ignore[abstract]
+            The warnings of a parse that may be replaced are held until it is
+            known whether it is. They are dropped when it is, since they describe
+            a header the result does not have -- ``packet length < 0`` twice for
+            an Ethernet frame of 10 octets (:issue:`1580`) -- and reported as the
+            parse ends when it is kept, still inside the guard that catches them
+            under an ``error`` filter. A layer kept with its header cut short
+            still warns. A layer captured at least as long as its hint cannot be
+            replaced, and is parsed holding nothing, even inside one that holds.
 
+        """
         captured = min(length, len(file_))
-        length_hint = getattr(next_, '__length_hint__', None)
-        hint = None if length_hint is None else length_hint()
-        if hint is not None and captured < hint and captured < next_.length:
+        with hold_warnings(_short_of_hint(klass, captured)) as held:
+            next_ = klass(file_, length, **kwargs)  # type: ignore[abstract]
+
+            length_hint = getattr(next_, '__length_hint__', None)
+            hint = None if length_hint is None else length_hint()
+            held.discard = hint is not None and captured < hint and captured < next_.length
+        if held.discard:
             from pcapkit.protocols.misc.raw import Raw  # isort: skip # pylint: disable=import-outside-toplevel
             next_ = Raw(file_, length, **kwargs)
         return next_
