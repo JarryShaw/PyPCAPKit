@@ -70,6 +70,12 @@ def _reader_type() -> 'Type[PcapReader]':
     packet block, which :meth:`~scapy.utils.RawPcapNgReader._read_block` is the
     last place to see.
 
+    The PCAP-NG subclass also starts each section with no interfaces, as the
+    PCAP-NG specification defines a section: an interface ID counts the Interface
+    Description Blocks of its own section only. `Scapy`_'s reader keeps appending
+    to one table across Section Header Blocks, so a later section's interface 0
+    resolved to the first section's, with its link type and resolution (#1522).
+
     Built when called, so that importing this module does not import `Scapy`_,
     and so that it always subclasses the :class:`scapy.utils.PcapReader` of the
     moment.
@@ -106,6 +112,11 @@ def _reader_type() -> 'Type[PcapReader]':
         alternative = _PcapReader
 
         _resolution = 1_000_000
+
+        def _read_block_shb(self, *args: 'Any', **kwargs: 'Any') -> 'None':
+            super()._read_block_shb(*args, **kwargs)
+            # a new section: its interface IDs restart from 0 (#1522)
+            self.interfaces = []
 
         def _read_block(self, *args: 'Any', **kwargs: 'Any') -> 'Any':
             block = super()._read_block(*args, **kwargs)
