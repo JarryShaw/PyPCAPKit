@@ -302,7 +302,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/context.html">Parsing Context</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/enum.html">Enumeration Base</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/infoclass.html">Info Class</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/io.html">Seekable I/O Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/io.html">I/O Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
@@ -504,7 +504,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.http.status_code</span><span class="w"> </span><span class="kn">import</span> <span class="n">StatusCode</span> <span class="k">as</span> <span class="n">Enum_StatusCode</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumLookup</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.http</span><span class="w"> </span><span class="kn">import</span> <span class="n">_HTTP2_PREFACE</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.http</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">_HTTP2_PREFACE_HEADER</span><span class="p">,</span> <span class="n">_RE_METHOD</span><span class="p">,</span> <span class="n">_RE_STATUS</span><span class="p">,</span>
+                                                <span class="n">_RE_VERSION</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.http</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">HTTPBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv1</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">Data_HTTP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv1</span><span class="w"> </span><span class="kn">import</span> <span class="n">RequestHeader</span> <span class="k">as</span> <span class="n">Data_RequestHeader</span>
@@ -526,98 +527,10 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'HTTP'</span><span class="p">]</span>
 
-<span class="c1"># Regular expression to match HTTP methods. Anchored at both ends: :func:`re.match`</span>
-<span class="c1"># anchors only at the start, so an unanchored pattern prefix-matches and accepts the</span>
-<span class="c1"># leading ``G`` of ``Get`` as a whole method token. Method tokens are case-sensitive</span>
-<span class="c1"># per :rfc:`9110#section-9.1`, so ``Get`` is not ``GET`` and must not parse as one.</span>
-<span class="n">_RE_METHOD</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rb</span><span class="s2">"(?P&lt;method&gt;[A-Z][A-Z-]*)\Z"</span><span class="p">)</span>  <span class="c1"># RFC 9110, section 16.1.1, 9.1, 5.6.2</span>
-<span class="c1"># Regular expression to match HTTP version string.</span>
-<span class="n">_RE_VERSION</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rb</span><span class="s2">"HTTP/(?P&lt;version&gt;\d\.\d)"</span><span class="p">)</span>
-<span class="c1"># Regular expression to match HTTP status code. Anchored for the same reason as</span>
-<span class="c1"># ``_RE_METHOD``, and it matters more here: this pattern is only a guard, and the</span>
-<span class="c1"># value is taken from ``int(para2)`` on the raw token, so an unanchored prefix</span>
-<span class="c1"># match would let ``200x`` and ``2000`` past the guard and then out of ``int()``</span>
-<span class="c1"># as a bare ``ValueError`` -- where ``_read_http_header`` documents</span>
-<span class="c1"># ``ProtocolError``.</span>
-<span class="c1"># :rfc:`9112#section-4` gives ``status-code = 3DIGIT``, exactly three -- the</span>
-<span class="c1"># grammar is in HTTP/1.1 because ``status-code`` is part of its ``status-line``</span>
-<span class="c1"># production; :rfc:`9110#section-15` covers the code semantics and registry, not</span>
-<span class="c1"># the syntax.</span>
-<span class="n">_RE_STATUS</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'\d</span><span class="si">{3}</span><span class="s1">\Z'</span><span class="p">)</span>
-
-<span class="c1"># The HTTP/2 connection preface's header block, as ``HTTP.read`` splits it off at</span>
-<span class="c1"># the first CRLFCRLF: ``PRI * HTTP/2.0``. A start line with zero field lines, so</span>
-<span class="c1"># the patterns above accept it; it is refused by name in ``_read_http_header``</span>
-<span class="c1"># and ``_test_start_line`` so that the preface never parses as HTTP/1.</span>
-<span class="n">_HTTP2_PREFACE_HEADER</span> <span class="o">=</span> <span class="n">_HTTP2_PREFACE</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n\r\n</span><span class="s1">'</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-
-
-<div class="viewcode-block" id="_test_start_line">
-<a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1._test_start_line">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">_test_start_line</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Whether ``data`` opens with an HTTP/1.* start line.</span>
-
-<span class="sd">    This is a *classification* predicate and parses nothing: it answers "is this</span>
-<span class="sd">    HTTP/1?" for :meth:`HTTP._guess_version</span>
-<span class="sd">    &lt;pcapkit.protocols.application.http.HTTP._guess_version&gt;`. Classifying by</span>
-<span class="sd">    trial-parsing every version in the family would decide a payload that is</span>
-<span class="sd">    not HTTP at all by which parser happened to fail less loudly.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        data: Payload to classify.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        Whether the payload's first line is a ``request-line`` or a</span>
-<span class="sd">        ``status-line`` (:rfc:`9112#section-2.1`).</span>
-
-<span class="sd">    Note:</span>
-<span class="sd">        The acceptance rule is deliberately the *same* one</span>
-<span class="sd">        :meth:`HTTP._read_http_header</span>
-<span class="sd">        &lt;pcapkit.protocols.application.httpv1.HTTP._read_http_header&gt;` applies</span>
-<span class="sd">        further down this module -- ``_RE_METHOD`` with ``_RE_VERSION`` for a</span>
-<span class="sd">        request, ``_RE_VERSION`` with ``_RE_STATUS`` for a response -- which is</span>
-<span class="sd">        why this lives beside those three patterns rather than in the dispatcher</span>
-<span class="sd">        that calls it. The two must accept the same start lines: a predicate</span>
-<span class="sd">        looser than the parser classifies payloads the parser then refuses, and</span>
-<span class="sd">        one tighter than the parser hands real HTTP/1 to a later arm.</span>
-<span class="sd">        ``test_start_line_predicate_agrees_with_the_httpv1_parser`` pins that</span>
-<span class="sd">        agreement.</span>
-
-<span class="sd">        The checks the parser performs *before* those patterns are mirrored too,</span>
-<span class="sd">        and this is not pedantry -- they are the whole reason the HTTP/2</span>
-<span class="sd">        connection preface is not claimed here. ``PRI *</span>
-<span class="sd">        HTTP/2.0\\r\\n\\r\\nSM\\r\\n\\r\\n`` is deliberately a well-formed</span>
-<span class="sd">        HTTP/1.1 *request line* (:rfc:`9113#section-3.4`), so a predicate that</span>
-<span class="sd">        tested only the first line would answer :data:`True` for it. Split at the</span>
-<span class="sd">        header/body separator first, as :meth:`HTTP.read</span>
-<span class="sd">        &lt;pcapkit.protocols.application.httpv1.HTTP.read&gt;` does, and the preface's</span>
-<span class="sd">        header is exactly ``PRI * HTTP/2.0`` (``_HTTP2_PREFACE_HEADER``), which</span>
-<span class="sd">        the parser refuses by name and so does this. Any *other* header with no</span>
-<span class="sd">        CRLF in it is a start line with zero field lines, which</span>
-<span class="sd">        :rfc:`9112#section-2.1` allows and both accept (:issue:`1041`).</span>
-
-<span class="sd">        An HTTP/0.9 request line carries only two tokens and so is not recognised</span>
-<span class="sd">        here either, matching the parser, which raises on fewer than three.</span>
-
-<span class="sd">    """</span>
-    <span class="n">header</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n\r\n</span><span class="s1">'</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">header</span> <span class="o">==</span> <span class="n">data</span><span class="p">:</span>  <span class="c1"># no header/body separator -- ``read`` raises</span>
-        <span class="k">return</span> <span class="kc">False</span>
-
-    <span class="k">if</span> <span class="n">header</span> <span class="o">==</span> <span class="n">_HTTP2_PREFACE_HEADER</span><span class="p">:</span>  <span class="c1"># the preface -- ``_read_http_header`` raises</span>
-        <span class="k">return</span> <span class="kc">False</span>
-
-    <span class="n">startline</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">para1</span><span class="p">,</span> <span class="n">para2</span><span class="p">,</span> <span class="n">para3</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'\s+'</span><span class="p">,</span> <span class="n">startline</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">False</span>
-
-    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span>
-        <span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">_RE_METHOD</span><span class="p">,</span> <span class="n">para1</span><span class="p">)</span> <span class="ow">and</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">_RE_VERSION</span><span class="p">,</span> <span class="n">para3</span><span class="p">))</span>     <span class="c1"># request-line</span>
-        <span class="ow">or</span> <span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">_RE_VERSION</span><span class="p">,</span> <span class="n">para1</span><span class="p">)</span> <span class="ow">and</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">_RE_STATUS</span><span class="p">,</span> <span class="n">para2</span><span class="p">))</span>  <span class="c1"># status-line</span>
-    <span class="p">)</span></div>
-
+<span class="c1"># NOTE: The start-line patterns ``_RE_METHOD``, ``_RE_VERSION`` and ``_RE_STATUS``,</span>
+<span class="c1"># and ``_HTTP2_PREFACE_HEADER``, are imported from ``http.py``, where</span>
+<span class="c1"># :func:`~pcapkit.protocols.application.http.test_start_line` classifies with</span>
+<span class="c1"># them; one copy keeps that predicate and this parser in agreement.</span>
 
 
 <div class="viewcode-block" id="Type">
@@ -1028,7 +941,8 @@
         <span class="c1"># one such header refused by name is the HTTP/2 connection preface's:</span>
         <span class="c1"># ``PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n`` splits in ``read`` to exactly</span>
         <span class="c1"># ``PRI * HTTP/2.0``, which ``_RE_METHOD`` and ``_RE_VERSION`` would</span>
-        <span class="c1"># otherwise accept as an HTTP/1 request (see ``_HTTP2_PREFACE_HEADER``).</span>
+        <span class="c1"># otherwise accept as an HTTP/1 request (see ``_HTTP2_PREFACE_HEADER`` in</span>
+        <span class="c1"># ``http.py``).</span>
         <span class="k">if</span> <span class="n">header</span> <span class="o">==</span> <span class="n">_HTTP2_PREFACE_HEADER</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: invalid format'</span><span class="p">)</span>
         <span class="n">startline</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">headerfield</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span><span class="p">)</span>

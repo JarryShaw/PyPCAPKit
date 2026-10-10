@@ -302,7 +302,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/context.html">Parsing Context</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/enum.html">Enumeration Base</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/infoclass.html">Info Class</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/io.html">Seekable I/O Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/io.html">I/O Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
@@ -495,7 +495,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">dictdumper.dumper</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dumper</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextRegistry</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeekableReader</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">PeekableStream</span><span class="p">,</span> <span class="n">SeekableReader</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.dumpkit.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_dumper</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">Engine</span><span class="p">,</span> <span class="n">EngineBase</span>
@@ -655,44 +655,6 @@
 <span class="c1">#: Engines whose library opens the input by *path*, ``Extractor._ifnm``, rather</span>
 <span class="c1">#: than reading ``Extractor._ifile``, so they cannot take an unnamed stream.</span>
 <span class="n">_PATH_ENGINES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s1">'scapy'</span><span class="p">,</span> <span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcap'</span><span class="p">,</span> <span class="s1">'pcap_ct'</span><span class="p">})</span>
-
-
-<span class="k">class</span><span class="w"> </span><span class="nc">_PeekableStream</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Give a seekable binary stream without ``peek`` one.</span>
-
-<span class="sd">    :class:`Extractor` and the PCAP-NG engine read ahead with ``peek``, which</span>
-<span class="sd">    :class:`io.BufferedReader` has and a plain :class:`typing.IO` such as</span>
-<span class="sd">    :class:`io.BytesIO` does not (#1506). The read-ahead is a read and a seek</span>
-<span class="sd">    back, and every other attribute is the stream's own. It is not an</span>
-<span class="sd">    :class:`io.IOBase`, so it has no finaliser that could close the caller's</span>
-<span class="sd">    stream behind their back (#610).</span>
-
-<span class="sd">    Arguments:</span>
-<span class="sd">        stream: seekable binary stream</span>
-
-<span class="sd">    """</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stream</span><span class="p">:</span> <span class="s1">'IO[bytes]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span> <span class="o">=</span> <span class="n">stream</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">peek</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Return up to ``size`` octets, at least one if any remain, without consuming them.</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            size: number of octets wanted</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            The octets at the current position.</span>
-
-<span class="sd">        """</span>
-        <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-        <span class="k">finally</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Extractor">
@@ -1991,8 +1953,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span> <span class="o">=</span> <span class="n">SeekableReader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">,</span> <span class="n">buffer_save</span><span class="p">,</span> <span class="n">buffer_path</span><span class="p">,</span>
                                          <span class="n">stream_closing</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_flag_s</span><span class="p">)</span>
         <span class="k">elif</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="p">,</span> <span class="s1">'peek'</span><span class="p">):</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'input stream has no peek(), wrapping it in _PeekableStream'</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'BufferedReader'</span><span class="p">,</span> <span class="n">_PeekableStream</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'input stream has no peek(), wrapping it in PeekableStream'</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'BufferedReader'</span><span class="p">,</span> <span class="n">PeekableStream</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_q</span><span class="p">:</span>
             <span class="n">output</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__output__</span><span class="p">[</span><span class="n">fmt</span><span class="p">]</span>

@@ -3,16 +3,16 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta property="og:title" content="Seekable I/O Object" />
+<meta property="og:title" content="I/O Objects" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/corekit/io.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.corekit.io contains SeekableReader, a seekable customisation of io.BufferedReader." />
-<meta name="description" content="pcapkit.corekit.io contains SeekableReader, a seekable customisation of io.BufferedReader." />
+<meta property="og:description" content="pcapkit.corekit.io contains SeekableReader, a seekable customisation of io.BufferedReader, and two stream proxies: PeekableStream, which adds peek to a seekable stream, and NamedStream, which gives..." />
+<meta name="description" content="pcapkit.corekit.io contains SeekableReader, a seekable customisation of io.BufferedReader, and two stream proxies: PeekableStream, which adds peek to a seekable stream, and NamedStream, which gives..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Module Descriptor" href="module.html"><link rel="prev" title="Info Class" href="infoclass.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>Seekable I/O Object - PyPCAPKit</title>
+        <title>I/O Objects - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -309,7 +309,7 @@
 <li class="toctree-l3"><a class="reference internal" href="context.html">Parsing Context</a></li>
 <li class="toctree-l3"><a class="reference internal" href="enum.html">Enumeration Base</a></li>
 <li class="toctree-l3"><a class="reference internal" href="infoclass.html">Info Class</a></li>
-<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Seekable I/O Object</a></li>
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">I/O Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="protochain.html">Protocol Chain</a></li>
@@ -485,10 +485,13 @@
         </div>
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.corekit.io">
-<span id="seekable-i-o-object"></span><h1>Seekable I/O Object<a class="headerlink" href="#module-pcapkit.corekit.io" title="Link to this heading">¶</a></h1>
+<span id="i-o-objects"></span><h1>I/O Objects<a class="headerlink" href="#module-pcapkit.corekit.io" title="Link to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.corekit.io" title="pcapkit.corekit.io"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.io</span></code></a> contains
 <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader" title="pcapkit.corekit.io.SeekableReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">SeekableReader</span></code></a>, a seekable customisation of
-<a class="reference external" href="https://docs.python.org/3/library/io.html#io.BufferedReader" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">io.BufferedReader</span></code></a>.</p>
+<a class="reference external" href="https://docs.python.org/3/library/io.html#io.BufferedReader" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">io.BufferedReader</span></code></a>, and two stream proxies:
+<a class="reference internal" href="#pcapkit.corekit.io.PeekableStream" title="pcapkit.corekit.io.PeekableStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">PeekableStream</span></code></a>, which adds <code class="docutils literal notranslate"><span class="pre">peek</span></code> to a seekable
+stream, and <a class="reference internal" href="#pcapkit.corekit.io.NamedStream" title="pcapkit.corekit.io.NamedStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">NamedStream</span></code></a>, which gives a stream a
+<code class="docutils literal notranslate"><span class="pre">name</span></code>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.io.SeekableReader">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.io.</span></span><span class="sig-name descname"><span class="pre">SeekableReader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">131072</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">stream_closing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#SeekableReader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.SeekableReader" title="Link to this definition">¶</a></dt>
@@ -822,6 +825,83 @@ terminal/tty device).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.corekit.io.PeekableStream">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.io.</span></span><span class="sig-name descname"><span class="pre">PeekableStream</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#PeekableStream"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.PeekableStream" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Give a seekable binary stream without <code class="docutils literal notranslate"><span class="pre">peek</span></code> one.</p>
+<p><a class="reference internal" href="../foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> and the PCAP-NG engine
+read ahead with <code class="docutils literal notranslate"><span class="pre">peek</span></code>, which <a class="reference external" href="https://docs.python.org/3/library/io.html#io.BufferedReader" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">io.BufferedReader</span></code></a> has and a plain
+<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">typing.IO</span></code></a> such as <a class="reference external" href="https://docs.python.org/3/library/io.html#io.BytesIO" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">io.BytesIO</span></code></a> does not (#1506). The
+read-ahead is a read and a seek back, and every other attribute is the
+stream’s own. It is not an <a class="reference external" href="https://docs.python.org/3/library/io.html#io.IOBase" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">io.IOBase</span></code></a>, so it has no finaliser that
+could close the caller’s stream behind their back (#610).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>stream</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]</span>) – seekable binary stream</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.corekit.io.PeekableStream.peek">
+<span class="sig-name descname"><span class="pre">peek</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#PeekableStream.peek"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.PeekableStream.peek" title="Link to this definition">¶</a></dt>
+<dd><p>Return up to <code class="docutils literal notranslate"><span class="pre">size</span></code> octets, at least one if any remain, without consuming them.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>size</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – number of octets wanted</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The octets at the current position.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.corekit.io.NamedStream">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.io.</span></span><span class="sig-name descname"><span class="pre">NamedStream</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#NamedStream"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.NamedStream" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Read-only proxy that gives a stream the <code class="docutils literal notranslate"><span class="pre">name</span></code> attribute.</p>
+<p><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapfile.savefile.load_savefile()</span></code> dereferences <code class="docutils literal notranslate"><span class="pre">input_file.name</span></code>
+unconditionally, on the way into its trace helper. That is fine for the
+<a class="reference external" href="https://docs.python.org/3/library/io.html#io.BufferedReader" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedReader</span></code></a> <a class="reference internal" href="../foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>
+normally holds, but not for the <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader" title="pcapkit.corekit.io.SeekableReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">SeekableReader</span></code></a>
+it substitutes when the caller supplied a non-seekable stream – that class
+exposes no <code class="docutils literal notranslate"><span class="pre">name</span></code>, so the load would fail with <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#AttributeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeError</span></code></a> before
+a single byte was read.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stream</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.BinaryIO" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BinaryIO</span></code></a></span>) – Underlying binary stream.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name to report as <a class="reference internal" href="#pcapkit.corekit.io.NamedStream.name" title="pcapkit.corekit.io.NamedStream.name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.corekit.io.NamedStream.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pcapkit.corekit.io.NamedStream.name" title="Link to this definition">¶</a></dt>
+<dd><p>Name of the underlying stream.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.corekit.io.NamedStream.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#NamedStream.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.NamedStream.read" title="Link to this definition">¶</a></dt>
+<dd><p>Read from the underlying stream.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>size</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Number of bytes to read; all remaining bytes if negative.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>

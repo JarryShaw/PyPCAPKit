@@ -302,7 +302,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/context.html">Parsing Context</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/enum.html">Enumeration Base</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/infoclass.html">Info Class</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/io.html">Seekable I/O Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/io.html">I/O Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
@@ -469,14 +469,17 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.corekit.io</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">"""Seekable I/O Object</span>
-<span class="sd">=========================</span>
+<span class="sd">"""I/O Objects</span>
+<span class="sd">===============</span>
 
 <span class="sd">.. module:: pcapkit.corekit.io</span>
 
 <span class="sd">:mod:`pcapkit.corekit.io` contains seekable I/O object</span>
 <span class="sd">:class:`~pcapkit.corekit.io.SeekableReader`, which is a customised</span>
-<span class="sd">implementation to :class:`io.BufferedReader`.</span>
+<span class="sd">implementation to :class:`io.BufferedReader`, and the stream proxies</span>
+<span class="sd">:class:`~pcapkit.corekit.io.PeekableStream`, which adds ``peek`` to a</span>
+<span class="sd">seekable stream, and :class:`~pcapkit.corekit.io.NamedStream`, which gives</span>
+<span class="sd">a stream a ``name``.</span>
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
@@ -489,11 +492,11 @@
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">io</span><span class="w"> </span><span class="kn">import</span> <span class="n">BytesIO</span><span class="p">,</span> <span class="n">RawIOBase</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">BinaryIO</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Buffer</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'SeekableReader'</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'SeekableReader'</span><span class="p">,</span> <span class="s1">'PeekableStream'</span><span class="p">,</span> <span class="s1">'NamedStream'</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="SeekableReader">
@@ -1205,6 +1208,88 @@
                         <span class="bp">self</span><span class="o">.</span><span class="n">_write_buffer</span><span class="p">(</span><span class="n">buf_tmp</span><span class="p">)</span>
                         <span class="n">buf</span> <span class="o">+=</span> <span class="n">buf_tmp</span>
         <span class="k">return</span> <span class="n">buf</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="PeekableStream">
+<a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.PeekableStream">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PeekableStream</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Give a seekable binary stream without ``peek`` one.</span>
+
+<span class="sd">    :class:`~pcapkit.foundation.extraction.Extractor` and the PCAP-NG engine</span>
+<span class="sd">    read ahead with ``peek``, which :class:`io.BufferedReader` has and a plain</span>
+<span class="sd">    :class:`typing.IO` such as :class:`io.BytesIO` does not (#1506). The</span>
+<span class="sd">    read-ahead is a read and a seek back, and every other attribute is the</span>
+<span class="sd">    stream's own. It is not an :class:`io.IOBase`, so it has no finaliser that</span>
+<span class="sd">    could close the caller's stream behind their back (#610).</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        stream: seekable binary stream</span>
+
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stream</span><span class="p">:</span> <span class="s1">'IO[bytes]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span> <span class="o">=</span> <span class="n">stream</span>
+
+<div class="viewcode-block" id="PeekableStream.peek">
+<a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.PeekableStream.peek">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">peek</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return up to ``size`` octets, at least one if any remain, without consuming them.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            size: number of octets wanted</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The octets at the current position.</span>
+
+<span class="sd">        """</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="NamedStream">
+<a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.NamedStream">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NamedStream</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Read-only proxy that gives a stream the ``name`` attribute.</span>
+
+<span class="sd">    :func:`pcapfile.savefile.load_savefile` dereferences ``input_file.name``</span>
+<span class="sd">    unconditionally, on the way into its trace helper. That is fine for the</span>
+<span class="sd">    :class:`~io.BufferedReader` :class:`~pcapkit.foundation.extraction.Extractor`</span>
+<span class="sd">    normally holds, but not for the :class:`~pcapkit.corekit.io.SeekableReader`</span>
+<span class="sd">    it substitutes when the caller supplied a non-seekable stream -- that class</span>
+<span class="sd">    exposes no ``name``, so the load would fail with :exc:`AttributeError` before</span>
+<span class="sd">    a single byte was read.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        stream: Underlying binary stream.</span>
+<span class="sd">        name: Name to report as :attr:`name`.</span>
+
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stream</span><span class="p">:</span> <span class="s1">'BinaryIO'</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span> <span class="o">=</span> <span class="n">stream</span>
+        <span class="c1">#: Name of the underlying stream.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+
+<div class="viewcode-block" id="NamedStream.read">
+<a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.NamedStream.read">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read from the underlying stream.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            size: Number of bytes to read; all remaining bytes if negative.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">size</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

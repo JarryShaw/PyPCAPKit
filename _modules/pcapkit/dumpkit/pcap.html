@@ -302,7 +302,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/context.html">Parsing Context</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/enum.html">Enumeration Base</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/infoclass.html">Info Class</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/io.html">Seekable I/O Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/io.html">I/O Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
@@ -479,6 +479,7 @@
 <span class="sd">:mod:`dictdumper`.</span>
 
 <span class="sd">"""</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">decimal</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">struct</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
@@ -497,6 +498,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.version</span><span class="w"> </span><span class="kn">import</span> <span class="n">VersionInfo</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">Data_Frame</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameInfo</span> <span class="k">as</span> <span class="n">Data_FrameInfo</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">'PCAPIO'</span><span class="p">,</span>
@@ -519,6 +521,28 @@
 <span class="c1">#: the two spellings writing the same octets for every input.</span>
 <span class="n">_UINT32_MASK</span> <span class="o">=</span> <span class="mh">0xFFFF_FFFF</span>
 
+<span class="c1">#: Units per second of a record's ``ts_usec`` field, keyed by the global header's</span>
+<span class="c1">#: nanosecond flag.</span>
+<span class="n">_RESOLUTION</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="kc">False</span><span class="p">:</span> <span class="mi">1_000_000</span><span class="p">,</span>
+    <span class="kc">True</span><span class="p">:</span> <span class="mi">1_000_000_000</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_truncates_to</span><span class="p">(</span><span class="n">scaled</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">den</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">fraction</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whether ``fraction`` is ``scaled / den`` truncated to a whole unit.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        scaled: numerator of a frame's offset into its second, in units</span>
+<span class="sd">        den: denominator of that offset</span>
+<span class="sd">        fraction: a record header's ``ts_usec`` field</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        :data:`True` if ``fraction &lt;= scaled / den &lt; fraction + 1``.</span>
+
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">fraction</span> <span class="o">*</span> <span class="n">den</span> <span class="o">&lt;=</span> <span class="n">scaled</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">fraction</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">den</span>
+
 
 <div class="viewcode-block" id="PCAPIO">
 <a class="viewcode-back" href="../../../pcapkit/dumpkit/pcap.html#pcapkit.dumpkit.pcap.PCAPIO">[docs]</a>
@@ -539,6 +563,10 @@
         <span class="n">_ghdr</span><span class="p">:</span> <span class="s1">'Data_Header'</span>
         <span class="c1">#: Record header packer, in the global header's byte order.</span>
         <span class="n">_rechdr</span><span class="p">:</span> <span class="s1">'struct.Struct'</span>
+        <span class="c1">#: Units per second of a record's fraction, in this file's resolution.</span>
+        <span class="n">_tsres</span><span class="p">:</span> <span class="s1">'int'</span>
+        <span class="c1">#: Units per second of a record's fraction, in the other resolution.</span>
+        <span class="n">_tsalt</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
@@ -640,6 +668,12 @@
         <span class="c1">#: validates and normalises it.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_rechdr</span> <span class="o">=</span> <span class="n">_RECORD_HEADER</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_ghdr</span><span class="o">.</span><span class="n">magic_number</span><span class="o">.</span><span class="n">byteorder</span><span class="p">]</span>
 
+        <span class="c1">#: int: Units per second of the fraction this file's records carry, and</span>
+        <span class="c1">#: of the one the other resolution would, taken from :attr:`self._ghdr</span>
+        <span class="c1">#: &lt;_ghdr&gt;` for the same reason as :attr:`self._rechdr &lt;_rechdr&gt;`.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tsres</span> <span class="o">=</span> <span class="n">_RESOLUTION</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_ghdr</span><span class="o">.</span><span class="n">magic_number</span><span class="o">.</span><span class="n">nanosecond</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tsalt</span> <span class="o">=</span> <span class="n">_RESOLUTION</span><span class="p">[</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ghdr</span><span class="o">.</span><span class="n">magic_number</span><span class="o">.</span><span class="n">nanosecond</span><span class="p">]</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_append_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Data_Frame'</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'IO[bytes]'</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Call this function to write contents.</span>
 
@@ -650,9 +684,11 @@
 
 <span class="sd">        Notes:</span>
 <span class="sd">            A PCAP record is a 16-octet header followed by the packet octets, and</span>
-<span class="sd">            both are already in hand: the header fields are exactly</span>
-<span class="sd">            ``value.frame_info`` and the octets are exactly ``value.packet``. So</span>
-<span class="sd">            this writes them directly, rather than handing them to</span>
+<span class="sd">            both are already in hand: the header fields are ``value.frame_info``,</span>
+<span class="sd">            with the fraction in this file's resolution (see</span>
+<span class="sd">            :meth:`self._make_timestamp &lt;_make_timestamp&gt;`), and the octets are</span>
+<span class="sd">            exactly ``value.packet``. So this writes them directly, rather than</span>
+<span class="sd">            handing them to</span>
 <span class="sd">            :class:`~pcapkit.protocols.misc.pcap.frame.Frame`, whose constructor</span>
 <span class="sd">            packs the record and then **dissects it again** through the whole</span>
 <span class="sd">            protocol stack to arrive at bytes it was given. That round trip</span>
@@ -674,12 +710,63 @@
         <span class="c1"># dict-capable trace format on the strength of that error.</span>
         <span class="n">packet</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">packet</span>
         <span class="n">frame_info</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">frame_info</span>
+        <span class="n">ts_sec</span><span class="p">,</span> <span class="n">ts_frac</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_timestamp</span><span class="p">(</span><span class="n">frame_info</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">time_epoch</span><span class="p">)</span>
 
-        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rechdr</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">frame_info</span><span class="o">.</span><span class="n">ts_sec</span> <span class="o">&amp;</span> <span class="n">_UINT32_MASK</span><span class="p">,</span>
-                                     <span class="n">frame_info</span><span class="o">.</span><span class="n">ts_usec</span> <span class="o">&amp;</span> <span class="n">_UINT32_MASK</span><span class="p">,</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rechdr</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">ts_sec</span> <span class="o">&amp;</span> <span class="n">_UINT32_MASK</span><span class="p">,</span>
+                                     <span class="n">ts_frac</span> <span class="o">&amp;</span> <span class="n">_UINT32_MASK</span><span class="p">,</span>
                                      <span class="n">frame_info</span><span class="o">.</span><span class="n">incl_len</span> <span class="o">&amp;</span> <span class="n">_UINT32_MASK</span><span class="p">,</span>
                                      <span class="n">frame_info</span><span class="o">.</span><span class="n">orig_len</span> <span class="o">&amp;</span> <span class="n">_UINT32_MASK</span><span class="p">)</span> <span class="o">+</span> <span class="n">packet</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span> <span class="o">+=</span> <span class="mi">1</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_timestamp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame_info</span><span class="p">:</span> <span class="s1">'Data_FrameInfo'</span><span class="p">,</span>
+                        <span class="n">time_epoch</span><span class="p">:</span> <span class="s1">'decimal.Decimal | float | int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[int, int]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Record header seconds and fraction, in this file's resolution.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            frame_info: the frame's record header fields</span>
+<span class="sd">            time_epoch: the frame's UNIX timestamp</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The ``ts_sec`` and ``ts_usec`` fields to write.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            ``frame_info`` does not say which resolution its ``ts_usec`` is in.</span>
+<span class="sd">            A PCAP frame carries its file's, and one converted from PCAP-NG</span>
+<span class="sd">            carries its interface's (c.f. :func:`~pcapkit.toolkit.pcapng.block2frame`),</span>
+<span class="sd">            either of which may differ from this file's (:issue:`1500`).</span>
+<span class="sd">            ``time_epoch`` settles it: the fraction is in whichever resolution</span>
+<span class="sd">            truncates the frame's offset into its second to exactly that value.</span>
+
+<span class="sd">            The fraction is written as is when that is this file's resolution,</span>
+<span class="sd">            so a record traced at its own resolution keeps its octets, and also</span>
+<span class="sd">            when neither resolution fits, as for a frame built by hand. When it</span>
+<span class="sd">            is the other resolution, the fraction is recomputed from</span>
+<span class="sd">            ``time_epoch`` at this file's -- microseconds times 1000, or</span>
+<span class="sd">            nanoseconds divided by 1000 and **truncated** rather than rounded.</span>
+<span class="sd">            That is how :func:`~pcapkit.toolkit.pcapng.block2frame` and</span>
+<span class="sd">            :meth:`Frame.make &lt;pcapkit.protocols.misc.pcap.frame.Frame.make&gt;`</span>
+<span class="sd">            reduce a timestamp to a fraction, and how libpcap scales a</span>
+<span class="sd">            nanosecond file down (``sf-pcap.c``). It also keeps the second:</span>
+<span class="sd">            999,999,999 ns truncates to 999,999 us, where rounding would reach</span>
+<span class="sd">            a whole second. A recomputed fraction of a second or more is carried</span>
+<span class="sd">            into ``ts_sec``, so that multiplying by 1000 cannot overflow the</span>
+<span class="sd">            field.</span>
+
+<span class="sd">        """</span>
+        <span class="n">ts_sec</span> <span class="o">=</span> <span class="n">frame_info</span><span class="o">.</span><span class="n">ts_sec</span>
+        <span class="n">ts_usec</span> <span class="o">=</span> <span class="n">frame_info</span><span class="o">.</span><span class="n">ts_usec</span>
+
+        <span class="c1"># NOTE: In integers rather than in :class:`decimal.Decimal`, whose</span>
+        <span class="c1"># context precision would round a long fraction, e.g. from an interface</span>
+        <span class="c1"># with a binary ``if_tsresol``.</span>
+        <span class="n">num</span><span class="p">,</span> <span class="n">den</span> <span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">time_epoch</span><span class="p">)</span><span class="o">.</span><span class="n">as_integer_ratio</span><span class="p">()</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">num</span> <span class="o">-</span> <span class="n">ts_sec</span> <span class="o">*</span> <span class="n">den</span>  <span class="c1"># ``time_epoch - ts_sec``, over ``den``</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">_truncates_to</span><span class="p">(</span><span class="n">offset</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tsres</span><span class="p">,</span> <span class="n">den</span><span class="p">,</span> <span class="n">ts_usec</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="ow">not</span> <span class="n">_truncates_to</span><span class="p">(</span><span class="n">offset</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tsalt</span><span class="p">,</span> <span class="n">den</span><span class="p">,</span> <span class="n">ts_usec</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="n">ts_sec</span><span class="p">,</span> <span class="n">ts_usec</span>
+
+        <span class="n">carry</span><span class="p">,</span> <span class="n">ts_frac</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">offset</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tsres</span> <span class="o">//</span> <span class="n">den</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tsres</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ts_sec</span> <span class="o">+</span> <span class="n">carry</span><span class="p">,</span> <span class="n">ts_frac</span></div>
 
 </pre></div>
         </article>

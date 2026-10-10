@@ -309,7 +309,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../context.html">Parsing Context</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../enum.html">Enumeration Base</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../infoclass.html">Info Class</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../io.html">Seekable I/O Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../io.html">I/O Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../protochain.html">Protocol Chain</a></li>
@@ -848,8 +848,9 @@ drives, which this bypasses completely.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Building a member this way, rather than as some other type
-altogether, is why <code class="xref py py-meth docutils literal notranslate"><span class="pre">post_process()</span></code>
-and its siblings need this rather than <a class="reference internal" href="#pcapkit.corekit.fields.numbers.EnumField._pseudo_member" title="pcapkit.corekit.fields.numbers.EnumField._pseudo_member"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_pseudo_member()</span></code></a>:
+altogether, is why <a class="reference internal" href="#pcapkit.corekit.fields.numbers.PortEnumField.post_process" title="pcapkit.corekit.fields.numbers.PortEnumField.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">PortEnumField.post_process()</span></code></a> and
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">OptionEnumField.post_process</span></code>
+need this rather than <a class="reference internal" href="#pcapkit.corekit.fields.numbers.EnumField._pseudo_member" title="pcapkit.corekit.fields.numbers.EnumField._pseudo_member"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_pseudo_member()</span></code></a>:
 the result answers <code class="docutils literal notranslate"><span class="pre">isinstance(result,</span> <span class="pre">AppType)</span></code> truthfully,
 which matters to at least seven <code class="docutils literal notranslate"><span class="pre">isinstance</span></code> sites elsewhere in
 <a class="reference internal" href="../../protocols/index.html#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a> (see <code class="docutils literal notranslate"><span class="pre">test_a_member_is_still_an_apptype</span></code>
@@ -884,7 +885,7 @@ reduce an <a class="reference external" href="https://docs.python.org/3/library/
 one lookup this member is deliberately absent from. A minted
 member is registered and so round-trips; left alone, this one
 would not. Measured on CPython 3.14.7, resolving port 53406
-through <code class="xref py py-class docutils literal notranslate"><span class="pre">PortEnumField</span></code>
+through the TCP schema’s <a class="reference internal" href="#pcapkit.corekit.fields.numbers.PortEnumField" title="pcapkit.corekit.fields.numbers.PortEnumField"><code class="xref py py-class docutils literal notranslate"><span class="pre">PortEnumField</span></code></a>
 with nothing in place of the override,
 <code class="docutils literal notranslate"><span class="pre">pickle.loads(pickle.dumps(member))</span></code> raised
 <code class="docutils literal notranslate"><span class="pre">ValueError:</span> <span class="pre">'unknown</span> <span class="pre">[53406</span> <span class="pre">-</span> <span class="pre">tcp]'</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">a</span> <span class="pre">valid</span> <span class="pre">TCP</span></code> – while
@@ -945,6 +946,112 @@ the shape the caller’s registry gives its real members –
     rather than saying plainly that this needs extending first.</p>
 </dd>
 </dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.numbers.PortEnumField">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.numbers.</span></span><span class="sig-name descname"><span class="pre">PortEnumField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;pcapkit.corekit.sentinels.NoValueType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">byteorder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'big'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bit_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;function</span> <span class="pre">PortEnumField.&lt;lambda&gt;&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proto</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/numbers.html#PortEnumField"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.numbers.PortEnumField" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.corekit.fields.numbers.EnumField" title="pcapkit.corekit.fields.numbers.EnumField"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumField</span></code></a></p>
+<p>Enumerated value for transport-layer port fields.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span>) – Field size (in bytes); if a callable is given, it should return
+an integer value and accept the current packet as its only argument.</p></li>
+<li><p><strong>default</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></a> | <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code> | <a class="reference internal" href="../sentinels.html#pcapkit.corekit.sentinels.NoValueType" title="pcapkit.corekit.sentinels.NoValueType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueType</span></code></a></span>) – Field default value, if any.</p></li>
+<li><p><strong>signed</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Whether the field is signed; <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> defers to the
+class-level <code class="docutils literal notranslate"><span class="pre">__signed__</span></code>, which this class leaves unset and so
+means unsigned.</p></li>
+<li><p><strong>byteorder</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<code class="docutils literal notranslate"><span class="pre">'little'</span></code>, <code class="docutils literal notranslate"><span class="pre">'big'</span></code>]</span>) – Field byte order.</p></li>
+<li><p><strong>bit_length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Field bit length.</p></li>
+<li><p><strong>namespace</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – The port registry, i.e.
+<code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code>.</p></li>
+<li><p><strong>callback</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</span>) – Callback function to be called upon
+<a class="reference internal" href="field.html#pcapkit.corekit.fields.field.FieldBase.__call__" title="pcapkit.corekit.fields.field.FieldBase.__call__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.__call__</span></code></a>.</p></li>
+<li><p><strong>proto</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.apptype.TransportProtocol" title="pcapkit.const.reg.apptype.apptype.TransportProtocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransportProtocol</span></code></a></span>) – The transport protocol whose ports this field carries – a single
+<code class="xref py py-class docutils literal notranslate"><span class="pre">TransportProtocol</span></code> member, which
+is what tells e.g. TCP/80 from UDP/80. The TCP, UDP and SCTP
+schemas each pass their own.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>This class is specifically designed for <code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code>
+as it is actually a <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.StrEnum" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code></a> class.</p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.numbers.PortEnumField.pre_process">
+<span class="sig-name descname"><span class="pre">pre_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/numbers.html#PortEnumField.pre_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.numbers.PortEnumField.pre_process" title="Link to this definition">¶</a></dt>
+<dd><p>Process field value before construction (packing).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a></span>) – Field value.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Packet data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Processed field value.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.numbers.PortEnumField.post_process">
+<span class="sig-name descname"><span class="pre">post_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/numbers.html#PortEnumField.post_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.numbers.PortEnumField.post_process" title="Link to this definition">¶</a></dt>
+<dd><p>Process field value after parsing (unpacked).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Field value.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Packet data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Processed field value – the registry member declared for the
+port, or an unregistered member of the same registry, carrying
+the port itself, when the registry declares none.</p>
+</dd>
+</dl>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> mints a fresh
+member – via <code class="xref py py-func docutils literal notranslate"><span class="pre">aenum.extend_enum()</span></code> – for any port neither an
+existing row nor one of <code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code>’s documented IANA spans
+accounts for, which in practice means the ephemeral/dynamic range.
+Calling it on every parsed port would therefore grow the registry
+without bound. This peeks at the registry
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> itself would
+consult – its per-port rows via <code class="docutils literal notranslate"><span class="pre">__registry__.getlist</span></code>, then
+its documented spans via <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> – and only calls
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> once one of those is
+already known to hold, so a genuine miss gets
+<a class="reference internal" href="#pcapkit.corekit.fields.numbers.EnumField._unregistered_member" title="pcapkit.corekit.fields.numbers.EnumField._unregistered_member"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumField._unregistered_member()</span></code></a> instead of a mint.</p>
+<p>A port outside this field’s own width is rejected <em>before</em> any of
+that, rather than being let through to <code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code> and
+caught alongside a genuine miss. Both are a bare <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>
+with nothing to tell them apart by type, and
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> rejects the
+out-of-range case deliberately, so that it is never minted over – a
+catch keyed on exception type alone cannot see the difference
+between that and <code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code>’s own “no member has this value”,
+so it would absorb both and quietly turn the rejection into a
+miss. Checking the width first needs no exception-based
+distinction at all. <code class="docutils literal notranslate"><span class="pre">self.length</span></code> is the field’s own declared byte
+width (<code class="docutils literal notranslate"><span class="pre">2</span></code> for every caller of this class, hence <code class="docutils literal notranslate"><span class="pre">0</span></code>-<code class="docutils literal notranslate"><span class="pre">65535</span></code>)
+rather than a hard-coded <code class="docutils literal notranslate"><span class="pre">65535</span></code> borrowed from
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code>’s own guard,
+so the two stay in lockstep by construction.</p>
+</div>
 </dd></dl>
 
 </dd></dl>

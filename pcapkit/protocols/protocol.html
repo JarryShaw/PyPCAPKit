@@ -309,7 +309,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../corekit/context.html">Parsing Context</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/enum.html">Enumeration Base</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/infoclass.html">Info Class</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../corekit/io.html">Seekable I/O Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../corekit/io.html">I/O Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/protochain.html">Protocol Chain</a></li>
@@ -651,6 +651,10 @@ about nothing displaced, and the stored entry is kept as it is
 resolved and resolves nothing, so a stored descriptor stays
 deferred, and an incumbent left as an unresolved descriptor still
 reports as different from the class it names.</p>
+<p>A descriptor equal to the one <code class="docutils literal notranslate"><span class="pre">code</span></code> shipped with restores that
+shipped object, unresolved, so undoing an override leaves the entry
+as shipped (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1504">#1504</a>); see <code class="xref py py-meth docutils literal notranslate"><span class="pre">_next_layer_entry()</span></code>, which
+every layer’s <code class="docutils literal notranslate"><span class="pre">register</span></code> shares.</p>
 </div>
 </dd></dl>
 

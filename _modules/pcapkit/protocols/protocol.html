@@ -302,7 +302,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/context.html">Parsing Context</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/enum.html">Enumeration Base</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/infoclass.html">Info Class</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/io.html">Seekable I/O Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/io.html">I/O Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
@@ -496,6 +496,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">string</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">struct</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">textwrap</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">types</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">urllib.parse</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
 
@@ -930,6 +931,13 @@
     <span class="n">__proto__</span><span class="p">:</span> <span class="s1">'DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]'</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw'</span><span class="p">,</span> <span class="s1">'Raw'</span><span class="p">),</span>
     <span class="p">)</span>
+
+    <span class="c1">#: Read-only copy of :attr:`__proto__` as the class defining it shipped it,</span>
+    <span class="c1">#: taken by :meth:`__init_subclass__` before anything can register into it.</span>
+    <span class="c1">#: :meth:`_next_layer_entry` reads it to tell a descriptor handed back from</span>
+    <span class="c1">#: a new one without resolving it (:issue:`1504`).</span>
+    <span class="n">_shipped_proto</span><span class="p">:</span> <span class="s1">'types.MappingProxyType[Any, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]'</span> <span class="o">=</span> \
+        <span class="n">types</span><span class="o">.</span><span class="n">MappingProxyType</span><span class="p">({})</span>
 
     <span class="c1">#: Construction keywords this protocol consumes out of ``**kwargs`` instead</span>
     <span class="c1">#: of declaring as a parameter, e.g. with ``kwargs.get('spam')`` in</span>
@@ -1389,22 +1397,73 @@
 <span class="sd">            deferred, and an incumbent left as an unresolved descriptor still</span>
 <span class="sd">            reports as different from the class it names.</span>
 
+<span class="sd">            A descriptor equal to the one ``code`` shipped with restores that</span>
+<span class="sd">            shipped object, unresolved, so undoing an override leaves the entry</span>
+<span class="sd">            as shipped (:issue:`1504`); see :meth:`_next_layer_entry`, which</span>
+<span class="sd">            every layer's ``register`` shares.</span>
+
+<span class="sd">        """</span>
+        <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="n">entry</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_next_layer_entry</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">entry</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">entry</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'protocol </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1"> already registered, overwriting '</span>
+                 <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">incumbent</span><span class="si">!r}</span><span class="s1"> with </span><span class="si">{</span><span class="n">entry</span><span class="si">!r}</span><span class="s1">'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">entry</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_next_layer_entry</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span>
+                          <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Work out what a next-layer ``register`` stores under ``code``.</span>
+
+<span class="sd">        :meth:`register` and the :class:`~pcapkit.protocols.link.link.Link`,</span>
+<span class="sd">        :class:`~pcapkit.protocols.internet.internet.Internet`,</span>
+<span class="sd">        :class:`~pcapkit.protocols.transport.transport.Transport`,</span>
+<span class="sd">        :class:`~pcapkit.protocols.transport.sctp.SCTP` and</span>
+<span class="sd">        :class:`~pcapkit.protocols.misc.pcap.frame.Frame` overrides share this;</span>
+<span class="sd">        each still warns and stores for itself.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            code: registry key</span>
+<span class="sd">            protocol: module descriptor or a :class:`ProtocolBase` subclass</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`None` if ``protocol`` is the entry stored under ``code``</span>
+<span class="sd">            already -- the same object, or a descriptor equal to a stored one</span>
+<span class="sd">            (:issue:`1364`). Otherwise the entry to store: if ``protocol`` is a</span>
+<span class="sd">            descriptor equal to the one ``code`` shipped with, per</span>
+<span class="sd">            :attr:`_shipped_proto`, the shipped object itself, unresolved;</span>
+<span class="sd">            else ``protocol`` resolved to its class.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a</span>
+<span class="sd">                class, or not a :class:`ProtocolBase` subclass.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The shipped descriptor is matched before it is resolved, so an</span>
+<span class="sd">            override undone by handing back the shipped entry leaves the</span>
+<span class="sd">            registry as it shipped: the entry is still a descriptor, nothing is</span>
+<span class="sd">            imported, and the class is looked up when a frame dispatches to it</span>
+<span class="sd">            (:issue:`1504`).</span>
+
 <span class="sd">        """</span>
         <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">incumbent</span> <span class="ow">is</span> <span class="n">protocol</span> <span class="ow">or</span> <span class="p">(</span>
                 <span class="nb">isinstance</span><span class="p">(</span><span class="n">incumbent</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">)</span>
                 <span class="ow">and</span> <span class="n">incumbent</span> <span class="o">==</span> <span class="n">protocol</span><span class="p">)):</span>
-            <span class="k">return</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">shipped</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_shipped_proto</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">shipped</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="n">protocol</span> <span class="o">==</span> <span class="n">shipped</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">shipped</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
             <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'protocol must be a class, not </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'protocol must be a Protocol subclass, not </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">protocol</span><span class="p">:</span>
-            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'protocol </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1"> already registered, overwriting '</span>
-                 <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">incumbent</span><span class="si">!r}</span><span class="s1"> with </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">protocol</span>
+        <span class="k">return</span> <span class="n">protocol</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_schema</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'_ST | dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>
@@ -1778,6 +1837,16 @@
 
         <span class="bp">cls</span><span class="o">.</span><span class="n">__schema__</span> <span class="o">=</span> <span class="n">schema</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__data__</span> <span class="o">=</span> <span class="n">data</span>
+
+        <span class="c1"># NOTE: a class defining its own ``__proto__`` ships what its body put</span>
+        <span class="c1"># there; copy it now, before anything can register into it, so that</span>
+        <span class="c1"># ``_next_layer_entry`` can restore a shipped descriptor without</span>
+        <span class="c1"># resolving it (:issue:`1504`). A class that inherits ``__proto__``</span>
+        <span class="c1"># inherits this copy with it.</span>
+        <span class="k">if</span> <span class="s1">'__proto__'</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
+            <span class="n">table</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">'__proto__'</span><span class="p">]</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_shipped_proto</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">MappingProxyType</span><span class="p">(</span>
+                <span class="nb">dict</span><span class="p">(</span><span class="n">table</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">)</span> <span class="k">else</span> <span class="p">{})</span>
 
         <span class="k">if</span> <span class="n">code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.registry.protocols</span><span class="w"> </span><span class="kn">import</span> \

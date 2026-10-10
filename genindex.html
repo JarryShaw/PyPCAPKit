@@ -301,7 +301,7 @@
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/context.html">Parsing Context</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/enum.html">Enumeration Base</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/infoclass.html">Info Class</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/io.html">Seekable I/O Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/io.html">I/O Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/protochain.html">Protocol Chain</a></li>
@@ -3110,8 +3110,6 @@
         <li><a href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._tcp">_tcp (pcapkit.foundation.extraction.Extractor attribute)</a>
 </li>
         <li><a href="pcapkit/corekit/fields/field.html#pcapkit.corekit.fields.field.FieldBase._template">_template (pcapkit.corekit.fields.field.FieldBase attribute)</a>
-</li>
-        <li><a href="pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1._test_start_line">_test_start_line() (in module pcapkit.protocols.application.httpv1)</a>
 </li>
         <li><a href="pcapkit/corekit/fields/strings.html#pcapkit.corekit.fields.strings._TextField">_TextField (class in pcapkit.corekit.fields.strings)</a>
 </li>
@@ -32244,6 +32242,8 @@
 </li>
           <li><a href="pcapkit/corekit/fields/misc.html#pcapkit.corekit.fields.misc.SwitchField.name">(pcapkit.corekit.fields.misc.SwitchField property)</a>
 </li>
+          <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.NamedStream.name">(pcapkit.corekit.io.NamedStream attribute)</a>
+</li>
           <li><a href="pcapkit/corekit/module.html#pcapkit.corekit.module.ModuleDescriptor.name">(pcapkit.corekit.module.ModuleDescriptor property)</a>
 </li>
           <li><a href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines._pcap_backend.Probe.name">(pcapkit.foundation.engines._pcap_backend.Probe attribute)</a>
@@ -32334,6 +32334,8 @@
         <li><a href="pcapkit/vendor/default.html#pcapkit.vendor.default.Vendor.NAME">NAME (pcapkit.vendor.default.Vendor attribute)</a>
 </li>
         <li><a href="pcapkit/const/pcapng.html#pcapkit.const.pcapng.block_type.BlockType.Name_Resolution_Block">Name_Resolution_Block (pcapkit.const.pcapng.block_type.BlockType attribute)</a>
+</li>
+        <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.NamedStream">NamedStream (class in pcapkit.corekit.io)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.namemunge">namemunge (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
@@ -33671,10 +33673,10 @@
         </ul></li>
         <li><a href="pcapkit/const/mh.html#pcapkit.const.mh.lla_code.LLACode.New_Access_Point">New_Access_Point (pcapkit.const.mh.lla_code.LLACode attribute)</a>
 </li>
-        <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode.New_Care_of_Address">New_Care_of_Address (pcapkit.protocols.internet.mh.IPv6AddressPrefixCode attribute)</a>
-</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode.New_Care_of_Address">New_Care_of_Address (pcapkit.protocols.internet.mh.IPv6AddressPrefixCode attribute)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.new_rwho">new_rwho (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -40520,8 +40522,6 @@
           <li><a href="pcapkit/vendor/ftp.html#module-pcapkit.vendor.ftp.return_code">module</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     pcapkit.vendor.hip
 
@@ -40529,6 +40529,8 @@
           <li><a href="pcapkit/vendor/hip.html#module-pcapkit.vendor.hip">module</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     pcapkit.vendor.hip.certificate
 
@@ -41813,7 +41815,13 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.pe_mike">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
-        <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.peek">peek() (pcapkit.corekit.io.SeekableReader method)</a>
+        <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.PeekableStream.peek">peek() (pcapkit.corekit.io.PeekableStream method)</a>
+
+        <ul>
+          <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.peek">(pcapkit.corekit.io.SeekableReader method)</a>
+</li>
+        </ul></li>
+        <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.PeekableStream">PeekableStream (class in pcapkit.corekit.io)</a>
 </li>
         <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.parameter.Parameter.PEER_PERMISSION">PEER_PERMISSION (pcapkit.const.hip.parameter.Parameter attribute)</a>
 </li>
@@ -42541,6 +42549,8 @@
           <li><a href="pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.MPTCPAddAddress.port">(pcapkit.protocols.schema.transport.tcp.MPTCPAddAddress attribute)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.PortEnumField">PortEnumField (class in pcapkit.corekit.fields.numbers)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.portgate_auth">portgate_auth (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -42573,6 +42583,8 @@
           <li><a href="pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.EnumField.post_process">(pcapkit.corekit.fields.numbers.EnumField method)</a>
 </li>
           <li><a href="pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.NumberField.post_process">(pcapkit.corekit.fields.numbers.NumberField method)</a>
+</li>
+          <li><a href="pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.PortEnumField.post_process">(pcapkit.corekit.fields.numbers.PortEnumField method)</a>
 </li>
           <li><a href="pcapkit/corekit/fields/strings.html#pcapkit.corekit.fields.strings.BitField.post_process">(pcapkit.corekit.fields.strings.BitField method)</a>
 </li>
@@ -42843,6 +42855,8 @@
           <li><a href="pcapkit/corekit/fields/misc.html#pcapkit.corekit.fields.misc.SwitchField.pre_process">(pcapkit.corekit.fields.misc.SwitchField method)</a>
 </li>
           <li><a href="pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.NumberField.pre_process">(pcapkit.corekit.fields.numbers.NumberField method)</a>
+</li>
+          <li><a href="pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.PortEnumField.pre_process">(pcapkit.corekit.fields.numbers.PortEnumField method)</a>
 </li>
           <li><a href="pcapkit/corekit/fields/strings.html#pcapkit.corekit.fields.strings.BitField.pre_process">(pcapkit.corekit.fields.strings.BitField method)</a>
 </li>
@@ -45386,9 +45400,11 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.reachout">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
-        <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.read">read() (pcapkit.corekit.io.SeekableReader method)</a>
+        <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.NamedStream.read">read() (pcapkit.corekit.io.NamedStream method)</a>
 
         <ul>
+          <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.read">(pcapkit.corekit.io.SeekableReader method)</a>
+</li>
           <li><a href="pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP.read">(pcapkit.protocols.application.ftp.FTP method)</a>
 </li>
           <li><a href="pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.HTTP.read">(pcapkit.protocols.application.http.HTTP method)</a>
@@ -47898,10 +47914,10 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.reserved_5784">reserved_5784 (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 </li>
-        <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.reserved_5786">reserved_5786 (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
-</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.reserved_5786">reserved_5786 (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.reserved_5787">reserved_5787 (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.reserved_5794">reserved_5794 (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
@@ -49828,7 +49844,7 @@
 </li>
           <li><a href="pcapkit/const/http.html#index-66">RFC 9110 Section 9.3.8</a>
 </li>
-          <li><a href="changelog/1.5.0.html#index-52">RFC 9112 Section 2.1</a>, <a href="pcapkit/protocols/application/httpv1.html#index-2">[1]</a>, <a href="pcapkit/protocols/application/httpv1.html#index-4">[2]</a>
+          <li><a href="changelog/1.5.0.html#index-52">RFC 9112 Section 2.1</a>, <a href="pcapkit/protocols/application/http.html#index-6">[1]</a>, <a href="pcapkit/protocols/application/http.html#index-8">[2]</a>
 </li>
           <li><a href="changelog/1.5.0.html#index-30">RFC 9112 Section 4</a>, <a href="pcapkit/const/http.html#index-148">[1]</a>
 </li>
@@ -49838,7 +49854,7 @@
 </li>
           <li><a href="pcapkit/protocols/application/http.html#index-3">RFC 9113 Section 3.1</a>
 </li>
-          <li><a href="pcapkit/const/http.html#index-55">RFC 9113 Section 3.4</a>, <a href="pcapkit/protocols/application/http.html#index-6">[1]</a>, <a href="pcapkit/protocols/application/httpv1.html#index-3">[2]</a>
+          <li><a href="pcapkit/const/http.html#index-55">RFC 9113 Section 3.4</a>, <a href="pcapkit/protocols/application/http.html#index-7">[1]</a>, <a href="pcapkit/protocols/application/http.html#index-9">[2]</a>
 </li>
           <li><a href="changelog/1.5.0.html#index-46">RFC 9113 Section 6.1</a>, <a href="changelog/1.5.0.html#index-47">[1]</a>, <a href="pcapkit/const/http.html#index-14">[2]</a>, <a href="pcapkit/protocols/application/http.html#index-5">[3]</a>
 </li>
@@ -56985,6 +57001,8 @@
         </ul></li>
         <li><a href="pcapkit/corekit/fields/misc.html#pcapkit.corekit.fields.misc.ConditionalField.test">test() (pcapkit.corekit.fields.misc.ConditionalField method)</a>
 </li>
+        <li><a href="pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.test_start_line">test_start_line() (in module pcapkit.protocols.application.http)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.tetrinet">tetrinet (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -57489,14 +57507,14 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.tn_timing">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.tn_tl_fd1">tn_tl_fd1 (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.tn_tl_fd1">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.tn_tl_fd2">tn_tl_fd2 (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>

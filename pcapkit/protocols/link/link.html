@@ -309,7 +309,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/context.html">Parsing Context</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/enum.html">Enumeration Base</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/infoclass.html">Info Class</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../corekit/io.html">Seekable I/O Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../corekit/io.html">I/O Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/protochain.html">Protocol Chain</a></li>
@@ -563,7 +563,8 @@ already registered, naming the displaced entry and its
 replacement so a caller can tell <em>what</em> was lost. Fires only
 when the incumbent differs from the replacement – see
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.register</span></code> for the
-guard this shares with <code class="docutils literal notranslate"><span class="pre">register_protocol</span></code>.</p>
+guard this shares with <code class="docutils literal notranslate"><span class="pre">register_protocol</span></code>, and for the
+shipped descriptor a restore puts back (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1504">#1504</a>).</p>
 </dd>
 </dl>
 </dd></dl>

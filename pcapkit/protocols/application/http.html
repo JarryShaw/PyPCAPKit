@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/application/http.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.application.http contains HTTP only, which is a base class for Hypertext Transfer Protocol (HTTP)* family, eg. HTTP/1.* and HTTP/2. Footnotes*, https://en.wikipedia.org/wiki/Hyper..." />
-<meta name="description" content="pcapkit.protocols.application.http contains HTTP only, which is a base class for Hypertext Transfer Protocol (HTTP)* family, eg. HTTP/1.* and HTTP/2. Footnotes*, https://en.wikipedia.org/wiki/Hyper..." />
+<meta property="og:description" content="pcapkit.protocols.application.http contains HTTP, which is a base class for Hypertext Transfer Protocol (HTTP)* family, eg. HTTP/1.* and HTTP/2, and test_start_line(), which tells whether a payload..." />
+<meta name="description" content="pcapkit.protocols.application.http contains HTTP, which is a base class for Hypertext Transfer Protocol (HTTP)* family, eg. HTTP/1.* and HTTP/2, and test_start_line(), which tells whether a payload..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="HTTP/1.* - Hypertext Transfer Protocol" href="httpv1.html"><link rel="prev" title="Base Protocol" href="application.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -309,7 +309,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/context.html">Parsing Context</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/enum.html">Enumeration Base</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/infoclass.html">Info Class</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../corekit/io.html">Seekable I/O Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../corekit/io.html">I/O Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/protochain.html">Protocol Chain</a></li>
@@ -487,11 +487,13 @@
           <section id="module-pcapkit.protocols.application.http">
 <span id="http-hypertext-transfer-protocol"></span><h1>HTTP - Hypertext Transfer Protocol<a class="headerlink" href="#module-pcapkit.protocols.application.http" title="Link to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.protocols.application.http" title="pcapkit.protocols.application.http"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application.http</span></code></a> contains
-<a class="reference internal" href="#pcapkit.protocols.application.http.HTTP" title="pcapkit.protocols.application.http.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code></a>
-only, which is a base class for Hypertext Transfer
+<a class="reference internal" href="#pcapkit.protocols.application.http.HTTP" title="pcapkit.protocols.application.http.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code></a>,
+which is a base class for Hypertext Transfer
 Protocol (HTTP) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a> family, eg.
 <a class="reference internal" href="httpv1.html#pcapkit.protocols.application.httpv1.HTTP" title="pcapkit.protocols.application.httpv1.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP/1.*</span></code></a>
-and <a class="reference internal" href="httpv2.html#pcapkit.protocols.application.httpv2.HTTP" title="pcapkit.protocols.application.httpv2.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP/2</span></code></a>.</p>
+and <a class="reference internal" href="httpv2.html#pcapkit.protocols.application.httpv2.HTTP" title="pcapkit.protocols.application.httpv2.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP/2</span></code></a>,
+and <a class="reference internal" href="#pcapkit.protocols.application.http.test_start_line" title="pcapkit.protocols.application.http.test_start_line"><code class="xref py py-func docutils literal notranslate"><span class="pre">test_start_line()</span></code></a>,
+which tells whether a payload opens with an HTTP/1.* start line.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.http.HTTP">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.http.</span></span><span class="sig-name descname"><span class="pre">HTTP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/http.html#HTTP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.http.HTTP" title="Link to this definition">¶</a></dt>
@@ -687,10 +689,59 @@ the tail of the preface as packet payload.</p>
 
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.http.test_start_line">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.http.</span></span><span class="sig-name descname"><span class="pre">test_start_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/http.html#test_start_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.http.test_start_line" title="Link to this definition">¶</a></dt>
+<dd><p>Whether <code class="docutils literal notranslate"><span class="pre">data</span></code> opens with an HTTP/1.* start line.</p>
+<p>This is a <em>classification</em> predicate and parses nothing: it answers “is this
+HTTP/1?” for <a class="reference internal" href="#pcapkit.protocols.application.http.HTTP._guess_version" title="pcapkit.protocols.application.http.HTTP._guess_version"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTP._guess_version</span></code></a>. Classifying by
+trial-parsing every version in the family would decide a payload that is
+not HTTP at all by which parser happened to fail less loudly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Payload to classify.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Whether the payload’s first line is a <code class="docutils literal notranslate"><span class="pre">request-line</span></code> or a
+<code class="docutils literal notranslate"><span class="pre">status-line</span></code> (<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9112.html#section-2.1"><strong>RFC 9112 Section 2.1</strong></a>).</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The acceptance rule is deliberately the <em>same</em> one
+<a class="reference internal" href="httpv1.html#pcapkit.protocols.application.httpv1.HTTP._read_http_header" title="pcapkit.protocols.application.httpv1.HTTP._read_http_header"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTP._read_http_header</span></code></a> applies
+– <code class="docutils literal notranslate"><span class="pre">_RE_METHOD</span></code> with <code class="docutils literal notranslate"><span class="pre">_RE_VERSION</span></code> for a request, <code class="docutils literal notranslate"><span class="pre">_RE_VERSION</span></code>
+with <code class="docutils literal notranslate"><span class="pre">_RE_STATUS</span></code> for a response – which is why those three patterns
+are defined beside this predicate and
+<a class="reference internal" href="httpv1.html#module-pcapkit.protocols.application.httpv1" title="pcapkit.protocols.application.httpv1"><code class="xref py py-mod docutils literal notranslate"><span class="pre">httpv1</span></code></a> imports them from here. The
+two must accept the same start lines: a predicate looser than the parser
+classifies payloads the parser then refuses, and one tighter than the
+parser hands real HTTP/1 to a later arm.
+<code class="docutils literal notranslate"><span class="pre">test_start_line_predicate_agrees_with_the_httpv1_parser</span></code> pins that
+agreement.</p>
+<p>The checks the parser performs <em>before</em> those patterns are mirrored too,
+and this is not pedantry – they are the whole reason the HTTP/2
+connection preface is not claimed here. <code class="docutils literal notranslate"><span class="pre">PRI</span> <span class="pre">*</span>
+<span class="pre">HTTP/2.0\r\n\r\nSM\r\n\r\n</span></code> is deliberately a well-formed
+HTTP/1.1 <em>request line</em> (<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-3.4"><strong>RFC 9113 Section 3.4</strong></a>), so a predicate that
+tested only the first line would answer <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a> for it. Split at the
+header/body separator first, as <a class="reference internal" href="httpv1.html#pcapkit.protocols.application.httpv1.HTTP.read" title="pcapkit.protocols.application.httpv1.HTTP.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTP.read</span></code></a> does, and the preface’s
+header is exactly <code class="docutils literal notranslate"><span class="pre">PRI</span> <span class="pre">*</span> <span class="pre">HTTP/2.0</span></code> (<code class="docutils literal notranslate"><span class="pre">_HTTP2_PREFACE_HEADER</span></code>), which
+the parser refuses by name and so does this. Any <em>other</em> header with no
+CRLF in it is a start line with zero field lines, which
+<span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9112.html#section-2.1"><strong>RFC 9112 Section 2.1</strong></a> allows and both accept (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1041">#1041</a>).</p>
+<p>An HTTP/0.9 request line carries only two tokens and so is not recognised
+here either, matching the parser, which raises on fewer than three.</p>
+</div>
+</dd></dl>
+
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.http._HTTP2_PREFACE">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.http.</span></span><span class="sig-name descname"><span class="pre">_HTTP2_PREFACE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">b'PRI</span> <span class="pre">*</span> <span class="pre">HTTP/2.0\r\n\r\nSM\r\n\r\n'</span></span><a class="headerlink" href="#pcapkit.protocols.application.http._HTTP2_PREFACE" title="Link to this definition">¶</a></dt>
-<dd><p>The HTTP/2 connection preface (<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-3.4"><strong>RFC 9113 Section 3.4</strong></a>). A client opens every
+<dd><p>The HTTP/2 connection preface (<span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-3.4"><strong>RFC 9113 Section 3.4</strong></a>). A client opens every
 HTTP/2 connection – with prior knowledge, over TLS, or after an upgrade –
 by sending exactly these 24 octets, and the sequence is <em>designed</em> to be
 identifiable without parsing: it is a well-formed HTTP/1.1 request line whose

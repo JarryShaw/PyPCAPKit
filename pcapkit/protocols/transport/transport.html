@@ -309,7 +309,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/context.html">Parsing Context</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/enum.html">Enumeration Base</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/infoclass.html">Info Class</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../corekit/io.html">Seekable I/O Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../corekit/io.html">I/O Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/protochain.html">Protocol Chain</a></li>
@@ -543,7 +543,8 @@ message names both. An unresolved
 <a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> counts as
 different from the class it names. See
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.register</span></code> for the
-guard this shares with <code class="docutils literal notranslate"><span class="pre">register_protocol</span></code>.</p>
+guard this shares with <code class="docutils literal notranslate"><span class="pre">register_protocol</span></code>, and for the
+shipped descriptor a restore puts back (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1504">#1504</a>).</p>
 </dd>
 </dl>
 <div class="admonition note">
@@ -601,7 +602,7 @@ distinguishes e.g. TCP/80 from UDP/80</p></li>
 <p class="admonition-title">Important</p>
 <p><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.make</span></code> accepts a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> for a
 port, but the schema field converts it only on the way <em>out</em> (in
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">PortEnumField.pre_process</span></code>),
+<a class="reference internal" href="../../corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.PortEnumField.pre_process" title="pcapkit.corekit.fields.numbers.PortEnumField.pre_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">PortEnumField.pre_process</span></code></a>),
 so the schema attribute keeps whatever it was handed. Normalising
 here makes a constructed packet carry the same
 <code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code> as a parsed one, so
