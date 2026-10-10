@@ -1033,7 +1033,10 @@ class IPv4UnitTests(unittest.TestCase):
         self.assertEqual(decoded_ip.hdr_len, 28)
         self.assertEqual(decoded_ip.options[OptionNumber.SID].sid, 55)
         self.assertEqual(decoded_ip.offset, 8)
-        self.assertEqual(next_type, TransType.TCP)
+        # a later fragment's data starts with no TCP header, so no upper layer
+        # is dispatched on, though ``protocol`` still names it (#1553)
+        self.assertIsNone(next_type)
+        self.assertEqual(decoded_ip.protocol, TransType.TCP)
         self.assertEqual(payload_length, 4)
 
         proto.__header__ = ipv4_schema.IPv4(
@@ -1052,8 +1055,9 @@ class IPv4UnitTests(unittest.TestCase):
         )
         proto._decode_next_layer.reset_mock()
         self.assertEqual(proto.read(length=24), 'decoded')
-        decoded_no_options = proto._decode_next_layer.call_args.args[0]
+        decoded_no_options, next_type, _ = proto._decode_next_layer.call_args.args
         self.assertFalse(hasattr(decoded_no_options, 'options'))
+        self.assertEqual(next_type, TransType.UDP)  # offset 0: dispatched
 
         proto.__header__ = ipv4_schema.IPv4(
             vihl={'version': 6, 'ihl': 5},
