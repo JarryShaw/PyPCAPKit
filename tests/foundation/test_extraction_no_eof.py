@@ -338,17 +338,36 @@ class NoEOFOverAGrowingFileStopsAtWhatIsThere(ChildBoundedTestCase):
     would make the cut-off intermittent rather than absent, which is harder to
     reason about than a crisp rule. So the rule is crisp and written down here.
 
+    The case below sequences the append on the extractor's own end of stream, not
+    on that 0.6s timer: a loaded runner took longer than 0.6s to get there, read
+    the sixth frame, and failed (#1583).
+
     """
 
     def test_a_file_appended_to_after_the_read_yields_only_what_was_there(self) -> None:
         """Five of six frames, the sixth having been appended too late.
 
-        The child is bounded like the others: on ``6c3d1b0d9`` this same body does
-        not terminate at all, so the case doubles as another reproduction.
+        "Too late" is an event, not a delay. The extractor announces each end of
+        stream it meets as ``ExtractionWarning: EOF reached``, through the ``warn``
+        that :mod:`pcapkit.foundation.extraction` imports, so the child wraps that
+        name and appends the sixth frame inside the *second* announcement: the
+        extractor has met end of stream, retried once, and met it again at the
+        same position. That is where it has reached end of stream, and the frame
+        is on disk before it decides to stop, so any later look at the file -- a
+        grace period, a poll, a size check -- would find it.
+
+        The first announcement is the wrong trigger. The retry after it exists for
+        a capture that has merely paused, so a frame appended there is read, and
+        should be -- :class:`NoEOFStillRetriesAnInputThatGrows`.
+
+        The child is bounded like the others: on ``6c3d1b0d9`` the retry never
+        stops, so it reads the appended frame and then does not terminate, and the
+        case doubles as another reproduction.
 
         """
         output = self.run_bounded(f"""
-            import os, tempfile, threading, time
+            import os, tempfile
+            import pcapkit.foundation.extraction as extraction
             {self.CAPTURE}
 
             with open(capture, 'rb') as source:
@@ -359,24 +378,38 @@ class NoEOFOverAGrowingFileStopsAtWhatIsThere(ChildBoundedTestCase):
             # An append landing mid-record raises ValueError on every tree, which
             # is a separate, pre-existing matter.
             split = 430
-            tmp = tempfile.mkdtemp(prefix='pcapkit-grow-')
-            path = os.path.join(tmp, 'growing.pcap')
-            with open(path, 'wb') as sink:
-                sink.write(payload[:split])
+            with tempfile.TemporaryDirectory(prefix='pcapkit-grow-') as tmp:
+                path = os.path.join(tmp, 'growing.pcap')
+                with open(path, 'wb') as sink:
+                    sink.write(payload[:split])
 
-            def append_later():
-                time.sleep(0.6)
-                with open(path, 'ab') as sink:
-                    sink.write(payload[split:])
-                    sink.flush()
-                    os.fsync(sink.fileno())
+                # The file's size at each end of stream the extractor announces.
+                sizes = []
+                announce = extraction.warn
 
-            threading.Thread(target=append_later, daemon=True).start()
+                def append_at_the_second_end_of_stream(message, *args, **kwargs):
+                    if str(message) == 'EOF reached':
+                        sizes.append(os.path.getsize(path))
+                        if len(sizes) == 2:
+                            with open(path, 'ab') as sink:
+                                sink.write(payload[split:])
+                    return announce(message, *args, **kwargs)
 
-            extractor = pcapkit.extract(fin=path, nofile=True, store=False,
-                                        auto=False, no_eof=True)
-            numbers = [frame.info.number for frame in extractor]
-            assert numbers == [1, 2, 3, 4, 5], numbers
+                extraction.warn = append_at_the_second_end_of_stream
+
+                extractor = pcapkit.extract(fin=path, nofile=True, store=False,
+                                            auto=False, no_eof=True)
+                numbers = [next(extractor).info.number for _ in range(5)]
+                assert not sizes, 'end of stream before five frames: ' + repr(sizes)
+
+                numbers += [frame.info.number for frame in extractor]
+                # Not vacuous: both ends of stream were met on the five-frame
+                # file, and the sixth frame was on disk before the extractor
+                # stopped.
+                assert sizes[:2] == [split, split], 'no append: ' + repr(sizes)
+                assert os.path.getsize(path) == len(payload), os.path.getsize(path)
+                assert numbers == [1, 2, 3, 4, 5], numbers
+
             print('frames ' + repr(numbers), flush=True)
             print({SENTINEL!r}, flush=True)
         """)
