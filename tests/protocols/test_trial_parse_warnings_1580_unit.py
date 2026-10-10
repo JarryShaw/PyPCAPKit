@@ -468,6 +468,15 @@ class TestTrialParseWarnings(unittest.TestCase):
         self.assertEqual(len(unrelated), 1)
         self.assertEqual(self._schema(caught), TCP_CUT_MESSAGES)
 
+    def test_hold_warnings_is_exported(self) -> None:
+        """``import *`` brings ``hold_warnings`` in, as it does ``warnings.catch_warnings`` (#1602)."""
+        import pcapkit.utilities.warnings as warnings_module
+
+        self.assertIn('hold_warnings', warnings_module.__all__)
+        namespace = {}  # type: dict[str, Any]
+        exec('from pcapkit.utilities.warnings import *', namespace)  # pylint: disable=exec-used
+        self.assertIs(namespace['hold_warnings'], warnings_module.hold_warnings)
+
 
 if __name__ == '__main__':
     unittest.main()
