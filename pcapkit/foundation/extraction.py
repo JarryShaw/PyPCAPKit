@@ -1389,8 +1389,13 @@ class Extractor(Generic[_P]):
         # will not be moved after reading; however, the returned bytes object
         # may not be exactly 4 bytes, so we use [:4] to get the first 4 bytes
         self._magic = self._ifile.peek(4)[:4]
-        #self._magic = self._ifile.read(4)  # magic number
-        #self._ifile.seek(0, os.SEEK_SET)
+        if len(self._magic) < 4:
+            # NOTE: ``peek`` makes at most one read of the stream, which a pipe or a
+            # raw stream may answer with fewer than four octets, so a short peek is
+            # not a short file. Read them instead, and seek back (:issue:`1586`).
+            position = self._ifile.tell()
+            self._magic = self._ifile.read(4)
+            self._ifile.seek(position, os.SEEK_SET)
 
         self.run()    # start extraction
 
