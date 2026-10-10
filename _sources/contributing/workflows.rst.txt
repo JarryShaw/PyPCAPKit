@@ -245,8 +245,8 @@ repository target the same reusable workflow, with the same input:
 not one: ``gate`` (the full suite, one Python version) and ``changelog``
 (checks ``CHANGELOG.md`` against its source entry). It skips the other
 **eight** -- the five matrix jobs, ``test`` (five Python legs),
-``integration`` (five), ``engine-tests`` (one job per engine, each looping
-over six Python versions), ``pypcap-parity`` (two) and ``unittest-ordering``
+``integration`` (five), ``engine-tests`` (one job for each of five engines,
+each looping over six Python versions), ``pypcap-parity`` (two) and ``unittest-ordering``
 (eleven matrix cells), each of which has already run once for this commit
 from Unit Tests' own ``push`` trigger (and, all but ``unittest-ordering``,
 which runs on ``main`` pushes only, from its ``pull_request`` trigger), so
@@ -479,6 +479,32 @@ initial value, to tune once weekly reports exist. ``W9`` is therefore expected t
 while the pool stays saturated, and the first runs with JUnit will show whether
 ``W7``'s 10-second test line needs raising. What to do when one fires is on
 :doc:`conventions/process`.
+
+Work Kept Off the Pull-Request Queue (`#1538 <https://github.com/JarryShaw/PyPCAPKit/issues/1538>`__)
+-----------------------------------------------------------------------------------------------------
+
+Three cuts in :file:`unit-tests.yml` keep work that cannot gate a merge from competing
+with pull-request jobs for the 20-runner pool. None touches a required check or adds a
+permission to the reusable workflow.
+
+* ``unittest-ordering`` runs on ``main`` pushes only, per `#1052
+  <https://github.com/JarryShaw/PyPCAPKit/issues/1052>`__ item H, and has
+  ``needs: [test]``, so its eleven cells join the queue once ``test`` finishes rather
+  than when the push run is created, ahead of that run's own ``Python`` legs and of
+  pull-request jobs created later in a merge wave. Its ``if:`` opens with
+  ``!cancelled()``, so the cells still run when ``test`` fails, and a red cell still
+  fails the push run that GitHub Pages, Conda Update and Vendor Update (and so Create
+  Release) wait on. The cost is wall time: the push run, and those workflows, finish
+  about one slowest cell later, about 6 min before any queue wait (estimate).
+* ``engine-tests``' ``Run the 3.15 cell (experimental, non-blocking)`` step runs on
+  ``main`` pushes only. This narrows `#845 <https://github.com/JarryShaw/PyPCAPKit/issues/845>`__'s
+  ruling -- present so a regression is visible, never blocking -- from every run to
+  every ``main`` push: a 3.15 regression shows within one merge. The step keeps
+  ``continue-on-error: true``.
+* ``engine-tests`` has no ``DPKT`` cell. Its only path was
+  :file:`tests/toolkit/test_dpkt_unit.py`, which ``test`` runs with ``DPKT`` installed
+  on 3.10-3.14. Dropped with it: that file in a venv holding only ``test`` and ``DPKT``,
+  and on 3.15.
 
 Required Status Checks
 ----------------------

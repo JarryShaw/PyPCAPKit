@@ -307,6 +307,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/io.html">I/O Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/sentinels.html">Sentinel Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/version.html">Version Info</a></li>
@@ -835,8 +836,20 @@
         <span class="c1"># octets, and parsing the next layer from none would default-fill a</span>
         <span class="c1"># header that was never captured, which ``from_data`` then rebuilds</span>
         <span class="c1"># (:issue:`1167`). A zero length makes it a ``NoPayload`` instead.</span>
+        <span class="c1">#</span>
+        <span class="c1"># A Total Length of 0 is what TCP segmentation offload leaves in a</span>
+        <span class="c1"># capture taken on the sending host: the payload is then the rest of</span>
+        <span class="c1"># the captured frame, with no trailer, as Wireshark ("presumed TSO") and</span>
+        <span class="c1"># dpkt read it. Any other Total Length shorter than the header is</span>
+        <span class="c1"># Wireshark's "Bogus IP length", which it dissects no further: no</span>
+        <span class="c1"># payload, and the octets after the header are the trailer, as they are</span>
+        <span class="c1"># for a Total Length equal to the header's. Either way the rebuild</span>
+        <span class="c1"># writes the Total Length back as it was (:issue:`1547`).</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">:</span>
-            <span class="n">_plen</span> <span class="o">=</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">len</span> <span class="o">-</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span>
+            <span class="k">if</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">len</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">_plen</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">_plen</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">len</span> <span class="o">-</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">_plen</span> <span class="o">=</span> <span class="mi">0</span>
 

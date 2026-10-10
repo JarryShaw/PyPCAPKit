@@ -307,6 +307,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/io.html">I/O Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/sentinels.html">Sentinel Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/version.html">Version Info</a></li>
@@ -542,6 +543,12 @@
 <span class="sd">    packet block, which :meth:`~scapy.utils.RawPcapNgReader._read_block` is the</span>
 <span class="sd">    last place to see.</span>
 
+<span class="sd">    The PCAP-NG subclass also starts each section with no interfaces, as the</span>
+<span class="sd">    PCAP-NG specification defines a section: an interface ID counts the Interface</span>
+<span class="sd">    Description Blocks of its own section only. `Scapy`_'s reader keeps appending</span>
+<span class="sd">    to one table across Section Header Blocks, so a later section's interface 0</span>
+<span class="sd">    resolved to the first section's, with its link type and resolution (#1522).</span>
+
 <span class="sd">    Built when called, so that importing this module does not import `Scapy`_,</span>
 <span class="sd">    and so that it always subclasses the :class:`scapy.utils.PcapReader` of the</span>
 <span class="sd">    moment.</span>
@@ -578,6 +585,11 @@
         <span class="n">alternative</span> <span class="o">=</span> <span class="n">_PcapReader</span>
 
         <span class="n">_resolution</span> <span class="o">=</span> <span class="mi">1_000_000</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_read_block_shb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_read_block_shb</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="c1"># a new section: its interface IDs restart from 0 (#1522)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">interfaces</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">_read_block</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
             <span class="n">block</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_read_block</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>

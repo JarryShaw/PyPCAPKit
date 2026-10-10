@@ -307,6 +307,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/io.html">I/O Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/sentinels.html">Sentinel Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/version.html">Version Info</a></li>
@@ -1296,8 +1297,12 @@
     <span class="p">)</span>
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__option_padding__'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-    <span class="c1">#: Payload.</span>
-    <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'vihl'</span><span class="p">][</span><span class="s1">'ihl'</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="c1">#: Payload. A Total Length of 0, as TCP segmentation offload leaves it in a</span>
+    <span class="c1">#: capture taken on the sending host, takes the rest of the data and leaves</span>
+    <span class="c1">#: no trailer; any other Total Length shorter than the header leaves the</span>
+    <span class="c1">#: payload empty and the rest to the trailer (:issue:`1547`).</span>
+    <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span>
+        <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="nb">max</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'vihl'</span><span class="p">][</span><span class="s1">'ihl'</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">)))</span>
     <span class="c1">#: Octets captured past the Total Length, such as Ethernet minimum-frame</span>
     <span class="c1">#: padding. A :class:`~pcapkit.corekit.fields.misc.PayloadField` with no</span>
     <span class="c1">#: length takes whatever the payload leaves on unpack and writes its value</span>

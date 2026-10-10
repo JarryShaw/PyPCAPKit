@@ -314,6 +314,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/corekit/io.html">I/O Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/corekit/module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/corekit/sentinels.html">Sentinel Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/corekit/version.html">Version Info</a></li>
@@ -742,8 +743,8 @@ repository target the same reusable workflow, with the same input:</p>
 not one: <code class="docutils literal notranslate"><span class="pre">gate</span></code> (the full suite, one Python version) and <code class="docutils literal notranslate"><span class="pre">changelog</span></code>
 (checks <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> against its source entry). It skips the other
 <strong>eight</strong> – the five matrix jobs, <code class="docutils literal notranslate"><span class="pre">test</span></code> (five Python legs),
-<code class="docutils literal notranslate"><span class="pre">integration</span></code> (five), <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> (one job per engine, each looping
-over six Python versions), <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> (two) and <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>
+<code class="docutils literal notranslate"><span class="pre">integration</span></code> (five), <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> (one job for each of five engines,
+each looping over six Python versions), <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> (two) and <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>
 (eleven matrix cells), each of which has already run once for this commit
 from Unit Tests’ own <code class="docutils literal notranslate"><span class="pre">push</span></code> trigger (and, all but <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>,
 which runs on <code class="docutils literal notranslate"><span class="pre">main</span></code> pushes only, from its <code class="docutils literal notranslate"><span class="pre">pull_request</span></code> trigger), so
@@ -981,6 +982,31 @@ while the pool stays saturated, and the first runs with JUnit will show whether
 <code class="docutils literal notranslate"><span class="pre">W7</span></code>’s 10-second test line needs raising. What to do when one fires is on
 <a class="reference internal" href="conventions/process.html"><span class="doc">Running the Repository</span></a>.</p>
 </section>
+<section id="work-kept-off-the-pull-request-queue-1538">
+<h2>Work Kept Off the Pull-Request Queue (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1538">#1538</a>)<a class="headerlink" href="#work-kept-off-the-pull-request-queue-1538" title="Link to this heading">¶</a></h2>
+<p>Three cuts in <code class="file docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> keep work that cannot gate a merge from competing
+with pull-request jobs for the 20-runner pool. None touches a required check or adds a
+permission to the reusable workflow.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code> runs on <code class="docutils literal notranslate"><span class="pre">main</span></code> pushes only, per <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1052">#1052</a> item H, and has
+<code class="docutils literal notranslate"><span class="pre">needs:</span> <span class="pre">[test]</span></code>, so its eleven cells join the queue once <code class="docutils literal notranslate"><span class="pre">test</span></code> finishes rather
+than when the push run is created, ahead of that run’s own <code class="docutils literal notranslate"><span class="pre">Python</span></code> legs and of
+pull-request jobs created later in a merge wave. Its <code class="docutils literal notranslate"><span class="pre">if:</span></code> opens with
+<code class="docutils literal notranslate"><span class="pre">!cancelled()</span></code>, so the cells still run when <code class="docutils literal notranslate"><span class="pre">test</span></code> fails, and a red cell still
+fails the push run that GitHub Pages, Conda Update and Vendor Update (and so Create
+Release) wait on. The cost is wall time: the push run, and those workflows, finish
+about one slowest cell later, about 6 min before any queue wait (estimate).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">engine-tests</span></code>’ <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">the</span> <span class="pre">3.15</span> <span class="pre">cell</span> <span class="pre">(experimental,</span> <span class="pre">non-blocking)</span></code> step runs on
+<code class="docutils literal notranslate"><span class="pre">main</span></code> pushes only. This narrows <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/845">#845</a>’s
+ruling – present so a regression is visible, never blocking – from every run to
+every <code class="docutils literal notranslate"><span class="pre">main</span></code> push: a 3.15 regression shows within one merge. The step keeps
+<code class="docutils literal notranslate"><span class="pre">continue-on-error:</span> <span class="pre">true</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> has no <code class="docutils literal notranslate"><span class="pre">DPKT</span></code> cell. Its only path was
+<code class="file docutils literal notranslate"><span class="pre">tests/toolkit/test_dpkt_unit.py</span></code>, which <code class="docutils literal notranslate"><span class="pre">test</span></code> runs with <code class="docutils literal notranslate"><span class="pre">DPKT</span></code> installed
+on 3.10-3.14. Dropped with it: that file in a venv holding only <code class="docutils literal notranslate"><span class="pre">test</span></code> and <code class="docutils literal notranslate"><span class="pre">DPKT</span></code>,
+and on 3.15.</p></li>
+</ul>
+</section>
 <section id="required-status-checks">
 <h2>Required Status Checks<a class="headerlink" href="#required-status-checks" title="Link to this heading">¶</a></h2>
 <p>Ruleset <code class="docutils literal notranslate"><span class="pre">23497679</span></code> on <code class="docutils literal notranslate"><span class="pre">main</span></code> requires six contexts, with
@@ -1141,6 +1167,7 @@ repeating it here.</p>
 <li><a class="reference internal" href="#pull-request-target"><code class="docutils literal notranslate"><span class="pre">pull_request_target</span></code></a></li>
 <li><a class="reference internal" href="#coverage-1063">Coverage (#1063)</a></li>
 <li><a class="reference internal" href="#ci-timing-review-1538">CI Timing Review (#1538)</a></li>
+<li><a class="reference internal" href="#work-kept-off-the-pull-request-queue-1538">Work Kept Off the Pull-Request Queue (#1538)</a></li>
 <li><a class="reference internal" href="#required-status-checks">Required Status Checks</a></li>
 <li><a class="reference internal" href="#deployment-environment">Deployment <code class="docutils literal notranslate"><span class="pre">environment:</span></code></a></li>
 </ul>

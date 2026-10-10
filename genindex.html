@@ -306,6 +306,7 @@
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/io.html">I/O Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/protochain.html">Protocol Chain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/sentinels.html">Sentinel Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/version.html">Version Info</a></li>
@@ -485,12 +486,8 @@
           <li><a href="pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.__additional__">(pcapkit.protocols.schema.schema.Schema attribute)</a>
 </li>
         </ul></li>
-        <li><a href="pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.DeferredPacket.__analyse__">__analyse__() (pcapkit.foundation.reassembly.data.data.DeferredPacket method)</a>
-
-        <ul>
-          <li><a href="pcapkit/foundation/traceflow/index.html#pcapkit.foundation.traceflow.data.data.DeferredPacket.__analyse__">(pcapkit.foundation.traceflow.data.data.DeferredPacket method)</a>
+        <li><a href="pcapkit/corekit/packet.html#pcapkit.corekit.packet.DeferredPacket.__analyse__">__analyse__() (pcapkit.corekit.packet.DeferredPacket method)</a>
 </li>
-        </ul></li>
         <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG.__block__">__block__ (pcapkit.protocols.misc.pcapng.PCAPNG attribute)</a>
 </li>
         <li><a href="pcapkit/corekit/context.html#pcapkit.corekit.context.ContextRegistry.__bool__">__bool__() (pcapkit.corekit.context.ContextRegistry method)</a>
@@ -560,6 +557,8 @@
         <li><a href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__data__">__data__ (pcapkit.protocols.protocol.Protocol attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.EnumSchema.__default__">__default__ (pcapkit.protocols.schema.schema.EnumSchema attribute)</a>
+</li>
+        <li><a href="pcapkit/corekit/packet.html#pcapkit.corekit.packet.DeferredPacket.__deferred__">__deferred__ (pcapkit.corekit.packet.DeferredPacket attribute)</a>
 </li>
         <li><a href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.__engine__">__engine__ (pcapkit.foundation.extraction.Extractor attribute)</a>
 </li>
@@ -710,6 +709,8 @@
         <li><a href="pcapkit/corekit/infoclass.html#id0">__init_subclass__() (pcapkit.corekit.infoclass.Info class method)</a>, <a href="pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.Info.__init_subclass__">[1]</a>
 
         <ul>
+          <li><a href="pcapkit/corekit/packet.html#pcapkit.corekit.packet.DeferredPacket.__init_subclass__">(pcapkit.corekit.packet.DeferredPacket class method)</a>
+</li>
           <li><a href="pcapkit/dumpkit/common.html#pcapkit.dumpkit.common.Dumper.__init_subclass__">(pcapkit.dumpkit.common.Dumper class method)</a>
 </li>
           <li><a href="pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.Engine.__init_subclass__">(pcapkit.foundation.engines.engine.Engine class method)</a>
@@ -1843,10 +1844,10 @@
 </li>
         <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_rxspeed">_make_option_if_rxspeed() (pcapkit.protocols.misc.pcapng.PCAPNG method)</a>
 </li>
-        <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_speed">_make_option_if_speed() (pcapkit.protocols.misc.pcapng.PCAPNG method)</a>
-</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_speed">_make_option_if_speed() (pcapkit.protocols.misc.pcapng.PCAPNG method)</a>
+</li>
         <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_tsoffset">_make_option_if_tsoffset() (pcapkit.protocols.misc.pcapng.PCAPNG method)</a>
 </li>
         <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_tsresol">_make_option_if_tsresol() (pcapkit.protocols.misc.pcapng.PCAPNG method)</a>
@@ -13261,12 +13262,8 @@
           <li><a href="pcapkit/foundation/traceflow/index.html#pcapkit.foundation.traceflow.data.data.Deferred">(class in pcapkit.foundation.traceflow.data.data)</a>
 </li>
         </ul></li>
-        <li><a href="pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.DeferredPacket">DeferredPacket (class in pcapkit.foundation.reassembly.data.data)</a>
-
-        <ul>
-          <li><a href="pcapkit/foundation/traceflow/index.html#pcapkit.foundation.traceflow.data.data.DeferredPacket">(class in pcapkit.foundation.traceflow.data.data)</a>
+        <li><a href="pcapkit/corekit/packet.html#pcapkit.corekit.packet.DeferredPacket">DeferredPacket (class in pcapkit.corekit.packet)</a>
 </li>
-        </ul></li>
         <li><a href="pcapkit/protocols/link/vlan.html#pcapkit.protocols.data.link.vlan.TCI.dei">dei (pcapkit.protocols.data.link.vlan.TCI attribute)</a>
 
         <ul>
@@ -30268,6 +30265,8 @@
 </li>
           <li><a href="pcapkit/corekit/multidict.html#module-pcapkit.corekit.multidict">pcapkit.corekit.multidict</a>
 </li>
+          <li><a href="pcapkit/corekit/packet.html#module-pcapkit.corekit.packet">pcapkit.corekit.packet</a>
+</li>
           <li><a href="pcapkit/corekit/protochain.html#module-pcapkit.corekit.protochain">pcapkit.corekit.protochain</a>
 </li>
           <li><a href="pcapkit/corekit/sentinels.html#module-pcapkit.corekit.sentinels">pcapkit.corekit.sentinels</a>
@@ -39136,6 +39135,13 @@
         <li><a href="pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.pcapkit.corekit.multidict._VT">pcapkit.corekit.multidict._VT (in module pcapkit.corekit.multidict)</a>
 </li>
         <li>
+    pcapkit.corekit.packet
+
+        <ul>
+          <li><a href="pcapkit/corekit/packet.html#module-pcapkit.corekit.packet">module</a>
+</li>
+        </ul></li>
+        <li>
     pcapkit.corekit.protochain
 
         <ul>
@@ -40541,6 +40547,8 @@
           <li><a href="pcapkit/vendor/ftp.html#module-pcapkit.vendor.ftp.command">module</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     pcapkit.vendor.ftp.return_code
 
@@ -40548,8 +40556,6 @@
           <li><a href="pcapkit/vendor/ftp.html#module-pcapkit.vendor.ftp.return_code">module</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     pcapkit.vendor.hip
 
@@ -57642,9 +57648,7 @@
         <ul>
           <li><a href="pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.to_dict">(pcapkit.corekit.multidict.MultiDict method)</a>
 </li>
-          <li><a href="pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.DeferredPacket.to_dict">(pcapkit.foundation.reassembly.data.data.DeferredPacket method)</a>
-</li>
-          <li><a href="pcapkit/foundation/traceflow/index.html#pcapkit.foundation.traceflow.data.data.DeferredPacket.to_dict">(pcapkit.foundation.traceflow.data.data.DeferredPacket method)</a>
+          <li><a href="pcapkit/corekit/packet.html#pcapkit.corekit.packet.DeferredPacket.to_dict">(pcapkit.corekit.packet.DeferredPacket method)</a>
 </li>
           <li><a href="pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.to_dict">(pcapkit.protocols.schema.schema.Schema method)</a>
 </li>

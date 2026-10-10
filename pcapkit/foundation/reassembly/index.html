@@ -314,6 +314,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/io.html">I/O Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/multidict.html">Multi-Mapping Dictionary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/protochain.html">Protocol Chain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/sentinels.html">Sentinel Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/version.html">Version Info</a></li>
@@ -617,9 +618,9 @@ cost of IP reassembly over it.</p>
 smaller saving, being FIN/RST-driven rather than per-frame – 222 submits per
 <code class="file docutils literal notranslate"><span class="pre">http.pcap</span></code> pass against 1117.</p>
 <p>Holding the call here defers it to the first read of
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">Datagram.packet</span></code>, so a caller that wants the parsed payload still gets
-exactly the object an eager call would produce, and one that does not never
-pays for it.</p>
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">Datagram.packet</span></code>, where <a class="reference internal" href="../../corekit/packet.html#pcapkit.corekit.packet.DeferredPacket" title="pcapkit.corekit.packet.DeferredPacket"><code class="xref py py-class docutils literal notranslate"><span class="pre">DeferredPacket</span></code></a>
+runs it, so a caller that wants the parsed payload still gets exactly the
+object an eager call would produce, and one that does not never pays for it.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -647,55 +648,7 @@ bound to the reassembly object’s protocol.</p></li>
 
 </dd></dl>
 
-<dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.data.DeferredPacket">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.data.data.</span></span><span class="sig-name descname"><span class="pre">DeferredPacket</span></span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data/data.html#DeferredPacket"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.data.DeferredPacket" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>Resolves a <a class="reference internal" href="#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a> <code class="docutils literal notranslate"><span class="pre">packet</span></code> field on first read.</p>
-<p>A reassembled datagram’s <code class="docutils literal notranslate"><span class="pre">packet</span></code> is the parsed form of the payload it just
-reassembled, and both reassemblers can hand a <a class="reference internal" href="#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a> in its place.
-This carries the reading half of that arrangement, so the two <code class="docutils literal notranslate"><span class="pre">Datagram</span></code>
-models share it rather than each declaring it.</p>
-<p>A subclass has to list <code class="docutils literal notranslate"><span class="pre">packet</span></code> in its <code class="docutils literal notranslate"><span class="pre">__additional__</span></code>. That is what makes
-the field lazy at all: <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> stores a field
-whose name is a <em>builtin</em> name under a mangled key and maps it back on the way
-out, so <code class="docutils literal notranslate"><span class="pre">packet</span></code> never lands in <a class="reference external" href="https://docs.python.org/3/reference/datamodel.html#object.__dict__" title="(in Python v3.15)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__dict__</span></code></a> itself – which
-routes reading it through <code class="xref py py-meth docutils literal notranslate"><span class="pre">__getattr__()</span></code>, where the deferred analysis can
-run, while <code class="docutils literal notranslate"><span class="pre">dict(datagram)</span></code>, <a class="reference internal" href="#pcapkit.foundation.reassembly.data.data.DeferredPacket.to_dict" title="pcapkit.foundation.reassembly.data.data.DeferredPacket.to_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_dict()</span></code></a> and iteration still report the
-field under its own name.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.data.DeferredPacket.__analyse__">
-<span class="sig-name descname"><span class="pre">__analyse__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data/data.html#DeferredPacket.__analyse__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.data.DeferredPacket.__analyse__" title="Link to this definition">¶</a></dt>
-<dd><p>Resolve a deferred analysis, at most once.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Parsed payload, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> for a datagram reported as the tuple
-of its received runs.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.data.DeferredPacket.to_dict">
-<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/data/data.html#DeferredPacket.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.data.DeferredPacket.to_dict" title="Link to this definition">¶</a></dt>
-<dd><p>Convert <code class="xref py py-class docutils literal notranslate"><span class="pre">Datagram</span></code> into <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The datagram’s fields, with <code class="docutils literal notranslate"><span class="pre">packet</span></code> analysed if it had not been
-read yet – a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> holding a <a class="reference internal" href="#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a> would leak an
-implementation detail into what is meant to be plain data.</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
+<p><code class="docutils literal notranslate"><span class="pre">DeferredPacket</span></code> is re-exported here from <a class="reference internal" href="../../corekit/packet.html#module-pcapkit.corekit.packet" title="pcapkit.corekit.packet"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.packet</span></code></a>; see <a class="reference internal" href="../../corekit/packet.html"><span class="doc">Deferred Packet</span></a>.</p>
 </section>
 </section>
 

@@ -314,6 +314,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/io.html">I/O Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/multidict.html">Multi-Mapping Dictionary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/protochain.html">Protocol Chain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/sentinels.html">Sentinel Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/version.html">Version Info</a></li>
@@ -1904,7 +1905,10 @@ exist; any other value is a <code class="docutils literal notranslate"><span cla
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.IPv4.payload">
 <span class="sig-name descname"><span class="pre">payload</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PayloadField</span> <span class="pre">payload&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.IPv4.payload" title="Link to this definition">¶</a></dt>
-<dd><p>Payload.</p>
+<dd><p>Payload. A Total Length of 0, as TCP segmentation offload leaves it in a
+capture taken on the sending host, takes the rest of the data and leaves
+no trailer; any other Total Length shorter than the header leaves the
+payload empty and the rest to the trailer (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1547">#1547</a>).</p>
 </dd></dl>
 
 <dl class="py attribute">

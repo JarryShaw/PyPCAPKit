@@ -25,6 +25,7 @@ inherits from.
    io
    module
    multidict
+   packet
    protochain
    sentinels
    version

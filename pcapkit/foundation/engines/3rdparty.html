@@ -314,6 +314,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/io.html">I/O Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/multidict.html">Multi-Mapping Dictionary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/protochain.html">Protocol Chain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/sentinels.html">Sentinel Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/version.html">Version Info</a></li>
@@ -907,6 +908,9 @@ is provided, as the PyShark engine does not parse with
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pyshark.PyShark.read_frame">
 <span class="sig-name descname"><span class="pre">read_frame</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pyshark.html#PyShark.read_frame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pyshark.PyShark.read_frame" title="Link to this definition">¶</a></dt>
 <dd><p>Read frames with PyShark engine.</p>
+<p>A tshark record that is not a packet, such as a PCAP-NG systemd Journal
+Export Block, is skipped. Frames are numbered by count, as the default
+engine numbers them, not by tshark’s frame number.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></span></p>

@@ -307,6 +307,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/io.html">I/O Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/sentinels.html">Sentinel Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/version.html">Version Info</a></li>
@@ -477,12 +478,13 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumLookup</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span><span class="p">,</span> <span class="n">info_final</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">DeferredPacket</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrEnum</span><span class="p">,</span> <span class="n">auto</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'ReassemblyData'</span><span class="p">,</span> <span class="s1">'Completion'</span><span class="p">,</span> <span class="s1">'Deferred'</span><span class="p">,</span> <span class="s1">'DeferredPacket'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">Datagram</span> <span class="k">as</span> <span class="n">IP_Datagram</span>
@@ -598,9 +600,9 @@
 <span class="sd">    :file:`http.pcap` pass against 1117.</span>
 
 <span class="sd">    Holding the call here defers it to the first read of</span>
-<span class="sd">    :attr:`Datagram.packet`, so a caller that wants the parsed payload still gets</span>
-<span class="sd">    exactly the object an eager call would produce, and one that does not never</span>
-<span class="sd">    pays for it.</span>
+<span class="sd">    :attr:`Datagram.packet`, where :class:`~pcapkit.corekit.packet.DeferredPacket`</span>
+<span class="sd">    runs it, so a caller that wants the parsed payload still gets exactly the</span>
+<span class="sd">    object an eager call would produce, and one that does not never pays for it.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        analyze: The analyser to call, i.e.</span>
@@ -629,95 +631,6 @@
 
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">analyze</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span></div>
-</div>
-
-
-
-<div class="viewcode-block" id="DeferredPacket">
-<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.DeferredPacket">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">DeferredPacket</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Resolves a :class:`Deferred` ``packet`` field on first read.</span>
-
-<span class="sd">    A reassembled datagram's ``packet`` is the parsed form of the payload it just</span>
-<span class="sd">    reassembled, and both reassemblers can hand a :class:`Deferred` in its place.</span>
-<span class="sd">    This carries the reading half of that arrangement, so the two ``Datagram``</span>
-<span class="sd">    models share it rather than each declaring it.</span>
-
-<span class="sd">    A subclass has to list ``packet`` in its ``__additional__``. That is what makes</span>
-<span class="sd">    the field lazy at all: :class:`~pcapkit.corekit.infoclass.Info` stores a field</span>
-<span class="sd">    whose name is a *builtin* name under a mangled key and maps it back on the way</span>
-<span class="sd">    out, so ``packet`` never lands in :attr:`~object.__dict__` itself -- which</span>
-<span class="sd">    routes reading it through :meth:`__getattr__`, where the deferred analysis can</span>
-<span class="sd">    run, while ``dict(datagram)``, :meth:`to_dict` and iteration still report the</span>
-<span class="sd">    field under its own name.</span>
-
-<span class="sd">    """</span>
-
-    <span class="c1"># NOTE: the ``super()`` calls below are suppressed for both checkers. They are</span>
-    <span class="c1"># undefined *on this mixin*, which is what a mixin is -- the base arrives at</span>
-    <span class="c1"># the point of use, where every subclass is declared</span>
-    <span class="c1"># ``class X(DeferredPacket, Info)`` and :class:`~pcapkit.corekit.infoclass.Info`</span>
-    <span class="c1"># supplies all three. Neither mypy nor pylint can see that from here, and</span>
-    <span class="c1"># pylint calls it an *error* rather than a warning.</span>
-
-<div class="viewcode-block" id="DeferredPacket.__analyse__">
-<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.DeferredPacket.__analyse__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">__analyse__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[ProtocolBase]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Resolve a deferred analysis, at most once.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed payload, or :data:`None` for a datagram reported as the tuple</span>
-<span class="sd">            of its received runs.</span>
-
-<span class="sd">        """</span>
-        <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'packet'</span><span class="p">,</span> <span class="s1">'packet'</span><span class="p">)</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Deferred</span><span class="p">):</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="k">return</span> <span class="n">value</span></div>
-
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
-        <span class="c1"># NOTE: reached only for names absent from ``__dict__``, which ``packet``</span>
-        <span class="c1"># always is -- see ``__additional__`` above. Everything else has to raise,</span>
-        <span class="c1"># or a typo would silently answer with a parsed payload.</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="s1">'packet'</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1"> object has no attribute </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__analyse__</span><span class="p">()</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">'packet'</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__analyse__</span><span class="p">()</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># type: ignore[misc] # pylint: disable=no-member</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'object'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
-        <span class="c1"># NOTE: ``Mapping.__contains__`` answers by fetching the value, which</span>
-        <span class="c1"># would run the deferred analysis merely to decide that the field exists.</span>
-        <span class="c1"># ``packet`` is a declared field, so it is always there.</span>
-        <span class="k">return</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">'packet'</span> <span class="ow">or</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__contains__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># type: ignore[misc] # pylint: disable=no-member</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__analyse__</span><span class="p">()</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__analyse__</span><span class="p">()</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span>
-
-<div class="viewcode-block" id="DeferredPacket.to_dict">
-<a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.DeferredPacket.to_dict">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Any]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Convert :class:`Datagram` into :obj:`dict`.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            The datagram's fields, with ``packet`` analysed if it had not been</span>
-<span class="sd">            read yet -- a :obj:`dict` holding a :class:`Deferred` would leak an</span>
-<span class="sd">            implementation detail into what is meant to be plain data.</span>
-
-<span class="sd">        """</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__analyse__</span><span class="p">()</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>  <span class="c1"># type: ignore[misc] # pylint: disable=no-member</span></div>
 </div>
 
 

@@ -307,6 +307,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/io.html">I/O Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/packet.html">Deferred Packet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/sentinels.html">Sentinel Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/version.html">Version Info</a></li>
@@ -497,6 +498,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pyshark.capture.file_capture</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileCapture</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyshark.packet.layers.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseLayer</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pyshark.packet.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">PySharkPacket</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
@@ -504,6 +506,45 @@
 <span class="c1">#: logging.Logger: Module-level logger, a child of the package-wide</span>
 <span class="c1">#: :data:`pcapkit.utilities.logging.logger`.</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_frame_layer</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'PySharkPacket'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[BaseLayer]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The ``frame`` layer of a `PyShark`_ packet, or :data:`None` when the record has none.</span>
+
+<span class="sd">    Looked up by name, because `PyShark`_ takes the second PDML ``&lt;proto&gt;`` as</span>
+<span class="sd">    ``frame_info``. On a packet with a comment, that is ``pkt_comment``, which has</span>
+<span class="sd">    no ``protocols``, and the frame layer is ``layers[0]``. By its source,</span>
+<span class="sd">    :program:`tshark` 4.2.2 roots a Sysdig event at ``syscall`` and a Netflix</span>
+<span class="sd">    custom block at ``bblog``, so those records have no ``frame`` layer.</span>
+
+<span class="sd">    .. _PyShark: https://kiminewt.github.io/pyshark</span>
+
+<span class="sd">    """</span>
+    <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">frame_info</span><span class="p">,</span> <span class="o">*</span><span class="n">packet</span><span class="o">.</span><span class="n">layers</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">layer</span><span class="o">.</span><span class="n">layer_name</span> <span class="o">==</span> <span class="s1">'frame'</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">layer</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_packet</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'PySharkPacket'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whether a `PyShark`_ packet is a packet record, rather than another kind of tshark record.</span>
+
+<span class="sd">    :program:`tshark` numbers every record it reads, not only packets: a PCAP-NG</span>
+<span class="sd">    systemd Journal Export Block, Custom Block or Sysdig Event Block is a frame</span>
+<span class="sd">    to it, measured with :program:`tshark` 4.6.9. The default engine counts</span>
+<span class="sd">    Enhanced, Simple and obsolete Packet Blocks only.</span>
+
+<span class="sd">    The marker is ``frame.encap_type`` on the record's :func:`_frame_layer`.</span>
+<span class="sd">    Wireshark adds it for ``REC_TYPE_PACKET`` records only:</span>
+<span class="sd">    :file:`epan/dissectors/packet-frame.c` lines 1001-1002 in 4.2.2, and 828-890</span>
+<span class="sd">    in 4.6.9. The summary line is not used, because it differs between those</span>
+<span class="sd">    versions. A record with no ``frame`` layer is not a packet either.</span>
+
+<span class="sd">    .. _PyShark: https://kiminewt.github.io/pyshark</span>
+
+<span class="sd">    """</span>
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">_frame_layer</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s1">'encap_type'</span> <span class="ow">in</span> <span class="n">frame</span><span class="o">.</span><span class="n">field_names</span>
 
 
 <div class="viewcode-block" id="PyShark">
@@ -693,10 +734,12 @@
                  <span class="sa">f</span><span class="s2">"so 'ipv4=</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_ipv4</span><span class="si">}</span><span class="s2">', 'ipv6=</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_ipv6</span><span class="si">}</span><span class="s2">' and 'tcp=</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_tcp</span><span class="si">}</span><span class="s2">' will be ignored"</span><span class="p">,</span>
                  <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
 
-        <span class="c1"># setup verbose handler</span>
+        <span class="c1"># setup verbose handler; a packet always has a frame layer, since</span>
+        <span class="c1"># read_frame skips every record that does not (#1515)</span>
         <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_v</span><span class="p">:</span>
             <span class="n">ext</span><span class="o">.</span><span class="n">_vfunc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">_frnum</span><span class="si">:</span><span class="s1">&gt;3d</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">frame_info</span><span class="o">.</span><span class="n">protocols</span><span class="si">}</span><span class="s1">'</span>  <span class="c1"># pylint: disable=protected-access</span>
+                <span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">_frnum</span><span class="si">:</span><span class="s1">&gt;3d</span><span class="si">}</span><span class="s1">: '</span>  <span class="c1"># pylint: disable=protected-access</span>
+                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">cast</span><span class="p">(</span><span class="s2">"BaseLayer"</span><span class="p">,</span><span class="w"> </span><span class="n">_frame_layer</span><span class="p">(</span><span class="n">f</span><span class="p">))</span><span class="o">.</span><span class="n">protocols</span><span class="si">}</span><span class="s1">'</span>
             <span class="p">)</span>
 
         <span class="c1"># extract global header</span>
@@ -712,6 +755,10 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">read_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'PySharkPacket'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Read frames with PyShark engine.</span>
 
+<span class="sd">        A tshark record that is not a packet, such as a PCAP-NG systemd Journal</span>
+<span class="sd">        Export Block, is skipped. Frames are numbered by count, as the default</span>
+<span class="sd">        engine numbers them, not by tshark's frame number.</span>
+
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed frame instance.</span>
 
@@ -723,11 +770,15 @@
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.pyshark</span><span class="w"> </span><span class="kn">import</span> <span class="n">packet2dict</span><span class="p">,</span> <span class="n">tcp_traceflow</span>
         <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>
 
-        <span class="c1"># fetch PyShark packet</span>
-        <span class="n">packet</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'PySharkPacket'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span><span class="o">.</span><span class="n">next</span><span class="p">())</span>
+        <span class="c1"># fetch the next PyShark packet that is a packet record</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">packet</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'PySharkPacket'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span><span class="o">.</span><span class="n">next</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">_is_packet</span><span class="p">(</span><span class="n">packet</span><span class="p">):</span>
+                <span class="k">break</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'pyshark: skipping tshark frame </span><span class="si">%s</span><span class="s1">, not a packet record'</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">number</span><span class="p">)</span>
 
         <span class="c1"># verbose output</span>
-        <span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">number</span><span class="p">)</span>
+        <span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">ext</span><span class="o">.</span><span class="n">_vfunc</span><span class="p">(</span><span class="n">ext</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
 
         <span class="c1"># write plist</span>
