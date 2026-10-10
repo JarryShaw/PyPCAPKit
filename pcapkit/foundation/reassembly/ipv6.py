@@ -158,3 +158,20 @@ class IPv6(IP):
         if header[offset] != Enum_TransType.IPv6_Frag:
             return header
         return header[:offset] + bytes((int(proto),)) + header[offset + 1:]
+
+    def _header_overhead(self, length: 'int') -> 'int':
+        """Count the header octets that the Payload Length includes.
+
+        The Payload Length counts every octet after the fixed IPv6 header
+        (:rfc:`8200#section-3`), so a reassembled packet's is its unfragmentable
+        part's extension headers plus its data (:rfc:`8200#section-4.5`). The
+        header here is the unfragmentable part, its Fragment header excluded.
+
+        Args:
+            length: Length of the datagram's header.
+
+        Returns:
+            How many of those octets the Payload Length counts.
+
+        """
+        return max(length - _IPV6_HDR_LEN, 0)

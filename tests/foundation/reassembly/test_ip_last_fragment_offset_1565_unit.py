@@ -82,9 +82,12 @@ class TestIPReassemblyLastFragmentOffset(unittest.TestCase):
                                 self.assertEqual(datagram.payload, bytes(LAST) + tail)
 
     def test_the_last_fragment_at_the_largest_offset_completes_its_datagram(self) -> None:
+        # IPv6 only: an IPv4 datagram reaching octet 65,528 is too long for its
+        # Total Length, header included, so it never completes (#1585).
         from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.ipv6 import IPv6
 
-        for cls in self._classes():
+        for cls in (IPv6,):
             for size in (1, 7):
                 for strict in (True, False):
                     with self.subTest(cls=cls.__name__, size=size, strict=strict):

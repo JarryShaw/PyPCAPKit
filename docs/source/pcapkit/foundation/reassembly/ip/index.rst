@@ -94,10 +94,17 @@ Because completion frees the buffer (:rfc:`791#section-3.2`), a fragment that
 arrives after its datagram has completed opens a new buffer, which is later
 reported as a separate incomplete datagram; this is intended (:issue:`1507`).
 
-Two departures from the procedure above:
+Three departures from the procedure above:
 
 * Only the final fragment's partial last ``RCVBT`` block is set. A non-final
   fragment carries a multiple of 8 octets, so one ending mid-block was cut or
   is malformed, and setting its last block would complete the datagram with
   octets nobody sent (:issue:`1567`).
 * A datagram longer than the data buffer is never complete (:issue:`1566`).
+* Nor is a datagram longer than its length field can declare: 65,535 octets
+  with its header, all of which IPv4's Total Length counts and all but the
+  fixed 40 octets of which IPv6's Payload Length counts. Linux rejects such a
+  datagram too (:issue:`1585`). A fragment with Total Length 0, as TCP
+  segmentation offload and BIG TCP leave one, declares no length
+  (:issue:`1555`), so a datagram it carries past that bound grows the data
+  buffer instead, and only the buffer bounds it.

@@ -155,9 +155,13 @@ Terminology
           :meth:`IP._detect_conflicts <pcapkit.foundation.reassembly.ip.IP._detect_conflicts>`.
           ``RCVBT`` records receipt in 8-octet blocks, which is coarser than
           the octet a conflict needs; ``TDL`` is what recovers the exact
-          extent for the one block that can be partially real -- the final
-          fragment's own tail -- so a conflict here is never wider than the
-          octets that genuinely disagreed, even inside that block.
+          extent for the one block marked received that can be partially real
+          -- the final fragment's own tail -- so a conflict here is never wider
+          than the octets that genuinely disagreed, even inside that block.
+          Any other partial last block -- a non-final, truncated or clipped
+          fragment's -- is left unmarked (:issue:`1567`), and its octets are
+          not compared: a later fragment that overwrites them records no
+          conflict (:issue:`1585`).
 
        .. note::
 
