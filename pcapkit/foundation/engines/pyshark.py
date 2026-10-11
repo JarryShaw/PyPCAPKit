@@ -10,19 +10,22 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 .. _PyShark: https://kiminewt.github.io/pyshark
 
 """
+import json
+import subprocess
 import sys
+import tempfile
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.foundation.engines.engine import EngineBase
 from pcapkit.foundation.reassembly import ReassemblyManager
 from pcapkit.utilities.exceptions import stacklevel
 from pcapkit.utilities.logging import get_logger
-from pcapkit.utilities.warnings import AttributeWarning, warn
+from pcapkit.utilities.warnings import AttributeWarning, PySharkWarning, warn
 
 __all__ = ['PyShark']
 
 if TYPE_CHECKING:
-    from typing import Optional
+    from typing import IO, Optional, Union
 
     from pyshark.capture.file_capture import FileCapture
     from pyshark.packet.layers.base import BaseLayer
@@ -33,6 +36,34 @@ if TYPE_CHECKING:
 #: logging.Logger: Module-level logger, a child of the package-wide
 #: :data:`pcapkit.utilities.logging.logger`.
 logger = get_logger(__name__)
+
+
+def _ek_record(line: 'bytes') -> 'Optional[Union[tuple[int, bytes], str]]':
+    """Parse a line of :program:`tshark`'s ``-T ek -x -J frame`` output.
+
+    Args:
+        line: One line of the output.
+
+    Returns:
+        :data:`None` for an index line, which each packet line follows; for a
+        packet line, its ``frame.number`` and its frame's captured octets, the
+        ``frame_raw`` that ``-x`` adds; otherwise, a phrase saying the line
+        cannot be parsed.
+
+    """
+    try:
+        record = json.loads(line)
+        if isinstance(record, dict) and set(record) == {'index'}:
+            return None
+        layers = record['layers']
+        number, octets = layers['frame']['frame_frame_number'], layers['frame_raw']
+        if isinstance(number, list):
+            number = number[0]
+        if isinstance(octets, list):
+            octets = octets[0]
+        return int(number), bytes.fromhex(octets)
+    except (ValueError, LookupError, TypeError):  # not JSON, a field missing, or not text
+        return f'gave output it cannot parse: {bytes(line[:80])!r}'
 
 
 def _frame_layer(packet: 'PySharkPacket') -> 'Optional[BaseLayer]':
@@ -88,6 +119,15 @@ class PyShark(EngineBase['PySharkPacket']):
         _expkg: 'pyshark'
         #: Engine extraction temporary storage.
         _extmp: 'FileCapture'
+        #: The second :program:`tshark` pass :meth:`_octets` reads captured
+        #: octets from, once it is first asked for some.
+        _exraw: 'Optional[subprocess.Popen[bytes]]'
+        #: Where that pass writes its standard error.
+        _exraw_err: 'Optional[IO[bytes]]'
+        #: The frame number and octets :meth:`_octets` last read from it.
+        _exraw_held: 'Optional[tuple[int, bytes]]'
+        #: Whether that pass has failed, so :meth:`_octets` reads no more.
+        _exraw_failed: 'bool'
 
     ##########################################################################
     # Defaults.
@@ -225,6 +265,10 @@ class PyShark(EngineBase['PySharkPacket']):
 
         self._expkg = pyshark
         self._extmp = cast('FileCapture', None)
+        self._exraw = None
+        self._exraw_err = None
+        self._exraw_held = None
+        self._exraw_failed = False
 
         super().__init__(extractor)
 
@@ -336,7 +380,7 @@ class PyShark(EngineBase['PySharkPacket']):
         # trace flows
         if ext._flag_t:
             if ext._tcp:
-                data_tf_tcp = tcp_traceflow(packet, count=ext._frnum)
+                data_tf_tcp = tcp_traceflow(packet, count=ext._frnum, octets=self._octets)
                 if data_tf_tcp is not None:
                     ext._trace.tcp(data_tf_tcp)
 
@@ -348,11 +392,141 @@ class PyShark(EngineBase['PySharkPacket']):
         # return frame record
         return packet
 
+    def _octets_command(self) -> 'list[str]':
+        """The command line of the second :program:`tshark` pass :meth:`_octets` reads.
+
+        Returns:
+            :program:`tshark`, found as `PyShark`_ finds it, reading the capture
+            with the preferences :meth:`run` gives `PyShark`_
+            (:attr:`OVERRIDE_PREFS`) and no name resolution, and writing the
+            frames :data:`~pcapkit.toolkit.pyshark.OCTETS_FILTER` matches as
+            Elasticsearch JSON, one line each, with their captured octets
+            (``-x``) and no protocol's fields but the frame's (``-J frame``).
+
+        .. _PyShark: https://kiminewt.github.io/pyshark
+
+        """
+        from pyshark.tshark.tshark import get_process_path  # isort:skip
+
+        from pcapkit.toolkit.pyshark import OCTETS_FILTER  # isort:skip
+
+        command = [get_process_path(), '-l', '-n', '-r', self._extractor._ifnm, '-Y', OCTETS_FILTER,
+                   '-T', 'ek', '-x', '-J', 'frame']
+        for name, value in self.OVERRIDE_PREFS.items():
+            command += ['-o', f'{name}:{value}']
+        return command
+
+    def _read_octets(self, number: 'int') -> 'Union[bytes, str]':
+        """Read the captured octets of a frame from the second :program:`tshark` pass.
+
+        Args:
+            number: The frame's ``frame.number``.
+
+        Returns:
+            The octets, or a phrase saying why there are none.
+
+        """
+        if self._exraw is None:
+            self._exraw_err = tempfile.TemporaryFile()  # pylint: disable=consider-using-with
+            self._exraw = subprocess.Popen(self._octets_command(), stdin=subprocess.DEVNULL,  # pylint: disable=consider-using-with
+                                           stdout=subprocess.PIPE, stderr=self._exraw_err)
+        held = self._exraw_held
+        while held is None or held[0] < number:
+            line = cast('IO[bytes]', self._exraw.stdout).readline()
+            if not line:
+                status = self._exraw.wait()
+                if not status:
+                    return f'ended before frame {number}'
+                error = cast('IO[bytes]', self._exraw_err)
+                error.seek(0)
+                last = error.read().decode('utf-8', 'replace').strip().splitlines()[-1:]
+                return f'exited with status {status}' + ''.join(f' ({text})' for text in last)
+            record = _ek_record(line)
+            if isinstance(record, str):
+                return record
+            if record is not None:
+                held = self._exraw_held = record
+        if held[0] != number:
+            return f'has no frame {number}'
+        return held[1]
+
+    def _octets(self, packet: 'PySharkPacket') -> 'Optional[bytes]':
+        """Read the captured octets of a frame, which the PDML :meth:`run` reads does not carry.
+
+        :func:`~pcapkit.toolkit.pyshark.tcp_traceflow` asks for them of a frame
+        :data:`~pcapkit.toolkit.pyshark.OCTETS_FILTER` matches only (:issue:`1625`).
+        They come from a second :program:`tshark` pass over the capture (see
+        :meth:`_octets_command`), started on the first request. Both passes
+        number frames alike and deliver them in order, so the second is read
+        forward to the frame asked for, and the last frame it read is kept for
+        the next request. A capture with no such frame never starts it.
+
+        Args:
+            packet: PyShark packet of the first pass.
+
+        Returns:
+            The frame's captured octets; :data:`None` once the second pass has
+            failed.
+
+        Warns:
+            PySharkWarning: When the second pass fails: it cannot be started,
+                exits with an error, gives output that cannot be parsed, or
+                lacks the frame asked for. It is then stopped, and this and every
+                later frame is traced as tshark dissects it, as before
+                :issue:`1625`, which can disagree with the default engine.
+
+        Note:
+            The second pass is a process of this engine's own rather than a
+            second :class:`pyshark.FileCapture`, for two reasons measured with
+            `PyShark`_ 0.6 and :program:`tshark` 4.6.9. Its JSON parser reads
+            ``frame.time_epoch``, which a Simple Packet Block lacks, and raises
+            :exc:`KeyError`. And each capture it creates sets a new
+            :class:`asyncio.SafeChildWatcher` (``Capture._setup_eventloop``), so
+            the process of the first is left unreaped once a second exists.
+
+        .. _PyShark: https://kiminewt.github.io/pyshark
+
+        """
+        if self._exraw_failed:
+            return None
+        try:
+            found = self._read_octets(int(packet.number))
+        except Exception as exc:  # pylint: disable=broad-except
+            found = f'failed: {type(exc).__name__}: {exc}'
+        if isinstance(found, bytes):
+            return found
+
+        self._exraw_failed = True
+        self._stop_octets()
+        warn(f'Frame {self._extractor._frnum}: the second tshark pass, which reads the captured octets '
+             f'of a frame with an AH or IPv6 extension header in IPv4, {found}; this and later such '
+             'frames are traced as tshark dissects them, which can disagree with the default engine',
+             PySharkWarning, stacklevel=stacklevel())
+        return None
+
+    def _stop_octets(self) -> 'None':
+        """Stop the second :program:`tshark` pass, if :meth:`_octets` started it, and reap it."""
+        process, self._exraw = self._exraw, None
+        error, self._exraw_err = self._exraw_err, None
+        try:
+            if process is not None:
+                if process.poll() is None:
+                    process.kill()
+                process.wait()
+                cast('IO[bytes]', process.stdout).close()
+        finally:
+            if error is not None:
+                error.close()
+
     def close(self) -> 'None':
         """Close engine.
 
         This method is to be used for closing the engine instance. It is to
-        close the engine instance after the extraction process is finished.
+        close the engine instance after the extraction process is finished,
+        and the second pass :meth:`_octets` started, if any.
 
         """
-        self._extmp.close()
+        try:
+            self._extmp.close()
+        finally:
+            self._stop_octets()
