@@ -582,6 +582,70 @@ def packet2dict(packet: 'Packet', timestamp: 'float', *,
     }
 
 
+def _first_ipv4(packet: 'Packet') -> 'tuple[Optional[IP], Optional[int]]':
+    """Fetch the first IPv4 layer of a DPKT packet, as the default engine dissects it.
+
+    Args:
+        packet: DPKT packet, i.e. the outermost layer.
+
+    Returns:
+        The network layer (see :func:`_network`) if it is IPv4, else the first
+        IPv4 packet its IPv6 packet carries (:rfc:`2473`) -- directly, behind
+        extension headers, or inside more IPv6. Beside it, :data:`None` for the
+        former, and for the latter how many of its octets, from its first on,
+        lie inside the Payload Length of every IPv6 packet carrying it. Both are
+        :data:`None` if there is no such IPv4 packet, or the default engine
+        dissects nothing past an IPv6 packet on the way: a later fragment
+        (:rfc:`8200#section-4.5`), one with more than
+        :data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT`
+        extension headers (:issue:`1604`), or one whose Payload Length is zero
+        with no Jumbo Payload option to stand in for it (:rfc:`2675`).
+
+    Note:
+        The default engine takes ``frame['IPv4']``, the first IPv4 layer however
+        deep (:func:`pcapkit.toolkit.pcap.ipv4_reassembly`); TCP is keyed by the
+        innermost instead (see :func:`_tcp_carrier`). It hands that layer only
+        the octets inside each Payload Length above it, so they end there, short
+        of any trailer (:issue:`1615`). `DPKT`_ decodes the IPv4 packet in all
+        three cases above -- a later fragment unless its Fragment header comes
+        first, any number of extension headers, and a zero Payload Length as the
+        rest of the frame -- so each is checked here.
+
+    .. _DPKT: https://dpkt.readthedocs.io
+
+    """
+    import dpkt  # isort:skip
+
+    from pcapkit.protocols.internet.internet import EXTENSION_HEADER_LIMIT  # isort:skip
+    from pcapkit.protocols.schema.internet.ipv6 import jumbo_payload_length  # isort:skip
+
+    ip = _network(packet)
+    extent = None  # type: Optional[int] # octets of ``ip`` the packets above hold
+    while isinstance(ip, dpkt.ip6.IP6):
+        ext_hdrs = _ipv6_ext_hdrs(ip)
+        if len(ext_hdrs) > EXTENSION_HEADER_LIMIT or any(
+            isinstance(ext_hdr, dpkt.ip6.IP6FragmentHeader) and ext_hdr.frag_off for ext_hdr in ext_hdrs
+        ):
+            return None, None
+        if getattr(ip, 'p', None) not in IP_TUNNELS or not isinstance(ip.data, (dpkt.ip.IP, dpkt.ip6.IP6)):
+            return None, None
+
+        plen = ip.plen
+        if not plen:
+            plen = jumbo_payload_length(ip.nxt, _layer2bytes(packet, ip)[0][ip.__hdr_len__:])
+            if plen is None:
+                return None, None
+        end = ip.__hdr_len__ + plen
+        if extent is not None:
+            end = min(end, extent)
+        extent = max(end - _wire_hdr_len(ip, ip.data), 0)
+        ip = ip.data
+
+    if not isinstance(ip, dpkt.ip.IP):
+        return None, None
+    return ip, extent
+
+
 def ipv4_reassembly(packet: 'Packet', timestamp: 'float', *,
                     count: 'int' = -1) -> 'IP_Packet[IPv4Address] | None':
     """Make data for IPv4 reassembly.
@@ -602,9 +666,11 @@ def ipv4_reassembly(packet: 'Packet', timestamp: 'float', *,
         Data for IPv4 reassembly.
 
         * If the ``packet`` can be used for IPv4 reassembly. A packet can be reassembled
-          if it contains IPv4 layer (:class:`dpkt.ip.IP`) whose header the default engine
-          accepts (see :func:`_ipv4_accepted`), and the **DF** (:attr:`dpkt.ip.IP.df`)
-          flag is :data:`False`.
+          if it contains IPv4 layer (:class:`dpkt.ip.IP`) -- the first of the frame, as
+          for the default engine, so one carried in IPv6 counts (see
+          :func:`_first_ipv4`) -- whose header the default engine accepts (see
+          :func:`_ipv4_accepted`), and the **DF** (:attr:`dpkt.ip.IP.df`) flag is
+          :data:`False`.
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv4
           reassembly (:term:`reasm.ipv4.packet`) will be returned; otherwise, returns :data:`None`.
 
@@ -617,13 +683,17 @@ def ipv4_reassembly(packet: 'Packet', timestamp: 'float', *,
         :func:`attach_buffer` is what makes them the wire's again. The packet
         itself is left untouched either way.
 
+        The header is the IHL's octets and the payload the rest, to the end of
+        the frame or of the IPv6 packets carrying it, as the default engine
+        hands them over; the reassembler bounds the payload by the Total Length
+        itself. Neither is cut at the Total Length, which may be shorter than
+        the header (:issue:`1616`).
+
     See Also:
         :class:`pcapkit.foundation.reassembly.ipv4.IPv4`
 
     """
-    network = _network(packet)
-    # an IPv6 layer is the one with extension headers, as in ``_wire_hdr_len``
-    ipv4 = None if hasattr(network, 'extension_hdrs') else network
+    ipv4, extent = _first_ipv4(packet)
     if ipv4 is not None and _ipv4_accepted(ipv4):
         if ipv4.df:     # dismiss not fragmented packet
             return None
@@ -631,11 +701,13 @@ def ipv4_reassembly(packet: 'Packet', timestamp: 'float', *,
         # covers any IP options, whereas ``IP.__hdr_len__`` is the fixed 20-octet
         # struct size and would leave option octets at the head of the payload
         ihl = ipv4.hl * 4
-        wire, captured = _layer2bytes(packet, ipv4)
-        # a zero Total Length is what TCP segmentation offload leaves behind, in
-        # which case the datagram runs to the end of the frame, as with DPKT
-        if captured and ipv4.len:
-            wire = wire[:ipv4.len]
+        wire, _ = _layer2bytes(packet, ipv4)
+        if extent is not None:
+            wire = wire[:extent]
+            # a Jumbo Payload Length may leave less than DPKT decoded from the
+            # rest of the frame, and the default engine then dissects no IPv4
+            if len(wire) < ihl:
+                return None
 
         data = IP_Packet(
             bufid=(
