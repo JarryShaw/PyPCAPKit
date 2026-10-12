@@ -742,6 +742,32 @@ def ipv6_reassembly(packet: 'Packet', timestamp: 'float', *,
     return None
 
 
+def _tcp_flags(tcp: 'TCP') -> 'tuple[bool, bool, bool]':
+    """Read the RST, SYN and FIN flags of a DPKT TCP segment.
+
+    Args:
+        tcp: DPKT TCP packet.
+
+    Returns:
+        Whether RST, SYN and FIN are set, in that order.
+
+    Note:
+        Each flag is masked out of :attr:`dpkt.tcp.TCP.flags` by its ``TH_*``
+        value, so it is read from the flags octet alone, as the default engine
+        reads it. `DPKT`_ 1.9.8 makes that field nine bits wide, its top bit
+        the NS bit (:rfc:`3540`): read by its position among the field's binary
+        digits, every flag was one bit low with NS set, a SYN reading as a FIN
+        (:issue:`1618`).
+
+    .. _DPKT: https://dpkt.readthedocs.io
+
+    """
+    from dpkt.tcp import TH_FIN, TH_RST, TH_SYN  # isort:skip
+
+    flags = tcp.flags
+    return bool(flags & TH_RST), bool(flags & TH_SYN), bool(flags & TH_FIN)
+
+
 def tcp_reassembly(packet: 'Packet', timestamp: 'float', *,
                    count: 'int' = -1) -> 'TCP_Packet | None':
     """Make data for TCP reassembly.
@@ -778,7 +804,7 @@ def tcp_reassembly(packet: 'Packet', timestamp: 'float', *,
     """
     ip, tcp = _tcp_carrier(packet)
     if ip is not None and tcp is not None:
-        flags = bin(tcp.flags)[2:].zfill(8)
+        rst, syn, fin = _tcp_flags(tcp)
         wire, _ = _layer2bytes(packet, tcp)
         raw_len = len(tcp.data)                                 # payload length, header excludes
 
@@ -792,9 +818,9 @@ def tcp_reassembly(packet: 'Packet', timestamp: 'float', *,
             num=count,                                          # original packet range number
             ack=tcp.ack,                                        # acknowledgement
             dsn=tcp.seq,                                        # data sequence number
-            rst=bool(int(flags[5])),                            # reset connection flag
-            syn=bool(int(flags[6])),                            # synchronise flag
-            fin=bool(int(flags[7])),                            # finish flag
+            rst=rst,                                            # reset connection flag
+            syn=syn,                                            # synchronise flag
+            fin=fin,                                            # finish flag
             header=wire[:tcp.off * 4],                          # raw bytes type header
             payload=bytearray(bytes(tcp.data)),                 # raw bytearray type payload
             first=tcp.seq,                                      # first sequence number of payload
@@ -844,16 +870,16 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
     """
     ip, tcp = _tcp_carrier(packet)
     if ip is not None and tcp is not None:
-        flags = bin(tcp.flags)[2:].zfill(8)
+        rst, syn, fin = _tcp_flags(tcp)
         wire, _ = _layer2bytes(packet, tcp)
 
         data = TF_TCP_Packet(  # type: ignore[type-var]
             protocol=data_link,                                         # data link type from global header
             index=count,                                                # frame number
             frame=packet2frame(packet, timestamp, data_link=data_link),  # extracted packet
-            syn=bool(int(flags[6])),                                    # TCP synchronise (SYN) flag
-            fin=bool(int(flags[7])),                                    # TCP finish (FIN) flag
-            rst=bool(int(flags[5])),                                    # TCP reset (RST) flag
+            syn=syn,                                                    # TCP synchronise (SYN) flag
+            fin=fin,                                                    # TCP finish (FIN) flag
+            rst=rst,                                                    # TCP reset (RST) flag
             src=ipaddress.ip_address(ip.src),                           # source IP
             dst=ipaddress.ip_address(ip.dst),                           # destination IP
             srcport=tcp.sport,                                          # TCP source port
