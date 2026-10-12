@@ -37,6 +37,7 @@ from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.data.internet.ipv6 import IPv6 as Data_IPv6
 from pcapkit.protocols.internet.internet import EXTENSION_HEADER_LIMIT
 from pcapkit.protocols.internet.ip import IP
+from pcapkit.protocols.protocol import FRAME_LAYER_LIMIT, _frame_depth
 from pcapkit.protocols.schema.internet.ipv6 import IPv6 as Schema_IPv6
 from pcapkit.protocols.schema.internet.ipv6 import jumbo_payload_length
 from pcapkit.utilities.decorators import beholder
@@ -535,6 +536,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         _exthdr = []                # (parser class, info) per extension header
         split = None                # type: Optional[tuple[int, int]] # at first Fragment header
         opaque = False              # walk ended at a non-zero Fragment Offset
+        depth = _frame_depth.get()  # layers of the frame up to this one
 
         # traverse if next header is an extension header
         payload = self.__header__.get_payload()
@@ -553,14 +555,27 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             if len(_protos) >= EXTENSION_HEADER_LIMIT:
                 break
 
+            # NOTE: Likewise past :data:`FRAME_LAYER_LIMIT
+            # <pcapkit.protocols.protocol.FRAME_LAYER_LIMIT>` layers of the
+            # frame (:issue:`1610`), since each header walked is one of them.
+            if depth + len(_protos) >= FRAME_LAYER_LIMIT:
+                break
+
             # # directly break when No Next Header occurs
             # if proto.name == 'IPv6-NoNxt':
             #     proto = None
             #     break
 
             # make protocol name
-            next_ = self._import_next_layer(proto, packet=packet, version=6, extension=True,
-                                            payload=payload)  # type: ignore[misc,call-arg,arg-type]
+            # NOTE: Counted after every header walked, as it would be were each
+            # dissected by the one before it. ESP dissects its decrypted
+            # payload even when walked, and those layers count on from here.
+            token = _frame_depth.set(depth + len(_protos))
+            try:
+                next_ = self._import_next_layer(proto, packet=packet, version=6, extension=True,
+                                                payload=payload)  # type: ignore[misc,call-arg,arg-type]
+            finally:
+                _frame_depth.reset(token)
             info = next_.info
 
             # A layer with no ``next`` field cannot safely continue the walk.
@@ -657,8 +672,12 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         # ``fragment`` above, which this leaves as it was.
         ipv6_exthdr = ProtoChain.from_list(_protos)  # type: ignore[arg-type]
         self._exthdr_depth = len(_protos)  # the headers the upper layer follows
-        return super()._decode_next_layer(ipv6, None if opaque else proto, raw_len, packet=packet,
-                                          ipv6_exthdr=ipv6_exthdr, payload=payload)
+        token = _frame_depth.set(depth + len(_protos))
+        try:
+            return super()._decode_next_layer(ipv6, None if opaque else proto, raw_len, packet=packet,
+                                              ipv6_exthdr=ipv6_exthdr, payload=payload)
+        finally:
+            _frame_depth.reset(token)
 
     @beholder  # type: ignore[arg-type]
     def _import_next_layer(self, proto: 'int', length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
