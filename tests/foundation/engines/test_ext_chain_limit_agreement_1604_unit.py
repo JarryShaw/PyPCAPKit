@@ -163,8 +163,8 @@ class TestExtensionHeaderChainAgreement(harness.RoundTripBase):
                   'default recursion limit, and so agrees at 1,000',
             'INPUTS', 'extra, default has none', ('ipv6-33/scapy/*',)),
         Gap(1609, 'tshark dissects up to about 496 extension headers, so finds the TCP past '
-                  'EXTENSION_HEADER_LIMIT, carried in IPv4 or IPv6; at 1,000 it gives up and agrees',
-            'INPUTS', 'extra, default has none', ('ipv4-33/pyshark/trace', 'ipv6-33/pyshark/trace')),
+                  'EXTENSION_HEADER_LIMIT, carried in IPv6; at 1,000 it gives up and agrees',
+            'INPUTS', 'extra, default has none', ('ipv6-33/pyshark/trace',)),
     )
 
     @classmethod
