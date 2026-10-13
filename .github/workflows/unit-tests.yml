@@ -40,6 +40,46 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  # #1660: the Python versions, from .github/python-versions.json. The matrix
+  # jobs below read theirs from here with `fromJSON`, and `gate` reads `latest`
+  # for its name. util/python_versions.py needs only the standard library, so
+  # the runner's own `python3` runs it, against a checkout of those two files.
+  # Runs on every path, `gate-only` included, and asks for no write permission,
+  # since this file is a reusable workflow whose callers grant `contents: read`.
+  #
+  # The other single-interpreter jobs (`unittest-ordering`, `changelog`,
+  # `project-tests`) run the same script in a step of their own, which leaves
+  # their `needs:` and `if:` as they were. setup-python takes an empty
+  # `python-version` as "the Python on PATH", with only a warning, so
+  # `unittest-ordering`'s `!cancelled()` would otherwise need a check that this
+  # job succeeded.
+  python-versions:
+    name: Read the Python versions
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      latest: ${{ steps.read.outputs.latest }}
+      test: ${{ steps.read.outputs.test }}
+      integration: ${{ steps.read.outputs.integration }}
+      pypcap-parity: ${{ steps.read.outputs.pypcap-parity }}
+      engine-supported: ${{ steps.read.outputs.engine-supported }}
+      engine-ktlo: ${{ steps.read.outputs.engine-ktlo }}
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            .github/python-versions.json
+            util/python_versions.py
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Read .github/python-versions.json
+        id: read
+        run: python3 util/python_versions.py --github-output
+
   test:
     # `github.event_name` is NOT 'workflow_call' inside a called workflow --
     # the github context is inherited from the caller, so it reads
@@ -49,7 +89,7 @@ jobs:
     # reusable workflow to know how it was invoked.
     name: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}
     if: ${{ inputs.gate-only != true && needs.changes.outputs.code != 'false' }}
-    needs: [changes]
+    needs: [changes, python-versions]
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
     timeout-minutes: 45
     # #1672: the level of every annotation a failing step writes -- a warning on
@@ -58,53 +98,39 @@ jobs:
       ANNOTATION_LEVEL: ${{ matrix.ktlo && 'warning' || 'error' }}
     strategy:
       fail-fast: false
-      matrix:
-        # #1633: the supported tier, 3.11-3.15, blocks through `required-checks`.
-        python-version:
-          - "3.11"
-          - "3.12"
-          - "3.13"
-          - "3.14"
-          - "3.15"
-        # Exactly one leg runs under coverage, so measuring it adds no leg to
-        # the queue. 3.14 because it had the most headroom under the 45-minute
-        # cap on main (15.6, 15.8 and 16.8 minutes
-        # in runs 37393532176, 37392964804 and 37391296686, against 12.8-22.0
-        # for the other four), and because coverage's sys.monitoring core,
-        # which measures branches only from 3.14 on, is its cheapest tracer.
-        include:
-          - python-version: "3.14"
-            coverage: true
-          # The KTLO tier (#1633): end-of-life versions that still build and
-          # test but never block. `required-checks` reads this job's one
-          # `needs.test.result`, so a KTLO leg cannot fail the job: each step
-          # that can fail on one carries `continue-on-error: ${{ matrix.ktlo
-          # == true }}` instead -- the step-level form, whose effect on the job
-          # is documented, as for engine-tests' KTLO cell. The leg concludes
-          # success, and the job's last step, `KTLO summary`, reports each
-          # failed step as a warning (#1672). 3.8 and 3.9 need
-          # ubuntu-24.04: setup-python has no Ubuntu 26.04 build of either, and
-          # `ubuntu-latest` moves to 26.04 from 2026-10-19.
-          #
-          # 3.7 needs ubuntu-22.04, the newest image setup-python builds it for
-          # (3.7.17). It cannot install today -- the `test` extra's `pytest>=8`
-          # needs 3.8, and the sources use syntax 3.7 cannot parse -- so the leg
-          # stops at its install step, with one annotation naming pip's reason
-          # (see that step). ubuntu-22.04 is deprecated: brownouts from
-          # 2027-03-23, retirement on 2027-04-17 (actions/runner-images#14254).
-          # A brownout fails the leg before any step runs, which no step-level
-          # `continue-on-error` can contain, so this leg must go before then.
-          - python-version: "3.7"
-            ktlo: true
-            os: ubuntu-22.04
-          - python-version: "3.8"
-            ktlo: true
-            os: ubuntu-24.04
-          - python-version: "3.9"
-            ktlo: true
-            os: ubuntu-24.04
-          - python-version: "3.10"
-            ktlo: true
+      # #1660: .github/python-versions.json's CPython tiers, through the
+      # `python-versions` job. The supported tier is the `python-version` axis
+      # and blocks through `required-checks` (#1633); `include` marks one leg
+      # `coverage: true` and adds each KTLO leg with `ktlo: true`.
+      #
+      # Exactly one leg runs under coverage, so measuring it adds no leg to
+      # the queue. It is `latest`, the newest supported version, like every
+      # single-interpreter job (#1661). Uncovered, 3.15's tests step took a
+      # median 8.1 minutes (max 10.4) in runs 38428091094-38433484101, and
+      # coverage cost 1.8x on 3.15 locally (2.0x on 3.14): a step of about
+      # 15-19 minutes under the job's 45.
+      #
+      # The KTLO tier (#1633): end-of-life versions that still build and
+      # test but never block. `required-checks` reads this job's one
+      # `needs.test.result`, so a KTLO leg cannot fail the job: each step
+      # that can fail on one carries `continue-on-error: ${{ matrix.ktlo
+      # == true }}` instead -- the step-level form, whose effect on the job
+      # is documented, as for engine-tests' KTLO cell. The leg concludes
+      # success, and the job's last step, `KTLO summary`, reports each
+      # failed step as a warning (#1672). A version `ubuntu-latest` cannot
+      # provide carries its `runner` from the file as `os`: 3.8 and 3.9 need
+      # ubuntu-24.04, as setup-python has no Ubuntu 26.04 build of either
+      # and `ubuntu-latest` moves to 26.04 from 2026-10-19.
+      #
+      # 3.7 needs ubuntu-22.04, the newest image setup-python builds it for
+      # (3.7.17). It cannot install today -- the `test` extra's `pytest>=8`
+      # needs 3.8, and the sources use syntax 3.7 cannot parse -- so the leg
+      # stops at its install step, with one annotation naming pip's reason
+      # (see that step). ubuntu-22.04 is deprecated: brownouts from
+      # 2027-03-23, retirement on 2027-04-17 (actions/runner-images#14254).
+      # A brownout fails the leg before any step runs, which no step-level
+      # `continue-on-error` can contain, so this leg must go before then.
+      matrix: ${{ fromJSON(needs.python-versions.outputs.test) }}
 
     steps:
       - uses: actions/checkout@v7
@@ -226,6 +252,7 @@ jobs:
         shell: bash
         env:
           SHA: ${{ github.sha }}
+          PYTHON: ${{ matrix.python-version }}
           TESTS_OUTCOME: ${{ steps.tests.outcome }}
         run: |
           set -euo pipefail
@@ -290,7 +317,7 @@ jobs:
           json.dump({'total': total, 'tests': tests, 'packages': rows},
                     open('coverage-comment/coverage-summary.json', 'w'))
           status = '' if tests == 'success' else f' -- **tests {tests}**, so this is partial'
-          print(f"**Coverage: {total:.2f}%**{status} (unit tier, Python 3.14, `{os.environ['SHA'][:9]}`)")
+          print(f"**Coverage: {total:.2f}%**{status} (unit tier, Python {os.environ['PYTHON']}, `{os.environ['SHA'][:9]}`)")
           print()
           print('| Package | Statements | Missed | Branches | Partial | Cover |')
           print('|---|--:|--:|--:|--:|--:|')
@@ -378,7 +405,7 @@ jobs:
   integration:
     name: Integration Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}
     if: ${{ inputs.gate-only != true && needs.changes.outputs.code != 'false' }}
-    needs: [changes]
+    needs: [changes, python-versions]
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
     timeout-minutes: 45
     # See the `test` job above.
@@ -386,26 +413,9 @@ jobs:
       ANNOTATION_LEVEL: ${{ matrix.ktlo && 'warning' || 'error' }}
     strategy:
       fail-fast: false
-      matrix:
-        # The two tiers of the `test` job above, for the same reasons.
-        python-version:
-          - "3.11"
-          - "3.12"
-          - "3.13"
-          - "3.14"
-          - "3.15"
-        include:
-          - python-version: "3.7"
-            ktlo: true
-            os: ubuntu-22.04
-          - python-version: "3.8"
-            ktlo: true
-            os: ubuntu-24.04
-          - python-version: "3.9"
-            ktlo: true
-            os: ubuntu-24.04
-          - python-version: "3.10"
-            ktlo: true
+      # The two tiers of the `test` job above, for the same reasons, without
+      # its coverage leg.
+      matrix: ${{ fromJSON(needs.python-versions.outputs.integration) }}
 
     steps:
       - uses: actions/checkout@v7
@@ -609,15 +619,17 @@ jobs:
   # every annotation titled by engine and Python version and a per-cell row in
   # the job summary.
   #
-  # #1633 splits the interpreters into two tiers. The supported cells, 3.11-3.15,
-  # share one step, and any one of them failing fails the job. 3.10 is KTLO:
-  # end-of-life, still tested on every run, never blocking. It is its own step
-  # with step-level `continue-on-error: true` -- the treatment #845 gave the
-  # then-prerelease 3.15 cell -- so a 3.10 failure is reported as warnings and a
-  # job-summary row (#1672) while the job, and `required-checks`, which reads its
-  # result, stay green. 3.7-3.9 are not cells here: setup-python has no
-  # Ubuntu 26.04 build of any of them, and this job installs every interpreter
-  # on `ubuntu-latest`; PCAP_CT's extra is also `>= '3.10'`.
+  # #1633 splits the interpreters into two tiers, read from
+  # .github/python-versions.toml by `python-versions` (#1660). The supported
+  # cells share one step, and any one of them failing fails the job. The KTLO
+  # cells (3.10 today) are end-of-life, still tested on every run, never
+  # blocking. They are a step of their own with step-level `continue-on-error:
+  # true` -- the treatment #845 gave the then-prerelease 3.15 cell -- so a KTLO
+  # failure is reported as warnings and a job-summary row (#1672) while the
+  # job, and `required-checks`, which reads its result, stay green. A version
+  # with a `runner` in that file is no cell here, since this job installs every
+  # interpreter on `ubuntu-latest`: so not 3.7-3.9, which setup-python builds
+  # for no Ubuntu 26.04. PCAP_CT's extra is also `>= '3.10'`.
   #
   # Scoped deliberately out (#845): per-engine integration coverage (needs
   # regenerated captures, so it stays in aggregate in `integration` and
@@ -627,7 +639,7 @@ jobs:
   engine-tests:
     name: Engines (${{ matrix.engine }})
     if: ${{ inputs.gate-only != true && needs.changes.outputs.code != 'false' }}
-    needs: [changes]
+    needs: [changes, python-versions]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -649,23 +661,21 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # Each interpreter is then reachable as `python3.X`. The KTLO one is
-      # installed by a step of its own so that losing it cannot fail the job;
-      # it comes first because the last version installed is the default
-      # `python`. The supported five share the second step.
+      # Each interpreter is then reachable as `python3.X`. The KTLO ones are
+      # installed by a step of their own so that losing one cannot fail the
+      # job; it comes first because the last version installed is the default
+      # `python`, and is skipped when the tier has no cell here. The supported
+      # ones share the second step. Each output is one version per line, the
+      # list form setup-python reads.
       - uses: actions/setup-python@v7
+        if: ${{ needs.python-versions.outputs.engine-ktlo != '' }}
         continue-on-error: true
         with:
-          python-version: "3.10"
+          python-version: ${{ needs.python-versions.outputs.engine-ktlo }}
 
       - uses: actions/setup-python@v7
         with:
-          python-version: |
-            3.11
-            3.12
-            3.13
-            3.14
-            3.15
+          python-version: ${{ needs.python-versions.outputs.engine-supported }}
 
       # Only the engines that need a system package get one:
       #
@@ -971,13 +981,14 @@ jobs:
       # Every cell runs even after one fails, so one red run reports all of
       # them; the step fails at the end if any did. ANNOTATION_LEVEL is the
       # level of the cell script's annotations (#1672).
-      - name: Run the 3.11-3.15 cells
+      - name: Run the supported cells
         shell: bash
         env:
+          PYTHONS: ${{ needs.python-versions.outputs.engine-supported }}
           ANNOTATION_LEVEL: error
         run: |
           failed=()
-          for py in 3.11 3.12 3.13 3.14 3.15; do
+          for py in $PYTHONS; do
             echo "::group::Python $py ($ENGINE)"
             if ! bash "$RUNNER_TEMP/engine-cell.sh" "$py"; then
               failed+=("$py")
@@ -991,24 +1002,31 @@ jobs:
           fi
 
       # KTLO, non-blocking (#1633) -- see this job's comment. Runs on every event,
-      # as the 3.10 cell did while it was supported. #1672: this step is the
-      # KTLO cell's report, as `KTLO summary` is a KTLO leg's in the matrix jobs.
-      # A failure is a job-summary row and warnings, the cell's own included,
-      # and an interpreter the setup step above could not install fails here.
-      - name: Run the 3.10 cell (KTLO, non-blocking)
+      # as the 3.10 cell did while it was supported; with no KTLO cell it loops
+      # over nothing. #1672: this step is the KTLO cells' report, as `KTLO
+      # summary` is a KTLO leg's in the matrix jobs. A failure is a job-summary
+      # row and warnings, the cell's own included, and an interpreter the setup
+      # step above could not install fails here.
+      - name: Run the KTLO cells (non-blocking)
         shell: bash
         continue-on-error: true
         env:
+          PYTHONS: ${{ needs.python-versions.outputs.engine-ktlo }}
           ANNOTATION_LEVEL: warning
         run: |
-          echo "::group::Python 3.10 ($ENGINE)"
-          if ! bash "$RUNNER_TEMP/engine-cell.sh" 3.10; then
-            echo "| 3.10 | $ENGINE | | FAILED (KTLO, non-blocking) |" >> "$GITHUB_STEP_SUMMARY"
+          failed=()
+          for py in $PYTHONS; do
+            echo "::group::Python $py ($ENGINE)"
+            if ! bash "$RUNNER_TEMP/engine-cell.sh" "$py"; then
+              failed+=("$py")
+              echo "| $py | $ENGINE | | FAILED (KTLO, non-blocking) |" >> "$GITHUB_STEP_SUMMARY"
+            fi
             echo "::endgroup::"
-            echo "::warning title=$ENGINE failed on Python 3.10 (KTLO%2C non-blocking)::3.10 is end-of-life and KTLO per #1633; this does not fail the job."
+          done
+          if [ "${#failed[@]}" -ne 0 ]; then
+            echo "::warning title=$ENGINE failed on Python ${failed[*]} (KTLO%2C non-blocking)::${failed[*]} is end-of-life and KTLO per #1633; this does not fail the job."
             exit 1
           fi
-          echo "::endgroup::"
 
   # Whether upstream PyPCAP is worth building in CI at all -- #751's own
   # instruction was "try to build and if the CI is not a good suit, then we
@@ -1038,13 +1056,15 @@ jobs:
   # The matrix is deliberately just 3.10 and 3.11, not every version: PyPCAP's
   # marker and PyPCAPFile's marker are both "python_version < '3.12'", so
   # 3.12 and later would install neither extra here and pay this job's full
-  # fixture-tier run for zero new coverage. 3.11 is the one supported leg; 3.10
-  # is KTLO (#1633), non-blocking through step-level `continue-on-error`, for
-  # the reason given on the `test` job's matrix.
+  # fixture-tier run for zero new coverage. util/python_versions.py takes the
+  # versions below 3.12 that run on `ubuntu-latest` from both tiers (#1660).
+  # 3.11 is the one supported leg; 3.10 is KTLO (#1633), non-blocking through
+  # step-level `continue-on-error`, for the reason given on the `test` job's
+  # matrix.
   pypcap-parity:
     name: PyPCAP/PyPCAPFile parity Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}
     if: ${{ inputs.gate-only != true && needs.changes.outputs.code != 'false' }}
-    needs: [changes]
+    needs: [changes, python-versions]
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -1059,13 +1079,7 @@ jobs:
       ANNOTATION_LEVEL: ${{ matrix.ktlo && 'warning' || 'error' }}
     strategy:
       fail-fast: false
-      matrix:
-        python-version:
-          - "3.10"
-          - "3.11"
-        include:
-          - python-version: "3.10"
-            ktlo: true
+      matrix: ${{ fromJSON(needs.python-versions.outputs.pypcap-parity) }}
 
     steps:
       - uses: actions/checkout@v7
@@ -1456,9 +1470,15 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # `latest` from .github/python-versions.json, read here rather than
+      # through `python-versions`: see that job's comment.
+      - name: Read the Python versions
+        id: python-versions
+        run: python3 util/python_versions.py --github-output
+
       - uses: actions/setup-python@v7
         with:
-          python-version: "3.14"
+          python-version: ${{ steps.python-versions.outputs.latest }}
           cache: pip
 
       # DPKT/crypto/NGAP join `test` for the same reason the `test` job above
@@ -1510,9 +1530,14 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # See `unittest-ordering` above.
+      - name: Read the Python versions
+        id: python-versions
+        run: python3 util/python_versions.py --github-output
+
       - uses: actions/setup-python@v7
         with:
-          python-version: "3.14"
+          python-version: ${{ steps.python-versions.outputs.latest }}
 
       # No install step: the generator imports argparse, difflib, pathlib, re, sys
       # and typing and nothing else, so it runs against a bare interpreter.
@@ -1620,9 +1645,14 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # See `unittest-ordering` above.
+      - name: Read the Python versions
+        id: python-versions
+        run: python3 util/python_versions.py --github-output
+
       - uses: actions/setup-python@v7
         with:
-          python-version: "3.14"
+          python-version: ${{ steps.python-versions.outputs.latest }}
           cache: pip
 
       - name: Install package and test dependencies
@@ -1642,9 +1672,12 @@ jobs:
   # all, on one interpreter. It is deliberately not the matrix -- the matrix
   # has already run against this very commit, from this workflow's own push or
   # pull_request trigger, before anything reaches a release path.
+  #
+  # On `latest`, from `python-versions`, which its name needs too (#1661).
   gate:
-    name: Gate (full suite, Python 3.14)
+    name: Gate (full suite, Python ${{ needs.python-versions.outputs.latest }})
     if: ${{ inputs.gate-only == true }}
+    needs: [python-versions]
     runs-on: ubuntu-latest
     timeout-minutes: 45
 
@@ -1653,7 +1686,7 @@ jobs:
 
       - uses: actions/setup-python@v7
         with:
-          python-version: "3.14"
+          python-version: ${{ needs.python-versions.outputs.latest }}
           cache: pip
 
       # DPKT joins Scapy here for the same reason as the `integration` job
@@ -1666,7 +1699,7 @@ jobs:
       # above, which each cover only the subset their own selection reaches.
       # PyPCAPFile is deliberately NOT added here -- see the `test` job's
       # comment above for the bug that used to make installing it a
-      # regression, now fixed by #743/#746. This job runs on 3.14 only, where
+      # regression, now fixed by #743/#746. This job runs on `latest` only, where
       # PyPCAPFile's marker resolves to nothing regardless, so adding it here
       # would be a no-op that misleadingly suggests the extra is exercised by
       # `gate`; #751's `engine-tests` and `pypcap-parity` jobs cover it for

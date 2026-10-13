@@ -48,23 +48,23 @@ Editing ``__version__`` by hand without also moving :file:`CITATION.cff`'s
 ``tests/project/test_bump_version.py``'s
 ``RepositoryCitationTests.test_the_citation_file_names_the_packaged_version``
 (``:494-514``) asserts the two agree, and ``create-release.yml``'s
-``unit-tests`` job (``:401-415``) calls ``unit-tests.yml`` with
+``unit-tests`` job (``:419-433``) calls ``unit-tests.yml`` with
 ``gate-only: true``, which runs the **full** suite rather than the tiered
-subset an ordinary push runs (its ``gate`` job, ``unit-tests.yml:1645-1714``).
+subset an ordinary push runs (its ``gate`` job, ``unit-tests.yml:1677-1747``).
 That gate runs whenever a release will -- a moved ``__version__`` is exactly
 what makes ``version_check``'s evidence read "not yet published" -- and every
-publishing job requires it to have succeeded (``:434,619,784,1026``), so a
+publishing job requires it to have succeeded (``:452,637,802,1037``), so a
 citation left behind fails the gate well before any approval is requested.
 Either run the script, or move both fields by hand in the same commit.
 
 This is the **only** edit a person makes to get a release started -- the tag,
 the Release, and every upload are the workflow's job from here. Two other
 checks run unconditionally on the same path, though neither is a step in *this*
-process: the ``changelog`` job (``unit-tests.yml:1505-1526``) fails outright if
+process: the ``changelog`` job (``unit-tests.yml:1525-1544``) fails outright if
 ``CHANGELOG.md`` has drifted from its source entry under
 :file:`docs/source/changelog/`, and the release-body step warns, without
 failing, if that entry's heading still reads "unreleased"
-(``create-release.yml:488-489``). Both enforce what the changelog convention
+(``create-release.yml:506-507``). Both enforce what the changelog convention
 already asks for.
 
 Two Ways to Start a Release
@@ -79,10 +79,10 @@ neither is a workaround for the other:
    release, not which version: ``version_check``'s checkout
    (``:216-220``) pins ``ref: ${{ github.sha }}``, which on this trigger is
    the commit the pushed tag points at, and reads ``pcapkit.__version__`` out
-   of *that* tree (``:237``). Every downstream tag and release name is built
+   of *that* tree (``:244``). Every downstream tag and release name is built
    from that output -- ``v${{ needs.version_check.outputs.PCAPKIT_VERSION }}``
-   is ``github``'s ``tag_name`` at ``:530`` and the release ``pypi`` and
-   ``conda`` upload to at ``:933`` and ``:1283``, always from
+   is ``github``'s ``tag_name`` at ``:548`` and the release ``pypi`` and
+   ``conda`` upload to at ``:944`` and ``:1290``, always from
    ``PCAPKIT_VERSION``, never from ``github.ref_name`` -- so the version
    actually released is whatever ``__version__`` says on the tagged commit,
    not the name of the tag that was pushed. The two agree only if the tag
@@ -126,19 +126,19 @@ days later, and tagged ``main``'s tip ``2c0008c3c`` as both ``v1.5.0b9`` and
 the default branch, and ``tag`` pulled ``main`` before tagging.
 
 * On ``workflow_run``, where ``github`` creates the ``v*`` tag, it passes
-  ``target_commitish`` ``github.sha`` (``:543``); on a ``v*`` push the tag
+  ``target_commitish`` ``github.sha`` (``:561``); on a ``v*`` push the tag
   already exists and it passes none. Either way it then checks that the tag
   names that commit.
-* ``tag`` cuts ``conda-<version>+0`` at that commit (``:656-683``) before it
+* ``tag`` cuts ``conda-<version>+0`` at that commit (``:674-701``) before it
   reads ``main`` at all; the :file:`conda/build` reset is a separate commit on
-  top of ``main`` (``:705-758``), described under `Precautions`_.
+  top of ``main`` (``:723-776``), described under `Precautions`_.
 * ``pypi`` and ``conda`` check out that commit and, before building, check
   that every tag they publish under names it, as ``tag`` does for the ``v*``
   tag. A run created for a *later* commit of the same version therefore fails
   with an ``::error`` instead of publishing a second tree under that version;
   a partial release is finished by re-running the run that tagged it.
 * ``pypi`` and ``conda`` attach their files with ``gh release upload``
-  (``:926-963``, ``:1278-1313``), not ``action-gh-release``, which calls Update
+  (``:937-974``, ``:1285-1320``), not ``action-gh-release``, which calls Update
   a release before every upload (3.0.2's ``src/github.ts:631-683``). A file
   the release already has is left alone
   (`#1640 <https://github.com/JarryShaw/PyPCAPKit/issues/1640>`__): the action
@@ -232,11 +232,11 @@ The owner's choice on `#1634
 the release with a GitHub App installation token, which Create a release
 accepts for a target that changes a workflow file when it has the "Workflows"
 repository permission (write). "Mint the release App's token"
-(``create-release.yml:503-511``) runs
+(``create-release.yml:521-529``) runs
 ``actions/create-github-app-token@v3`` with ``permission-contents: write`` and
 ``permission-workflows: write`` and no ``owner`` or ``repositories``, so the
 token is "scoped to only the current repository" and revoked in the action's
-``post`` step (v3.3.0's README). Only Create Release spends it (``:547``).
+``post`` step (v3.3.0's README). Only Create Release spends it (``:565``).
 While ``vars.RELEASE_APP_CLIENT_ID`` is unset, which reads as "an empty
 string", the step skips and Create Release spends ``GITHUB_TOKEN``, so the
 workflow keeps working, refusals included, until the App exists. A PAT would
@@ -261,13 +261,13 @@ the release test gate, ask for a second approval and race the first run's
 uploads from another concurrency group, so ``version_check`` skips a ``push``
 whose ``github.actor_id`` is ``vars.RELEASE_APP_BOT_ID`` (``:210-212``), and
 ``release_status`` reports it with ``::notice title=Nothing to release``
-(``:1385-1387``). A tag pushed by a person runs as before. Whether a tag made
+(``:1392-1394``). A tag pushed by a person runs as before. Whether a tag made
 through the Releases API fires ``push``, and with the bot as actor, is
 unmeasured; if not, the guard never matches and the cost is one approval to
 reject.
 
 A refused Create Release (404, or 403 "Resource not accessible by
-integration") is explained by "Explain a refused release tag" (``:580-592``)
+integration") is explained by "Explain a refused release tag" (``:598-610``)
 according to the token spent: with ``GITHUB_TOKEN`` it lists the setup above;
 with the App's, it points at the App's permissions and installation. For a
 final release, first delete any draft ``v<version>`` the refused run left:
@@ -302,7 +302,7 @@ checks *is* the one it is about to create:
 * ``tag`` checks whether ``conda-<version>+0``, the tag *it* creates, already
   exists.
 * ``pypi`` compares PyPI's file count for the version against the 7 expected
-  -- the 6 supported legs' wheels plus the sdist kept only on the 3.14 leg; the
+  -- the 6 supported legs' wheels plus the sdist kept only on the 3.15 leg; the
   KTLO legs' wheels (#1633) are not counted. This job is
   already idempotent (``skip-existing: true`` on both upload steps), so the
   check exists only to save the cost of the build matrix, not for correctness.
@@ -404,8 +404,8 @@ Only ``github-release`` carries a required reviewer; ``conda-tag``,
 removed on `#887 <https://github.com/JarryShaw/PyPCAPKit/issues/887>`__.
 What still makes one approval mean *the whole release* is the ``needs:``
 graph: ``tag`` and ``pypi`` both depend on ``github``
-(``.github/workflows/create-release.yml:619,784``), and ``conda`` depends on
-``tag`` and ``github`` (``:1026``) -- so nothing downstream of ``github`` can
+(``.github/workflows/create-release.yml:637,802``), and ``conda`` depends on
+``tag`` and ``github`` (``:1037``) -- so nothing downstream of ``github`` can
 start before it is approved, and rejecting it leaves nothing tagged and
 nothing published. Before this change ``tag`` depended on ``version_check``
 alone, so removing its reviewer without moving this dependency would have let
@@ -452,7 +452,7 @@ back, and neither is needed, since a plain re-run self-heals; see
 
 **``environment: pypi`` stays even though its reviewer is gone.** ``pypi``
 publishes through PyPI's OIDC trusted publishing (``environment: pypi`` at
-``:779``, ``id-token: write`` at ``:783``), and PyPI's trusted-publisher
+``:797``, ``id-token: write`` at ``:801``), and PyPI's trusted-publisher
 configuration can be scoped to a GitHub Actions environment name. If this
 project's publisher on PyPI is scoped that way, removing the ``pypi`` name
 -- not just its reviewer -- would break the upload with a claim mismatch;
@@ -463,7 +463,7 @@ the name regardless, since there is no upside to removing it.
 **``conda-tag`` writes to ``main``, so a release is not read-only on the
 branch.** After cutting ``conda-<version>+0`` at the run's commit, the
 ``tag`` job pushes a commit setting :file:`conda/build` to ``0`` on top of
-``main`` (``.github/workflows/create-release.yml:705-758``) -- a plain
+``main`` (``.github/workflows/create-release.yml:723-776``) -- a plain
 fast-forward push, never a rewrite -- so the next Conda Update bump of that
 version is ``+1``. There is none when the run's commit is not on ``main``, nor
 when ``main``'s tip already says ``0`` (the usual case, since

@@ -1,0 +1,771 @@
+# -*- coding: utf-8 -*-
+"""#1660: the Python version tiers are declared once, in :file:`.github/python-versions.json`.
+
+Before #1660 every matrix spelt its versions out, so a tier change -- 3.11
+reaching end-of-life, a new pre-release -- meant editing some 27 files by hand.
+Now :file:`util/python_versions.py` reads the file, and each workflow takes its
+matrices, and each single-interpreter job its ``latest``, from that script's
+step outputs. Four things are pinned here:
+
+* **The file and the script.** :func:`python_versions.load` rejects a malformed
+  file, ``latest`` is the newest supported CPython (the owner's ruling on
+  #1661), and the script parses as the runners' own ``python3`` would read it.
+* **Nothing moved.** The tiers as this change introduced them expand to exactly
+  the legs, in the same order, that ``main`` spelt out at :data:`MAIN`, apart
+  from the one deliberate move: the coverage leg and the ``gate`` from 3.14 to
+  ``latest``, 3.15. Job-name templates are compared too, since rulesets match
+  check names literally. Where git still has :data:`MAIN`, the recorded
+  matrices are read back against it.
+* **Every version comes from the file.** No workflow pins a Python version --
+  in a setup action's input, a matrix, a comparison, a job name, an ``env``
+  value, or a wheel or conda tag and version loop in a script -- unless the
+  file's ``exemptions`` list that pin with its value and its reason, and every
+  exemption still matches a pin. Every single-interpreter job reads ``latest``,
+  and Create Release's Anaconda check is run to show it counts what the file
+  lists. (Expected outcomes per engine and version in ``engine-tests``' cell
+  script are facts about the engines, not pins, and are not read.)
+* **The prose follows the file.** The classifiers, README, SECURITY.md, the
+  docs' version lists, the bug-report template, and the comments and docs
+  naming the coverage leg's version or the release checks' counts.
+
+"""
+
+from __future__ import annotations
+
+import ast
+import contextlib
+import importlib.util
+import io
+import json
+import os
+import pathlib
+import re
+import shutil
+import subprocess  # nosec B404
+import sys
+import tempfile
+import unittest
+from typing import TYPE_CHECKING
+from unittest import mock
+
+try:
+    import yaml
+except ImportError:  # pragma: no cover
+    yaml = None  # type: ignore[assignment]
+
+if TYPE_CHECKING:
+    from typing import Any, Callable, Iterator, Optional
+
+ROOT = pathlib.Path(__file__).resolve().parents[2]
+WORKFLOWS = ROOT / '.github' / 'workflows'
+SCRIPT = ROOT / 'util' / 'python_versions.py'
+#: How every workflow runs the script.
+SCRIPT_STEP = 'python3 util/python_versions.py --github-output'
+
+
+def load_script() -> 'Any':
+    """:file:`util/python_versions.py`, which is a script and not a package."""
+    spec = importlib.util.spec_from_file_location('python_versions', SCRIPT)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)  # type: ignore[union-attr]
+    return module
+
+
+#: Loaded once, so a missing script fails each test rather than the import.
+try:
+    python_versions = load_script()
+except FileNotFoundError:  # pragma: no cover
+    python_versions = None
+
+
+def script() -> 'Any':
+    if python_versions is None:
+        raise AssertionError(f'{SCRIPT.relative_to(ROOT)} is missing')
+    return python_versions
+
+
+def live_outputs() -> 'dict[str, str]':
+    """Every output the script writes for the file as it stands."""
+    return script().outputs(script().load())
+
+
+def workflow(name: 'str') -> 'dict[str, Any]':
+    """``name`` parsed, or the test skipped when PyYAML (the ``test`` extra) is absent."""
+    if yaml is None:  # pragma: no cover
+        raise unittest.SkipTest('PyYAML, from the test extra, is not installed')
+    return yaml.safe_load((WORKFLOWS / name).read_text(encoding='utf-8'))
+
+
+def has_main() -> 'bool':
+    """Whether this clone holds :data:`MAIN`; a shallow CI checkout does not."""
+    found = subprocess.run(['git', 'cat-file', '-e', f'{MAIN}^{{commit}}'], cwd=ROOT, capture_output=True, check=False)
+    return not found.returncode
+
+
+def workflow_at_main(name: 'str') -> 'dict[str, Any]':
+    """``name`` as it stood at :data:`MAIN`."""
+    text = subprocess.run(['git', 'show', f'{MAIN}:.github/workflows/{name}'], cwd=ROOT,
+                          capture_output=True, text=True, check=True).stdout
+    return yaml.safe_load(text)
+
+
+def workflows(load: 'Callable[[str], dict[str, Any]]' = workflow) -> 'Iterator[tuple[str, dict[str, Any]]]':
+    for path in sorted(WORKFLOWS.glob('*.yml')):
+        yield path.name, load(path.name)
+
+
+#: ``${{ needs.J.outputs.O }}`` or ``${{ steps.S.outputs.O }}``, optionally in ``fromJSON()``.
+READ = re.compile(r'\$\{\{\s*(fromJSON\(\s*)?((?:needs|steps)\.[\w-]+\.outputs\.[\w-]+)\s*\)?\s*\}\}')
+REF = re.compile(r'(needs|steps)\.([\w-]+)\.outputs\.([\w-]+)')
+
+
+def script_output(name: 'str', job_id: 'str', ref: 'str') -> 'str':
+    """The script output that reference ``ref``, read in job ``job_id``, ends at.
+
+    A ``needs`` reference is followed through the job it names, which must be in
+    ``job_id``'s ``needs``, to that job's own ``outputs``; a ``steps`` one must
+    name a step of the job that runs :data:`SCRIPT_STEP`.
+
+    """
+    jobs = workflow(name)['jobs']
+    kind, target, output = REF.fullmatch(ref).groups()  # type: ignore[union-attr]
+    if kind == 'needs':
+        needs = jobs[job_id].get('needs', [])
+        assert target in ([needs] if isinstance(needs, str) else needs), f'{name} {job_id} does not need {target}'
+        value = jobs[target]['outputs'][output]
+        inner = READ.fullmatch(value)
+        assert inner is not None and not inner.group(1), f'{name} {target}.outputs.{output} is {value!r}'
+        return script_output(name, target, inner.group(2))
+    step = next(step for step in jobs[job_id]['steps'] if step.get('id') == target)
+    assert step['run'].strip() == SCRIPT_STEP, f'{name} {job_id} step {target} runs {step["run"]!r}'
+    return output
+
+
+def resolve(name: 'str', job_id: 'str', text: 'Any', values: 'Optional[dict[str, str]]' = None) -> 'Any':
+    """What ``text`` reads from the script's outputs, or :data:`None` if it reads none."""
+    match = READ.fullmatch(str(text).strip())
+    if match is None:
+        return None
+    output = script_output(name, job_id, match.group(2))
+    values = live_outputs() if values is None else values
+    assert output in values, f'{name} {job_id} reads {output!r}, which the script does not write'
+    return json.loads(values[output]) if match.group(1) else values[output]
+
+
+def matrix(name: 'str', job_id: 'str', values: 'Optional[dict[str, str]]' = None) -> 'dict[str, Any]':
+    """Job ``job_id``'s ``strategy.matrix``, each expression read from the script."""
+    raw = workflow(name)['jobs'][job_id]['strategy']['matrix']
+    if isinstance(raw, str):
+        found = resolve(name, job_id, raw, values)
+        assert isinstance(found, dict), f'{name} {job_id} matrix is {raw!r}'
+        return found
+    return {key: (resolve(name, job_id, value, values) if isinstance(value, str) else value)
+            for key, value in raw.items()}
+
+
+def legs(spec: 'dict[str, Any]') -> 'list[dict[str, Any]]':
+    """The matrix combinations GitHub expands ``spec`` to, in its order.
+
+    The base axes' product, then each ``include`` entry: merged into every
+    combination whose original values it matches, or added as one of its own --
+    GitHub's documented ``include`` rule, which is what lets ``ktlo: true`` mark
+    an existing leg as well as add a new one.
+
+    """
+    spec = dict(spec)
+    include = spec.pop('include', [])
+    combos = [{}]  # type: list[dict[str, Any]]
+    for key, values in spec.items():
+        combos = [dict(combo, **{key: str(value)}) for combo in combos for value in values]
+    for entry in include:
+        entry = {key: str(value) if key in spec else value for key, value in entry.items()}
+        matched = [combo for combo in combos
+                   if all(combo.get(key) == value for key, value in entry.items() if key in spec)]
+        added = False
+        for combo in matched:
+            if all(key in spec or key not in combo for key in entry):
+                combo.update(entry)
+                added = True
+        if not added:
+            combos.append(dict(entry))
+    return combos
+
+
+def setups(spec: 'dict[str, Any]') -> 'list[dict[str, Any]]':
+    """A job's setup-python and setup-miniconda steps."""
+    return [step for step in spec.get('steps', [])
+            if str(step.get('uses', '')).startswith(('actions/setup-python@', 'conda-incubator/setup-miniconda@'))]
+
+
+#: The last commit before the file: its matrices are what the file must reproduce.
+MAIN = '1024109fc1a8d16d67d24d5ed5af2c57bb81076b'
+#: Every Python matrix as MAIN spelt it out, as (workflow, job): ``strategy.matrix``.
+SUPPORTED_AT_MAIN = ['3.11', '3.12', '3.13', '3.14', '3.15']
+KTLO_AT_MAIN = [{'python-version': '3.7', 'ktlo': True, 'os': 'ubuntu-22.04'},
+                {'python-version': '3.8', 'ktlo': True, 'os': 'ubuntu-24.04'},
+                {'python-version': '3.9', 'ktlo': True, 'os': 'ubuntu-24.04'},
+                {'python-version': '3.10', 'ktlo': True}]
+CONDA_AT_MAIN = {'os': ['macos-latest', 'ubuntu-latest'], 'python-version': SUPPORTED_AT_MAIN}
+MAIN_MATRICES = {
+    ('unit-tests.yml', 'test'): {
+        'python-version': SUPPORTED_AT_MAIN,
+        'include': [{'python-version': '3.14', 'coverage': True}] + KTLO_AT_MAIN},
+    ('unit-tests.yml', 'integration'): {'python-version': SUPPORTED_AT_MAIN, 'include': KTLO_AT_MAIN},
+    ('unit-tests.yml', 'pypcap-parity'): {
+        'python-version': ['3.10', '3.11'], 'include': [{'python-version': '3.10', 'ktlo': True}]},
+    ('python-compatibility.yml', 'compatibility'): {'python-version': SUPPORTED_AT_MAIN, 'include': KTLO_AT_MAIN},
+    ('create-release.yml', 'pypi'): {
+        'python-version': SUPPORTED_AT_MAIN + ['pypy3.11'],
+        'include': [{'python-version': '3.10', 'ktlo': True}, {'python-version': 'pypy3.10', 'ktlo': True}]},
+    ('create-release.yml', 'conda'): CONDA_AT_MAIN,
+    ('cron-conda.yml', 'conda-dist'): CONDA_AT_MAIN,
+}
+#: engine-tests' two setup inputs at MAIN, (KTLO step, supported step), and its loops.
+ENGINES_AT_MAIN = ('3.10', '\n'.join(SUPPORTED_AT_MAIN))
+#: Each matrix job's name template at MAIN, which must not change.
+TEMPLATES_AT_MAIN = {
+    ('unit-tests.yml', 'test'): "Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}",
+    ('unit-tests.yml', 'integration'):
+        "Integration Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}",
+    ('unit-tests.yml', 'pypcap-parity'):
+        "PyPCAP/PyPCAPFile parity Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}",
+    ('python-compatibility.yml', 'compatibility'):
+        "Compat Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}",
+    ('create-release.yml', 'pypi'):
+        "PyPI distribution for Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}",
+    ('create-release.yml', 'conda'):
+        'Conda deployment (release) on ${{ matrix.os }} with Python ${{ matrix.python-version }}',
+    ('cron-conda.yml', 'conda-dist'):
+        'Conda deployment (update) on ${{ matrix.os }} with Python ${{ matrix.python-version }}',
+}
+#: Ruleset 23497679's required contexts at MAIN.
+REQUIRED_AT_MAIN = {'Required checks passed'} | {f'Compat Python {v}' for v in SUPPORTED_AT_MAIN}
+#: The tiers MAIN's matrices encode, as this change first wrote them into the file.
+TIERS_AT_MAIN = {
+    'latest': '3.15',
+    'versions': {
+        'cpython': {'3.7': {'tier': 'ktlo', 'runner': 'ubuntu-22.04'},
+                    '3.8': {'tier': 'ktlo', 'runner': 'ubuntu-24.04'},
+                    '3.9': {'tier': 'ktlo', 'runner': 'ubuntu-24.04'},
+                    '3.10': {'tier': 'ktlo'},
+                    **{version: {'tier': 'supported'} for version in SUPPORTED_AT_MAIN}},
+        'pypy': {'pypy3.10': {'tier': 'ktlo'}, 'pypy3.11': {'tier': 'supported'}},
+    },
+}
+
+
+def render(template: 'str', leg: 'dict[str, Any]') -> 'str':
+    """A matrix job's name for one leg, for the two expression shapes these names use."""
+    name = template.replace("${{ matrix.ktlo && ' (KTLO)' || '' }}", ' (KTLO)' if leg.get('ktlo') is True else '')
+    name = re.sub(r'\$\{\{ matrix\.([\w-]+) \}\}', lambda match: str(leg[match.group(1)]), name)
+    assert '${{' not in name, name
+    return name
+
+
+def write_tiers(directory: 'pathlib.Path', data: 'dict[str, Any]') -> 'pathlib.Path':
+    path = directory / 'python-versions.json'
+    path.write_text(json.dumps(data), encoding='utf-8')
+    return path
+
+
+class TestTheFileAndTheScript(unittest.TestCase):
+    """The file is well formed, and the script reads it as a runner's ``python3`` would."""
+
+    def setUp(self) -> None:
+        tmp = tempfile.TemporaryDirectory(prefix='pcapkit-1660-')  # pylint: disable=consider-using-with
+        self.addCleanup(tmp.cleanup)
+        self.tmp = pathlib.Path(tmp.name)
+
+    def test_the_file_loads_and_latest_is_the_newest_supported_version(self) -> None:
+        """The owner's ruling (#1661): single-interpreter jobs run the newest supported version."""
+        data = script().load()
+        supported = script().tier(data, 'cpython', 'supported')
+        self.assertEqual(data['latest'], max(supported, key=script().key))
+        self.assertTrue(supported and script().tier(data, 'pypy', 'supported'))
+
+    def test_a_malformed_file_is_refused_with_its_reason(self) -> None:
+        cpython = TIERS_AT_MAIN['versions']['cpython']
+        cases = {
+            'unknown tier': dict(cpython, **{'3.15': {'tier': 'blocking'}}),
+            'pre-release': dict(cpython, **{'3.16': {'tier': 'pre-release'}}),
+            'misspelt version': dict(cpython, **{'3.16.0': {'tier': 'supported'}}),
+            'runner typo': dict(cpython, **{'3.10': {'tier': 'ktlo', 'runner': 'ubuntu-latest'}}),
+            'unknown key': dict(cpython, **{'3.10': {'tier': 'ktlo', 'os': 'ubuntu-24.04'}}),
+            'out of order': dict(list(cpython.items())[::-1]),
+        }
+        for label, versions in cases.items():
+            with self.subTest(case=label):
+                data = dict(TIERS_AT_MAIN, versions=dict(TIERS_AT_MAIN['versions'], cpython=versions))
+                with self.assertRaises(ValueError):
+                    script().load(write_tiers(self.tmp, data))
+        for label, data in (('latest is not supported', dict(TIERS_AT_MAIN, latest='3.10')),
+                            ('an exemption has no reason', dict(TIERS_AT_MAIN, exemptions=[
+                                {'workflow': 'lint.yml', 'job': 'lint', 'where': 'x', 'value': '3.14', 'reason': ''}])),
+                            ('an unknown top-level key', dict(TIERS_AT_MAIN, matrices={})),
+                            ('no PyPy', dict(TIERS_AT_MAIN, versions={'cpython': cpython})),
+                            ('PyPy lists nothing', dict(TIERS_AT_MAIN, versions={'cpython': cpython, 'pypy': {}}))):
+            with self.subTest(case=label), self.assertRaises(ValueError):
+                script().load(write_tiers(self.tmp, data))
+
+    def test_a_supported_version_on_an_older_runner_is_refused(self) -> None:
+        """A job pinned to ``ubuntu-latest`` would otherwise stop testing it without a word."""
+        pinned = {'3.11': {'tier': 'supported', 'runner': 'ubuntu-24.04'}}
+        cpython = dict(TIERS_AT_MAIN['versions']['cpython'], **pinned)
+        data = script().load(write_tiers(self.tmp, dict(TIERS_AT_MAIN, versions=dict(
+            TIERS_AT_MAIN['versions'], cpython=cpython))))
+        with self.assertRaisesRegex(ValueError, 'cannot run supported 3.11'):
+            script().outputs(data)
+
+    @staticmethod
+    def parse_github_output(text: 'str') -> 'dict[str, str]':
+        """``$GITHUB_OUTPUT`` as the runner reads it: ``name=value``, or ``name<<DELIMITER`` lines."""
+        parsed = {}  # type: dict[str, str]
+        lines = iter(text.splitlines())
+        for line in lines:
+            if '<<' in line and '=' not in line.split('<<', 1)[0]:
+                name, delimiter = line.split('<<', 1)
+                value = []
+                for nested in lines:
+                    if nested == delimiter:
+                        break
+                    value.append(nested)
+                parsed[name] = '\n'.join(value)
+            else:
+                name, _, value_text = line.partition('=')
+                parsed[name] = value_text
+        return parsed
+
+    def main(self, *argv: 'str', github_output: 'Optional[str]' = None) -> 'tuple[int, str]':
+        """The script's ``main`` run in this process, with its status and stdout."""
+        environ = {key: value for key, value in os.environ.items() if key != 'GITHUB_OUTPUT'}
+        if github_output is not None:
+            environ['GITHUB_OUTPUT'] = github_output
+        stdout = io.StringIO()
+        with mock.patch.dict(os.environ, environ, clear=True), contextlib.redirect_stdout(stdout):
+            status = script().main(list(argv))
+        return status, stdout.getvalue()
+
+    def test_the_command_line_writes_each_output_as_the_runner_reads_it(self) -> None:
+        """One ``name=value`` line each, a multi-line value under a fresh delimiter."""
+        output = self.tmp / 'github-output'
+        status, printed = self.main('--github-output', github_output=str(output))
+        self.assertEqual(status, 0, printed)
+        self.assertEqual(self.parse_github_output(output.read_text(encoding='utf-8')), live_outputs())
+        self.assertEqual(self.main('latest', 'conda'), (0, f"{live_outputs()['latest']}\n{live_outputs()['conda']}\n"))
+        for argv, env, title in ((('nope',), None, 'Cannot read the Python version tiers'),
+                                 (('--github-output',), None, 'GITHUB_OUTPUT is not set'),
+                                 (('--file', str(write_tiers(self.tmp, dict(TIERS_AT_MAIN, latest='3.10')))),
+                                  None, 'Cannot read the Python version tiers')):
+            with self.subTest(argv=argv):
+                status, printed = self.main(*argv, github_output=env)
+                self.assertEqual(status, 1)
+                self.assertRegex(printed, rf'^::error title={title}::')
+        # And as a workflow runs it, by path, with nothing but the runner's environment.
+        output.unlink()
+        result = subprocess.run([sys.executable, str(SCRIPT), '--github-output'],
+                                cwd=ROOT, env={'GITHUB_OUTPUT': str(output), 'PATH': ''},
+                                capture_output=True, text=True, check=False, timeout=60)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(self.parse_github_output(output.read_text(encoding='utf-8')), live_outputs())
+
+    def test_the_script_parses_as_python_38(self) -> None:
+        """Runners run it with their own ``python3``; 3.8 is older than any image's."""
+        ast.parse(SCRIPT.read_text(encoding='utf-8'), feature_version=(3, 8))
+        tree = ast.parse(SCRIPT.read_text(encoding='utf-8'))
+        imported = {alias.name.split('.')[0] for node in ast.walk(tree) if isinstance(node, ast.Import)
+                    for alias in node.names}
+        imported |= {node.module.split('.')[0] for node in ast.walk(tree)
+                     if isinstance(node, ast.ImportFrom) and node.module and not node.level}
+        self.assertLessEqual(imported, {'__future__', 'argparse', 'json', 'os', 'pathlib', 're', 'sys',
+                                        'typing', 'uuid'})
+
+
+class TestNothingMovedButLatest(unittest.TestCase):
+    """The file reproduces every matrix ``main`` spelt out, but for the coverage leg."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        with tempfile.TemporaryDirectory(prefix='pcapkit-1660-') as tmp:
+            cls.values = script().outputs(script().load(write_tiers(pathlib.Path(tmp), TIERS_AT_MAIN)))
+
+    def test_every_matrix_expands_to_mains_legs(self) -> None:
+        """Same legs, same order; the coverage leg moves from 3.14 to ``latest`` (#1661).
+
+        Where the clone holds :data:`MAIN`, :data:`MAIN_MATRICES` is read back
+        against it first, so the comparison is with what ``main`` really ran.
+
+        """
+        for (name, job_id), spec in MAIN_MATRICES.items():
+            if has_main():
+                with self.subTest(recorded=name, job=job_id):
+                    self.assertEqual(workflow_at_main(name)['jobs'][job_id]['strategy']['matrix'], spec)
+            expected = legs(spec)
+            if (name, job_id) == ('unit-tests.yml', 'test'):
+                for leg in expected:
+                    leg.pop('coverage', None)
+                    if leg['python-version'] == TIERS_AT_MAIN['latest']:
+                        leg['coverage'] = True
+            with self.subTest(workflow=name, job=job_id):
+                self.assertEqual(legs(matrix(name, job_id, self.values)), expected)
+
+    def test_engine_tests_installs_and_runs_mains_cells(self) -> None:
+        if has_main():
+            engines = tuple(step['with']['python-version'].strip()
+                            for step in setups(workflow_at_main('unit-tests.yml')['jobs']['engine-tests']))
+            self.assertEqual(engines, ENGINES_AT_MAIN)
+        spec = workflow('unit-tests.yml')['jobs']['engine-tests']
+        inputs = tuple(resolve('unit-tests.yml', 'engine-tests', step['with']['python-version'], self.values)
+                       for step in setups(spec))
+        self.assertEqual(inputs, ENGINES_AT_MAIN)
+        loops = {step['name']: resolve('unit-tests.yml', 'engine-tests', step['env']['PYTHONS'], self.values)
+                 for step in spec['steps'] if 'PYTHONS' in step.get('env', {})}
+        self.assertEqual(loops, {'Run the supported cells': ENGINES_AT_MAIN[1],
+                                 'Run the KTLO cells (non-blocking)': ENGINES_AT_MAIN[0]})
+
+    def test_no_job_name_changes_but_the_gates(self) -> None:
+        """Rulesets match check names literally, so each template and leg name stays."""
+        for (name, job_id), template in TEMPLATES_AT_MAIN.items():
+            with self.subTest(workflow=name, job=job_id):
+                self.assertEqual(workflow(name)['jobs'][job_id]['name'], template)
+        compat = TEMPLATES_AT_MAIN[('python-compatibility.yml', 'compatibility')]
+        compat_legs = legs(matrix('python-compatibility.yml', 'compatibility', self.values))
+        blocking = {render(compat, leg) for leg in compat_legs
+                    if leg.get('ktlo') is not True}
+        self.assertEqual(blocking | {'Required checks passed'}, REQUIRED_AT_MAIN)
+        self.assertEqual(workflow('unit-tests.yml')['jobs']['required-checks']['name'], 'Required checks passed')
+        gate = workflow('unit-tests.yml')['jobs']['gate']['name']
+        expression = re.search(r'\$\{\{[^}]*\}\}', gate).group(0)  # type: ignore[union-attr]
+        self.assertEqual(gate.replace(expression, resolve('unit-tests.yml', 'gate', expression, self.values)),
+                         'Gate (full suite, Python 3.15)')
+        if has_main():
+            self.assertEqual(workflow_at_main('unit-tests.yml')['jobs']['gate']['name'],
+                             'Gate (full suite, Python 3.14)')
+            for (name, job_id), template in TEMPLATES_AT_MAIN.items():
+                with self.subTest(recorded=name, job=job_id):
+                    self.assertEqual(workflow_at_main(name)['jobs'][job_id]['name'], template)
+
+
+#: Setup actions whose ``python-version`` input picks the interpreter.
+SETUP_ACTIONS = ('actions/setup-python@', 'conda-incubator/setup-miniconda@')
+#: A literal version, or a list of them.
+VERSIONS = re.compile(r'\s*(?:pypy)?3\.\d+(?:\s+(?:pypy)?3\.\d+)*\s*')
+#: ``matrix.python-version`` compared with a literal version.
+COMPARED = re.compile(r"matrix\.python-version\s*[!=]=\s*'([^']+)'|'([^']+)'\s*[!=]=\s*matrix\.python-version")
+#: A job name naming its Python outside an expression.
+NAMED = re.compile(r'\bPython ((?:pypy)?3\.\d+)\b')
+#: A wheel or conda build tag, and a shell loop over literal versions.
+TAG = re.compile(r'\b(?:cp|pp|py)3\d{1,2}\b')
+LOOP = re.compile(r'\bfor \w+ in ((?:(?:pypy)?3\.\d+\s*)+)')
+
+
+def strings(node: 'Any', where: 'str') -> 'Iterator[tuple[str, str]]':
+    """Every string under ``node``, with a readable path to it."""
+    if isinstance(node, str):
+        yield where, node
+    elif isinstance(node, dict):
+        for key, value in node.items():
+            yield from strings(value, f'{where}.{key}' if where else str(key))
+    elif isinstance(node, list):
+        for value in node:
+            yield from strings(value, where)
+
+
+def step_label(step: 'dict[str, Any]') -> 'str':
+    """A step's name, else ``Set up Python`` for a setup action, else what it ``uses``."""
+    if 'name' in step:
+        return str(step['name'])
+    return 'Set up Python' if str(step.get('uses', '')).startswith(SETUP_ACTIONS) else str(step.get('uses'))
+
+
+def pins(load: 'Callable[[str], dict[str, Any]]' = workflow) -> 'dict[tuple[str, str, str], list[str]]':
+    """Every literal Python version a workflow selects with, as (workflow, job, where): values."""
+    found = {}  # type: dict[tuple[str, str, str], list[str]]
+
+    def add(name: 'str', job_id: 'str', where: 'str', value: 'str') -> None:
+        found.setdefault((name, job_id, where), []).append(' '.join(value.split()))
+
+    for name, spec in workflows(load):
+        for job_id, job in spec.get('jobs', {}).items():
+            title = str(job.get('name', ''))
+            for version in NAMED.findall(re.sub(r'\$\{\{.*?\}\}', '', title)):
+                add(name, job_id, 'name', version)
+            raw = job.get('strategy', {}).get('matrix', {})
+            if isinstance(raw, dict):
+                for where, text in strings({key: value for key, value in raw.items()
+                                            if key in ('python-version', 'include')}, 'strategy.matrix'):
+                    if VERSIONS.fullmatch(text):
+                        add(name, job_id, where, text)
+            for where, text in strings({key: value for key, value in job.items() if key != 'steps'}, ''):
+                for a, b in COMPARED.findall(text):
+                    add(name, job_id, where, a or b)
+                if where.startswith('env.') and VERSIONS.fullmatch(text):
+                    add(name, job_id, where, text)
+            for step in job.get('steps', ()):
+                label = step_label(step)
+                version = step.get('with', {}).get('python-version')
+                if str(step.get('uses', '')).startswith(SETUP_ACTIONS) and isinstance(version, str) \
+                        and '${{' not in version:
+                    add(name, job_id, f'{label}: with.python-version', version)
+                for where, text in strings({key: value for key, value in step.items() if key != 'run'}, ''):
+                    for a, b in COMPARED.findall(text):
+                        add(name, job_id, f'{label}: {where}', a or b)
+                    if where.startswith('env.') and VERSIONS.fullmatch(text):
+                        add(name, job_id, f'{label}: {where}', text)
+                code = '\n'.join(line for line in str(step.get('run', '')).splitlines()
+                                 if not line.strip().startswith('#'))
+                for found_tag in TAG.findall(code):
+                    add(name, job_id, f'{label}: run', found_tag)
+                for loop in LOOP.findall(code):
+                    add(name, job_id, f'{label}: run', loop)
+                for a, b in COMPARED.findall(code):
+                    add(name, job_id, f'{label}: run', a or b)
+    return found
+
+
+#: The jobs that run on one interpreter, which the ruling (#1661) puts on ``latest``.
+SINGLE = (('unit-tests.yml', 'gate'), ('unit-tests.yml', 'unittest-ordering'), ('unit-tests.yml', 'changelog'),
+          ('unit-tests.yml', 'project-tests'), ('create-release.yml', 'version_check'),
+          ('cron-conda.yml', 'conda-update'), ('cron-vendor.yml', 'vendor-update'),
+          ('deploy-pages.yml', 'deploy-pages'), ('ci-timing.yml', 'report'))
+
+
+class TestEveryVersionComesFromTheFile(unittest.TestCase):
+    """No workflow selects a Python version the file does not give it, bar the exemptions."""
+
+    #: A pin of each kind the scan reads, as it stood at :data:`MAIN`.
+    PINS_AT_MAIN = (
+        ('unit-tests.yml', 'gate', 'name'),
+        ('unit-tests.yml', 'gate', 'Set up Python: with.python-version'),
+        ('unit-tests.yml', 'test', 'strategy.matrix.python-version'),
+        ('unit-tests.yml', 'test', 'strategy.matrix.include.python-version'),
+        ('unit-tests.yml', 'engine-tests', 'Run the 3.11-3.15 cells: run'),
+        ('create-release.yml', 'version_check', 'Check PyPI publish completeness: run'),
+        ('create-release.yml', 'pypi', 'No Source Distribution for Python ${{ matrix.python-version }}: if'),
+        ('unit-tests.yml', 'pypcap-parity', 'env.APT_CACHE_SAVE'),
+    )
+
+    def test_no_pin_but_the_files_exemptions(self) -> None:
+        """Each pin is exempt with its value; each exemption still matches a pin.
+
+        Where the clone holds :data:`MAIN`, the scan is shown not to be blind
+        first: it finds :data:`PINS_AT_MAIN` in ``main``'s workflows.
+
+        """
+        if has_main():
+            at_main = pins(workflow_at_main)
+            for key in self.PINS_AT_MAIN:
+                with self.subTest(at_main=key):
+                    self.assertIn(key, at_main)
+        exemptions = {(e['workflow'], e['job'], e['where']): e['value'] for e in script().load()['exemptions']}
+        found = pins()
+        for key, values in found.items():
+            with self.subTest(pin=key):
+                self.assertIn(key, exemptions, f'{key} pins {values}: read it from the file, or exempt it there')
+                self.assertEqual(values, [exemptions[key]] * len(values))
+        for key in exemptions:
+            with self.subTest(exemption=key):
+                self.assertIn(key, found, 'this exemption matches no pin: drop it from the file')
+
+    def test_every_setup_reads_the_matrix_or_the_file(self) -> None:
+        """A setup action's version is ``matrix.python-version``, a script output, or an exempt literal."""
+        exemptions = {(e['workflow'], e['job'], e['where']) for e in script().load()['exemptions']}
+        for name, spec in workflows():
+            for job_id, job in spec.get('jobs', {}).items():
+                for step in setups(job):
+                    text = str(step.get('with', {}).get('python-version', ''))
+                    where = (name, job_id, f'{step_label(step)}: with.python-version')
+                    with self.subTest(step=where):
+                        if where in exemptions or 'matrix.python-version' in text:
+                            continue
+                        output = script_output(name, job_id, READ.fullmatch(text).group(2))  # type: ignore[union-attr]
+                        expected = {'engine-tests': ('engine-supported', 'engine-ktlo')}.get(job_id, ('latest',))
+                        self.assertIn(output, expected)
+
+    def test_every_single_interpreter_job_runs_latest(self) -> None:
+        latest = script().load()['latest']
+        for name, job_id in SINGLE:
+            job = workflow(name)['jobs'][job_id]
+            with self.subTest(workflow=name, job=job_id):
+                steps = [step for step in setups(job) if str(step['uses']).startswith('actions/setup-python@')]
+                self.assertEqual([resolve(name, job_id, step['with']['python-version']) for step in steps], [latest])
+
+    def test_the_coverage_leg_and_the_sdist_leg_are_latest(self) -> None:
+        latest = script().load()['latest']
+        covered = [leg['python-version'] for leg in legs(matrix('unit-tests.yml', 'test')) if leg.get('coverage')]
+        self.assertEqual(covered, [latest])
+        step = next(step for step in workflow('create-release.yml')['jobs']['pypi']['steps']
+                    if step.get('id') == 'no_sdist')
+        condition = re.fullmatch(r"\$\{\{ matrix\.python-version != (\S+) && steps\.build\.outcome == 'success' \}\}",
+                                 step['if'])
+        self.assertIsNotNone(condition, step['if'])
+        self.assertEqual(resolve('create-release.yml', 'pypi', '${{ %s }}' % condition.group(1)), latest)  # type: ignore[union-attr]
+
+    def test_the_versions_jobs_read_two_files_and_write_nothing(self) -> None:
+        """``unit-tests.yml`` is a reusable workflow whose callers grant only ``contents: read``."""
+        for name in ('unit-tests.yml', 'python-compatibility.yml'):
+            spec = workflow(name)
+            job = spec['jobs']['python-versions']
+            with self.subTest(workflow=name):
+                self.assertEqual(job.get('permissions', spec['permissions']), {'contents': 'read'})
+                checkout = job['steps'][0]
+                self.assertTrue(checkout['uses'].startswith('actions/checkout@'))
+                self.assertEqual(checkout['with']['sparse-checkout'].split(),
+                                 ['.github/python-versions.json', 'util/python_versions.py'])
+                self.assertIs(checkout['with']['sparse-checkout-cone-mode'], False)
+                self.assertEqual(job['steps'][1]['run'].strip(), SCRIPT_STEP)
+                self.assertNotIn('if', job)
+
+
+class TestTheAnacondaCheckCountsTheFile(unittest.TestCase):
+    """``version_check``'s Anaconda evidence, run as the workflow runs it, ``curl`` stubbed.
+
+    Its PyPI twin is executed by ``test_python_matrix_tiers_1633``.
+
+    """
+
+    def setUp(self) -> None:
+        if shutil.which('bash') is None or shutil.which('python3') is None:  # pragma: no cover
+            self.skipTest('bash and python3 are needed to run the workflow shell')
+
+    def complete(self, distributions: 'list[tuple[str, str]]') -> 'str':
+        """``PCAPKIT_CONDA_COMPLETE`` for a release holding these (platform, build) pairs."""
+        step = next(step for step in workflow('create-release.yml')['jobs']['version_check']['steps']
+                    if step.get('name') == 'Check Anaconda publish completeness')
+        builds = resolve('create-release.yml', 'version_check', step['env']['PCAPKIT_CONDA_BUILDS'])
+        with tempfile.TemporaryDirectory(prefix='pcapkit-1660-') as tmp:
+            scratch = pathlib.Path(tmp)
+            reply = scratch / 'reply.json'
+            reply.write_text(json.dumps({'distributions': [{'attrs': {'subdir': platform, 'build': f'{build}_0'}}
+                                                           for platform, build in distributions]}), encoding='utf-8')
+            curl = scratch / 'curl'
+            curl.write_text('#!/bin/bash\nwhile [ $# -gt 0 ]; do [ "$1" = -o ] && cp "$REPLY" "$2"; shift; done\n'
+                            'printf 200\n', encoding='utf-8')
+            curl.chmod(0o755)
+            output = scratch / 'output'
+            output.write_text('', encoding='utf-8')
+            result = subprocess.run(
+                ['bash', '-e', '-c', step['run'].replace('/tmp/anaconda_release.json', str(scratch / 'release.json'))],
+                env=dict(os.environ, PATH=f'{scratch}{os.pathsep}{os.environ["PATH"]}', REPLY=str(reply),
+                         GITHUB_OUTPUT=str(output), PCAPKIT_VERSION='1.5.0', PCAPKIT_CONDA_BUILDS=builds),
+                capture_output=True, text=True, check=False, timeout=60)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            written = dict(line.split('=', 1) for line in output.read_text(encoding='utf-8').split())
+            return written['PCAPKIT_CONDA_COMPLETE']
+
+    def test_each_platform_needs_each_supported_build(self) -> None:
+        builds = live_outputs()['conda-builds'].split()
+        every = [(platform, build) for platform in ('linux-64', 'osx-64') for build in builds]
+        ktlo = [('linux-64', 'py' + version.replace('.', ''))
+                for version in script().tier(script().load(), 'cpython', 'ktlo')]
+        self.assertEqual(self.complete(every), 'true')
+        self.assertEqual(self.complete(every[1:] + ktlo), 'false')
+        self.assertEqual(self.complete([]), 'false')
+
+
+def prose(path: 'pathlib.Path') -> 'str':
+    """``path``'s text with each line break, and a leading ``#``/``#:`` after it, as one space."""
+    return re.sub(r'[ \t]*\n[ \t]*(?:#:?[ \t]*)?', ' ', path.read_text(encoding='utf-8'))
+
+
+class TestTheProseFollowsTheFile(unittest.TestCase):
+    """What the classifiers, docs and comments say about the versions, read against the file."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        data = script().load()
+        cls.latest = data['latest']
+        cls.supported = script().tier(data, 'cpython', 'supported')
+        cls.ktlo = script().tier(data, 'cpython', 'ktlo')
+        values = script().outputs(data)
+        cls.wheels = len(values['pypi-wheels'].split())
+        cls.conda = len(json.loads(values['conda']))
+
+    def test_the_classifiers_name_the_supported_tier_and_both_implementations(self) -> None:
+        text = (ROOT / 'pyproject.toml').read_text(encoding='utf-8')
+        self.assertEqual(re.findall(r'"Programming Language :: Python :: (3\.\d+)"', text), self.supported)
+        self.assertEqual(re.findall(r'"Programming Language :: Python :: Implementation :: (\w+)"', text),
+                         ['CPython', 'PyPy'])
+
+    #: (file, claim with the first and last version of a tier captured, which tier).
+    RANGES = (
+        ('README.md', r'CI supports (3\.\d+) to (3\.\d+)', 'supported'),
+        ('README.md', r'tests the end-of-life (3\.\d+) to (3\.\d+)', 'ktlo'),
+        ('docs/source/index.rst', r'CI supports (3\.\d+) to (3\.\d+)', 'supported'),
+        ('docs/source/index.rst', r'tests the end-of-life (3\.\d+) to (3\.\d+)', 'ktlo'),
+        ('docs/source/index.rst', r'(3\.\d+) to (3\.\d+) are end-of-life and best-effort', 'ktlo'),
+        ('docs/source/contributing/pep.rst', r'in CI against Python (3\.\d+) through (3\.\d+)', 'supported'),
+        ('docs/source/contributing/pep.rst', r'against the end-of-life (3\.\d+) through (3\.\d+)', 'ktlo'),
+        ('docs/source/contributing/workflows.rst', r'The \*\*supported\*\* tier, (3\.\d+)-(3\.\d+),', 'supported'),
+        ('docs/source/contributing/workflows.rst', r'end-of-life (3\.\d+)-(3\.\d+), still built', 'ktlo'),
+        ('SECURITY.md', r'blocking tier: CPython (3\.\d+) through (3\.\d+)', 'supported'),
+        ('SECURITY.md', r'but (3\.\d+) to (3\.\d+) are best-effort', 'ktlo'),
+        ('pyproject.toml', r'\*\*(3\.\d+) through (3\.\d+)\*\* are supported', 'supported'),
+        ('pyproject.toml', r'\*\*(3\.\d+) through (3\.\d+)\*\* are KTLO', 'ktlo'),
+        ('pyproject.toml', r'the KTLO tier \((3\.\d+)-(3\.\d+)\)', 'ktlo'),
+        ('.github/workflows/lint.yml', r'Python Compatibility sweep (3\.\d+)-(3\.\d+),', 'supported'),
+        ('.github/workflows/lint.yml', r'the non-blocking KTLO legs (3\.\d+)-(3\.\d+)', 'ktlo'),
+    )
+
+    def test_each_tier_range_names_the_files_tier(self) -> None:
+        for path, pattern, name in self.RANGES:
+            versions = self.supported if name == 'supported' else self.ktlo
+            with self.subTest(path=path, claim=pattern):
+                self.assertEqual(re.findall(pattern, prose(ROOT / path)), [(versions[0], versions[-1])])
+
+    def test_the_required_contexts_table_is_the_supported_tier(self) -> None:
+        """The docs' copy of ruleset 23497679, which a tier change edits with it."""
+        page = prose(ROOT / 'docs' / 'source' / 'contributing' / 'workflows.rst')
+        self.assertEqual(re.findall(r'\* - ``Compat Python (3\.\d+)``', page), self.supported)
+        comment = prose(WORKFLOWS / 'unit-tests.yml')
+        self.assertEqual(re.findall(r'and (\w+) for `Compat Python (3\.\d+)`-`(3\.\d+)`', comment),
+                         [(['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven'][len(self.supported)],
+                           self.supported[0], self.supported[-1])])
+
+    def test_the_bug_report_template_offers_supported_versions(self) -> None:
+        text = (ROOT / '.github' / 'ISSUE_TEMPLATE' / 'bug_report.md').read_text(encoding='utf-8')
+        versions = re.search(r'Python Version: \[e\.g\. ([^\]]+)\]', text).group(1).split(', ')  # type: ignore[union-attr]
+        self.assertEqual(versions[0], self.latest)
+        self.assertLessEqual(set(versions), set(self.supported))
+        implementations = re.search(r'Python Implementation: \[e\.g\. ([^\]]+)\]', text).group(1)  # type: ignore[union-attr]
+        self.assertEqual(implementations.split(', '), ['CPython', 'PyPy'])
+
+    #: (file, a claim naming the coverage leg's or the sdist leg's version) -- ``latest``.
+    LATEST = (
+        ('.github/workflows/coverage-comment.yml', r'\(unit tier, Python (\d+\.\d+), '),
+        ('.github/workflows/coverage-comment.yml', r"the `test` job's Python (\d+\.\d+) leg"),
+        ('.github/coverage.toml', r'\(`test`, Python (\d+\.\d+)\)'),
+        ('docs/source/contributing/workflows.rst',
+         r'the ``Python (\d+\.\d+)`` leg of ``test`` \(matrix key ``coverage: true``\)'),
+        ('docs/source/contributing/conventions/test-coverage.rst', r"the ``test`` job's Python (\d+\.\d+) cell"),
+        ('.github/workflows/create-release.yml', r'keeps only on the (\d+\.\d+) leg'),
+        ('docs/source/contributing/releasing.rst', r'the sdist kept only on the (\d+\.\d+) leg'),
+    )
+
+    def test_each_claim_about_the_latest_leg_names_latest(self) -> None:
+        for path, pattern in self.LATEST:
+            with self.subTest(path=path, claim=pattern):
+                self.assertEqual(re.findall(pattern, prose(ROOT / path)), [self.latest])
+
+    def test_the_release_checks_counts_follow_the_matrices(self) -> None:
+        """version_check's own counts come from the file; the prose stating them must too."""
+        release = prose(WORKFLOWS / 'create-release.yml')
+        page = prose(ROOT / 'docs' / 'source' / 'contributing' / 'releasing.rst')
+        claims = (
+            (release, r'against the (\d+) expected', [str(self.wheels + 1)] * 2),
+            (release, r'expected -- the (\d+) supported legs', [str(self.wheels)]),
+            (release, r'the (\d+)-leg ``conda`` matrix \(2 OS x (\d+) Python versions\)',
+             [(str(2 * self.conda), str(self.conda))]),
+            (release, r'only (\d+) of (\d+) legs', [(str(2 * self.conda - 1), str(2 * self.conda))]),
+            (page, r'against the (\d+) expected -- the (\d+) supported legs',
+             [(str(self.wheels + 1), str(self.wheels))]),
+            (page, r'against the (\d+) expected \(2 OS x (\d+) Python versions\)',
+             [(str(2 * self.conda), str(self.conda))]),
+        )
+        for text, pattern, expected in claims:
+            with self.subTest(claim=pattern):
+                self.assertEqual(re.findall(pattern, text), expected)
+
+
+if __name__ == '__main__':
+    unittest.main()

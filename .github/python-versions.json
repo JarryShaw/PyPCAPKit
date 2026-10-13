@@ -1,0 +1,51 @@
+{
+  "//": "The Python version tiers (#1660). Every workflow matrix and every single-interpreter job's version is read from here through util/python_versions.py, and tests/project/test_python_versions_1660.py pins the classifiers and docs to it. A tier change is a one-line edit below plus the matching edit to ruleset 23497679's Compat contexts. Tiers: supported (blocking), ktlo (end-of-life, non-blocking) and pre-release (non-blocking; none listed today). `runner` is the image a version needs when ubuntu-latest cannot provide it. `latest` is the newest supported CPython, which the single-interpreter jobs run on. See docs/source/contributing/workflows.rst.",
+  "latest": "3.15",
+  "versions": {
+    "cpython": {
+      "3.7": {"tier": "ktlo", "runner": "ubuntu-22.04"},
+      "3.8": {"tier": "ktlo", "runner": "ubuntu-24.04"},
+      "3.9": {"tier": "ktlo", "runner": "ubuntu-24.04"},
+      "3.10": {"tier": "ktlo"},
+      "3.11": {"tier": "supported"},
+      "3.12": {"tier": "supported"},
+      "3.13": {"tier": "supported"},
+      "3.14": {"tier": "supported"},
+      "3.15": {"tier": "supported"}
+    },
+    "pypy": {
+      "pypy3.10": {"tier": "ktlo"},
+      "pypy3.11": {"tier": "supported"}
+    }
+  },
+  "exemptions": [
+    {
+      "workflow": "lint.yml",
+      "job": "lint",
+      "where": "Set up Python: with.python-version",
+      "value": "3.14",
+      "reason": "Measured for #1661 at edada31dd: on 3.15, pylint 4.1.3 (astroid 4.3.4) crashes on pcapkit/toolkit/dpkt.py (F0002 astroid-error) and reports 35 E1101 no-member against 3.14's 12, so the counts lint.yml records would move with the interpreter, not the code. bandit, mypy and vermin read the same on both. The crash still reproduces at 1024109fc under setup-python's 3.15.0 build, which has no C _decimal."
+    },
+    {
+      "workflow": "unit-tests.yml",
+      "job": "pypcap-parity",
+      "where": "env.APT_CACHE_SAVE",
+      "value": "3.11",
+      "reason": "The parity matrix's one supported leg saves the apt cache. Both legs install one set under one key, and a second saver fails with `Unable to reserve cache`."
+    },
+    {
+      "workflow": "create-release.yml",
+      "job": "conda",
+      "where": "Conda environment creation and activation: with.python-version",
+      "value": "3.15",
+      "reason": "conda-forge's conda has no py315 build, so installing 3.15 into base fails with `RemoveError: Conda cannot remove itself` (#1633, conda 26.7.2). 3.15 leaves base on its own Python; `conda build --python` still builds for 3.15. Drop this once conda publishes a py315 build."
+    },
+    {
+      "workflow": "cron-conda.yml",
+      "job": "conda-dist",
+      "where": "Conda environment creation and activation: with.python-version",
+      "value": "3.15",
+      "reason": "As for create-release.yml's conda job: conda-forge's conda has no py315 build yet."
+    }
+  ]
+}

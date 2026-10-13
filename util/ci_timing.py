@@ -93,11 +93,23 @@ DEFAULT_TIMEOUT = 360
 
 #: The aggregate job the ruleset requires; its completion is "mergeable".
 REQUIRED_JOB = 'Required checks passed'
-#: The leg running under coverage, and the legs its tests step is paired against:
-#: the rest of the supported tier (#1633), not the KTLO legs, which are named
-#: ``Python 3.x (KTLO)`` and may stop early without failing.
-COVERAGE_JOB = 'Python 3.14'
-PAIRED_JOBS = ('Python 3.11', 'Python 3.12', 'Python 3.13', 'Python 3.15')
+#: The Python version tiers (#1660), which the two names below are read from.
+TIERS = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.github', 'python-versions.json')
+
+
+def _coverage_legs() -> 'tuple[str, tuple[str, ...]]':
+    """The ``latest`` leg's job name, and the other supported legs', from :data:`TIERS`."""
+    with open(TIERS, encoding='utf-8') as file:
+        data = json.load(file)
+    paired = tuple(f'Python {version}' for version, entry in data['versions']['cpython'].items()
+                   if entry['tier'] == 'supported' and version != data['latest'])
+    return f"Python {data['latest']}", paired
+
+
+#: The leg running under coverage, ``latest``, and the legs its tests step is paired
+#: against: the rest of the supported tier (#1633), not the KTLO legs, which are
+#: named ``Python 3.x (KTLO)`` and may stop early without failing.
+COVERAGE_JOB, PAIRED_JOBS = _coverage_legs()
 TESTS_STEP = 'Run unit tests'
 #: The leg ms/test is measured on: a supported version not under coverage, kept on
 #: 3.13 -- the newest such leg when W4's baseline was measured -- so that W4 compares
@@ -115,7 +127,8 @@ STEPS_OF_INTEREST = (
     r'Report coverage',
     r'Run full test suite',
     r'Run tests/.* under plain unittest',
-    r'Run the 3\.10 cell.*',
+    # engine-tests' KTLO step, named by its one version until #1660.
+    r'Run the (?:3\.10 cell|KTLO cells).*',
 )
 
 # Thresholds. Each is anchored to a value measured on 2026-10-05..09 for #1538,

@@ -45,6 +45,9 @@ import urllib.parse
 import zipfile
 from unittest import mock
 
+from tests.project.test_python_versions_1660 import legs as matrix_legs
+from tests.project.test_python_versions_1660 import matrix
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 FIXTURES = pathlib.Path(__file__).resolve().parent / 'ci_timing_fixtures'
 WORKFLOWS = ROOT / '.github' / 'workflows'
@@ -60,6 +63,10 @@ LINK_ROOT = 'https://api.github.com/repositories/109791841/actions/workflows/uni
 #: Runs per fake page, small so the paging is exercised.
 PAGE = 2
 PR_RUN, CANCELLED_RUN, PUSH_RUN, TIMEOUT_RUN = 38001768735, 38002005234, 37998639834, 37323913186
+#: The coverage leg, and the legs paired with it, when the fixtures were recorded.
+#: #1661 moved coverage to 3.15, which no fixture run has.
+FIXTURE_COVERAGE_JOB = 'Python 3.14'
+FIXTURE_PAIRED_JOBS = ('Python 3.11', 'Python 3.12', 'Python 3.13')
 JUNIT_ARTIFACT_ID = 11648726901
 #: The day slices a 7-day window ending at :data:`NOW` is listed in.
 SLICES = [f'2026-10-{day:02d}T00:00:00Z..2026-10-{day:02d}T23:59:59Z' for day in range(9, 2, -1)]
@@ -320,7 +327,9 @@ class TestEndToEnd(unittest.TestCase):
     def setUpClass(cls) -> 'None':
         cls.api = FakeAPI()
         # One or two runs per event in the fixtures, so the sample floor comes down.
-        with mock.patch.object(ci_timing, 'MIN_SAMPLES', 1):
+        with mock.patch.object(ci_timing, 'MIN_SAMPLES', 1), \
+                mock.patch.object(ci_timing, 'COVERAGE_JOB', FIXTURE_COVERAGE_JOB), \
+                mock.patch.object(ci_timing, 'PAIRED_JOBS', FIXTURE_PAIRED_JOBS):
             cls.status, cls.stdout, cls.report, cls.summary = run_main(api=cls.api)
 
     def ids(self) -> 'list[str]':
@@ -422,9 +431,9 @@ class TestEndToEnd(unittest.TestCase):
             steps = {job['name']: next(span(s['started_at'], s['completed_at']) for s in job['steps']
                                        if s['name'] == ci_timing.TESTS_STEP)
                      for job in jobs_of(run) if re.fullmatch(r'Python 3\.1\d', job['name'])}
-            paired = [steps[name] for name in ci_timing.PAIRED_JOBS if name in steps]
+            paired = [steps[name] for name in FIXTURE_PAIRED_JOBS if name in steps]
             if len(paired) >= 2:
-                ratios.append(steps[ci_timing.COVERAGE_JOB] / statistics.median(paired))
+                ratios.append(steps[FIXTURE_COVERAGE_JOB] / statistics.median(paired))
         self.assertEqual(len(ratios), 2)
         self.assertAlmostEqual(self.report['derived']['coverage_ratio']['median'], statistics.median(ratios))
 
@@ -711,12 +720,13 @@ class TestTimingArtifacts(unittest.TestCase):
                 self.assertIn('--durations=', section)
 
     def test_the_legs_the_review_reads_exist(self) -> 'None':
-        test = re.search(r'(?ms)^  test:\n(.*?)(?=^  [\w-]+:\n)', self.text).group(1)
+        """``test``'s legs, from .github/python-versions.json since #1660."""
+        found = matrix_legs(matrix('unit-tests.yml', 'test'))
         for leg in ci_timing.JUNIT_LEGS:
             with self.subTest(leg=leg):
-                self.assertIn(f'- "{leg}"', test)
-        coverage = re.search(r'include:\n\s+- python-version: "([\d.]+)"\n\s+coverage: true', test)
-        self.assertEqual(f'Python {coverage.group(1)}', ci_timing.COVERAGE_JOB)
+                self.assertIn(leg, [entry['python-version'] for entry in found if not entry.get('ktlo')])
+        coverage = [entry['python-version'] for entry in found if entry.get('coverage')]
+        self.assertEqual([f'Python {version}' for version in coverage], [ci_timing.COVERAGE_JOB])
 
     def test_the_reusable_workflow_asks_for_no_write_permission(self) -> 'None':
         """Its four callers grant ``contents: read``, so a write scope would break them."""
