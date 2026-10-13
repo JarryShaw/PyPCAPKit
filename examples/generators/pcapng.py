@@ -8,9 +8,11 @@ checkout of anything private, by two routes:
 
 * **Downloaded** -- fetched from a public source, with the source URL and the
   SHA-256 of the exact bytes pinned below. The digest is checked after every
-  download and a mismatch is a hard error, never a warning. If the network is
-  unavailable the download degrades to a synthesised stand-in, and both the
-  console output and the return value say so rather than pretending otherwise.
+  download and a mismatch is a hard error, never a warning. An HTTP 429 or
+  5xx, or a timeout, is retried a few times with backoff (see
+  :func:`_download`). If the network is still unavailable the download
+  degrades to a synthesised stand-in, and both the console output and the
+  return value say so rather than pretending otherwise.
 * **Synthesised** -- written byte by byte by :class:`_Blocks` below, with no
   network access whatsoever, from packet payloads carried in the committed
   ``examples/captures/dhcp.pcapng`` fixture. Generation is deterministic: the same input
@@ -151,11 +153,15 @@ Usage
 
 from __future__ import annotations
 
+import datetime
+import email.utils
 import hashlib
 import logging
 import pathlib
+import socket
 import struct
 import sys
+import time
 import urllib.error
 import urllib.request
 from typing import TYPE_CHECKING, NamedTuple
@@ -184,6 +190,12 @@ WIRESHARK_CAPTURES = ('https://raw.githubusercontent.com/wireshark/wireshark/'
 
 #: Timeout, in seconds, for a single download attempt.
 TIMEOUT = 30
+#: Attempts per download, the first included, before falling back to a stand-in.
+DOWNLOAD_ATTEMPTS = 3
+#: Wait, in seconds, before the first retry; it doubles for each retry after it.
+RETRY_BACKOFF = 2.0
+#: Most seconds one download spends waiting between its attempts, summed.
+RETRY_BUDGET = 30.0
 
 #: Fixed base timestamp (2017-07-14T02:40:00Z) so generation is reproducible.
 BASE_SECONDS = 1_500_000_000
@@ -817,10 +829,92 @@ FIXTURES = (
 )
 
 
+def _transient(exc: 'OSError') -> 'bool':
+    """Whether a failed download is worth another attempt.
+
+    Only HTTP 429, an HTTP 5xx, and a timeout are. Any other HTTP error is the
+    server's final answer, and an unreachable host fails at once rather than
+    after a wait, which keeps an offline run as quick as it was.
+
+    """
+    if isinstance(exc, urllib.error.HTTPError):
+        return exc.code == 429 or 500 <= exc.code <= 599
+    reason = exc.reason if isinstance(exc, urllib.error.URLError) else exc
+    return isinstance(reason, (socket.timeout, TimeoutError))
+
+
+def _retry_after(exc: 'OSError', now: 'float') -> 'Optional[float]':
+    """The wait, in seconds, an HTTP error's ``Retry-After`` header asks for.
+
+    The header is either delay-seconds or an HTTP-date (RFC 9110, section
+    10.2.3). A date already past asks for no wait.
+
+    Args:
+        exc: The failure of the attempt that is to be retried.
+        now: The current time, in seconds since the epoch.
+
+    Returns:
+        The wait, or :data:`None` if there is no header or it does not parse.
+
+    """
+    headers = getattr(exc, 'headers', None)
+    value = None if headers is None else headers.get('Retry-After')
+    if value is None:
+        return None
+    value = value.strip()
+    if value.isascii() and value.isdigit():
+        return float(value)
+    try:
+        when = email.utils.parsedate_to_datetime(value)
+    except (TypeError, ValueError):
+        return None
+    if when.tzinfo is None:  # a ``-0000`` zone, which RFC 5322 reads as UTC
+        when = when.replace(tzinfo=datetime.timezone.utc)
+    return max(0.0, when.timestamp() - now)
+
+
 def _download(url: 'str') -> 'bytes':
-    """Fetch ``url`` and return its body."""
-    with urllib.request.urlopen(url, timeout=TIMEOUT) as response:  # nosec: B310
-        return response.read()
+    """Fetch ``url`` and return its body, retrying a transient failure.
+
+    A failure :func:`_transient` accepts is retried, up to
+    :data:`DOWNLOAD_ATTEMPTS` attempts in all, after the wait its
+    ``Retry-After`` header asks for, or else after an exponential backoff from
+    :data:`RETRY_BACKOFF`. The waits of one download add up to at most
+    :data:`RETRY_BUDGET`: a wait longer than what is left of it ends the
+    retries rather than being cut short, since retrying before the server
+    asked would only be refused again. Each retry is logged on stderr.
+
+    Args:
+        url: Capture to fetch.
+
+    Returns:
+        The response body.
+
+    Raises:
+        OSError: The last failure, once the retries are over or for a failure
+            that is not retried -- :func:`_materialise` then falls back to a
+            stand-in (#1658).
+
+    """
+    attempt, waited = 1, 0.0
+    while True:
+        try:
+            with urllib.request.urlopen(url, timeout=TIMEOUT) as response:  # nosec: B310
+                return response.read()
+        except OSError as exc:
+            if attempt >= DOWNLOAD_ATTEMPTS or not _transient(exc):
+                raise
+            delay = _retry_after(exc, time.time())
+            if delay is None:
+                delay = RETRY_BACKOFF * 2 ** (attempt - 1)
+            if waited + delay > RETRY_BUDGET:
+                print(f'    ! {url}: {exc}; waiting {delay:.1f} s more would pass the '
+                      f'{RETRY_BUDGET:g} s retry budget, so not retrying', file=sys.stderr)
+                raise
+            print(f'    ! {url}: {exc}; retry {attempt} of {DOWNLOAD_ATTEMPTS - 1} '
+                  f'in {delay:.1f} s', file=sys.stderr)
+            time.sleep(delay)
+            attempt, waited = attempt + 1, waited + delay
 
 
 def _materialise(fixture: '_Fixture', path: 'pathlib.Path') -> 'tuple[bytes, str]':
