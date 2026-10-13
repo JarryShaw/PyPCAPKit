@@ -73,6 +73,7 @@ Internal Definitions below.
    .. automethod:: _lookup_next_layer
    .. automethod:: _decode_next_layer
    .. automethod:: _import_next_layer
+   .. automethod:: _parse_next_layer
    .. automethod:: _get_context
 
    .. autoattribute:: _data
@@ -82,6 +83,7 @@ Internal Definitions below.
    .. autoattribute:: _protos
    .. autoattribute:: _seekset
    .. autoattribute:: _sigterm
+   .. autoattribute:: _past_layer_limit
    .. autoattribute:: __data__
 
    .. automethod:: __init__
@@ -98,6 +100,26 @@ Internal Definitions below.
    .. autoattribute:: _exlayer
    .. autoattribute:: _exproto
    .. autoattribute:: _exctx
+
+Layers per Frame
+----------------
+
+A frame is dissected to at most
+:data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT` layers of its protocol
+chain, counted from the first layer the frame record carries, through tunnels,
+VLAN tags and IPv6 extension headers alike. What follows is kept as
+:class:`~pcapkit.protocols.misc.raw.Raw`, with one
+:exc:`~pcapkit.utilities.warnings.ProtocolWarning` (:issue:`1610`), and is
+marked :attr:`~pcapkit.protocols.protocol.Protocol._past_layer_limit`, so the
+default engine's TCP reassembly and flow tracing do not read a TCP segment
+there back out, as they do one the TCP parser rejected (:issue:`1518`). A
+protocol constructed from its own octets is not counted itself, so the count
+starts at the first layer it dissects. One chain of extension headers is also bounded on
+its own, by :data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT`.
+The ``dpkt``, ``scapy``, ``pyshark`` and ``pypcapfile`` engines dissect with
+their own parsers, which do not apply this bound (:issue:`1609`).
+
+.. autodata:: pcapkit.protocols.protocol.FRAME_LAYER_LIMIT
 
 Data Models
 -----------

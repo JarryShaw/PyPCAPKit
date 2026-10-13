@@ -646,7 +646,9 @@ the IP layer that carries it – in a tunnel, the innermost
 (<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.1"><strong>RFC 9293 Section 3.1</strong></a>) if the payload of the innermost IP layer is a
 <a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> the TCP parser rejected, of
 protocol TCP, from a datagram that is not a later fragment, with at
-least those 20 octets captured; else <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p>
+least those 20 octets captured; else <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>. A segment past
+<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.FRAME_LAYER_LIMIT" title="pcapkit.protocols.protocol.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a> is kept raw
+without being parsed, not rejected, so it is not read (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1610">#1610</a>).</p>
 </dd>
 </dl>
 <div class="admonition note">
@@ -656,7 +658,7 @@ past the captured octets, and the TCP parser rejects such a header by
 design (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1404">#1404</a>), so the segment arrives as
 <a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>. The ports, numbers and flags
 are all in the fixed header, so the segment still belongs to its flow,
-as it does for <code class="xref py py-mod docutils literal notranslate"><span class="pre">dpkt</span></code>, <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.html#module-scapy" title="(in Scapy v2.8.0.post4)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scapy</span></code></a> and Wireshark (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1518">#1518</a>).
+as it does for <code class="xref py py-mod docutils literal notranslate"><span class="pre">dpkt</span></code>, <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.html#module-scapy" title="(in Scapy v2.8.0.post5)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scapy</span></code></a> and Wireshark (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1518">#1518</a>).
 The header and payload are then the captured octets either side of the
 Data Offset. Inside a tunnel, this holds of the IP layer carrying the
 segment, as it does without one.</p>

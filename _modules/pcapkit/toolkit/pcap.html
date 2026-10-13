@@ -598,7 +598,9 @@
 <span class="sd">        (:rfc:`9293#section-3.1`) if the payload of the innermost IP layer is a</span>
 <span class="sd">        :class:`~pcapkit.protocols.misc.raw.Raw` the TCP parser rejected, of</span>
 <span class="sd">        protocol TCP, from a datagram that is not a later fragment, with at</span>
-<span class="sd">        least those 20 octets captured; else :data:`None`.</span>
+<span class="sd">        least those 20 octets captured; else :data:`None`. A segment past</span>
+<span class="sd">        :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT` is kept raw</span>
+<span class="sd">        without being parsed, not rejected, so it is not read (:issue:`1610`).</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        A capture snapped inside the TCP header leaves a Data Offset that runs</span>
@@ -634,7 +636,10 @@
     <span class="n">raw</span> <span class="o">=</span> <span class="n">ip</span><span class="o">.</span><span class="n">payload</span>
     <span class="c1"># NOTE: a Raw with no error is one the caller asked for, by stopping the</span>
     <span class="c1"># dissection at a ``layer`` or ``protocol``, not a segment TCP rejected.</span>
+    <span class="c1"># Nor is one past FRAME_LAYER_LIMIT, which carries an error all the same:</span>
+    <span class="c1"># the frame is not dissected past it, so its TCP is not read (#1610).</span>
     <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">Raw</span><span class="p">)</span> <span class="ow">or</span> <span class="n">raw</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">error</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="ow">or</span> <span class="n">raw</span><span class="o">.</span><span class="n">_past_layer_limit</span>  <span class="c1"># pylint: disable=protected-access</span>
             <span class="ow">or</span> <span class="n">ip_info</span><span class="o">.</span><span class="n">protocol</span> <span class="o">!=</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">TCP</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
 

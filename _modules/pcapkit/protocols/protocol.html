@@ -491,6 +491,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections.abc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">contextvars</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">difflib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
@@ -524,8 +525,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">beholder</span><span class="p">,</span> <span class="n">seekset</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">ProtocolNotFound</span><span class="p">,</span>
                                           <span class="n">ProtocolNotImplemented</span><span class="p">,</span> <span class="n">RegistryError</span><span class="p">,</span> <span class="n">StructError</span><span class="p">,</span>
-                                          <span class="n">UnsupportedCall</span><span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">UnknownFieldWarning</span><span class="p">,</span> <span class="n">hold_warnings</span><span class="p">,</span> <span class="n">warn</span>
+                                          <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">UnknownFieldWarning</span><span class="p">,</span>
+                                        <span class="n">hold_warnings</span><span class="p">,</span> <span class="n">warn</span><span class="p">)</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">StdlibEnum</span>
@@ -864,6 +866,37 @@
          <span class="n">UnknownFieldWarning</span><span class="p">)</span>
 
 
+<span class="c1">#: Most layers dissected in one frame (:issue:`1610`). A layer is one entry of</span>
+<span class="c1">#: the frame's protocol chain, counted from the first layer the frame record</span>
+<span class="c1">#: carries, usually its link layer; a protocol constructed from its own octets</span>
+<span class="c1">#: is not counted itself, so the count starts at the first layer it dissects.</span>
+<span class="c1">#: IPv6 extension headers are layers like any other, whether</span>
+<span class="c1">#: :class:`~pcapkit.protocols.internet.ipv6.IPv6` walks them or each dissects</span>
+<span class="c1">#: the next. What follows the last layer is kept as</span>
+<span class="c1">#: :class:`~pcapkit.protocols.misc.raw.Raw`, with one</span>
+<span class="c1">#: :exc:`~pcapkit.utilities.warnings.ProtocolWarning`, unless it would have been</span>
+<span class="c1">#: left raw anyway or there is nothing left.</span>
+<span class="c1">#:</span>
+<span class="c1">#: Each layer dissects the next from inside its own parse, so without the bound</span>
+<span class="c1">#: a deep enough frame, such as IP in IP or stacked 802.1Q tags, stops wherever</span>
+<span class="c1">#: Python's recursion limit falls, which depends on the interpreter and on how</span>
+<span class="c1">#: deep the caller's own stack is. A tunnel does not restart the count, and nor</span>
+<span class="c1">#: does the end of a chain of extension headers, which</span>
+<span class="c1">#: :data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT` bounds on</span>
+<span class="c1">#: its own.</span>
+<span class="n">FRAME_LAYER_LIMIT</span> <span class="o">=</span> <span class="mi">64</span>
+
+<span class="c1">#: contextvars.ContextVar[int]: How many layers of the frame being dissected</span>
+<span class="c1">#: come before the next one :meth:`ProtocolBase._parse_next_layer` parses, c.f.</span>
+<span class="c1">#: :data:`FRAME_LAYER_LIMIT`.</span>
+<span class="n">_frame_depth</span> <span class="o">=</span> <span class="n">contextvars</span><span class="o">.</span><span class="n">ContextVar</span><span class="p">(</span><span class="s1">'_frame_depth'</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1">#: contextvars.ContextVar[bool]: Whether a payload is being rebuilt by</span>
+<span class="c1">#: :meth:`ProtocolBase._make_payload`, so that the layer it is rebuilt for</span>
+<span class="c1">#: parses the same octets again, c.f. :data:`FRAME_LAYER_LIMIT`.</span>
+<span class="n">_rebuilding</span> <span class="o">=</span> <span class="n">contextvars</span><span class="o">.</span><span class="n">ContextVar</span><span class="p">(</span><span class="s1">'_rebuilding'</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_short_of_hint</span><span class="p">(</span><span class="n">klass</span><span class="p">:</span> <span class="s1">'Type[ProtocolBase]'</span><span class="p">,</span> <span class="n">captured</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Tell whether ``captured`` octets may be too few for a ``klass`` header.</span>
 
@@ -1015,6 +1048,13 @@
     <span class="c1">#: :data:`None` is what an instance built without ``__init__`` (e.g.</span>
     <span class="c1">#: ``object.__new__(SomeProtocol)``) sees, so reading it is always safe.</span>
     <span class="n">_exctx</span><span class="p">:</span> <span class="s1">'Optional[ContextRegistry]'</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1">#: Whether this layer is past :data:`FRAME_LAYER_LIMIT`, and so was kept as</span>
+    <span class="c1">#: :class:`~pcapkit.protocols.misc.raw.Raw` by :meth:`_parse_next_layer`</span>
+    <span class="c1">#: without being parsed. Such a layer carries an ``error`` as one that</span>
+    <span class="c1">#: failed to parse does, so this is what tells the two apart: what follows</span>
+    <span class="c1">#: the limit is not to be read on (:issue:`1610`).</span>
+    <span class="n">_past_layer_limit</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
@@ -2497,6 +2537,14 @@
 <span class="sd">        neither. The payload is then found from the structure of ``data``</span>
 <span class="sd">        instead, by :meth:`_lookup_payload`.</span>
 
+<span class="sd">        The payload is built one layer further into the frame than this</span>
+<span class="sd">        protocol, as :meth:`_parse_next_layer` counts it, since each layer built</span>
+<span class="sd">        parses its own octets again. So rebuilding a frame stops at</span>
+<span class="sd">        :data:`FRAME_LAYER_LIMIT` where parsing it did, rather than that many</span>
+<span class="sd">        layers below each layer of it (:issue:`1610`). Nor does the payload's</span>
+<span class="sd">        parse warn of the limit: this protocol's own parse goes over the same</span>
+<span class="sd">        octets, so the rebuilt frame warns of it once, as the parsed one did.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            data: protocol data</span>
 <span class="sd">            exclude: keys of ``data`` that are not the payload, though they may</span>
@@ -2512,7 +2560,12 @@
                 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.null</span><span class="w"> </span><span class="kn">import</span> \
                     <span class="n">NoPayload</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
                 <span class="k">return</span> <span class="n">NoPayload</span><span class="p">()</span>
-            <span class="k">return</span> <span class="n">proto</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+            <span class="n">token</span><span class="p">,</span> <span class="n">rebuilding</span> <span class="o">=</span> <span class="n">_frame_depth</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">_frame_depth</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">_rebuilding</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">proto</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="n">_rebuilding</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">rebuilding</span><span class="p">)</span>
+                <span class="n">_frame_depth</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
 
         <span class="n">proto</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[Type[Protocol]]'</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__next_type__'</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">proto</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">)):</span>
@@ -2526,7 +2579,12 @@
                 <span class="n">NoPayload</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
             <span class="k">return</span> <span class="n">NoPayload</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="n">proto</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+        <span class="n">token</span><span class="p">,</span> <span class="n">rebuilding</span> <span class="o">=</span> <span class="n">_frame_depth</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">_frame_depth</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">_rebuilding</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">proto</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">_rebuilding</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">rebuilding</span><span class="p">)</span>
+            <span class="n">_frame_depth</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_lookup_payload</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Data'</span><span class="p">,</span> <span class="n">exclude</span><span class="p">:</span> <span class="s1">'tuple[str, ...]'</span> <span class="o">=</span> <span class="p">())</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Optional[Type[ProtocolBase]], Optional[str]]'</span><span class="p">:</span>  <span class="c1"># pylint: disable=line-too-long</span>
@@ -2768,7 +2826,8 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Instance of ``klass``, or of :class:`~pcapkit.protocols.misc.raw.Raw`</span>
-<span class="sd">            when fewer octets were captured than its header needs.</span>
+<span class="sd">            when fewer octets were captured than its header needs, or when it is</span>
+<span class="sd">            past :data:`FRAME_LAYER_LIMIT`.</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            :meth:`Schema.unpack &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;`</span>
@@ -2797,14 +2856,44 @@
 <span class="sd">            still warns. A layer captured at least as long as its hint cannot be</span>
 <span class="sd">            replaced, and is parsed holding nothing, even inside one that holds.</span>
 
-<span class="sd">        """</span>
-        <span class="n">captured</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_</span><span class="p">))</span>
-        <span class="k">with</span> <span class="n">hold_warnings</span><span class="p">(</span><span class="n">_short_of_hint</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="n">captured</span><span class="p">))</span> <span class="k">as</span> <span class="n">held</span><span class="p">:</span>
-            <span class="n">next_</span> <span class="o">=</span> <span class="n">klass</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[abstract]</span>
+<span class="sd">            A layer past :data:`FRAME_LAYER_LIMIT` in its frame is not parsed:</span>
+<span class="sd">            it and the rest of the frame are kept as</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.raw.Raw`, marked</span>
+<span class="sd">            :attr:`_past_layer_limit`, with one</span>
+<span class="sd">            :exc:`~pcapkit.utilities.warnings.ProtocolWarning` (:issue:`1610`).</span>
 
-            <span class="n">length_hint</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">next_</span><span class="p">,</span> <span class="s1">'__length_hint__'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-            <span class="n">hint</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">length_hint</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">length_hint</span><span class="p">()</span>
-            <span class="n">held</span><span class="o">.</span><span class="n">discard</span> <span class="o">=</span> <span class="n">hint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">captured</span> <span class="o">&lt;</span> <span class="n">hint</span> <span class="ow">and</span> <span class="n">captured</span> <span class="o">&lt;</span> <span class="n">next_</span><span class="o">.</span><span class="n">length</span>
+<span class="sd">        Warns:</span>
+<span class="sd">            ProtocolWarning: If the next layer is past :data:`FRAME_LAYER_LIMIT`.</span>
+
+<span class="sd">        """</span>
+        <span class="n">depth</span> <span class="o">=</span> <span class="n">_frame_depth</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">depth</span> <span class="o">&gt;</span> <span class="n">FRAME_LAYER_LIMIT</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.null</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+
+            <span class="c1"># NOTE: Nothing is lost if the next layer is raw already, or empty.</span>
+            <span class="k">if</span> <span class="n">klass</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Raw</span> <span class="ow">and</span> <span class="n">klass</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NoPayload</span><span class="p">:</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s1">'the frame reached the limit of </span><span class="si">{</span><span class="n">FRAME_LAYER_LIMIT</span><span class="si">}</span><span class="s1"> layers; the rest of it, '</span>
+                           <span class="sa">f</span><span class="s1">'from </span><span class="si">{</span><span class="n">klass</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> on, is left undissected'</span><span class="p">)</span>
+                <span class="c1"># NOTE: Inside a payload being rebuilt, the layer it is rebuilt</span>
+                <span class="c1"># for warns of the same octets once its own parse gets here.</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">_rebuilding</span><span class="o">.</span><span class="n">get</span><span class="p">():</span>
+                    <span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+                <span class="n">raw</span> <span class="o">=</span> <span class="n">Raw</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="p">{</span><span class="o">**</span><span class="n">kwargs</span><span class="p">,</span> <span class="s1">'error'</span><span class="p">:</span> <span class="n">message</span><span class="p">})</span>
+                <span class="n">raw</span><span class="o">.</span><span class="n">_past_layer_limit</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># pylint: disable=protected-access</span>
+                <span class="k">return</span> <span class="n">raw</span>
+
+        <span class="n">captured</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_</span><span class="p">))</span>
+        <span class="n">token</span> <span class="o">=</span> <span class="n">_frame_depth</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">depth</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">hold_warnings</span><span class="p">(</span><span class="n">_short_of_hint</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="n">captured</span><span class="p">))</span> <span class="k">as</span> <span class="n">held</span><span class="p">:</span>
+                <span class="n">next_</span> <span class="o">=</span> <span class="n">klass</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[abstract]</span>
+
+                <span class="n">length_hint</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">next_</span><span class="p">,</span> <span class="s1">'__length_hint__'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="n">hint</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">length_hint</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">length_hint</span><span class="p">()</span>
+                <span class="n">held</span><span class="o">.</span><span class="n">discard</span> <span class="o">=</span> <span class="n">hint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">captured</span> <span class="o">&lt;</span> <span class="n">hint</span> <span class="ow">and</span> <span class="n">captured</span> <span class="o">&lt;</span> <span class="n">next_</span><span class="o">.</span><span class="n">length</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">_frame_depth</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">held</span><span class="o">.</span><span class="n">discard</span><span class="p">:</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
             <span class="n">next_</span> <span class="o">=</span> <span class="n">Raw</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
