@@ -77,7 +77,10 @@ jobs:
 
       # One annotation saying why, so a red leg -- 3.7's, today, where the
       # editable install succeeds and 41 modules do not compile -- is legible
-      # from the run summary without opening the log.
+      # from the run summary without opening the log. Each title escapes `,` as
+      # `%2C`: the runner splits a command's properties on `,`, so the KTLO
+      # leg's title would otherwise stop at "(KTLO" (actions/runner
+      # src/Runner.Common/ActionCommand.cs:100, at 5f0b3ddcc).
       - name: Verify package
         shell: bash
         env:
@@ -88,10 +91,10 @@ jobs:
             cat "$log"
             count=$(awk '/^\*\*\* Error compiling /{n++} END{print n+0}' "$log")
             first=$(awk '/^  File "/{sub(/^  /, ""); print; exit}' "$log")
-            echo "::error title=pcapkit does not compile on $LEG::$count modules fail to compile, the first at ${first:-an unreported place}; see this step's log."
+            echo "::error title=pcapkit does not compile on ${LEG//,/%2C}::$count modules fail to compile, the first at ${first:-an unreported place}; see this step's log."
             exit 1
           fi
           if ! python -c 'import pcapkit; print(pcapkit.__version__)'; then
-            echo "::error title=pcapkit does not import on $LEG::See the traceback in this step's log."
+            echo "::error title=pcapkit does not import on ${LEG//,/%2C}::See the traceback in this step's log."
             exit 1
           fi

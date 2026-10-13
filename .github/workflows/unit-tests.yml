@@ -142,12 +142,12 @@ jobs:
       # why.
       #
       # #1633: a KTLO leg that cannot install -- 3.7 today -- fails fast and
-      # once. This step names pip's last ERROR line in one annotation, and
-      # every later step needs `steps.install.outcome == 'success'`, so they
-      # are skipped rather than failing one by one against a missing package.
-      # The install itself needs its interpreter: if setup-python failed, the
-      # image's own `python` would be installed into and tested under this
-      # leg's name. On a supported leg either failure fails the job, as before.
+      # once: one annotation names pip's last ERROR line (its title's `,` as
+      # `%2C`, as the runner splits properties on `,`), and every later step
+      # needs `steps.install.outcome == 'success'`, so it is skipped rather
+      # than failing against a missing package. The install needs its own
+      # interpreter: if setup-python failed, the image's `python` would be
+      # tested under this leg's name. On a supported leg either fails the job.
       - name: Install package and test dependencies
         id: install
         if: ${{ steps.python.outcome == 'success' }}
@@ -160,7 +160,7 @@ jobs:
           if ! python -m pip install -e '.[test,DPKT,crypto,NGAP]' 2>&1 | tee "$RUNNER_TEMP/pip-install.log"; then
             reason=$(sed -n 's/^ERROR: //p' "$RUNNER_TEMP/pip-install.log" | tail -n 1)
             if [ -z "$reason" ]; then reason="pip failed without an ERROR line; see this step's log"; fi
-            echo "::error title=pcapkit did not install on $LEG::${reason//%/%25}. The rest of this leg is skipped."
+            echo "::error title=pcapkit did not install on ${LEG//,/%2C}::${reason//%/%25}. The rest of this leg is skipped."
             exit 1
           fi
 
@@ -410,7 +410,7 @@ jobs:
           if ! python -m pip install -e '.[test,Scapy,DPKT,cli]' 2>&1 | tee "$RUNNER_TEMP/pip-install.log"; then
             reason=$(sed -n 's/^ERROR: //p' "$RUNNER_TEMP/pip-install.log" | tail -n 1)
             if [ -z "$reason" ]; then reason="pip failed without an ERROR line; see this step's log"; fi
-            echo "::error title=pcapkit did not install on $LEG::${reason//%/%25}. The rest of this leg is skipped."
+            echo "::error title=pcapkit did not install on ${LEG//,/%2C}::${reason//%/%25}. The rest of this leg is skipped."
             exit 1
           fi
 
@@ -857,7 +857,7 @@ jobs:
                  'read timed out|connection (reset|refused|aborted)|temporary failure in name resolution|max retries exceeded|could not fetch url|newconnectionerror|readtimeouterror|httpsconnectionpool|retrying \(retry\(|http error (5[0-9][0-9]|429)|status code 429|too many 429 error responses|no matching distribution found' \
                && ! echo "$output" | grep -qiE \
                  'failed building wheel|error: command .* failed with exit code|subprocess-exited-with-error'; then
-              echo "::error title=$ENGINE's install failure on Python $PY looks transient, not a compile failure::pip exited $status, but the output matches a network/index failure pattern rather than the C-API compile failure this cell records as expected. Re-run the job rather than trusting this as a genuine 'not-installable' result."
+              echo "::error title=$ENGINE's install failure on Python $PY looks transient%2C not a compile failure::pip exited $status, but the output matches a network/index failure pattern rather than the C-API compile failure this cell records as expected. Re-run the job rather than trusting this as a genuine 'not-installable' result."
               exit 1
             fi
             echo "::notice title=$ENGINE is not installable on Python $PY (expected)::pip exited $status, matching this cell's recorded expectation ('not-installable'), and the output does not match a transient-failure pattern. No tests run for this cell -- this is a deliberate skip, not a pass."
@@ -930,7 +930,7 @@ jobs:
           if ! bash "$RUNNER_TEMP/engine-cell.sh" 3.10; then
             echo "| 3.10 | $ENGINE | | FAILED (KTLO, non-blocking) |" >> "$GITHUB_STEP_SUMMARY"
             echo "::endgroup::"
-            echo "::error title=$ENGINE failed on Python 3.10 (KTLO, non-blocking)::3.10 is end-of-life and KTLO per #1633; this does not fail the job."
+            echo "::error title=$ENGINE failed on Python 3.10 (KTLO%2C non-blocking)::3.10 is end-of-life and KTLO per #1633; this does not fail the job."
             exit 1
           fi
           echo "::endgroup::"

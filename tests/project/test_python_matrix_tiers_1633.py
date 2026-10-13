@@ -23,9 +23,11 @@ the prose that states the tiers back against the matrices.
 
 3.7 joined the tier afterwards, at the owner's request, and cannot install or
 import pcapkit: the ``test`` extra's ``pytest>=8`` needs 3.8, and the sources use
-3.8 syntax. So its legs are red by design, and :class:`TestPython37IsKTLO` pins
+3.8 syntax. So each of its legs fails a step by design -- only Compat's shows red,
+its ``continue-on-error`` being job-level -- and :class:`TestPython37IsKTLO` pins
 that they fail fast and say why -- the install and verify steps are executed with
-``python`` stubbed. 3.6 stays out: setup-python builds it only for retired images.
+``python`` stubbed, and each annotation is parsed as the runner parses it. 3.6
+stays out: setup-python builds it only for retired images.
 
 """
 
@@ -48,7 +50,7 @@ except ImportError:  # pragma: no cover
     yaml = None  # type: ignore[assignment]
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, Optional
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 WORKFLOWS = ROOT / '.github' / 'workflows'
@@ -105,10 +107,16 @@ RETIRED_CLAIMS = re.compile('|'.join((
     r'3\.6 and 3\.7 are (?:in no matrix|left out|not run)',
     r'KTLO tier \(3\.8-3\.10\)',
     r'3\.8 through 3\.10\** are KTLO',
-    r'end-of-life (?:versions that still run, )?3\.8(?:-| to )3\.10',
+    r'end-of-life (?:versions that still run, )?3\.8(?:-| to | through )3\.10',
     r'the 3\.8-3\.10 legs',
+    r'KTLO legs 3\.8-3\.10',
     r'3\.8 to 3\.10 are best-effort',
     r'3\.8, 3\.9 and 3\.10 are end-of-life',
+    r"CI's range starts at 3\.8",
+    r'oldest tested leg is ``Python 3\.8',
+    # Only Compat's 3.7 leg shows red; step-level ``continue-on-error`` leaves
+    # the ``test`` and ``integration`` legs concluding ``success``.
+    r"3\.7's legs are red by design",
 )))
 #: Where :data:`RETIRED_CLAIMS` is looked for, as (directory, globs), plus root files.
 #: The changelog is history and is left out.
@@ -410,11 +418,57 @@ PIP_37 = ('INFO: pip is looking at multiple versions of pypcapkit[crypto,dpkt,ng
           'extra == "test" (from pypcapkit[crypto,dpkt,ngap,test]) (from versions: 7.4.4)\n'
           'ERROR: No matching distribution found for pytest>=8; extra == "test"')
 LEG_37 = 'Python 3.7 (KTLO, non-blocking)'
+#: :data:`LEG_37` as a ``title=`` property must carry it: ``,`` escaped (see :func:`runner_parse`).
+TITLE_37 = 'Python 3.7 (KTLO%2C non-blocking)'
 
 
 def workflow_commands(output: 'str') -> 'list[str]':
     """The workflow-command lines of ``output``."""
     return [line for line in output.splitlines() if line.startswith('::')]
+
+
+#: ``(escaped, character)`` pairs, in the order actions/runner un-escapes them.
+PROPERTY_ESCAPES = (('%0D', '\r'), ('%0A', '\n'), ('%3A', ':'), ('%2C', ','), ('%25', '%'))
+DATA_ESCAPES = (('%0D', '\r'), ('%0A', '\n'), ('%25', '%'))
+
+
+def runner_parse(line: 'str') -> 'Optional[tuple[str, dict[str, str], str]]':
+    """``line`` as the runner reads it: ``(command, properties, message)``, or :data:`None`.
+
+    A port of ``ActionCommand.TryParseV2`` and its un-escaping, from
+    ``src/Runner.Common/ActionCommand.cs`` in actions/runner at 5f0b3ddcc. The
+    properties end at the first ``::`` after the leading one (``:69``), and are
+    split on every ``,`` (``:100``, ``propertiesStr.Split(new[] { ',' }, ...)``)
+    *before* ``%2C`` becomes a comma (``:30``, ``:106``). A piece holding no
+    ``=`` is dropped without a word, so ``title=on 3.7 (KTLO, non-blocking)``
+    renders as "on 3.7 (KTLO".
+
+    """
+    message = line.lstrip()
+    if not message.startswith('::'):
+        return None
+    end = message.find('::', 2)
+    if end < 0:
+        return None
+    command, _, rest = message[2:end].partition(' ')
+    properties = {}  # type: dict[str, str]
+    for piece in filter(None, rest.strip().split(',')):
+        pair = [part for part in piece.split('=', 1) if part]
+        if len(pair) == 2:
+            value = pair[1]
+            for escaped, char in PROPERTY_ESCAPES:
+                value = value.replace(escaped, char)
+            properties[pair[0].lower()] = value  # an OrdinalIgnoreCase dictionary
+    data = message[end + 2:]
+    for escaped, char in DATA_ESCAPES:
+        data = data.replace(escaped, char)
+    return command, properties, data
+
+
+def titles(output: 'str') -> 'list[str]':
+    """Each workflow command's ``title`` in ``output``, as the run summary shows it."""
+    parsed = (runner_parse(line) for line in workflow_commands(output))
+    return [command[1].get('title', '') for command in parsed if command is not None]
 
 
 class TestPython37IsKTLO(unittest.TestCase):
@@ -488,8 +542,9 @@ class TestPython37IsKTLO(unittest.TestCase):
                 result = self.run_step(name, job_id, install, PIP_STUB, {'PIP_OUTPUT': PIP_37, 'PIP_STATUS': '1'})
                 self.assertNotEqual(result.returncode, 0)
                 self.assertEqual(workflow_commands(result.stdout + result.stderr), [
-                    f'::error title=pcapkit did not install on {LEG_37}::No matching distribution found '
+                    f'::error title=pcapkit did not install on {TITLE_37}::No matching distribution found '
                     'for pytest>=8; extra == "test". The rest of this leg is skipped.'])
+                self.assertEqual(titles(result.stdout), [f'pcapkit did not install on {LEG_37}'])
                 self.assertEqual((self.tmp / 'pip-install.log').read_text(encoding='utf-8'), PIP_37 + '\n')
 
     def test_an_install_failure_without_an_error_line_is_still_named(self) -> None:
@@ -500,7 +555,7 @@ class TestPython37IsKTLO(unittest.TestCase):
                                        {'PIP_OUTPUT': output, 'PIP_STATUS': '1'})
                 self.assertNotEqual(result.returncode, 0)
                 self.assertEqual(workflow_commands(result.stdout), [
-                    f'::error title=pcapkit did not install on {LEG_37}::{reason}. The rest of this leg is skipped.'])
+                    f'::error title=pcapkit did not install on {TITLE_37}::{reason}. The rest of this leg is skipped.'])
 
     def test_a_clean_install_passes_without_an_annotation(self) -> None:
         for name, job_id, install in LEGACY_37[:2]:
@@ -513,10 +568,10 @@ class TestPython37IsKTLO(unittest.TestCase):
     def test_the_compatibility_leg_names_its_first_compile_error(self) -> None:
         cases = (
             ({'COMPILE_OUTPUT': COMPILE_37, 'COMPILE_STATUS': '1', 'IMPORT_STATUS': '0'},
-             [f'::error title=pcapkit does not compile on {LEG_37}::2 modules fail to compile, the first at '
+             [f'::error title=pcapkit does not compile on {TITLE_37}::2 modules fail to compile, the first at '
               'File "pcapkit/const/ftp/command.py", line 286; see this step\'s log.']),
             ({'COMPILE_OUTPUT': '', 'COMPILE_STATUS': '0', 'IMPORT_STATUS': '1'},
-             [f"::error title=pcapkit does not import on {LEG_37}::See the traceback in this step's log."]),
+             [f"::error title=pcapkit does not import on {TITLE_37}::See the traceback in this step's log."]),
             ({'COMPILE_OUTPUT': '', 'COMPILE_STATUS': '0', 'IMPORT_STATUS': '0'}, []),
         )  # type: tuple[tuple[dict[str, str], list[str]], ...]
         for env, expected in cases:
@@ -525,8 +580,64 @@ class TestPython37IsKTLO(unittest.TestCase):
                                        VERIFY_STUB, env)
                 self.assertEqual(bool(result.returncode), bool(expected), result.stderr)
                 self.assertEqual(workflow_commands(result.stdout), expected)
+                for title in titles(result.stdout):
+                    self.assertTrue(title.endswith(f' on {LEG_37}'), title)
                 if env['COMPILE_STATUS'] != '0':
                     self.assertIn('SyntaxError: invalid syntax', result.stdout)
+
+
+#: The properties an annotation takes; anything else in one is a value cut at a ``,``.
+ANNOTATION_PROPERTIES = frozenset({'title', 'file', 'line', 'endline', 'col', 'endcolumn'})
+#: An annotation command and its properties, which end at the next ``::``.
+ANNOTATION = re.compile(r'::(?:error|warning|notice) (.*?)::')
+#: A ``${...}`` expansion: the shell replaces it, so the runner never sees its text.
+BRACED = re.compile(r'\$\{([^}]*)\}')
+#: The one braced form that escapes what it expands: ``${NAME//,/%2C}``.
+ESCAPED = re.compile(r'\w+//,/%2C')
+#: A plain ``$NAME`` or ``${NAME}``.
+PLAIN = re.compile(r'\$(?:\{(\w+)\}|(\w+))')
+
+
+class TestNoAnnotationTitleIsCutAtAComma(unittest.TestCase):
+    """Every ``title=`` a workflow emits reaches the run summary whole.
+
+    The runner splits an annotation's properties on ``,`` before un-escaping
+    ``%2C`` (:func:`runner_parse`), so ``title=failed on 3.10 (KTLO, non-blocking)``
+    shows as "failed on 3.10 (KTLO". A comma in the source text is one way; an
+    ``env:`` value holding one, such as ``LEG``'s ``(KTLO, non-blocking)``,
+    expanded plainly into a title is the other. ``${LEG//,/%2C}`` is the fix.
+
+    """
+
+    def test_no_title_holds_an_unescaped_comma(self) -> None:
+        found = []
+        for path in sorted(WORKFLOWS.glob('*.yml')):
+            spec = workflow(path.name)
+            for job_id, body in spec.get('jobs', {}).items():
+                for step in body.get('steps', []):
+                    if 'run' not in step:
+                        continue
+                    env = {**(spec.get('env') or {}), **(body.get('env') or {}), **(step.get('env') or {})}
+                    label = f"{path.name} {job_id} {step.get('name') or step.get('id')!r}"
+                    for match in ANNOTATION.finditer(step['run']):
+                        properties = match.group(1)
+                        found.extend(f'{label}: ${{{body}}} can expand a comma' for body in BRACED.findall(properties)
+                                     if ',' in body and not ESCAPED.fullmatch(body))
+                        found.extend(f'{label}: ${name} expands {env[name]!r}'
+                                     for name in (a or b for a, b in PLAIN.findall(properties))
+                                     if ',' in str(env.get(name, '')))
+                        found.extend(f'{label}: {piece!r} is not a property'
+                                     for piece in BRACED.sub('_', properties).strip().split(',')
+                                     if piece.split('=', 1)[0].strip().lower() not in ANNOTATION_PROPERTIES)
+        self.assertEqual(found, [])
+
+    def test_the_parser_cuts_where_the_runner_does(self) -> None:
+        """:func:`runner_parse` against the two forms, so the test above reads what GitHub would."""
+        cut = runner_parse('::error title=pcapkit failed on Python 3.10 (KTLO, non-blocking)::message')
+        whole = runner_parse('::error file=a.py,line=3,title=on Python 3.10 (KTLO%2C non-blocking)::100%25 done')
+        self.assertEqual(cut, ('error', {'title': 'pcapkit failed on Python 3.10 (KTLO'}, 'message'))
+        self.assertEqual(whole, ('error', {'file': 'a.py', 'line': '3',
+                                           'title': 'on Python 3.10 (KTLO, non-blocking)'}, '100% done'))
 
 
 def prose(path: 'pathlib.Path') -> 'str':
