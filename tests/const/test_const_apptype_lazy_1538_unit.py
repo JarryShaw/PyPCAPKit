@@ -22,6 +22,8 @@ leaves a second generation of each behind.
 
 """
 
+import importlib.util
+import inspect
 import json
 import os
 import pathlib
@@ -29,13 +31,48 @@ import subprocess
 import sys
 import textwrap
 import unittest
+from typing import TYPE_CHECKING
 
 from tests._support import reimport_once_per_class
 
+if TYPE_CHECKING:
+    from types import ModuleType
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
+#: The names ``dir(pcapkit.const.reg.apptype)`` listed on the eager package
+#: besides those the import system sets. Those are not pinned, since they vary
+#: by interpreter -- Python 3.15 no longer sets ``__cached__`` (:gh:`97879`,
+#: GitHub issue #1648) -- so :func:`eager_dir` reads them off the running one.
+PACKAGE_NAMES = ['AppType', 'DCCP', 'SCTP', 'TCP', 'TransportProtocol', 'UDP', '__all__',
+                 'apptype', 'dccp', 'sctp', 'tcp', 'udp']
+
+
+def import_system_names(module: 'ModuleType') -> 'list[str]':
+    """``dir(module)`` as importing it would leave it, were its body empty.
+
+    An import is :func:`importlib.util.module_from_spec`, which sets the
+    attributes the spec implies, then the loader's ``exec_module``, which runs
+    the body with :func:`exec` in the module's namespace and so adds
+    ``__builtins__``. Both run here on ``module``'s own spec, so the names are
+    the ones this interpreter, and the loader that imported ``module``, set.
+    :data:`PRELUDE` carries this function's source into each child.
+
+    """
+    fresh = importlib.util.module_from_spec(module.__spec__)  # type: ignore[arg-type]
+    exec('', vars(fresh))  # pylint: disable=exec-used
+    return dir(fresh)
+
+
+def eager_dir(interpreter: 'list[str]') -> 'list[str]':
+    """``dir()`` of the eager package, given :func:`import_system_names` of it."""
+    if not set(interpreter).isdisjoint(PACKAGE_NAMES):
+        raise AssertionError(f'the import system set a name the package defines: {interpreter}')
+    return sorted({*PACKAGE_NAMES, *interpreter})
+
+
 PRELUDE = f'''
-import json, sys
+import importlib.util, json, sys
 import pcapkit
 assert pcapkit.__file__.startswith({str(ROOT)!r}), pcapkit.__file__
 
@@ -45,12 +82,8 @@ def loaded():
 
 def emit(**kwargs):
     print(json.dumps(kwargs))
-'''
 
-#: ``dir(pcapkit.const.reg.apptype)`` as the eager package answered it.
-EAGER_DIR = ['AppType', 'DCCP', 'SCTP', 'TCP', 'TransportProtocol', 'UDP', '__all__',
-             '__builtins__', '__cached__', '__doc__', '__file__', '__loader__', '__name__',
-             '__package__', '__path__', '__spec__', 'apptype', 'dccp', 'sctp', 'tcp', 'udp']
+''' + inspect.getsource(import_system_names)
 
 #: ``repr(AppType.__registries__)`` once populated, eager or lazy.
 REGISTRIES_REPR = ("{<TransportProtocol.tcp: 1>: <aenum 'TCP'>, <TransportProtocol.udp: 2>: "
@@ -125,10 +158,11 @@ class LazyAppTypeContractTests(unittest.TestCase):
             namespace = {}
             exec('from pcapkit.const.reg.apptype import *', namespace)
             emit(dir=listed, before=before, after=loaded(), all=pkg.__all__,
+                 interpreter=import_system_names(pkg),
                  star=sorted(name for name in namespace if name != '__builtins__'),
                  resolved=[namespace[name] is getattr(pkg, name) for name in pkg.__all__])
         ''')
-        self.assertEqual(out['dir'], EAGER_DIR)
+        self.assertEqual(out['dir'], eager_dir(out['interpreter']))
         self.assertEqual(out['before'], [])
         self.assertEqual(out['star'], sorted(out['all']))
         self.assertEqual(out['resolved'], [True] * 6)
@@ -312,7 +346,7 @@ class PackageGetattrTests(unittest.TestCase):
         for name in ('Tcp', 'tCP', 'sctp_', 'nope'):
             with self.subTest(name=name), self.assertRaises(AttributeError):
                 getattr_(name)
-        self.assertEqual(vars(pkg)['__dir__'](), EAGER_DIR)
+        self.assertEqual(vars(pkg)['__dir__'](), eager_dir(import_system_names(pkg)))
 
 
 class SharedImportProbe(unittest.TestCase):

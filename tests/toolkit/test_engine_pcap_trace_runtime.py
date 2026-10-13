@@ -23,13 +23,15 @@ import hashlib
 import importlib.util
 import os
 import struct
+import sys
 import tempfile
 import unittest
 import warnings
 from typing import TYPE_CHECKING
 from unittest import mock
 
-from tests._support import close_extractor, reimport_once_per_class, sample_path
+from tests._support import (PCAPNG_GENERATOR, close_extractor, reimport_once_per_class, sample_path,
+                            skip_if_stand_in)
 
 if TYPE_CHECKING:
     from typing import Any
@@ -149,6 +151,7 @@ class EnginePCAPTraceTests(unittest.TestCase):
 
     def _assert_same_files(self, fin: 'str', *, nanosecond: 'bool',
                            caught: 'list | None' = None) -> None:
+        skip_if_stand_in(self, fin)
         base = self._flows('default', fin, nanosecond=nanosecond)
         self.assertTrue(base)
         for engine in ENGINES:
@@ -170,6 +173,24 @@ class EnginePCAPTraceTests(unittest.TestCase):
             for nanosecond in (False, True):
                 with self.subTest(capture=capture, nanosecond=nanosecond):
                     self._assert_same_files(sample_path(capture), nanosecond=nanosecond)
+
+    def test_a_stand_in_capture_skips_rather_than_fails(self) -> None:
+        # When the Wireshark download fails the generator writes a stand-in under the
+        # upstream name, built from DHCP, so it has no TCP flow to trace (#1478). The
+        # comparison needs one, so on a stand-in it skips rather than fails.
+        spec = importlib.util.spec_from_file_location('_pcapng_generator_stand_in', PCAPNG_GENERATOR)
+        assert spec is not None and spec.loader is not None
+        generator = importlib.util.module_from_spec(spec)
+        saved = list(sys.path)
+        try:
+            spec.loader.exec_module(generator)
+        finally:
+            sys.path[:] = saved
+        fin = os.path.join(self.tmp, 'many_interfaces.pcapng')
+        with open(fin, 'wb') as file:
+            file.write(generator.build_many_interfaces())
+        with self.assertRaises(unittest.SkipTest):
+            self._assert_same_files(fin, nanosecond=False)
 
     def test_a_nanosecond_pcap_keeps_its_resolution(self) -> None:
         # The record fraction stays in the capture's own resolution, as the default
