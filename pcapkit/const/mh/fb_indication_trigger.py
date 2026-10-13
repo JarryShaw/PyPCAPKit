@@ -20,16 +20,16 @@ __all__ = ['FlowBindingIndicationTrigger']
 class FlowBindingIndicationTrigger(EnumRegistry, IntEnum):
     """[FlowBindingIndicationTrigger] Flow Binding Indication Triggers"""
 
-    #: Reserved [:rfc:`7109`]
+    #: Reserved [RFC 7109]
     Reserved_0 = 0
 
-    #: Unspecified [:rfc:`7109`]
+    #: Unspecified [RFC 7109]
     Unspecified = 1
 
-    #: Administrative Reason [:rfc:`7109`]
+    #: Administrative Reason [RFC 7109]
     Administrative_Reason = 2
 
-    #: Possible Out-of-Sync BCE State [:rfc:`7109`]
+    #: Possible Out-of-Sync BCE State [RFC 7109]
     Possible_Out_of_Sync_BCE_State = 3
 
     @classmethod
@@ -46,6 +46,6 @@ class FlowBindingIndicationTrigger(EnumRegistry, IntEnum):
             #: Unassigned
             return cls._unregistered_member(value, 'Unassigned')
         if 250 <= value <= 255:
-            #: Reserved for Testing Purposes Only [:rfc:`7109`]
+            #: Reserved for Testing Purposes Only [RFC 7109]
             return cls._unregistered_member(value, 'Reserved_for_Testing_Purposes_Only')
         return super()._missing_(value)

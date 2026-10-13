@@ -20,22 +20,22 @@ __all__ = ['HomeAddressReply']
 class HomeAddressReply(EnumRegistry, IntEnum):
     """[HomeAddressReply] IPv4 Home Address Reply Status Codes"""
 
-    #: Success [:rfc:`5844`]
+    #: Success [RFC 5844]
     Success = 0
 
-    #: Failure, Reason Unspecified [:rfc:`5844`]
+    #: Failure, Reason Unspecified [RFC 5844]
     Failure_Reason_Unspecified = 128
 
-    #: Administratively prohibited [:rfc:`5844`]
+    #: Administratively prohibited [RFC 5844]
     Administratively_prohibited = 129
 
-    #: Incorrect IPv4 home address [:rfc:`5844`]
+    #: Incorrect IPv4 home address [RFC 5844]
     Incorrect_IPv4_home_address = 130
 
-    #: Invalid IPv4 address [:rfc:`5844`]
+    #: Invalid IPv4 address [RFC 5844]
     Invalid_IPv4_address = 131
 
-    #: Dynamic IPv4 home address assignment not available [:rfc:`5844`]
+    #: Dynamic IPv4 home address assignment not available [RFC 5844]
     Dynamic_IPv4_home_address_assignment_not_available = 132
 
     @classmethod

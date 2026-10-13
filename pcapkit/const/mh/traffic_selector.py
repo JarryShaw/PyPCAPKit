@@ -20,13 +20,13 @@ __all__ = ['TrafficSelector']
 class TrafficSelector(EnumRegistry, IntEnum):
     """[TrafficSelector] Traffic Selector Format"""
 
-    #: Reserved [:rfc:`6089`]
+    #: Reserved [RFC 6089]
     Reserved_0 = 0
 
-    #: IPv4 Binary Traffic Selector [:rfc:`6088`]
+    #: IPv4 Binary Traffic Selector [RFC 6088]
     IPv4_Binary_Traffic_Selector = 1
 
-    #: IPv6 Binary Traffic Selector [:rfc:`6088`]
+    #: IPv6 Binary Traffic Selector [RFC 6088]
     IPv6_Binary_Traffic_Selector = 2
 
     @classmethod
@@ -43,6 +43,6 @@ class TrafficSelector(EnumRegistry, IntEnum):
             #: Unassigned
             return cls._unregistered_member(value, 'Unassigned')
         if 251 <= value <= 255:
-            #: Reserved for Experimental Use [:rfc:`6089`]
+            #: Reserved for Experimental Use [RFC 6089]
             return cls._unregistered_member(value, 'Reserved_for_Experimental_Use')
         return super()._missing_(value)

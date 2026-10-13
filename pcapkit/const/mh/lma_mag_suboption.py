@@ -20,13 +20,13 @@ __all__ = ['LMAControlledMAGSuboption']
 class LMAControlledMAGSuboption(EnumRegistry, IntEnum):
     """[LMAControlledMAGSuboption] LMA-Controlled MAG Parameters Sub-Option Type Values"""
 
-    #: Reserved [:rfc:`8127`]
+    #: Reserved [RFC 8127]
     Reserved_0 = 0
 
-    #: Binding Re-registration Control Sub-Option [:rfc:`8127`]
+    #: Binding Re-registration Control Sub-Option [RFC 8127]
     Binding_Re_registration_Control = 1
 
-    #: Heartbeat Control Sub-Option [:rfc:`8127`]
+    #: Heartbeat Control Sub-Option [RFC 8127]
     Heartbeat_Control = 2
 
     @classmethod

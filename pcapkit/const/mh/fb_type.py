@@ -23,10 +23,10 @@ class FlowBindingType(EnumRegistry, IntEnum):
     #: Unassigned
     Unassigned_0 = 0
 
-    #: Flow Binding Indication [:rfc:`7109`]
+    #: Flow Binding Indication [RFC 7109]
     Indication = 1
 
-    #: Flow Binding Acknowledgement [:rfc:`7109`]
+    #: Flow Binding Acknowledgement [RFC 7109]
     Acknowledgement = 2
 
     @classmethod

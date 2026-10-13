@@ -20,16 +20,16 @@ __all__ = ['HandoverInitiateStatus']
 class HandoverInitiateStatus(EnumRegistry, IntEnum):
     """[HandoverInitiateStatus] Handover Initiate Status Codes"""
 
-    #: FBU with the PCoA as source IP address [:rfc:`5568`]
+    #: FBU with the PCoA as source IP address [RFC 5568]
     FBU_with_the_PCoA_as_source_IP_address = 0
 
-    #: FBU whose source IP address is not PCoA [:rfc:`5568`]
+    #: FBU whose source IP address is not PCoA [RFC 5568]
     FBU_whose_source_IP_address_is_not_PCoA = 1
 
-    #: Indicate the completion of forwarding [:rfc:`5949`]
+    #: Indicate the completion of forwarding [RFC 5949]
     Indicate_the_completion_of_forwarding = 2
 
-    #: All available context transferred [:rfc:`5949`]
+    #: All available context transferred [RFC 5949]
     All_available_context_transferred = 3
 
     @classmethod
