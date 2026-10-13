@@ -20,16 +20,16 @@ __all__ = ['Authentication']
 class Authentication(EnumRegistry, IntEnum):
     """[Authentication] Authentication Types"""
 
-    #: No Authentication [:rfc:`1583`]
+    #: No Authentication [RFC 1583]
     No_Authentication = 0
 
-    #: Simple Password Authentication [:rfc:`1583`]
+    #: Simple Password Authentication [RFC 1583]
     Simple_Password_Authentication = 1
 
-    #: Cryptographic authentication [:rfc:`2328`][:rfc:`5709`]
+    #: Cryptographic authentication [RFC 2328][; ][RFC 5709]
     Cryptographic_authentication = 2
 
-    #: Cryptographic Authentication with Extended Sequence Numbers [:rfc:`7474`]
+    #: Cryptographic Authentication with Extended Sequence Numbers [RFC 7474]
     Cryptographic_Authentication_with_Extended_Sequence_Numbers = 3
 
     @classmethod
@@ -46,6 +46,6 @@ class Authentication(EnumRegistry, IntEnum):
             #: Unassigned
             return cls._unregistered_member(value, 'Unassigned')
         if 256 <= value <= 65535:
-            #: Deprecated [:rfc:`6549`]
+            #: Deprecated [RFC 6549]
             return cls._unregistered_member(value, 'Deprecated')
         return super()._missing_(value)

@@ -20,13 +20,13 @@ __all__ = ['HandoverACKFlag']
 class HandoverACKFlag(EnumRegistry, IntFlag):
     """[HandoverACKFlag] Handover Acknowledge Flags"""
 
-    #: Buffer flag [:rfc:`5949`]
+    #: Buffer flag [RFC 5949]
     U = 0x80
 
-    #: Proxy flag [:rfc:`5949`]
+    #: Proxy flag [RFC 5949]
     P = 0x40
 
-    #: Forwarding flag [:rfc:`5949`]
+    #: Forwarding flag [RFC 5949]
     F = 0x20
 
     @classmethod

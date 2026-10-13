@@ -3147,8 +3147,8 @@ class UDP(AppType):
     gdoi = 848, 'gdoi', TransportProtocol.udp
 
     #: - [TCP] DNS query-response protocol run over TLS [RFC 7858]
-    #: - [UDP] DNS query-response protocol run over DTLS or QUIC [RFC 7858][RFC
-    #:   8094][RFC 9250]
+    #: - [UDP] DNS query-response protocol run over DTLS or QUIC [RFC 7858][;][RFC
+    #:   8094][;][RFC 9250]
     domain_s = 853, 'domain-s', TransportProtocol.udp
 
     #: - [TCP] Dynamic Link Exchange Protocol (DLEP) [RFC 8175]
@@ -3285,16 +3285,16 @@ class UDP(AppType):
     #: - [UDP] surf
     surf = 1010, 'surf', TransportProtocol.udp
 
-    #: - [TCP] RFC3692-style Experiment 1 [1][RFC 4727][RFC 6335]
-    #: - [UDP] RFC3692-style Experiment 1 [1][RFC 4727][RFC 6335]
-    #: - [SCTP] RFC3692-style Experiment 1 [1][RFC 4727][RFC 6335]
-    #: - [DCCP] RFC3692-style Experiment 1 [1][RFC 4727][RFC 6335]
+    #: - [TCP] RFC3692-style Experiment 1 [1][RFC 4727][;][RFC 6335]
+    #: - [UDP] RFC3692-style Experiment 1 [1][RFC 4727][;][RFC 6335]
+    #: - [SCTP] RFC3692-style Experiment 1 [1][RFC 4727][;][RFC 6335]
+    #: - [DCCP] RFC3692-style Experiment 1 [1][RFC 4727][;][RFC 6335]
     exp1 = 1021, 'exp1', TransportProtocol.udp
 
-    #: - [TCP] RFC3692-style Experiment 2 [1][RFC 4727][RFC 6335]
-    #: - [UDP] RFC3692-style Experiment 2 [1][RFC 4727][RFC 6335]
-    #: - [SCTP] RFC3692-style Experiment 2 [1][RFC 4727][RFC 6335]
-    #: - [DCCP] RFC3692-style Experiment 2 [1][RFC 4727][RFC 6335]
+    #: - [TCP] RFC3692-style Experiment 2 [1][RFC 4727][;][RFC 6335]
+    #: - [UDP] RFC3692-style Experiment 2 [1][RFC 4727][;][RFC 6335]
+    #: - [SCTP] RFC3692-style Experiment 2 [1][RFC 4727][;][RFC 6335]
+    #: - [DCCP] RFC3692-style Experiment 2 [1][RFC 4727][;][RFC 6335]
     exp2 = 1022, 'exp2', TransportProtocol.udp
 
     #: - [TCP] Reserved [RFC 6335]
@@ -3644,7 +3644,7 @@ class UDP(AppType):
     icp = 1112, 'icp', TransportProtocol.udp
 
     #: - [TCP] Licklider Transmission Protocol [RFC 5326]
-    #: - [UDP] Licklider Transmission Protocol [RFC 5326][RFC 7122]
+    #: - [UDP] Licklider Transmission Protocol [RFC 5326][;][RFC 7122]
     #: - [DCCP] Licklider Transmission Protocol [RFC 7122]
     ltp_deepspace = 1113, 'ltp-deepspace', TransportProtocol.udp
 
@@ -11466,7 +11466,7 @@ class UDP(AppType):
     brp = 3043, 'brp', TransportProtocol.udp
 
     #: - [TCP] Extensible Provisioning Protocol [RFC 5734]
-    #: - [UDP] EPP running over QUIC [RFC 5734][RFC-ietf-regext-epp-quic-12]
+    #: - [UDP] EPP running over QUIC [RFC 5734][;][RFC-ietf-regext-epp-quic-12]
     epp_700 = 700, 'epp', TransportProtocol.udp
 
     #: - [TCP] EndPoint Protocol
@@ -16559,7 +16559,7 @@ class UDP(AppType):
     awacs_ice = 4488, 'awacs-ice', TransportProtocol.udp
 
     #: - [TCP] IPsec NAT-Traversal [RFC 9329]
-    #: - [UDP] IPsec NAT-Traversal [RFC 3948][RFC 7296]
+    #: - [UDP] IPsec NAT-Traversal [RFC 3948][;][RFC 7296]
     ipsec_nat_t = 4500, 'ipsec-nat-t', TransportProtocol.udp
 
     #: [UDP] M-Bus-OMS over UDP
@@ -16734,11 +16734,11 @@ class UDP(AppType):
     #: - [TCP] Distributed Denial-of-Service Open Threat Signaling (DOTS) Signal
     #:   Channel Protocol. The service name is used to construct the SRV service
     #:   names "_dots-signal._udp" and "_dots-signal._tcp" for discovering DOTS
-    #:   servers used to establish DOTS signal channel. [RFC 8973][RFC 9132]
+    #:   servers used to establish DOTS signal channel. [RFC 8973][;][RFC 9132]
     #: - [UDP] Distributed Denial-of-Service Open Threat Signaling (DOTS) Signal
     #:   Channel Protocol. The service name is used to construct the SRV service
     #:   names "_dots-signal._udp" and "_dots-signal._tcp" for discovering DOTS
-    #:   servers used to establish DOTS signal channel. [RFC 8973][RFC 9132]
+    #:   servers used to establish DOTS signal channel. [RFC 8973][;][RFC 9132]
     dots_signal = 4646, 'dots-signal', TransportProtocol.udp
 
     #: - [TCP] PlayStation2 App Port
@@ -17314,14 +17314,14 @@ class UDP(AppType):
     #: - [UDP] FileMaker, Inc. - Proprietary name binding
     fmpro_internal = 5003, 'fmpro-internal', TransportProtocol.udp
 
-    #: - [TCP] RTP media data [RFC 3551][RFC 4571]
+    #: - [TCP] RTP media data [RFC 3551][;][RFC 4571]
     #: - [UDP] RTP media data [RFC 3551]
-    #: - [DCCP] RTP media data [RFC 3551][RFC 5762]
+    #: - [DCCP] RTP media data [RFC 3551][;][RFC 5762]
     avt_profile_1 = 5004, 'avt-profile-1', TransportProtocol.udp
 
-    #: - [TCP] RTP control protocol [RFC 3551][RFC 4571]
+    #: - [TCP] RTP control protocol [RFC 3551][;][RFC 4571]
     #: - [UDP] RTP control protocol [RFC 3551]
-    #: - [DCCP] RTP control protocol [RFC 3551][RFC 5762]
+    #: - [DCCP] RTP control protocol [RFC 3551][;][RFC 5762]
     avt_profile_2 = 5005, 'avt-profile-2', TransportProtocol.udp
 
     #: - [TCP] wsm server
@@ -18573,7 +18573,7 @@ class UDP(AppType):
     #: - [UDP] Constrained Application Protocol [RFC 7252]
     coap = 5683, 'coap', TransportProtocol.udp
 
-    #: - [TCP] Constrained Application Protocol (CoAP) [RFC 7301][RFC 8323]
+    #: - [TCP] Constrained Application Protocol (CoAP) [RFC 7301][;][RFC 8323]
     #: - [UDP] DTLS-secured CoAP [RFC 7252]
     coaps = 5684, 'coaps', TransportProtocol.udp
 
@@ -22428,7 +22428,7 @@ class UDP(AppType):
     #: [UDP] Reserved
     reserved_10443 = 10443, 'reserved', TransportProtocol.udp
 
-    #: [UDP] HIP NAT-Traversal [RFC 5770][RFC 9028]
+    #: [UDP] HIP NAT-Traversal [RFC 5770][;][RFC 9028]
     hip_nat_t = 10500, 'hip-nat-t', TransportProtocol.udp
 
     #: - [TCP] MOS Media Object Metadata Port

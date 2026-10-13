@@ -793,13 +793,13 @@ class AppType(EnumRegistry, StrEnum):
          - [N/A] Remote Job Service
        * - ``netconf-beep``
          - N/A
-         - [N/A] NETCONF over BEEP [RFC 4744][RFC 9900]
+         - [N/A] NETCONF over BEEP [RFC 4744][;][RFC 9900]
        * - ``netconfsoapbeep``
          - N/A
-         - [N/A] NETCONF for SOAP over BEEP [RFC 4743][RFC 9900]
+         - [N/A] NETCONF for SOAP over BEEP [RFC 4743][;][RFC 9900]
        * - ``netconfsoaphttp``
          - N/A
-         - [N/A] NETCONF for SOAP over HTTPS [RFC 4743][RFC 9900]
+         - [N/A] NETCONF for SOAP over HTTPS [RFC 4743][;][RFC 9900]
        * - ``nfile``
          - N/A
          - [N/A] A File Access Protocol

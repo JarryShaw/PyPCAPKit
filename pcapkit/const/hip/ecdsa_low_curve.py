@@ -20,10 +20,10 @@ __all__ = ['ECDSALowCurve']
 class ECDSALowCurve(EnumRegistry, IntEnum):
     """[ECDSALowCurve] ECDSA_LOW Curve Label"""
 
-    #: RESERVED [:rfc:`7401`]
+    #: RESERVED [RFC 7401]
     RESERVED_0 = 0
 
-    #: SECP160R1 [:rfc:`7401`]
+    #: SECP160R1 [RFC 7401]
     SECP160R1 = 1
 
     @classmethod

@@ -265,7 +265,7 @@ class TCP(AppType):
        * - ``dns-llq-tls``
          - [TCP] DNS Long-Lived Queries over TLS [RFC 6281]
        * - ``dns-push-tls``
-         - [TCP] DNS Push Notification Service Type [:rfc:`8765#section-6.1`]
+         - [TCP] DNS Push Notification Service Type [RFC 8765, Section 6.1]
        * - ``dns-query-tls``
          - [TCP] DNS queries to the authoritative server over TLS
        * - ``dns-update``
@@ -653,7 +653,7 @@ class TCP(AppType):
        * - ``roambot``
          - [TCP] Roambot communication
        * - ``robustirc``
-         - [TCP] Like ircu (RFC1459), but failure tolerant due to strong
+         - [TCP] Like ircu ([RFC 1459]), but failure tolerant due to strong
            consistency among n>=3 servers
        * - ``roomcast-capi``
          - [TCP] RoomCast Control Protocol
@@ -1500,7 +1500,7 @@ class TCP(AppType):
     #: - [UDP] Britton-Lee IDM
     bl_idm = 142, 'bl-idm', TransportProtocol.tcp
 
-    #: [TCP] Internet Message Access Protocol [RFC 3501][RFC 9051]
+    #: [TCP] Internet Message Access Protocol [RFC 3501][;][RFC 9051]
     imap = 143, 'imap', TransportProtocol.tcp
 
     #: - [TCP] UAAC Protocol
@@ -3678,8 +3678,8 @@ class TCP(AppType):
     gdoi = 848, 'gdoi', TransportProtocol.tcp
 
     #: - [TCP] DNS query-response protocol run over TLS [RFC 7858]
-    #: - [UDP] DNS query-response protocol run over DTLS or QUIC [RFC 7858][RFC
-    #:   8094][RFC 9250]
+    #: - [UDP] DNS query-response protocol run over DTLS or QUIC [RFC 7858][;][RFC
+    #:   8094][;][RFC 9250]
     domain_s = 853, 'domain-s', TransportProtocol.tcp
 
     #: - [TCP] Dynamic Link Exchange Protocol (DLEP) [RFC 8175]
@@ -3776,7 +3776,7 @@ class TCP(AppType):
     #: - [UDP] telnet protocol over TLS/SSL
     telnets = 992, 'telnets', TransportProtocol.tcp
 
-    #: [TCP] IMAP over TLS protocol [RFC 3501][RFC 8314][RFC 9051]
+    #: [TCP] IMAP over TLS protocol [RFC 3501][;][RFC 8314][;][RFC 9051]
     imaps = 993, 'imaps', TransportProtocol.tcp
 
     #: - [TCP] Reserved
@@ -3816,16 +3816,16 @@ class TCP(AppType):
     #: - [UDP] surf
     surf = 1010, 'surf', TransportProtocol.tcp
 
-    #: - [TCP] RFC3692-style Experiment 1 [1][RFC 4727][RFC 6335]
-    #: - [UDP] RFC3692-style Experiment 1 [1][RFC 4727][RFC 6335]
-    #: - [SCTP] RFC3692-style Experiment 1 [1][RFC 4727][RFC 6335]
-    #: - [DCCP] RFC3692-style Experiment 1 [1][RFC 4727][RFC 6335]
+    #: - [TCP] RFC3692-style Experiment 1 [1][RFC 4727][;][RFC 6335]
+    #: - [UDP] RFC3692-style Experiment 1 [1][RFC 4727][;][RFC 6335]
+    #: - [SCTP] RFC3692-style Experiment 1 [1][RFC 4727][;][RFC 6335]
+    #: - [DCCP] RFC3692-style Experiment 1 [1][RFC 4727][;][RFC 6335]
     exp1 = 1021, 'exp1', TransportProtocol.tcp
 
-    #: - [TCP] RFC3692-style Experiment 2 [1][RFC 4727][RFC 6335]
-    #: - [UDP] RFC3692-style Experiment 2 [1][RFC 4727][RFC 6335]
-    #: - [SCTP] RFC3692-style Experiment 2 [1][RFC 4727][RFC 6335]
-    #: - [DCCP] RFC3692-style Experiment 2 [1][RFC 4727][RFC 6335]
+    #: - [TCP] RFC3692-style Experiment 2 [1][RFC 4727][;][RFC 6335]
+    #: - [UDP] RFC3692-style Experiment 2 [1][RFC 4727][;][RFC 6335]
+    #: - [SCTP] RFC3692-style Experiment 2 [1][RFC 4727][;][RFC 6335]
+    #: - [DCCP] RFC3692-style Experiment 2 [1][RFC 4727][;][RFC 6335]
     exp2 = 1022, 'exp2', TransportProtocol.tcp
 
     #: - [TCP] Reserved [RFC 6335]
@@ -4175,7 +4175,7 @@ class TCP(AppType):
     icp = 1112, 'icp', TransportProtocol.tcp
 
     #: - [TCP] Licklider Transmission Protocol [RFC 5326]
-    #: - [UDP] Licklider Transmission Protocol [RFC 5326][RFC 7122]
+    #: - [UDP] Licklider Transmission Protocol [RFC 5326][;][RFC 7122]
     #: - [DCCP] Licklider Transmission Protocol [RFC 7122]
     ltp_deepspace = 1113, 'ltp-deepspace', TransportProtocol.tcp
 
@@ -12000,7 +12000,7 @@ class TCP(AppType):
     brp = 3043, 'brp', TransportProtocol.tcp
 
     #: - [TCP] Extensible Provisioning Protocol [RFC 5734]
-    #: - [UDP] EPP running over QUIC [RFC 5734][RFC-ietf-regext-epp-quic-12]
+    #: - [UDP] EPP running over QUIC [RFC 5734][;][RFC-ietf-regext-epp-quic-12]
     epp_700 = 700, 'epp', TransportProtocol.tcp
 
     #: - [TCP] EndPoint Protocol
@@ -17101,7 +17101,7 @@ class TCP(AppType):
     awacs_ice = 4488, 'awacs-ice', TransportProtocol.tcp
 
     #: - [TCP] IPsec NAT-Traversal [RFC 9329]
-    #: - [UDP] IPsec NAT-Traversal [RFC 3948][RFC 7296]
+    #: - [UDP] IPsec NAT-Traversal [RFC 3948][;][RFC 7296]
     ipsec_nat_t = 4500, 'ipsec-nat-t', TransportProtocol.tcp
 
     #: [TCP] Reserved
@@ -17278,11 +17278,11 @@ class TCP(AppType):
     #: - [TCP] Distributed Denial-of-Service Open Threat Signaling (DOTS) Signal
     #:   Channel Protocol. The service name is used to construct the SRV service
     #:   names "_dots-signal._udp" and "_dots-signal._tcp" for discovering DOTS
-    #:   servers used to establish DOTS signal channel. [RFC 8973][RFC 9132]
+    #:   servers used to establish DOTS signal channel. [RFC 8973][;][RFC 9132]
     #: - [UDP] Distributed Denial-of-Service Open Threat Signaling (DOTS) Signal
     #:   Channel Protocol. The service name is used to construct the SRV service
     #:   names "_dots-signal._udp" and "_dots-signal._tcp" for discovering DOTS
-    #:   servers used to establish DOTS signal channel. [RFC 8973][RFC 9132]
+    #:   servers used to establish DOTS signal channel. [RFC 8973][;][RFC 9132]
     dots_signal = 4646, 'dots-signal', TransportProtocol.tcp
 
     #: - [TCP] PlayStation2 App Port
@@ -17862,14 +17862,14 @@ class TCP(AppType):
     #: - [UDP] FileMaker, Inc. - Proprietary name binding
     fmpro_internal = 5003, 'fmpro-internal', TransportProtocol.tcp
 
-    #: - [TCP] RTP media data [RFC 3551][RFC 4571]
+    #: - [TCP] RTP media data [RFC 3551][;][RFC 4571]
     #: - [UDP] RTP media data [RFC 3551]
-    #: - [DCCP] RTP media data [RFC 3551][RFC 5762]
+    #: - [DCCP] RTP media data [RFC 3551][;][RFC 5762]
     avt_profile_1 = 5004, 'avt-profile-1', TransportProtocol.tcp
 
-    #: - [TCP] RTP control protocol [RFC 3551][RFC 4571]
+    #: - [TCP] RTP control protocol [RFC 3551][;][RFC 4571]
     #: - [UDP] RTP control protocol [RFC 3551]
-    #: - [DCCP] RTP control protocol [RFC 3551][RFC 5762]
+    #: - [DCCP] RTP control protocol [RFC 3551][;][RFC 5762]
     avt_profile_2 = 5005, 'avt-profile-2', TransportProtocol.tcp
 
     #: - [TCP] wsm server
@@ -19124,7 +19124,7 @@ class TCP(AppType):
     #: - [UDP] Constrained Application Protocol [RFC 7252]
     coap = 5683, 'coap', TransportProtocol.tcp
 
-    #: - [TCP] Constrained Application Protocol (CoAP) [RFC 7301][RFC 8323]
+    #: - [TCP] Constrained Application Protocol (CoAP) [RFC 7301][;][RFC 8323]
     #: - [UDP] DTLS-secured CoAP [RFC 7252]
     coaps = 5684, 'coaps', TransportProtocol.tcp
 
@@ -20037,7 +20037,7 @@ class TCP(AppType):
     #: [TCP] Reserved
     reserved_6511 = 6511, 'reserved', TransportProtocol.tcp
 
-    #: [TCP] NETCONF over TLS [RFC 7589][RFC 9918]
+    #: [TCP] NETCONF over TLS [RFC 7589][;][RFC 9918]
     netconf_tls = 6513, 'netconf-tls', TransportProtocol.tcp
 
     #: - [TCP] Syslog over TLS [RFC 5425]
@@ -20685,7 +20685,7 @@ class TCP(AppType):
     dlip = 7201, 'dlip', TransportProtocol.tcp
 
     #: [TCP] Inter-Channel Termination Protocol (ICTP) for multi-wavelength PON
-    #: (Passive Optical Network) systems [TR-352][Inter-Channel-Termination
+    #: (Passive Optical Network) systems [TR-352][;][Inter-Channel-Termination
     #: protocol (ICTP) is a peer-to-peer protocol with a binary message format that
     #: is used by a set of optical line terminal (OLT) channel terminations (CT)
     #: comprising a 40-Gigabit-capable next-generation passive optical network (NG-

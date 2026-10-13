@@ -20,34 +20,34 @@ __all__ = ['RevocationStatusCode']
 class RevocationStatusCode(EnumRegistry, IntEnum):
     """[RevocationStatusCode] Binding Revocation Acknowledgement Status Codes"""
 
-    #: success [:rfc:`5846`]
+    #: success [RFC 5846]
     success = 0
 
-    #: partial success [:rfc:`5846`]
+    #: partial success [RFC 5846]
     partial_success = 1
 
-    #: Binding Does NOT Exist [:rfc:`5846`]
+    #: Binding Does NOT Exist [RFC 5846]
     Binding_Does_NOT_Exist = 128
 
-    #: IPv4 Home Address Option Required [:rfc:`5846`]
+    #: IPv4 Home Address Option Required [RFC 5846]
     IPv4_Home_Address_Option_Required = 129
 
-    #: Global Revocation NOT Authorized [:rfc:`5846`]
+    #: Global Revocation NOT Authorized [RFC 5846]
     Global_Revocation_NOT_Authorized = 130
 
-    #: Revoked Mobile Nodes Identity Required [:rfc:`5846`]
+    #: Revoked Mobile Nodes Identity Required [RFC 5846]
     Revoked_Mobile_Nodes_Identity_Required = 131
 
-    #: Revocation Failed - MN is Attached [:rfc:`5846`]
+    #: Revocation Failed - MN is Attached [RFC 5846]
     Revocation_Failed_MN_is_Attached = 132
 
-    #: Revocation Trigger NOT Supported [:rfc:`5846`]
+    #: Revocation Trigger NOT Supported [RFC 5846]
     Revocation_Trigger_NOT_Supported = 133
 
-    #: Revocation Function NOT Supported [:rfc:`5846`]
+    #: Revocation Function NOT Supported [RFC 5846]
     Revocation_Function_NOT_Supported = 134
 
-    #: Proxy Binding Revocation NOT Supported [:rfc:`5846`]
+    #: Proxy Binding Revocation NOT Supported [RFC 5846]
     Proxy_Binding_Revocation_NOT_Supported = 135
 
     @classmethod

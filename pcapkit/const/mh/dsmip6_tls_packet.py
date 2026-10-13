@@ -20,13 +20,13 @@ __all__ = ['DSMIP6TLSPacket']
 class DSMIP6TLSPacket(EnumRegistry, IntEnum):
     """[DSMIP6TLSPacket] DSMIP6-TLS Packet Types Registry"""
 
-    #: non-encrypted IP packet [:rfc:`6618`]
+    #: non-encrypted IP packet [RFC 6618]
     non_encrypted_IP_packet = 0
 
-    #: encrypted IP packet [:rfc:`6618`]
+    #: encrypted IP packet [RFC 6618]
     encrypted_IP_packet = 1
 
-    #: mobility header [:rfc:`6618`]
+    #: mobility header [RFC 6618]
     mobility_header = 8
 
     @classmethod

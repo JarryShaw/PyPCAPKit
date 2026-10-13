@@ -20,16 +20,16 @@ __all__ = ['NATTraversal']
 class NATTraversal(EnumRegistry, IntEnum):
     """[NATTraversal] HIP NAT Traversal Modes"""
 
-    #: Reserved [:rfc:`5770`]
+    #: Reserved [RFC 5770]
     Reserved_0 = 0
 
-    #: UDP-ENCAPSULATION [:rfc:`5770`]
+    #: UDP-ENCAPSULATION [RFC 5770]
     UDP_ENCAPSULATION = 1
 
-    #: ICE-STUN-UDP [:rfc:`5770`]
+    #: ICE-STUN-UDP [RFC 5770]
     ICE_STUN_UDP = 2
 
-    #: ICE-HIP-UDP [:rfc:`9028`]
+    #: ICE-HIP-UDP [RFC 9028]
     ICE_HIP_UDP = 3
 
     @classmethod

@@ -88,16 +88,16 @@ class SCTP(AppType):
     #: - [SCTP] BGP [RFC 9260]
     bgp = 179, 'bgp', TransportProtocol.sctp
 
-    #: - [TCP] RFC3692-style Experiment 1 [1][RFC 4727][RFC 6335]
-    #: - [UDP] RFC3692-style Experiment 1 [1][RFC 4727][RFC 6335]
-    #: - [SCTP] RFC3692-style Experiment 1 [1][RFC 4727][RFC 6335]
-    #: - [DCCP] RFC3692-style Experiment 1 [1][RFC 4727][RFC 6335]
+    #: - [TCP] RFC3692-style Experiment 1 [1][RFC 4727][;][RFC 6335]
+    #: - [UDP] RFC3692-style Experiment 1 [1][RFC 4727][;][RFC 6335]
+    #: - [SCTP] RFC3692-style Experiment 1 [1][RFC 4727][;][RFC 6335]
+    #: - [DCCP] RFC3692-style Experiment 1 [1][RFC 4727][;][RFC 6335]
     exp1 = 1021, 'exp1', TransportProtocol.sctp
 
-    #: - [TCP] RFC3692-style Experiment 2 [1][RFC 4727][RFC 6335]
-    #: - [UDP] RFC3692-style Experiment 2 [1][RFC 4727][RFC 6335]
-    #: - [SCTP] RFC3692-style Experiment 2 [1][RFC 4727][RFC 6335]
-    #: - [DCCP] RFC3692-style Experiment 2 [1][RFC 4727][RFC 6335]
+    #: - [TCP] RFC3692-style Experiment 2 [1][RFC 4727][;][RFC 6335]
+    #: - [UDP] RFC3692-style Experiment 2 [1][RFC 4727][;][RFC 6335]
+    #: - [SCTP] RFC3692-style Experiment 2 [1][RFC 4727][;][RFC 6335]
+    #: - [DCCP] RFC3692-style Experiment 2 [1][RFC 4727][;][RFC 6335]
     exp2 = 1022, 'exp2', TransportProtocol.sctp
 
     #: - [TCP] Cisco IP SLAs Control Protocol

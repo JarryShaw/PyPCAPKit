@@ -20,40 +20,40 @@ __all__ = ['Group']
 class Group(EnumRegistry, IntEnum):
     """[Group] Group IDs"""
 
-    #: Reserved [:rfc:`7401`]
+    #: Reserved [RFC 7401]
     Reserved_0 = 0
 
-    #: 384-bit group (DEPRECATED) [:rfc:`5201`]
+    #: 384-bit group (DEPRECATED) [RFC 5201]
     Group_384_bit_group = 1
 
-    #: OAKLEY well known group 1 (DEPRECATED) [:rfc:`5201`]
+    #: OAKLEY well known group 1 (DEPRECATED) [RFC 5201]
     OAKLEY_well_known_group_1 = 2
 
-    #: 1536-bit MODP group [:rfc:`7401`]
+    #: 1536-bit MODP group [RFC 7401]
     Group_1536_bit_MODP_group = 3
 
-    #: 3072-bit MODP group [:rfc:`7401`]
+    #: 3072-bit MODP group [RFC 7401]
     Group_3072_bit_MODP_group = 4
 
-    #: 6144-bit MODP group (DEPRECATED) [:rfc:`5201`]
+    #: 6144-bit MODP group (DEPRECATED) [RFC 5201]
     Group_6144_bit_MODP_group = 5
 
-    #: 8192-bit MODP group (DEPRECATED) [:rfc:`5201`]
+    #: 8192-bit MODP group (DEPRECATED) [RFC 5201]
     Group_8192_bit_MODP_group = 6
 
-    #: NIST P-256 [:rfc:`7401`]
+    #: NIST P-256 [RFC 7401]
     NIST_P_256 = 7
 
-    #: NIST P-384 [:rfc:`7401`]
+    #: NIST P-384 [RFC 7401]
     NIST_P_384 = 8
 
-    #: NIST P-521 [:rfc:`7401`]
+    #: NIST P-521 [RFC 7401]
     NIST_P_521 = 9
 
-    #: SECP160R1 [:rfc:`7401`]
+    #: SECP160R1 [RFC 7401]
     SECP160R1 = 10
 
-    #: 2048-bit MODP group [:rfc:`7401`]
+    #: 2048-bit MODP group [RFC 7401]
     Group_2048_bit_MODP_group = 11
 
     @classmethod

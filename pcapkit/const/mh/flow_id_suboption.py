@@ -20,22 +20,22 @@ __all__ = ['FlowIDSuboption']
 class FlowIDSuboption(EnumRegistry, IntEnum):
     """[FlowIDSuboption] Flow Identification Sub-Options"""
 
-    #: Pad [:rfc:`6089`]
+    #: Pad [RFC 6089]
     Pad = 0
 
-    #: PadN [:rfc:`6089`]
+    #: PadN [RFC 6089]
     PadN = 1
 
-    #: BID Reference [:rfc:`6089`]
+    #: BID Reference [RFC 6089]
     BID_Reference = 2
 
-    #: Traffic Selector [:rfc:`6089`]
+    #: Traffic Selector [RFC 6089]
     Traffic_Selector = 3
 
-    #: Flow Binding Action [:rfc:`7109`]
+    #: Flow Binding Action [RFC 7109]
     Flow_Binding_Action = 4
 
-    #: Target Care-of Address [:rfc:`7109`]
+    #: Target Care-of Address [RFC 7109]
     Target_Care_of_Address = 5
 
     @classmethod
@@ -52,6 +52,6 @@ class FlowIDSuboption(EnumRegistry, IntEnum):
             #: Unassigned
             return cls._unregistered_member(value, 'Unassigned')
         if 251 <= value <= 255:
-            #: Reserved for Experimental Use [:rfc:`6089`]
+            #: Reserved for Experimental Use [RFC 6089]
             return cls._unregistered_member(value, 'Reserved_for_Experimental_Use')
         return super()._missing_(value)

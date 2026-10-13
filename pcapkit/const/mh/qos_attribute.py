@@ -20,43 +20,43 @@ __all__ = ['QoSAttribute']
 class QoSAttribute(EnumRegistry, IntEnum):
     """[QoSAttribute] Quality-of-Service Attribute Registry"""
 
-    #: Reserved [:rfc:`7222`]
+    #: Reserved [RFC 7222]
     Reserved_0 = 0
 
-    #: Per-MN-Agg-Max-DL-Bit-Rate [:rfc:`7222`]
+    #: Per-MN-Agg-Max-DL-Bit-Rate [RFC 7222]
     Per_MN_Agg_Max_DL_Bit_Rate = 1
 
-    #: Per-MN-Agg-Max-UL-Bit-Rate [:rfc:`7222`]
+    #: Per-MN-Agg-Max-UL-Bit-Rate [RFC 7222]
     Per_MN_Agg_Max_UL_Bit_Rate = 2
 
-    #: Per-Session-Agg-Max-DL-Bit-Rate [:rfc:`7222`]
+    #: Per-Session-Agg-Max-DL-Bit-Rate [RFC 7222]
     Per_Session_Agg_Max_DL_Bit_Rate = 3
 
-    #: Per-Session-Agg-Max-UL-Bit-Rate [:rfc:`7222`]
+    #: Per-Session-Agg-Max-UL-Bit-Rate [RFC 7222]
     Per_Session_Agg_Max_UL_Bit_Rate = 4
 
-    #: Allocation-Retention-Priority [:rfc:`7222`]
+    #: Allocation-Retention-Priority [RFC 7222]
     Allocation_Retention_Priority = 5
 
-    #: Aggregate-Max-DL-Bit-Rate [:rfc:`7222`]
+    #: Aggregate-Max-DL-Bit-Rate [RFC 7222]
     Aggregate_Max_DL_Bit_Rate = 6
 
-    #: Aggregate-Max-UL-Bit-Rate [:rfc:`7222`]
+    #: Aggregate-Max-UL-Bit-Rate [RFC 7222]
     Aggregate_Max_UL_Bit_Rate = 7
 
-    #: Guaranteed-DL-Bit-Rate [:rfc:`7222`]
+    #: Guaranteed-DL-Bit-Rate [RFC 7222]
     Guaranteed_DL_Bit_Rate = 8
 
-    #: Guaranteed-UL-Bit-Rate [:rfc:`7222`]
+    #: Guaranteed-UL-Bit-Rate [RFC 7222]
     Guaranteed_UL_Bit_Rate = 9
 
-    #: QoS-Traffic-Selector [:rfc:`7222`]
+    #: QoS-Traffic-Selector [RFC 7222]
     QoS_Traffic_Selector = 10
 
-    #: QoS-Vendor-Specific-Attribute [:rfc:`7222`]
+    #: QoS-Vendor-Specific-Attribute [RFC 7222]
     QoS_Vendor_Specific_Attribute = 11
 
-    #: Reserved [:rfc:`7222`]
+    #: Reserved [RFC 7222]
     Reserved_255 = 255
 
     @classmethod

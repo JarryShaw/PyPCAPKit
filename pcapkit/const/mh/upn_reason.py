@@ -20,34 +20,34 @@ __all__ = ['UpdateNotificationReason']
 class UpdateNotificationReason(EnumRegistry, IntEnum):
     """[UpdateNotificationReason] Update Notification Reasons Registry"""
 
-    #: Reserved [:rfc:`7077`]
+    #: Reserved [RFC 7077]
     Reserved_0 = 0
 
-    #: FORCE-REREGISTRATION [:rfc:`7077`]
+    #: FORCE-REREGISTRATION [RFC 7077]
     FORCE_REREGISTRATION = 1
 
-    #: UPDATE-SESSION-PARAMETERS [:rfc:`7077`]
+    #: UPDATE-SESSION-PARAMETERS [RFC 7077]
     UPDATE_SESSION_PARAMETERS = 2
 
-    #: VENDOR-SPECIFIC-REASON [:rfc:`7077`]
+    #: VENDOR-SPECIFIC-REASON [RFC 7077]
     VENDOR_SPECIFIC_REASON = 3
 
-    #: ANI-PARAMS-REQUESTED [:rfc:`7077`]
+    #: ANI-PARAMS-REQUESTED [RFC 7077]
     ANI_PARAMS_REQUESTED = 4
 
-    #: QOS_SERVICE_REQUEST [:rfc:`7222`]
+    #: QOS_SERVICE_REQUEST [RFC 7222]
     QOS_SERVICE_REQUEST = 5
 
-    #: PGW-TRIGGERED-PCSCF-RESTORATION-PCO [3GPP TS 29.275][Kimmo Kymalainen]
+    #: PGW-TRIGGERED-PCSCF-RESTORATION-PCO [3GPP TS 29.275][; ][Kimmo Kymalainen]
     PGW_TRIGGERED_PCSCF_RESTORATION_PCO = 6
 
-    #: PGW-TRIGGERED-PCSCF-RESTORATION-DHCP [3GPP TS 29.275][Kimmo Kymalainen]
+    #: PGW-TRIGGERED-PCSCF-RESTORATION-DHCP [3GPP TS 29.275][; ][Kimmo Kymalainen]
     PGW_TRIGGERED_PCSCF_RESTORATION_DHCP = 7
 
-    #: FLOW-MOBILITY [:rfc:`7864`]
+    #: FLOW-MOBILITY [RFC 7864]
     FLOW_MOBILITY = 8
 
-    #: Reserved [:rfc:`7077`]
+    #: Reserved [RFC 7077]
     Reserved_255 = 255
 
     @classmethod

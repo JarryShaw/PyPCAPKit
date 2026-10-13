@@ -20,10 +20,10 @@ __all__ = ['AuthSubtype']
 class AuthSubtype(EnumRegistry, IntEnum):
     """[AuthSubtype] Subtype Field of the MN-HA and MN-AAA Authentication Mobility Options"""
 
-    #: MN-HA authentication mobility option [:rfc:`4285`]
+    #: MN-HA authentication mobility option [RFC 4285]
     MN_HA = 1
 
-    #: MN-AAA authentication mobility option [:rfc:`4285`]
+    #: MN-AAA authentication mobility option [RFC 4285]
     MN_AAA = 2
 
     @classmethod

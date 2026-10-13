@@ -64,20 +64,20 @@ class DCCP(AppType):
     #: - [DCCP] Discard [RFC 4340]
     discard = 9, 'discard', TransportProtocol.dccp
 
-    #: - [TCP] RFC3692-style Experiment 1 [1][RFC 4727][RFC 6335]
-    #: - [UDP] RFC3692-style Experiment 1 [1][RFC 4727][RFC 6335]
-    #: - [SCTP] RFC3692-style Experiment 1 [1][RFC 4727][RFC 6335]
-    #: - [DCCP] RFC3692-style Experiment 1 [1][RFC 4727][RFC 6335]
+    #: - [TCP] RFC3692-style Experiment 1 [1][RFC 4727][;][RFC 6335]
+    #: - [UDP] RFC3692-style Experiment 1 [1][RFC 4727][;][RFC 6335]
+    #: - [SCTP] RFC3692-style Experiment 1 [1][RFC 4727][;][RFC 6335]
+    #: - [DCCP] RFC3692-style Experiment 1 [1][RFC 4727][;][RFC 6335]
     exp1 = 1021, 'exp1', TransportProtocol.dccp
 
-    #: - [TCP] RFC3692-style Experiment 2 [1][RFC 4727][RFC 6335]
-    #: - [UDP] RFC3692-style Experiment 2 [1][RFC 4727][RFC 6335]
-    #: - [SCTP] RFC3692-style Experiment 2 [1][RFC 4727][RFC 6335]
-    #: - [DCCP] RFC3692-style Experiment 2 [1][RFC 4727][RFC 6335]
+    #: - [TCP] RFC3692-style Experiment 2 [1][RFC 4727][;][RFC 6335]
+    #: - [UDP] RFC3692-style Experiment 2 [1][RFC 4727][;][RFC 6335]
+    #: - [SCTP] RFC3692-style Experiment 2 [1][RFC 4727][;][RFC 6335]
+    #: - [DCCP] RFC3692-style Experiment 2 [1][RFC 4727][;][RFC 6335]
     exp2 = 1022, 'exp2', TransportProtocol.dccp
 
     #: - [TCP] Licklider Transmission Protocol [RFC 5326]
-    #: - [UDP] Licklider Transmission Protocol [RFC 5326][RFC 7122]
+    #: - [UDP] Licklider Transmission Protocol [RFC 5326][;][RFC 7122]
     #: - [DCCP] Licklider Transmission Protocol [RFC 7122]
     ltp_deepspace = 1113, 'ltp-deepspace', TransportProtocol.dccp
 
@@ -92,14 +92,14 @@ class DCCP(AppType):
     #: - [DCCP] DTN Bundle DCCP CL Protocol [RFC 7122]
     dtn_bundle = 4556, 'dtn-bundle', TransportProtocol.dccp
 
-    #: - [TCP] RTP media data [RFC 3551][RFC 4571]
+    #: - [TCP] RTP media data [RFC 3551][;][RFC 4571]
     #: - [UDP] RTP media data [RFC 3551]
-    #: - [DCCP] RTP media data [RFC 3551][RFC 5762]
+    #: - [DCCP] RTP media data [RFC 3551][;][RFC 5762]
     avt_profile_1 = 5004, 'avt-profile-1', TransportProtocol.dccp
 
-    #: - [TCP] RTP control protocol [RFC 3551][RFC 4571]
+    #: - [TCP] RTP control protocol [RFC 3551][;][RFC 4571]
     #: - [UDP] RTP control protocol [RFC 3551]
-    #: - [DCCP] RTP control protocol [RFC 3551][RFC 5762]
+    #: - [DCCP] RTP control protocol [RFC 3551][;][RFC 5762]
     avt_profile_2 = 5005, 'avt-profile-2', TransportProtocol.dccp
 
     #: - [TCP] Syslog over TLS [RFC 5425]

@@ -20,22 +20,22 @@ __all__ = ['FlowBindingAction']
 class FlowBindingAction(EnumRegistry, IntEnum):
     """[FlowBindingAction] Flow Binding Action Values"""
 
-    #: Add a flow binding [:rfc:`7109`]
+    #: Add a flow binding [RFC 7109]
     Add = 11
 
-    #: Delete a flow binding [:rfc:`7109`]
+    #: Delete a flow binding [RFC 7109]
     Delete = 12
 
-    #: Modify a flow binding [:rfc:`7109`]
+    #: Modify a flow binding [RFC 7109]
     Modify = 13
 
-    #: Refresh a flow binding [:rfc:`7109`]
+    #: Refresh a flow binding [RFC 7109]
     Refresh = 14
 
-    #: Move a flow binding [:rfc:`7109`]
+    #: Move a flow binding [RFC 7109]
     Move = 15
 
-    #: Revoke a flow binding [:rfc:`7109`]
+    #: Revoke a flow binding [RFC 7109]
     Revoke = 16
 
     @classmethod

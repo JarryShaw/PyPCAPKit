@@ -20,19 +20,19 @@ __all__ = ['EdDSACurve']
 class EdDSACurve(EnumRegistry, IntEnum):
     """[EdDSACurve] EdDSA Curve Label"""
 
-    #: RESERVED [:rfc:`9374`]
+    #: RESERVED [RFC 9374]
     RESERVED_0 = 0
 
-    #: EdDSA25519 [:rfc:`8032`]
+    #: EdDSA25519 [RFC 8032]
     EdDSA25519 = 1
 
-    #: EdDSA25519ph [:rfc:`8032`]
+    #: EdDSA25519ph [RFC 8032]
     EdDSA25519ph = 2
 
-    #: EdDSA448 [:rfc:`8032`]
+    #: EdDSA448 [RFC 8032]
     EdDSA448 = 3
 
-    #: EdDSA448ph [:rfc:`8032`]
+    #: EdDSA448ph [RFC 8032]
     EdDSA448ph = 4
 
     @classmethod

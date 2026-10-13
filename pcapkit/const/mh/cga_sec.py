@@ -20,13 +20,13 @@ __all__ = ['CGASec']
 class CGASec(EnumRegistry, IntEnum):
     """[CGASec] CGA SEC"""
 
-    #: SHA-1_0hash2bits [:rfc:`4982`]
+    #: SHA-1_0hash2bits [RFC 4982]
     SHA_1_0hash2bits = 0b000
 
-    #: SHA-1_16hash2bits [:rfc:`4982`]
+    #: SHA-1_16hash2bits [RFC 4982]
     SHA_1_16hash2bits = 0b001
 
-    #: SHA-1_32hash2bits [:rfc:`4982`]
+    #: SHA-1_32hash2bits [RFC 4982]
     SHA_1_32hash2bits = 0b010
 
     @classmethod

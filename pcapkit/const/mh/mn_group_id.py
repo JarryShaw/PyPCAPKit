@@ -20,13 +20,13 @@ __all__ = ['MNGroupID']
 class MNGroupID(EnumRegistry, IntEnum):
     """[MNGroupID] Mobile Node Group Identifier Type Registry"""
 
-    #: Reserved [:rfc:`6602`]
+    #: Reserved [RFC 6602]
     Reserved_0 = 0
 
-    #: Bulk Binding Update Group [:rfc:`6602`]
+    #: Bulk Binding Update Group [RFC 6602]
     Bulk_Binding_Update_Group = 1
 
-    #: Reserved [:rfc:`6602`]
+    #: Reserved [RFC 6602]
     Reserved_255 = 255
 
     @classmethod

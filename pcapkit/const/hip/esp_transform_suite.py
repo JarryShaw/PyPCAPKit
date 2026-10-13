@@ -20,52 +20,52 @@ __all__ = ['ESPTransformSuite']
 class ESPTransformSuite(EnumRegistry, IntEnum):
     """[ESPTransformSuite] ESP Transform Suite IDs"""
 
-    #: RESERVED [:rfc:`7402`]
+    #: RESERVED [RFC 7402]
     RESERVED_0 = 0
 
-    #: AES-128-CBC with HMAC-SHA1 [:rfc:`3602`][:rfc:`2404`]
+    #: AES-128-CBC with HMAC-SHA1 [RFC 3602][; ][RFC 2404]
     AES_128_CBC_with_HMAC_SHA1 = 1
 
-    #: DEPRECATED [:rfc:`7402`]
+    #: DEPRECATED [RFC 7402]
     DEPRECATED_2 = 2
 
-    #: DEPRECATED [:rfc:`7402`]
+    #: DEPRECATED [RFC 7402]
     DEPRECATED_3 = 3
 
-    #: DEPRECATED [:rfc:`7402`]
+    #: DEPRECATED [RFC 7402]
     DEPRECATED_4 = 4
 
-    #: DEPRECATED [:rfc:`7402`]
+    #: DEPRECATED [RFC 7402]
     DEPRECATED_5 = 5
 
-    #: DEPRECATED [:rfc:`7402`]
+    #: DEPRECATED [RFC 7402]
     DEPRECATED_6 = 6
 
-    #: NULL with HMAC-SHA-256 [:rfc:`2410`][:rfc:`4868`]
+    #: NULL with HMAC-SHA-256 [RFC 2410][; ][RFC 4868]
     NULL_with_HMAC_SHA_256 = 7
 
-    #: AES-128-CBC with HMAC-SHA-256 [:rfc:`3602`][:rfc:`4868`]
+    #: AES-128-CBC with HMAC-SHA-256 [RFC 3602][; ][RFC 4868]
     AES_128_CBC_with_HMAC_SHA_256 = 8
 
-    #: AES-256-CBC with HMAC-SHA-256 [:rfc:`3602`][:rfc:`4868`]
+    #: AES-256-CBC with HMAC-SHA-256 [RFC 3602][; ][RFC 4868]
     AES_256_CBC_with_HMAC_SHA_256 = 9
 
-    #: AES-CCM-8 [:rfc:`4309`]
+    #: AES-CCM-8 [RFC 4309]
     AES_CCM_8 = 10
 
-    #: AES-CCM-16 [:rfc:`4309`]
+    #: AES-CCM-16 [RFC 4309]
     AES_CCM_16 = 11
 
-    #: AES-GCM with an 8 octet ICV [:rfc:`4106`]
+    #: AES-GCM with an 8 octet ICV [RFC 4106]
     AES_GCM_with_an_8_octet_ICV = 12
 
-    #: AES-GCM with a 16 octet ICV [:rfc:`4106`]
+    #: AES-GCM with a 16 octet ICV [RFC 4106]
     AES_GCM_with_a_16_octet_ICV = 13
 
-    #: AES-CMAC-96 [:rfc:`4493`][:rfc:`4494`]
+    #: AES-CMAC-96 [RFC 4493][; ][RFC 4494]
     AES_CMAC_96 = 14
 
-    #: AES-GMAC [:rfc:`4543`]
+    #: AES-GMAC [RFC 4543]
     AES_GMAC = 15
 
     @classmethod

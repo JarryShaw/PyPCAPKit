@@ -20,25 +20,25 @@ __all__ = ['Suite']
 class Suite(EnumRegistry, IntEnum):
     """[Suite] Suite IDs"""
 
-    #: Reserved [:rfc:`5201`]
+    #: Reserved [RFC 5201]
     Reserved_0 = 0
 
-    #: AES-CBC with HMAC-SHA1 [:rfc:`5201`]
+    #: AES-CBC with HMAC-SHA1 [RFC 5201]
     AES_CBC_with_HMAC_SHA1 = 1
 
-    #: 3DES-CBC with HMAC-SHA1 [:rfc:`5201`]
+    #: 3DES-CBC with HMAC-SHA1 [RFC 5201]
     Suite_3DES_CBC_with_HMAC_SHA1 = 2
 
-    #: 3DES-CBC with HMAC-MD5 [:rfc:`5201`]
+    #: 3DES-CBC with HMAC-MD5 [RFC 5201]
     Suite_3DES_CBC_with_HMAC_MD5 = 3
 
-    #: BLOWFISH-CBC with HMAC-SHA1 [:rfc:`5201`]
+    #: BLOWFISH-CBC with HMAC-SHA1 [RFC 5201]
     BLOWFISH_CBC_with_HMAC_SHA1 = 4
 
-    #: NULL-ENCRYPT with HMAC-SHA1 [:rfc:`5201`]
+    #: NULL-ENCRYPT with HMAC-SHA1 [RFC 5201]
     NULL_ENCRYPT_with_HMAC_SHA1 = 5
 
-    #: NULL-ENCRYPT with HMAC-MD5 [:rfc:`5201`]
+    #: NULL-ENCRYPT with HMAC-MD5 [RFC 5201]
     NULL_ENCRYPT_with_HMAC_MD5 = 6
 
     @classmethod
