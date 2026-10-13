@@ -672,6 +672,24 @@ def _past_extension_headers(protocol: 'int', data: 'bytes') -> 'Optional[tuple[i
         they are there.
 
     """
+    walked = _walk_extension_headers(protocol, data)
+    return None if walked is None else walked[:2]
+
+
+def _walk_extension_headers(protocol: 'int', data: 'bytes') -> 'Optional[tuple[int, bytes, int]]':
+    """Step over the headers :func:`_past_extension_headers` steps over, and count them.
+
+    Args:
+        protocol: The IPv4 packet's protocol number.
+        data: Raw octets of its payload.
+
+    Returns:
+        What :func:`_past_extension_headers` returns, then how many headers it
+        stepped over, each of them one layer of the frame to the default engine
+        (c.f. :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT`); or
+        :data:`None` where it returns :data:`None`.
+
+    """
     depth = 0
     while protocol in IPV4_EXTENSION_HEADERS:
         if depth == EXTENSION_HEADER_LIMIT:
@@ -687,7 +705,7 @@ def _past_extension_headers(protocol: 'int', data: 'bytes') -> 'Optional[tuple[i
         if header is None:
             return None
         protocol, data = header[0], data[header[1]:]
-    return protocol, data
+    return protocol, data, depth
 
 
 def _upper_layer(version: 'int', data: 'bytes') -> 'Optional[tuple[int, bytes]]':

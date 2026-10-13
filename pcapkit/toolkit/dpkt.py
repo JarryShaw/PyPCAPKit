@@ -23,8 +23,9 @@ from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.data import FrameRecord
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
 from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
-from pcapkit.toolkit.pypcapfile import (IPV4_EXTENSION_HEADERS, TCP_MIN_HEADER_LEN,
-                                        _default_accepts, _past_extension_headers)
+from pcapkit.toolkit.pypcapfile import (IPV4_EXTENSION_HEADERS, TCP_MIN_HEADER_LEN, VLAN_TAG_LEN,
+                                        VLAN_TAGS, _default_accepts, _past_extension_headers,
+                                        _walk_extension_headers)
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
 if TYPE_CHECKING:
@@ -33,6 +34,7 @@ if TYPE_CHECKING:
     from typing import Any, Optional
 
     from dpkt.dpkt import Packet
+    from dpkt.ethernet import Ethernet
     from dpkt.ip import IP
     from dpkt.ip6 import IP6, IP6FragmentHeader
     from dpkt.tcp import TCP
@@ -80,10 +82,25 @@ BUFFER_ATTR = '__pcapkit_buffer__'
 #: IPv6 alike: IPv4 (protocol 4, :rfc:`2003`) and IPv6 (protocol 41,
 #: :rfc:`2473` and :rfc:`4213`). `DPKT`_ also decodes an IPv4 packet's
 #: protocol 0 as IPv4, its ``IP_PROTO_IP``, where the default engine reads an
-#: IPv6 Hop-by-Hop Options header, so :func:`_tcp_carrier` does not enter it.
+#: IPv6 Hop-by-Hop Options header, so neither :func:`_tcp_carrier` nor
+#: :func:`_first_ipv6` enters it.
 #:
 #: .. _DPKT: https://dpkt.readthedocs.io
 IP_TUNNELS = frozenset((int(Enum_TransType.IPv4), int(Enum_TransType.IPv6)))
+
+#: Destination address prefixes by which `DPKT`_ reads an Ethernet frame whose
+#: EtherType field is an 802.3 length, at most 1500, as Cisco ISL; the default
+#: engine reads one as raw octets (see :func:`_ethernet_accepted`).
+#:
+#: .. _DPKT: https://dpkt.readthedocs.io
+ISL_ADDRESSES = (b'\x01\x00\x0c\x00\x00', b'\x03\x00\x0c\x00\x00')
+
+#: TPIDs of the VLAN tags `DPKT`_ steps over in an Ethernet II frame: 802.1Q,
+#: 802.1ad and the legacy QinQ ``0x9100`` and ``0x9200``, i.e.
+#: ``dpkt.ethernet._ETH_TYPES_QINQ`` (see :func:`_vlan_tpids`).
+#:
+#: .. _DPKT: https://dpkt.readthedocs.io
+DPKT_VLAN_TAGS = frozenset((0x8100, 0x88A8, 0x9100, 0x9200))
 
 
 class RecordTimestamp:
@@ -325,12 +342,49 @@ def _ipv6_ext_hdrs(ipv6: 'IP6') -> 'list[Any]':
     return list(getattr(ipv6, 'extension_hdrs', {}).values())
 
 
-def _wire_hdr_len(packet: 'Packet', payload: 'Packet') -> 'int':
+def _vlan_tpids(wire: 'bytes | memoryview') -> 'list[int]':
+    """Read the TPIDs of the VLAN tags `DPKT`_ steps over in an Ethernet II frame, off its octets.
+
+    Args:
+        wire: Octets of an Ethernet frame, from its destination address on.
+
+    Returns:
+        The frame's EtherType, then each tag's but the last's, for as long as
+        each is one of the :data:`DPKT_VLAN_TAGS` and a whole tag follows it;
+        empty for a frame whose EtherType field is an 802.3 length.
+
+    Note:
+        :class:`dpkt.ethernet.Ethernet` reads at most two tags at a time, and
+        reads on only while the tag it read names 802.1Q. Where it then has no
+        decoder for the EtherType, its constructor reads again from there, and
+        starts its :attr:`~dpkt.ethernet.Ethernet.vlan_tags` afresh: so it keeps
+        only the tags of its last read, one for 802.1Q then 802.1ad, two
+        802.1ad, or three tags, and its re-serialisation is 4 octets short for
+        each tag it dropped. Where it decodes the payload, the tags it stepped
+        over are all those heading it, since none of the :data:`DPKT_VLAN_TAGS`
+        has a decoder, so they are read off the octets instead.
+
+    .. _DPKT: https://dpkt.readthedocs.io
+
+    """
+    tpids = []  # type: list[int]
+    offset = 12
+    while len(wire) >= offset + 2 + VLAN_TAG_LEN:
+        tpid = int.from_bytes(wire[offset:offset + 2], 'big')
+        if tpid not in DPKT_VLAN_TAGS:
+            break
+        tpids.append(tpid)
+        offset += VLAN_TAG_LEN
+    return tpids
+
+
+def _wire_hdr_len(packet: 'Packet', payload: 'Packet', wire: 'Optional[bytes | memoryview]' = None) -> 'int':
     """Calculate the octets a layer occupies before its payload begins.
 
     Args:
         packet: DPKT packet, i.e. one layer of a frame.
         payload: That layer's payload, i.e. :attr:`packet.data <dpkt.dpkt.Packet.data>`.
+        wire: The captured octets of ``packet``, from its first on, if any.
 
     Returns:
         The advance :meth:`~dpkt.dpkt.Packet.unpack` itself made to reach the
@@ -349,14 +403,24 @@ def _wire_hdr_len(packet: 'Packet', payload: 'Packet') -> 'int':
 
         Every other layer's ``len()`` does bound its payload, so the difference
         of the two is used there. For IPv4 that difference is the Internet
-        Header Length, options included.
+        Header Length, options included. For an Ethernet II frame whose
+        ``wire`` is given, 4 octets are added for each VLAN tag
+        :class:`dpkt.ethernet.Ethernet` stepped over but dropped from its
+        :attr:`~dpkt.ethernet.Ethernet.vlan_tags`, which ``len()`` counts (see
+        :func:`_vlan_tpids`).
 
     """
+    import dpkt  # isort:skip
+
     if hasattr(packet, 'extension_hdrs'):
         return packet.__hdr_len__ + sum(
             ext_hdr.length for ext_hdr in _ipv6_ext_hdrs(cast('IP6', packet))
         )
-    return len(packet) - len(payload)
+    hdr_len = len(packet) - len(payload)
+    if wire is not None and isinstance(packet, dpkt.ethernet.Ethernet) and int.from_bytes(wire[12:14], 'big') > 1500:
+        dropped = len(_vlan_tpids(wire)) - len(getattr(packet, 'vlan_tags', None) or ())
+        hdr_len += VLAN_TAG_LEN * dropped
+    return hdr_len
 
 
 def _layer2bytes(packet: 'Packet', layer: 'Packet') -> 'tuple[bytes, bool]':
@@ -390,11 +454,12 @@ def _layer2bytes(packet: 'Packet', layer: 'Packet') -> 'tuple[bytes, bool]':
     if buffer is not None:
         offset = 0
         current = packet
+        view = memoryview(cast('bytes', buffer))
         while current is not layer:
             payload = getattr(current, 'data', None)
             if payload is None or isinstance(payload, (bytes, bytearray)):
                 break
-            offset += _wire_hdr_len(current, payload)
+            offset += _wire_hdr_len(current, payload, view[offset:])
             current = payload
         else:
             wire = cast('bytes', buffer)[offset:]
@@ -409,6 +474,54 @@ def _layer2bytes(packet: 'Packet', layer: 'Packet') -> 'tuple[bytes, bool]':
     return packet2bytes(layer), False
 
 
+def _ethernet_accepted(packet: 'Ethernet') -> 'bool':
+    """Test if the default engine reads past a DPKT Ethernet frame's link layer as `DPKT`_ did.
+
+    Args:
+        packet: DPKT Ethernet frame.
+
+    Returns:
+        :data:`False` if `DPKT`_ reached its payload past an MPLS label stack, a
+        Cisco ISL header, or a VLAN tag whose TPID is neither of the
+        :data:`~pcapkit.toolkit.pypcapfile.VLAN_TAGS`; else :data:`True`.
+
+    Note:
+        `DPKT`_ pops an MPLS label stack and guesses IPv4 or IPv6 from the
+        nibble after it, unwraps an ISL header, and steps over the legacy QinQ
+        tags ``0x9100`` and ``0x9200``, naming the IPv4 or IPv6 packet it finds
+        ``ip`` or ``ip6`` as for an untagged frame. The default engine reads
+        what follows any of them as raw octets (see :attr:`Link.__proto__
+        <pcapkit.protocols.link.link.Link.__proto__>`), an ISL frame's 802.3
+        length field included (:issue:`1638`). A tag's TPID is the EtherType
+        before it: the frame's, then each tag's but the last's.
+
+        `DPKT`_ records an ISL header as a tag, but unwraps it into the frame
+        itself, so a VLAN tag of the frame inside replaces it; the captured
+        octets attached by :func:`attach_buffer` still show it, by the
+        :data:`ISL_ADDRESSES` and length field `DPKT`_ recognises it by. Nor
+        does it keep every tag of a stack it reads in two goes, so the TPIDs
+        are read off those octets too (see :func:`_vlan_tpids`).
+
+    .. _DPKT: https://dpkt.readthedocs.io
+
+    """
+    import dpkt  # isort:skip
+
+    if getattr(packet, 'mpls_labels', None):
+        return False
+    tags = list(getattr(packet, 'vlan_tags', None) or ())
+    if any(isinstance(tag, dpkt.ethernet.VLANtagISL) for tag in tags):
+        return False
+    buffer = getattr(packet, BUFFER_ATTR, None)  # type: Optional[bytes]
+    if buffer is None:
+        tpids = [packet.type, *(tag.type for tag in tags)][:len(tags)]
+    elif buffer[:5] in ISL_ADDRESSES and int.from_bytes(buffer[12:14], 'big') <= 1500:
+        return False
+    else:
+        tpids = _vlan_tpids(buffer)
+    return all(tpid in VLAN_TAGS for tpid in tpids)
+
+
 def _network(packet: 'Packet') -> 'Optional[IP | IP6]':
     """Fetch the network layer of a DPKT packet.
 
@@ -419,7 +532,9 @@ def _network(packet: 'Packet') -> 'Optional[IP | IP6]':
         The packet itself if it is an IPv4 or IPv6 packet, as `DPKT`_ reads every
         frame of a raw-IP link type (:issue:`1548`); otherwise the IPv4 or IPv6
         payload of its link layer, which `DPKT`_ names ``ip`` or ``ip6`` -- a
-        bare IP packet names neither -- or :data:`None` if it has none.
+        bare IP packet names neither -- or :data:`None` if it has none, or the
+        default engine dissects no payload of an Ethernet frame where `DPKT`_
+        found one (see :func:`_ethernet_accepted`).
 
     .. _DPKT: https://dpkt.readthedocs.io
 
@@ -428,9 +543,48 @@ def _network(packet: 'Packet') -> 'Optional[IP | IP6]':
 
     if isinstance(packet, (dpkt.ip.IP, dpkt.ip6.IP6)):
         return packet
+    if isinstance(packet, dpkt.ethernet.Ethernet) and not _ethernet_accepted(packet):
+        return None
     if hasattr(packet, 'ip'):
         return cast('IP', packet.ip)
     return getattr(packet, 'ip6', None)
+
+
+def _network_depth(packet: 'Packet') -> 'int':
+    """Count the layers of a DPKT packet the default engine dissects up to its network layer.
+
+    Args:
+        packet: DPKT packet, i.e. the outermost layer, whose network layer
+            :func:`_network` found.
+
+    Returns:
+        The place of that layer in the frame, its first layer being ``1``, as
+        the default engine counts towards
+        :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT`: ``1`` for the
+        packet of a raw-IP link type, which is the network layer itself; else
+        ``2``, and one more for each VLAN tag of an Ethernet frame, which the
+        default engine dissects as a layer of its own.
+
+    Note:
+        The tags are read off the captured octets, as `DPKT`_ keeps only some
+        of a stack it reads in two goes (see :func:`_vlan_tpids`). Each is
+        802.1Q or 802.1ad, or :func:`_ethernet_accepted` refuses the frame.
+
+    .. _DPKT: https://dpkt.readthedocs.io
+
+    """
+    import dpkt  # isort:skip
+
+    if isinstance(packet, (dpkt.ip.IP, dpkt.ip6.IP6)):
+        return 1
+    tags = 0
+    if isinstance(packet, dpkt.ethernet.Ethernet):
+        buffer = getattr(packet, BUFFER_ATTR, None)  # type: Optional[bytes]
+        if buffer is None:
+            tags = len(getattr(packet, 'vlan_tags', None) or ())
+        else:
+            tags = len(_vlan_tpids(buffer))
+    return 2 + tags
 
 
 def _ipv4_accepted(ipv4: 'IP') -> 'bool':
@@ -778,6 +932,79 @@ def _first_ipv4(packet: 'Packet') -> 'tuple[Optional[IP], Optional[int]]':
     return ip, extent
 
 
+def _first_ipv6(packet: 'Packet') -> 'tuple[Optional[IP6], Optional[tuple[bytes, bool]], int]':
+    """Fetch the first IPv6 layer of a DPKT packet, as the default engine dissects it.
+
+    Args:
+        packet: DPKT packet, i.e. the outermost layer.
+
+    Returns:
+        The network layer (see :func:`_network`) if it is IPv6, else the first
+        IPv6 packet its IPv4 packet carries (:rfc:`4213`) -- directly, behind
+        the headers the default engine reads past (see
+        :func:`~pcapkit.toolkit.pypcapfile._past_extension_headers`), or inside
+        more IPv4 (:rfc:`2003`). Beside it, :data:`None` for the former, whose
+        octets are those :func:`_layer2bytes` slices, and for the latter its
+        octets from its first on, as far as the Total Length of every IPv4
+        packet carrying it goes, and whether they are the captured ones; then
+        its place in the frame (see :func:`_network_depth`), one more for each
+        IPv4 packet and each of those headers before it. Both are :data:`None`,
+        and the place ``0``, if there is no such packet, or the default engine
+        dissects nothing past an IPv4 packet on the way: one whose header it
+        rejects (see :func:`_ipv4_accepted`), a later fragment
+        (:rfc:`791#section-3.2`), or one carrying any other protocol, such as
+        the ICMP error that quotes an IPv6 packet. So too if the IPv6 packet is
+        past :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT`, which the
+        default engine keeps raw (:issue:`1610`).
+
+    Note:
+        The default engine takes ``frame['IPv6']``, the first IPv6 layer however
+        deep (:func:`pcapkit.toolkit.pcap.ipv6_reassembly`), and an IPv4 packet
+        hands its payload the octets its Total Length leaves -- a Total Length
+        of ``0``, which TCP segmentation offload leaves, the rest of what
+        carries it -- so they are cut here as it cuts them (:issue:`1637`).
+        `DPKT`_ decodes the IPv6 packet an IPv4 packet carries directly, but
+        reads protocol 0 as IPv4 and keeps the IPv6 extension headers as octets,
+        so one behind an AH or extension header is decoded from the octets
+        instead (see :func:`_decode_ip`), as in :func:`_tcp_carrier`.
+
+    .. _DPKT: https://dpkt.readthedocs.io
+
+    """
+    import dpkt  # isort:skip
+
+    from pcapkit.protocols.protocol import FRAME_LAYER_LIMIT  # isort:skip
+
+    ip = _network(packet)
+    if ip is None:
+        return None, None, 0
+    octets = None  # type: Optional[tuple[bytes, bool]] # of ``ip``, once sliced
+    depth = _network_depth(packet)  # of ``ip``
+    while isinstance(ip, dpkt.ip.IP) and depth <= FRAME_LAYER_LIMIT:
+        if ip.p not in IP_TUNNELS and ip.p not in IPV4_EXTENSION_HEADERS:
+            return None, None, 0
+        if not _ipv4_accepted(ip) or ip.offset:
+            return None, None, 0
+        wire, captured = octets or _layer2bytes(packet, ip)
+        ihl = ip.hl * 4
+        payload = wire[ihl:max(ip.len, ihl)] if ip.len else wire[ihl:]
+        if ip.p in IPV4_EXTENSION_HEADERS:
+            walked = _walk_extension_headers(ip.p, payload)
+            if walked is None or walked[0] not in IP_TUNNELS:
+                return None, None, 0
+            proto, upper, hops = walked
+            if (inner := _decode_ip(proto, upper)) is None:
+                return None, None, 0
+            ip, octets, depth = inner, (upper, captured), depth + 1 + hops
+        elif isinstance(ip.data, (dpkt.ip.IP, dpkt.ip6.IP6)):
+            ip, octets, depth = ip.data, (payload, captured), depth + 1
+        else:
+            return None, None, 0
+    if not hasattr(ip, 'extension_hdrs') or depth > FRAME_LAYER_LIMIT:
+        return None, None, 0
+    return cast('IP6', ip), octets, depth
+
+
 def ipv4_reassembly(packet: 'Packet', timestamp: 'float', *,
                     count: 'int' = -1) -> 'IP_Packet[IPv4Address] | None':
     """Make data for IPv4 reassembly.
@@ -878,8 +1105,14 @@ def ipv6_reassembly(packet: 'Packet', timestamp: 'float', *,
         Data for IPv6 reassembly.
 
         * If the ``packet`` can be used for IPv6 reassembly. A packet can be reassembled
-          if it contains IPv6 layer (:class:`dpkt.ip6.IP6`) and IPv6 Fragment header
-          (:rfc:`2460#section-4.5`, i.e., :class:`dpkt.ip6.IP6FragmentHeader`).
+          if it contains IPv6 layer (:class:`dpkt.ip6.IP6`) -- the first of the frame, as
+          for the default engine, so one carried in IPv4 counts (see :func:`_first_ipv6`)
+          -- and IPv6 Fragment header (:rfc:`2460#section-4.5`, i.e.,
+          :class:`dpkt.ip6.IP6FragmentHeader`) inside its Payload Length, and among its first
+          :data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT` extension
+          headers, the most the default engine walks (:issue:`1604`), and inside the first
+          :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT` layers of the frame, past
+          which it dissects nothing (:issue:`1610`).
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv6
           reassembly (:term:`reasm.ipv6.packet`) will be returned; otherwise, returns :data:`None`.
 
@@ -892,22 +1125,41 @@ def ipv6_reassembly(packet: 'Packet', timestamp: 'float', *,
         :func:`attach_buffer` is what makes them the wire's again. The packet
         itself is left untouched either way.
 
+        The captured octets end at the Payload Length, as the default engine
+        cuts them, or at the Jumbo Payload Length (:rfc:`2675`) of a zero one.
+        A zero Payload Length with no Jumbo Payload option leaves the default
+        engine no extension header to read, and so no input; `DPKT`_ reads the
+        rest of the frame instead.
+
     See Also:
         :class:`pcapkit.foundation.reassembly.ipv6.IPv6`
 
+    .. _DPKT: https://dpkt.readthedocs.io
+
     """
-    network = _network(packet)
-    ipv6 = cast('IP6', network) if hasattr(network, 'extension_hdrs') else None
+    from pcapkit.protocols.internet.internet import EXTENSION_HEADER_LIMIT  # isort:skip
+    from pcapkit.protocols.protocol import FRAME_LAYER_LIMIT  # isort:skip
+    from pcapkit.protocols.schema.internet.ipv6 import jumbo_payload_length  # isort:skip
+
+    ipv6, octets, depth = _first_ipv6(packet)
     if ipv6 is not None:
         ipv6_frag = ipv6.extension_hdrs.get(44)  # type: Optional[IP6FragmentHeader]
         if ipv6_frag is None:       # dismiss not fragmented packet
             return None
+        # the default engine walks no more extension headers than either bound
+        # leaves, each header one layer of the frame past the IPv6 header's
+        bound = min(EXTENSION_HEADER_LIMIT, FRAME_LAYER_LIMIT - depth)
+        if not any(ext_hdr is ipv6_frag for ext_hdr in _ipv6_ext_hdrs(ipv6)[:bound]):
+            return None
         hdr_len = ipv6_hdr_len(ipv6)
-        wire, captured = _layer2bytes(packet, ipv6)
-        # a zero Payload Length is a jumbogram or TCP segmentation offload, in
-        # which case the datagram runs to the end of the frame, as with DPKT
-        if captured and ipv6.plen:
-            wire = wire[:ipv6.__hdr_len__ + ipv6.plen]
+        wire, captured = octets or _layer2bytes(packet, ipv6)
+        if captured:
+            plen = ipv6.plen or jumbo_payload_length(ipv6.nxt, wire[ipv6.__hdr_len__:])
+            if not plen:
+                return None
+            wire = wire[:ipv6.__hdr_len__ + plen]
+            if len(wire) < hdr_len + ipv6_frag.__hdr_len__:     # Fragment header cut short
+                return None
         # payload following the IPv6 Fragment header
         payload = wire[hdr_len + ipv6_frag.__hdr_len__:]
 
