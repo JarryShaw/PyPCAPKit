@@ -660,15 +660,15 @@ through ``fromJSON``, and each single-interpreter job reads ``latest``.
 
 **A tier change is a one-line edit to that file, plus the matching edit to ruleset
 23497679's ``Compat`` contexts.** The file's ``exemptions`` list each pin kept
-off ``latest``, with its reason in the comment above it, such as ``lint.yml``'s
-3.14. ``tests/project/test_python_versions_1660.py`` fails on a pin the file does
-not list, on an exemption with no comment, and on a classifier, doc or comment
-that no longer matches the file -- the coverage leg's version, the release
-checks' counts. Its tests, and the other tests that read the file, skip on the
-KTLO interpreters, which have no ``tomllib``. Two edits it names rather
-than makes: a new ``pypi`` KTLO leg needs its own ``ktlo_*`` output for
-``release_status``, and a pre-release leg needs non-blocking mechanics no
-workflow has yet, so the script refuses one.
+off ``latest``, with its reason in the comment above it, such as the conda
+jobs' ``!= '3.15'``. ``tests/project/test_python_versions_1660.py`` fails on a
+pin the file does not list, on an exemption with no comment, and on a
+classifier, doc or comment that no longer matches the file -- the coverage
+leg's version, the release checks' counts. Its tests, and the other tests that
+read the file, skip on the KTLO interpreters, which have no ``tomllib``. Two
+edits it names rather than makes: a new ``pypi`` KTLO leg needs its own
+``ktlo_*`` output for ``release_status``, and a pre-release leg needs
+non-blocking mechanics no workflow has yet, so the script refuses one.
 
 Deployment ``environment:``
 ----------------------------

@@ -151,7 +151,8 @@ make vermin    # minimum-Python-version check
 
 Four of them — `pylint`, `mypy`, `bandit` and `vermin` — also run in CI as the `Lint` job in
 `.github/workflows/lint.yml`: on every pull request against `main`, on a weekly Saturday schedule
-and on demand through `workflow_dispatch`, on Python 3.14 alone rather than across the test matrix.
+and on demand through `workflow_dispatch`, on the newest supported Python alone (`latest` in
+`.github/python-versions.toml`) rather than across the test matrix.
 The job drives them through the `Makefile` rather than restating their flags (`vermin` by its
 `vermin-ci` variant), with `RUN=` emptying the `pipenv run` prefix. Both paths read the same flag
 variables, so a check cannot come out clean locally and red in CI because the two drifted.

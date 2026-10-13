@@ -670,7 +670,7 @@ def pins(load: 'Callable[[str], dict[str, Any]]' = workflow) -> 'dict[tuple[str,
 SINGLE = (('unit-tests.yml', 'gate'), ('unit-tests.yml', 'unittest-ordering'), ('unit-tests.yml', 'changelog'),
           ('unit-tests.yml', 'project-tests'), ('create-release.yml', 'version_check'),
           ('cron-conda.yml', 'conda-update'), ('cron-vendor.yml', 'vendor-update'),
-          ('deploy-pages.yml', 'deploy-pages'), ('ci-timing.yml', 'report'))
+          ('deploy-pages.yml', 'deploy-pages'), ('ci-timing.yml', 'report'), ('lint.yml', 'lint'))
 
 
 class TestEveryVersionComesFromTheFile(unittest.TestCase):
@@ -686,6 +686,7 @@ class TestEveryVersionComesFromTheFile(unittest.TestCase):
         ('create-release.yml', 'version_check', 'Check PyPI publish completeness: run'),
         ('create-release.yml', 'pypi', 'No Source Distribution for Python ${{ matrix.python-version }}: if'),
         ('unit-tests.yml', 'pypcap-parity', 'env.APT_CACHE_SAVE'),
+        ('lint.yml', 'lint', 'Set up Python: with.python-version'),
     )
 
     def test_no_pin_but_the_files_exemptions(self) -> None:
