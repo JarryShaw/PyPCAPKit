@@ -45,10 +45,11 @@ license = { text="BSD 3-Clause License" }
 # rather than something that works.
 #
 # Independently, CI has two tiers (#1633). **3.11 through 3.15** are supported and
-# blocking. **3.8 through 3.10** are KTLO: end-of-life, still built and tested, never
-# blocking. 3.6 and 3.7 are not run at all: on 3.6 the build fails (no
-# ``setuptools>=61``), on 3.7 the import fails as above, and the ``test`` extra's
-# ``pytest>=8`` needs 3.8 on both. The ``PCAP_CT`` extra needs 3.10 regardless.
+# blocking. **3.7 through 3.10** are KTLO: end-of-life, still built and tested, never
+# blocking. 3.7's legs are red by design: the import fails as above, and the
+# ``test`` extra's ``pytest>=8`` needs 3.8. 3.6 is not run at all: setup-python
+# builds it only for retired Ubuntu images, and the build needs ``setuptools>=61``
+# besides. The ``PCAP_CT`` extra needs 3.10 regardless.
 requires-python = ">=3.6, <4"
 description = "PyPCAPKit: comprehensive network packet analysis library"
 keywords = [ "network", "pcap", "packet" ]
@@ -66,7 +67,7 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     # The supported tier only (#1633). A version classifier is a claim of
-    # support, which the KTLO tier (3.8-3.10) is by definition not: it may stay
+    # support, which the KTLO tier (3.7-3.10) is by definition not: it may stay
     # red without blocking anything. ``requires-python`` above is what keeps
     # those versions installable.
     "Programming Language :: Python :: 3.11",
