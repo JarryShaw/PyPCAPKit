@@ -98,6 +98,13 @@ class RecordTimestamp:
     carries those three. Reassembly and flow tracing are handed a plain
     :obj:`float` of it, as by every other engine (:issue:`1501`).
 
+    A copy, a deep copy and a pickle at any protocol all rebuild a timestamp
+    from what its :meth:`~object.__reduce__` returns, so all keep the three.
+    This class answers each of those protocols itself, ahead of the numeric base
+    class: the pure-Python :class:`~decimal.Decimal` copies a subclass as
+    ``type(self)(str(self))``, with the constructor's defaults for the rest
+    (:issue:`1647`).
+
     .. _DPKT: https://dpkt.readthedocs.io
 
     """
@@ -111,6 +118,20 @@ class RecordTimestamp:
         resolution: 'int'
         #: Original length of the packet, or :data:`None` if unknown.
         orig_len: 'Optional[int]'
+
+    def __reduce__(self) -> 'tuple[Any, ...]':
+        raise NotImplementedError(f'{type(self).__name__} does not say how it is rebuilt')
+
+    def __reduce_ex__(self, protocol: 'Any') -> 'tuple[Any, ...]':
+        return self.__reduce__()
+
+    def __copy__(self) -> 'Any':
+        factory, args = self.__reduce__()
+        return factory(*args)
+
+    def __deepcopy__(self, memo: 'Any') -> 'Any':
+        factory, args = self.__reduce__()
+        return factory(*copy.deepcopy(args, memo))
 
 
 class Timestamp(RecordTimestamp, float):
