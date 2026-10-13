@@ -311,7 +311,7 @@ every job past it is gated the same way: ``github`` needs ``[ unit-tests,
 version_check ]`` (``:434``), ``tag`` needs ``[ github, unit-tests,
 version_check ]`` (``:619``), ``pypi`` needs ``[ github, unit-tests,
 version_check ]`` (``:784``), and ``conda`` needs ``[ tag, github,
-unit-tests, version_check ]`` (``:997``).
+unit-tests, version_check ]`` (``:1026``).
 
 .. mermaid::
 
@@ -337,7 +337,7 @@ unit-tests, version_check ]`` (``:997``).
 
 This is a transitive reduction, as in :doc:`releasing`: ``version_check`` and
 ``unit-tests`` are also direct ``needs:`` of ``tag`` and ``pypi``
-(``create-release.yml:619,784``) and of ``conda`` (``:997``), but ``github``
+(``create-release.yml:619,784``) and of ``conda`` (``:1026``), but ``github``
 already implies those edges, since it depends on both itself. Drawing them
 would add lines without changing which job can start before which, or which
 job a skip in ``version_check`` reaches.

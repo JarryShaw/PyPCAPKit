@@ -49,7 +49,7 @@ Editing ``__version__`` by hand without also moving :file:`CITATION.cff`'s
 subset an ordinary push runs (its ``gate`` job, ``unit-tests.yml:1645-1714``).
 That gate runs whenever a release will -- a moved ``__version__`` is exactly
 what makes ``version_check``'s evidence read "not yet published" -- and every
-publishing job requires it to have succeeded (``:434,619,784,997``), so a
+publishing job requires it to have succeeded (``:434,619,784,1026``), so a
 citation left behind fails the gate well before any approval is requested.
 Either run the script, or move both fields by hand in the same commit.
 
@@ -78,7 +78,7 @@ neither is a workaround for the other:
    of *that* tree (``:237``). Every downstream tag and release name is built
    from that output -- ``v${{ needs.version_check.outputs.PCAPKIT_VERSION }}``
    is ``github``'s ``tag_name`` at ``:530`` and the release ``pypi`` and
-   ``conda`` upload to at ``:924`` and ``:1254``, always from
+   ``conda`` upload to at ``:933`` and ``:1283``, always from
    ``PCAPKIT_VERSION``, never from ``github.ref_name`` -- so the version
    actually released is whatever ``__version__`` says on the tagged commit,
    not the name of the tag that was pushed. The two agree only if the tag
@@ -134,7 +134,7 @@ the default branch, and ``tag`` pulled ``main`` before tagging.
   with an ``::error`` instead of publishing a second tree under that version;
   a partial release is finished by re-running the run that tagged it.
 * ``pypi`` and ``conda`` attach their files with ``gh release upload``
-  (``:918-954``, ``:1249-1284``), not ``action-gh-release``, which calls Update
+  (``:926-963``, ``:1278-1313``), not ``action-gh-release``, which calls Update
   a release before every upload (3.0.2's ``src/github.ts:631-683``). A file
   the release already has is left alone
   (`#1640 <https://github.com/JarryShaw/PyPCAPKit/issues/1640>`__): the action
@@ -248,7 +248,7 @@ the release test gate, ask for a second approval and race the first run's
 uploads from another concurrency group, so ``version_check`` skips a ``push``
 whose ``github.actor_id`` is ``vars.RELEASE_APP_BOT_ID`` (``:210-212``), and
 ``release_status`` reports it with ``::notice title=Nothing to release``
-(``:1356-1358``). A tag pushed by a person runs as before. Whether a tag made
+(``:1385-1387``). A tag pushed by a person runs as before. Whether a tag made
 through the Releases API fires ``push``, and with the bot as actor, is
 unmeasured; if not, the guard never matches and the cost is one approval to
 reject.
@@ -392,7 +392,7 @@ removed on `#887 <https://github.com/JarryShaw/PyPCAPKit/issues/887>`__.
 What still makes one approval mean *the whole release* is the ``needs:``
 graph: ``tag`` and ``pypi`` both depend on ``github``
 (``.github/workflows/create-release.yml:619,784``), and ``conda`` depends on
-``tag`` and ``github`` (``:997``) -- so nothing downstream of ``github`` can
+``tag`` and ``github`` (``:1026``) -- so nothing downstream of ``github`` can
 start before it is approved, and rejecting it leaves nothing tagged and
 nothing published. Before this change ``tag`` depended on ``version_check``
 alone, so removing its reviewer without moving this dependency would have let
