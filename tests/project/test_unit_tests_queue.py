@@ -414,7 +414,7 @@ class TestEngineCellLoops(_Scratch):
         self.assertEqual(calls, ['3.11', '3.12', '3.13', '3.14', '3.15'])
 
     def test_a_failing_ktlo_cell_fails_its_own_step(self) -> None:
-        """The step is red; only its ``continue-on-error`` keeps the job green."""
+        """The step fails; its ``continue-on-error`` keeps the job green, its annotation is a warning (#1672)."""
         status, calls = self.run_loop('Run the 3.10 cell (KTLO, non-blocking)', fail='3.10')
         self.assertNotEqual(status, 0)
         self.assertEqual(calls, ['3.10'])

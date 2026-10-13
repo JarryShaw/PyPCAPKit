@@ -810,7 +810,11 @@ jobs:
         # and published but never blocking. Each step that can fail on one
         # carries `continue-on-error: ${{ matrix.ktlo == true }}`, the
         # step-level form, so ``needs.pypi.result`` cannot see it -- see the
-        # same choice in unit-tests.yml's ``test`` job.
+        # same choice in unit-tests.yml's ``test`` job. #1672: each step after
+        # setup-python waits on the ``outcome`` of the one it needs, so a KTLO
+        # leg stops at its first failure, where a supported leg stops, rather
+        # than building with the image's ``python`` or uploading nothing; and
+        # ``KTLO summary`` reports each failed step as a warning.
         include:
           - python-version: "3.10"
             ktlo: true
@@ -852,6 +856,7 @@ jobs:
 
       - name: Install and Setup
         id: install
+        if: ${{ steps.setup.outcome == 'success' }}
         continue-on-error: ${{ matrix.ktlo == true }}
         run: |
           set -x
@@ -861,6 +866,7 @@ jobs:
 
       - name: Build Package
         id: build
+        if: ${{ steps.install.outcome == 'success' }}
         continue-on-error: ${{ matrix.ktlo == true }}
         env:
           PCAPKIT_VERSION: ${{ needs.version_check.outputs.PCAPKIT_VERSION }}
@@ -872,13 +878,14 @@ jobs:
 
       - name: No Source Distribution for Python ${{ matrix.python-version }}
         id: no_sdist
-        if: ${{ matrix.python-version != '3.14' }}
+        if: ${{ matrix.python-version != '3.14' && steps.build.outcome == 'success' }}
         continue-on-error: ${{ matrix.ktlo == true }}
         run: |
           rm dist/*.tar.gz
 
       - name: Publish to PyPI
         id: publish
+        if: ${{ steps.build.outcome == 'success' && steps.no_sdist.outcome != 'failure' }}
         continue-on-error: ${{ matrix.ktlo == true }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
@@ -891,6 +898,7 @@ jobs:
       ## 1.5.0b2 Python 3.12 leg *after* PyPI had already accepted the upload,
       ## which skipped the GitHub Release step below and lost that wheel.
       - name: Publish package to TestPyPI
+        if: ${{ steps.publish.outcome == 'success' }}
         continue-on-error: true
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
@@ -917,6 +925,7 @@ jobs:
       # ``::error``, where it only warned. ``conda`` runs the same script.
       - name: Upload package to GitHub Release
         id: upload
+        if: ${{ steps.publish.outcome == 'success' }}
         continue-on-error: ${{ matrix.ktlo == true }}
         shell: bash
         env:
@@ -972,6 +981,26 @@ jobs:
           esac
           echo "ktlo_$(printf '%s' "$LEG" | tr -d '.')=$result" >> "$GITHUB_OUTPUT"
           echo "Python $LEG (KTLO, non-blocking): $result (step outcomes: $OUTCOMES)"
+
+      # #1672: the warning and job-summary line for each failed step, the same
+      # step as ends every KTLO leg in unit-tests.yml; see its ``test`` job.
+      - name: KTLO summary
+        if: ${{ !cancelled() && matrix.ktlo == true }}
+        continue-on-error: ${{ matrix.ktlo == true }}
+        shell: bash
+        env:
+          LEG: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}
+          STEPS: ${{ toJSON(steps) }}
+        run: |
+          failed=$(jq -r 'to_entries[] | select(.value.outcome == "failure") | .key' <<< "$STEPS")
+          if [ -z "$failed" ]; then
+            echo "$LEG: no step failed."
+            exit 0
+          fi
+          while IFS= read -r id; do
+            echo "::warning title=${id} failed on ${LEG//,/%2C}::KTLO legs never block (#1633), so this job still succeeds (#1672); see the ${id} step's log."
+            echo "- ${LEG}: step \`${id}\` failed; non-blocking, so this job still succeeds." >> "$GITHUB_STEP_SUMMARY"
+          done <<< "$failed"
 
   conda:
     name: Conda deployment (release) on ${{ matrix.os }} with Python ${{ matrix.python-version }}

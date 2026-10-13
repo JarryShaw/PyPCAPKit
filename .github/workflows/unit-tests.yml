@@ -52,6 +52,10 @@ jobs:
     needs: [changes]
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
     timeout-minutes: 45
+    # #1672: the level of every annotation a failing step writes -- a warning on
+    # a KTLO leg, which must not show red, an error on a supported one.
+    env:
+      ANNOTATION_LEVEL: ${{ matrix.ktlo && 'warning' || 'error' }}
     strategy:
       fail-fast: false
       matrix:
@@ -76,8 +80,9 @@ jobs:
           # `needs.test.result`, so a KTLO leg cannot fail the job: each step
           # that can fail on one carries `continue-on-error: ${{ matrix.ktlo
           # == true }}` instead -- the step-level form, whose effect on the job
-          # is documented, as for engine-tests' KTLO cell. A failure still shows
-          # as a red step and an error annotation. 3.8 and 3.9 need
+          # is documented, as for engine-tests' KTLO cell. The leg concludes
+          # success, and the job's last step, `KTLO summary`, reports each
+          # failed step as a warning (#1672). 3.8 and 3.9 need
           # ubuntu-24.04: setup-python has no Ubuntu 26.04 build of either, and
           # `ubuntu-latest` moves to 26.04 from 2026-10-19.
           #
@@ -103,6 +108,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+        id: checkout
+        continue-on-error: ${{ matrix.ktlo == true }}
 
       - uses: actions/setup-python@v7
         id: python
@@ -147,7 +154,8 @@ jobs:
       # needs `steps.install.outcome == 'success'`, so it is skipped rather
       # than failing against a missing package. The install needs its own
       # interpreter: if setup-python failed, the image's `python` would be
-      # tested under this leg's name. On a supported leg either fails the job.
+      # tested under this leg's name. On a supported leg either fails the job;
+      # on a KTLO leg the annotation is a warning (#1672).
       - name: Install package and test dependencies
         id: install
         if: ${{ steps.python.outcome == 'success' }}
@@ -160,7 +168,7 @@ jobs:
           if ! python -m pip install -e '.[test,DPKT,crypto,NGAP]' 2>&1 | tee "$RUNNER_TEMP/pip-install.log"; then
             reason=$(sed -n 's/^ERROR: //p' "$RUNNER_TEMP/pip-install.log" | tail -n 1)
             if [ -z "$reason" ]; then reason="pip failed without an ERROR line; see this step's log"; fi
-            echo "::error title=pcapkit did not install on ${LEG//,/%2C}::${reason//%/%25}. The rest of this leg is skipped."
+            echo "::${ANNOTATION_LEVEL} title=pcapkit did not install on ${LEG//,/%2C}::${reason//%/%25}. The rest of this leg is skipped."
             exit 1
           fi
 
@@ -174,6 +182,7 @@ jobs:
       # the log says what that was -- print it so the number `-n auto` picked
       # is a measured fact instead of an assumption about runner size.
       - name: Report available parallelism
+        id: parallelism
         if: ${{ steps.install.outcome == 'success' }}
         continue-on-error: ${{ matrix.ktlo == true }}
         run: |
@@ -335,12 +344,46 @@ jobs:
           path: ${{ runner.temp }}/junit.xml
           retention-days: 14
 
+      # #1672: the KTLO leg's report, and the last step of every KTLO matrix
+      # job, in one script. Each step above that can fail on a KTLO leg has an
+      # `id` and `continue-on-error: ${{ matrix.ktlo == true }}`, so its failure
+      # leaves the job, and `required-checks`, at success. This step makes the
+      # failure visible again: one warning and one job-summary line per failed
+      # step. `toJSON(steps)` holds each step above with an `id`, and its
+      # `outcome` is the result before `continue-on-error` applied. jq is on
+      # every Ubuntu runner image. A step masked on every leg, as the timings
+      # upload is, is not KTLO's to report. Not removable here: the error the
+      # runner itself records for a failed `run:` step, `Process completed with
+      # exit code N.`, whatever its `continue-on-error` (actions/runner
+      # src/Runner.Worker/Handlers/ScriptHandler.cs:354, at 5f0b3ddcc), and an
+      # action's own error. Neither changes the job's conclusion.
+      - name: KTLO summary
+        if: ${{ !cancelled() && matrix.ktlo == true }}
+        continue-on-error: ${{ matrix.ktlo == true }}
+        shell: bash
+        env:
+          LEG: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}
+          STEPS: ${{ toJSON(steps) }}
+        run: |
+          failed=$(jq -r 'to_entries[] | select(.value.outcome == "failure") | .key' <<< "$STEPS")
+          if [ -z "$failed" ]; then
+            echo "$LEG: no step failed."
+            exit 0
+          fi
+          while IFS= read -r id; do
+            echo "::warning title=${id} failed on ${LEG//,/%2C}::KTLO legs never block (#1633), so this job still succeeds (#1672); see the ${id} step's log."
+            echo "- ${LEG}: step \`${id}\` failed; non-blocking, so this job still succeeds." >> "$GITHUB_STEP_SUMMARY"
+          done <<< "$failed"
+
   integration:
     name: Integration Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}
     if: ${{ inputs.gate-only != true && needs.changes.outputs.code != 'false' }}
     needs: [changes]
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
     timeout-minutes: 45
+    # See the `test` job above.
+    env:
+      ANNOTATION_LEVEL: ${{ matrix.ktlo && 'warning' || 'error' }}
     strategy:
       fail-fast: false
       matrix:
@@ -366,6 +409,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+        id: checkout
+        continue-on-error: ${{ matrix.ktlo == true }}
 
       - uses: actions/setup-python@v7
         id: python
@@ -410,13 +455,14 @@ jobs:
           if ! python -m pip install -e '.[test,Scapy,DPKT,cli]' 2>&1 | tee "$RUNNER_TEMP/pip-install.log"; then
             reason=$(sed -n 's/^ERROR: //p' "$RUNNER_TEMP/pip-install.log" | tail -n 1)
             if [ -z "$reason" ]; then reason="pip failed without an ERROR line; see this step's log"; fi
-            echo "::error title=pcapkit did not install on ${LEG//,/%2C}::${reason//%/%25}. The rest of this leg is skipped."
+            echo "::${ANNOTATION_LEVEL} title=pcapkit did not install on ${LEG//,/%2C}::${reason//%/%25}. The rest of this leg is skipped."
             exit 1
           fi
 
       # `shell: bash` rather than the default, because it runs with -o pipefail:
       # without it the `tee` below would swallow the generator's exit status.
       - name: Regenerate sample captures
+        id: samples
         if: ${{ steps.install.outcome == 'success' }}
         continue-on-error: ${{ matrix.ktlo == true }}
         shell: bash
@@ -425,7 +471,7 @@ jobs:
           # be built, so no test has run yet and nothing is wrong with the code
           # under test.
           if ! python examples/generators/make_samples.py 2>&1 | tee "$RUNNER_TEMP/make-samples.log"; then
-            echo "::error title=Sample fixture generation failed::examples/generators/make_samples.py could not rebuild examples/captures/. This is a fixture-generation failure, not a test failure -- the test suite has not run."
+            echo "::${ANNOTATION_LEVEL} title=Sample fixture generation failed::examples/generators/make_samples.py could not rebuild examples/captures/. This is a fixture-generation failure, not a test failure -- the test suite has not run."
             exit 1
           fi
 
@@ -443,6 +489,7 @@ jobs:
 
       # See the `test` job above for why this step exists.
       - name: Report available parallelism
+        id: parallelism
         if: ${{ steps.install.outcome == 'success' }}
         continue-on-error: ${{ matrix.ktlo == true }}
         run: |
@@ -467,16 +514,17 @@ jobs:
       # say so. `--dist load` is pinned explicitly; see the `test` job above
       # for why.
       - name: Run full test suite
+        id: suite
         if: ${{ steps.install.outcome == 'success' }}
         continue-on-error: ${{ matrix.ktlo == true }}
         shell: bash
         run: |
           if ! selection=$(python -c "from tests._tiers import fixture_tier_paths; print(' '.join(fixture_tier_paths()))"); then
-            echo "::error title=Could not compute the fixture-tier selection::tests._tiers.fixture_tier_paths() failed -- see the traceback above. Refusing to fall back to a bare 'pytest -q', which would silently re-run the entire suite instead of failing loudly."
+            echo "::${ANNOTATION_LEVEL} title=Could not compute the fixture-tier selection::tests._tiers.fixture_tier_paths() failed -- see the traceback above. Refusing to fall back to a bare 'pytest -q', which would silently re-run the entire suite instead of failing loudly."
             exit 1
           fi
           if [ -z "$selection" ]; then
-            echo "::error title=Fixture-tier selection is empty::tests._tiers.fixture_tier_paths() returned nothing, which cannot be right -- tests/integration alone should always be part of it. Refusing to run pytest with no arguments."
+            echo "::${ANNOTATION_LEVEL} title=Fixture-tier selection is empty::tests._tiers.fixture_tier_paths() returned nothing, which cannot be right -- tests/integration alone should always be part of it. Refusing to run pytest with no arguments."
             exit 1
           fi
           echo "Fixture-dependent selection: $selection"
@@ -492,6 +540,25 @@ jobs:
           name: junit-integration-${{ matrix.python-version }}
           path: ${{ runner.temp }}/junit.xml
           retention-days: 14
+
+      # #1672: see the `test` job's step of the same name.
+      - name: KTLO summary
+        if: ${{ !cancelled() && matrix.ktlo == true }}
+        continue-on-error: ${{ matrix.ktlo == true }}
+        shell: bash
+        env:
+          LEG: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}
+          STEPS: ${{ toJSON(steps) }}
+        run: |
+          failed=$(jq -r 'to_entries[] | select(.value.outcome == "failure") | .key' <<< "$STEPS")
+          if [ -z "$failed" ]; then
+            echo "$LEG: no step failed."
+            exit 0
+          fi
+          while IFS= read -r id; do
+            echo "::warning title=${id} failed on ${LEG//,/%2C}::KTLO legs never block (#1633), so this job still succeeds (#1672); see the ${id} step's log."
+            echo "- ${LEG}: step \`${id}\` failed; non-blocking, so this job still succeeds." >> "$GITHUB_STEP_SUMMARY"
+          done <<< "$failed"
 
   # Per-engine coverage for the third-party capture engines (#845): every
   # (Python version, engine) pair is checked, and a failure -- or a correctly
@@ -546,8 +613,8 @@ jobs:
   # share one step, and any one of them failing fails the job. 3.10 is KTLO:
   # end-of-life, still tested on every run, never blocking. It is its own step
   # with step-level `continue-on-error: true` -- the treatment #845 gave the
-  # then-prerelease 3.15 cell -- so a 3.10 failure shows as a failed step and an
-  # error annotation while the job, and `required-checks`, which reads its
+  # then-prerelease 3.15 cell -- so a 3.10 failure is reported as warnings and a
+  # job-summary row (#1672) while the job, and `required-checks`, which reads its
   # result, stay green. 3.7-3.9 are not cells here: setup-python has no
   # Ubuntu 26.04 build of any of them, and this job installs every interpreter
   # on `ubuntu-latest`; PCAP_CT's extra is also `>= '3.10'`.
@@ -824,7 +891,7 @@ jobs:
             PyPCAPFile) EXTRA=PyPCAPFile; RAW_PKGS=(pypcapfile); IMPORT_NAME=pcapfile ;;
             PyPCAP) EXTRA=PyPCAP; RAW_PKGS=(pypcap); IMPORT_NAME=pcap ;;
             PCAP_CT) EXTRA=PCAP_CT; RAW_PKGS=(pcap-ct libpcap); IMPORT_NAME=pcap ;;
-            *) echo "::error::unknown engine $ENGINE"; exit 1 ;;
+            *) echo "::${ANNOTATION_LEVEL}::unknown engine $ENGINE"; exit 1 ;;
           esac
 
           set +e
@@ -838,11 +905,11 @@ jobs:
           echo "$output"
 
           if [ "$status" -ne 0 ] && [ "$EXPECT" != "not-installable" ]; then
-            echo "::error title=$ENGINE failed to install on Python $PY::This cell expects '$EXPECT', which requires a successful install. pip exited $status."
+            echo "::${ANNOTATION_LEVEL} title=$ENGINE failed to install on Python $PY::This cell expects '$EXPECT', which requires a successful install. pip exited $status."
             exit 1
           fi
           if [ "$status" -eq 0 ] && [ "$EXPECT" = "not-installable" ]; then
-            echo "::error title=$ENGINE now installs on Python $PY::This cell is recorded as not-installable in this job's expect case (and in pyproject.toml's marker for $ENGINE). It installed cleanly -- update both rather than leaving this green for the wrong reason."
+            echo "::${ANNOTATION_LEVEL} title=$ENGINE now installs on Python $PY::This cell is recorded as not-installable in this job's expect case (and in pyproject.toml's marker for $ENGINE). It installed cleanly -- update both rather than leaving this green for the wrong reason."
             exit 1
           fi
           if [ "$status" -ne 0 ]; then
@@ -857,7 +924,7 @@ jobs:
                  'read timed out|connection (reset|refused|aborted)|temporary failure in name resolution|max retries exceeded|could not fetch url|newconnectionerror|readtimeouterror|httpsconnectionpool|retrying \(retry\(|http error (5[0-9][0-9]|429)|status code 429|too many 429 error responses|no matching distribution found' \
                && ! echo "$output" | grep -qiE \
                  'failed building wheel|error: command .* failed with exit code|subprocess-exited-with-error'; then
-              echo "::error title=$ENGINE's install failure on Python $PY looks transient%2C not a compile failure::pip exited $status, but the output matches a network/index failure pattern rather than the C-API compile failure this cell records as expected. Re-run the job rather than trusting this as a genuine 'not-installable' result."
+              echo "::${ANNOTATION_LEVEL} title=$ENGINE's install failure on Python $PY looks transient%2C not a compile failure::pip exited $status, but the output matches a network/index failure pattern rather than the C-API compile failure this cell records as expected. Re-run the job rather than trusting this as a genuine 'not-installable' result."
               exit 1
             fi
             echo "::notice title=$ENGINE is not installable on Python $PY (expected)::pip exited $status, matching this cell's recorded expectation ('not-installable'), and the output does not match a transient-failure pattern. No tests run for this cell -- this is a deliberate skip, not a pass."
@@ -869,7 +936,7 @@ jobs:
           # still exits 0 and every test would then skip, so require the
           # module this cell exists to exercise.
           if ! python -c "import $IMPORT_NAME" 2>/dev/null; then
-            echo "::error title=$ENGINE installed but $IMPORT_NAME does not import on Python $PY::pip exited 0 but the module this cell exists to exercise is not importable -- a green install that unlocked nothing."
+            echo "::${ANNOTATION_LEVEL} title=$ENGINE installed but $IMPORT_NAME does not import on Python $PY::pip exited 0 but the module this cell exists to exercise is not importable -- a green install that unlocked nothing."
             exit 1
           fi
 
@@ -883,7 +950,7 @@ jobs:
           echo "Running: $TEST_PATHS"
           # shellcheck disable=SC2086
           if ! python -m pytest -q -n auto --dist load $TEST_PATHS; then
-            echo "::error title=$ENGINE tests failed on Python $PY::See the 'Python $PY ($ENGINE)' group in this step's log."
+            echo "::${ANNOTATION_LEVEL} title=$ENGINE tests failed on Python $PY::See the 'Python $PY ($ENGINE)' group in this step's log."
             exit 1
           fi
           echo "| $PY | $ENGINE | $EXPECT | passed |" >> "$GITHUB_STEP_SUMMARY"
@@ -902,9 +969,12 @@ jobs:
           python -c "import os; print('cpu_count', os.cpu_count())"
 
       # Every cell runs even after one fails, so one red run reports all of
-      # them; the step fails at the end if any did.
+      # them; the step fails at the end if any did. ANNOTATION_LEVEL is the
+      # level of the cell script's annotations (#1672).
       - name: Run the 3.11-3.15 cells
         shell: bash
+        env:
+          ANNOTATION_LEVEL: error
         run: |
           failed=()
           for py in 3.11 3.12 3.13 3.14 3.15; do
@@ -921,16 +991,21 @@ jobs:
           fi
 
       # KTLO, non-blocking (#1633) -- see this job's comment. Runs on every event,
-      # as the 3.10 cell did while it was supported.
+      # as the 3.10 cell did while it was supported. #1672: this step is the
+      # KTLO cell's report, as `KTLO summary` is a KTLO leg's in the matrix jobs.
+      # A failure is a job-summary row and warnings, the cell's own included,
+      # and an interpreter the setup step above could not install fails here.
       - name: Run the 3.10 cell (KTLO, non-blocking)
         shell: bash
         continue-on-error: true
+        env:
+          ANNOTATION_LEVEL: warning
         run: |
           echo "::group::Python 3.10 ($ENGINE)"
           if ! bash "$RUNNER_TEMP/engine-cell.sh" 3.10; then
             echo "| 3.10 | $ENGINE | | FAILED (KTLO, non-blocking) |" >> "$GITHUB_STEP_SUMMARY"
             echo "::endgroup::"
-            echo "::error title=$ENGINE failed on Python 3.10 (KTLO%2C non-blocking)::3.10 is end-of-life and KTLO per #1633; this does not fail the job."
+            echo "::warning title=$ENGINE failed on Python 3.10 (KTLO%2C non-blocking)::3.10 is end-of-life and KTLO per #1633; this does not fail the job."
             exit 1
           fi
           echo "::endgroup::"
@@ -980,6 +1055,8 @@ jobs:
       # or the other's save fails with `Unable to reserve cache`. The supported
       # leg, so the cache does not depend on a leg that may not get that far.
       APT_CACHE_SAVE: ${{ matrix.python-version == '3.11' }}
+      # See the `test` job above.
+      ANNOTATION_LEVEL: ${{ matrix.ktlo && 'warning' || 'error' }}
     strategy:
       fail-fast: false
       matrix:
@@ -992,8 +1069,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+        id: checkout
+        continue-on-error: ${{ matrix.ktlo == true }}
 
       - uses: actions/setup-python@v7
+        id: python
         continue-on-error: ${{ matrix.ktlo == true }}
         with:
           python-version: ${{ matrix.python-version }}
@@ -1060,6 +1140,7 @@ jobs:
           restore-keys: ${{ steps.apt-plan.outputs.restore-prefix }}
 
       - name: Seed apt's archive with the cached .deb files
+        id: apt-seed
         if: steps.apt-cache.outputs.cache-matched-key != ''
         continue-on-error: ${{ matrix.ktlo == true }}
         run: |
@@ -1068,6 +1149,7 @@ jobs:
           echo "Seeded $(find "$RUNNER_TEMP/apt-debs" -name '*.deb' | wc -l) .deb files"
 
       - name: Install libpcap headers, a C toolchain, and tshark
+        id: apt-install
         continue-on-error: ${{ matrix.ktlo == true }}
         timeout-minutes: 10
         run: |
@@ -1119,7 +1201,12 @@ jobs:
           path: ${{ runner.temp }}/apt-debs/*.deb
           key: ${{ steps.apt-plan.outputs.key }}
 
+      # As in the `test` job (#1672): the install needs this leg's interpreter,
+      # and the steps after it need the install, so a KTLO leg whose setup or
+      # install failed stops there instead of testing the image's `python`.
       - name: Install package, test and generator dependencies
+        id: install
+        if: ${{ steps.python.outcome == 'success' }}
         continue-on-error: ${{ matrix.ktlo == true }}
         run: |
           python -m pip install -U pip setuptools wheel
@@ -1128,11 +1215,13 @@ jobs:
       # See the `integration` job above for why this step is shaped the way it
       # is.
       - name: Regenerate sample captures
+        id: samples
+        if: ${{ steps.install.outcome == 'success' }}
         continue-on-error: ${{ matrix.ktlo == true }}
         shell: bash
         run: |
           if ! python examples/generators/make_samples.py 2>&1 | tee "$RUNNER_TEMP/make-samples.log"; then
-            echo "::error title=Sample fixture generation failed::examples/generators/make_samples.py could not rebuild examples/captures/. This is a fixture-generation failure, not a test failure -- the test suite has not run."
+            echo "::${ANNOTATION_LEVEL} title=Sample fixture generation failed::examples/generators/make_samples.py could not rebuild examples/captures/. This is a fixture-generation failure, not a test failure -- the test suite has not run."
             exit 1
           fi
 
@@ -1145,6 +1234,8 @@ jobs:
 
       # See the `test` job above for why this step exists.
       - name: Report available parallelism
+        id: parallelism
+        if: ${{ steps.install.outcome == 'success' }}
         continue-on-error: ${{ matrix.ktlo == true }}
         run: |
           nproc
@@ -1153,19 +1244,40 @@ jobs:
       # See the `integration` job above for why this is asked of
       # tests/_tiers.py directly rather than spelled out as literal flags.
       - name: Run full test suite
+        id: suite
+        if: ${{ steps.install.outcome == 'success' }}
         continue-on-error: ${{ matrix.ktlo == true }}
         shell: bash
         run: |
           if ! selection=$(python -c "from tests._tiers import fixture_tier_paths; print(' '.join(fixture_tier_paths()))"); then
-            echo "::error title=Could not compute the fixture-tier selection::tests._tiers.fixture_tier_paths() failed -- see the traceback above. Refusing to fall back to a bare 'pytest -q', which would silently re-run the entire suite instead of failing loudly."
+            echo "::${ANNOTATION_LEVEL} title=Could not compute the fixture-tier selection::tests._tiers.fixture_tier_paths() failed -- see the traceback above. Refusing to fall back to a bare 'pytest -q', which would silently re-run the entire suite instead of failing loudly."
             exit 1
           fi
           if [ -z "$selection" ]; then
-            echo "::error title=Fixture-tier selection is empty::tests._tiers.fixture_tier_paths() returned nothing, which cannot be right -- tests/integration alone should always be part of it. Refusing to run pytest with no arguments."
+            echo "::${ANNOTATION_LEVEL} title=Fixture-tier selection is empty::tests._tiers.fixture_tier_paths() returned nothing, which cannot be right -- tests/integration alone should always be part of it. Refusing to run pytest with no arguments."
             exit 1
           fi
           echo "Fixture-dependent selection: $selection"
           python -m pytest -q -n auto --dist load $selection
+
+      # #1672: see the `test` job's step of the same name.
+      - name: KTLO summary
+        if: ${{ !cancelled() && matrix.ktlo == true }}
+        continue-on-error: ${{ matrix.ktlo == true }}
+        shell: bash
+        env:
+          LEG: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}
+          STEPS: ${{ toJSON(steps) }}
+        run: |
+          failed=$(jq -r 'to_entries[] | select(.value.outcome == "failure") | .key' <<< "$STEPS")
+          if [ -z "$failed" ]; then
+            echo "$LEG: no step failed."
+            exit 0
+          fi
+          while IFS= read -r id; do
+            echo "::warning title=${id} failed on ${LEG//,/%2C}::KTLO legs never block (#1633), so this job still succeeds (#1672); see the ${id} step's log."
+            echo "- ${LEG}: step \`${id}\` failed; non-blocking, so this job still succeeds." >> "$GITHUB_STEP_SUMMARY"
+          done <<< "$failed"
 
   # GitHub issue #981: two test modules
   # (tests/protocols/application/test_http_unit.py and

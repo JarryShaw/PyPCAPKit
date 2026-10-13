@@ -19,15 +19,17 @@ job-level one); a compatibility leg must never carry a required context's name;
 and PyPI's completeness evidence must not count a KTLO wheel, or one failed KTLO
 leg would leave every later release run retrying it. The release-side checks
 execute the workflow's own shell, stubbing only ``curl``. The last class reads
-the prose that states the tiers back against the matrices.
+the prose that states the tiers back against the matrices. #1672 later made
+every KTLO leg conclude ``success``, Compat's included, and report a failed step
+as a warning; :mod:`tests.project.test_ktlo_legs_stay_green_1672` pins that.
 
 3.7 joined the tier afterwards, at the owner's request, and cannot install or
 import pcapkit: the ``test`` extra's ``pytest>=8`` needs 3.8, and the sources use
-3.8 syntax. So each of its legs fails a step by design -- only Compat's shows red,
-its ``continue-on-error`` being job-level -- and :class:`TestPython37IsKTLO` pins
-that they fail fast and say why -- the install and verify steps are executed with
-``python`` stubbed, and each annotation is parsed as the runner parses it. 3.6
-stays out: setup-python builds it only for retired images.
+3.8 syntax. So each of its legs fails a step by design, and
+:class:`TestPython37IsKTLO` pins that they fail fast and say why, at warning level
+-- the install and verify steps are executed with ``python`` stubbed, and each
+annotation is parsed as the runner parses it. 3.6 stays out: setup-python builds
+it only for retired images.
 
 """
 
@@ -56,8 +58,10 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 WORKFLOWS = ROOT / '.github' / 'workflows'
 
 SUPPORTED = ('3.11', '3.12', '3.13', '3.14', '3.15')
-#: The step-level guard every failure-prone step of an aggregated job carries.
+#: The step-level guard every failure-prone step of a KTLO leg's job carries.
 KTLO_GUARD = '${{ matrix.ktlo == true }}'
+#: The job-level level of every annotation a failing step writes (#1672).
+ANNOTATION_LEVEL = "${{ matrix.ktlo && 'warning' || 'error' }}"
 #: Ruleset 23497679's required contexts once the owner applies #1633's edit.
 REQUIRED = frozenset({'Required checks passed'} | {f'Compat Python {v}' for v in SUPPORTED})
 
@@ -114,9 +118,19 @@ RETIRED_CLAIMS = re.compile('|'.join((
     r'3\.8, 3\.9 and 3\.10 are end-of-life',
     r"CI's range starts at 3\.8",
     r'oldest tested leg is ``Python 3\.8',
-    # Only Compat's 3.7 leg shows red; step-level ``continue-on-error`` leaves
-    # the ``test`` and ``integration`` legs concluding ``success``.
     r"3\.7's legs are red by design",
+    # #1672: no KTLO leg shows red, Compat's included, and a failed KTLO step's
+    # own annotation is a warning.
+    r'3\.7 is red by design',
+    r'a failed leg shows red without failing the run',
+    r'it shows red, and the run stays green',
+    r'Only the ``Compat`` leg shows red',
+    r'only Compat.s shows red',
+    r'may stay red without blocking',
+    r'shows as a red step and an error annotation',
+    r'shows as a failed step and an error annotation',
+    r'with one error annotation saying why',
+    r'a KTLO leg carries job-level',
 )))
 #: Where :data:`RETIRED_CLAIMS` is looked for, as (directory, globs), plus root files.
 #: The changelog is history and is left out.
@@ -193,7 +207,8 @@ class TestTheSupportedTierBlocks(unittest.TestCase):
                 spec = job(name, job_id)
                 versions = sorted({leg['python-version'] for leg in legs(spec) if not is_ktlo(leg)})
                 self.assertEqual(versions, sorted(blocking))
-                self.assertIn(spec.get('continue-on-error', False), (False, KTLO_GUARD))
+                # #1672: not even KTLO-only; job-level, a failed leg's check run is red.
+                self.assertNotIn('continue-on-error', spec)
 
     def test_engine_tests_runs_every_supported_cell_in_its_blocking_step(self) -> None:
         steps = job('unit-tests.yml', 'engine-tests')['steps']
@@ -250,12 +265,10 @@ class TestTheKTLOTierNeverBlocks(unittest.TestCase):
                 self.assertNotIn('continue-on-error', spec)
             for step in spec['steps']:
                 label = step.get('name') or step.get('uses')
-                if str(step.get('uses', '')).startswith('actions/checkout@'):
-                    continue
                 condition = str(step.get('if', ''))
                 if 'matrix.coverage' in condition or 'APT_CACHE_SAVE' in condition:
                     continue  # only ever on a supported leg: the coverage one, the cache saver
-                if label == "Check the release tags name this run's commit":
+                if label in ('Checkout code', "Check the release tags name this run's commit"):
                     continue  # #1634: blocks every leg alike, pinned in its own test module
                 with self.subTest(workflow=name, job=job_id, step=label):
                     self.assertIn(step.get('continue-on-error'), (True, KTLO_GUARD))
@@ -268,11 +281,6 @@ class TestTheKTLOTierNeverBlocks(unittest.TestCase):
         cell = next(step for step in steps if step.get('name') == 'Run the 3.10 cell (KTLO, non-blocking)')
         self.assertIs(cell.get('continue-on-error'), True)
         self.assertIn('engine-cell.sh" 3.10', cell['run'])
-
-    def test_a_compatibility_ktlo_leg_shows_red_without_failing_the_run(self) -> None:
-        """No aggregate reads this job, so job-level ``continue-on-error`` is the right form."""
-        spec = job('python-compatibility.yml', 'compatibility')
-        self.assertEqual(spec.get('continue-on-error'), KTLO_GUARD)
 
     def test_no_ktlo_leg_is_a_required_context(self) -> None:
         spec = job('python-compatibility.yml', 'compatibility')
@@ -420,6 +428,15 @@ PIP_37 = ('INFO: pip is looking at multiple versions of pypcapkit[crypto,dpkt,ng
 LEG_37 = 'Python 3.7 (KTLO, non-blocking)'
 #: :data:`LEG_37` as a ``title=`` property must carry it: ``,`` escaped (see :func:`runner_parse`).
 TITLE_37 = 'Python 3.7 (KTLO%2C non-blocking)'
+#: The 3.7 leg's matrix entry, and a supported leg's, as :meth:`TestPython37IsKTLO.run_step` takes them.
+KTLO_37 = {'python-version': '3.7', 'ktlo': True}
+SUPPORTED_312 = {'python-version': '3.12'}
+#: Every KTLO leg's install step, as (workflow, job, step): it needs setup-python's ``python`` (#1672).
+INSTALLS = (
+    LEGACY_37[0], LEGACY_37[1],
+    ('unit-tests.yml', 'pypcap-parity', 'Install package, test and generator dependencies'),
+    ('python-compatibility.yml', 'compatibility', 'Install package'),
+)
 
 
 def workflow_commands(output: 'str') -> 'list[str]':
@@ -472,7 +489,7 @@ def titles(output: 'str') -> 'list[str]':
 
 
 class TestPython37IsKTLO(unittest.TestCase):
-    """3.7 runs, non-blocking, and stops at the first failure with one annotation."""
+    """3.7 runs, non-blocking, and stops at the first failure with one warning."""
 
     def setUp(self) -> None:
         if shutil.which('bash') is None:  # pragma: no cover
@@ -482,12 +499,23 @@ class TestPython37IsKTLO(unittest.TestCase):
         self.tmp = pathlib.Path(tmp.name)
 
     def run_step(self, name: 'str', job_id: 'str', step_name: 'str', stub: 'str',
-                 env: 'dict[str, str]') -> 'subprocess.CompletedProcess[str]':
-        """Step ``step_name`` under ``shell: bash`` (``-eo pipefail``), ``python`` stubbed."""
-        step = next(step for step in job(name, job_id)['steps'] if step.get('name') == step_name)
+                 env: 'dict[str, str]', leg: 'Optional[dict[str, Any]]' = None,
+                 ) -> 'subprocess.CompletedProcess[str]':
+        """Step ``step_name`` on ``leg`` (3.7's by default) under ``shell: bash``, ``python`` stubbed.
+
+        ``LEG`` and the job's ``ANNOTATION_LEVEL`` get the values their expressions
+        take on that leg, and ``-eo pipefail`` is what ``shell: bash`` runs.
+
+        """
+        leg = KTLO_37 if leg is None else leg
+        spec = job(name, job_id)
+        step = next(step for step in spec['steps'] if step.get('name') == step_name)
         self.assertEqual(step.get('shell'), 'bash', 'pipefail is what keeps `tee` from hiding a failure')
         self.assertEqual(step['env']['LEG'], "Python ${{ matrix.python-version }}"
                                              "${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}")
+        self.assertEqual(spec['env']['ANNOTATION_LEVEL'], ANNOTATION_LEVEL)
+        env = dict(env, LEG=f"Python {leg['python-version']}{' (KTLO, non-blocking)' if is_ktlo(leg) else ''}",
+                   ANNOTATION_LEVEL='warning' if is_ktlo(leg) else 'error')
         bin_dir = self.tmp / 'bin'
         bin_dir.mkdir(exist_ok=True)
         python = bin_dir / 'python'
@@ -495,7 +523,7 @@ class TestPython37IsKTLO(unittest.TestCase):
         python.chmod(0o755)
         return subprocess.run(['bash', '--noprofile', '--norc', '-eo', 'pipefail', '-c', step['run']],
                               env=dict(os.environ, PATH=f'{bin_dir}{os.pathsep}{os.environ["PATH"]}',
-                                       RUNNER_TEMP=str(self.tmp), LEG=LEG_37, **env),
+                                       RUNNER_TEMP=str(self.tmp), **env),
                               capture_output=True, text=True, check=False, timeout=60)
 
     def test_37_is_a_ktlo_leg_of_exactly_the_three_test_matrices(self) -> None:
@@ -518,10 +546,12 @@ class TestPython37IsKTLO(unittest.TestCase):
         """The install needs setup-python's interpreter, and every later step needs the install.
 
         ``outcome``, not ``conclusion``: ``continue-on-error`` turns a failed step's
-        conclusion into ``success``, so only its outcome still says it failed.
+        conclusion into ``success``, so only its outcome still says it failed. #1672
+        brought Compat and ``pypcap-parity`` in; ``KTLO summary`` is the one step
+        that has to run after a failed install, to report it.
 
         """
-        for name, job_id, install in LEGACY_37[:2]:
+        for name, job_id, install in INSTALLS:
             steps = job(name, job_id)['steps']
             setup = next(step for step in steps if str(step.get('uses', '')).startswith('actions/setup-python@'))
             index = next(i for i, step in enumerate(steps) if step.get('name') == install)
@@ -533,6 +563,8 @@ class TestPython37IsKTLO(unittest.TestCase):
                 condition = str(step.get('if', ''))
                 if 'matrix.coverage' in condition:
                     continue  # the 3.14 leg only, which a failed install fails anyway
+                if step.get('name') == 'KTLO summary':
+                    continue
                 with self.subTest(workflow=name, job=job_id, step=step.get('name') or step.get('uses')):
                     self.assertIn("steps.install.outcome == 'success'", condition)
 
@@ -542,7 +574,7 @@ class TestPython37IsKTLO(unittest.TestCase):
                 result = self.run_step(name, job_id, install, PIP_STUB, {'PIP_OUTPUT': PIP_37, 'PIP_STATUS': '1'})
                 self.assertNotEqual(result.returncode, 0)
                 self.assertEqual(workflow_commands(result.stdout + result.stderr), [
-                    f'::error title=pcapkit did not install on {TITLE_37}::No matching distribution found '
+                    f'::warning title=pcapkit did not install on {TITLE_37}::No matching distribution found '
                     'for pytest>=8; extra == "test". The rest of this leg is skipped.'])
                 self.assertEqual(titles(result.stdout), [f'pcapkit did not install on {LEG_37}'])
                 self.assertEqual((self.tmp / 'pip-install.log').read_text(encoding='utf-8'), PIP_37 + '\n')
@@ -555,7 +587,8 @@ class TestPython37IsKTLO(unittest.TestCase):
                                        {'PIP_OUTPUT': output, 'PIP_STATUS': '1'})
                 self.assertNotEqual(result.returncode, 0)
                 self.assertEqual(workflow_commands(result.stdout), [
-                    f'::error title=pcapkit did not install on {TITLE_37}::{reason}. The rest of this leg is skipped.'])
+                    f'::warning title=pcapkit did not install on {TITLE_37}::{reason}. '
+                    'The rest of this leg is skipped.'])
 
     def test_a_clean_install_passes_without_an_annotation(self) -> None:
         for name, job_id, install in LEGACY_37[:2]:
@@ -568,10 +601,10 @@ class TestPython37IsKTLO(unittest.TestCase):
     def test_the_compatibility_leg_names_its_first_compile_error(self) -> None:
         cases = (
             ({'COMPILE_OUTPUT': COMPILE_37, 'COMPILE_STATUS': '1', 'IMPORT_STATUS': '0'},
-             [f'::error title=pcapkit does not compile on {TITLE_37}::2 modules fail to compile, the first at '
+             [f'::warning title=pcapkit does not compile on {TITLE_37}::2 modules fail to compile, the first at '
               'File "pcapkit/const/ftp/command.py", line 286; see this step\'s log.']),
             ({'COMPILE_OUTPUT': '', 'COMPILE_STATUS': '0', 'IMPORT_STATUS': '1'},
-             [f"::error title=pcapkit does not import on {TITLE_37}::See the traceback in this step's log."]),
+             [f"::warning title=pcapkit does not import on {TITLE_37}::See the traceback in this step's log."]),
             ({'COMPILE_OUTPUT': '', 'COMPILE_STATUS': '0', 'IMPORT_STATUS': '0'}, []),
         )  # type: tuple[tuple[dict[str, str], list[str]], ...]
         for env, expected in cases:
@@ -585,11 +618,27 @@ class TestPython37IsKTLO(unittest.TestCase):
                 if env['COMPILE_STATUS'] != '0':
                     self.assertIn('SyntaxError: invalid syntax', result.stdout)
 
+    def test_a_supported_leg_fails_the_same_steps_at_error_level(self) -> None:
+        """#1672 changed the KTLO level only: on 3.12 each of these still fails as an ``::error``."""
+        cases = [(name, job_id, install, PIP_STUB, {'PIP_OUTPUT': PIP_37, 'PIP_STATUS': '1'},
+                  '::error title=pcapkit did not install on Python 3.12::No matching distribution found '
+                  'for pytest>=8; extra == "test". The rest of this leg is skipped.')
+                 for name, job_id, install in LEGACY_37[:2]]
+        cases.append(('python-compatibility.yml', 'compatibility', 'Verify package', VERIFY_STUB,
+                      {'COMPILE_OUTPUT': '', 'COMPILE_STATUS': '0', 'IMPORT_STATUS': '1'},
+                      "::error title=pcapkit does not import on Python 3.12::See the traceback in this step's log."))
+        for name, job_id, step_name, stub, env, expected in cases:
+            with self.subTest(workflow=name, job=job_id):
+                result = self.run_step(name, job_id, step_name, stub, env, leg=SUPPORTED_312)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual(workflow_commands(result.stdout), [expected])
+
 
 #: The properties an annotation takes; anything else in one is a value cut at a ``,``.
 ANNOTATION_PROPERTIES = frozenset({'title', 'file', 'line', 'endline', 'col', 'endcolumn'})
-#: An annotation command and its properties, which end at the next ``::``.
-ANNOTATION = re.compile(r'::(?:error|warning|notice) (.*?)::')
+#: An annotation command and its properties, which end at the next ``::``. The level
+#: can also be ``${ANNOTATION_LEVEL}``, a job's per-leg one (#1672).
+ANNOTATION = re.compile(r'::(?:error|warning|notice|\$\{ANNOTATION_LEVEL\}) (.*?)::')
 #: A ``${...}`` expansion: the shell replaces it, so the runner never sees its text.
 BRACED = re.compile(r'\$\{([^}]*)\}')
 #: The one braced form that escapes what it expands: ``${NAME//,/%2C}``.

@@ -31,14 +31,15 @@ jobs:
     #
     # #1633: two tiers. The supported tier, 3.11-3.15, keeps the plain name,
     # which is what ruleset 23497679 requires one context per version of. The
-    # KTLO tier -- end-of-life versions that still run, 3.7-3.10 -- is suffixed
-    # ` (KTLO)`, so no required context can ever match one, and carries
-    # `continue-on-error`, so a failed leg shows red without failing the run.
-    # 3.7 is red by design: it cannot import pcapkit (see "Verify package"). 3.6
-    # is left out: setup-python builds it only for retired Ubuntu images.
+    # KTLO tier, end-of-life 3.7-3.10, is suffixed ` (KTLO)`, so no required
+    # context can match one. Its steps carry `continue-on-error`, as in
+    # unit-tests.yml's `test` job: job-level, a failed leg's check run concluded
+    # `failure`, so every commit showed red (#1672). 3.7 fails "Verify package"
+    # by design. No 3.6: setup-python builds it only for retired Ubuntu images.
     name: Compat Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
-    continue-on-error: ${{ matrix.ktlo == true }}
+    env:
+      ANNOTATION_LEVEL: ${{ matrix.ktlo && 'warning' || 'error' }}
     strategy:
       fail-fast: false
       matrix:
@@ -65,23 +66,37 @@ jobs:
             ktlo: true
     steps:
       - uses: actions/checkout@v7
+        id: checkout
+        continue-on-error: ${{ matrix.ktlo == true }}
 
       - uses: actions/setup-python@v7
+        id: python
+        continue-on-error: ${{ matrix.ktlo == true }}
         with:
           python-version: ${{ matrix.python-version }}
 
+      # The install needs this leg's interpreter, and the check below needs the
+      # install, as in unit-tests.yml's `test` job: on a KTLO leg a failed step
+      # no longer stops the job, so each one waits on the `outcome` it needs.
       - name: Install package
+        id: install
+        if: ${{ steps.python.outcome == 'success' }}
+        continue-on-error: ${{ matrix.ktlo == true }}
         run: |
           python -m pip install -U pip setuptools wheel
           python -m pip install -e .
 
-      # One annotation saying why, so a red leg -- 3.7's, today, where the
+      # One annotation saying why, so a failed leg -- 3.7's, today, where the
       # editable install succeeds and 41 modules do not compile -- is legible
-      # from the run summary without opening the log. Each title escapes `,` as
-      # `%2C`: the runner splits a command's properties on `,`, so the KTLO
-      # leg's title would otherwise stop at "(KTLO" (actions/runner
+      # from the run summary without opening the log. ANNOTATION_LEVEL makes it
+      # a warning on a KTLO leg (#1672). Each title escapes `,` as `%2C`: the
+      # runner splits a command's properties on `,`, so the KTLO leg's title
+      # would otherwise stop at "(KTLO" (actions/runner
       # src/Runner.Common/ActionCommand.cs:100, at 5f0b3ddcc).
       - name: Verify package
+        id: verify
+        if: ${{ steps.install.outcome == 'success' }}
+        continue-on-error: ${{ matrix.ktlo == true }}
         shell: bash
         env:
           LEG: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}
@@ -91,10 +106,30 @@ jobs:
             cat "$log"
             count=$(awk '/^\*\*\* Error compiling /{n++} END{print n+0}' "$log")
             first=$(awk '/^  File "/{sub(/^  /, ""); print; exit}' "$log")
-            echo "::error title=pcapkit does not compile on ${LEG//,/%2C}::$count modules fail to compile, the first at ${first:-an unreported place}; see this step's log."
+            echo "::${ANNOTATION_LEVEL} title=pcapkit does not compile on ${LEG//,/%2C}::$count modules fail to compile, the first at ${first:-an unreported place}; see this step's log."
             exit 1
           fi
           if ! python -c 'import pcapkit; print(pcapkit.__version__)'; then
-            echo "::error title=pcapkit does not import on ${LEG//,/%2C}::See the traceback in this step's log."
+            echo "::${ANNOTATION_LEVEL} title=pcapkit does not import on ${LEG//,/%2C}::See the traceback in this step's log."
             exit 1
           fi
+
+      # #1672: the KTLO leg's report -- the same step ends every KTLO matrix
+      # job; see unit-tests.yml's `test` job for how it works.
+      - name: KTLO summary
+        if: ${{ !cancelled() && matrix.ktlo == true }}
+        continue-on-error: ${{ matrix.ktlo == true }}
+        shell: bash
+        env:
+          LEG: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}
+          STEPS: ${{ toJSON(steps) }}
+        run: |
+          failed=$(jq -r 'to_entries[] | select(.value.outcome == "failure") | .key' <<< "$STEPS")
+          if [ -z "$failed" ]; then
+            echo "$LEG: no step failed."
+            exit 0
+          fi
+          while IFS= read -r id; do
+            echo "::warning title=${id} failed on ${LEG//,/%2C}::KTLO legs never block (#1633), so this job still succeeds (#1672); see the ${id} step's log."
+            echo "- ${LEG}: step \`${id}\` failed; non-blocking, so this job still succeeds." >> "$GITHUB_STEP_SUMMARY"
+          done <<< "$failed"

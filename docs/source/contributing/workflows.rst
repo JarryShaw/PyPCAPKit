@@ -274,7 +274,7 @@ and ``project-tests``, and ``required-checks`` (see `Required Status
 Checks`_ below), gated out by their own ``if:`` rather than by having
 already run. ``changelog`` carries no
 ``if:`` at all and runs on every path regardless -- deliberately, per its own
-comment (``unit-tests.yml:1381-1387``): ``create-release.yml`` feeds
+comment (``unit-tests.yml:1493-1499``): ``create-release.yml`` feeds
 ``CHANGELOG.md`` to the GitHub Release body, so the release path is exactly
 where a drifted file must not go unchecked. Confirmed on run `36210743295
 <https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295>`__ (a
@@ -542,41 +542,41 @@ grepping every workflow file for its name:
      - Where
    * - ``Required checks passed``
      - job ``required-checks``
-     - ``unit-tests.yml:1694``
+     - ``unit-tests.yml:1806``
    * - ``Compat Python 3.11``
      - job ``compatibility``, matrix leg ``3.11``
-     - ``python-compatibility.yml:39,46``
+     - ``python-compatibility.yml:39,47``
    * - ``Compat Python 3.12``
      - job ``compatibility``, matrix leg ``3.12``
-     - ``python-compatibility.yml:39,47``
+     - ``python-compatibility.yml:39,48``
    * - ``Compat Python 3.13``
      - job ``compatibility``, matrix leg ``3.13``
-     - ``python-compatibility.yml:39,48``
+     - ``python-compatibility.yml:39,49``
    * - ``Compat Python 3.14``
      - job ``compatibility``, matrix leg ``3.14``
-     - ``python-compatibility.yml:39,49``
+     - ``python-compatibility.yml:39,50``
    * - ``Compat Python 3.15``
      - job ``compatibility``, matrix leg ``3.15``
-     - ``python-compatibility.yml:39,50``
+     - ``python-compatibility.yml:39,51``
 
 That is the list after `#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__,
 which added ``Compat Python 3.15`` and removed ``Compat Python 3.10``. Moving a version
 between the tiers below means editing the ruleset in the same change.
 
 ``Required checks passed`` is defined by exactly one job
-(``unit-tests.yml:1694``). ``Compat Python`` is defined by one, the
+(``unit-tests.yml:1806``). ``Compat Python`` is defined by one, the
 ``compatibility`` job in ``python-compatibility.yml`` (``:39``), expanding to
-the five required legs at ``:46-50`` and to four KTLO legs at ``:55-65`` whose
+the five required legs at ``:47-51`` and to four KTLO legs at ``:56-66`` whose
 names end in ``(KTLO)``, so no required context matches one. A comment at
-``unit-tests.yml:1605`` mentions the string without defining it.
+``unit-tests.yml:1717`` mentions the string without defining it.
 
 ``Required checks passed`` is an aggregate, not a single check run. The ruleset
 requires it and the five ``Compat Python 3.11``-``3.15`` legs, nothing else, as
-``unit-tests.yml``'s own comment (``unit-tests.yml:1604-1614``) records. It
+``unit-tests.yml``'s own comment (``unit-tests.yml:1716-1726``) records. It
 ``needs:`` the gating jobs of ``unit-tests.yml`` -- ``test``, ``integration``,
 ``engine-tests`` and ``pypcap-parity``, plus ``changes`` and ``project-tests``
 for the docs-only path -- and checks each result explicitly
-(``unit-tests.yml:1693-1747``). Rulesets match check names literally, with no
+(``unit-tests.yml:1805-1859``). Rulesets match check names literally, with no
 wildcard, so requiring the matrix cells one by one would mean editing the
 ruleset whenever a matrix changes; the aggregate keeps the required list fixed.
 It accepts the four legs as ``skipped`` only on a docs-only pull request, where
@@ -585,32 +585,43 @@ instead. The ``Compat`` legs stay required separately because they come from
 ``python-compatibility.yml``, and a job cannot ``needs:`` a job in another
 workflow file. This job runs on Unit Tests' own ``push``/``pull_request``
 triggers; the ``gate-only: true`` reusable calls documented above skip it via
-``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:1696``),
+``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:1808``),
 so it is never produced -- and never expected -- on those paths.
 
 Python versions come in two tiers (#1633). The **supported** tier, 3.11-3.15,
 blocks: a failed leg fails ``Required checks passed`` or its own required
 ``Compat`` context. The **KTLO** tier -- end-of-life 3.7-3.10, still built and
-tested -- never blocks and is never a required context. Each KTLO leg sits in the
-same job as the supported ones, so the two mechanisms differ by whether something
-aggregates the job:
+tested -- never blocks, is never a required context, and never shows a commit or a
+pull request red (#1672). Each KTLO leg shares its job with supported legs, in
+``unit-tests.yml``, ``python-compatibility.yml`` and ``create-release.yml``, and
+every such job works the same way:
 
-* ``python-compatibility.yml`` has no aggregate, so a KTLO leg carries job-level
-  ``continue-on-error`` (``:41``): it shows red, and the run stays green.
-* In ``unit-tests.yml`` ``required-checks`` reads one ``needs.<job>.result`` per job,
-  and GitHub does not document what that reads when a job-level
-  ``continue-on-error`` leg fails. So every step that can fail on a KTLO leg carries
-  ``continue-on-error: ${{ matrix.ktlo == true }}`` instead, whose effect is
-  documented (``unit-tests.yml:74-82``); ``engine-tests`` runs its 3.10 cell as a
-  step of its own with ``continue-on-error: true``.
+* Every step that can fail on a KTLO leg has an ``id`` and
+  ``continue-on-error: ${{ matrix.ktlo == true }}`` (``unit-tests.yml:78-87``),
+  unless it is masked on every leg, as the timings uploads are. Its ``outcome`` is
+  then ``failure`` but its ``conclusion`` ``success``, so the job, its check run
+  and ``required-checks`` read ``success``. A step that needs an earlier one's work
+  waits on that step's ``outcome``: a leg that cannot install stops there, and a
+  ``pypi`` leg stops at its first failure.
+* The last step, ``KTLO summary``, runs on KTLO legs only and reports each failed
+  ``outcome`` as a warning and a job-summary line. A step's own annotations take
+  ``ANNOTATION_LEVEL``: ``warning`` on a KTLO leg, ``error`` on a supported one.
+  ``engine-tests``' 3.10 cell, a step of its own with ``continue-on-error: true``,
+  reports the same way.
+* Never job-level ``continue-on-error``: it passes the *run*, but the leg's check
+  run still concludes ``failure``, which showed every commit red while
+  ``Compat Python 3.7 (KTLO)`` carried it.
+
+Two errors remain on a failed KTLO step, neither changing a conclusion: the
+runner's ``Process completed with exit code N.`` for a ``run:`` step, and an
+action's own. And #1634's tag check still blocks the ``pypi`` KTLO legs: it fails
+every leg alike, and masked, the leg would go on to publish.
 
 3.7 can neither install the ``test`` extra nor import the package, so each 3.7 leg
-fails one step, with one error annotation saying why: ``test`` and ``integration``
-at the install step, the ``Compat`` leg at ``Verify package``. Only the ``Compat``
-leg shows red, through its job-level ``continue-on-error``; the ``test`` and
-``integration`` legs conclude ``success``, their failed step and annotation inside.
-They run on ``ubuntu-22.04``, which retires on 2027-04-17 after brownouts from
-2027-03-23 (actions/runner-images#14254). A brownout fails a ``test`` or
+fails one step, with a warning saying why -- ``test`` and ``integration`` at the
+install step, the ``Compat`` leg at ``Verify package`` -- and concludes
+``success``. They run on ``ubuntu-22.04``, which retires on 2027-04-17 after
+brownouts from 2027-03-23 (actions/runner-images#14254). A brownout fails a ``test`` or
 ``integration`` leg before any step runs, where no ``continue-on-error`` reaches,
 and so fails ``Required checks passed``: they must go before then (#1660). 3.6 is
 in no matrix: setup-python builds it only for retired Ubuntu images. Nor are
@@ -628,7 +639,7 @@ Four jobs, all in ``create-release.yml``, declare a deployment
 * ``github`` -- ``environment: github-release`` (``create-release.yml:431``)
 * ``tag`` -- ``environment: conda-tag`` (``create-release.yml:617``)
 * ``pypi`` -- ``environment: pypi`` (``create-release.yml:779``)
-* ``conda`` -- ``environment: anaconda`` (``create-release.yml:994``)
+* ``conda`` -- ``environment: anaconda`` (``create-release.yml:1023``)
 
 No other workflow in scope here declares one -- including
 ``deploy-pages.yml``, whose ``deploy-pages`` job pushes straight to the
