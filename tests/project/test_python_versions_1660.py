@@ -473,17 +473,18 @@ class TestTheFileAndTheScript(unittest.TestCase):
         """On 3.8-3.10 these modules skip, or their tests do, rather than fail to import.
 
         Run in a fresh interpreter whose ``import tomllib`` fails, as it does there,
-        where the two scripts that read the file cannot load at all.
+        where the two scripts that read the file cannot load at all. That
+        interpreter may already hold :mod:`tomllib`: on the coverage leg,
+        ``patch = subprocess`` starts coverage in it, which reads its TOML
+        config first. So the module is dropped and its entry set to ``None``,
+        which makes any import of it raise :exc:`ModuleNotFoundError`.
 
         """
         probe = textwrap.dedent('''\
             import importlib, importlib.util, json, sys, unittest
-            class NoTomllib:
-                def find_spec(self, name, path=None, target=None):
-                    if name == 'tomllib':
-                        raise ImportError('No module named tomllib')
-            assert 'tomllib' not in sys.modules
-            sys.meta_path.insert(0, NoTomllib())
+            for name in [name for name in sys.modules if name == 'tomllib' or name.startswith('tomllib.')]:
+                del sys.modules[name]
+            sys.modules['tomllib'] = None
             found = {}
             for name in sys.argv[1:]:
                 try:
@@ -511,6 +512,7 @@ class TestTheFileAndTheScript(unittest.TestCase):
                                 text=True, check=False, timeout=120)
         self.assertEqual(result.returncode, 0, result.stderr)
         skipped = f'skipped: {NO_TOMLLIB}'
+        blocked = 'ModuleNotFoundError: import of tomllib halted; None in sys.modules'
         self.assertEqual(json.loads(result.stdout.splitlines()[-1]), {
             'tests.project.test_python_versions_1660': 'imported',
             'tests.project.test_python_matrix_tiers_1633': skipped,
@@ -519,8 +521,8 @@ class TestTheFileAndTheScript(unittest.TestCase):
             'tests.project.test_unit_tests_queue': 'imported',
             'tests.project.test_workflow_apt_cache': 'imported',
             'script()': skipped,
-            'util/python_versions.py': 'ImportError: No module named tomllib',
-            'util/ci_timing.py': 'ImportError: No module named tomllib',
+            'util/python_versions.py': blocked,
+            'util/ci_timing.py': blocked,
         })
 
 
