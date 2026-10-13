@@ -150,7 +150,9 @@ def packet2dict(packet: 'Packet') -> 'dict[str, Any]':
         packet: Scapy packet.
 
     Returns:
-        A :obj:`dict` mapping of packet data. Each layer carries only the fields
+        A :obj:`dict` mapping of packet data. Its ``packet`` is the octets of
+        the frame (see :func:`_frame`), none for a zero-length one. Each layer
+        carries only the fields
         set on it (for a dissected packet, those read from the wire, with no
         defaults filled in). Field values that are themselves
         Scapy packets (e.g. IP options, DNS records), including those inside
@@ -182,7 +184,7 @@ def packet2dict(packet: 'Packet') -> 'dict[str, Any]':
         return dict_
 
     return {
-        'packet': bytes(packet),
+        'packet': _frame(packet),
         packet.name: wrapper(packet),
     }
 
@@ -204,8 +206,10 @@ def packet2frame(packet: 'Packet') -> 'FrameRecord':
 
     Note:
         The octets are ``packet.original``, which `Scapy`_'s readers keep as read,
-        rather than ``bytes(packet)``, which rebuilds them. ``orig_len`` is
-        ``packet.wirelen``, the record's original length.
+        rather than ``bytes(packet)``, which rebuilds them; for a packet not read
+        from a capture, such as one built by hand, they are the octets it builds
+        into (see :func:`_frame`). ``orig_len`` is ``packet.wirelen``, the
+        record's original length.
 
         The fraction in ``frame_info.ts_usec`` is in the capture's own resolution,
         as the default engine's is. That resolution is the one
@@ -220,8 +224,7 @@ def packet2frame(packet: 'Packet') -> 'FrameRecord':
         raise ModuleNotFound("No module named 'scapy'", name='scapy')
     mapping = packet2dict(packet)
 
-    original = getattr(packet, 'original', None)
-    octets = bytes(original) if isinstance(original, (bytes, bytearray)) else bytes(packet)
+    octets = _frame(packet)
     wirelen = getattr(packet, 'wirelen', None)
     orig_len = len(octets) if wirelen is None else int(wirelen)
 
@@ -238,6 +241,34 @@ def packet2frame(packet: 'Packet') -> 'FrameRecord':
         incl_len=len(octets),
         orig_len=orig_len,
     ), time_epoch=decimal.Decimal(epoch))
+
+
+def _frame(packet: 'Packet') -> 'bytes':
+    """Return the octets of the frame a Scapy packet stands for.
+
+    Args:
+        packet: Scapy packet.
+
+    Returns:
+        For a packet read from a capture, which every `Scapy`_ reader gives a
+        ``wirelen``, the record's original length, ``packet.original``: the
+        octets of the record, which the readers keep as read. For any other,
+        such as one built by hand, ``bytes(packet)``: the octets it builds into.
+
+    Note:
+        `Scapy`_ dissects a packet only from a non-empty string, so a
+        zero-length frame comes back as the first layer its link type names,
+        every field left to its default, as one built by hand with no fields
+        would be. ``bytes()`` of it builds a header out of nothing -- 20 octets
+        at ``RAW`` and ``IPV4``, of an IPv4 layer whose ``ihl``, ``len`` and
+        ``chksum`` are :data:`None` until then -- where the record has none
+        (:issue:`1676`).
+
+    """
+    original = getattr(packet, 'original', None)
+    if getattr(packet, 'wirelen', None) is not None and isinstance(original, (bytes, bytearray)):
+        return bytes(original)
+    return bytes(packet)
 
 
 def _within_datagrams(layer: 'Packet') -> 'bytes':
@@ -282,7 +313,10 @@ def _within_datagrams(layer: 'Packet') -> 'bytes':
                 # a zero is a jumbogram's, or else it declares nothing
                 length = carrier.plen or jumbo_payload_length(carrier.nh, bytes(carrier.payload)) or 0
         elif isinstance(carrier, IP) and carrier.len:   # a zero is TSO's
-            length = max(carrier.len - carrier.ihl * 4, 0)
+            ihl = carrier.ihl
+            if ihl is None:     # on a layer built by hand, given a Total Length but no IHL
+                ihl = bytes(carrier)[0] & 0x0F
+            length = max(carrier.len - ihl * 4, 0)
         if length is not None:
             # ``bytes()`` of a layer spans it and every layer after it, padding
             # included, so the difference is the octets between the end of the
@@ -306,10 +340,16 @@ def _tcp_segment(tcp: 'TCP') -> 'tuple[bytes, bytes] | None':
         (:rfc:`9293#section-3.1`), since the default engine then reads no
         segment at all.
 
+    Note:
+        The Data Offset is read off the octets, which for a dissected layer
+        carry the ``dataofs`` `Scapy`_ read, and for a layer built by hand the
+        one it builds, as it leaves ``dataofs`` :data:`None` until then
+        (:issue:`1676`).
+
     """
     segment = _within_datagrams(tcp)
-    hdr_len = tcp.dataofs * 4
-    if len(segment) < 20 or hdr_len < 20:
+    hdr_len = (segment[12] >> 4) * 4 if len(segment) >= TCP_MIN_HEADER_LEN else 0
+    if hdr_len < TCP_MIN_HEADER_LEN:
         return None
     return segment[:hdr_len], segment[hdr_len:]
 
@@ -423,8 +463,9 @@ def _network(packet: 'Packet') -> 'Optional[tuple[Packet, int]]':
         for a raw IP link type; and for a BSD loopback header the IPv4 or IPv6
         packet its address family names, as the default engine reads it (see
         :data:`LOOPBACK_FAMILIES`). :data:`None` for any other link type, whose
-        frames the default engine leaves raw (:issue:`1650`), or a loopback
-        family it dissects nothing behind.
+        frames the default engine leaves raw (:issue:`1650`), a loopback
+        family it dissects nothing behind, or a zero-length frame, of which it
+        dissects nothing at all (:issue:`1676`).
 
     Note:
         The default engine dissects the first layer of the ``NULL``,
@@ -433,6 +474,10 @@ def _network(packet: 'Packet') -> 'Optional[tuple[Packet, int]]':
         and ``RAW`` as IPv4 or IPv6 by its version nibble, as `Scapy`_ does.
         `Scapy`_ dissects IP straight behind the headers of many others, such as
         ``LINUX_SLL``, ``LINUX_SLL2``, ``PPP`` and the ``DLT_RAW`` of 12.
+
+        `Scapy`_ hands a zero-length frame back as a layer of defaults, which
+        at ``RAW`` and ``IPV4`` is an IPv4 header with no IHL (see
+        :func:`_frame`), so it is told by the frame's octets, not its layers.
 
         A loopback header's family is read as
         :func:`~pcapkit.protocols.link.loopback.family_byteorder` reads it --
@@ -447,16 +492,19 @@ def _network(packet: 'Packet') -> 'Optional[tuple[Packet, int]]':
     from scapy.layers.inet6 import IPv6
 
     linktype = _linktype(packet)
+    if linktype not in (Enum_LinkType.NULL, Enum_LinkType.ETHERNET, Enum_LinkType.LOOP,
+                        Enum_LinkType.RAW, Enum_LinkType.IPV4, Enum_LinkType.IPV6):
+        return None
+    octets = _frame(packet)
+    if not octets:
+        return None
     if linktype == Enum_LinkType.ETHERNET:
         return packet.payload, 2
     if linktype in (Enum_LinkType.RAW, Enum_LinkType.IPV4, Enum_LinkType.IPV6):
         return packet, 1
-    if linktype not in (Enum_LinkType.NULL, Enum_LinkType.LOOP):
-        return None
 
     from pcapkit.protocols.link.loopback import family_byteorder  # isort:skip
 
-    octets = bytes(packet)
     if len(octets) < 4:
         return None
     version = LOOPBACK_FAMILIES.get(int.from_bytes(octets[:4], family_byteorder(octets[:4], linktype)))
@@ -853,9 +901,12 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
         # the default engine hands it only the octets inside the Payload Length
         # of each IPv6 packet above it, so those are all it keeps (:issue:`1623`)
         octets = _within_datagrams(ipv4)
-        ihl = ipv4.ihl * 4
+        # NOTE: the IHL and Total Length are read off the octets, as Scapy
+        # leaves ``ihl`` and ``len`` None on a layer built by hand until it is
+        # built (:issue:`1676`)
+        ihl = (octets[0] & 0x0F) * 4 if octets else IPV4_HEADER_LEN
         # the default engine dissects no IPv4 header those octets cut short
-        if len(octets) < ihl or not _ipv4_accepted(ipv4):
+        if len(octets) < max(ihl, IPV4_HEADER_LEN) or not _ipv4_accepted(ipv4):
             return None
 
         data = IP_Packet(
@@ -876,7 +927,7 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
             fo=ipv4.frag * 8,                          # fragment offset
             ihl=ihl,                                   # internet header length
             mf=bool(ipv4.flags.MF),                    # more fragment flag
-            tl=ipv4.len,                               # total length, header includes
+            tl=int.from_bytes(octets[2:4], 'big'),     # total length, header includes
             header=octets[:ihl],                       # raw bytes type header
             # NOTE: this keeps the octets past the Total Length, as the default
             # engine's adapter does, since the reassembly machinery cuts the
