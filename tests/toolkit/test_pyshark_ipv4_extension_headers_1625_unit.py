@@ -634,7 +634,8 @@ class ToolkitOctetsTests(unittest.TestCase):
                 version = {b'\x08\x00': 4, b'\x86\xdd': 6}[octets[12:14]]
                 with self.subTest(case=name), warnings.catch_warnings():
                     warnings.simplefilter('ignore')  # what the parsers warn of rejecting a header
-                    segment = toolkit._from_octets(version, octets[14:])  # pylint: disable=protected-access
+                    # the IP header is the frame's second layer, after Ethernet
+                    segment = toolkit._from_octets(version, octets[14:], 2)  # pylint: disable=protected-access
                     record = base['trace'].get(number)
                     if record is None:
                         self.assertIsNone(segment)
@@ -646,29 +647,30 @@ class ToolkitOctetsTests(unittest.TestCase):
     def test_the_outermost_ip_layer_is_found_as_the_default_engine_finds_it(self) -> None:
         from pcapkit.toolkit import pyshark as toolkit
 
+        # its version, where it starts, and its place in the frame (#1609)
         packet4, packet6 = v4(tcp(1), 6), v6(tcp(1), 6)
         for name, linktype, octets, found in (
-            ('ethernet', 1, eth(packet4), (4, 14)),
-            ('ethernet, ipv6', 1, eth(packet6), (6, 14)),
-            ('vlan', 1, vlan(packet4, 0x8100), (4, 18)),
-            ('qinq', 1, vlan(packet4, 0x88A8, 0x8100), (4, 22)),
+            ('ethernet', 1, eth(packet4), (4, 14, 2)),
+            ('ethernet, ipv6', 1, eth(packet6), (6, 14, 2)),
+            ('vlan', 1, vlan(packet4, 0x8100), (4, 18, 3)),
+            ('qinq', 1, vlan(packet4, 0x88A8, 0x8100), (4, 22, 4)),
             ('ethernet, arp', 1, wire.ethernet(packet4, 0x0806), None),
             ('ethernet, mpls', 1, wire.ethernet(b'\x00\x01\x01\x40' + packet4, 0x8847), None),
             ('ethernet cut short', 1, eth(packet4)[:13], None),
             ('vlan tag cut short', 1, vlan(packet4, 0x8100)[:17], None),
-            ('null', 0, loopback(packet4, 2, 'little'), (4, 4)),
-            ('null, big-endian', 0, loopback(packet6, 28, 'big'), (6, 4)),
+            ('null', 0, loopback(packet4, 2, 'little'), (4, 4, 2)),
+            ('null, big-endian', 0, loopback(packet6, 28, 'big'), (6, 4, 2)),
             ('null, another family', 0, loopback(packet4, 7, 'little'), None),
             ('null cut short', 0, b'\x02\x00\x00', None),
-            ('loop', 108, loopback(packet6, 24, 'big'), (6, 4)),
+            ('loop', 108, loopback(packet6, 24, 'big'), (6, 4, 2)),
             # a LOOP family is in network byte order, never inferred
             ('loop, little-endian', 108, loopback(packet4, 2, 'little'), None),
-            ('raw', 101, packet4, (4, 0)),
-            ('raw, ipv6', 101, packet6, (6, 0)),
+            ('raw', 101, packet4, (4, 0, 1)),
+            ('raw, ipv6', 101, packet6, (6, 0, 1)),
             ('raw, another version', 101, b'\x55' + packet4[1:], None),
             ('raw, empty', 101, b'', None),
-            ('ipv4', 228, packet4, (4, 0)),
-            ('ipv6', 229, packet6, (6, 0)),
+            ('ipv4', 228, packet4, (4, 0, 1)),
+            ('ipv6', 229, packet6, (6, 0, 1)),
             ('linux sll', 113, sll(packet4), None),
         ):
             with self.subTest(case=name):
@@ -810,7 +812,7 @@ class ToolkitOctetsTests(unittest.TestCase):
 
         self.assertEqual(toolkit.OCTETS_FILTER, 'tcp || ip.proto == 0 || ip.proto == 43 || ip.proto == 44 || '
                                                 'ip.proto == 51 || ip.proto == 60 || ip.proto == 135 || '
-                                                'ip.proto == 139 || ip.proto == 140')
+                                                'ip.proto == 139 || ip.proto == 140 || vlan')
         self.assertEqual(len(IPV4_EXTENSION_HEADERS), 7)
         self.assertEqual(toolkit.OCTETS_PROTOCOLS - IPV4_EXTENSION_HEADERS, {140})
 
