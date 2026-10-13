@@ -20,6 +20,8 @@ which is a base class for internet layer protocols, eg. :class:`~pcapkit.protoco
    .. automethod:: _import_next_layer
    .. automethod:: _next_layer_class
    .. automethod:: _next_exthdr_depth
+   .. automethod:: _make_payload
+   .. automethod:: _rebuilt_exthdr_depth
 
    .. autoattribute:: __layer__
       :no-value:
