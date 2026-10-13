@@ -23,8 +23,8 @@ class EtherType(EnumRegistry, IntEnum):
     #: Formerly XEROX PUP. Invalid as an Ethertype since 1983. Use 0x0A00. [Boggs,
     #: D., J. Shoch, E. Taft, and R. Metcalfe, "PUP: An Internetwork Architecture",
     #: XEROX Palo Alto Research Center, CSL-79-10, July 1979; also in IEEE
-    #: Transactions on Communication, Volume COM-28, Number 4, April 1980.][Neil
-    #: Sembower]
+    #: Transactions on Communication, Volume COM-28, Number 4, April 1980.][;
+    #: ][Neil Sembower]
     Formerly_XEROX_PUP_Invalid_as_an_Ethertype_since_1983_Use_0x0A00 = 0x0200
 
     #: Formerly PUP Addr Trans. Invalid as an Ethertype since 1983. Use 0x0A01.
@@ -43,7 +43,7 @@ class EtherType(EnumRegistry, IntEnum):
     #: and Physical Layer Specifications", Digital, Intel and Xerox, November 1982.
     #: And: XEROX, "The Ethernet, A Local Area Network: Data Link Layer and
     #: Physical Layer Specification", X3T51/80-50, Xerox Corporation, Stamford,
-    #: CT., October 1980.][Neil Sembower]
+    #: CT., October 1980.][; ][Neil Sembower]
     XEROX_NS_IDP = 0x0600
 
     #: DLOG [Neil Sembower]
@@ -52,7 +52,7 @@ class EtherType(EnumRegistry, IntEnum):
     #: DLOG [Neil Sembower]
     DLOG_0x0661 = 0x0661
 
-    #: Internet Protocol version 4 (IPv4) [:rfc:`9542`]
+    #: Internet Protocol version 4 (IPv4) [RFC 9542]
     Internet_Protocol_version_4 = 0x0800
 
     #: X.75 Internet [Neil Sembower]
@@ -70,13 +70,13 @@ class EtherType(EnumRegistry, IntEnum):
     #: X.25 Level 3 [Neil Sembower]
     X_25_Level_3 = 0x0805
 
-    #: Address Resolution Protocol (ARP) [:rfc:`9542`]
+    #: Address Resolution Protocol (ARP) [RFC 9542]
     Address_Resolution_Protocol = 0x0806
 
     #: XNS Compatability [Neil Sembower]
     XNS_Compatability = 0x0807
 
-    #: Frame Relay ARP [:rfc:`1701`]
+    #: Frame Relay ARP [RFC 1701]
     Frame_Relay_ARP = 0x0808
 
     #: Symbolics Private [David Plummer]
@@ -94,10 +94,10 @@ class EtherType(EnumRegistry, IntEnum):
     #: Banyan VINES [Neil Sembower]
     Banyan_VINES = 0x0BAD
 
-    #: VINES Loopback [:rfc:`1701`]
+    #: VINES Loopback [RFC 1701]
     VINES_Loopback = 0x0BAE
 
-    #: VINES Echo [:rfc:`1701`]
+    #: VINES Echo [RFC 1701]
     VINES_Echo = 0x0BAF
 
     #: Berkeley Trailer nego [Neil Sembower]
@@ -106,10 +106,10 @@ class EtherType(EnumRegistry, IntEnum):
     #: Valid Systems [Neil Sembower]
     Valid_Systems = 0x1600
 
-    #: TRILL [:rfc:`6325`]
+    #: TRILL [RFC 6325]
     TRILL = 0x22F3
 
-    #: L2-IS-IS [:rfc:`6325`]
+    #: L2-IS-IS [RFC 6325]
     L2_IS_IS = 0x22F4
 
     #: PCS Basic Block Protocol [Neil Sembower]
@@ -142,10 +142,10 @@ class EtherType(EnumRegistry, IntEnum):
     #: DEC LAVC, SCA [Neil Sembower]
     DEC_LAVC_SCA = 0x6007
 
-    #: Transparent Ethernet Bridging [:rfc:`1701`]
+    #: Transparent Ethernet Bridging [RFC 1701]
     Transparent_Ethernet_Bridging = 0x6558
 
-    #: Raw Frame Relay [:rfc:`1701`]
+    #: Raw Frame Relay [RFC 1701]
     Raw_Frame_Relay = 0x6559
 
     #: Ungermann-Bass download [Neil Sembower]
@@ -160,10 +160,10 @@ class EtherType(EnumRegistry, IntEnum):
     #: Cabletron [Neil Sembower]
     Cabletron = 0x7034
 
-    #: Cronus VLN [:rfc:`824`][Daniel Tappan]
+    #: Cronus VLN [RFC 824][; ][Daniel Tappan]
     Cronus_VLN = 0x8003
 
-    #: Cronus Direct [:rfc:`824`][Daniel Tappan]
+    #: Cronus Direct [RFC 824][; ][Daniel Tappan]
     Cronus_Direct = 0x8004
 
     #: HP Probe [Neil Sembower]
@@ -199,7 +199,7 @@ class EtherType(EnumRegistry, IntEnum):
     #: Tigan, Inc. [Neil Sembower]
     Tigan_Inc = 0x802F
 
-    #: Reverse Address Resolution Protocol (RARP) [:rfc:`903`][Joseph Murdock]
+    #: Reverse Address Resolution Protocol (RARP) [RFC 903][; ][Joseph Murdock]
     Reverse_Address_Resolution_Protocol = 0x8035
 
     #: Aeonic Systems [Neil Sembower]
@@ -320,7 +320,7 @@ class EtherType(EnumRegistry, IntEnum):
     Wellfleet_Communications = 0x80FF
 
     #: Customer VLAN Tag Type (C-Tag, formerly called the Q-Tag) (initially
-    #: Wellfleet) [:rfc:`9542`]
+    #: Wellfleet) [RFC 9542]
     Customer_VLAN_Tag_Type = 0x8100
 
     #: Hayes Microcomputers [Neil Sembower]
@@ -383,49 +383,50 @@ class EtherType(EnumRegistry, IntEnum):
     #: Delta Controls [Neil Sembower]
     Delta_Controls = 0x86DE
 
-    #: Internet Protocol version 6 (IPv6) [:rfc:`9542`]
+    #: Internet Protocol version 6 (IPv6) [RFC 9542]
     Internet_Protocol_version_6 = 0x86DD
 
     #: ATOMIC [Joe Touch]
     ATOMIC = 0x86DF
 
-    #: TCP/IP Compression [:rfc:`1144`][:rfc:`1701`]
+    #: TCP/IP Compression [RFC 1144][; ][RFC 1701]
     TCP_IP_Compression = 0x876B
 
-    #: IP Autonomous Systems [:rfc:`1701`]
+    #: IP Autonomous Systems [RFC 1701]
     IP_Autonomous_Systems = 0x876C
 
-    #: Secure Data [:rfc:`1701`]
+    #: Secure Data [RFC 1701]
     Secure_Data = 0x876D
 
-    #: IEEE Std 802.3 - Ethernet Passive Optical Network (EPON) [EPON][:rfc:`9542`]
+    #: IEEE Std 802.3 - Ethernet Passive Optical Network (EPON) [EPON][; ][RFC
+    #: 9542]
     IEEE_Std_802_3_Ethernet_Passive_Optical_Network = 0x8808
 
     #: Slow Protocols (Link Aggregation, OAM, etc.) [IEEE]
     Slow_Protocols = 0x8809
 
-    #: Point-to-Point Protocol (PPP) [:rfc:`9542`]
+    #: Point-to-Point Protocol (PPP) [RFC 9542]
     Point_to_Point_Protocol = 0x880B
 
-    #: General Switch Management Protocol (GSMP) [:rfc:`9542`]
+    #: General Switch Management Protocol (GSMP) [RFC 9542]
     General_Switch_Management_Protocol = 0x880C
 
     #: Ethernet NIC hardware and software testing [Wind River]
     Ethernet_NIC_hardware_and_software_testing = 0x8822
 
-    #: MPLS [:rfc:`5332`]
+    #: MPLS [RFC 5332]
     MPLS = 0x8847
 
-    #: MPLS with upstream-assigned label [:rfc:`5332`]
+    #: MPLS with upstream-assigned label [RFC 5332]
     MPLS_with_upstream_assigned_label = 0x8848
 
-    #: Multicast Channel Allocation Protocol (MCAP) [:rfc:`9542`]
+    #: Multicast Channel Allocation Protocol (MCAP) [RFC 9542]
     Multicast_Channel_Allocation_Protocol = 0x8861
 
-    #: PPP over Ethernet (PPPoE) Discovery Stage [:rfc:`2516`]
+    #: PPP over Ethernet (PPPoE) Discovery Stage [RFC 2516]
     PPP_over_Ethernet_Discovery_Stage = 0x8863
 
-    #: PPP over Ethernet (PPPoE) Session Stage [:rfc:`2516`][:rfc:`8822`]
+    #: PPP over Ethernet (PPPoE) Session Stage [RFC 2516][; ][RFC 8822]
     PPP_over_Ethernet_Session_Stage = 0x8864
 
     #: IEEE Std 802.1X - Port-based network access control [IEEE]
@@ -461,7 +462,7 @@ class EtherType(EnumRegistry, IntEnum):
     #: IEEE Std 802.1Q - Multiple Multicast Registration Protocol (MMRP) [IEEE]
     IEEE_Std_802_1Q_Multiple_Multicast_Registration_Protocol = 0x88F6
 
-    #: Precision Time Protocol [NIST: IEEE Std 1588][Kang Lee]
+    #: Precision Time Protocol [NIST: IEEE Std 1588][; ][Kang Lee]
     Precision_Time_Protocol = 0x88F7
 
     #: IEEE Std 802.11 - Fast Roaming Remote Request (802.11r) [IEEE]
@@ -473,19 +474,19 @@ class EtherType(EnumRegistry, IntEnum):
     #: IEEE Std 802.1Qbe - Multiple I-SID Registration Protocol [IEEE]
     IEEE_Std_802_1Qbe_Multiple_I_SID_Registration_Protocol = 0x8929
 
-    #: TRILL Fine Grained Labeling (FGL) [:rfc:`7172`]
+    #: TRILL Fine Grained Labeling (FGL) [RFC 7172]
     TRILL_Fine_Grained_Labeling = 0x893B
 
     #: IEEE Std 802.1Qbg - ECP Protocol (also used in 802.1BR) [IEEE]
     IEEE_Std_802_1Qbg_ECP_Protocol = 0x8940
 
-    #: TRILL RBridge Channel [:rfc:`7178`]
+    #: TRILL RBridge Channel [RFC 7178]
     TRILL_RBridge_Channel = 0x8946
 
     #: GeoNetworking as defined in ETSI EN 302 636-4-1 [IEEE]
     GeoNetworking_as_defined_in_ETSI_EN_302_636_4_1 = 0x8947
 
-    #: NSH (Network Service Header) [:rfc:`8300`]
+    #: NSH (Network Service Header) [RFC 8300]
     NSH = 0x894F
 
     #: Loopback [Neil Sembower]
@@ -500,22 +501,22 @@ class EtherType(EnumRegistry, IntEnum):
     #: 3Com(Bridge) loop detect [Neil Sembower]
     EtherType_3Com_loop_detect = 0x9003
 
-    #: Multi-Topology [:rfc:`8377`]
+    #: Multi-Topology [RFC 8377]
     Multi_Topology = 0x9A22
 
-    #: LoWPAN encapsulation [:rfc:`7973`]
+    #: LoWPAN encapsulation [RFC 7973]
     LoWPAN_encapsulation = 0xA0ED
 
     #: The Ethertype will be used to identify a "Channel" in which control messages
     #: are encapsulated as payload of GRE packets. When a GRE packet tagged with
     #: the Ethertype is received, the payload will be handed to the network
-    #: processor for processing. [:rfc:`8157`]
+    #: processor for processing. [RFC 8157]
     The_Ethertype_will_be_used_to_identify_a_Channel_in_which_control_messages_are_encapsulated_as_payload_of_GRE_packets_When_a_GRE_packet_tagged_with_the_Ethertype_is_received_the_payload_will_be_handed_to_the_network_processor_for_processing = 0xB7EA
 
     #: BBN VITAL-LanBridge cache private protocol. [Neil Sembower]
     BBN_VITAL_LanBridge_cache_private_protocol = 0xFF00
 
-    #: Reserved [:rfc:`1701`]
+    #: Reserved [RFC 1701]
     Reserved = 0xFFFF
 
     @classmethod

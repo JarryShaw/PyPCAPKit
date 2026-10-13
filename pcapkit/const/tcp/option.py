@@ -20,52 +20,52 @@ __all__ = ['Option']
 class Option(EnumRegistry, IntEnum):
     """[Option] TCP Option Kind Numbers"""
 
-    #: End of Option List [:rfc:`9293`]
+    #: End of Option List [RFC 9293]
     End_of_Option_List = 0
 
-    #: No-Operation [:rfc:`9293`]
+    #: No-Operation [RFC 9293]
     No_Operation = 1
 
-    #: Maximum Segment Size [:rfc:`9293`]
+    #: Maximum Segment Size [RFC 9293]
     Maximum_Segment_Size = 2
 
-    #: Window Scale [:rfc:`7323`]
+    #: Window Scale [RFC 7323]
     Window_Scale = 3
 
-    #: SACK Permitted [:rfc:`2018`]
+    #: SACK Permitted [RFC 2018]
     SACK_Permitted = 4
 
-    #: SACK [:rfc:`2018`]
+    #: SACK [RFC 2018]
     SACK = 5
 
-    #: Echo (obsoleted by option 8) [:rfc:`1072`][:rfc:`6247`]
+    #: Echo (obsoleted by option 8) [RFC 1072][; ][RFC 6247]
     Echo = 6
 
-    #: Echo Reply (obsoleted by option 8) [:rfc:`1072`][:rfc:`6247`]
+    #: Echo Reply (obsoleted by option 8) [RFC 1072][; ][RFC 6247]
     Echo_Reply = 7
 
-    #: Timestamps [:rfc:`7323`]
+    #: Timestamps [RFC 7323]
     Timestamps = 8
 
-    #: Partial Order Connection Permitted (obsolete) [:rfc:`1693`][:rfc:`6247`]
+    #: Partial Order Connection Permitted (obsolete) [RFC 1693][; ][RFC 6247]
     Partial_Order_Connection_Permitted = 9
 
-    #: Partial Order Service Profile (obsolete) [:rfc:`1693`][:rfc:`6247`]
+    #: Partial Order Service Profile (obsolete) [RFC 1693][; ][RFC 6247]
     Partial_Order_Service_Profile = 10
 
-    #: CC (obsolete) [:rfc:`1644`][:rfc:`6247`]
+    #: CC (obsolete) [RFC 1644][; ][RFC 6247]
     CC = 11
 
-    #: CC.NEW (obsolete) [:rfc:`1644`][:rfc:`6247`]
+    #: CC.NEW (obsolete) [RFC 1644][; ][RFC 6247]
     CC_NEW = 12
 
-    #: CC.ECHO (obsolete) [:rfc:`1644`][:rfc:`6247`]
+    #: CC.ECHO (obsolete) [RFC 1644][; ][RFC 6247]
     CC_ECHO = 13
 
-    #: TCP Alternate Checksum Request (obsolete) [:rfc:`1146`][:rfc:`6247`]
+    #: TCP Alternate Checksum Request (obsolete) [RFC 1146][; ][RFC 6247]
     TCP_Alternate_Checksum_Request = 14
 
-    #: TCP Alternate Checksum Data (obsolete) [:rfc:`1146`][:rfc:`6247`]
+    #: TCP Alternate Checksum Data (obsolete) [RFC 1146][; ][RFC 6247]
     TCP_Alternate_Checksum_Data = 15
 
     #: Skeeter [Stev Knowles]
@@ -74,10 +74,10 @@ class Option(EnumRegistry, IntEnum):
     #: Bubba [Stev Knowles]
     Bubba = 17
 
-    #: Trailer Checksum Option [Subbu Subramaniam][Monroe Bridges]
+    #: Trailer Checksum Option [Subbu Subramaniam][; ][Monroe Bridges]
     Trailer_Checksum_Option = 18
 
-    #: MD5 Signature Option (obsoleted by option 29) [:rfc:`2385`]
+    #: MD5 Signature Option (obsoleted by option 29) [RFC 2385]
     MD5_Signature_Option = 19
 
     #: SCPS Capabilities [Keith Scott]
@@ -101,16 +101,16 @@ class Option(EnumRegistry, IntEnum):
     #: TCP Compression Filter [Steve Bellovin]
     TCP_Compression_Filter = 26
 
-    #: Quick-Start Response [:rfc:`4782`]
+    #: Quick-Start Response [RFC 4782]
     Quick_Start_Response = 27
 
-    #: User Timeout Option (also, other known unauthorized use)  [:rfc:`5482`]
+    #: User Timeout Option (also, other known unauthorized use)  [RFC 5482]
     User_Timeout_Option = 28
 
-    #: TCP Authentication Option (TCP-AO) [:rfc:`5925`]
+    #: TCP Authentication Option (TCP-AO) [RFC 5925]
     TCP_Authentication_Option = 29
 
-    #: Multipath TCP (MPTCP) [:rfc:`8684`]
+    #: Multipath TCP (MPTCP) [RFC 8684]
     Multipath_TCP = 30
 
     #: Reserved (known unauthorized use without proper IANA assignment)
@@ -122,10 +122,10 @@ class Option(EnumRegistry, IntEnum):
     #: Reserved (known unauthorized use without proper IANA assignment)
     Reserved_33 = 33
 
-    #: TCP Fast Open Cookie [:rfc:`7413`]
+    #: TCP Fast Open Cookie [RFC 7413]
     TCP_Fast_Open_Cookie = 34
 
-    #: Encryption Negotiation (TCP-ENO) [:rfc:`8547`]
+    #: Encryption Negotiation (TCP-ENO) [RFC 8547]
     Encryption_Negotiation = 69
 
     #: Reserved (known unauthorized use without proper IANA assignment)
@@ -140,21 +140,21 @@ class Option(EnumRegistry, IntEnum):
     #: Reserved (known unauthorized use without proper IANA assignment)
     Reserved_78 = 78
 
-    #: Accurate ECN Order 0 (AccECN0) [:rfc:`9768`]
+    #: Accurate ECN Order 0 (AccECN0) [RFC 9768]
     Accurate_ECN_Order_0 = 172
 
     #: Reserved
     Reserved_173 = 173
 
-    #: Accurate ECN Order 1 (AccECN1) [:rfc:`9768`]
+    #: Accurate ECN Order 1 (AccECN1) [RFC 9768]
     Accurate_ECN_Order_1 = 174
 
     #: RFC3692-style Experiment 1 (also improperly used for shipping
-    #: products)  [:rfc:`4727`]
+    #: products)  [RFC 4727]
     RFC3692_style_Experiment_1 = 253
 
     #: RFC3692-style Experiment 2 (also improperly used for shipping
-    #: products)  [:rfc:`4727`]
+    #: products)  [RFC 4727]
     RFC3692_style_Experiment_2 = 254
 
     @classmethod

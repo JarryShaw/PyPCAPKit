@@ -20,95 +20,95 @@ __all__ = ['Chunk']
 class Chunk(EnumRegistry, IntEnum):
     """[Chunk] SCTP Chunk Types"""
 
-    #: Payload Data (DATA) [:rfc:`9260`]
+    #: Payload Data (DATA) [RFC 9260]
     Payload_Data = 0
 
-    #: Initiation (INIT) [:rfc:`9260`]
+    #: Initiation (INIT) [RFC 9260]
     Initiation = 1
 
-    #: Initiation Acknowledgement (INIT ACK) [:rfc:`9260`]
+    #: Initiation Acknowledgement (INIT ACK) [RFC 9260]
     Initiation_Acknowledgement = 2
 
-    #: Selective Acknowledgement (SACK) [:rfc:`9260`]
+    #: Selective Acknowledgement (SACK) [RFC 9260]
     Selective_Acknowledgement = 3
 
-    #: Heartbeat Request (HEARTBEAT) [:rfc:`9260`]
+    #: Heartbeat Request (HEARTBEAT) [RFC 9260]
     Heartbeat_Request = 4
 
-    #: Heartbeat Acknowledgement (HEARTBEAT ACK) [:rfc:`9260`]
+    #: Heartbeat Acknowledgement (HEARTBEAT ACK) [RFC 9260]
     Heartbeat_Acknowledgement = 5
 
-    #: Abort (ABORT) [:rfc:`9260`]
+    #: Abort (ABORT) [RFC 9260]
     Abort = 6
 
-    #: Shutdown (SHUTDOWN) [:rfc:`9260`]
+    #: Shutdown (SHUTDOWN) [RFC 9260]
     Shutdown = 7
 
-    #: Shutdown Acknowledgement (SHUTDOWN ACK) [:rfc:`9260`]
+    #: Shutdown Acknowledgement (SHUTDOWN ACK) [RFC 9260]
     Shutdown_Acknowledgement = 8
 
-    #: Operation Error (ERROR) [:rfc:`9260`]
+    #: Operation Error (ERROR) [RFC 9260]
     Operation_Error = 9
 
-    #: State Cookie (COOKIE ECHO) [:rfc:`9260`]
+    #: State Cookie (COOKIE ECHO) [RFC 9260]
     State_Cookie = 10
 
-    #: Cookie Acknowledgement (COOKIE ACK) [:rfc:`9260`]
+    #: Cookie Acknowledgement (COOKIE ACK) [RFC 9260]
     Cookie_Acknowledgement = 11
 
-    #: Reserved for Explicit Congestion Notification Echo (ECNE) [:rfc:`9260`]
+    #: Reserved for Explicit Congestion Notification Echo (ECNE) [RFC 9260]
     Reserved_for_Explicit_Congestion_Notification_Echo = 12
 
-    #: Reserved for Congestion Window Reduced (CWR) [:rfc:`9260`]
+    #: Reserved for Congestion Window Reduced (CWR) [RFC 9260]
     Reserved_for_Congestion_Window_Reduced = 13
 
-    #: Shutdown Complete (SHUTDOWN COMPLETE) [:rfc:`9260`]
+    #: Shutdown Complete (SHUTDOWN COMPLETE) [RFC 9260]
     Shutdown_Complete = 14
 
-    #: Authentication Chunk (AUTH) [:rfc:`4895`]
+    #: Authentication Chunk (AUTH) [RFC 4895]
     Authentication_Chunk = 15
 
-    #: Reserved for IETF-defined Chunk Extensions [:rfc:`9260`]
+    #: Reserved for IETF-defined Chunk Extensions [RFC 9260]
     Reserved_for_IETF_defined_Chunk_Extensions_63 = 63
 
-    #: Payload Data supporting Interleaving (I-DATA) [:rfc:`8260`]
+    #: Payload Data supporting Interleaving (I-DATA) [RFC 8260]
     Payload_Data_supporting_Interleaving = 64
 
     #: DTLS (TEMPORARY - registered 2026-02-20, expires 2027-02-20) [draft-ietf-
     #: tsvwg-sctp-dtls-chunk-01]
     DTLS = 65
 
-    #: Reserved for IETF-defined Chunk Extensions [:rfc:`9260`]
+    #: Reserved for IETF-defined Chunk Extensions [RFC 9260]
     Reserved_for_IETF_defined_Chunk_Extensions_127 = 127
 
-    #: Address Configuration Acknowledgment (ASCONF-ACK) [:rfc:`5061`]
+    #: Address Configuration Acknowledgment (ASCONF-ACK) [RFC 5061]
     Address_Configuration_Acknowledgment = 128
 
     #: Unassigned
     Unassigned_129 = 129
 
-    #: Re-configuration Chunk (RE-CONFIG) [:rfc:`6525`]
+    #: Re-configuration Chunk (RE-CONFIG) [RFC 6525]
     Re_configuration_Chunk = 130
 
     #: Unassigned
     Unassigned_131 = 131
 
-    #: Padding Chunk (PAD) [:rfc:`4820`]
+    #: Padding Chunk (PAD) [RFC 4820]
     Padding_Chunk = 132
 
-    #: Reserved for IETF-defined Chunk Extensions [:rfc:`9260`]
+    #: Reserved for IETF-defined Chunk Extensions [RFC 9260]
     Reserved_for_IETF_defined_Chunk_Extensions_191 = 191
 
-    #: Forward TSN [:rfc:`3758`]
+    #: Forward TSN [RFC 3758]
     Forward_TSN = 192
 
-    #: Address Configuration Change Chunk (ASCONF) [:rfc:`5061`]
+    #: Address Configuration Change Chunk (ASCONF) [RFC 5061]
     Address_Configuration_Change_Chunk = 193
 
-    #: I-FORWARD-TSN [:rfc:`8260`]
+    #: I-FORWARD-TSN [RFC 8260]
     I_FORWARD_TSN = 194
 
-    #: Reserved for IETF-defined Chunk Extensions [:rfc:`9260`]
+    #: Reserved for IETF-defined Chunk Extensions [RFC 9260]
     Reserved_for_IETF_defined_Chunk_Extensions_255 = 255
 
     @classmethod

@@ -20,37 +20,37 @@ __all__ = ['Operation']
 class Operation(EnumRegistry, IntEnum):
     """[Operation] Operation Codes [:rfc:`826`][:rfc:`5494`]"""
 
-    #: Reserved [:rfc:`5494`]
+    #: Reserved [RFC 5494]
     Reserved_0 = 0
 
-    #: REQUEST [:rfc:`826`][:rfc:`5227`]
+    #: REQUEST [RFC 826][; ][RFC 5227]
     REQUEST = 1
 
-    #: REPLY [:rfc:`826`][:rfc:`5227`]
+    #: REPLY [RFC 826][; ][RFC 5227]
     REPLY = 2
 
-    #: request Reverse [:rfc:`903`]
+    #: request Reverse [RFC 903]
     request_Reverse = 3
 
-    #: reply Reverse [:rfc:`903`]
+    #: reply Reverse [RFC 903]
     reply_Reverse = 4
 
-    #: DRARP-Request [:rfc:`1931`]
+    #: DRARP-Request [RFC 1931]
     DRARP_Request = 5
 
-    #: DRARP-Reply [:rfc:`1931`]
+    #: DRARP-Reply [RFC 1931]
     DRARP_Reply = 6
 
-    #: DRARP-Error [:rfc:`1931`]
+    #: DRARP-Error [RFC 1931]
     DRARP_Error = 7
 
-    #: InARP-Request [:rfc:`2390`]
+    #: InARP-Request [RFC 2390]
     InARP_Request = 8
 
-    #: InARP-Reply [:rfc:`2390`]
+    #: InARP-Reply [RFC 2390]
     InARP_Reply = 9
 
-    #: ARP-NAK [:rfc:`1577`]
+    #: ARP-NAK [RFC 1577]
     ARP_NAK = 10
 
     #: MARS-Request [Grenville Armitage]
@@ -89,16 +89,16 @@ class Operation(EnumRegistry, IntEnum):
     #: MARS-Redirect-Map [Grenville Armitage]
     MARS_Redirect_Map = 22
 
-    #: MAPOS-UNARP [Mitsuru Maruyama][:rfc:`2176`]
+    #: MAPOS-UNARP [Mitsuru Maruyama][; ][RFC 2176]
     MAPOS_UNARP = 23
 
-    #: OP_EXP1 [:rfc:`5494`]
+    #: OP_EXP1 [RFC 5494]
     OP_EXP1 = 24
 
-    #: OP_EXP2 [:rfc:`5494`]
+    #: OP_EXP2 [RFC 5494]
     OP_EXP2 = 25
 
-    #: Reserved [:rfc:`5494`]
+    #: Reserved [RFC 5494]
     Reserved_65535 = 65535
 
     @classmethod

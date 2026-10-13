@@ -20,43 +20,43 @@ __all__ = ['CauseCode']
 class CauseCode(EnumRegistry, IntEnum):
     """[CauseCode] SCTP Error Cause Codes"""
 
-    #: Invalid Stream Identifier [:rfc:`9260`]
+    #: Invalid Stream Identifier [RFC 9260]
     Invalid_Stream_Identifier = 1
 
-    #: Missing Mandatory Parameter [:rfc:`9260`]
+    #: Missing Mandatory Parameter [RFC 9260]
     Missing_Mandatory_Parameter = 2
 
-    #: Stale Cookie [:rfc:`9260`]
+    #: Stale Cookie [RFC 9260]
     Stale_Cookie = 3
 
-    #: Out of Resource [:rfc:`9260`]
+    #: Out of Resource [RFC 9260]
     Out_of_Resource = 4
 
-    #: Unresolvable Address [:rfc:`9260`]
+    #: Unresolvable Address [RFC 9260]
     Unresolvable_Address = 5
 
-    #: Unrecognized Chunk Type [:rfc:`9260`]
+    #: Unrecognized Chunk Type [RFC 9260]
     Unrecognized_Chunk_Type = 6
 
-    #: Invalid Mandatory Parameter [:rfc:`9260`]
+    #: Invalid Mandatory Parameter [RFC 9260]
     Invalid_Mandatory_Parameter = 7
 
-    #: Unrecognized Parameters [:rfc:`9260`]
+    #: Unrecognized Parameters [RFC 9260]
     Unrecognized_Parameters = 8
 
-    #: No User Data [:rfc:`9260`]
+    #: No User Data [RFC 9260]
     No_User_Data = 9
 
-    #: Cookie Received While Shutting Down [:rfc:`9260`]
+    #: Cookie Received While Shutting Down [RFC 9260]
     Cookie_Received_While_Shutting_Down = 10
 
-    #: Restart of an Association with New Addresses [:rfc:`9260`]
+    #: Restart of an Association with New Addresses [RFC 9260]
     Restart_of_an_Association_with_New_Addresses = 11
 
-    #: User-Initiated Abort [:rfc:`9260`]
+    #: User-Initiated Abort [RFC 9260]
     User_Initiated_Abort = 12
 
-    #: Protocol Violation [:rfc:`9260`]
+    #: Protocol Violation [RFC 9260]
     Protocol_Violation = 13
 
     #: Missing DTLS Chunk Support (TEMPORARY - registered 2026-08-13, expires
@@ -75,22 +75,22 @@ class CauseCode(EnumRegistry, IntEnum):
     #: expires 2027-08-13) [draft-ietf-tsvwg-sctp-dtls-chunk-04]
     Incompatible_DTLS_Key_Management_Roles = 103
 
-    #: Request to Delete Last Remaining IP Address [:rfc:`5061`]
+    #: Request to Delete Last Remaining IP Address [RFC 5061]
     Request_to_Delete_Last_Remaining_IP_Address = 160
 
-    #: Operation Refused Due to Resource Shortage [:rfc:`5061`]
+    #: Operation Refused Due to Resource Shortage [RFC 5061]
     Operation_Refused_Due_to_Resource_Shortage = 161
 
-    #: Request to Delete Source IP Address [:rfc:`5061`]
+    #: Request to Delete Source IP Address [RFC 5061]
     Request_to_Delete_Source_IP_Address = 162
 
-    #: Association Aborted due to illegal ASCONF-ACK [:rfc:`5061`]
+    #: Association Aborted due to illegal ASCONF-ACK [RFC 5061]
     Association_Aborted_due_to_illegal_ASCONF_ACK = 163
 
-    #: Request refused - no authorization [:rfc:`5061`]
+    #: Request refused - no authorization [RFC 5061]
     Request_refused_no_authorization = 164
 
-    #: Unsupported HMAC Identifier [:rfc:`4895`]
+    #: Unsupported HMAC Identifier [RFC 4895]
     Unsupported_HMAC_Identifier = 261
 
     @classmethod

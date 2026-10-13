@@ -44,16 +44,16 @@ class StatusCode(EnumRegistry, IntEnum):
     def __str__(self) -> 'str':
         return "[%s] %s" % (self._value_, self.message)
 
-    #: Continue [:rfc:`9110#section-15.2.1`]
+    #: Continue [RFC 9110, Section 15.2.1]
     CODE_100 = 100, 'Continue'
 
-    #: Switching Protocols [:rfc:`9110#section-15.2.2`]
+    #: Switching Protocols [RFC 9110, Section 15.2.2]
     CODE_101 = 101, 'Switching Protocols'
 
-    #: Processing [:rfc:`2518`]
+    #: Processing [RFC 2518]
     CODE_102 = 102, 'Processing'
 
-    #: Early Hints [:rfc:`8297`]
+    #: Early Hints [RFC 8297]
     CODE_103 = 103, 'Early Hints'
 
     #: Upload Resumption Supported (TEMPORARY - registered 2024-11-13, extension
@@ -61,191 +61,191 @@ class StatusCode(EnumRegistry, IntEnum):
     #: upload-05]
     CODE_104 = 104, 'Upload Resumption Supported'
 
-    #: OK [:rfc:`9110#section-15.3.1`]
+    #: OK [RFC 9110, Section 15.3.1]
     CODE_200 = 200, 'OK'
 
-    #: Created [:rfc:`9110#section-15.3.2`]
+    #: Created [RFC 9110, Section 15.3.2]
     CODE_201 = 201, 'Created'
 
-    #: Accepted [:rfc:`9110#section-15.3.3`]
+    #: Accepted [RFC 9110, Section 15.3.3]
     CODE_202 = 202, 'Accepted'
 
-    #: Non-Authoritative Information [:rfc:`9110#section-15.3.4`]
+    #: Non-Authoritative Information [RFC 9110, Section 15.3.4]
     CODE_203 = 203, 'Non-Authoritative Information'
 
-    #: No Content [:rfc:`9110#section-15.3.5`]
+    #: No Content [RFC 9110, Section 15.3.5]
     CODE_204 = 204, 'No Content'
 
-    #: Reset Content [:rfc:`9110#section-15.3.6`]
+    #: Reset Content [RFC 9110, Section 15.3.6]
     CODE_205 = 205, 'Reset Content'
 
-    #: Partial Content [:rfc:`9110#section-15.3.7`]
+    #: Partial Content [RFC 9110, Section 15.3.7]
     CODE_206 = 206, 'Partial Content'
 
-    #: Multi-Status [:rfc:`4918`]
+    #: Multi-Status [RFC 4918]
     CODE_207 = 207, 'Multi-Status'
 
-    #: Already Reported [:rfc:`5842`]
+    #: Already Reported [RFC 5842]
     CODE_208 = 208, 'Already Reported'
 
-    #: IM Used [:rfc:`3229`]
+    #: IM Used [RFC 3229]
     CODE_226 = 226, 'IM Used'
 
-    #: Multiple Choices [:rfc:`9110#section-15.4.1`]
+    #: Multiple Choices [RFC 9110, Section 15.4.1]
     CODE_300 = 300, 'Multiple Choices'
 
-    #: Moved Permanently [:rfc:`9110#section-15.4.2`]
+    #: Moved Permanently [RFC 9110, Section 15.4.2]
     CODE_301 = 301, 'Moved Permanently'
 
-    #: Found [:rfc:`9110#section-15.4.3`]
+    #: Found [RFC 9110, Section 15.4.3]
     CODE_302 = 302, 'Found'
 
-    #: See Other [:rfc:`9110#section-15.4.4`]
+    #: See Other [RFC 9110, Section 15.4.4]
     CODE_303 = 303, 'See Other'
 
-    #: Not Modified [:rfc:`9110#section-15.4.5`]
+    #: Not Modified [RFC 9110, Section 15.4.5]
     CODE_304 = 304, 'Not Modified'
 
-    #: Use Proxy [:rfc:`9110#section-15.4.6`]
+    #: Use Proxy [RFC 9110, Section 15.4.6]
     CODE_305 = 305, 'Use Proxy'
 
-    #: (Unused) [:rfc:`9110#section-15.4.7`]
+    #: (Unused) [RFC 9110, Section 15.4.7]
     CODE_306 = 306, '(Unused)'
 
-    #: Temporary Redirect [:rfc:`9110#section-15.4.8`]
+    #: Temporary Redirect [RFC 9110, Section 15.4.8]
     CODE_307 = 307, 'Temporary Redirect'
 
-    #: Permanent Redirect [:rfc:`9110#section-15.4.9`]
+    #: Permanent Redirect [RFC 9110, Section 15.4.9]
     CODE_308 = 308, 'Permanent Redirect'
 
-    #: Bad Request [:rfc:`9110#section-15.5.1`]
+    #: Bad Request [RFC 9110, Section 15.5.1]
     CODE_400 = 400, 'Bad Request'
 
-    #: Unauthorized [:rfc:`9110#section-15.5.2`]
+    #: Unauthorized [RFC 9110, Section 15.5.2]
     CODE_401 = 401, 'Unauthorized'
 
-    #: Payment Required [:rfc:`9110#section-15.5.3`]
+    #: Payment Required [RFC 9110, Section 15.5.3]
     CODE_402 = 402, 'Payment Required'
 
-    #: Forbidden [:rfc:`9110#section-15.5.4`]
+    #: Forbidden [RFC 9110, Section 15.5.4]
     CODE_403 = 403, 'Forbidden'
 
-    #: Not Found [:rfc:`9110#section-15.5.5`]
+    #: Not Found [RFC 9110, Section 15.5.5]
     CODE_404 = 404, 'Not Found'
 
-    #: Method Not Allowed [:rfc:`9110#section-15.5.6`]
+    #: Method Not Allowed [RFC 9110, Section 15.5.6]
     CODE_405 = 405, 'Method Not Allowed'
 
-    #: Not Acceptable [:rfc:`9110#section-15.5.7`]
+    #: Not Acceptable [RFC 9110, Section 15.5.7]
     CODE_406 = 406, 'Not Acceptable'
 
-    #: Proxy Authentication Required [:rfc:`9110#section-15.5.8`]
+    #: Proxy Authentication Required [RFC 9110, Section 15.5.8]
     CODE_407 = 407, 'Proxy Authentication Required'
 
-    #: Request Timeout [:rfc:`9110#section-15.5.9`]
+    #: Request Timeout [RFC 9110, Section 15.5.9]
     CODE_408 = 408, 'Request Timeout'
 
-    #: Conflict [:rfc:`9110#section-15.5.10`]
+    #: Conflict [RFC 9110, Section 15.5.10]
     CODE_409 = 409, 'Conflict'
 
-    #: Gone [:rfc:`9110#section-15.5.11`]
+    #: Gone [RFC 9110, Section 15.5.11]
     CODE_410 = 410, 'Gone'
 
-    #: Length Required [:rfc:`9110#section-15.5.12`]
+    #: Length Required [RFC 9110, Section 15.5.12]
     CODE_411 = 411, 'Length Required'
 
-    #: Precondition Failed [:rfc:`9110#section-15.5.13`]
+    #: Precondition Failed [RFC 9110, Section 15.5.13]
     CODE_412 = 412, 'Precondition Failed'
 
-    #: Content Too Large [:rfc:`9110#section-15.5.14`]
+    #: Content Too Large [RFC 9110, Section 15.5.14]
     CODE_413 = 413, 'Content Too Large'
 
-    #: URI Too Long [:rfc:`9110#section-15.5.15`]
+    #: URI Too Long [RFC 9110, Section 15.5.15]
     CODE_414 = 414, 'URI Too Long'
 
-    #: Unsupported Media Type [:rfc:`9110#section-15.5.16`]
+    #: Unsupported Media Type [RFC 9110, Section 15.5.16]
     CODE_415 = 415, 'Unsupported Media Type'
 
-    #: Range Not Satisfiable [:rfc:`9110#section-15.5.17`]
+    #: Range Not Satisfiable [RFC 9110, Section 15.5.17]
     CODE_416 = 416, 'Range Not Satisfiable'
 
-    #: Expectation Failed [:rfc:`9110#section-15.5.18`]
+    #: Expectation Failed [RFC 9110, Section 15.5.18]
     CODE_417 = 417, 'Expectation Failed'
 
-    #: (Unused) [:rfc:`9110#section-15.5.19`]
+    #: (Unused) [RFC 9110, Section 15.5.19]
     CODE_418 = 418, '(Unused)'
 
-    #: Misdirected Request [:rfc:`9110#section-15.5.20`]
+    #: Misdirected Request [RFC 9110, Section 15.5.20]
     CODE_421 = 421, 'Misdirected Request'
 
-    #: Unprocessable Content [:rfc:`9110#section-15.5.21`]
+    #: Unprocessable Content [RFC 9110, Section 15.5.21]
     CODE_422 = 422, 'Unprocessable Content'
 
-    #: Locked [:rfc:`4918`]
+    #: Locked [RFC 4918]
     CODE_423 = 423, 'Locked'
 
-    #: Failed Dependency [:rfc:`4918`]
+    #: Failed Dependency [RFC 4918]
     CODE_424 = 424, 'Failed Dependency'
 
-    #: Too Early [:rfc:`8470`]
+    #: Too Early [RFC 8470]
     CODE_425 = 425, 'Too Early'
 
-    #: Upgrade Required [:rfc:`9110#section-15.5.22`]
+    #: Upgrade Required [RFC 9110, Section 15.5.22]
     CODE_426 = 426, 'Upgrade Required'
 
     #: Unassigned
     CODE_427 = 427, 'Unassigned'
 
-    #: Precondition Required [:rfc:`6585`]
+    #: Precondition Required [RFC 6585]
     CODE_428 = 428, 'Precondition Required'
 
-    #: Too Many Requests [:rfc:`6585`]
+    #: Too Many Requests [RFC 6585]
     CODE_429 = 429, 'Too Many Requests'
 
     #: Unassigned
     CODE_430 = 430, 'Unassigned'
 
-    #: Request Header Fields Too Large [:rfc:`6585`]
+    #: Request Header Fields Too Large [RFC 6585]
     CODE_431 = 431, 'Request Header Fields Too Large'
 
-    #: Unavailable For Legal Reasons [:rfc:`7725`]
+    #: Unavailable For Legal Reasons [RFC 7725]
     CODE_451 = 451, 'Unavailable For Legal Reasons'
 
-    #: Internal Server Error [:rfc:`9110#section-15.6.1`]
+    #: Internal Server Error [RFC 9110, Section 15.6.1]
     CODE_500 = 500, 'Internal Server Error'
 
-    #: Not Implemented [:rfc:`9110#section-15.6.2`]
+    #: Not Implemented [RFC 9110, Section 15.6.2]
     CODE_501 = 501, 'Not Implemented'
 
-    #: Bad Gateway [:rfc:`9110#section-15.6.3`]
+    #: Bad Gateway [RFC 9110, Section 15.6.3]
     CODE_502 = 502, 'Bad Gateway'
 
-    #: Service Unavailable [:rfc:`9110#section-15.6.4`]
+    #: Service Unavailable [RFC 9110, Section 15.6.4]
     CODE_503 = 503, 'Service Unavailable'
 
-    #: Gateway Timeout [:rfc:`9110#section-15.6.5`]
+    #: Gateway Timeout [RFC 9110, Section 15.6.5]
     CODE_504 = 504, 'Gateway Timeout'
 
-    #: HTTP Version Not Supported [:rfc:`9110#section-15.6.6`]
+    #: HTTP Version Not Supported [RFC 9110, Section 15.6.6]
     CODE_505 = 505, 'HTTP Version Not Supported'
 
-    #: Variant Also Negotiates [:rfc:`2295`]
+    #: Variant Also Negotiates [RFC 2295]
     CODE_506 = 506, 'Variant Also Negotiates'
 
-    #: Insufficient Storage [:rfc:`4918`]
+    #: Insufficient Storage [RFC 4918]
     CODE_507 = 507, 'Insufficient Storage'
 
-    #: Loop Detected [:rfc:`5842`]
+    #: Loop Detected [RFC 5842]
     CODE_508 = 508, 'Loop Detected'
 
     #: Unassigned
     CODE_509 = 509, 'Unassigned'
 
-    #: Not Extended (OBSOLETED) [:rfc:`2774`][Status change of HTTP experiments to
+    #: Not Extended (OBSOLETED) [RFC 2774][; ][Status change of HTTP experiments to
     #: Historic]
     CODE_510 = 510, 'Not Extended'
 
-    #: Network Authentication Required [:rfc:`6585`]
+    #: Network Authentication Required [RFC 6585]
     CODE_511 = 511, 'Network Authentication Required'
 
     @classmethod

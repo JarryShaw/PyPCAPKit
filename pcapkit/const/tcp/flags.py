@@ -19,40 +19,40 @@ __all__ = ['Flags']
 class Flags(EnumRegistry, IntFlag):
     """[Flags] TCP Header Flags"""
 
-    #: Reserved for future use [:rfc:`9293`]
+    #: Reserved for future use [RFC 9293]
     Reserved_4 = 1 << 4
 
-    #: Reserved for future use [:rfc:`9293`]
+    #: Reserved for future use [RFC 9293]
     Reserved_5 = 1 << 5
 
-    #: Reserved for future use [:rfc:`9293`]
+    #: Reserved for future use [RFC 9293]
     Reserved_6 = 1 << 6
 
-    #: AE (Accurate ECN) [:rfc:`9768`]
+    #: AE (Accurate ECN) [RFC 9768]
     AE = 1 << 7
 
-    #: CWR (Congestion Window Reduced) [:rfc:`3168`]
+    #: CWR (Congestion Window Reduced) [RFC 3168]
     CWR = 1 << 8
 
-    #: ECE (ECN-Echo) [:rfc:`3168`]
+    #: ECE (ECN-Echo) [RFC 3168]
     ECE = 1 << 9
 
-    #: Urgent Pointer field is significant (URG) [:rfc:`9293`]
+    #: Urgent Pointer field is significant (URG) [RFC 9293]
     URG = 1 << 10
 
-    #: Acknowledgment field is significant (ACK) [:rfc:`9293`]
+    #: Acknowledgment field is significant (ACK) [RFC 9293]
     ACK = 1 << 11
 
-    #: Push Function (PSH) [:rfc:`9293`]
+    #: Push Function (PSH) [RFC 9293]
     PSH = 1 << 12
 
-    #: Reset the connection (RST) [:rfc:`9293`]
+    #: Reset the connection (RST) [RFC 9293]
     RST = 1 << 13
 
-    #: Synchronize sequence numbers (SYN) [:rfc:`9293`]
+    #: Synchronize sequence numbers (SYN) [RFC 9293]
     SYN = 1 << 14
 
-    #: No more data from sender (FIN) [:rfc:`9293`]
+    #: No more data from sender (FIN) [RFC 9293]
     FIN = 1 << 15
 
     @classmethod
