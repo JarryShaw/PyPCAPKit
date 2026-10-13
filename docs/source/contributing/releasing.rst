@@ -29,10 +29,14 @@ counter, or a fresh ``.post1`` for a final release -- and then:
 * resets :file:`conda/build` to ``0``.
 
 Its one scheduled caller is the ``Bump Version`` step of
-``.github/workflows/cron-vendor.yml``, and only when a weekly registry crawl
-actually changed something (``steps.verify-changed-files.outputs.files_changed
-== 'true'``) -- a crawl that finds nothing does not bump. That commit is what
-starts the automated path described below.
+``.github/workflows/cron-vendor.yml``, and only when a registry crawl changed
+code. ``util/vendor_code_changed.py`` compares each changed file with ``HEAD``;
+a crawl whose changes are all to comments or docstrings is committed as
+"Updated vendor documentation without a version bump" instead, so it reaches
+``main`` without starting a release
+(`#1674 <https://github.com/JarryShaw/PyPCAPKit/issues/1674>`__). A crawl that
+finds nothing commits nothing. The bump commit is what starts the automated
+path described below.
 
 The same script is also the manual entry point: run
 ``python util/bump_version.py`` and commit the result to ``main`` for a
