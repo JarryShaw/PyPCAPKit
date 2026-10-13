@@ -254,7 +254,28 @@ jobs:
               ;;
             1)
               commit="$(git rev-parse HEAD)"
-              git push origin "${commit}:${GITHUB_REF}"
+              status=0
+              git push origin "${commit}:${GITHUB_REF}" || status=$?
+              if [ "$status" -ne 0 ]; then
+                # #1649: a merge landing after the fetch above has the push
+                # refused as a non-fast-forward. That is main moving past this
+                # checkout one step later than the rule can see, so it ends as
+                # the rule's refusal does. Only main moved to a commit without
+                # `$commit` in its history is that race: at `$tip` the push
+                # failed for another reason, and over `$commit` it landed though
+                # git says it did not. Those, and a fetch that fails, fail the
+                # step.
+                git fetch origin "${GITHUB_REF#refs/heads/}" || exit "$status"
+                moved="$(git rev-parse FETCH_HEAD)"
+                ancestry=0
+                git merge-base --is-ancestor "$commit" "$moved" || ancestry=$?
+                if [ "$moved" = "$tip" ] || [ "$ancestry" -ne 1 ]; then
+                  exit "$status"
+                fi
+                echo "::notice title=Not pushed as main moved during the push::main moved from $tip to $moved after the fetch, so $commit is not a fast-forward. The bump is left to the Conda Update that $moved's own Unit Tests run raises."
+                echo "pushed=false" >> "$GITHUB_OUTPUT"
+                exit 0
+              fi
               echo "pushed=true" >> "$GITHUB_OUTPUT"
               echo "commit=${commit}" >> "$GITHUB_OUTPUT"
               ;;

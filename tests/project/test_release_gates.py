@@ -3937,28 +3937,37 @@ class CondaStepHarness(CondaWorkflowMixin):
     def _land_after_fetch(self, name: 'str', files: 'dict[str, str]', message: 'str',
                           identity: 'Optional[tuple[tuple[str, str], tuple[str, str]]]' = None,
                           ) -> 'tuple[str, dict[str, str]]':
-        """:meth:`_land`, but the push is left to a ``git`` shim that makes it
-        once, the moment a ``git fetch`` run through it returns: the commit's
-        sha, and the ``PATH`` that puts the shim first. It marks having fired
-        by creating ``landed`` in the temporary directory.
+        """:meth:`_land`, but the push is left to :meth:`_after_first`, the
+        moment a ``git fetch`` returns: the commit's sha, and the ``PATH``.
 
         """
         clone = self._stage(name, files, message, identity)
+        env = self._after_first(
+            'fetch', f'exec "$git" -C {shlex.quote(str(clone))} push -q origin HEAD:refs/heads/main')
+        return self._git(clone, 'rev-parse', 'HEAD'), env
+
+    def _after_first(self, command: 'str', action: 'str') -> 'dict[str, str]':
+        """The ``PATH`` that puts first a ``git`` shim running the real one,
+        ``$git``, and then, once, the ``sh`` line ``action``, the moment a
+        ``git <command>`` run through it succeeds. It marks having fired by
+        creating ``fired`` in the temporary directory.
+
+        """
         real = shutil.which('git', path=self.env['PATH'])
         assert real is not None  # setUpClass skips without it
-        git, marker = shlex.quote(real), shlex.quote(str(self.root / 'landed'))
+        marker = shlex.quote(str(self.root / 'fired'))
         shim = self.root / 'shim'
         shim.mkdir()
         (shim / 'git').write_text(
             '#!/bin/sh\n'
-            f'{git} "$@" || exit\n'
-            f'if [ "$1" = fetch ] && [ ! -e {marker} ]; then\n'
+            f'git={shlex.quote(real)}\n'
+            '"$git" "$@" || exit\n'
+            f'if [ "$1" = {shlex.quote(command)} ] && [ ! -e {marker} ]; then\n'
             f'  : > {marker}\n'
-            f'  exec {git} -C {shlex.quote(str(clone))} push -q origin HEAD:refs/heads/main\n'
+            f'  {action}\n'
             'fi\n', encoding='utf-8')
         (shim / 'git').chmod(0o755)
-        return (self._git(clone, 'rev-parse', 'HEAD'),
-                {'PATH': f'{shim}{os.pathsep}{self.env["PATH"]}'})
+        return {'PATH': f'{shim}{os.pathsep}{self.env["PATH"]}'}
 
     def _bash(self, script: 'str', cwd: 'pathlib.Path', env: 'dict[str, str]',
               ) -> 'tuple[subprocess.CompletedProcess[str], dict[str, str]]':
@@ -4121,9 +4130,11 @@ class TestCondaPushReportsWhatLanded(CondaStepHarness, unittest.TestCase):
     def test_a_merge_landing_after_the_fetch_refuses_the_push(self) -> None:
         """The rebase is onto the tip the rule judged, ``$tip``, so a merge that
         lands after the fetch is never under the bump: ``origin`` has moved past
-        what is pushed, the push is not a fast-forward, and it is refused. The
-        step fails having written nothing, so nothing is tagged or uploaded,
-        and the merge's own ``Unit Tests`` run raises the next bump.
+        what is pushed, the push is not a fast-forward, and it is refused. That
+        is :meth:`test_a_bump_is_not_pushed_over_a_commit_with_no_verdict` one
+        step later, and it ends the same way (#1649): ``pushed=false``, a
+        notice, and a green job, and the merge's own ``Unit Tests`` run raises
+        the next bump.
 
         """
         clone = self._clone('first')
@@ -4131,10 +4142,12 @@ class TestCondaPushReportsWhatLanded(CondaStepHarness, unittest.TestCase):
                                             'fix(toolkit): a merge', (self.HUMAN, self.GITHUB))
         self._bump(clone, {0: 'package0==2.0'})
         result, outputs = self._run(clone, **env)
-        self.assertTrue((self.root / 'landed').exists(), 'the merge never raced the fetch')
-        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertTrue((self.root / 'fired').exists(), 'the merge never raced the fetch')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn('[rejected]', result.stderr)
-        self.assertEqual(outputs, {}, 'the step reported a push that did not land')
+        self.assertEqual(outputs, {'pushed': 'false'}, 'the step reported a push that did not land')
+        self.assertIn(f'::notice title=Not pushed as main moved during the push::main moved '
+                      f'from {self.base} to {merge} after the fetch', result.stdout)
         self.assertEqual(self._origin('rev-parse', 'main'), merge)
         self.assertEqual(self._git(clone, 'rev-parse', 'HEAD^'), self.base,
                          'the bump was not rebased onto the tip the rule judged')
@@ -4159,6 +4172,87 @@ class TestCondaPushReportsWhatLanded(CondaStepHarness, unittest.TestCase):
         landed = self._origin('rev-parse', 'main')
         self.assertEqual(outputs, {'pushed': 'true', 'commit': landed})
         self.assertEqual(self._origin('rev-parse', 'main^'), merge)
+
+    def test_a_push_the_remote_declines_fails_the_step(self) -> None:
+        """A refusal with ``main`` where it was fetched -- a hook here, a ruleset
+        on GitHub -- is no race, and must not pass as one: the step fails, as
+        every push failure did before #1649.
+
+        """
+        clone = self._clone('first')
+        hook = self.origin / 'hooks' / 'pre-receive'
+        hook.write_text('#!/bin/sh\necho declined >&2\nexit 1\n', encoding='utf-8')
+        hook.chmod(0o755)
+        self._bump(clone, {0: 'package0==2.0'})
+        result, outputs = self._run(clone)
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn('[remote rejected]', result.stderr)
+        self.assertEqual(outputs, {})
+        self.assertNotIn('::notice', result.stdout)
+        self.assertEqual(self._origin('rev-parse', 'main'), self.base)
+
+    def test_a_remote_lost_after_the_fetch_fails_the_step(self) -> None:
+        """A broken remote: the push fails, and so does the fetch that would ask
+        where ``main`` is now. With no answer the step fails rather than
+        guessing at a race.
+
+        """
+        clone = self._clone('first')
+        gone = self.root / 'origin.gone'
+        env = self._after_first('fetch', f'mv {shlex.quote(str(self.origin))} '
+                                         f'{shlex.quote(str(gone))}')
+        self._bump(clone, {0: 'package0==2.0'})
+        result, outputs = self._run(clone, **env)
+        self.assertTrue((self.root / 'fired').exists(), 'the remote was never lost')
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(outputs, {})
+        self.assertNotIn('::notice', result.stdout)
+        gone.rename(self.origin)
+        self.assertEqual(self._origin('rev-parse', 'main'), self.base)
+
+    def test_a_push_that_lands_but_reports_failure_fails_the_step(self) -> None:
+        """``main`` moved, but to the bump itself: the push landed though git
+        said it did not, as when the connection drops after the remote updates
+        the ref. Calling that a race would report ``pushed=false`` and green
+        for a bump nothing then tags, so it fails, as git reported.
+
+        """
+        clone = self._clone('first')
+        env = self._after_first('push', "echo 'fatal: the remote end hung up unexpectedly' >&2"
+                                        '; exit 128')
+        self._bump(clone, {0: 'package0==2.0'})
+        result, outputs = self._run(clone, **env)
+        self.assertTrue((self.root / 'fired').exists(), 'the push never ran')
+        self.assertEqual(result.returncode, 128, result.stdout + result.stderr)
+        self.assertEqual(outputs, {})
+        self.assertNotIn('::notice', result.stdout)
+        self.assertEqual(self._origin('rev-parse', 'main'), self._git(clone, 'rev-parse', 'HEAD'))
+        self.assertEqual(self._origin('rev-parse', 'main^'), self.base)
+
+    def test_a_push_that_lands_under_a_later_merge_but_reports_failure_fails_the_step(
+            self) -> None:
+        """The test above with a merge landing over the bump before the step
+        looks: ``main`` is at a third commit, but one with the bump in its
+        history, so this is no race either.
+
+        """
+        clone = self._clone('first')
+        merger = self._stage('merge', {'pcapkit/toolkit/scapy.py': 'fix\n'},
+                             'fix(toolkit): a merge', (self.HUMAN, self.GITHUB))
+        git = f'"$git" -C {shlex.quote(str(merger))}'
+        env = self._after_first('push', f'{git} pull -q --rebase origin main'
+                                        f' && {git} push -q origin HEAD:refs/heads/main'
+                                        "; echo 'fatal: the remote end hung up unexpectedly' >&2"
+                                        '; exit 128')
+        self._bump(clone, {0: 'package0==2.0'})
+        result, outputs = self._run(clone, **env)
+        self.assertTrue((self.root / 'fired').exists(), 'the push never ran')
+        self.assertEqual(result.returncode, 128, result.stdout + result.stderr)
+        self.assertEqual(outputs, {})
+        self.assertNotIn('::notice', result.stdout)
+        self.assertEqual(self._origin('rev-parse', 'main'), self._git(merger, 'rev-parse', 'HEAD'))
+        self.assertEqual(self._origin('rev-parse', 'main^'), self._git(clone, 'rev-parse', 'HEAD'),
+                         'the merge did not land over the bump')
 
     def test_a_rule_that_cannot_answer_fails_the_step(self) -> None:
         """No sha to compare is a broken run, not a stale one: the step fails,
