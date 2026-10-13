@@ -20,6 +20,7 @@ from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
 from pcapkit.protocols.internet.ip import IP as Protocol_IP
+from pcapkit.protocols.internet.ipv4 import IPv4
 from pcapkit.protocols.misc.null import NoPayload
 from pcapkit.protocols.misc.raw import Raw
 from pcapkit.protocols.protocol import ProtocolBase
@@ -32,7 +33,6 @@ if TYPE_CHECKING:
     from pcapkit.const.reg.linktype import LinkType
     from pcapkit.protocols.data.internet.ipv4 import IPv4 as Data_IPv4
     from pcapkit.protocols.data.internet.ipv6 import IPv6 as Data_IPv6
-    from pcapkit.protocols.internet.ipv4 import IPv4
     from pcapkit.protocols.internet.ipv6 import IPv6
     from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
     from pcapkit.protocols.misc.pcap import Frame
@@ -164,10 +164,12 @@ def tcp_segment(frame: 'ProtocolBase') -> 'Optional[TCPSegment]':
         return None
 
     # A later fragment's payload starts mid-datagram, with no TCP header in it.
-    if ip_info.version == 4:
-        offset = ip_info.offset
+    # NOTE: the layer's class says which header it is, not its Version field:
+    # IPv6 keeps whatever Version it reads, 4 included (#1666).
+    if isinstance(ip, IPv4):
+        offset = ip.info.offset
     else:
-        frag = cast('IPv6', ip).extension_headers.get(Enum_ExtensionHeader.IPv6_Frag)  # type: ignore[call-overload]
+        frag = ip.extension_headers.get(Enum_ExtensionHeader.IPv6_Frag)  # type: ignore[call-overload]
         offset = 0 if frag is None else cast('IPv6_Frag', frag).info.offset
     if offset:
         return None
