@@ -519,8 +519,11 @@ cannot be used for it.</p>
 <dd class="field-odd"><p><p>Data for IPv4 reassembly.</p>
 <ul class="simple">
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be used for IPv4 reassembly. A packet can be reassembled
-if it contains IPv4 layer (<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html#scapy.layers.inet.IP" title="(in Scapy v2.8.0.post5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.layers.inet.IP</span></code></a>) whose header the
-default engine accepts (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_ipv4_accepted()</span></code>), and the <strong>DF</strong>
+if it contains IPv4 layer (<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html#scapy.layers.inet.IP" title="(in Scapy v2.8.0.post5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.layers.inet.IP</span></code></a>) – the first of the
+frame, as for the default engine, so one carried in IPv6 counts but none an
+ICMP or ICMPv6 error quotes (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_first_ipv4()</span></code>) – whose header the
+default engine accepts (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_ipv4_accepted()</span></code>) and lies inside every
+IPv6 packet carrying it, and the <strong>DF</strong>
 (<code class="xref py py-attr docutils literal notranslate"><span class="pre">scapy.layers.inet.IP.flags.DF</span></code>) flag is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>.</p></li>
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be reassembled, then the <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> mapping of data for IPv4
 reassembly (<a class="reference internal" href="../foundation/reassembly/ip/ipv4.html#term-reasm.ipv4.packet"><span class="xref std std-term">reasm.ipv4.packet</span></a>) will be returned; otherwise, returns <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p></li>
@@ -589,7 +592,8 @@ reassembly (<a class="reference internal" href="../foundation/reassembly/ip/ipv6
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be used for TCP reassembly. A packet can be reassembled
 if it contains TCP layer (<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html#scapy.layers.inet.TCP" title="(in Scapy v2.8.0.post5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.layers.inet.TCP</span></code></a>) whose fixed header
 lies inside its datagram, and whose Data Offset counts at least that header,
-behind no IPv4 header the default engine rejects and in no later IPv4 fragment,
+behind no IPv4 header the default engine rejects, in no later IPv4 fragment and
+in no datagram an ICMP or ICMPv6 error quotes,
 or a TCP segment the default engine reads behind an AH or IPv6 extension header
 in IPv4. It is keyed by the IP layer that carries it – in an IP-in-IP tunnel,
 the innermost (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_tcp_carrier()</span></code>).</p></li>
