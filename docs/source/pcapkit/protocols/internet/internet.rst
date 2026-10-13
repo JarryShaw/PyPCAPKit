@@ -37,7 +37,7 @@ A chain of IPv6 extension headers is dissected to at most
 a row, whether it follows IPv6 or another layer such as IPv4. What follows is
 kept as :class:`~pcapkit.protocols.misc.raw.Raw`, with one
 :exc:`~pcapkit.utilities.warnings.ProtocolWarning` (:issue:`1604`). The
-``pypcapfile`` toolkit stops at the same depth. The ``dpkt``, ``scapy`` and
+``pypcapfile`` and ``scapy`` toolkits stop at the same depth. The ``dpkt`` and
 ``pyshark`` engines leave the walk to their own parsers, which do not stop
 there, so they may still find the upper layer past it (:issue:`1609`).
 
