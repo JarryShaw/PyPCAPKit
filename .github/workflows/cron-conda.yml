@@ -558,12 +558,15 @@ jobs:
 
       # #1634: the upload below never makes the release. ncipollo/release-action
       # v1.21.0 creates a missing one, and its tag, at ``commit``
-      # (src/Action.ts:72-92), and retargets a draft at ``commit``
-      # (:85-92,107-120): ``omitDraftDuringUpdate`` keeps it a draft, but a
-      # re-run of Create Release would reuse it, target and all. A bump made
-      # while Create Release waits on approval would then tag the pending
-      # version at main's tip, and Create Release's tag check would fail. Only
-      # the GitHub upload is skipped; the build is on anaconda.org regardless.
+      # (src/Action.ts:72-92), so a bump made while Create Release waits on
+      # approval would tag the pending version at main's tip, and Create
+      # Release's tag check would fail. It also retargets a draft at ``commit``
+      # (:85-92,107-120), which ``omitDraftDuringUpdate`` keeps a draft, but
+      # Create Release's ``workflow_run`` run finds the draft and resets its
+      # target to the run's sha (softprops/action-gh-release v3.0.2,
+      # src/github.ts:636-646,832-866). Skipping a draft is a precaution
+      # against retargeting a release Create Release owns. Only the GitHub
+      # upload is skipped; the build is on anaconda.org regardless.
       - name: Check the GitHub release exists
         id: release
         if: ${{ matrix.os == 'ubuntu-latest' }}

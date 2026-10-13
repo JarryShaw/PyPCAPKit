@@ -1237,13 +1237,16 @@ class TestCondaUpdateNeverMakesTheRelease(CondaDistMixin, unittest.TestCase):
     reads the release by tag, which GitHub's REST docs give as "a published
     release"; on a 404 it updates a draft of that tag or else calls
     ``createRelease`` (``:72-92``), both with ``target_commitish: commit``
-    (``:107-120``, ``src/Releases.ts:76-99,150-174``). ``omitDraftDuringUpdate``
-    keeps the draft a draft (``src/Inputs.ts:210-213``), but retargeted at
-    ``commit``, which a re-run of Create Release would reuse, target and all.
-    Either way a bump made while Create Release waits on its approval --
-    1.5.0b9 waited three days, and cron-conda bumped three times meanwhile --
-    would put ``v<version>`` on ``main``'s tip, and Create Release's tag check
-    would then fail. On an existing release it calls Update a release with
+    (``:107-120``, ``src/Releases.ts:76-99,150-174``). With no release, a bump
+    made while Create Release waits on its approval -- 1.5.0b9 waited three
+    days, and cron-conda bumped three times meanwhile -- would put
+    ``v<version>`` on ``main``'s tip, and Create Release's tag check would then
+    fail. A draft stays a draft (``omitDraftDuringUpdate``,
+    ``src/Inputs.ts:210-213``) but is retargeted at ``commit``; Create Release's
+    ``workflow_run`` run finds the draft and resets its target to the run's sha
+    (``action-gh-release`` 3.0.2's ``src/github.ts:636-646,832-866``), so
+    skipping a draft is a precaution against retargeting a release Create
+    Release owns. On an existing release it calls Update a release with
     ``target_commitish: commit`` (``src/Action.ts:107-120``,
     ``src/Releases.ts:150-174``), and GitHub's REST docs check "the new value of
     target_commitish if you are changing it, otherwise the existing target"

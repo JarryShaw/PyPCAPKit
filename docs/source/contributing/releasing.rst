@@ -203,14 +203,17 @@ names the default branch -- ``github.ref_name`` on both its triggers -- as
 stays put, as Update a release calls the target "Unused if the Git tag already
 exists". It also uploads only to a published release, read first with ``gh
 release view``. With none, the action would create one, and its tag, at
-``commit`` (``src/Action.ts:72-92``), and it would retarget a draft at
-``commit`` (``src/Action.ts:85-92,107-120``), which stays a draft but which a
-re-run of Create Release would reuse, target and all. Conda
-Update bumped 1.5.0b9's build three times while that run waited on approval;
-once ``conda-dist`` runs on every bump
-(`#1632 <https://github.com/JarryShaw/PyPCAPKit/issues/1632>`__), either path
-would tag the pending version at ``main``'s tip and fail Create Release's tag
-check. That build then goes to anaconda.org only, with a ``::notice``. The
+``commit`` (``src/Action.ts:72-92``). Conda Update bumped 1.5.0b9's build
+three times while that run waited on approval; once ``conda-dist`` runs on
+every bump (`#1632 <https://github.com/JarryShaw/PyPCAPKit/issues/1632>`__),
+that would tag the pending version at ``main``'s tip and fail Create Release's
+tag check. The action would also retarget a draft at ``commit``
+(``src/Action.ts:85-92,107-120``), which ``omitDraftDuringUpdate`` keeps a
+draft, but Create Release's ``workflow_run`` run finds the draft and resets
+its target to the run's sha (``action-gh-release`` 3.0.2's
+``src/github.ts:636-646,832-866``), so skipping a draft is a precaution
+against retargeting a release Create Release owns.
+Either way the build goes to anaconda.org only, with a ``::notice``. The
 update also sends the release's name, notes and ``prerelease`` and ``draft``
 flags, which unset inputs make the tag, ``""`` and ``false``
 (``src/Inputs.ts:70-92,128-135,210-240``), so the step sets the four
