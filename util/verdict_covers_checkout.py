@@ -30,10 +30,16 @@ Run with ``VERDICT_SHA`` set, from the checkout. Writes ``verified=true`` or
 ``verified=false`` to ``$GITHUB_OUTPUT``, and exits non-zero only when it cannot
 answer at all.
 
+Conda Update's Push Changes step asks the same question of the commits its
+rebase would bring in (#1632): ``VERDICT_SHA`` is the commit it checked out,
+``--head`` the tip it fetched, and ``--exit-code`` answers in the exit status,
+for the shell, instead of in ``$GITHUB_OUTPUT``.
+
 """
 
 from __future__ import annotations
 
+import argparse
 import os
 import re
 import subprocess  # nosec B404
@@ -59,6 +65,10 @@ BOT_MANAGED_PATHS = frozenset({'conda/build', 'conda/requirements.txt'})
 
 #: A full commit sha, which is all ``head_sha`` ever holds for a push run.
 _SHA = re.compile(r'^[0-9a-f]{40}$')
+
+#: ``--exit-code``'s status for "not covered". Not 1, which is also what an
+#: uncaught exception exits with, so a crash cannot be read as an answer.
+NOT_COVERED = 3
 
 
 class Decision(NamedTuple):
@@ -109,15 +119,30 @@ def decide(verdict: 'str', head: 'str', cwd: 'Optional[str]' = None) -> 'Decisio
                           f'up to {head} are bot commits to {managed} only.')
 
 
-def main() -> int:
+def main(argv: 'Optional[list[str]]' = None) -> int:
     """Decide for the checkout in the working directory and report it."""
+    parser = argparse.ArgumentParser(description=__doc__.split('\n', 1)[0])
+    parser.add_argument('--head', default='HEAD', metavar='REV',
+                        help='the commit to decide for (default: HEAD)')
+    parser.add_argument('--exit-code', action='store_true',
+                        help=f'print the reason, write no output, and exit 0 when covered '
+                             f'or {NOT_COVERED} when not')
+    args = parser.parse_args(argv)
+
     verdict = os.environ.get('VERDICT_SHA', '')
     if _SHA.match(verdict) is None:
         print(f'::error title=No verdict to compare::VERDICT_SHA is {verdict!r}, not a commit sha')
         return 1
-    head = _git('rev-parse', 'HEAD').stdout.strip()
+    resolved = _git('rev-parse', '--verify', '--quiet', f'{args.head}^{{commit}}', check=False)
+    if resolved.returncode != 0:
+        print(f'::error title=No commit to compare::{args.head!r} is not a commit in this checkout')
+        return 1
+    head = resolved.stdout.strip()
 
     decision = decide(verdict, head)
+    if args.exit_code:
+        print(decision.reason)
+        return 0 if decision.verified else NOT_COVERED
     if decision.verified:
         print(decision.reason)
     else:

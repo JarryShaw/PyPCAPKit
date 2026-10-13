@@ -283,6 +283,30 @@ class TestTheRuleOnRealRunShapes(unittest.TestCase):
         stdout = self.assertVerdict(base, merge, 'false', repo=clone)
         self.assertIn('::notice title=Skipped', stdout)
 
+    def test_push_changes_form_answers_in_the_exit_status(self) -> None:
+        """``--head`` and ``--exit-code``, as Conda Update's Push Changes runs it
+        (#1632): ``VERDICT_SHA`` is the checkout, ``--head`` the tip it fetched,
+        and the answer is the exit status, with nothing written for the step.
+
+        """
+        checkout = self.sha['f4f94bcad']
+        human = self._commit('fix(toolkit): another merge', ['pcapkit/toolkit/scapy.py'])
+        cases = ((checkout, 0, 'Unit Tests verified'),
+                 (human, verdict_covers_checkout.NOT_COVERED, 'not by the bot'),
+                 ('no-such-ref', 1, '::error title=No commit to compare::'))
+        for head, status, text in cases:
+            with self.subTest(head=head):
+                self._git('checkout', '-q', '--detach', self.sha['2e941bbb7'])
+                output = self.root / 'output'
+                output.write_text('', encoding='utf-8')
+                result = subprocess.run(
+                    [sys.executable, str(SCRIPT), '--head', head, '--exit-code'], cwd=self.repo,
+                    env=dict(self.env, VERDICT_SHA=checkout, GITHUB_OUTPUT=str(output)),
+                    capture_output=True, text=True, timeout=scale_timeout(60))
+                self.assertEqual(result.returncode, status, result.stdout + result.stderr)
+                self.assertIn(text, result.stdout)
+                self.assertEqual(output.read_text(encoding='utf-8'), '')
+
     def test_a_missing_verdict_fails_loudly_and_writes_nothing(self) -> None:
         """No sha is a broken payload, not a stale verdict."""
         for verdict in ('', 'main', self.sha['f4f94bcad'][:9]):

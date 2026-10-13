@@ -235,9 +235,11 @@ So Vendor Update, Conda Update and GitHub Pages each run a ``verdict`` job first
 and act only when the tip is the verified commit, or that commit plus bot commits
 to ``conda/build`` and ``conda/requirements.txt`` alone; otherwise they skip, and
 the tip's own Unit Tests run raises them again. The rule and its evidence are in
-``util/verdict_covers_checkout.py``. It covers the checkout only: Conda Update's
-push rebases onto ``main`` again, and Conda Tag tags whatever ``git pull`` brings
-in, so a commit that lands after the event can still be tagged.
+``util/verdict_covers_checkout.py``. Conda Update also writes after the
+checkout, so it applies the same rule a second time: its push rebases onto
+``main``'s tip only when the commits that brings in pass it, and otherwise
+pushes nothing, and Conda Tag tags the commit that push landed rather than the
+tip (`#1632 <https://github.com/JarryShaw/PyPCAPKit/issues/1632>`__).
 
 Reusable-Workflow Calls (``uses:``)
 -----------------------------------

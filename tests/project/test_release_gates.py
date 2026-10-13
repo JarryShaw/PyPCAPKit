@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""Tests that nothing in :file:`.github/workflows/create-release.yml` publishes ungated.
+"""Tests that nothing in the workflows that publish does so ungated or unpublished.
+
+Two files: :file:`.github/workflows/create-release.yml`, which everything up to
+:class:`TestYAMLAgreesWithTheScanner` is about, and -- since #1632 --
+:file:`.github/workflows/cron-conda.yml`, whose conda build bumps stopped being
+tagged and uploaded altogether. They share the scanner, the expression
+evaluator and the cascade model below; nothing else.
 
 #641: the ``pypi`` job's ``environment: release`` was commented out while the
 ``id-token: write`` from the same upstream snippet had been re-added live below it,
@@ -142,8 +148,10 @@ raises :exc:`UnsupportedExpression`, and
 ``test_every_declared_if_is_evaluable`` is what makes the file growing past
 that subset a loud failure rather than a silent gap.
 
-Two things the evaluator deliberately does **not** model, both of them runner
-behaviour rather than expression semantics:
+Two things :func:`evaluate_condition` deliberately does **not** model, both of
+them runner behaviour rather than expression semantics. Neither is folded into
+the evaluator; both are modelled *beside* it, by :func:`cascade_skipped_by` and
+:func:`job_runs`, for the jobs whose correctness turns on them (#1632):
 
 * **The implicit ``success()``** Actions prepends to an ``if:`` that calls no
   status-check function itself. It applies to ``github``, which is why
@@ -151,11 +159,53 @@ behaviour rather than expression semantics:
   condition and says so; it does not apply to ``tag``/``pypi``/``conda``,
   which all open with ``!cancelled()``, so for those three the declared
   condition is the whole gate.
-* **The cascade-skip** that skips a job whose ``needs:`` included a skipped
-  job before that job's own ``if:`` is evaluated at all. Escaping it is what
-  ``!cancelled()`` is *for*, and
+* **The cascade-skip** that skips such a job before its own ``if:`` is
+  evaluated at all, once a ``needs:`` ancestor skipped or failed. Escaping it
+  is what ``!cancelled()`` is *for*, and
   ``test_evidence_gated_jobs_survive_a_legitimately_skipped_predecessor``
-  pins it textually above, because nothing runnable here can observe it.
+  pins it textually above.
+
+#1632 is what happens when a job does not escape it, so for
+:file:`cron-conda.yml` the cascade is evaluated rather than only asserted
+about. Since #731 that workflow runs on ``workflow_run`` and skips its own
+``unit-tests`` gate on that event; ``conda-update`` escapes the skipped
+ancestor with ``!cancelled()`` and commits a build bump, while ``conda-tag``
+and ``conda-dist`` called no status-check function at all -- so Actions'
+implicit ``success()`` skipped both, and the five bumps #1632 lists were
+committed and then neither tagged nor uploaded. Measured on run
+38325136710: ``Update requirements.txt`` succeeded with its Bump, Commit and
+Push steps all green (pushing ``f4f94bcad``), and both downstream jobs reported
+``skipped``.
+
+That defect sits one layer *below* an ``if:`` -- both conditions evaluated
+**true** on that run -- so no amount of evaluating them can see it, which is
+the same shape of argument #962 made one layer up.
+:class:`TestCondaBumpIsTaggedAndUploaded` therefore goes through
+:func:`job_runs`, which composes the declared condition with
+:func:`cascade_skipped_by`'s model of the implicit check;
+:class:`TestTheCascadeModel` pins that model on fixtures, including the
+pre-fix condition text, so the model itself cannot drift into agreeing with
+whatever the file happens to say.
+
+Getting past the cascade exposed a second defect: two runs can compute the same
+bump from one checkout, and the second reports the bump the first already
+pushed, so ``conda-tag`` would have re-created an existing tag and failed. Run
+38325153882 was one: raised by ``Unit Tests`` 38323026585 for 01151b13f, 12 s
+after 38325136710 was raised by 38323045571 for 9083163f5, both on ``main``'s tip
+2e941bbb7 -- two runs in a merge wave, not one run's ``workflow_run`` firing
+twice. ``conda-update``'s ``CONDA_CHANGED`` therefore reads its Push Changes
+step's verdict on what actually landed, so the rows carry *step* outputs and
+:func:`resolve_outputs` maps them through the job's declared ``outputs:`` -- and
+:class:`TestCondaPushReportsWhatLanded` runs that step's script against a local
+origin to show the verdict is the right one.
+
+And making the chain reachable opened a third (#1643's review): Push Changes
+rebased onto whatever ``main`` held by then and Conda Tag tagged ``main``'s tip
+after a ``git pull``, so a commit landing during the run could be tagged and
+uploaded with no ``Unit Tests`` verdict of its own. Push Changes now pushes only
+when what its rebase brings in is covered by :file:`util/verdict_covers_checkout.py`'s
+rule, and Conda Tag tags the ``CONDA_COMMIT`` it pushed;
+:class:`TestCondaTagTagsWhatWasPushed` runs Conda Tag's own steps after it.
 
 """
 
@@ -163,11 +213,14 @@ from __future__ import annotations
 
 import itertools
 import json
+import os
 import pathlib
 import re
+import shlex
 import shutil
 import subprocess
 import sys
+import tempfile
 import unittest
 from typing import TYPE_CHECKING
 
@@ -178,10 +231,23 @@ if TYPE_CHECKING:
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
-#: The workflow under test. The only one that publishes: :file:`cron-conda.yml`
-#: and :file:`cron-vendor.yml` build and commit but upload nothing, and
-#: :file:`deploy-pages.yml` publishes documentation rather than a package, which is
-#: a separate question from #641 and is not gated here.
+#: The workflow #641 is about, and the one every test above
+#: :class:`TestCondaBumpIsTaggedAndUploaded` reads.
+#:
+#: Not the only one that publishes, which this comment claimed until #1632:
+#: :file:`cron-conda.yml` uploads to anaconda.org and attaches the same
+#: packages to a GitHub Release, from its ``conda-dist`` job
+#: (``anaconda/actions/upload-package`` and ``ncipollo/release-action``,
+#: :file:`cron-conda.yml` at the end of the file). It is read through
+#: :data:`CONDA_WORKFLOW` below, for whether a bump reaches those uploads at
+#: all; the ``environment:`` rule in this module is asserted over *this* file
+#: only, and extending it to ``conda-dist`` -- which carries no
+#: ``environment:`` -- is a #641 question nobody has asked yet rather than
+#: something #1632 settles.
+#:
+#: :file:`cron-vendor.yml` does build and commit without uploading, and
+#: :file:`deploy-pages.yml` publishes documentation rather than a package,
+#: which is a separate question from #641 and is not gated here.
 WORKFLOW = ROOT / '.github' / 'workflows' / 'create-release.yml'
 
 #: Strings whose presence in a job means that job has an effect outside the run,
@@ -236,12 +302,17 @@ def strip_comments(text: 'str') -> 'str':
     return '\n'.join(re.sub(r'(?:(?<=\s)|^)#.*$', '', line) for line in text.splitlines())
 
 
-def job_blocks(text: 'str') -> 'dict[str, str]':
+def job_blocks(text: 'str', source: 'Optional[pathlib.Path]' = None) -> 'dict[str, str]':
     """``{job name: the job's own lines}`` for a workflow's top-level ``jobs:``.
 
     Indentation-based rather than a YAML parse, so that this module keeps working
     on a fresh clone without the ``test`` extra, where PyYAML is not installed.
     :class:`TestYAMLAgreesWithTheScanner` is what stops the two from drifting.
+
+    ``source`` only names the file in the failure message, and defaults to
+    :data:`WORKFLOW` for the callers that predate there being a second one
+    (#1632) -- a message naming ``create-release.yml`` for a scan of
+    ``cron-conda.yml`` would send the reader to the wrong file.
 
     """
     lines = text.splitlines()
@@ -249,7 +320,8 @@ def job_blocks(text: 'str') -> 'dict[str, str]':
     try:
         start = next(i for i, line in enumerate(lines) if line.rstrip() == 'jobs:')
     except StopIteration:
-        raise AssertionError(f'no top-level `jobs:` mapping found in {WORKFLOW}') from None
+        raise AssertionError(
+            f'no top-level `jobs:` mapping found in {source or WORKFLOW}') from None
 
     blocks = {}  # type: dict[str, list[str]]
     current = None  # type: Optional[str]
@@ -319,11 +391,24 @@ def declared_if(block: 'str') -> 'str':
     Handles both the single-line ``if: ${{ ... }}`` form used elsewhere in this
     file and the folded block-scalar form (``if: >-``, continued below at six
     spaces) #888 introduces for ``tag``, ``pypi`` and ``conda``, whose
-    conditions grew past one line. Folding is exactly what YAML itself does to
-    a ``>``/``>-`` scalar -- join each continuation line with a single space --
-    so flattening it the same way here reproduces a real parse rather than
-    approximating one; :class:`TestYAMLAgreesWithTheScanner` is what checks
-    that claim against :func:`yaml.safe_load` when it is installed.
+    conditions grew past one line.
+
+    Folding here is "join each continuation line with a single space", which is
+    what YAML does to a ``>``/``>-`` scalar whose content lines all sit at the
+    block's own indentation -- true of every condition in
+    :file:`create-release.yml`, which is why
+    :class:`TestYAMLAgreesWithTheScanner` compares the two exactly.
+
+    It is an *approximation* where a continuation line is indented deeper than
+    the block, as ``conda-update``'s is in :file:`cron-conda.yml` (#1632): YAML
+    calls those "more indented lines" and keeps the breaks around them as
+    literal newlines, extra spaces included, so a real parse of that value
+    carries ``\\n`` where this returns ``' '``. Measured rather than assumed --
+    it is what made :class:`TestYAMLAgreesWithTheCondaScanner` compare the two
+    modulo whitespace. Nothing downstream can tell the difference: Actions'
+    expression grammar and :func:`_tokenize` both treat any run of whitespace
+    as one separator, and every text assertion here either compacts the
+    whitespace out or matches a clause containing none.
 
     """
     lines = block.splitlines()
@@ -344,6 +429,47 @@ def declared_if(block: 'str') -> 'str':
                 parts.append(nested.strip())
         return ' '.join(parts)
     return ''
+
+
+def with_condition(block: 'str', condition: 'str') -> 'str':
+    """``block`` with its job-level ``if:`` replaced by ``condition``, inline.
+
+    Only used to run a *mutated* condition through :func:`job_runs`, which
+    reads the block rather than a condition string -- so a mutation has to be
+    applied where that function will look for it. Rewriting the key in the
+    single-line form rather than editing inside a folded scalar keeps the
+    result readable by :func:`declared_if` whichever spelling the original
+    used, and ``test_replacing_a_condition_round_trips`` is what checks that
+    claim instead of assuming it.
+
+    Raises rather than appending an ``if:`` to a block that has none: a
+    silently-added key would make a mutation test pass while mutating nothing.
+
+    """
+    lines = block.splitlines()
+    out = []  # type: list[str]
+    index = 0
+    replaced = False
+    while index < len(lines):
+        line = lines[index]
+        index += 1
+        if _IF.match(line) is None:
+            out.append(line)
+            continue
+
+        out.append(f'    if: {condition}')
+        replaced = True
+        # Drop whatever continued the original value: a folded scalar's
+        # continuation lines sit at six spaces, and a blank line inside one
+        # belongs to it as well. The next job-level key is at four, which ends
+        # the loop.
+        while index < len(lines) and (not lines[index].strip()
+                                      or lines[index].startswith(' ' * 6)):
+            index += 1
+
+    if not replaced:
+        raise AssertionError(f'no job-level `if:` to replace in:\n{block}')
+    return '\n'.join(out)
 
 
 def needs_closure(jobs: 'dict[str, str]', name: str) -> 'set[str]':
@@ -386,9 +512,10 @@ def block_scalar_after(block: 'str', key: 're.Pattern[str]') -> 'str':
     """The dedented body of the literal block scalar (``|``) opened by the
     first line in ``block`` matching ``key``.
 
-    Only used for :data:`_RUN_LITERAL` against ``release_status``, which has
-    exactly one step and therefore exactly one ``run:`` -- ambiguous for a
-    job with more than one, which is why this is not the general-purpose
+    Only used for :data:`_RUN_LITERAL` against a block holding exactly one
+    ``run:`` -- ``release_status``, which has one step, or a single step
+    narrowed by :func:`step_block` -- since it is ambiguous for a block with
+    more than one, which is why this is not the general-purpose
     ``run:`` extractor the rest of this module reaches for. Dedents by the
     body's *own* first line, the same rule a real YAML literal block scalar
     follows, rather than assuming a fixed indent.
@@ -1160,6 +1287,491 @@ def text_gate_violations(condition: 'str', job: 'str') -> 'list[str]':
             violations.append(f'refers to {strict}.result more than once')
 
     return violations
+
+
+#: :file:`cron-conda.yml`, the second workflow this module covers (#1632).
+#: Kept separate from :data:`WORKFLOW` rather than folded into it: the two
+#: files share the scanner, the evaluator and the cascade model, and nothing
+#: else -- every expectation above this point is about ``create-release.yml``'s
+#: own job graph.
+CONDA_WORKFLOW = ROOT / '.github' / 'workflows' / 'cron-conda.yml'
+
+#: A call to one of Actions' four status-check functions. Their presence
+#: anywhere in a job's ``if:`` is what replaces the implicit ``success()``
+#: every test above calls by that name, and which GitHub's own reference calls
+#: a default: "A default status check of ``success()`` is applied unless you
+#: include one of these functions" -- "Evaluate expressions in workflows and
+#: actions", *Status check functions* (read 2026-10-12).
+#:
+#: Written to require the parentheses, because the bare word ``success``
+#: appears in nearly every condition in either file as the *literal*
+#: ``'success'``, and reading that as an opt-out would make the model below
+#: answer "escaped" for every job in both.
+_STATUS_CHECK_CALL = re.compile(r'\b(?:always|cancelled|success|failure)\s*\(\s*\)')
+
+
+def calls_status_check(condition: 'str') -> 'bool':
+    """Whether ``condition`` opts its job out of the implicit ``success()``.
+
+    Coarse, like the rest of this module's scanning, and safe to be: the
+    argument is the ``if:`` *value* that :func:`declared_if` returns, so a
+    comment sitting next to the key cannot contribute a match.
+
+    """
+    return _STATUS_CHECK_CALL.search(condition) is not None
+
+
+def cascade_skipped_by(jobs: 'dict[str, str]', name: 'str',
+                       results: 'dict[str, object]') -> 'Optional[str]':
+    """The ancestor whose result makes Actions skip ``name`` before that job's
+    own ``if:`` is evaluated, or :data:`None` when nothing does.
+
+    The rule, which #1632 is a bug in: an ``if:`` calling no status-check
+    function is evaluated as though ``success()`` had been conjoined onto it --
+    "A default status check of ``success()`` is applied unless you include one
+    of these functions", quoted from the reference cited on
+    :data:`_STATUS_CHECK_CALL` -- and that check is false once a job this one
+    depends on skipped, failed or was cancelled.
+
+    It reads the whole chain, not only the direct ``needs:`` entries -- the
+    part #1632 cost, and documented: "If a run contains a series of jobs that
+    need each other, a failure or skip applies to all jobs in the dependency
+    chain from the point of failure or skip onwards" ("Workflow syntax for
+    GitHub Actions", ``jobs.<job_id>.needs``, read 2026-10-12). Run
+    38325136710 corroborates it: ``unit-tests`` skipped, ``conda-update``
+    escaped the skip with ``!cancelled()`` and succeeded, and ``conda-tag`` --
+    whose ``needs:`` names only ``conda-update`` -- still reported
+    ``skipped``. A job that escaped the cascade therefore does not absorb it on
+    its dependents' behalf, which is why this walks :func:`needs_closure` and
+    not ``declared_needs``.
+
+    Walked in sorted order so the ancestor named in a failure message is stable
+    rather than an artefact of the walk; which one is named cannot change the
+    answer, since one is enough.
+
+    """
+    for ancestor in sorted(needs_closure(jobs, name)):
+        if ancestor not in results:
+            raise UnsupportedExpression(
+                f'`{name}` depends on `{ancestor}`, whose result no scenario here '
+                f'models; known results are {sorted(results)}'
+            )
+        if results[ancestor] != 'success':
+            return ancestor
+    return None
+
+
+#: A job-level ``outputs:`` key, and one ``NAME: value`` entry of its mapping.
+_OUTPUTS = re.compile(r'^ {4}outputs:[ \t]*(?:#.*)?$')
+_OUTPUT_ENTRY = re.compile(r'^ {6}([A-Za-z_][A-Za-z0-9_-]*):[ \t]*(\S.*?)[ \t]*$')
+
+
+def declared_outputs(block: 'str') -> 'dict[str, str]':
+    """``{output name: value expression}`` from the job's own ``outputs:``.
+
+    Comment lines inside the mapping are skipped, and anything else this cannot
+    read raises -- an output dropped here would be served as ``null`` and
+    decide a row by accident.
+
+    """
+    lines = block.splitlines()
+    for index, line in enumerate(lines):
+        if _OUTPUTS.match(line) is None:
+            continue
+        outputs = {}  # type: dict[str, str]
+        for nested in lines[index + 1:]:
+            stripped = nested.strip()
+            if not stripped:
+                continue
+            if not nested.startswith(' ' * 6):
+                break
+            if stripped.startswith('#'):
+                continue
+            match = _OUTPUT_ENTRY.match(nested)
+            if match is None:
+                raise AssertionError(f'cannot read the `outputs:` entry {nested!r}')
+            outputs[match.group(1)] = match.group(2)
+        return outputs
+    return {}
+
+
+def resolve_outputs(block: 'str', steps: 'dict[str, object]') -> 'dict[str, object]':
+    """The job's declared ``outputs:``, evaluated against its ``steps`` context.
+
+    What lets a row state *step* facts -- what a run's log shows each step
+    wrote -- and leave to the file which of them a job output carries. #1632's
+    second-run row depends on it: run 38325153882's ``files_changed``
+    was ``'true'`` and its push landed nothing, so the answer turns on which of
+    the two ``CONDA_CHANGED`` is mapped to, and a row holding the job output
+    directly would assume that instead of reading it.
+
+    """
+    context = {'steps': steps}  # type: dict[str, object]
+    return {name: _evaluate(parse_condition(value), context)
+            for name, value in declared_outputs(block).items()}
+
+
+def resolved_context(jobs: 'dict[str, str]', context: 'dict[str, object]') -> 'dict[str, object]':
+    """``context`` with each ``needs`` entry that carries ``steps`` given the
+    ``outputs`` its job's :func:`declared_outputs` make of them.
+
+    An entry carrying both raises, since which one a row means is then a guess.
+
+    """
+    needs = context.get('needs')
+    if not isinstance(needs, dict):
+        return context
+
+    resolved = {}  # type: dict[str, object]
+    for job, entry in needs.items():
+        if not isinstance(entry, dict) or 'steps' not in entry:
+            resolved[job] = entry
+            continue
+        if 'outputs' in entry:
+            raise AssertionError(f'`{job}` carries both `steps` and `outputs`')
+        steps = entry['steps']
+        assert isinstance(steps, dict)
+        rest = {key: value for key, value in entry.items() if key != 'steps'}
+        resolved[job] = {**rest, 'outputs': resolve_outputs(jobs[job], steps)}
+    return {**context, 'needs': resolved}
+
+
+#: A step's ``- name:`` line, at whatever indent the job's ``steps:`` sit.
+_STEP_NAME = re.compile(r'^( *)- name:[ \t]*(.*?)[ \t]*$')
+
+
+def step_block(block: 'str', name: 'str') -> 'str':
+    """The lines of the step called ``name`` in a job ``block``, from its
+    ``- name:`` line to the next line indented no deeper than that dash --
+    the next step, a comment above one, or the job's next key.
+
+    Narrows a job to one step, so that :func:`block_scalar_after` -- which
+    takes the *first* ``run:`` it finds -- reads that step's script and not an
+    earlier one.
+
+    """
+    lines = block.splitlines()
+    for index, line in enumerate(lines):
+        match = _STEP_NAME.match(line)
+        if match is None or match.group(2) != name:
+            continue
+        indent = len(match.group(1))
+        body = [line]
+        for nested in lines[index + 1:]:
+            if nested.strip() and len(nested) - len(nested.lstrip(' ')) <= indent:
+                break
+            body.append(nested)
+        return '\n'.join(body)
+    raise AssertionError(f'no step named {name!r} in the block')
+
+
+#: A ``key: value`` line inside a step, at whatever indent.
+_STEP_ENTRY = re.compile(r'^( +)([A-Za-z_][A-Za-z0-9_-]*):[ \t]*(.*?)[ \t]*$')
+
+
+def step_mapping(step: 'str', key: 'str') -> 'dict[str, str]':
+    """``{name: value}`` from the mapping under ``key:`` -- ``with:`` or ``env:``
+    -- in one :func:`step_block`. Comment lines are skipped; an entry this
+    cannot read raises, for :func:`declared_outputs`' reason.
+
+    """
+    lines = step.splitlines()
+    for index, line in enumerate(lines):
+        match = _STEP_ENTRY.match(line)
+        if match is None or match.group(2) != key or match.group(3):
+            continue
+        indent = len(match.group(1))
+        mapping = {}  # type: dict[str, str]
+        for nested in lines[index + 1:]:
+            stripped = nested.strip()
+            if not stripped:
+                continue
+            if len(nested) - len(nested.lstrip(' ')) <= indent:
+                break
+            if stripped.startswith('#'):
+                continue
+            entry = _STEP_ENTRY.match(nested)
+            if entry is None:
+                raise AssertionError(f'cannot read the `{key}:` entry {nested!r}')
+            mapping[entry.group(2)] = entry.group(3)
+        return mapping
+    return {}
+
+
+def step_values(jobs: 'dict[str, str]', job: 'str', step: 'str', key: 'str',
+                context: 'dict[str, object]',
+                names: 'Optional[tuple[str, ...]]' = None) -> 'dict[str, object]':
+    """:func:`step_mapping`'s entries -- those in ``names``, or all of them --
+    with each whole-value ``${{ }}`` evaluated against ``context``, its step
+    outputs mapped through :func:`resolved_context` first. A value holding no
+    expression is returned as written, and a name the step does not declare is
+    left out.
+
+    ``names`` exists because a ``with:`` mapping also carries ``secrets.*``,
+    which no context here models and :func:`_lookup` rightly refuses.
+
+    """
+    context = resolved_context(jobs, context)
+    mapping = step_mapping(step_block(jobs[job], step), key)
+    return {name: (_evaluate(parse_condition(value), context) if '${{' in value else value)
+            for name, value in mapping.items() if names is None or name in names}
+
+
+def job_runs(jobs: 'dict[str, str]', name: 'str', context: 'dict[str, object]') -> 'bool':
+    """Whether the job actually runs: the cascade check first, then its ``if:``.
+
+    :func:`evaluate_condition` answers the second question alone, which was all
+    #962 needed -- every gate it was written for opens with ``!cancelled()``,
+    so for those the declared condition *is* the gate. #1632 is the case where
+    the first question is the whole defect: both skipped jobs' conditions
+    evaluated true on run 38325136710 and neither ran. So this composes the two
+    in the order Actions applies them, and a test that goes through it is
+    checking what a run reports rather than what a condition says.
+
+    A job with no ``if:`` at all is ``true`` once the cascade lets it through,
+    which is Actions' own default. Outputs are read through
+    :func:`resolved_context` first, so a row's step outputs reach the condition
+    the way the file maps them.
+
+    """
+    context = resolved_context(jobs, context)
+    condition = declared_if(jobs[name])
+    if not calls_status_check(condition):
+        needs = context.get('needs')
+        results = {}  # type: dict[str, object]
+        if isinstance(needs, dict):
+            results = {job: entry.get('result') if isinstance(entry, dict) else NULL
+                       for job, entry in needs.items()}
+        if cascade_skipped_by(jobs, name, results) is not None:
+            return False
+    if not condition:
+        return True
+    return evaluate_condition(condition, context)
+
+
+#: The jobs :file:`cron-conda.yml` declares. Named so that a scenario row can
+#: be keyed on them and ``test_the_scan_found_the_jobs`` fails loudly when the
+#: graph is renamed or extended, rather than leaving a new job unchecked.
+CONDA_JOBS = ('unit-tests', 'verdict', 'conda-update', 'conda-tag', 'conda-dist')
+
+#: What run 38325136710's Push Changes pushed, "Bumped build to 3".
+PUSHED_COMMIT = 'f4f94bcad4a195f98f1bd07d4d0bc2b6be7c9d15'
+
+
+def conda_context(unit_tests: 'str' = 'skipped',
+                  verdict: 'str' = 'success',
+                  verified: 'object' = 'true',
+                  conda_update: 'str' = 'success',
+                  conda_tag: 'str' = 'success',
+                  conda_dist: 'str' = 'success',
+                  files_changed: 'object' = 'true',
+                  pushed: 'object' = 'true',
+                  commit: 'object' = None,
+                  event_name: 'str' = 'workflow_run',
+                  workflow_run_conclusion: 'str' = 'success',
+                  workflow_run_event: 'str' = 'push',
+                  head_branch: 'str' = 'main',
+                  cancelled: 'bool' = False,
+                  outputs_present: 'bool' = True) -> 'dict[str, object]':
+    """The ``needs``/``github``/status context one row of :data:`CONDA_ROWS` stands for.
+
+    **The defaults are run 38325136710**, the broken run in #1632: a
+    ``workflow_run`` raised by a successful push build of ``Unit Tests`` on
+    ``main``, the ``unit-tests`` gate skipped because of that event,
+    ``conda-update`` succeeded, files changed, and its push landed the bump
+    (``f4f94bcad``). The row that carries the whole issue is therefore the bare
+    ``conda_context()``, and every other row changes exactly the one thing its
+    name says -- the same discipline :func:`release_context` follows, for the
+    same reason.
+
+    Except in one respect: ``verdict`` defaults to a verdict that covers the
+    checkout. 38325136710's did not -- it was for 9083163f5 with 2e941bbb7
+    checked out -- and since #1643 that run's own shape is the row that skips
+    ``conda-update``. ``verified=NULL`` is a ``verdict`` that wrote no output.
+
+    ``conda-update`` is given as its *steps'* outputs, which
+    :func:`resolved_context` maps through the job's declared ``outputs:``:
+    ``files_changed`` for Verify Changed files, ``pushed`` for Push Changes.
+    ``outputs_present=False`` is the shape a ``conda-update`` that never ran
+    leaves behind: no step wrote anything, which Actions serves as ``null``
+    rather than as ``''``. ``pushed=NULL`` is the narrower shape where Push
+    Changes did not write it -- and the only one allowed when ``files_changed``
+    is not ``'true'``, since that step is skipped then.
+
+    ``commit`` is the sha Push Changes writes beside ``pushed=true`` and only
+    then; left out, it is :data:`PUSHED_COMMIT` when ``pushed`` is ``'true'``
+    and ``NULL`` otherwise.
+
+    """
+    if files_changed != 'true' and pushed is not NULL:
+        raise AssertionError(
+            f'Push Changes is skipped unless files_changed is \'true\', so it cannot '
+            f'have written pushed={pushed!r} with files_changed={files_changed!r}'
+        )
+    if commit is None:
+        commit = PUSHED_COMMIT if pushed == 'true' else NULL
+    if pushed != 'true' and commit is not NULL:
+        raise AssertionError(
+            f'Push Changes writes commit only when it pushes, so it cannot have '
+            f'written commit={commit!r} with pushed={pushed!r}'
+        )
+
+    steps = {}  # type: dict[str, object]
+    if outputs_present:
+        steps = {
+            'verify-changed-files': {'outputs': {'files_changed': files_changed}},
+            'push-changes': {'outputs': {'pushed': pushed, 'commit': commit}},
+            # The values runs 38325136710 and 38325153882 both produced, for
+            # the same reason the results above are a real run's: a row reads
+            # as a run that happened rather than as a shape invented here.
+            'get_version': {'outputs': {
+                'PCAPKIT_VERSION': '1.5.0b9',
+                'PCAPKIT_CONDA_LABEL': 'dev',
+                'PCAPKIT_BUILD': '3',
+            }},
+        }
+
+    return {
+        'needs': {
+            'unit-tests': {'result': unit_tests},
+            'verdict': {'result': verdict,
+                        'outputs': {} if verified is NULL else {'verified': verified}},
+            'conda-update': {'result': conda_update, 'steps': steps},
+            'conda-tag': {'result': conda_tag},
+            'conda-dist': {'result': conda_dist},
+        },
+        'github': {
+            'event_name': event_name,
+            # No condition in this file reads it, and it is here anyway because
+            # :func:`_lookup` only raises for an unknown context *root*: a
+            # future clause reading `github.ref_name` would otherwise be served
+            # a silent ``null``. ``main`` is the only value this workflow sees,
+            # from both its schedule and the push builds it chains off.
+            'ref_name': 'main',
+            'event': {
+                'workflow_run': {
+                    'conclusion': workflow_run_conclusion,
+                    'event': workflow_run_event,
+                    'head_branch': head_branch,
+                },
+            },
+        },
+        STATUS: {'cancelled': cancelled},
+    }
+
+
+#: ``[(row name, context, {job: whether that job runs})]`` for
+#: :file:`cron-conda.yml`.
+#:
+#: A row names only the jobs it is actually about, so that it says nothing by
+#: accident about a job whose inputs it never set -- and the results it hands
+#: the rest of the chain agree with those expectations, which
+#: ``test_each_row_is_internally_consistent`` is what enforces. Without that
+#: agreement a row describes a run that cannot happen (a job expected to skip
+#: while its result is handed downstream as ``success``), and then it passes or
+#: fails for reasons unrelated to the gate under test.
+CONDA_ROWS = [
+    # The issue itself. Before the fix, `conda-tag` and `conda-dist` are
+    # cascade-skipped here while their own conditions are true.
+    ('run 38325136710: workflow_run, the gate skipped, a bump committed',
+     conda_context(),
+     {'unit-tests': False, 'verdict': True, 'conda-update': True, 'conda-tag': True,
+      'conda-dist': True}),
+    # #1643: what 38325136710 should have done, its verdict being for 9083163f5.
+    ('run 38325136710 itself: the verdict is for an older commit than the checkout',
+     conda_context(verified='false', conda_update='skipped', conda_tag='skipped',
+                   conda_dist='skipped', outputs_present=False),
+     {'verdict': True, 'conda-update': False, 'conda-tag': False, 'conda-dist': False}),
+    # A second run from the same checkout, with run 38325153882's step outputs
+    # -- `files_changed` 'true', build 3 -- whose rebase dropped the bump the
+    # run above had already pushed ("skipped previously applied commit",
+    # "Everything up-to-date"). `pushed` is what Push Changes decides on that
+    # state, which `TestCondaPushReportsWhatLanded` reproduces. With
+    # `CONDA_CHANGED` mapped to `files_changed` instead, `conda-tag` runs here
+    # and fails re-creating `conda-1.5.0b9+3`. 38325153882 itself was raised by
+    # a different `Unit Tests` run from 38325136710's, for 01151b13f, so since
+    # #1643 its `verdict` refuses it -- the row after this one.
+    ('a second run on a tip another run already bumped (38325153882\'s steps)',
+     conda_context(pushed='false', conda_tag='skipped', conda_dist='skipped'),
+     {'unit-tests': False, 'conda-update': True, 'conda-tag': False, 'conda-dist': False}),
+    ('run 38325153882 itself: the verdict is for 01151b13f, not the checkout',
+     conda_context(verified='false', conda_update='skipped', conda_tag='skipped',
+                   conda_dist='skipped', outputs_present=False),
+     {'verdict': True, 'conda-update': False, 'conda-tag': False, 'conda-dist': False}),
+    # #1643's review: the verdict covered the checkout, but a commit with no
+    # verdict of its own landed on `main` during the run. Push Changes refuses
+    # to rebase onto it and writes `pushed` 'false' and no `commit`, which
+    # `TestCondaPushReportsWhatLanded` runs the step to show.
+    ('main moved on to a human commit during the run, so nothing was pushed',
+     conda_context(pushed='false', conda_tag='skipped', conda_dist='skipped'),
+     {'verdict': True, 'conda-update': True, 'conda-tag': False, 'conda-dist': False}),
+    # The case that rule lets through: only bot commits to conda/ came in, and
+    # the bump was rebased onto them and pushed as a new commit, which is what
+    # `conda-tag` checks out and tags.
+    ('main moved on by bot commits to conda/ only, so the rebased bump was pushed',
+     conda_context(commit='0123456789abcdef0123456789abcdef01234567'),
+     {'verdict': True, 'conda-update': True, 'conda-tag': True, 'conda-dist': True}),
+    ('the Saturday schedule, the gate green',
+     conda_context(event_name='schedule', unit_tests='success', verdict='skipped', verified=NULL),
+     {'unit-tests': True, 'verdict': False, 'conda-update': True, 'conda-tag': True,
+      'conda-dist': True}),
+    ('the Saturday schedule, the gate failed',
+     conda_context(event_name='schedule', unit_tests='failure', verdict='skipped', verified=NULL,
+                   conda_update='skipped', conda_tag='skipped', conda_dist='skipped',
+                   outputs_present=False),
+     {'conda-update': False, 'conda-tag': False, 'conda-dist': False}),
+    ('no file changed, so no build was bumped',
+     conda_context(files_changed='false', pushed=NULL, conda_tag='skipped',
+                   conda_dist='skipped'),
+     {'conda-update': True, 'conda-tag': False, 'conda-dist': False}),
+    ('conda-update never ran, so it published no outputs',
+     conda_context(conda_update='skipped', conda_tag='skipped', conda_dist='skipped',
+                   outputs_present=False),
+     {'conda-tag': False, 'conda-dist': False}),
+    # `pushed`, and so `CONDA_CHANGED`, at null rather than at `'false'`: the
+    # one shape on which `== 'true'` and `!= 'false'` disagree, which is #967's
+    # argument applied to this chain's own evidence output.
+    ('conda-update ran but Push Changes never set pushed',
+     conda_context(pushed=NULL, conda_tag='skipped', conda_dist='skipped'),
+     {'conda-tag': False, 'conda-dist': False}),
+    # Outputs left *present* on purpose: a job that failed still publishes the
+    # outputs of the steps that already ran, so this row is decided by the
+    # result check and not by the evidence check.
+    ('conda-update failed after committing the bump',
+     conda_context(conda_update='failure', conda_tag='skipped', conda_dist='skipped'),
+     {'conda-tag': False, 'conda-dist': False}),
+    ('conda-update was cancelled',
+     conda_context(conda_update='cancelled', conda_tag='skipped', conda_dist='skipped'),
+     {'conda-tag': False, 'conda-dist': False}),
+    ('conda-tag failed, so the tag conda-dist checks out does not exist',
+     conda_context(conda_tag='failure', conda_dist='skipped'),
+     {'conda-dist': False}),
+    ('conda-tag was cancelled',
+     conda_context(conda_tag='cancelled', conda_dist='skipped'),
+     {'conda-dist': False}),
+    ('conda-tag skipped even though a bump was committed',
+     conda_context(conda_tag='skipped', conda_dist='skipped'),
+     {'conda-dist': False}),
+    ('the whole run was cancelled',
+     conda_context(cancelled=True, conda_update='cancelled', conda_tag='skipped',
+                   conda_dist='skipped', outputs_present=False),
+     {'conda-update': False, 'conda-tag': False, 'conda-dist': False}),
+    ("a pull request's Unit Tests completed",
+     conda_context(workflow_run_event='pull_request', verdict='skipped', verified=NULL,
+                   conda_update='skipped', conda_tag='skipped', conda_dist='skipped',
+                   outputs_present=False),
+     {'verdict': False, 'conda-update': False, 'conda-tag': False, 'conda-dist': False}),
+    ('Unit Tests failed on main',
+     conda_context(workflow_run_conclusion='failure', verdict='skipped', verified=NULL,
+                   conda_update='skipped', conda_tag='skipped', conda_dist='skipped',
+                   outputs_present=False),
+     {'verdict': False, 'conda-update': False, 'conda-tag': False, 'conda-dist': False}),
+    ('Unit Tests completed on a branch that is not main',
+     conda_context(head_branch='dependabot/pip/scapy-2.6.2', verdict='skipped', verified=NULL,
+                   conda_update='skipped', conda_tag='skipped', conda_dist='skipped',
+                   outputs_present=False),
+     {'verdict': False, 'conda-update': False, 'conda-tag': False, 'conda-dist': False}),
+]
 
 
 class WorkflowMixin:
@@ -2750,6 +3362,1171 @@ class TestYAMLAgreesWithTheScanner(WorkflowMixin, unittest.TestCase):
         self.assertEqual(scanned, expected,
                          'the indentation-based `if:` scanner and yaml.safe_load '
                          'disagree about at least one job\'s condition')
+
+
+class CondaWorkflowMixin:
+    """Reads and scans :file:`cron-conda.yml` once per test."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.text = CONDA_WORKFLOW.read_text(encoding='utf-8')  # type: ignore[attr-defined]
+        cls.jobs = job_blocks(cls.text, CONDA_WORKFLOW)  # type: ignore[attr-defined]
+
+
+class TestCondaBumpIsTaggedAndUploaded(CondaWorkflowMixin, unittest.TestCase):
+    """#1632: a committed build bump has to reach the tag and the upload.
+
+    The chain is ``unit-tests`` (the gate) -> ``conda-update`` (bumps
+    ``conda/build`` and pushes the commit) -> ``conda-tag`` (pushes
+    ``conda-<version>+<build>``) -> ``conda-dist`` (builds that tag and uploads
+    it to anaconda.org). Since #731 the gate skips on the ``workflow_run``
+    event, and the two publishing jobs called no status-check function, so
+    Actions' implicit ``success()`` skipped them behind the skipped gate even
+    though ``conda-update`` had escaped it and succeeded -- see this module's
+    docstring for the measured run.
+
+    Every assertion here goes through :func:`job_runs` rather than
+    :func:`evaluate_condition`, because the conditions were *true* on the run
+    that lost five bumps.
+
+    """
+
+    #: Stripped from each publishing job's condition to recover the shape #1632
+    #: found. A removal from the real text rather than a hand-written copy of
+    #: the old condition, so it cannot drift into testing something the file no
+    #: longer says.
+    PRE_FIX_REMOVAL = '!cancelled() && '
+
+    def _pre_fix_jobs(self) -> 'dict[str, str]':
+        """The scan with both publishing jobs' status-check function removed."""
+        jobs = dict(self.jobs)  # type: ignore[arg-type]
+        for name in ('conda-tag', 'conda-dist'):
+            condition = declared_if(jobs[name])
+            self.assertIn(self.PRE_FIX_REMOVAL, condition)
+            mutant = condition.replace(self.PRE_FIX_REMOVAL, '', 1)
+            self.assertFalse(
+                calls_status_check(mutant),
+                f'removing {self.PRE_FIX_REMOVAL!r} from `{name}` left another '
+                f'status-check call behind, so this mutation no longer reproduces '
+                f'#1632: {mutant!r}',
+            )
+            jobs[name] = with_condition(jobs[name], mutant)
+        return jobs
+
+    def test_the_scan_found_the_jobs(self) -> None:
+        """A scanner that finds nothing would pass every test below it."""
+        self.assertEqual(
+            sorted(self.jobs), sorted(CONDA_JOBS),
+            'the job list in cron-conda.yml moved; if that is intended, the '
+            'expectations in this class need revisiting rather than this line '
+            'being updated alone',
+        )
+
+    def test_the_table_covers_every_job_and_both_polarities(self) -> None:
+        """An empty or one-sided table would pass the headline test for nothing.
+
+        Every job needs a row that runs it *and* a row that skips it: a table
+        of skips is satisfied by the very defect this class is about, and a
+        table of runs by a job with no gate at all.
+
+        """
+        for job in CONDA_JOBS:
+            outcomes = {expectations[job] for _, _, expectations in CONDA_ROWS
+                        if job in expectations}
+            with self.subTest(job=job):
+                self.assertEqual(
+                    outcomes, {True, False},
+                    f'the table does not pin `{job}` in both directions, so it '
+                    f'is satisfied by a gate that always decides one way',
+                )
+
+    def test_each_row_is_internally_consistent(self) -> None:
+        """A row's expectations and the results it hands downstream must agree.
+
+        A row saying ``conda-update`` skips while handing its result to
+        ``conda-tag`` as ``success`` describes a run that cannot happen, and
+        then whatever it proves about ``conda-tag`` is an artefact of the
+        contradiction rather than a fact about the gate.
+
+        """
+        for name, context, expectations in CONDA_ROWS:
+            needs = context['needs']
+            assert isinstance(needs, dict)
+            for job, expected in expectations.items():
+                entry = needs[job]
+                assert isinstance(entry, dict)
+                with self.subTest(row=name, job=job):
+                    if expected:
+                        self.assertEqual(
+                            entry['result'], 'success',
+                            f'row {name!r} expects `{job}` to run but hands its '
+                            f'result downstream as {entry["result"]!r}',
+                        )
+                    else:
+                        self.assertIn(
+                            entry['result'], ('skipped', 'failure', 'cancelled'),
+                            f'row {name!r} expects `{job}` to skip but hands its '
+                            f'result downstream as {entry["result"]!r}',
+                        )
+
+    def test_every_job_decides_correctly_on_every_row(self) -> None:
+        """The headline assertion: the whole chain, on every scenario."""
+        violations = []  # type: list[str]
+        for name, context, expectations in CONDA_ROWS:
+            for job, expected in expectations.items():
+                if job_runs(self.jobs, job, context) != expected:  # type: ignore[arg-type]
+                    violations.append(
+                        f'{name}: `{job}` should '
+                        f'{"run" if expected else "skip"}, it did not'
+                    )
+        self.assertEqual(
+            violations, [],
+            f'cron-conda.yml disagrees with the publishing chain on '
+            f'{len(violations)} scenario(s): ' + '; '.join(violations),
+        )
+
+    def test_a_committed_bump_is_tagged_and_uploaded(self) -> None:
+        """The one row #1632 is, stated on its own so a failure names the issue.
+
+        The row is also the bare :func:`conda_context` default, i.e. run
+        38325136710 exactly: ``workflow_run`` on a green push build of ``main``,
+        the gate skipped on that event, ``conda-update`` succeeded and
+        ``CONDA_CHANGED`` is ``'true'``.
+
+        """
+        context = conda_context()
+        self.assertTrue(job_runs(self.jobs, 'conda-update', context))  # type: ignore[arg-type]
+        for job in ('conda-tag', 'conda-dist'):
+            with self.subTest(job=job):
+                self.assertTrue(
+                    job_runs(self.jobs, job, context),  # type: ignore[arg-type]
+                    f'`{job}` does not run on the shape of run 38325136710, so a '
+                    f'build bump is still committed and never published (#1632)',
+                )
+
+    def test_removing_the_status_check_reproduces_the_defect(self) -> None:
+        """The headline test has to be able to fail, and this is how it failed.
+
+        Both conditions evaluate **true** on that row with or without the
+        mutation -- asserted here, because it is the whole reason the test goes
+        through :func:`job_runs` -- and yet neither job runs once the
+        status-check call is gone. That is #1632 reproduced from the file as it
+        stands, rather than quoted from the issue.
+
+        """
+        pre_fix = self._pre_fix_jobs()
+        context = conda_context()
+        for job in ('conda-tag', 'conda-dist'):
+            with self.subTest(job=job):
+                self.assertTrue(
+                    evaluate_condition(declared_if(pre_fix[job]),
+                                       resolved_context(pre_fix, context)),
+                    f'`{job}`\'s own condition is false on this row even before '
+                    f'the cascade, so this row is not the #1632 shape',
+                )
+                self.assertFalse(
+                    job_runs(pre_fix, job, context),
+                    f'`{job}` still runs with no status-check function in its '
+                    f'`if:`, so this test would not have caught #1632',
+                )
+
+    def test_a_failed_or_cancelled_predecessor_still_stops_the_chain(self) -> None:
+        """The other half of the fix: escaping the cascade must not escape the
+        verdict.
+
+        ``!cancelled()`` on its own would publish a tag off a half-finished
+        update, which is worse than the skip it replaced -- so each job
+        checks its predecessors' results explicitly, and every non-``success``
+        result has to stop it. ``skipped`` included: a skipped ``conda-tag``
+        means no ``conda-<version>+<build>`` tag exists, and ``conda-dist``
+        checks that tag out by name.
+
+        """
+        for result in ('failure', 'cancelled', 'skipped'):
+            with self.subTest(predecessor='conda-update', result=result):
+                context = conda_context(conda_update=result, conda_tag='skipped',
+                                        conda_dist='skipped')
+                self.assertFalse(job_runs(self.jobs, 'conda-tag', context))  # type: ignore[arg-type]
+                self.assertFalse(job_runs(self.jobs, 'conda-dist', context))  # type: ignore[arg-type]
+            with self.subTest(predecessor='conda-tag', result=result):
+                context = conda_context(conda_tag=result, conda_dist='skipped')
+                self.assertFalse(job_runs(self.jobs, 'conda-dist', context))  # type: ignore[arg-type]
+
+    def test_a_bump_another_run_already_pushed_is_not_tagged_again(self) -> None:
+        """The second-run row, stated on its own, with the mutation it kills.
+
+        Run 38325153882's ``files_changed`` was ``'true'`` and its push landed
+        nothing, so the row is decided by which of the two ``CONDA_CHANGED`` is
+        mapped to. Mapped to ``files_changed``, as it was, ``conda-tag`` runs
+        and fails on a second ``git tag conda-1.5.0b9+3``.
+
+        """
+        context = conda_context(pushed='false', conda_tag='skipped', conda_dist='skipped')
+        self.assertTrue(job_runs(self.jobs, 'conda-update', context))  # type: ignore[arg-type]
+        for job in ('conda-tag', 'conda-dist'):
+            with self.subTest(job=job):
+                self.assertFalse(
+                    job_runs(self.jobs, job, context),  # type: ignore[arg-type]
+                    f'`{job}` runs for a bump this run did not push, so a second run '
+                    f'from the same checkout re-creates an existing tag and fails',
+                )
+
+        update = self.jobs['conda-update']  # type: ignore[attr-defined]
+        source = 'steps.push-changes.outputs.pushed'
+        self.assertEqual(
+            declared_outputs(update).get('CONDA_CHANGED'), f'${{{{ {source} }}}}',
+            '`CONDA_CHANGED` is no longer what Push Changes decided landed',
+        )
+        self.assertEqual(update.count(source), 1)
+        mutant = dict(self.jobs)  # type: ignore[arg-type]
+        mutant['conda-update'] = update.replace(
+            source, 'steps.verify-changed-files.outputs.files_changed')
+        self.assertTrue(
+            job_runs(mutant, 'conda-tag', context),
+            'mapping `CONDA_CHANGED` back to `files_changed` does not change this '
+            'row, so it cannot tell the fix from the defect',
+        )
+
+    def test_the_publishing_jobs_name_their_predecessors_strictly(self) -> None:
+        """The text layer, for the reasons #962 settled: it fails with a message
+        naming the clause rather than naming a scenario row, and it catches an
+        edit that keeps the truth table -- reversed operands -- which the rows
+        above cannot see.
+
+        No ``|| 'skipped'`` escape hatch anywhere in this chain, unlike
+        ``create-release.yml``'s ``tag``/``conda``: there, a predecessor skips
+        because its own artefact already exists, which is a reason to carry on.
+        Here ``conda-tag`` skips only when no bump was committed, in which case
+        there is nothing for ``conda-dist`` to upload either.
+
+        """
+        predecessors = {'conda-tag': ('conda-update',),
+                        'conda-dist': ('conda-update', 'conda-tag')}
+        for job, required in sorted(predecessors.items()):
+            with self.subTest(job=job):
+                condition = declared_if(self.jobs[job])
+                compact = re.sub(r'\s+', '', condition)
+                self.assertTrue(
+                    calls_status_check(condition),
+                    f'`{job}`\'s `if:` ({condition!r}) calls no status-check '
+                    f'function, so Actions conjoins the implicit `success()` and '
+                    f'the skipped `unit-tests` gate cascade-skips it -- #1632',
+                )
+                self.assertIn(
+                    '!cancelled()', condition,
+                    f'`{job}` escapes the cascade with something other than '
+                    f'`!cancelled()`; `always()` would also publish out of a '
+                    f'cancelled run',
+                )
+                self.assertEqual(
+                    set(declared_needs(self.jobs[job])), set(required),
+                    f'`{job}`\'s `needs:` and the clauses asserted here disagree, '
+                    f'so at least one predecessor is not being checked',
+                )
+                for predecessor in required:
+                    self.assertIn(
+                        f"&&needs.{predecessor}.result=='success'&&", compact,
+                        f'`{job}` does not require `{predecessor}` to have '
+                        f'succeeded as a top-level `&&` conjunct',
+                    )
+                    self.assertEqual(
+                        compact.count(f'.{predecessor}.result'), 1,
+                        f'`{job}` refers to `{predecessor}.result` more than once; '
+                        f'a second reference can only weaken the check',
+                    )
+                self.assertIn(
+                    "needs.conda-update.outputs.CONDA_CHANGED=='true'", compact,
+                    f'`{job}` no longer reads the bump evidence, so it would run '
+                    f'on a crawl that changed nothing',
+                )
+
+    def test_conda_dist_checks_out_the_tag_conda_tag_pushes(self) -> None:
+        """Why ``conda-tag`` is held to ``success`` with no ``|| 'skipped'``.
+
+        The checkout pins ``ref: conda-<version>+<build>``, so a ``conda-dist``
+        admitted behind a skipped or cancelled ``conda-tag`` fails in
+        ``actions/checkout`` instead of skipping cleanly -- the same defect a
+        cross-review found in ``create-release.yml``'s ``conda`` job.
+
+        """
+        self.assertIn('ref: conda-${{ needs.conda-update.outputs.PCAPKIT_VERSION }}',
+                      self.jobs['conda-dist'])
+
+    def test_conda_tag_checks_out_and_tags_the_commit_push_changes_pushed(self) -> None:
+        """#1643's review: the tag goes on what Push Changes pushed, not on the tip.
+
+        Read through the declared outputs, on the row where ``main`` moved on by
+        bot commits and the rebased bump is a commit no other row carries: both
+        the checkout's ``ref:`` and Create Tag's ``CONDA_COMMIT`` are that
+        commit, and Create Tag neither pulls nor tags ``HEAD``.
+        :class:`TestCondaTagTagsWhatWasPushed` runs those steps.
+
+        """
+        rebased = '0123456789abcdef0123456789abcdef01234567'
+        context = conda_context(commit=rebased)
+        jobs = self.jobs  # type: ignore[attr-defined]
+        self.assertEqual(step_values(jobs, 'conda-tag', 'Checkout code', 'with', context,
+                                     names=('ref',)).get('ref'),
+                         rebased, '`conda-tag` checks out something other than the pushed commit')
+        self.assertEqual(step_values(jobs, 'conda-tag', 'Create Tag', 'env', context).get('CONDA_COMMIT'),
+                         rebased, 'Create Tag is not handed the pushed commit')
+        script = block_scalar_after(step_block(jobs['conda-tag'], 'Create Tag'), _RUN_LITERAL)
+        self.assertNotRegex(script, r'\bgit +(pull|fetch|merge|reset)\b',
+                            'Create Tag moves the checkout off the pushed commit before tagging')
+        self.assertRegex(script, r'(?m)^ *git tag "\$tag" "\$CONDA_COMMIT" ',
+                         'Create Tag does not tag `$CONDA_COMMIT` by name')
+
+    def test_cron_conda_really_does_publish(self) -> None:
+        """The claim #1632 found wrong in this module's own comment.
+
+        :data:`WORKFLOW`'s comment read that ``cron-conda.yml`` "build[s] and
+        commit[s] but upload[s] nothing", which is how this chain came to have
+        no test of any kind. It uploads to anaconda.org and attaches the same
+        packages to a GitHub Release.
+
+        """
+        block = self.jobs['conda-dist']
+        self.assertIn('anaconda/actions/upload-package', block)
+        self.assertIn('ncipollo/release-action', block)
+        self.assertEqual(
+            sorted(publishing_reasons(block)),
+            ['uploads a package to anaconda.org'],
+            'the publishing markers no longer recognise what `conda-dist` does; '
+            'see PUBLISHING_MARKERS, which is an allowlist and says nothing about '
+            'a route it does not name',
+        )
+
+    def test_every_declared_if_is_evaluable(self) -> None:
+        """Nothing in this file may leave the subset :func:`parse_condition`
+        implements, for the reason the same test gives for ``create-release.yml``.
+
+        """
+        for name, block in sorted(self.jobs.items()):
+            condition = declared_if(block)
+            if not condition:
+                continue
+            with self.subTest(job=name):
+                try:
+                    evaluate_condition(condition, resolved_context(
+                        self.jobs, conda_context()))  # type: ignore[arg-type]
+                except UnsupportedExpression as error:
+                    self.fail(f'`{name}`\'s `if:` is outside the evaluated subset: {error}')
+
+
+class CondaStepHarness(CondaWorkflowMixin):
+    """A throwaway origin to run :file:`cron-conda.yml`'s own step scripts in (#1632).
+
+    Each test rebuilds a state a real run met and runs a step's ``run:`` text as
+    the runner does -- ``bash -e`` on a script file -- with the GitHub remote
+    rewritten to that origin by ``url.<path>.insteadOf``, so nothing touches the
+    network. The base commit stands for the run's checkout, ``$GITHUB_SHA``, and
+    carries the real :file:`util/verdict_covers_checkout.py`, which Push Changes
+    runs from its checkout; ``python3`` is this interpreter. Commits are
+    github-actions[bot]'s unless a test lands one as somebody else.
+
+    """
+
+    REMOTE = 'git@github.com:JarryShaw/PyPCAPKit.git'
+
+    #: ``conda/requirements.txt`` at the base commit: ten lines, so an edit to
+    #: the first and one to the last merge cleanly in a rebase.
+    REQUIREMENTS = [f'package{index}==1.0' for index in range(10)]
+
+    #: A squash merge's identities on ``main``: its author, committed by GitHub.
+    HUMAN = ('Jarry Shaw', 'jarryshaw@icloud.com')
+    GITHUB = ('GitHub', 'noreply@github.com')
+
+    #: The tag ``conda_context``'s ``get_version`` outputs name.
+    TAG = 'conda-1.5.0b9+3'
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        for tool in ('bash', 'git'):
+            if shutil.which(tool) is None:
+                raise unittest.SkipTest(f'{tool} not found on PATH')
+
+    def setUp(self) -> None:
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.root = pathlib.Path(tmp.name)
+        self.origin = self.root / 'origin.git'
+
+        # Isolated from the caller's git configuration, which may sign commits
+        # or rewrite URLs of its own. No automatic maintenance either, as in
+        # test_workflow_run_verdict.py (#1643), whose detached repack can
+        # outlive the test and race its cleanup: maintenance.auto is what
+        # commit, fetch, rebase and receive-pack consult, gc.auto what they fall
+        # back to, and autoDetach keeps anything that still runs in the
+        # foreground. See test_the_harness_git_runs_no_maintenance.
+        home = self.root / 'home'
+        home.mkdir()
+        (home / '.gitconfig').write_text(
+            '[user]\n\tname = github-actions[bot]\n'
+            '\temail = github-actions[bot]@users.noreply.github.com\n'
+            '[init]\n\tdefaultBranch = main\n'
+            '[commit]\n\tgpgsign = false\n'
+            '[tag]\n\tgpgsign = false\n'
+            '[maintenance]\n\tauto = false\n\tautoDetach = false\n'
+            '[gc]\n\tauto = 0\n\tautoDetach = false\n'
+            f'[url "{self.origin.as_posix()}"]\n\tinsteadOf = {self.REMOTE}\n',
+            encoding='utf-8',
+        )
+        bin_dir = self.root / 'bin'
+        bin_dir.mkdir()
+        (bin_dir / 'python3').write_text(
+            f'#!/bin/sh\nexec {shlex.quote(sys.executable)} "$@"\n', encoding='utf-8')
+        (bin_dir / 'python3').chmod(0o755)
+        self.env = {
+            'PATH': f'{bin_dir}{os.pathsep}{os.environ.get("PATH", "")}',
+            'HOME': str(home),
+            'XDG_CONFIG_HOME': str(home / '.config'),
+            'GIT_CONFIG_NOSYSTEM': '1',
+            'LC_ALL': 'C',
+        }
+
+        # Every push lands here, and receive-pack has its own switch for the
+        # same maintenance.
+        self._git(self.root, 'init', '--bare', str(self.origin))
+        self._origin('config', 'receive.autogc', 'false')
+        seed = self.root / 'seed'
+        self._git(self.root, 'init', str(seed))
+        (seed / 'conda').mkdir()
+        (seed / 'conda' / 'build').write_text('2\n', encoding='utf-8')
+        (seed / 'conda' / 'requirements.txt').write_text(
+            '\n'.join(self.REQUIREMENTS) + '\n', encoding='utf-8')
+        (seed / 'util').mkdir()
+        shutil.copyfile(ROOT / 'util' / 'verdict_covers_checkout.py',
+                        seed / 'util' / 'verdict_covers_checkout.py')
+        self._git(seed, 'add', '.')
+        self._git(seed, 'commit', '-m', 'base')
+        self._git(seed, 'push', self.REMOTE, 'HEAD:refs/heads/main')
+        self.base = self._git(seed, 'rev-parse', 'HEAD')
+
+    def _git(self, cwd: 'pathlib.Path', *args: 'str',
+             identity: 'Optional[tuple[tuple[str, str], tuple[str, str]]]' = None) -> 'str':
+        env = dict(self.env)
+        if identity is not None:
+            (author, author_email), (committer, committer_email) = identity
+            env.update(GIT_AUTHOR_NAME=author, GIT_AUTHOR_EMAIL=author_email,
+                       GIT_COMMITTER_NAME=committer, GIT_COMMITTER_EMAIL=committer_email)
+        result = subprocess.run(
+            ['git', *args], cwd=cwd, env=env, capture_output=True, text=True,
+            timeout=scale_timeout(30),
+        )
+        self.assertEqual(result.returncode, 0, f'git {" ".join(args)}: {result.stderr}')
+        return result.stdout.strip()
+
+    def _clone(self, name: 'str') -> 'pathlib.Path':
+        self._git(self.root, 'clone', self.REMOTE, name)
+        return self.root / name
+
+    def _bump(self, clone: 'pathlib.Path', edits: 'dict[int, str]') -> None:
+        """What Setup Conda Distribution, Bump Version and Commit Changes leave.
+
+        The message names the clone the way the real one carries ``$(date)``:
+        two runs' bumps are then different commits with the same patch, as
+        f4f94bcad and 644b9c197 were. Identical messages committed within one
+        second would be one sha, and the rebase this class exists to exercise
+        would never run.
+
+        """
+        lines = [edits.get(index, line) for index, line in enumerate(self.REQUIREMENTS)]
+        (clone / 'conda' / 'requirements.txt').write_text('\n'.join(lines) + '\n',
+                                                          encoding='utf-8')
+        (clone / 'conda' / 'build').write_text('3\n', encoding='utf-8')
+        self._git(clone, 'commit', '-am', f'Bumped build to 3\n\nUpdated by {clone.name}.')
+
+    def _stage(self, name: 'str', files: 'dict[str, str]', message: 'str',
+               identity: 'Optional[tuple[tuple[str, str], tuple[str, str]]]' = None,
+               ) -> 'pathlib.Path':
+        """A fresh clone holding one unpushed commit that writes ``files``."""
+        clone = self._clone(name)
+        for path, text in files.items():
+            (clone / path).parent.mkdir(parents=True, exist_ok=True)
+            (clone / path).write_text(text, encoding='utf-8')
+        self._git(clone, 'add', '--', *files)
+        self._git(clone, 'commit', '-m', message, identity=identity)
+        return clone
+
+    def _land(self, name: 'str', files: 'dict[str, str]', message: 'str',
+              identity: 'Optional[tuple[tuple[str, str], tuple[str, str]]]' = None) -> 'str':
+        """Push one commit writing ``files`` onto ``main``, as a merge or a bot
+        would while a run is under way; its sha.
+
+        """
+        clone = self._stage(name, files, message, identity)
+        self._git(clone, 'push', 'origin', 'HEAD:refs/heads/main')
+        return self._git(clone, 'rev-parse', 'HEAD')
+
+    def _land_after_fetch(self, name: 'str', files: 'dict[str, str]', message: 'str',
+                          identity: 'Optional[tuple[tuple[str, str], tuple[str, str]]]' = None,
+                          ) -> 'tuple[str, dict[str, str]]':
+        """:meth:`_land`, but the push is left to a ``git`` shim that makes it
+        once, the moment a ``git fetch`` run through it returns: the commit's
+        sha, and the ``PATH`` that puts the shim first. It marks having fired
+        by creating ``landed`` in the temporary directory.
+
+        """
+        clone = self._stage(name, files, message, identity)
+        real = shutil.which('git', path=self.env['PATH'])
+        assert real is not None  # setUpClass skips without it
+        git, marker = shlex.quote(real), shlex.quote(str(self.root / 'landed'))
+        shim = self.root / 'shim'
+        shim.mkdir()
+        (shim / 'git').write_text(
+            '#!/bin/sh\n'
+            f'{git} "$@" || exit\n'
+            f'if [ "$1" = fetch ] && [ ! -e {marker} ]; then\n'
+            f'  : > {marker}\n'
+            f'  exec {git} -C {shlex.quote(str(clone))} push -q origin HEAD:refs/heads/main\n'
+            'fi\n', encoding='utf-8')
+        (shim / 'git').chmod(0o755)
+        return (self._git(clone, 'rev-parse', 'HEAD'),
+                {'PATH': f'{shim}{os.pathsep}{self.env["PATH"]}'})
+
+    def _bash(self, script: 'str', cwd: 'pathlib.Path', env: 'dict[str, str]',
+              ) -> 'tuple[subprocess.CompletedProcess[str], dict[str, str]]':
+        """Run one step's script: its result and the outputs it wrote."""
+        path = self.root / 'step.sh'
+        path.write_text(script, encoding='utf-8')
+        output = self.root / 'step.output'
+        output.write_text('', encoding='utf-8')
+        run_env = dict(self.env, GITHUB_REF='refs/heads/main', GITHUB_SHA=self.base,
+                       GITHUB_OUTPUT=str(output))
+        run_env.update(env)
+        result = subprocess.run(
+            ['bash', '-e', str(path)], cwd=cwd, env=run_env,
+            capture_output=True, text=True, timeout=scale_timeout(60),
+        )
+        outputs = dict(line.split('=', 1) for line in
+                       output.read_text(encoding='utf-8').splitlines() if '=' in line)
+        return result, outputs
+
+    def _origin(self, *args: 'str') -> 'str':
+        return self._git(self.root, '--git-dir', str(self.origin), *args)
+
+    def _requirements(self, edits: 'dict[int, str]') -> 'str':
+        return '\n'.join(edits.get(index, line) for index, line in enumerate(self.REQUIREMENTS)) + '\n'
+
+
+class TestCondaPushReportsWhatLanded(CondaStepHarness, unittest.TestCase):
+    """``conda-update``'s Push Changes step, run against a local origin (#1632).
+
+    ``CONDA_CHANGED`` is the ``pushed`` this step writes and ``CONDA_COMMIT`` the
+    ``commit``, so whether a bump is tagged, and which commit, turns on its
+    shell and on git's rebase, which no expression row can check.
+
+    """
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        cls.step = step_block(cls.jobs['conda-update'], 'Push Changes')  # type: ignore[attr-defined]
+        cls.script = block_scalar_after(cls.step, _RUN_LITERAL)
+
+    def _run(self, clone: 'pathlib.Path', **env: 'str',
+             ) -> 'tuple[subprocess.CompletedProcess[str], dict[str, str]]':
+        return self._bash(self.script, clone, env)  # type: ignore[attr-defined]
+
+    def test_the_step_is_the_one_conda_changed_reads(self) -> None:
+        """The other tests run this script, so it has to be the one that counts."""
+        self.assertRegex(self.step, r'(?m)^ +id: push-changes$')  # type: ignore[attr-defined]
+        outputs = declared_outputs(self.jobs['conda-update'])  # type: ignore[attr-defined]
+        self.assertEqual(outputs.get('CONDA_CHANGED'), '${{ steps.push-changes.outputs.pushed }}')
+        self.assertEqual(outputs.get('CONDA_COMMIT'), '${{ steps.push-changes.outputs.commit }}')
+        self.assertNotIn('${{', self.script,  # type: ignore[attr-defined]
+                         'the script interpolates an expression this test runs unsubstituted')
+
+    def test_a_bump_onto_an_unmoved_main_is_pushed(self) -> None:
+        """Run 38325136710's push: nothing had moved ``main``, so the bump lands."""
+        clone = self._clone('first')
+        self._bump(clone, {0: 'package0==2.0'})
+        result, outputs = self._run(clone)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        landed = self._origin('rev-parse', 'main')
+        self.assertEqual(outputs, {'pushed': 'true', 'commit': landed})
+        self.assertEqual(landed, self._git(clone, 'rev-parse', 'HEAD'))
+        self.assertEqual(self._origin('show', 'main:conda/build'), '3')
+
+    def test_a_bump_another_run_already_pushed_is_not_reported(self) -> None:
+        """A second run from the same checkout, as 38325153882 was beside
+        38325136710: the same bump, after the first run pushed it. The rebase
+        drops it as already applied and the push would be a no-op, so it must
+        succeed and report ``false``.
+
+        """
+        first, second = self._clone('first'), self._clone('second')
+        for clone in (first, second):
+            self._bump(clone, {0: 'package0==2.0'})
+        self.assertEqual(self._run(first)[1].get('pushed'), 'true')
+        landed = self._origin('rev-parse', 'main')
+
+        self.assertNotEqual(self._git(second, 'rev-parse', 'HEAD'), landed)
+
+        result, outputs = self._run(second)
+        self.assertEqual(result.returncode, 0, f'the second run fails: {result.stderr}')
+        self.assertEqual(
+            outputs, {'pushed': 'false'},
+            'a run whose bump another run already pushed reports it as its own, '
+            'so conda-tag re-creates an existing tag',
+        )
+        self.assertEqual(self._origin('rev-parse', 'main'), landed)
+        self.assertEqual(self._git(second, 'rev-parse', 'HEAD'), landed,
+                         'the rebase kept the second bump, so this is not that run')
+
+    def test_a_bump_is_not_pushed_over_a_commit_with_no_verdict(self) -> None:
+        """#1643's review: a merge lands on ``main`` after the checkout. Rebasing
+        the bump onto it and pushing would have Conda Tag and Conda deployment
+        tag and upload a commit no ``Unit Tests`` run has passed. So nothing is
+        pushed, the job stays green, and the notice names the commit.
+
+        """
+        clone = self._clone('first')
+        merge = self._land('merge', {'pcapkit/toolkit/scapy.py': 'fix\n'},
+                           'fix(toolkit): a merge', (self.HUMAN, self.GITHUB))
+        self._bump(clone, {0: 'package0==2.0'})
+        result, outputs = self._run(clone)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(outputs, {'pushed': 'false'},
+                         'the bump was pushed on top of a commit with no verdict of its own')
+        self.assertEqual(self._origin('rev-parse', 'main'), merge)
+        self.assertIn('::notice title=Not pushed as main moved past this checkout::', result.stdout)
+        self.assertIn(f'{merge} after the verified {self.base} was authored by '
+                      f'{self.HUMAN[1]}', result.stdout)
+
+    def test_a_bump_is_not_pushed_over_a_bot_commit_outside_conda(self) -> None:
+        """The rule's other half: a bot commit counts only when it touches
+        ``conda/build`` and ``conda/requirements.txt`` alone, as a Vendor Update
+        bump, which rewrites ``pcapkit/``, does not.
+
+        """
+        clone = self._clone('first')
+        vendor = self._land('vendor', {'README': 'unrelated\n'}, 'Bumped version to 1.5.0b10')
+        self._bump(clone, {0: 'package0==2.0'})
+        result, outputs = self._run(clone)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(outputs, {'pushed': 'false'})
+        self.assertEqual(self._origin('rev-parse', 'main'), vendor)
+        self.assertIn('touches README, which is not bot-managed', result.stdout)
+
+    def test_a_bump_rebased_over_bot_commits_to_conda_is_pushed(self) -> None:
+        """What the rule lets through: ``main`` moved on by a bot commit to
+        ``conda/`` only. The bump is rebased onto it, and ``commit`` is the
+        rebased commit, which is what Conda Tag tags.
+
+        """
+        clone = self._clone('first')
+        bot = self._land('bot', {'conda/requirements.txt': self._requirements({9: 'package9==2.0'})},
+                         'Updated conda/requirements.txt')
+        self._bump(clone, {0: 'package0==2.0'})
+        result, outputs = self._run(clone)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        landed = self._origin('rev-parse', 'main')
+        self.assertEqual(outputs, {'pushed': 'true', 'commit': landed})
+        self.assertEqual(self._origin('rev-parse', 'main^'), bot)
+        self.assertEqual(self._origin('show', 'main:conda/build'), '3')
+        self.assertEqual(self._origin('show', 'main:conda/requirements.txt'),
+                         self._requirements({0: 'package0==2.0', 9: 'package9==2.0'}).strip())
+
+    def test_the_rule_is_run_from_the_checkout_not_from_the_tip_it_judges(self) -> None:
+        """The decision comes before the rebase, so a commit on the tip cannot
+        vouch for itself by rewriting the script that judges it.
+
+        """
+        clone = self._clone('first')
+        merge = self._land('merge', {'util/verdict_covers_checkout.py': 'raise SystemExit(0)\n'},
+                           'chore(util): accept everything', (self.HUMAN, self.GITHUB))
+        self._bump(clone, {0: 'package0==2.0'})
+        result, outputs = self._run(clone)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(outputs, {'pushed': 'false'})
+        self.assertEqual(self._origin('rev-parse', 'main'), merge)
+
+    def test_a_merge_landing_after_the_fetch_refuses_the_push(self) -> None:
+        """The rebase is onto the tip the rule judged, ``$tip``, so a merge that
+        lands after the fetch is never under the bump: ``origin`` has moved past
+        what is pushed, the push is not a fast-forward, and it is refused. The
+        step fails having written nothing, so nothing is tagged or uploaded,
+        and the merge's own ``Unit Tests`` run raises the next bump.
+
+        """
+        clone = self._clone('first')
+        merge, env = self._land_after_fetch('merge', {'pcapkit/toolkit/scapy.py': 'fix\n'},
+                                            'fix(toolkit): a merge', (self.HUMAN, self.GITHUB))
+        self._bump(clone, {0: 'package0==2.0'})
+        result, outputs = self._run(clone, **env)
+        self.assertTrue((self.root / 'landed').exists(), 'the merge never raced the fetch')
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn('[rejected]', result.stderr)
+        self.assertEqual(outputs, {}, 'the step reported a push that did not land')
+        self.assertEqual(self._origin('rev-parse', 'main'), merge)
+        self.assertEqual(self._git(clone, 'rev-parse', 'HEAD^'), self.base,
+                         'the bump was not rebased onto the tip the rule judged')
+
+    def test_a_rebase_that_fetches_again_pushes_the_merge_under_the_bump(self) -> None:
+        """The test above has to be able to fail, and this is how: with
+        ``git pull --rebase`` for ``git rebase "$tip"``, the rebase fetches
+        again, takes in the merge no verdict was asked about, and the step
+        pushes it under the bump and reports that as the commit to tag.
+
+        """
+        script = self.script  # type: ignore[attr-defined]
+        self.assertEqual(script.count('git rebase "$tip"'), 1,
+                         'Push Changes no longer runs `git rebase "$tip"` once')
+        mutated = script.replace('git rebase "$tip"', 'git pull --rebase')
+        clone = self._clone('first')
+        merge, env = self._land_after_fetch('merge', {'pcapkit/toolkit/scapy.py': 'fix\n'},
+                                            'fix(toolkit): a merge', (self.HUMAN, self.GITHUB))
+        self._bump(clone, {0: 'package0==2.0'})
+        result, outputs = self._bash(mutated, clone, env)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        landed = self._origin('rev-parse', 'main')
+        self.assertEqual(outputs, {'pushed': 'true', 'commit': landed})
+        self.assertEqual(self._origin('rev-parse', 'main^'), merge)
+
+    def test_a_rule_that_cannot_answer_fails_the_step(self) -> None:
+        """No sha to compare is a broken run, not a stale one: the step fails,
+        writes nothing, and pushes nothing.
+
+        """
+        clone = self._clone('first')
+        self._bump(clone, {0: 'package0==2.0'})
+        result, outputs = self._run(clone, GITHUB_SHA='')
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertIn('::error title=No verdict to compare::', result.stdout)
+        self.assertEqual(outputs, {})
+        self.assertEqual(self._origin('rev-parse', 'main'), self.base)
+
+    def test_a_rebase_that_keeps_the_commit_but_drops_the_bump_is_not_reported(self) -> None:
+        """Why the step asks about ``conda/build`` rather than "is a commit
+        left to push": here one is, and pushing it would land under a build
+        another run already tagged.
+
+        """
+        first, second = self._clone('first'), self._clone('second')
+        self._bump(first, {0: 'package0==2.0'})
+        self._bump(second, {0: 'package0==2.0', 9: 'package9==2.0'})
+        self.assertEqual(self._run(first)[1].get('pushed'), 'true')
+        landed = self._origin('rev-parse', 'main')
+
+        result, outputs = self._run(second)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(outputs, {'pushed': 'false'})
+        self.assertEqual(self._origin('rev-parse', 'main'), landed)
+        self.assertEqual(
+            self._git(second, 'rev-list', '--count', f'{landed}..HEAD'), '1',
+            'the rebase dropped the whole commit, so this no longer tests the '
+            'partial case',
+        )
+
+    def test_the_harness_git_runs_no_maintenance(self) -> None:
+        """No git process outlives the command that started it, in any
+        repository here.
+
+        A commit, fetch or rebase runs ``git maintenance run --auto``, as
+        receive-pack does in ``origin`` after each push, detached by default. On
+        git 2.55.0 such a repack outlived a test in test_workflow_run_verdict.py
+        and raced its cleanup (#1643). Here a commit-graph write is due on every
+        run and runs in the foreground, so any maintenance at all leaves a file
+        behind, through clones, commits, a rebase over a bot commit and pushes.
+
+        """
+        with (self.root / 'home' / '.gitconfig').open('a', encoding='utf-8') as config:
+            config.write('[maintenance]\n\tautoDetach = false\n'
+                         '[maintenance "commit-graph"]\n\tenabled = true\n\tauto = -1\n')
+        clone = self._clone('first')
+        self._land('bot', {'conda/requirements.txt': self._requirements({9: 'package9==2.0'})},
+                   'Updated conda/requirements.txt')
+        self._bump(clone, {0: 'package0==2.0'})
+        result, outputs = self._run(clone)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(outputs.get('pushed'), 'true')
+        repositories = [self.origin] + [path / '.git' for path in sorted(self.root.iterdir())
+                                        if (path / '.git').is_dir()]
+        self.assertEqual(len(repositories), 4, 'origin, seed, first and bot')
+        for repository in repositories:
+            with self.subTest(repository=repository.relative_to(self.root).as_posix()):
+                written = sorted(path.name for path in (repository / 'objects' / 'info').glob('*'))
+                self.assertEqual(written, [], 'git ran maintenance in this repository')
+
+
+class TestCondaTagTagsWhatWasPushed(CondaStepHarness, unittest.TestCase):
+    """``conda-tag``'s steps, run after Push Changes against a local origin.
+
+    The checkout is what ``actions/checkout`` does with the job's ``ref:``,
+    evaluated from Push Changes' outputs: that commit detached, or, with no
+    ``ref:``, "the reference or SHA for that event" -- ``main`` at
+    ``$GITHUB_SHA``, tracking ``origin/main``. Create Tag and Push Tag then run
+    with the ``env:`` they declare, and ``conda-dist`` checks out the tag they
+    leave on ``origin``.
+
+    """
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        update = cls.jobs['conda-update']  # type: ignore[attr-defined]
+        tag = cls.jobs['conda-tag']  # type: ignore[attr-defined]
+        cls.push = block_scalar_after(step_block(update, 'Push Changes'), _RUN_LITERAL)
+        cls.steps = [(name, block_scalar_after(step_block(tag, name), _RUN_LITERAL))
+                     for name in ('Create Tag', 'Push Tag')]
+
+    def _pushed(self) -> 'tuple[dict[str, str], str]':
+        """A bump pushed onto an unmoved ``main``: Push Changes' outputs, and
+        the commit ``origin`` received, read from ``origin`` rather than from
+        those outputs.
+
+        """
+        clone = self._clone('update')
+        self._bump(clone, {0: 'package0==2.0'})
+        result, outputs = self._bash(self.push, clone, {})  # type: ignore[attr-defined]
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(outputs.get('pushed'), 'true')
+        return outputs, self._origin('rev-parse', 'main')
+
+    def _conda_tag(self, outputs: 'dict[str, str]',
+                   ) -> 'list[tuple[str, subprocess.CompletedProcess[str]]]':
+        """Check out as the job says and run its steps until one fails."""
+        context = conda_context(pushed=outputs.get('pushed', NULL),
+                                commit=outputs.get('commit', NULL))
+        jobs = self.jobs  # type: ignore[attr-defined]
+        ref = step_values(jobs, 'conda-tag', 'Checkout code', 'with', context,
+                          names=('ref',)).get('ref', NULL)
+        checkout = self._clone('tagger')
+        if isinstance(ref, str) and ref:
+            self._git(checkout, 'checkout', '-q', '--detach', ref)
+        else:
+            self._git(checkout, 'reset', '-q', '--hard', self.base)
+
+        results = []  # type: list[tuple[str, subprocess.CompletedProcess[str]]]
+        for name, script in self.steps:  # type: ignore[attr-defined]
+            env = {key: '' if value is NULL else str(value) for key, value in
+                   step_values(jobs, 'conda-tag', name, 'env', context).items()}
+            result, _ = self._bash(script, checkout, env)
+            results.append((name, result))
+            if result.returncode != 0:
+                break
+        return results
+
+    def _tag_on_origin(self, target: 'str') -> 'str':
+        """Tag ``target`` on ``origin`` as an earlier run would have; the tag object."""
+        clone = self._clone('earlier')
+        self._git(clone, 'tag', self.TAG, target, '-m', 'Conda Build')
+        self._git(clone, 'push', 'origin', f'refs/tags/{self.TAG}')
+        return self._origin('rev-parse', f'refs/tags/{self.TAG}')
+
+    def test_the_tag_names_the_pushed_commit_after_main_moves_on(self) -> None:
+        """#1643's review: a merge landing between the push and this job is not
+        what was bumped, and has no verdict; tagging ``main``'s tip after a
+        ``git pull`` tagged it, and ``conda-dist`` would have uploaded it.
+
+        """
+        outputs, pushed = self._pushed()
+        merge = self._land('merge', {'pcapkit/toolkit/scapy.py': 'fix\n'},
+                           'fix(toolkit): a merge', (self.HUMAN, self.GITHUB))
+        results = self._conda_tag(outputs)
+        for name, result in results:
+            with self.subTest(step=name):
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual([name for name, _ in results], ['Create Tag', 'Push Tag'])
+        tagged = self._origin('rev-parse', f'refs/tags/{self.TAG}^{{commit}}')
+        self.assertNotEqual(tagged, merge, 'the tag went on the commit that landed after the push')
+        self.assertEqual(tagged, pushed)
+
+    def test_a_tag_already_on_the_pushed_commit_is_left_and_the_job_passes(self) -> None:
+        """A re-run of this job after its tag was pushed: nothing to do, and no
+        reason to stop ``conda-dist``.
+
+        """
+        outputs, pushed = self._pushed()
+        earlier = self._tag_on_origin(pushed)
+        results = self._conda_tag(outputs)
+        for name, result in results:
+            with self.subTest(step=name):
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual([name for name, _ in results], ['Create Tag', 'Push Tag'])
+        self.assertIn('::notice title=Already tagged::', results[0][1].stdout)
+        self.assertEqual(self._origin('rev-parse', f'refs/tags/{self.TAG}'), earlier)
+
+    def test_a_tag_on_another_commit_fails_and_is_not_moved(self) -> None:
+        """The build number already names a different tree, so neither this tag
+        nor the upload behind it may go ahead.
+
+        """
+        outputs, pushed = self._pushed()
+        earlier = self._tag_on_origin(self.base)
+        results = self._conda_tag(outputs)
+        self.assertEqual([name for name, _ in results], ['Create Tag'])
+        self.assertNotEqual(results[0][1].returncode, 0)
+        self.assertIn(f'::error title=Tag already names another commit::{self.TAG} tags '
+                      f'{self.base}, not {pushed}', results[0][1].stdout)
+        self.assertEqual(self._origin('rev-parse', f'refs/tags/{self.TAG}'), earlier)
+
+    def test_with_no_commit_to_tag_nothing_is_tagged(self) -> None:
+        """``CONDA_CHANGED`` without ``CONDA_COMMIT`` cannot come out of Push
+        Changes, which writes both together; were it to, Create Tag fails rather
+        than falling back to whatever the checkout holds.
+
+        """
+        self._pushed()
+        results = self._conda_tag({'pushed': 'true'})
+        self.assertEqual([name for name, _ in results], ['Create Tag'])
+        self.assertNotEqual(results[0][1].returncode, 0)
+        self.assertEqual(self._git(self.root / 'tagger', 'tag', '--list'), '')
+        self.assertEqual(self._git(self.root, 'ls-remote', '--tags', self.REMOTE), '')
+
+
+class TestTheCascadeModel(unittest.TestCase):
+    """:func:`cascade_skipped_by`, :func:`calls_status_check` and
+    :func:`with_condition` against fixtures rather than against the repository.
+
+    The cascade model is the one thing in this module that is not checkable
+    against the file it describes -- it *is* the description -- so it is pinned
+    on a fixture carrying the #1632 shape, and on the pre-fix condition text
+    itself. Same reasoning as :class:`TestTheExpressionEvaluator`: a mistake
+    here would otherwise show up as a quietly wrong row in
+    :data:`CONDA_ROWS`.
+
+    """
+
+    #: The #1632 graph, reduced to its shape: a gate that skips, a job that
+    #: escapes the skip and succeeds, and a job that escapes nothing.
+    FIXTURE = (
+        'jobs:\n'
+        '  gate:\n'
+        "    if: ${{ github.event_name != 'workflow_run' }}\n"
+        '  update:\n'
+        '    needs: [ gate ]\n'
+        '    if: >-\n'
+        "      !cancelled() && needs.gate.result != 'failure'\n"
+        '  tag:\n'
+        '    needs: [ update ]\n'
+        "    if: needs.update.outputs.CHANGED == 'true'\n"
+    )
+
+    def setUp(self) -> None:
+        self.jobs = job_blocks(self.FIXTURE)
+
+    def test_a_skipped_ancestor_cascades_through_a_job_that_escaped_it(self) -> None:
+        """The measured #1632 behaviour: escaping the cascade is not absorbing it."""
+        results = {'gate': 'skipped', 'update': 'success', 'tag': 'skipped'}
+        self.assertEqual(cascade_skipped_by(self.jobs, 'tag', results), 'gate')
+        self.assertEqual(cascade_skipped_by(self.jobs, 'update', results), 'gate')
+
+    def test_a_fully_successful_chain_cascades_nothing(self) -> None:
+        results = {'gate': 'success', 'update': 'success', 'tag': 'success'}
+        for job in ('gate', 'update', 'tag'):
+            with self.subTest(job=job):
+                self.assertIsNone(cascade_skipped_by(self.jobs, job, results))
+
+    def test_a_failed_ancestor_cascades_as_a_skipped_one_does(self) -> None:
+        for result in ('failure', 'cancelled', 'skipped'):
+            with self.subTest(result=result):
+                results = {'gate': 'success', 'update': result, 'tag': 'skipped'}
+                self.assertEqual(cascade_skipped_by(self.jobs, 'tag', results), 'update')
+
+    def test_an_ancestor_no_scenario_models_raises(self) -> None:
+        """Answering ``None`` for an unmodelled ancestor would decide a row by
+        accident, the same way an unknown context root would.
+
+        """
+        with self.assertRaises(UnsupportedExpression):
+            cascade_skipped_by(self.jobs, 'tag', {'gate': 'success'})
+
+    def test_the_pre_fix_condition_is_what_the_cascade_catches(self) -> None:
+        """The two halves of #1632, on the fixture: ``tag``'s condition is true
+        and ``tag`` does not run.
+
+        """
+        context = conda_context()
+        context['needs'] = {
+            'gate': {'result': 'skipped'},
+            'update': {'result': 'success', 'outputs': {'CHANGED': 'true'}},
+            'tag': {'result': 'skipped'},
+        }
+        self.assertTrue(evaluate_condition(declared_if(self.jobs['tag']), context))
+        self.assertFalse(job_runs(self.jobs, 'tag', context))
+
+    def test_adding_the_guard_to_the_fixture_fixes_it(self) -> None:
+        """And the fix, on the same fixture, so the model is shown to admit one."""
+        context = conda_context()
+        context['needs'] = {
+            'gate': {'result': 'skipped'},
+            'update': {'result': 'success', 'outputs': {'CHANGED': 'true'}},
+            'tag': {'result': 'skipped'},
+        }
+        fixed = dict(self.jobs)
+        fixed['tag'] = with_condition(
+            fixed['tag'],
+            "!cancelled() && needs.update.result == 'success' && "
+            "needs.update.outputs.CHANGED == 'true'",
+        )
+        self.assertTrue(job_runs(fixed, 'tag', context))
+
+    def test_a_status_literal_is_not_a_status_check_call(self) -> None:
+        """The distinction the whole model rests on.
+
+        Nearly every condition in both workflows contains the word ``success``
+        as the literal ``'success'``; reading that as an opt-out would answer
+        "escaped" for almost every job in either file and make the cascade
+        model vacuous.
+
+        """
+        self.assertFalse(calls_status_check("needs.conda-update.result == 'success'"))
+        self.assertFalse(calls_status_check("github.event.workflow_run.conclusion == 'success'"))
+        for call in ('always()', 'cancelled()', '!cancelled()', 'success()', 'failure()',
+                     'cancelled( )', 'always ()'):
+            with self.subTest(call=call):
+                self.assertTrue(calls_status_check(f"{call} && needs.a.result == 'success'"))
+
+    def test_a_job_with_no_needs_is_never_cascade_skipped(self) -> None:
+        self.assertIsNone(cascade_skipped_by(self.jobs, 'gate', {'gate': 'skipped'}))
+
+    def test_a_job_with_no_condition_runs_once_the_cascade_lets_it_through(self) -> None:
+        jobs = {'gate': '    runs-on: ubuntu-latest\n',
+                'tag': '    needs: [ gate ]\n    runs-on: ubuntu-latest\n'}
+        self.assertTrue(job_runs(jobs, 'tag', {'needs': {'gate': {'result': 'success'}}}))
+        self.assertFalse(job_runs(jobs, 'tag', {'needs': {'gate': {'result': 'skipped'}}}))
+
+    def test_replacing_a_condition_round_trips(self) -> None:
+        """:func:`with_condition` has to leave a block :func:`declared_if` can
+        still read, from either spelling of the original.
+
+        """
+        for job in ('update', 'tag'):
+            with self.subTest(job=job):
+                block = with_condition(self.jobs[job], "always() && needs.a.result == 'x'")
+                self.assertEqual(declared_if(block), "always() && needs.a.result == 'x'")
+                self.assertEqual(declared_needs(block), declared_needs(self.jobs[job]))
+
+    def test_replacing_a_condition_that_is_not_there_raises(self) -> None:
+        with self.assertRaises(AssertionError):
+            with_condition('    runs-on: ubuntu-latest\n', 'always()')
+
+    #: A job declaring outputs, with a comment inside the mapping as
+    #: ``conda-update``'s has.
+    OUTPUTS_FIXTURE = (
+        '    runs-on: ubuntu-latest\n'
+        '    outputs:\n'
+        '      # A comment the scan steps over.\n'
+        '      CHANGED: ${{ steps.push.outputs.pushed }}\n'
+        '      BUILD: ${{ steps.version.outputs.BUILD }}\n'
+        '    steps:\n'
+        '      - name: Push\n'
+        '        id: push\n'
+        '        run: |\n'
+        '          echo first\n'
+        '\n'
+        '          echo second\n'
+        '      # The next step.\n'
+        '      - name: Version\n'
+        '        run: |\n'
+        '          echo third\n'
+    )
+
+    def test_outputs_resolve_through_the_declared_mapping(self) -> None:
+        steps = {'push': {'outputs': {'pushed': 'false'}},
+                 'other': {'outputs': {'pushed': 'true'}}}  # type: dict[str, object]
+        self.assertEqual(declared_outputs(self.OUTPUTS_FIXTURE), {
+            'CHANGED': '${{ steps.push.outputs.pushed }}',
+            'BUILD': '${{ steps.version.outputs.BUILD }}',
+        })
+        self.assertEqual(resolve_outputs(self.OUTPUTS_FIXTURE, steps),
+                         {'CHANGED': 'false', 'BUILD': NULL})
+        self.assertEqual(declared_outputs('    runs-on: ubuntu-latest\n'), {})
+
+    def test_an_unreadable_output_entry_raises(self) -> None:
+        with self.assertRaises(AssertionError):
+            declared_outputs('    outputs:\n      CHANGED ${{ steps.a.outputs.b }}\n')
+
+    def test_a_row_reads_step_outputs_through_the_job_that_declares_them(self) -> None:
+        jobs = {'update': self.OUTPUTS_FIXTURE,
+                'tag': "    needs: [ update ]\n    if: needs.update.outputs.CHANGED == 'true'\n"}
+        entry = {'result': 'success', 'steps': {'push': {'outputs': {'pushed': 'true'}}}}
+        context = {'needs': {'update': entry, 'tag': {'result': 'skipped'}}}  # type: dict[str, object]
+        resolved = resolved_context(jobs, context)['needs']
+        assert isinstance(resolved, dict)
+        self.assertEqual(resolved['update'],
+                         {'result': 'success', 'outputs': {'CHANGED': 'true', 'BUILD': NULL}})
+        self.assertIn('steps', entry, 'resolving mutated the row it was given')
+        self.assertTrue(job_runs(jobs, 'tag', context))
+        entry['steps'] = {'push': {'outputs': {'pushed': 'false'}}}
+        self.assertFalse(job_runs(jobs, 'tag', context))
+
+    def test_an_entry_with_both_steps_and_outputs_raises(self) -> None:
+        context = {'needs': {'update': {'result': 'success', 'steps': {},
+                                        'outputs': {}}}}  # type: dict[str, object]
+        with self.assertRaises(AssertionError):
+            resolved_context({'update': self.OUTPUTS_FIXTURE}, context)
+
+    def test_a_step_block_ends_at_the_next_step(self) -> None:
+        step = step_block(self.OUTPUTS_FIXTURE, 'Push')
+        self.assertEqual(block_scalar_after(step, _RUN_LITERAL), 'echo first\n\necho second')
+        self.assertNotIn('Version', step)
+        self.assertEqual(block_scalar_after(step_block(self.OUTPUTS_FIXTURE, 'Version'),
+                                            _RUN_LITERAL), 'echo third')
+        with self.assertRaises(AssertionError):
+            step_block(self.OUTPUTS_FIXTURE, 'Missing')
+
+
+class TestYAMLAgreesWithTheCondaScanner(CondaWorkflowMixin, unittest.TestCase):
+    """The same cross-check :class:`TestYAMLAgreesWithTheScanner` makes, for the
+    second file -- its folded ``if:`` scalars are what every expectation about
+    this chain is read out of.
+
+    """
+
+    def _parsed(self) -> 'dict':
+        try:
+            import yaml
+        except ImportError:  # pragma: no cover
+            self.skipTest('PyYAML, from the test extra, is not installed; the textual '
+                          'scan is asserted by TestCondaBumpIsTaggedAndUploaded')
+
+        parsed = yaml.safe_load(self.text)  # type: ignore[attr-defined]
+        self.assertIsInstance(parsed, dict, 'cron-conda.yml is not a YAML mapping')
+        return parsed
+
+    def test_the_same_job_to_if_mapping(self) -> None:
+        """Modulo whitespace, unlike the ``create-release.yml`` cross-check.
+
+        ``conda-update``'s folded scalar indents the ``workflow_run`` clause
+        deeper than the block, and YAML keeps the breaks around a "more
+        indented line" as literal newlines rather than folding them to spaces
+        -- so a real parse of that one value carries ``\\n`` where
+        :func:`declared_if` carries ``' '``. Measured here, which is why the
+        normalisation is one-sided to whitespace and nothing else: every other
+        difference between the two still fails this test, and nothing in either
+        the expression grammar or this module can tell one run of whitespace
+        from another. See :func:`declared_if`'s own docstring.
+
+        """
+        parsed = self._parsed()
+        expected = {name: re.sub(r'\s+', ' ', job.get('if') or '').strip()
+                    for name, job in parsed['jobs'].items()}
+        scanned = {name: re.sub(r'\s+', ' ', declared_if(block)).strip()
+                   for name, block in self.jobs.items()}
+        self.assertEqual(scanned, expected,
+                         'the indentation-based `if:` scanner and yaml.safe_load '
+                         'disagree about at least one job\'s condition')
+
+    def test_the_same_job_to_needs_mapping(self) -> None:
+        parsed = self._parsed()
+        expected = {name: list(job.get('needs', [])) for name, job in parsed['jobs'].items()}
+        scanned = {name: declared_needs(block) for name, block in self.jobs.items()}
+        self.assertEqual(scanned, expected,
+                         'the indentation-based `needs:` scanner and yaml.safe_load '
+                         'disagree about the dependency graph')
+
+    def test_the_same_job_to_outputs_mapping(self) -> None:
+        """What :func:`resolved_context` maps a row's step outputs through."""
+        parsed = self._parsed()
+        expected = {name: dict(job.get('outputs') or {}) for name, job in parsed['jobs'].items()}
+        scanned = {name: declared_outputs(block) for name, block in self.jobs.items()}
+        self.assertEqual(scanned, expected,
+                         'the indentation-based `outputs:` scanner and yaml.safe_load '
+                         'disagree about at least one job\'s outputs')
 
 
 if __name__ == '__main__':
