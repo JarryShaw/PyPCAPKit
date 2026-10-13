@@ -80,6 +80,18 @@ jobs:
           # as a red step and an error annotation. 3.8 and 3.9 need
           # ubuntu-24.04: setup-python has no Ubuntu 26.04 build of either, and
           # `ubuntu-latest` moves to 26.04 from 2026-10-19.
+          #
+          # 3.7 needs ubuntu-22.04, the newest image setup-python builds it for
+          # (3.7.17). It cannot install today -- the `test` extra's `pytest>=8`
+          # needs 3.8, and the sources use syntax 3.7 cannot parse -- so the leg
+          # stops at its install step, with one annotation naming pip's reason
+          # (see that step). ubuntu-22.04 is deprecated: brownouts from
+          # 2027-03-23, retirement on 2027-04-17 (actions/runner-images#14254).
+          # A brownout fails the leg before any step runs, which no step-level
+          # `continue-on-error` can contain, so this leg must go before then.
+          - python-version: "3.7"
+            ktlo: true
+            os: ubuntu-22.04
           - python-version: "3.8"
             ktlo: true
             os: ubuntu-24.04
@@ -93,6 +105,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v7
+        id: python
         continue-on-error: ${{ matrix.ktlo == true }}
         with:
           python-version: ${{ matrix.python-version }}
@@ -127,11 +140,29 @@ jobs:
       # HAS_PYPCAPFILE-gated methods between them), deliberately apart from
       # this job rather than added to it -- see either job's own comment for
       # why.
+      #
+      # #1633: a KTLO leg that cannot install -- 3.7 today -- fails fast and
+      # once. This step names pip's last ERROR line in one annotation, and
+      # every later step needs `steps.install.outcome == 'success'`, so they
+      # are skipped rather than failing one by one against a missing package.
+      # The install itself needs its interpreter: if setup-python failed, the
+      # image's own `python` would be installed into and tested under this
+      # leg's name. On a supported leg either failure fails the job, as before.
       - name: Install package and test dependencies
+        id: install
+        if: ${{ steps.python.outcome == 'success' }}
         continue-on-error: ${{ matrix.ktlo == true }}
+        shell: bash
+        env:
+          LEG: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}
         run: |
           python -m pip install -U pip setuptools wheel
-          python -m pip install -e '.[test,DPKT,crypto,NGAP]'
+          if ! python -m pip install -e '.[test,DPKT,crypto,NGAP]' 2>&1 | tee "$RUNNER_TEMP/pip-install.log"; then
+            reason=$(sed -n 's/^ERROR: //p' "$RUNNER_TEMP/pip-install.log" | tail -n 1)
+            if [ -z "$reason" ]; then reason="pip failed without an ERROR line; see this step's log"; fi
+            echo "::error title=pcapkit did not install on $LEG::${reason//%/%25}. The rest of this leg is skipped."
+            exit 1
+          fi
 
       # 7.10 is the first release with `[run] patch = ["subprocess"]`, which
       # .github/coverage.toml relies on to measure the xdist workers.
@@ -143,6 +174,7 @@ jobs:
       # the log says what that was -- print it so the number `-n auto` picked
       # is a measured fact instead of an assumption about runner size.
       - name: Report available parallelism
+        if: ${{ steps.install.outcome == 'success' }}
         continue-on-error: ${{ matrix.ktlo == true }}
         run: |
           nproc
@@ -150,6 +182,7 @@ jobs:
 
       - name: Run unit tests
         id: tests
+        if: ${{ steps.install.outcome == 'success' }}
         continue-on-error: ${{ matrix.ktlo == true }}
         # `--dist load` is pinned explicitly rather than left to default: a
         # future change to xdist's own default, or someone "optimising" to
@@ -294,7 +327,7 @@ jobs:
       # `continue-on-error` because the file is only diagnostic: an artifact
       # service outage must not fail a leg that `Required checks passed` needs.
       - name: Upload test timings
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
@@ -319,6 +352,9 @@ jobs:
           - "3.14"
           - "3.15"
         include:
+          - python-version: "3.7"
+            ktlo: true
+            os: ubuntu-22.04
           - python-version: "3.8"
             ktlo: true
             os: ubuntu-24.04
@@ -332,6 +368,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v7
+        id: python
         continue-on-error: ${{ matrix.ktlo == true }}
         with:
           python-version: ${{ matrix.python-version }}
@@ -359,15 +396,28 @@ jobs:
       # make installing it here a regression, now fixed by #743/#746. #751's
       # `pypcap-parity` job below covers those 6 methods instead, on the same
       # fixture-tier selection as this job but in a venv of its own.
+      #
+      # A KTLO leg that cannot install stops here, as in the `test` job above.
       - name: Install package, test and generator dependencies
+        id: install
+        if: ${{ steps.python.outcome == 'success' }}
         continue-on-error: ${{ matrix.ktlo == true }}
+        shell: bash
+        env:
+          LEG: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}
         run: |
           python -m pip install -U pip setuptools wheel
-          python -m pip install -e '.[test,Scapy,DPKT,cli]'
+          if ! python -m pip install -e '.[test,Scapy,DPKT,cli]' 2>&1 | tee "$RUNNER_TEMP/pip-install.log"; then
+            reason=$(sed -n 's/^ERROR: //p' "$RUNNER_TEMP/pip-install.log" | tail -n 1)
+            if [ -z "$reason" ]; then reason="pip failed without an ERROR line; see this step's log"; fi
+            echo "::error title=pcapkit did not install on $LEG::${reason//%/%25}. The rest of this leg is skipped."
+            exit 1
+          fi
 
       # `shell: bash` rather than the default, because it runs with -o pipefail:
       # without it the `tee` below would swallow the generator's exit status.
       - name: Regenerate sample captures
+        if: ${{ steps.install.outcome == 'success' }}
         continue-on-error: ${{ matrix.ktlo == true }}
         shell: bash
         run: |
@@ -393,6 +443,7 @@ jobs:
 
       # See the `test` job above for why this step exists.
       - name: Report available parallelism
+        if: ${{ steps.install.outcome == 'success' }}
         continue-on-error: ${{ matrix.ktlo == true }}
         run: |
           nproc
@@ -416,6 +467,7 @@ jobs:
       # say so. `--dist load` is pinned explicitly; see the `test` job above
       # for why.
       - name: Run full test suite
+        if: ${{ steps.install.outcome == 'success' }}
         continue-on-error: ${{ matrix.ktlo == true }}
         shell: bash
         run: |
@@ -433,7 +485,7 @@ jobs:
 
       # See the `test` job's step of the same name.
       - name: Upload test timings
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
@@ -496,9 +548,9 @@ jobs:
   # with step-level `continue-on-error: true` -- the treatment #845 gave the
   # then-prerelease 3.15 cell -- so a 3.10 failure shows as a failed step and an
   # error annotation while the job, and `required-checks`, which reads its
-  # result, stay green. 3.8 and 3.9 are not cells here: setup-python has no
-  # Ubuntu 26.04 build of either, and this job installs every interpreter on
-  # `ubuntu-latest`; PCAP_CT's extra is also `>= '3.10'`.
+  # result, stay green. 3.7-3.9 are not cells here: setup-python has no
+  # Ubuntu 26.04 build of any of them, and this job installs every interpreter
+  # on `ubuntu-latest`; PCAP_CT's extra is also `>= '3.10'`.
   #
   # Scoped deliberately out (#845): per-engine integration coverage (needs
   # regenerated captures, so it stays in aggregate in `integration` and
@@ -1613,7 +1665,7 @@ jobs:
   # here: the cell script exits 0 for a cell that declined exactly as
   # expected, so they contribute to that job's `success` like any other cell.
   #
-  # Nor is the KTLO tier (#1633): engine-tests' 3.10 cell, and the 3.8-3.10
+  # Nor is the KTLO tier (#1633): engine-tests' 3.10 cell, and the 3.7-3.10
   # legs of `test` and `integration` and the 3.10 leg of `pypcap-parity`.
   # Each is non-blocking through step-level `continue-on-error`, whose effect
   # on the job's result *is* documented (a step's `conclusion` is its result
@@ -1621,7 +1673,9 @@ jobs:
   # `success` while the failed step stays visible. Not a job-level
   # `continue-on-error`: GitHub does not document whether `needs.<job>.result`
   # sees such a job's failure as `failure` or `success`, so a KTLO-only
-  # regression could block every merge.
+  # regression could block every merge. The one failure no step can contain is
+  # a leg that never gets a runner: the 3.7 legs' deprecated ubuntu-22.04 image
+  # has brownouts from 2027-03-23 -- see the `test` job's matrix.
   #
   # The docs-only path. On a pull request whose diff touches nothing but
   # `docs/**` and `*.md` files outside the code directories (the `changes`

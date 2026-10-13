@@ -31,11 +31,11 @@ jobs:
     #
     # #1633: two tiers. The supported tier, 3.11-3.15, keeps the plain name,
     # which is what ruleset 23497679 requires one context per version of. The
-    # KTLO tier -- end-of-life versions that still run, 3.8-3.10 -- is suffixed
+    # KTLO tier -- end-of-life versions that still run, 3.7-3.10 -- is suffixed
     # ` (KTLO)`, so no required context can ever match one, and carries
     # `continue-on-error`, so a failed leg shows red without failing the run.
-    # 3.6 and 3.7 are left out: neither can install and import pcapkit (see the
-    # note on `requires-python` in pyproject.toml).
+    # 3.7 is red by design: it cannot import pcapkit (see "Verify package"). 3.6
+    # is left out: setup-python builds it only for retired Ubuntu images.
     name: Compat Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
     continue-on-error: ${{ matrix.ktlo == true }}
@@ -49,8 +49,12 @@ jobs:
           - "3.14"
           - "3.15"
         # setup-python publishes 3.8 and 3.9 builds up to Ubuntu 24.04 only, and
-        # `ubuntu-latest` moves to 26.04 from 2026-10-19, hence the pin.
+        # `ubuntu-latest` moves to 26.04 from 2026-10-19, hence the pin. 3.7's
+        # newest is for the deprecated 22.04; see the `test` job in unit-tests.yml.
         include:
+          - python-version: "3.7"
+            ktlo: true
+            os: ubuntu-22.04
           - python-version: "3.8"
             ktlo: true
             os: ubuntu-24.04
@@ -71,7 +75,23 @@ jobs:
           python -m pip install -U pip setuptools wheel
           python -m pip install -e .
 
+      # One annotation saying why, so a red leg -- 3.7's, today, where the
+      # editable install succeeds and 41 modules do not compile -- is legible
+      # from the run summary without opening the log.
       - name: Verify package
+        shell: bash
+        env:
+          LEG: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}
         run: |
-          python -m compileall -q pcapkit
-          python -c 'import pcapkit; print(pcapkit.__version__)'
+          log="$RUNNER_TEMP/compileall.log"
+          if ! python -m compileall -q pcapkit > "$log" 2>&1; then
+            cat "$log"
+            count=$(awk '/^\*\*\* Error compiling /{n++} END{print n+0}' "$log")
+            first=$(awk '/^  File "/{sub(/^  /, ""); print; exit}' "$log")
+            echo "::error title=pcapkit does not compile on $LEG::$count modules fail to compile, the first at ${first:-an unreported place}; see this step's log."
+            exit 1
+          fi
+          if ! python -c 'import pcapkit; print(pcapkit.__version__)'; then
+            echo "::error title=pcapkit does not import on $LEG::See the traceback in this step's log."
+            exit 1
+          fi

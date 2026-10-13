@@ -261,8 +261,8 @@ repository target the same reusable workflow, with the same input:
 ``gate-only: true`` selects **two** of ``unit-tests.yml``'s **ten** jobs,
 not one: ``gate`` (the full suite, one Python version) and ``changelog``
 (checks ``CHANGELOG.md`` against its source entry). It skips the other
-**eight** -- the five matrix jobs, ``test`` (eight Python legs: five
-supported, three KTLO), ``integration`` (eight), ``engine-tests`` (one job
+**eight** -- the five matrix jobs, ``test`` (nine Python legs: five
+supported, four KTLO), ``integration`` (nine), ``engine-tests`` (one job
 for each of five engines, each looping over six Python versions),
 ``pypcap-parity`` (two) and ``unittest-ordering``
 (eleven matrix cells), each of which has already run once for this commit
@@ -274,7 +274,7 @@ and ``project-tests``, and ``required-checks`` (see `Required Status
 Checks`_ below), gated out by their own ``if:`` rather than by having
 already run. ``changelog`` carries no
 ``if:`` at all and runs on every path regardless -- deliberately, per its own
-comment (``unit-tests.yml:1329-1335``): ``create-release.yml`` feeds
+comment (``unit-tests.yml:1381-1387``): ``create-release.yml`` feeds
 ``CHANGELOG.md`` to the GitHub Release body, so the release path is exactly
 where a drifted file must not go unchecked. Confirmed on run `36210743295
 <https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295>`__ (a
@@ -542,7 +542,7 @@ grepping every workflow file for its name:
      - Where
    * - ``Required checks passed``
      - job ``required-checks``
-     - ``unit-tests.yml:1640``
+     - ``unit-tests.yml:1694``
    * - ``Compat Python 3.11``
      - job ``compatibility``, matrix leg ``3.11``
      - ``python-compatibility.yml:39,46``
@@ -564,19 +564,19 @@ which added ``Compat Python 3.15`` and removed ``Compat Python 3.10``. Moving a 
 between the tiers below means editing the ruleset in the same change.
 
 ``Required checks passed`` is defined by exactly one job
-(``unit-tests.yml:1640``). ``Compat Python`` is defined by one, the
+(``unit-tests.yml:1694``). ``Compat Python`` is defined by one, the
 ``compatibility`` job in ``python-compatibility.yml`` (``:39``), expanding to
-the five required legs at ``:46-50`` and to three KTLO legs at ``:53-61`` whose
+the five required legs at ``:46-50`` and to four KTLO legs at ``:55-65`` whose
 names end in ``(KTLO)``, so no required context matches one. A comment at
-``unit-tests.yml:1553`` mentions the string without defining it.
+``unit-tests.yml:1605`` mentions the string without defining it.
 
 ``Required checks passed`` is an aggregate, not a single check run. The ruleset
 requires it and the five ``Compat Python 3.11``-``3.15`` legs, nothing else, as
-``unit-tests.yml``'s own comment (``unit-tests.yml:1552-1562``) records. It
+``unit-tests.yml``'s own comment (``unit-tests.yml:1604-1614``) records. It
 ``needs:`` the gating jobs of ``unit-tests.yml`` -- ``test``, ``integration``,
 ``engine-tests`` and ``pypcap-parity``, plus ``changes`` and ``project-tests``
 for the docs-only path -- and checks each result explicitly
-(``unit-tests.yml:1639-1693``). Rulesets match check names literally, with no
+(``unit-tests.yml:1693-1747``). Rulesets match check names literally, with no
 wildcard, so requiring the matrix cells one by one would mean editing the
 ruleset whenever a matrix changes; the aggregate keeps the required list fixed.
 It accepts the four legs as ``skipped`` only on a docs-only pull request, where
@@ -585,12 +585,12 @@ instead. The ``Compat`` legs stay required separately because they come from
 ``python-compatibility.yml``, and a job cannot ``needs:`` a job in another
 workflow file. This job runs on Unit Tests' own ``push``/``pull_request``
 triggers; the ``gate-only: true`` reusable calls documented above skip it via
-``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:1642``),
+``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:1696``),
 so it is never produced -- and never expected -- on those paths.
 
 Python versions come in two tiers (#1633). The **supported** tier, 3.11-3.15,
 blocks: a failed leg fails ``Required checks passed`` or its own required
-``Compat`` context. The **KTLO** tier -- end-of-life 3.8-3.10, still built and
+``Compat`` context. The **KTLO** tier -- end-of-life 3.7-3.10, still built and
 tested -- never blocks and is never a required context. Each KTLO leg sits in the
 same job as the supported ones, so the two mechanisms differ by whether something
 aggregates the job:
@@ -604,10 +604,17 @@ aggregates the job:
   documented (``unit-tests.yml:74-82``); ``engine-tests`` runs its 3.10 cell as a
   step of its own with ``continue-on-error: true``.
 
-3.6 and 3.7 are in no matrix: neither can install and import the package. Nor are
-3.8 and 3.9 in ``engine-tests``, which installs every interpreter on
-``ubuntu-latest``, where setup-python has no Ubuntu 26.04 build of either. Nor are
-they in ``pypcap-parity``, which also runs on ``ubuntu-latest``; neither version
+3.7's legs are red by design: it can neither install the ``test`` extra nor import
+the package, so ``test`` and ``integration`` stop at the install step and the
+``Compat`` leg at ``Verify package``, each with one error annotation saying why.
+They run on ``ubuntu-22.04``, which retires on 2027-04-17 after brownouts from
+2027-03-23 (actions/runner-images#14254). A brownout fails a ``test`` or
+``integration`` leg before any step runs, where no ``continue-on-error`` reaches,
+and so fails ``Required checks passed``: they must go before then. 3.6 is
+in no matrix: setup-python builds it only for retired Ubuntu images. Nor are
+3.7-3.9 in ``engine-tests``, which installs every interpreter on
+``ubuntu-latest``, where setup-python has no Ubuntu 26.04 build of any of them. Nor
+are they in ``pypcap-parity``, which also runs on ``ubuntu-latest``; none of them
 was measured on that job.
 
 Deployment ``environment:``

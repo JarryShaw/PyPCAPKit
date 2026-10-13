@@ -14,8 +14,8 @@ lines are not patched -- upgrading is the fix.
 
 Supported interpreters are the test matrix's blocking tier: CPython 3.11
 through 3.15. `pyproject.toml` declares `requires-python = ">=3.6, <4"` through the
-`bpc-*` source conversion, but 3.8 to 3.10 are best-effort (tested, never blocking)
-and below 3.8 is intent rather than something exercised -- see the note above
+`bpc-*` source conversion, but 3.7 to 3.10 are best-effort (tested, never blocking)
+and below 3.8 is intent rather than something that works -- see the note above
 `requires-python` in `pyproject.toml`. A report that only reproduces outside the tested range is still
 welcome; it may be fixed by raising the floor rather than by patching.
 
