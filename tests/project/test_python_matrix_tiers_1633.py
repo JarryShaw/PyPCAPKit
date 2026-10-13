@@ -224,6 +224,8 @@ class TestTheKTLOTierNeverBlocks(unittest.TestCase):
                 condition = str(step.get('if', ''))
                 if 'matrix.coverage' in condition or 'APT_CACHE_SAVE' in condition:
                     continue  # only ever on a supported leg: the coverage one, the cache saver
+                if label == "Check the release tags name this run's commit":
+                    continue  # #1634: blocks every leg alike, pinned in its own test module
                 with self.subTest(workflow=name, job=job_id, step=label):
                     self.assertIn(step.get('continue-on-error'), (True, KTLO_GUARD))
 

@@ -249,7 +249,7 @@ the caller's own workflow run, as one of the caller's own jobs, rather than
 starting an independent run after the caller finishes. All four calls in this
 repository target the same reusable workflow, with the same input:
 
-* ``.github/workflows/create-release.yml:379`` -- job ``unit-tests`` calls
+* ``.github/workflows/create-release.yml:413`` -- job ``unit-tests`` calls
   ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
 * ``.github/workflows/cron-conda.yml:50`` -- job ``unit-tests`` calls
   ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
@@ -293,21 +293,25 @@ own graph. Create Release's first job, ``version_check`` -- ahead of the
 
 .. code-block:: yaml
 
-   if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+   if: >-
+     ${{ (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') &&
+     !(github.event_name == 'push' && github.actor_id == vars.RELEASE_APP_BOT_ID) }}
 
-(``create-release.yml:179``). On the ``workflow_run`` path, this evaluates
-**false**, and the job is skipped outright, whenever the upstream Vendor
-Update run's own conclusion was anything other than ``success`` -- including
+(``create-release.yml:210-212``). Its second half skips the tag-push run that
+the release App's own tag starts (:doc:`releasing`, "The Release App"). On the
+``workflow_run`` path, this evaluates **false**, and the job is skipped
+outright, whenever the upstream Vendor Update run's own conclusion was
+anything other than ``success`` -- including
 ``skipped``, which is exactly what Vendor Update's *own* jobs report when
 *their* ``workflow_run``-path guards decline (see ``cron-vendor.yml``'s
 ``vendor-update`` job). ``unit-tests`` then depends on that job with
-``needs: [ version_check ]`` (``create-release.yml:369``) and an ``if:`` that
+``needs: [ version_check ]`` (``create-release.yml:403``) and an ``if:`` that
 calls no status-check function, so a skipped dependency skips it too -- and
 every job past it is gated the same way: ``github`` needs ``[ unit-tests,
-version_check ]`` (``:397``), ``tag`` needs ``[ github, unit-tests,
-version_check ]`` (``:498``), ``pypi`` needs ``[ github, unit-tests,
-version_check ]`` (``:578``), and ``conda`` needs ``[ tag, github,
-unit-tests, version_check ]`` (``:726``).
+version_check ]`` (``:434``), ``tag`` needs ``[ github, unit-tests,
+version_check ]`` (``:619``), ``pypi`` needs ``[ github, unit-tests,
+version_check ]`` (``:784``), and ``conda`` needs ``[ tag, github,
+unit-tests, version_check ]`` (``:997``).
 
 .. mermaid::
 
@@ -333,7 +337,7 @@ unit-tests, version_check ]`` (``:726``).
 
 This is a transitive reduction, as in :doc:`releasing`: ``version_check`` and
 ``unit-tests`` are also direct ``needs:`` of ``tag`` and ``pypi``
-(``create-release.yml:498,578``) and of ``conda`` (``:726``), but ``github``
+(``create-release.yml:619,784``) and of ``conda`` (``:997``), but ``github``
 already implies those edges, since it depends on both itself. Drawing them
 would add lines without changing which job can start before which, or which
 job a skip in ``version_check`` reaches.
@@ -612,10 +616,10 @@ Deployment ``environment:``
 Four jobs, all in ``create-release.yml``, declare a deployment
 ``environment:`` and can therefore pause for an approval:
 
-* ``github`` -- ``environment: github-release`` (``create-release.yml:394``)
-* ``tag`` -- ``environment: conda-tag`` (``create-release.yml:496``)
-* ``pypi`` -- ``environment: pypi`` (``create-release.yml:573``)
-* ``conda`` -- ``environment: anaconda`` (``create-release.yml:723``)
+* ``github`` -- ``environment: github-release`` (``create-release.yml:431``)
+* ``tag`` -- ``environment: conda-tag`` (``create-release.yml:617``)
+* ``pypi`` -- ``environment: pypi`` (``create-release.yml:779``)
+* ``conda`` -- ``environment: anaconda`` (``create-release.yml:994``)
 
 No other workflow in scope here declares one -- including
 ``deploy-pages.yml``, whose ``deploy-pages`` job pushes straight to the
