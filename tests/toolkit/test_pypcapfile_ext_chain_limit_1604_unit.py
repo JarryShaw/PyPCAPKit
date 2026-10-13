@@ -103,10 +103,10 @@ class PyPCAPFileExtensionHeaderChainLimitTests(unittest.TestCase):
                     mock.patch.dict('sys.modules', base.fake_ip_decoder()) as modules:
                 IP = modules['pcapfile.protocols.network.ip'].IP
                 packet = base.make_packet(base.tunnel(chain(count, 4) + tcp4, 60))
-                ipv4, upper = _innermost(packet)
+                ipv4, upper, depth = _innermost(packet)
                 self.assertIsNone(upper)
                 self.assertEqual(IP.calls, [(tcp4, 0)] if entered else [])
-                self.assertEqual(_transport(ipv4), base.TCP_SEGMENT if entered else None)
+                self.assertEqual(_transport(ipv4, depth), base.TCP_SEGMENT if entered else None)
                 if not entered:  # no TCP, and none left out either
                     self.assertEqual(self.decline(packet), [])
 
@@ -130,8 +130,8 @@ class PyPCAPFileExtensionHeaderChainLimitTests(unittest.TestCase):
                 from pcapkit.toolkit.pypcapfile import _innermost, _transport
 
                 inner = wire.ipv4(chain(count, 6) + tcp4, proto=60)
-                ipv4, _ = _innermost(base.make_packet(base.tunnel(chain(20, 4) + inner, 60)))
-                self.assertEqual(_transport(ipv4), tcp4 if found else None)
+                ipv4, _, depth = _innermost(base.make_packet(base.tunnel(chain(20, 4) + inner, 60)))
+                self.assertEqual(_transport(ipv4, depth), tcp4 if found else None)
 
     def test_ipv4_in_ipv6_is_found_only_within_the_limit(self) -> None:
         from pcapkit.toolkit.pypcapfile import _ipv4_in_ipv6

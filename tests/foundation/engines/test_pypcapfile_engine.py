@@ -301,6 +301,24 @@ class PyPCAPFileEngineTests(unittest.TestCase):
                 self.assertIn('unrecognised link layer protocol', warn.call_args.args[0])
                 self.assertIs(warn.call_args.args[1], AttributeWarning)
 
+    def test_run_warns_only_of_a_link_layer_left_unread(self) -> None:
+        # C.f. #1667: pcapfile decodes none of NULL, LOOP, RAW, IPV4 and IPV6,
+        # but the toolkit reads the IP packet in their frames, as the default
+        # engine does, so nothing is lost to warn of. Every other link type it
+        # has no decoder for, e.g. PPP (9), 12, 105, LINUX_SLL and 147, stays unread.
+        for linktype, unread in ((0, False), (108, False), (101, False), (228, False), (229, False),
+                                 (9, True), (12, True), (105, True), (113, True), (147, True),
+                                 (1, True)):
+            with self.subTest(linktype=linktype):
+                extractor, _ = self.make_extractor()
+                engine = self.engine(extractor, savefile=FakeSaveFile(ll_type=linktype), decoder=None)
+                with mock.patch('pcapkit.foundation.engines.pypcapfile.warn') as warn:
+                    engine.run()
+                self.assertIsNone(engine._declf)
+                messages = [call.args[0] for call in warn.call_args_list]
+                self.assertEqual(any('unrecognised link layer protocol' in message for message in messages),
+                                 unread, messages)
+
     def test_run_survives_the_malformed_upstream_link_layer_table(self) -> None:
         # ``pcapfile.linklayer.__LL_TYPES__`` carries a three-element entry for
         # LINKTYPE_IEEE802_11_RADIOTAP, so ``clookup`` raises IndexError for it.

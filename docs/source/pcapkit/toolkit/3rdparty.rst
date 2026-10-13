@@ -193,6 +193,17 @@ cannot be used for it.
    :func:`~pcapkit.toolkit.pypcapfile.tcp_traceflow`, with an
    :class:`~pcapkit.utilities.warnings.AttributeWarning` once per capture.
 
+   Nor does it decode a link layer but Ethernet. The adapters read the IP packet
+   of a BSD loopback (``NULL``, ``LOOP``) or raw-IP (``RAW``, ``IPV4``,
+   ``IPV6``) frame themselves, as the default engine dissects it (see
+   :data:`~pcapkit.toolkit.pypcapfile.READ_LINKTYPES`, :issue:`1667`). Every
+   other link type is left unread, as the default engine leaves it, and the
+   engine warns of it with an :class:`~pcapkit.utilities.warnings.AttributeWarning`.
+   Nor do the adapters read deeper than the default engine dissects: each VLAN
+   tag, IP header, AH and IPv6 extension header is one of the
+   :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT` layers of a frame, and
+   nothing past the last of them is read (:issue:`1609`).
+
 .. autofunction:: pcapkit.toolkit.pypcapfile.ipv4_reassembly
 
 .. autofunction:: pcapkit.toolkit.pypcapfile.ipv6_reassembly
@@ -214,6 +225,9 @@ Auxiliary Functions
 
 Internal Definitions
 --------------------
+
+.. autodata:: pcapkit.toolkit.pypcapfile.READ_LINKTYPES
+   :no-value:
 
 .. autodata:: pcapkit.toolkit.pypcapfile.TCP_MIN_HEADER_LEN
 

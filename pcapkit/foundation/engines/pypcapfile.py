@@ -47,10 +47,15 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
       objects, as `PyPCAPFile`_ 0.12.0 drops records the ``default`` engine
       reads -- see :meth:`_read_records`,
     * disables IPv6 reassembly, warning as it does so, while leaving IPv4 and
-      TCP reassembly and TCP flow tracing in place, and
+      TCP reassembly and TCP flow tracing in place,
     * leaves TCP over IPv6 out of TCP reassembly and flow tracing, with one
       :exc:`~pcapkit.utilities.warnings.AttributeWarning` per capture -- see
-      :mod:`pcapkit.toolkit.pypcapfile`.
+      :mod:`pcapkit.toolkit.pypcapfile` -- and
+    * leaves the frames of a link type `PyPCAPFile`_ has no decoder for
+      undecoded, from which :mod:`pcapkit.toolkit.pypcapfile` reads the IP
+      packet of the BSD loopback and raw-IP ones itself, as the ``default``
+      engine dissects it (see
+      :data:`~pcapkit.toolkit.pypcapfile.READ_LINKTYPES`).
 
     The engine stops decoding at the network layer rather than descending into
     the transport layer. `PyPCAPFile`_ decoders *replace* the payload bytes of
@@ -184,8 +189,10 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
                   support such operations.
                 * if IPv6 reassembly is enabled, as :mod:`pcapfile` has no IPv6
                   decoder.
-                * if :mod:`pcapfile` has no decoder for the savefile's link layer
-                  type, in which case frames are left undecoded.
+                * if the savefile's link layer type is left unread: neither
+                  :mod:`pcapfile` has a decoder for it nor
+                  :mod:`pcapkit.toolkit.pypcapfile` reads it (see
+                  :meth:`_get_decoder`).
 
         Raises:
             FormatError: If the file format is not supported, i.e., not a PCAP
@@ -302,20 +309,27 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
             The decoder class, or :data:`None` when :mod:`pcapfile` has none.
 
         Warns:
-            AttributeWarning: If no decoder is available, as frames will then be
-                left hexlified -- see :meth:`run` -- and no reassembly or flow
-                tracing is possible.
+            AttributeWarning: If no decoder is available and the link layer type
+                is none of the :data:`~pcapkit.toolkit.pypcapfile.READ_LINKTYPES`,
+                as frames will then be left hexlified -- see :meth:`run` -- and
+                no reassembly or flow tracing is possible. The frames of those
+                link types are left undecoded too, but reassembly and flow
+                tracing read the IP packet in them, as the ``default`` engine
+                does, so nothing is lost there to warn of.
 
         """
+        from pcapkit.toolkit.pypcapfile import READ_LINKTYPES  # isort:skip
+
         try:
             decoder = self._expkg.linklayer.clookup(linktype)
         except IndexError:  # malformed entry in ``pcapfile.linklayer.__LL_TYPES__``
             decoder = None
 
         if not callable(decoder):
-            warn(f'unrecognised link layer protocol: {self._dlink!r}; frames will be left '
-                 'undecoded and all analysis functions ignored', AttributeWarning,
-                 stacklevel=stacklevel())
+            if linktype not in READ_LINKTYPES:
+                warn(f'unrecognised link layer protocol: {self._dlink!r}; frames will be left '
+                     'undecoded and all analysis functions ignored', AttributeWarning,
+                     stacklevel=stacklevel())
             return None
         return decoder
 
