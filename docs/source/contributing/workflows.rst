@@ -604,13 +604,15 @@ aggregates the job:
   documented (``unit-tests.yml:74-82``); ``engine-tests`` runs its 3.10 cell as a
   step of its own with ``continue-on-error: true``.
 
-3.7's legs are red by design: it can neither install the ``test`` extra nor import
-the package, so ``test`` and ``integration`` stop at the install step and the
-``Compat`` leg at ``Verify package``, each with one error annotation saying why.
+3.7 can neither install the ``test`` extra nor import the package, so each 3.7 leg
+fails one step, with one error annotation saying why: ``test`` and ``integration``
+at the install step, the ``Compat`` leg at ``Verify package``. Only the ``Compat``
+leg shows red, through its job-level ``continue-on-error``; the ``test`` and
+``integration`` legs conclude ``success``, their failed step and annotation inside.
 They run on ``ubuntu-22.04``, which retires on 2027-04-17 after brownouts from
 2027-03-23 (actions/runner-images#14254). A brownout fails a ``test`` or
 ``integration`` leg before any step runs, where no ``continue-on-error`` reaches,
-and so fails ``Required checks passed``: they must go before then. 3.6 is
+and so fails ``Required checks passed``: they must go before then (#1660). 3.6 is
 in no matrix: setup-python builds it only for retired Ubuntu images. Nor are
 3.7-3.9 in ``engine-tests``, which installs every interpreter on
 ``ubuntu-latest``, where setup-python has no Ubuntu 26.04 build of any of them. Nor
