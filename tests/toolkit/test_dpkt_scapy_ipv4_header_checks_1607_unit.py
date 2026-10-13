@@ -61,7 +61,7 @@ GOOD_OPTIONS = {
 
 
 def ipv4(payload: bytes, *, version: int = 4, ihl: 'int | None' = None, options: bytes = b'',
-         length: 'int | None' = None, checksum: 'int | None' = None, df: bool = False,
+         length: 'int | None' = None, checksum: 'int | None' = None,
          proto: int = 6, src: str = '10.1.1.2', dst: str = '10.1.1.3') -> bytes:
     """An IPv4 packet carrying ``payload``, its version, IHL, Total Length and checksum as given.
 
@@ -74,7 +74,7 @@ def ipv4(payload: bytes, *, version: int = 4, ihl: 'int | None' = None, options:
     if length is None:
         length = 20 + len(options) + len(payload)
     header = bytearray(struct.pack('!BBHHHBBHII', (version << 4) | ihl, 0, length, 0x1234,
-                                   0x4000 if df else 0, 64, proto, 0,
+                                   0, 64, proto, 0,
                                    int(ipaddress.IPv4Address(src)), int(ipaddress.IPv4Address(dst))))
     header += options
     if checksum is None:
@@ -124,13 +124,13 @@ def frames() -> 'tuple[list[bytes], list[int], list[int]]':
         cases.append((False, False, lambda seg, v=version: ethernet(ipv4(seg, version=v))))
     cases += [
         (True, True, lambda seg: ethernet(ipv4(seg))),
-        # no header checksum is checked, and a Total Length only bounds the payload
+        # no header checksum is checked, and a Total Length only bounds the
+        # payload: one shorter than the header leaves no TCP, but the header is
+        # an IPv4 input all the same, whole (#1616)
         (True, True, lambda seg: ethernet(ipv4(seg, checksum=0xDEAD))),
         (True, True, lambda seg: ethernet(ipv4(seg, length=0))),
         (True, True, lambda seg: ethernet(ipv4(seg, length=1500))),
-        # DF, as dpkt cuts the header of its IPv4 input at a Total Length this
-        # short, which is no part of #1607
-        (False, False, lambda seg: ethernet(ipv4(seg, length=10, df=True))),
+        (False, True, lambda seg: ethernet(ipv4(seg, length=10))),
         # an IHL below 5, and one past the 44 octets captured
         (False, False, lambda seg: ethernet(ipv4(seg, ihl=4))),
         (False, False, lambda seg: ethernet(ipv4(seg, ihl=15))),
@@ -150,9 +150,8 @@ def frames() -> 'tuple[list[bytes], list[int], list[int]]':
         cases += [
             # the inner header of 4in4, whose outer one is the IPv4 input
             (accepted, True, lambda seg, f=fields: in4(ipv4(seg, **f))),
-            # the inner header of 4in6; DF where it is accepted, as dpkt finds
-            # no IPv4 layer in IPv6 for IPv4 reassembly, which is no part of #1607
-            (accepted, False, lambda seg, f=fields, df=accepted: in6(ipv4(seg, df=df, **f))),
+            # the inner header of 4in6, the frame's first IPv4 one (#1615)
+            (accepted, accepted, lambda seg, f=fields: in6(ipv4(seg, **f))),
             # the outer header of 4in4 and 6in4
             (accepted, accepted, lambda seg, f=fields: in4(ipv4(seg), **f)),
             (accepted, accepted, lambda seg, f=fields: in4(inner6(seg), proto=41, **f)),
