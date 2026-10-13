@@ -45,9 +45,9 @@ an extra or emptying it is caught too.
 
 One thing this deliberately does not model, recorded here rather than left to
 be discovered: **environment markers.** ``PyPCAPFile = [ "pypcapfile;
-python_version < '3.12'" ]`` resolves to nothing on three of the five matrix
-legs, so an install line carrying that extra would satisfy this module while
-two legs ran the tests and three went on skipping them. :func:`requirement_key`
+python_version < '3.12'" ]`` resolves to nothing on four of the five supported
+legs (3.12-3.15), so an install line carrying that extra would satisfy this module
+while only 3.11 and the KTLO legs ran the tests. :func:`requirement_key`
 strips the marker and :func:`provided_by` ignores it; the marker text is kept
 on :class:`Requirement` so a diagnostic can say so.
 
@@ -327,7 +327,7 @@ DEPENDENCY_GATE_EXCLUSIONS = {
             'engine can start.\n\n'
             "#751's dedicated engine-tests job now takes this: it installs PCAP_CT and a "
             'system libpcap (apt-get libpcap0.8) on its own PCAP_CT matrix cell, across '
-            'the same 3.10-3.14 (plus non-blocking 3.15, main pushes only) matrix -- '
+            'the same 3.11-3.15 (plus the non-blocking KTLO 3.10 cell, #1633) matrix -- '
             'rebuilt per #849 as one '
             'venv per (Python version, engine) pair rather than the one shared venv #751 '
             'first landed, so PCAP_CT is kept apart from PyPCAP by construction now, not '
@@ -787,8 +787,8 @@ def _toml_array(text: 'str', name: 'str') -> 'Optional[tuple[Requirement, ...]]'
     """The ``name = [ ... ]`` array of double-quoted strings in ``text``.
 
     A targeted scan rather than :mod:`tomllib`, which is 3.11+ while the
-    ``test`` job's matrix floor is 3.10 -- and a guard that skips on one leg of
-    five is the shape of invisibility this whole module exists to remove.
+    ``test`` job's matrix floor is 3.8 (a KTLO leg, #1633) -- and a guard that skips on
+    some legs is the shape of invisibility this whole module exists to remove.
     Comments are stripped first, quote-aware, because the arrays here are
     heavily annotated; the brackets inside ``"requests[socks]"`` are what makes
     a naive "up to the first ``]``" slice wrong.

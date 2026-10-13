@@ -59,9 +59,10 @@
 # Opt-in, and allowed to fail. There is no released `python:3.15-slim-bookworm`;
 # `3.15-rc-slim-bookworm` is a release candidate and the tag moves with every rc, so
 # the digest below freezes one particular candidate and will name an older rc as
-# time passes -- bump it deliberately, or drop the row when 3.15 ships. The
-# repository's CI already treats 3.15 as an allowed-to-fail leg, and this matches
-# that: `run.sh --pythons ...,3.15` measures it, a plain `run.sh` does not, and a
+# time passes -- bump it deliberately, or drop the row when 3.15 ships. Opt-in is
+# this file's own tier, not CI's: the repository's CI has run 3.15 as a blocking,
+# supported leg since #1633. `run.sh --pythons ...,3.15` measures it, a plain
+# `run.sh` does not, and a
 # version that cannot be built is reported as a missing column with the reason
 # rather than dropped.
 #

@@ -47,24 +47,21 @@ jobs:
     # this workflow used to) therefore ran the whole matrix in every caller
     # and skipped the gate everywhere. An input is the only reliable way for a
     # reusable workflow to know how it was invoked.
-    name: Python ${{ matrix.python-version }}
+    name: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}
     if: ${{ inputs.gate-only != true && needs.changes.outputs.code != 'false' }}
     needs: [changes]
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os || 'ubuntu-latest' }}
     timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
+        # #1633: the supported tier, 3.11-3.15, blocks through `required-checks`.
         python-version:
-          # 3.15 deliberately excluded: ruleset 23497679's required checks
-          # only cover 3.10-3.14, so a 3.15 leg here cannot block a merge and
-          # was pure queue contention -- see python-compatibility.yml for its
-          # (non-blocking, schedule-only) replacement.
-          - "3.10"
           - "3.11"
           - "3.12"
           - "3.13"
           - "3.14"
+          - "3.15"
         # Exactly one leg runs under coverage, so measuring it adds no leg to
         # the queue. 3.14 because it had the most headroom under the 45-minute
         # cap on main (15.6, 15.8 and 16.8 minutes
@@ -74,11 +71,29 @@ jobs:
         include:
           - python-version: "3.14"
             coverage: true
+          # The KTLO tier (#1633): end-of-life versions that still build and
+          # test but never block. `required-checks` reads this job's one
+          # `needs.test.result`, so a KTLO leg cannot fail the job: each step
+          # that can fail on one carries `continue-on-error: ${{ matrix.ktlo
+          # == true }}` instead -- the step-level form, whose effect on the job
+          # is documented, as for engine-tests' KTLO cell. A failure still shows
+          # as a red step and an error annotation. 3.8 and 3.9 need
+          # ubuntu-24.04: setup-python has no Ubuntu 26.04 build of either, and
+          # `ubuntu-latest` moves to 26.04 from 2026-10-19.
+          - python-version: "3.8"
+            ktlo: true
+            os: ubuntu-24.04
+          - python-version: "3.9"
+            ktlo: true
+            os: ubuntu-24.04
+          - python-version: "3.10"
+            ktlo: true
 
     steps:
       - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v7
+        continue-on-error: ${{ matrix.ktlo == true }}
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
@@ -113,6 +128,7 @@ jobs:
       # this job rather than added to it -- see either job's own comment for
       # why.
       - name: Install package and test dependencies
+        continue-on-error: ${{ matrix.ktlo == true }}
         run: |
           python -m pip install -U pip setuptools wheel
           python -m pip install -e '.[test,DPKT,crypto,NGAP]'
@@ -127,12 +143,14 @@ jobs:
       # the log says what that was -- print it so the number `-n auto` picked
       # is a measured fact instead of an assumption about runner size.
       - name: Report available parallelism
+        continue-on-error: ${{ matrix.ktlo == true }}
         run: |
           nproc
           python -c "import os; print('cpu_count', os.cpu_count())"
 
       - name: Run unit tests
         id: tests
+        continue-on-error: ${{ matrix.ktlo == true }}
         # `--dist load` is pinned explicitly rather than left to default: a
         # future change to xdist's own default, or someone "optimising" to
         # `loadfile`/`loadscope`, cannot silently change how this suite is
@@ -285,26 +303,36 @@ jobs:
           retention-days: 14
 
   integration:
-    name: Integration Python ${{ matrix.python-version }}
+    name: Integration Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}
     if: ${{ inputs.gate-only != true && needs.changes.outputs.code != 'false' }}
     needs: [changes]
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os || 'ubuntu-latest' }}
     timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
+        # The two tiers of the `test` job above, for the same reasons.
         python-version:
-          # See the `test` job above for why 3.15 is excluded here.
-          - "3.10"
           - "3.11"
           - "3.12"
           - "3.13"
           - "3.14"
+          - "3.15"
+        include:
+          - python-version: "3.8"
+            ktlo: true
+            os: ubuntu-24.04
+          - python-version: "3.9"
+            ktlo: true
+            os: ubuntu-24.04
+          - python-version: "3.10"
+            ktlo: true
 
     steps:
       - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v7
+        continue-on-error: ${{ matrix.ktlo == true }}
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
@@ -324,7 +352,7 @@ jobs:
       # are deliberately NOT added here: test_esp_unit.py and test_ngap_unit.py
       # are plain unit-tier and never enter this job's selection, so installing
       # cryptography/pycrate here would unlock nothing -- they are already
-      # covered, across all five Python versions, by the `test` job above.
+      # covered, on every Python version, by the `test` job above.
       # PyPCAPFile is NOT added here either, even though this job's selection
       # also reaches test_new_engine_parity_runtime.py's 6 HAS_PYPCAPFILE
       # methods -- see the `test` job's comment above for the bug that used to
@@ -332,6 +360,7 @@ jobs:
       # `pypcap-parity` job below covers those 6 methods instead, on the same
       # fixture-tier selection as this job but in a venv of its own.
       - name: Install package, test and generator dependencies
+        continue-on-error: ${{ matrix.ktlo == true }}
         run: |
           python -m pip install -U pip setuptools wheel
           python -m pip install -e '.[test,Scapy,DPKT,cli]'
@@ -339,6 +368,7 @@ jobs:
       # `shell: bash` rather than the default, because it runs with -o pipefail:
       # without it the `tee` below would swallow the generator's exit status.
       - name: Regenerate sample captures
+        continue-on-error: ${{ matrix.ktlo == true }}
         shell: bash
         run: |
           # Keep a failure here legible as what it is -- the fixtures could not
@@ -363,6 +393,7 @@ jobs:
 
       # See the `test` job above for why this step exists.
       - name: Report available parallelism
+        continue-on-error: ${{ matrix.ktlo == true }}
         run: |
           nproc
           python -c "import os; print('cpu_count', os.cpu_count())"
@@ -385,6 +416,7 @@ jobs:
       # say so. `--dist load` is pinned explicitly; see the `test` job above
       # for why.
       - name: Run full test suite
+        continue-on-error: ${{ matrix.ktlo == true }}
         shell: bash
         run: |
           if ! selection=$(python -c "from tests._tiers import fixture_tier_paths; print(' '.join(fixture_tier_paths()))"); then
@@ -458,12 +490,15 @@ jobs:
   # every annotation titled by engine and Python version and a per-cell row in
   # the job summary.
   #
-  # 3.15 is experimental-prerelease per #845's ruling: present so a regression
-  # is visible, but never blocking; since #1538 it runs on main pushes only.
-  # It is its own step with step-level `continue-on-error: true`, so a 3.15
-  # failure shows as a failed step and an error annotation while the job --
-  # and `required-checks`, which reads its result -- stays green. The 3.10-3.14
-  # cells share one step, and any one of them failing fails the job.
+  # #1633 splits the interpreters into two tiers. The supported cells, 3.11-3.15,
+  # share one step, and any one of them failing fails the job. 3.10 is KTLO:
+  # end-of-life, still tested on every run, never blocking. It is its own step
+  # with step-level `continue-on-error: true` -- the treatment #845 gave the
+  # then-prerelease 3.15 cell -- so a 3.10 failure shows as a failed step and an
+  # error annotation while the job, and `required-checks`, which reads its
+  # result, stay green. 3.8 and 3.9 are not cells here: setup-python has no
+  # Ubuntu 26.04 build of either, and this job installs every interpreter on
+  # `ubuntu-latest`; PCAP_CT's extra is also `>= '3.10'`.
   #
   # Scoped deliberately out (#845): per-engine integration coverage (needs
   # regenerated captures, so it stays in aggregate in `integration` and
@@ -495,21 +530,23 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # All six interpreters in one step; each is then reachable as
-      # `python3.X`. setup-python does not ship 3.15 as a release build yet, so
-      # `allow-prereleases` is needed for it to resolve at all (as in
-      # python-compatibility.yml's compatibility-nightly job); for 3.10-3.14 a
-      # GA release exists and wins.
+      # Each interpreter is then reachable as `python3.X`. The KTLO one is
+      # installed by a step of its own so that losing it cannot fail the job;
+      # it comes first because the last version installed is the default
+      # `python`. The supported five share the second step.
+      - uses: actions/setup-python@v7
+        continue-on-error: true
+        with:
+          python-version: "3.10"
+
       - uses: actions/setup-python@v7
         with:
           python-version: |
-            3.10
             3.11
             3.12
             3.13
             3.14
             3.15
-          allow-prereleases: true
 
       # Only the engines that need a system package get one:
       #
@@ -814,11 +851,11 @@ jobs:
 
       # Every cell runs even after one fails, so one red run reports all of
       # them; the step fails at the end if any did.
-      - name: Run the 3.10-3.14 cells
+      - name: Run the 3.11-3.15 cells
         shell: bash
         run: |
           failed=()
-          for py in 3.10 3.11 3.12 3.13 3.14; do
+          for py in 3.11 3.12 3.13 3.14 3.15; do
             echo "::group::Python $py ($ENGINE)"
             if ! bash "$RUNNER_TEMP/engine-cell.sh" "$py"; then
               failed+=("$py")
@@ -831,17 +868,17 @@ jobs:
             exit 1
           fi
 
-      # Non-blocking by #845, main pushes only by #1538 -- see this job's comment.
-      - name: Run the 3.15 cell (experimental, non-blocking)
-        if: ${{ github.event_name != 'pull_request' }}
+      # KTLO, non-blocking (#1633) -- see this job's comment. Runs on every event,
+      # as the 3.10 cell did while it was supported.
+      - name: Run the 3.10 cell (KTLO, non-blocking)
         shell: bash
         continue-on-error: true
         run: |
-          echo "::group::Python 3.15 ($ENGINE)"
-          if ! bash "$RUNNER_TEMP/engine-cell.sh" 3.15; then
-            echo "| 3.15 | $ENGINE | | FAILED (non-blocking) |" >> "$GITHUB_STEP_SUMMARY"
+          echo "::group::Python 3.10 ($ENGINE)"
+          if ! bash "$RUNNER_TEMP/engine-cell.sh" 3.10; then
+            echo "| 3.10 | $ENGINE | | FAILED (KTLO, non-blocking) |" >> "$GITHUB_STEP_SUMMARY"
             echo "::endgroup::"
-            echo "::error title=$ENGINE failed on Python 3.15 (non-blocking)::3.15 is experimental per #845; this does not fail the job."
+            echo "::error title=$ENGINE failed on Python 3.10 (KTLO, non-blocking)::3.10 is end-of-life and KTLO per #1633; this does not fail the job."
             exit 1
           fi
           echo "::endgroup::"
@@ -871,12 +908,14 @@ jobs:
   # HAS_PYPCAPFILE's 15 gated methods, which come along for free once
   # PyPCAPFile is on this job's install line too.
   #
-  # The matrix is deliberately just 3.10 and 3.11, not the full five: PyPCAP's
+  # The matrix is deliberately just 3.10 and 3.11, not every version: PyPCAP's
   # marker and PyPCAPFile's marker are both "python_version < '3.12'", so
-  # 3.12-3.14 would install neither extra here and pay this job's full
-  # fixture-tier run for zero new coverage.
+  # 3.12 and later would install neither extra here and pay this job's full
+  # fixture-tier run for zero new coverage. 3.11 is the one supported leg; 3.10
+  # is KTLO (#1633), non-blocking through step-level `continue-on-error`, for
+  # the reason given on the `test` job's matrix.
   pypcap-parity:
-    name: PyPCAP/PyPCAPFile parity Python ${{ matrix.python-version }}
+    name: PyPCAP/PyPCAPFile parity Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}
     if: ${{ inputs.gate-only != true && needs.changes.outputs.code != 'false' }}
     needs: [changes]
     runs-on: ubuntu-latest
@@ -886,19 +925,24 @@ jobs:
       APT_PACKAGES: build-essential libpcap-dev tshark
       APT_SET: pypcap-parity
       # Both cells install the same set under the same key; only one saves it,
-      # or the other's save fails with `Unable to reserve cache`.
-      APT_CACHE_SAVE: ${{ matrix.python-version == '3.10' }}
+      # or the other's save fails with `Unable to reserve cache`. The supported
+      # leg, so the cache does not depend on a leg that may not get that far.
+      APT_CACHE_SAVE: ${{ matrix.python-version == '3.11' }}
     strategy:
       fail-fast: false
       matrix:
         python-version:
           - "3.10"
           - "3.11"
+        include:
+          - python-version: "3.10"
+            ktlo: true
 
     steps:
       - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v7
+        continue-on-error: ${{ matrix.ktlo == true }}
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
@@ -932,6 +976,7 @@ jobs:
       - name: Plan the system packages
         id: apt-plan
         if: env.APT_PACKAGES != ''
+        continue-on-error: ${{ matrix.ktlo == true }}
         timeout-minutes: 4
         run: |
           set -eu
@@ -955,6 +1000,7 @@ jobs:
       - name: Restore the cached .deb files
         id: apt-cache
         if: steps.apt-plan.outputs.key != ''
+        continue-on-error: ${{ matrix.ktlo == true }}
         uses: actions/cache/restore@v6
         with:
           path: ${{ runner.temp }}/apt-debs/*.deb
@@ -963,12 +1009,14 @@ jobs:
 
       - name: Seed apt's archive with the cached .deb files
         if: steps.apt-cache.outputs.cache-matched-key != ''
+        continue-on-error: ${{ matrix.ktlo == true }}
         run: |
           set -eu
           sudo cp "$RUNNER_TEMP"/apt-debs/*.deb /var/cache/apt/archives/
           echo "Seeded $(find "$RUNNER_TEMP/apt-debs" -name '*.deb' | wc -l) .deb files"
 
       - name: Install libpcap headers, a C toolchain, and tshark
+        continue-on-error: ${{ matrix.ktlo == true }}
         timeout-minutes: 10
         run: |
           set -eu
@@ -1020,6 +1068,7 @@ jobs:
           key: ${{ steps.apt-plan.outputs.key }}
 
       - name: Install package, test and generator dependencies
+        continue-on-error: ${{ matrix.ktlo == true }}
         run: |
           python -m pip install -U pip setuptools wheel
           python -m pip install -e '.[test,Scapy,DPKT,cli,PyShark,PyPCAP,PyPCAPFile]'
@@ -1027,6 +1076,7 @@ jobs:
       # See the `integration` job above for why this step is shaped the way it
       # is.
       - name: Regenerate sample captures
+        continue-on-error: ${{ matrix.ktlo == true }}
         shell: bash
         run: |
           if ! python examples/generators/make_samples.py 2>&1 | tee "$RUNNER_TEMP/make-samples.log"; then
@@ -1043,6 +1093,7 @@ jobs:
 
       # See the `test` job above for why this step exists.
       - name: Report available parallelism
+        continue-on-error: ${{ matrix.ktlo == true }}
         run: |
           nproc
           python -c "import os; print('cpu_count', os.cpu_count())"
@@ -1050,6 +1101,7 @@ jobs:
       # See the `integration` job above for why this is asked of
       # tests/_tiers.py directly rather than spelled out as literal flags.
       - name: Run full test suite
+        continue-on-error: ${{ matrix.ktlo == true }}
         shell: bash
         run: |
           if ! selection=$(python -c "from tests._tiers import fixture_tier_paths; print(' '.join(fixture_tier_paths()))"); then
@@ -1454,7 +1506,7 @@ jobs:
       # PyPCAPFile's marker resolves to nothing regardless, so adding it here
       # would be a no-op that misleadingly suggests the extra is exercised by
       # `gate`; #751's `engine-tests` and `pypcap-parity` jobs cover it for
-      # real, on the 3.10-3.14 (and 3.10-3.11) legs where it actually installs.
+      # real, on the 3.10-3.15 (and 3.10-3.11) legs, 3.10 being KTLO in both.
       - name: Install package, test and generator dependencies
         run: |
           python -m pip install -U pip setuptools wheel
@@ -1498,7 +1550,7 @@ jobs:
         run: python -m pytest -q -n auto --dist load
 
   # Ruleset 23497679's required_status_checks requires six contexts: this
-  # job's `Required checks passed`, and five for `Compat Python 3.10`-`3.14`
+  # job's `Required checks passed`, and five for `Compat Python 3.11`-`3.15`
   # from the `compatibility` job in `.github/workflows/python-compatibility.yml`.
   # This job aggregates the gating jobs of *this* file, the ones its `needs:`
   # lists, because rulesets match check names literally and support no
@@ -1561,13 +1613,15 @@ jobs:
   # here: the cell script exits 0 for a cell that declined exactly as
   # expected, so they contribute to that job's `success` like any other cell.
   #
-  # Nor is its 3.15 cell. It is a step with step-level `continue-on-error:
-  # true` inside each engine's job, whose effect on the job's result *is*
-  # documented (a step's `conclusion` is its result after `continue-on-error`
-  # is applied), so the job, and this gate, read `success` while the failed
-  # step stays visible. Not a job-level `continue-on-error`: GitHub does not
-  # document whether `needs.<job>.result` sees such a job's failure as
-  # `failure` or `success`, so a 3.15-only regression could block every merge.
+  # Nor is the KTLO tier (#1633): engine-tests' 3.10 cell, and the 3.8-3.10
+  # legs of `test` and `integration` and the 3.10 leg of `pypcap-parity`.
+  # Each is non-blocking through step-level `continue-on-error`, whose effect
+  # on the job's result *is* documented (a step's `conclusion` is its result
+  # after `continue-on-error` is applied), so the job, and this gate, read
+  # `success` while the failed step stays visible. Not a job-level
+  # `continue-on-error`: GitHub does not document whether `needs.<job>.result`
+  # sees such a job's failure as `failure` or `success`, so a KTLO-only
+  # regression could block every merge.
   #
   # The docs-only path. On a pull request whose diff touches nothing but
   # `docs/**` and `*.md` files outside the code directories (the `changes`

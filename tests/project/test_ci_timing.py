@@ -237,9 +237,16 @@ class TestWorkflowText(unittest.TestCase):
         codeql = ci_timing.parse_workflow((WORKFLOWS / 'codeql-analysis.yml').read_text(encoding='utf-8'))
         self.assertTrue(codeql[0]['steps'])
         compat = ci_timing.parse_workflow((WORKFLOWS / 'python-compatibility.yml').read_text(encoding='utf-8'))
-        self.assertEqual(ci_timing.match_job(compat, 'Compat Python 3.15 (scheduled)')['id'],
-                         'compatibility-nightly')
+        self.assertEqual(ci_timing.match_job(compat, 'Compat Python 3.10 (KTLO)')['id'],
+                         'compatibility')
         self.assertEqual(ci_timing.match_job(compat, 'Compat Python 3.12')['id'], 'compatibility')
+        # #1633 retired the literal ``Compat Python 3.15 (scheduled)`` job this used
+        # to read, so the literal-over-template rule is checked on a stand-in.
+        both = ci_timing.parse_workflow(
+            'jobs:\n  matrixed:\n    name: Compat Python ${{ matrix.python-version }}\n'
+            '  pinned:\n    name: Compat Python 3.15 (scheduled)\n')
+        self.assertEqual(ci_timing.match_job(both, 'Compat Python 3.15 (scheduled)')['id'], 'pinned')
+        self.assertEqual(ci_timing.match_job(both, 'Compat Python 3.12')['id'], 'matrixed')
 
 
 class TestClient(unittest.TestCase):

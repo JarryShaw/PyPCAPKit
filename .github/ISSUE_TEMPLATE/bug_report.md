@@ -23,7 +23,7 @@ simply wrong, the most useful form is the observed value next to the expected on
 **System information**
 A clear and concise description of your system information.
  - OS Version: [e.g. macOS 15.3, Ubuntu 24.04, Windows 11]
- - Python Version: [e.g. 3.14, 3.12, 3.10]
+ - Python Version: [e.g. 3.15, 3.13, 3.11]
  - Python Implementation: [e.g. CPython, PyPy]
  - `pcapkit` Version: [`python -c "import pcapkit; print(pcapkit.__version__)"`]
  - If you are working from a checkout rather than an installed release, please give

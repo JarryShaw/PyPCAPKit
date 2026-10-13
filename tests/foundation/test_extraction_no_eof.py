@@ -177,7 +177,7 @@ class ChildBoundedTestCase(unittest.TestCase):
         except subprocess.TimeoutExpired as exc:
             # NOTE: ``TimeoutExpired.output`` is :class:`bytes` even under
             # ``text=True`` on CPython 3.14 -- measured, not assumed -- but that is
-            # an implementation detail, and this suite runs on 3.10 through 3.15.
+            # an implementation detail, and this suite runs on 3.8 through 3.15.
             # Accept either rather than turning the informative "did not
             # terminate" failure into an ``AttributeError`` on some other version.
             partial = exc.output or b''

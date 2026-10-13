@@ -13,7 +13,8 @@ Unlike popular PCAP extractors such as [Scapy](https://scapy.net),
 Where that depth is not needed, the same interface also drives six third-party
 extraction engines.
 
-The whole project supports **Python 3.6** or later.
+The whole project declares **Python 3.6** or later. CI supports 3.11 to 3.15, and
+still tests the end-of-life 3.8 to 3.10 without letting a failure block anything.
 
 ## Installation
 

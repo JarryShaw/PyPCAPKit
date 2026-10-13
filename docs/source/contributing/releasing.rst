@@ -44,23 +44,23 @@ Editing ``__version__`` by hand without also moving :file:`CITATION.cff`'s
 ``tests/project/test_bump_version.py``'s
 ``RepositoryCitationTests.test_the_citation_file_names_the_packaged_version``
 (``:494-514``) asserts the two agree, and ``create-release.yml``'s
-``unit-tests`` job (``:362-376``) calls ``unit-tests.yml`` with
+``unit-tests`` job (``:367-381``) calls ``unit-tests.yml`` with
 ``gate-only: true``, which runs the **full** suite rather than the tiered
-subset an ordinary push runs (its ``gate`` job, ``unit-tests.yml:1429-1498``).
+subset an ordinary push runs (its ``gate`` job, ``unit-tests.yml:1481-1550``).
 That gate runs whenever a release will -- a moved ``__version__`` is exactly
 what makes ``version_check``'s evidence read "not yet published" -- and every
-publishing job requires it to have succeeded (``:392,493,573,674``), so a
+publishing job requires it to have succeeded (``:397,498,578,726``), so a
 citation left behind fails the gate well before any approval is requested.
 Either run the script, or move both fields by hand in the same commit.
 
 This is the **only** edit a person makes to get a release started -- the tag,
 the Release, and every upload are the workflow's job from here. Two other
 checks run unconditionally on the same path, though neither is a step in *this*
-process: the ``changelog`` job (``unit-tests.yml:1289-1310``) fails outright if
+process: the ``changelog`` job (``unit-tests.yml:1341-1362``) fails outright if
 ``CHANGELOG.md`` has drifted from its source entry under
 :file:`docs/source/changelog/`, and the release-body step warns, without
 failing, if that entry's heading still reads "unreleased"
-(``create-release.yml:446-447``). Both enforce what the changelog convention
+(``create-release.yml:451-452``). Both enforce what the changelog convention
 already asks for.
 
 Two Ways to Start a Release
@@ -131,8 +131,9 @@ checks *is* the one it is about to create:
 
 * ``tag`` checks whether ``conda-<version>+0``, the tag *it* creates, already
   exists.
-* ``pypi`` compares PyPI's file count for the version against the 8 expected
-  -- 7 matrix legs plus the sdist kept only on the 3.14 leg. This job is
+* ``pypi`` compares PyPI's file count for the version against the 7 expected
+  -- the 6 supported legs' wheels plus the sdist kept only on the 3.14 leg; the
+  KTLO legs' wheels (#1633) are not counted. This job is
   already idempotent (``skip-existing: true`` on both upload steps), so the
   check exists only to save the cost of the build matrix, not for correctness.
 * ``conda`` compares Anaconda's aggregate count against the 10 expected (2 OS
@@ -233,8 +234,8 @@ Only ``github-release`` carries a required reviewer; ``conda-tag``,
 removed on `#887 <https://github.com/JarryShaw/PyPCAPKit/issues/887>`__.
 What still makes one approval mean *the whole release* is the ``needs:``
 graph: ``tag`` and ``pypi`` both depend on ``github``
-(``.github/workflows/create-release.yml:493,573``), and ``conda`` depends on
-``tag`` and ``github`` (``:674``) -- so nothing downstream of ``github`` can
+(``.github/workflows/create-release.yml:498,578``), and ``conda`` depends on
+``tag`` and ``github`` (``:726``) -- so nothing downstream of ``github`` can
 start before it is approved, and rejecting it leaves nothing tagged and
 nothing published. Before this change ``tag`` depended on ``version_check``
 alone, so removing its reviewer without moving this dependency would have let
@@ -291,7 +292,7 @@ the name regardless, since there is no upside to removing it.
 **``conda-tag`` writes to ``main``, so a release is not read-only on the
 branch.** The ``tag`` job resets :file:`conda/build` to ``0``, commits that,
 and pushes straight to ``main``
-(``.github/workflows/create-release.yml:512-532``) before cutting the
+(``.github/workflows/create-release.yml:517-537``) before cutting the
 ``conda-<version>+0`` tag. Approving ``github-release`` therefore also
 approves a commit landing on the default branch, not only the artefacts that
 sound like they are the point.

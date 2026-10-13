@@ -403,12 +403,14 @@ jobs:
           - macos-latest
           - ubuntu-latest
           # - windows-latest  # skip for now
+        # #1633: the supported tier; create-release.yml's ``conda`` job says why
+        # there is no KTLO 3.10 leg.
         python-version:
-          - "3.10"
           - "3.11"
           - "3.12"
           - "3.13"
           - "3.14"
+          - "3.15"
     steps:
       - uses: actions/checkout@v7
         with:
@@ -449,13 +451,14 @@ jobs:
           mkdir -p conda/wheels
           python -m pip download -r conda/requirements.txt -d conda/wheels
 
+      # See create-release.yml's step of the same name for the 3.15 exception.
       - name: Conda environment creation and activation
         uses: conda-incubator/setup-miniconda@v4.0.1
         env:
           PCAPKIT_VERSION: ${{ needs.conda-update.outputs.PCAPKIT_VERSION }}
           PCAPKIT_BUILD: ${{ needs.conda-update.outputs.PCAPKIT_BUILD }}
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ matrix.python-version != '3.15' && matrix.python-version || '' }}
           activate-environment: base
           auto-update-conda: false
           auto-activate: true

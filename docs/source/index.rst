@@ -10,7 +10,8 @@ construction and analysis.
 
 .. important::
 
-   The whole project supports **Python 3.6** or later; CI covers 3.10 to 3.14, and 3.15 as an allowed-to-fail leg.
+   The whole project declares **Python 3.6** or later. CI supports 3.11 to 3.15, and
+   still tests the end-of-life 3.8 to 3.10 without letting a failure block anything.
 
 .. .. contents::
 ..    :depth: 2
@@ -257,8 +258,9 @@ Installation
 
 .. note::
 
-   3.8 and 3.9 are end-of-life and best-effort. Individual *engines* also stop
-   earlier than the library does; see `Engine prerequisites`_.
+   3.8, 3.9 and 3.10 are end-of-life and best-effort: CI builds and tests them,
+   but a failure there blocks nothing. Individual *engines* also stop earlier than
+   the library does; see `Engine prerequisites`_.
 
 Run the following to install the current version from PyPI:
 

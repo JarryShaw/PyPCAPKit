@@ -275,7 +275,7 @@ def make_tmp_dir(case: unittest.TestCase) -> pathlib.Path:
     :meth:`unittest.TestCase.enterContext` would do this in one line, but it
     is Python 3.11+ and this repository supports back to
     ``requires-python = ">=3.6, <4"`` (:file:`pyproject.toml`) -- CI's own
-    oldest tested leg is ``Python 3.10``, where ``enterContext`` does not
+    oldest tested leg is ``Python 3.8 (KTLO)``, where ``enterContext`` does not
     exist at all (``AttributeError``). ``TemporaryDirectory.cleanup`` plus
     :meth:`~unittest.TestCase.addCleanup` is the same "clean up after the
     test regardless of outcome" guarantee, built from APIs both present since

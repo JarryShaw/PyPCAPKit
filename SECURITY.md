@@ -12,11 +12,11 @@ lines are not patched -- upgrading is the fix.
 | 1.3.x and older | :x:                | no longer patched                       |
 | 0.x             | :x:                | no longer patched                       |
 
-Supported interpreters are those the test matrix covers: CPython 3.10
-through 3.14. `pyproject.toml` declares `requires-python = ">=3.6, <4"` through the
-`bpc-*` source conversion, but 3.8 and 3.9 are best-effort and below 3.8 is intent
-rather than something exercised -- see the note above `requires-python` in
-`pyproject.toml`. A report that only reproduces outside the tested range is still
+Supported interpreters are the test matrix's blocking tier: CPython 3.11
+through 3.15. `pyproject.toml` declares `requires-python = ">=3.6, <4"` through the
+`bpc-*` source conversion, but 3.8 to 3.10 are best-effort (tested, never blocking)
+and below 3.8 is intent rather than something exercised -- see the note above
+`requires-python` in `pyproject.toml`. A report that only reproduces outside the tested range is still
 welcome; it may be fixed by raising the floor rather than by patching.
 
 ## Reporting a Vulnerability

@@ -93,11 +93,15 @@ DEFAULT_TIMEOUT = 360
 
 #: The aggregate job the ruleset requires; its completion is "mergeable".
 REQUIRED_JOB = 'Required checks passed'
-#: The leg running under coverage, and the legs its tests step is paired against.
+#: The leg running under coverage, and the legs its tests step is paired against:
+#: the rest of the supported tier (#1633), not the KTLO legs, which are named
+#: ``Python 3.x (KTLO)`` and may stop early without failing.
 COVERAGE_JOB = 'Python 3.14'
-PAIRED_JOBS = ('Python 3.10', 'Python 3.11', 'Python 3.12', 'Python 3.13')
+PAIRED_JOBS = ('Python 3.11', 'Python 3.12', 'Python 3.13', 'Python 3.15')
 TESTS_STEP = 'Run unit tests'
-#: The leg ms/test is measured on: the newest version not under coverage.
+#: The leg ms/test is measured on: a supported version not under coverage, kept on
+#: 3.13 -- the newest such leg when W4's baseline was measured -- so that W4 compares
+#: one interpreter with itself week over week.
 MS_PER_TEST_LEG = '3.13'
 #: The JUnit artifacts read, by leg, and from how many push runs.
 JUNIT_LEGS = ('3.13', '3.14')
@@ -111,7 +115,7 @@ STEPS_OF_INTEREST = (
     r'Report coverage',
     r'Run full test suite',
     r'Run tests/.* under plain unittest',
-    r'Run the 3\.15 cell.*',
+    r'Run the 3\.10 cell.*',
 )
 
 # Thresholds. Each is anchored to a value measured on 2026-10-05..09 for #1538,

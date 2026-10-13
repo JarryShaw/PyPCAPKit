@@ -17,7 +17,7 @@ import unittest
 
 try:
     import tomllib
-except ImportError:  # Python 3.10
+except ImportError:  # Python 3.10 and older
     tomllib = None  # type: ignore[assignment]
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]

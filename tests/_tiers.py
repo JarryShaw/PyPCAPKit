@@ -189,8 +189,8 @@ HANDLES_MISSING_FILE = frozenset({
     'Exception', 'BaseException',
 })
 
-#: ``try`` statement node types. :class:`ast.TryStar` is 3.11+, and Python 3.10
-#: is the floor, so it is looked up rather than named.
+#: ``try`` statement node types. :class:`ast.TryStar` is 3.11+, and CI still runs
+#: 3.8-3.10 (#1633), so it is looked up rather than named.
 _TRY_NODES = (ast.Try,) + ((ast.TryStar,) if hasattr(ast, 'TryStar') else ())  # type: ignore[attr-defined]
 
 

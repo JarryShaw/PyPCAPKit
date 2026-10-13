@@ -28,55 +28,43 @@ jobs:
     # exactly with the Unit Tests matrix job of the same name: `gh pr checks`
     # showed two rows reading `Python 3.10`, one a 13-second import smoke test
     # and one a three-minute test run, with nothing to tell them apart.
-    name: Compat Python ${{ matrix.python-version }}
-    runs-on: ubuntu-latest
+    #
+    # #1633: two tiers. The supported tier, 3.11-3.15, keeps the plain name,
+    # which is what ruleset 23497679 requires one context per version of. The
+    # KTLO tier -- end-of-life versions that still run, 3.8-3.10 -- is suffixed
+    # ` (KTLO)`, so no required context can ever match one, and carries
+    # `continue-on-error`, so a failed leg shows red without failing the run.
+    # 3.6 and 3.7 are left out: neither can install and import pcapkit (see the
+    # note on `requires-python` in pyproject.toml).
+    name: Compat Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}
+    runs-on: ${{ matrix.os || 'ubuntu-latest' }}
+    continue-on-error: ${{ matrix.ktlo == true }}
     strategy:
       fail-fast: false
       matrix:
         python-version:
-          # 3.15 deliberately excluded: ruleset 23497679's required checks
-          # only cover 3.10-3.14, so it cannot block a merge here either. Its
-          # replacement is the `compatibility-nightly` job below, which runs
-          # only on this workflow's existing weekly schedule.
-          - "3.10"
           - "3.11"
           - "3.12"
           - "3.13"
           - "3.14"
+          - "3.15"
+        # setup-python publishes 3.8 and 3.9 builds up to Ubuntu 24.04 only, and
+        # `ubuntu-latest` moves to 26.04 from 2026-10-19, hence the pin.
+        include:
+          - python-version: "3.8"
+            ktlo: true
+            os: ubuntu-24.04
+          - python-version: "3.9"
+            ktlo: true
+            os: ubuntu-24.04
+          - python-version: "3.10"
+            ktlo: true
     steps:
       - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
-
-      - name: Install package
-        run: |
-          python -m pip install -U pip setuptools wheel
-          python -m pip install -e .
-
-      - name: Verify package
-        run: |
-          python -m compileall -q pcapkit
-          python -c 'import pcapkit; print(pcapkit.__version__)'
-
-  # 3.15 is not in ruleset 23497679's required-checks list, so running it on
-  # every push/PR was queue contention with no gating signal (it was already
-  # `continue-on-error`). This job keeps early warning of a 3.15-only
-  # regression -- import and compileall only, ~14s -- without paying for it on
-  # every push: it fires solely on the schedule trigger above (line 9).
-  compatibility-nightly:
-    name: Compat Python 3.15 (scheduled)
-    if: ${{ github.event_name == 'schedule' }}
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v7
-
-      - uses: actions/setup-python@v7
-        with:
-          python-version: "3.15"
-          allow-prereleases: true
 
       - name: Install package
         run: |
