@@ -159,16 +159,16 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # One interpreter, not a matrix. Unit Tests sweeps 3.10-3.14 and Python
-      # Compatibility sweeps the same plus a schedule-only 3.15 leg, because
+      # One interpreter, not a matrix. Unit Tests and Python Compatibility sweep
+      # 3.11-3.15, plus the non-blocking KTLO legs 3.8-3.10 (#1633), because
       # they check that the package *runs* everywhere; these tools read the
       # source, and running them several times over would produce several
       # copies of the same findings for several times the runner cost.
       #
-      # 3.14 specifically, matching cron-vendor.yml, because it is the newest
-      # non-experimental version in the test matrix and the version the recorded
-      # counts above were measured on -- so a count that moves means the code
-      # moved, not the interpreter.
+      # 3.14 specifically, matching cron-vendor.yml, because it is the version
+      # the recorded counts above were measured on -- so a count that moves
+      # means the code moved, not the interpreter. 3.15 is newer, and supported
+      # since #1633, but moving to it would re-baseline every count above.
       - uses: actions/setup-python@v7
         with:
           python-version: '3.14'

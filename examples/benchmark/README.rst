@@ -460,8 +460,9 @@ self-tests below.
 Python 3.15
 -----------
 
-Opt-in, and allowed to fail -- matching the repository's CI, which already treats 3.15
-as an allowed-to-fail leg. There is no released ``python:3.15-slim-bookworm``; the
+Opt-in, and allowed to fail -- the benchmark's own choice, not CI's: the repository's CI
+has run 3.15 as a blocking, supported leg since #1633. There is no released
+``python:3.15-slim-bookworm``; the
 pins file names a ``3.15-rc`` digest, which freezes one particular release candidate
 and will name an older one as time passes. Measure it with:
 

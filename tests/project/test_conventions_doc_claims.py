@@ -1137,7 +1137,7 @@ class GetOverrideContractTests(unittest.TestCase):
 def _optional_dependencies() -> 'dict[str, list[str]]':
     """``pyproject.toml``'s ``[project.optional-dependencies]``, without a TOML library.
 
-    :mod:`tomllib` is 3.11+ and this repository supports 3.10 -- a first version used it
+    :mod:`tomllib` is 3.11+ and CI still tests 3.8-3.10 (#1633) -- a first version used it
     and failed the ``Python 3.10`` leg with ``ModuleNotFoundError`` while passing locally
     on 3.14. ``tomli``, the usual backport, is not a dependency here either
     (``grep -n tomli pyproject.toml`` finds nothing), so there is nothing to fall back to
@@ -1251,17 +1251,17 @@ class ProcessConventionTests(unittest.TestCase):
     def test_the_extras_reader_agrees_with_tomllib(self) -> 'None':
         """:func:`_optional_dependencies` matches a real TOML parser, key for key.
 
-        The reader exists because :mod:`tomllib` is 3.11+ and this repository supports
-        3.10, so the assertions above cannot use it. That makes the reader itself an
+        The reader exists because :mod:`tomllib` is 3.11+ and CI still tests 3.8-3.10
+        (#1633's KTLO legs), so the assertions above cannot use it. That makes the reader itself an
         unverified dependency of every extras claim on the page -- and its second
         version mis-parsed **3 of the 14** extras silently, inventing a requirement
         called ``9 skipped`` out of comment prose.
 
         So wherever a real parser *is* available -- which is every interpreter from 3.11
         up, including the one this suite usually runs on -- the two are compared
-        directly. On 3.10 there is nothing to compare against and the test skips, which
-        is honest: the reader is then unverified on the one version it was written for,
-        and the CI matrix covers the other four.
+        directly. Below 3.11 there is nothing to compare against and the test skips, which
+        is honest: the reader is then unverified on the versions it was written for,
+        and the supported tier, 3.11-3.15, covers it.
 
         """
         try:

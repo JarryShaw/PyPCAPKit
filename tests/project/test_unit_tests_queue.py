@@ -11,9 +11,9 @@ These fail silently if they drift, so they are pinned here:
   code, and a Markdown file under a code directory code too.
 * ``unittest-ordering`` stays off pull requests and out of the required set,
   and queues behind ``test`` without needing it to pass (#1538);
-  ``engine-tests``'s 3.15 cell stays non-blocking through a step-level
-  ``continue-on-error`` rather than a job-level one, runs on ``main`` pushes
-  only, and the job has no ``DPKT`` cell (#1538).
+  ``engine-tests``'s KTLO 3.10 cell stays non-blocking through a step-level
+  ``continue-on-error`` rather than a job-level one (#1633), and the job has no
+  ``DPKT`` cell (#1538).
 * The classifier, the engine cell loops and the apt retry are executed too: the
   classifier against a scratch merge commit, the others with their commands
   stubbed on ``PATH``.
@@ -213,18 +213,18 @@ class TestJobGating(unittest.TestCase):
         self.assertIn('--verbose', run_step)
         self.assertRegex(run_step, r'(?m)^        timeout-minutes: \d+$')
 
-    def test_engine_tests_is_one_job_per_engine_with_a_non_blocking_315_step(self) -> None:
-        """E: matrix on engine only; 3.15 blocks nothing, 3.10-3.14 do."""
+    def test_engine_tests_is_one_job_per_engine_with_a_non_blocking_ktlo_step(self) -> None:
+        """E: matrix on engine only; KTLO 3.10 blocks nothing, 3.11-3.15 do (#1633)."""
         section = job('engine-tests')
         head = header(section)
         self.assertNotIn('python-version', head)
         self.assertNotIn('continue-on-error', head)
         self.assertRegex(section, r'(?m)^        engine:$')
-        experimental = section.split('- name: Run the 3.15 cell', 1)[1]
-        self.assertRegex(experimental, r'(?m)^        continue-on-error: true$')
-        gating = section.split('- name: Run the 3.10-3.14 cells', 1)[1].split('      - name:', 1)[0]
+        ktlo = section.split('- name: Run the 3.10 cell', 1)[1]
+        self.assertRegex(ktlo, r'(?m)^        continue-on-error: true$')
+        gating = section.split('- name: Run the 3.11-3.15 cells', 1)[1].split('      - name:', 1)[0]
         self.assertNotIn('continue-on-error', gating)
-        self.assertIn('for py in 3.10 3.11 3.12 3.13 3.14;', gating)
+        self.assertIn('for py in 3.11 3.12 3.13 3.14 3.15;', gating)
 
     def test_unittest_ordering_queues_behind_test_and_survives_its_failure(self) -> None:
         """#1538 P4(a): queued after ``test``, and ``!cancelled()`` so a red ``test`` still runs it.
@@ -238,10 +238,10 @@ class TestJobGating(unittest.TestCase):
         self.assertIn("    if: ${{ !cancelled() && inputs.gate-only != true"
                       " && github.event_name != 'pull_request' }}\n", head)
 
-    def test_the_315_cell_runs_on_main_pushes_only(self) -> None:
-        """#1538 P6: a step-level ``if:``, which narrows #845's ruling to ``main`` pushes."""
-        experimental = step(job('engine-tests'), 'Run the 3.15 cell (experimental, non-blocking)')
-        self.assertIn("        if: ${{ github.event_name != 'pull_request' }}\n", experimental)
+    def test_the_ktlo_cell_runs_on_every_event(self) -> None:
+        """#1633: 3.10 still runs wherever it did; #1538's main-only cut was for prerelease 3.15."""
+        ktlo = step(job('engine-tests'), 'Run the 3.10 cell (KTLO, non-blocking)')
+        self.assertNotRegex(ktlo, r'(?m)^        if:')
 
     def test_engine_tests_has_no_dpkt_cell(self) -> None:
         """#1538 P8: its only path, test_dpkt_unit.py, already runs in ``test`` with DPKT."""
@@ -403,22 +403,21 @@ class TestEngineCellLoops(_Scratch):
 
     def test_every_gating_cell_runs_and_passing_passes(self) -> None:
         """All five gating interpreters run; none failing exits 0."""
-        status, calls = self.run_loop('Run the 3.10-3.14 cells', fail='none')
+        status, calls = self.run_loop('Run the 3.11-3.15 cells', fail='none')
         self.assertEqual(status, 0)
-        self.assertEqual(calls, ['3.10', '3.11', '3.12', '3.13', '3.14'])
+        self.assertEqual(calls, ['3.11', '3.12', '3.13', '3.14', '3.15'])
 
     def test_one_failing_cell_fails_the_step_after_the_rest_ran(self) -> None:
         """A failure is not swallowed, and does not stop the later cells."""
-        status, calls = self.run_loop('Run the 3.10-3.14 cells', fail='3.12')
+        status, calls = self.run_loop('Run the 3.11-3.15 cells', fail='3.12')
         self.assertNotEqual(status, 0)
-        self.assertEqual(calls, ['3.10', '3.11', '3.12', '3.13', '3.14'])
+        self.assertEqual(calls, ['3.11', '3.12', '3.13', '3.14', '3.15'])
 
-    def test_a_failing_315_cell_fails_its_own_step(self) -> None:
+    def test_a_failing_ktlo_cell_fails_its_own_step(self) -> None:
         """The step is red; only its ``continue-on-error`` keeps the job green."""
-        status, calls = self.run_loop('Run the 3.15 cell (experimental, non-blocking)',
-                                      fail='3.15')
+        status, calls = self.run_loop('Run the 3.10 cell (KTLO, non-blocking)', fail='3.10')
         self.assertNotEqual(status, 0)
-        self.assertEqual(calls, ['3.15'])
+        self.assertEqual(calls, ['3.10'])
 
 
 #: The two apt steps, as (job, step name, extra env).
@@ -562,12 +561,11 @@ CITATIONS: 'dict[str, list[tuple[str, Optional[str]]]]' = {
     'docs/source/contributing/workflows.rst': [
         ('# Deliberately *not* gated on ``gate-only``', '# this is neither expensive'),
         ('name: Required checks passed', None),
-        ('five for `Compat Python 3.10`', None),
+        ('five for `Compat Python 3.11`', None),
         ("# Ruleset 23497679's required_status_checks", '# them.'),
         ('  required-checks:', 'echo "All required jobs reported an accepted result."'),
         ('if: ${{ always() && inputs.gate-only != true }}', None),
-        ('# 3.15 deliberately excluded', '(non-blocking, schedule-only)'),
-        ('# See the `test` job above for why 3.15', None),
+        ('# The KTLO tier (#1633)', '# `ubuntu-latest` moves to 26.04'),
     ],
 }
 

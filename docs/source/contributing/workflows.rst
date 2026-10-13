@@ -232,7 +232,7 @@ the caller's own workflow run, as one of the caller's own jobs, rather than
 starting an independent run after the caller finishes. All four calls in this
 repository target the same reusable workflow, with the same input:
 
-* ``.github/workflows/create-release.yml:374`` -- job ``unit-tests`` calls
+* ``.github/workflows/create-release.yml:379`` -- job ``unit-tests`` calls
   ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
 * ``.github/workflows/cron-conda.yml:43`` -- job ``unit-tests`` calls
   ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
@@ -244,9 +244,10 @@ repository target the same reusable workflow, with the same input:
 ``gate-only: true`` selects **two** of ``unit-tests.yml``'s **ten** jobs,
 not one: ``gate`` (the full suite, one Python version) and ``changelog``
 (checks ``CHANGELOG.md`` against its source entry). It skips the other
-**eight** -- the five matrix jobs, ``test`` (five Python legs),
-``integration`` (five), ``engine-tests`` (one job for each of five engines,
-each looping over six Python versions), ``pypcap-parity`` (two) and ``unittest-ordering``
+**eight** -- the five matrix jobs, ``test`` (eight Python legs: five
+supported, three KTLO), ``integration`` (eight), ``engine-tests`` (one job
+for each of five engines, each looping over six Python versions),
+``pypcap-parity`` (two) and ``unittest-ordering``
 (eleven matrix cells), each of which has already run once for this commit
 from Unit Tests' own ``push`` trigger (and, all but ``unittest-ordering``,
 which runs on ``main`` pushes only, from its ``pull_request`` trigger), so
@@ -256,7 +257,7 @@ and ``project-tests``, and ``required-checks`` (see `Required Status
 Checks`_ below), gated out by their own ``if:`` rather than by having
 already run. ``changelog`` carries no
 ``if:`` at all and runs on every path regardless -- deliberately, per its own
-comment (``unit-tests.yml:1277-1283``): ``create-release.yml`` feeds
+comment (``unit-tests.yml:1329-1335``): ``create-release.yml`` feeds
 ``CHANGELOG.md`` to the GitHub Release body, so the release path is exactly
 where a drifted file must not go unchecked. Confirmed on run `36210743295
 <https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295>`__ (a
@@ -283,13 +284,13 @@ Update run's own conclusion was anything other than ``success`` -- including
 ``skipped``, which is exactly what Vendor Update's *own* jobs report when
 *their* ``workflow_run``-path guards decline (see ``cron-vendor.yml``'s
 ``vendor-update`` job). ``unit-tests`` then depends on that job with
-``needs: [ version_check ]`` (``create-release.yml:364``) and an ``if:`` that
+``needs: [ version_check ]`` (``create-release.yml:369``) and an ``if:`` that
 calls no status-check function, so a skipped dependency skips it too -- and
 every job past it is gated the same way: ``github`` needs ``[ unit-tests,
-version_check ]`` (``:392``), ``tag`` needs ``[ github, unit-tests,
-version_check ]`` (``:493``), ``pypi`` needs ``[ github, unit-tests,
-version_check ]`` (``:573``), and ``conda`` needs ``[ tag, github,
-unit-tests, version_check ]`` (``:674``).
+version_check ]`` (``:397``), ``tag`` needs ``[ github, unit-tests,
+version_check ]`` (``:498``), ``pypi`` needs ``[ github, unit-tests,
+version_check ]`` (``:578``), and ``conda`` needs ``[ tag, github,
+unit-tests, version_check ]`` (``:726``).
 
 .. mermaid::
 
@@ -315,7 +316,7 @@ unit-tests, version_check ]`` (``:674``).
 
 This is a transitive reduction, as in :doc:`releasing`: ``version_check`` and
 ``unit-tests`` are also direct ``needs:`` of ``tag`` and ``pypi``
-(``create-release.yml:493,573``) and of ``conda`` (``:674``), but ``github``
+(``create-release.yml:498,578``) and of ``conda`` (``:726``), but ``github``
 already implies those edges, since it depends on both itself. Drawing them
 would add lines without changing which job can start before which, or which
 job a skip in ``version_check`` reaches.
@@ -483,7 +484,7 @@ while the pool stays saturated, and the first runs with JUnit will show whether
 Work Kept Off the Pull-Request Queue (`#1538 <https://github.com/JarryShaw/PyPCAPKit/issues/1538>`__)
 -----------------------------------------------------------------------------------------------------
 
-Three cuts in :file:`unit-tests.yml` keep work that cannot gate a merge from competing
+Two cuts in :file:`unit-tests.yml` keep work that cannot gate a merge from competing
 with pull-request jobs for the 20-runner pool. None touches a required check or adds a
 permission to the reusable workflow.
 
@@ -496,15 +497,13 @@ permission to the reusable workflow.
   fails the push run that GitHub Pages, Conda Update and Vendor Update (and so Create
   Release) wait on. The cost is wall time: the push run, and those workflows, finish
   about one slowest cell later, about 6 min before any queue wait (estimate).
-* ``engine-tests``' ``Run the 3.15 cell (experimental, non-blocking)`` step runs on
-  ``main`` pushes only. This narrows `#845 <https://github.com/JarryShaw/PyPCAPKit/issues/845>`__'s
-  ruling -- present so a regression is visible, never blocking -- from every run to
-  every ``main`` push: a 3.15 regression shows within one merge. The step keeps
-  ``continue-on-error: true``.
 * ``engine-tests`` has no ``DPKT`` cell. Its only path was
   :file:`tests/toolkit/test_dpkt_unit.py`, which ``test`` runs with ``DPKT`` installed
-  on 3.10-3.14. Dropped with it: that file in a venv holding only ``test`` and ``DPKT``,
-  and on 3.15.
+  on every leg. Dropped with it: that file in a venv holding only ``test`` and ``DPKT``.
+
+A third cut, running the then-prerelease 3.15 engine cell on ``main`` pushes only,
+ended with `#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__: 3.15 is
+supported now, so its cells block on every run.
 
 Required Status Checks
 ----------------------
@@ -522,38 +521,41 @@ grepping every workflow file for its name:
      - Where
    * - ``Required checks passed``
      - job ``required-checks``
-     - ``unit-tests.yml:1586``
-   * - ``Compat Python 3.10``
-     - job ``compatibility``, matrix leg ``3.10``
-     - ``python-compatibility.yml:31,41``
+     - ``unit-tests.yml:1640``
    * - ``Compat Python 3.11``
      - job ``compatibility``, matrix leg ``3.11``
-     - ``python-compatibility.yml:31,42``
+     - ``python-compatibility.yml:39,46``
    * - ``Compat Python 3.12``
      - job ``compatibility``, matrix leg ``3.12``
-     - ``python-compatibility.yml:31,43``
+     - ``python-compatibility.yml:39,47``
    * - ``Compat Python 3.13``
      - job ``compatibility``, matrix leg ``3.13``
-     - ``python-compatibility.yml:31,44``
+     - ``python-compatibility.yml:39,48``
    * - ``Compat Python 3.14``
      - job ``compatibility``, matrix leg ``3.14``
-     - ``python-compatibility.yml:31,45``
+     - ``python-compatibility.yml:39,49``
+   * - ``Compat Python 3.15``
+     - job ``compatibility``, matrix leg ``3.15``
+     - ``python-compatibility.yml:39,50``
+
+That is the list after `#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__,
+which added ``Compat Python 3.15`` and removed ``Compat Python 3.10``. Moving a version
+between the tiers below means editing the ruleset in the same change.
 
 ``Required checks passed`` is defined by exactly one job
-(``unit-tests.yml:1586``). ``Compat Python`` is defined by two in
-``python-compatibility.yml``: the required ``compatibility`` job (``:31``,
-``Compat Python ${{ matrix.python-version }}``, expanding to the five required
-legs at ``:41-45``) and the non-required ``compatibility-nightly`` job (``:69``,
-``Compat Python 3.15 (scheduled)``, see below). A comment at
-``unit-tests.yml:1501`` mentions the string without defining it.
+(``unit-tests.yml:1640``). ``Compat Python`` is defined by one, the
+``compatibility`` job in ``python-compatibility.yml`` (``:39``), expanding to
+the five required legs at ``:46-50`` and to three KTLO legs at ``:53-61`` whose
+names end in ``(KTLO)``, so no required context matches one. A comment at
+``unit-tests.yml:1553`` mentions the string without defining it.
 
 ``Required checks passed`` is an aggregate, not a single check run. The ruleset
-requires it and the five ``Compat Python 3.10``-``3.14`` legs, nothing else, as
-``unit-tests.yml``'s own comment (``unit-tests.yml:1500-1510``) records. It
+requires it and the five ``Compat Python 3.11``-``3.15`` legs, nothing else, as
+``unit-tests.yml``'s own comment (``unit-tests.yml:1552-1562``) records. It
 ``needs:`` the gating jobs of ``unit-tests.yml`` -- ``test``, ``integration``,
 ``engine-tests`` and ``pypcap-parity``, plus ``changes`` and ``project-tests``
 for the docs-only path -- and checks each result explicitly
-(``unit-tests.yml:1585-1639``). Rulesets match check names literally, with no
+(``unit-tests.yml:1639-1693``). Rulesets match check names literally, with no
 wildcard, so requiring the matrix cells one by one would mean editing the
 ruleset whenever a matrix changes; the aggregate keeps the required list fixed.
 It accepts the four legs as ``skipped`` only on a docs-only pull request, where
@@ -562,17 +564,30 @@ instead. The ``Compat`` legs stay required separately because they come from
 ``python-compatibility.yml``, and a job cannot ``needs:`` a job in another
 workflow file. This job runs on Unit Tests' own ``push``/``pull_request``
 triggers; the ``gate-only: true`` reusable calls documented above skip it via
-``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:1588``),
+``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:1642``),
 so it is never produced -- and never expected -- on those paths.
 
-``Compat Python 3.10``-``3.14`` are five ordinary matrix legs, not an
-aggregate: ``python-compatibility.yml``'s own comment (``:37-40``) and
-``unit-tests.yml``'s matching one for its own, differently-matrixed
-``test``/``integration`` jobs (``unit-tests.yml:59-62``, ``unit-tests.yml:297``) both say why 3.15 is
-excluded from every *required* matrix in this repository -- the ruleset's
-required-checks list stops at 3.14, so a 3.15 leg cannot gate a merge and is
-kept advisory (``continue-on-error: true`` in ``python-compatibility.yml``'s
-``compatibility-nightly`` job, ``:72``) rather than required.
+Python versions come in two tiers (#1633). The **supported** tier, 3.11-3.15,
+blocks: a failed leg fails ``Required checks passed`` or its own required
+``Compat`` context. The **KTLO** tier -- end-of-life 3.8-3.10, still built and
+tested -- never blocks and is never a required context. Each KTLO leg sits in the
+same job as the supported ones, so the two mechanisms differ by whether something
+aggregates the job:
+
+* ``python-compatibility.yml`` has no aggregate, so a KTLO leg carries job-level
+  ``continue-on-error`` (``:41``): it shows red, and the run stays green.
+* In ``unit-tests.yml`` ``required-checks`` reads one ``needs.<job>.result`` per job,
+  and GitHub does not document what that reads when a job-level
+  ``continue-on-error`` leg fails. So every step that can fail on a KTLO leg carries
+  ``continue-on-error: ${{ matrix.ktlo == true }}`` instead, whose effect is
+  documented (``unit-tests.yml:74-82``); ``engine-tests`` runs its 3.10 cell as a
+  step of its own with ``continue-on-error: true``.
+
+3.6 and 3.7 are in no matrix: neither can install and import the package. Nor are
+3.8 and 3.9 in ``engine-tests``, which installs every interpreter on
+``ubuntu-latest``, where setup-python has no Ubuntu 26.04 build of either. Nor are
+they in ``pypcap-parity``, which also runs on ``ubuntu-latest``; neither version
+was measured on that job.
 
 Deployment ``environment:``
 ----------------------------
@@ -580,10 +595,10 @@ Deployment ``environment:``
 Four jobs, all in ``create-release.yml``, declare a deployment
 ``environment:`` and can therefore pause for an approval:
 
-* ``github`` -- ``environment: github-release`` (``create-release.yml:389``)
-* ``tag`` -- ``environment: conda-tag`` (``create-release.yml:491``)
-* ``pypi`` -- ``environment: pypi`` (``create-release.yml:568``)
-* ``conda`` -- ``environment: anaconda`` (``create-release.yml:671``)
+* ``github`` -- ``environment: github-release`` (``create-release.yml:394``)
+* ``tag`` -- ``environment: conda-tag`` (``create-release.yml:496``)
+* ``pypi`` -- ``environment: pypi`` (``create-release.yml:573``)
+* ``conda`` -- ``environment: anaconda`` (``create-release.yml:723``)
 
 No other workflow in scope here declares one -- including
 ``deploy-pages.yml``, whose ``deploy-pages`` job pushes straight to the

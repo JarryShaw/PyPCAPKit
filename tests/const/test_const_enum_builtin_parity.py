@@ -263,7 +263,7 @@ class _StdStrEnum(str, enum.Enum):
     """A built-in string enumeration.
 
     Spelled ``(str, enum.Enum)`` rather than :class:`enum.StrEnum`, which is
-    3.11+, because the CI matrix starts at 3.10.
+    3.11+, because CI still tests 3.8-3.10 (KTLO, #1633).
     """
 
     A = 'a'
