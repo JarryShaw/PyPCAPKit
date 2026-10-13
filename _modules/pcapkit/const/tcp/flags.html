@@ -496,40 +496,40 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">Flags</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">IntFlag</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[Flags] TCP Header Flags"""</span>
 
-    <span class="c1">#: Reserved for future use [RFC 9293]</span>
+    <span class="c1">#: Reserved for future use [:rfc:`9293`]</span>
     <span class="n">Reserved_4</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span>
 
-    <span class="c1">#: Reserved for future use [RFC 9293]</span>
+    <span class="c1">#: Reserved for future use [:rfc:`9293`]</span>
     <span class="n">Reserved_5</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">5</span>
 
-    <span class="c1">#: Reserved for future use [RFC 9293]</span>
+    <span class="c1">#: Reserved for future use [:rfc:`9293`]</span>
     <span class="n">Reserved_6</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">6</span>
 
-    <span class="c1">#: AE (Accurate ECN) [RFC 9768]</span>
+    <span class="c1">#: AE (Accurate ECN) [:rfc:`9768`]</span>
     <span class="n">AE</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">7</span>
 
-    <span class="c1">#: CWR (Congestion Window Reduced) [RFC 3168]</span>
+    <span class="c1">#: CWR (Congestion Window Reduced) [:rfc:`3168`]</span>
     <span class="n">CWR</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span>
 
-    <span class="c1">#: ECE (ECN-Echo) [RFC 3168]</span>
+    <span class="c1">#: ECE (ECN-Echo) [:rfc:`3168`]</span>
     <span class="n">ECE</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">9</span>
 
-    <span class="c1">#: Urgent Pointer field is significant (URG) [RFC 9293]</span>
+    <span class="c1">#: Urgent Pointer field is significant (URG) [:rfc:`9293`]</span>
     <span class="n">URG</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">10</span>
 
-    <span class="c1">#: Acknowledgment field is significant (ACK) [RFC 9293]</span>
+    <span class="c1">#: Acknowledgment field is significant (ACK) [:rfc:`9293`]</span>
     <span class="n">ACK</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">11</span>
 
-    <span class="c1">#: Push Function (PSH) [RFC 9293]</span>
+    <span class="c1">#: Push Function (PSH) [:rfc:`9293`]</span>
     <span class="n">PSH</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">12</span>
 
-    <span class="c1">#: Reset the connection (RST) [RFC 9293]</span>
+    <span class="c1">#: Reset the connection (RST) [:rfc:`9293`]</span>
     <span class="n">RST</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">13</span>
 
-    <span class="c1">#: Synchronize sequence numbers (SYN) [RFC 9293]</span>
+    <span class="c1">#: Synchronize sequence numbers (SYN) [:rfc:`9293`]</span>
     <span class="n">SYN</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">14</span>
 
-    <span class="c1">#: No more data from sender (FIN) [RFC 9293]</span>
+    <span class="c1">#: No more data from sender (FIN) [:rfc:`9293`]</span>
     <span class="n">FIN</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">15</span>
 
 <div class="viewcode-block" id="Flags._missing_">

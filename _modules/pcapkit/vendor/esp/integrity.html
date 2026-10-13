@@ -517,13 +517,16 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            The cell with its ``[RFCxxxx]`` citations turned into</span>
 <span class="sd">            :rst:role:`rfc` roles, or an empty string when the cell names no</span>
-<span class="sd">            document at all.</span>
+<span class="sd">            document at all. IANA's ``[RFC xxxx]; [RFC yyyy]`` spelling of a</span>
+<span class="sd">            cell is rendered as its ``[RFCxxxx][RFCyyyy]`` one is, as</span>
+<span class="sd">            :meth:`~pcapkit.vendor.default.Vendor.split_references` does for</span>
+<span class="sd">            the other crawlers (:issue:`1664`).</span>
 
 <span class="sd">        """</span>
-        <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">'\]\s+\['</span><span class="p">,</span> <span class="s1">']['</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">'\s+'</span><span class="p">,</span> <span class="s1">' '</span><span class="p">,</span> <span class="n">text</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">'\][\s;]*\['</span><span class="p">,</span> <span class="s1">']['</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">'\s+'</span><span class="p">,</span> <span class="s1">' '</span><span class="p">,</span> <span class="n">text</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">text</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">in</span> <span class="n">UNKNOWN</span><span class="p">:</span>
             <span class="k">return</span> <span class="s1">''</span>
-        <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">'\[RFC(\d+)\]'</span><span class="p">,</span>
+        <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">'\[RFC\s*(\d+)\]'</span><span class="p">,</span>
                       <span class="k">lambda</span> <span class="n">match</span><span class="p">:</span> <span class="sa">f</span><span class="s1">'[:rfc:`</span><span class="si">{</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="si">}</span><span class="s1">`]'</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'_'</span><span class="p">,</span> <span class="s1">' '</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'list[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[list[str], list[str]]'</span><span class="p">:</span>

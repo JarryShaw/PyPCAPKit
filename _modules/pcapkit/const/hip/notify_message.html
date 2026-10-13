@@ -497,118 +497,118 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">NotifyMessage</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[NotifyMessage] Notify Message Types"""</span>
 
-    <span class="c1">#: Reserved [RFC 7401]</span>
+    <span class="c1">#: Reserved [:rfc:`7401`]</span>
     <span class="n">Reserved_0</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="c1">#: UNSUPPORTED_CRITICAL_PARAMETER_TYPE [RFC 7401]</span>
+    <span class="c1">#: UNSUPPORTED_CRITICAL_PARAMETER_TYPE [:rfc:`7401`]</span>
     <span class="n">UNSUPPORTED_CRITICAL_PARAMETER_TYPE</span> <span class="o">=</span> <span class="mi">1</span>
 
-    <span class="c1">#: INVALID_SYNTAX [RFC 7401]</span>
+    <span class="c1">#: INVALID_SYNTAX [:rfc:`7401`]</span>
     <span class="n">INVALID_SYNTAX</span> <span class="o">=</span> <span class="mi">7</span>
 
-    <span class="c1">#: NO_DH_PROPOSAL_CHOSEN [RFC 7401]</span>
+    <span class="c1">#: NO_DH_PROPOSAL_CHOSEN [:rfc:`7401`]</span>
     <span class="n">NO_DH_PROPOSAL_CHOSEN</span> <span class="o">=</span> <span class="mi">14</span>
 
-    <span class="c1">#: INVALID_DH_CHOSEN [RFC 7401]</span>
+    <span class="c1">#: INVALID_DH_CHOSEN [:rfc:`7401`]</span>
     <span class="n">INVALID_DH_CHOSEN</span> <span class="o">=</span> <span class="mi">15</span>
 
-    <span class="c1">#: NO_HIP_PROPOSAL_CHOSEN [RFC 7401]</span>
+    <span class="c1">#: NO_HIP_PROPOSAL_CHOSEN [:rfc:`7401`]</span>
     <span class="n">NO_HIP_PROPOSAL_CHOSEN</span> <span class="o">=</span> <span class="mi">16</span>
 
-    <span class="c1">#: INVALID_HIP_CIPHER_CHOSEN [RFC 7401]</span>
+    <span class="c1">#: INVALID_HIP_CIPHER_CHOSEN [:rfc:`7401`]</span>
     <span class="n">INVALID_HIP_CIPHER_CHOSEN</span> <span class="o">=</span> <span class="mi">17</span>
 
-    <span class="c1">#: NO_ESP_PROPOSAL_CHOSEN [RFC 7402]</span>
+    <span class="c1">#: NO_ESP_PROPOSAL_CHOSEN [:rfc:`7402`]</span>
     <span class="n">NO_ESP_PROPOSAL_CHOSEN</span> <span class="o">=</span> <span class="mi">18</span>
 
-    <span class="c1">#: INVALID_ESP_TRANSFORM_CHOSEN [RFC 7402]</span>
+    <span class="c1">#: INVALID_ESP_TRANSFORM_CHOSEN [:rfc:`7402`]</span>
     <span class="n">INVALID_ESP_TRANSFORM_CHOSEN</span> <span class="o">=</span> <span class="mi">19</span>
 
-    <span class="c1">#: UNSUPPORTED_HIT_SUITE [RFC 7401]</span>
+    <span class="c1">#: UNSUPPORTED_HIT_SUITE [:rfc:`7401`]</span>
     <span class="n">UNSUPPORTED_HIT_SUITE</span> <span class="o">=</span> <span class="mi">20</span>
 
-    <span class="c1">#: AUTHENTICATION_FAILED [RFC 7401]</span>
+    <span class="c1">#: AUTHENTICATION_FAILED [:rfc:`7401`]</span>
     <span class="n">AUTHENTICATION_FAILED</span> <span class="o">=</span> <span class="mi">24</span>
 
     <span class="c1">#: Unassigned</span>
     <span class="n">Unassigned_25</span> <span class="o">=</span> <span class="mi">25</span>
 
-    <span class="c1">#: CHECKSUM_FAILED [RFC 7401]</span>
+    <span class="c1">#: CHECKSUM_FAILED [:rfc:`7401`]</span>
     <span class="n">CHECKSUM_FAILED</span> <span class="o">=</span> <span class="mi">26</span>
 
     <span class="c1">#: Unassigned</span>
     <span class="n">Unassigned_27</span> <span class="o">=</span> <span class="mi">27</span>
 
-    <span class="c1">#: HIP_MAC_FAILED [RFC 7401]</span>
+    <span class="c1">#: HIP_MAC_FAILED [:rfc:`7401`]</span>
     <span class="n">HIP_MAC_FAILED</span> <span class="o">=</span> <span class="mi">28</span>
 
-    <span class="c1">#: ENCRYPTION_FAILED [RFC 7401]</span>
+    <span class="c1">#: ENCRYPTION_FAILED [:rfc:`7401`]</span>
     <span class="n">ENCRYPTION_FAILED</span> <span class="o">=</span> <span class="mi">32</span>
 
-    <span class="c1">#: INVALID_HIT [RFC 7401]</span>
+    <span class="c1">#: INVALID_HIT [:rfc:`7401`]</span>
     <span class="n">INVALID_HIT</span> <span class="o">=</span> <span class="mi">40</span>
 
     <span class="c1">#: Unassigned</span>
     <span class="n">Unassigned_41</span> <span class="o">=</span> <span class="mi">41</span>
 
-    <span class="c1">#: BLOCKED_BY_POLICY [RFC 7401]</span>
+    <span class="c1">#: BLOCKED_BY_POLICY [:rfc:`7401`]</span>
     <span class="n">BLOCKED_BY_POLICY</span> <span class="o">=</span> <span class="mi">42</span>
 
     <span class="c1">#: Unassigned</span>
     <span class="n">Unassigned_43</span> <span class="o">=</span> <span class="mi">43</span>
 
-    <span class="c1">#: RESPONDER_BUSY_PLEASE_RETRY [RFC 7401]</span>
+    <span class="c1">#: RESPONDER_BUSY_PLEASE_RETRY [:rfc:`7401`]</span>
     <span class="n">RESPONDER_BUSY_PLEASE_RETRY</span> <span class="o">=</span> <span class="mi">44</span>
 
     <span class="c1">#: Unassigned</span>
     <span class="n">Unassigned_45</span> <span class="o">=</span> <span class="mi">45</span>
 
-    <span class="c1">#: LOCATOR_TYPE_UNSUPPORTED [RFC 8046]</span>
+    <span class="c1">#: LOCATOR_TYPE_UNSUPPORTED [:rfc:`8046`]</span>
     <span class="n">LOCATOR_TYPE_UNSUPPORTED</span> <span class="o">=</span> <span class="mi">46</span>
 
     <span class="c1">#: Unassigned</span>
     <span class="n">Unassigned_47</span> <span class="o">=</span> <span class="mi">47</span>
 
-    <span class="c1">#: CREDENTIALS_REQUIRED [RFC 8002]</span>
+    <span class="c1">#: CREDENTIALS_REQUIRED [:rfc:`8002`]</span>
     <span class="n">CREDENTIALS_REQUIRED</span> <span class="o">=</span> <span class="mi">48</span>
 
     <span class="c1">#: Unassigned</span>
     <span class="n">Unassigned_49</span> <span class="o">=</span> <span class="mi">49</span>
 
-    <span class="c1">#: INVALID_CERTIFICATE [RFC 8002]</span>
+    <span class="c1">#: INVALID_CERTIFICATE [:rfc:`8002`]</span>
     <span class="n">INVALID_CERTIFICATE</span> <span class="o">=</span> <span class="mi">50</span>
 
-    <span class="c1">#: REG_REQUIRED [RFC 8003]</span>
+    <span class="c1">#: REG_REQUIRED [:rfc:`8003`]</span>
     <span class="n">REG_REQUIRED</span> <span class="o">=</span> <span class="mi">51</span>
 
-    <span class="c1">#: NO_VALID_NAT_TRAVERSAL_MODE_PARAMETER [RFC 5770]</span>
+    <span class="c1">#: NO_VALID_NAT_TRAVERSAL_MODE_PARAMETER [:rfc:`5770`]</span>
     <span class="n">NO_VALID_NAT_TRAVERSAL_MODE_PARAMETER</span> <span class="o">=</span> <span class="mi">60</span>
 
-    <span class="c1">#: CONNECTIVITY_CHECKS_FAILED [RFC 5770]</span>
+    <span class="c1">#: CONNECTIVITY_CHECKS_FAILED [:rfc:`5770`]</span>
     <span class="n">CONNECTIVITY_CHECKS_FAILED</span> <span class="o">=</span> <span class="mi">61</span>
 
-    <span class="c1">#: MESSAGE_NOT_RELAYED [RFC 5770]</span>
+    <span class="c1">#: MESSAGE_NOT_RELAYED [:rfc:`5770`]</span>
     <span class="n">MESSAGE_NOT_RELAYED</span> <span class="o">=</span> <span class="mi">62</span>
 
-    <span class="c1">#: SERVER_REFLEXIVE_CANDIDATE_ALLOCATION_FAILED [RFC 9028]</span>
+    <span class="c1">#: SERVER_REFLEXIVE_CANDIDATE_ALLOCATION_FAILED [:rfc:`9028`]</span>
     <span class="n">SERVER_REFLEXIVE_CANDIDATE_ALLOCATION_FAILED</span> <span class="o">=</span> <span class="mi">63</span>
 
-    <span class="c1">#: RVS_HMAC_PROHIBITED_WITH_RELAY [RFC 9028]</span>
+    <span class="c1">#: RVS_HMAC_PROHIBITED_WITH_RELAY [:rfc:`9028`]</span>
     <span class="n">RVS_HMAC_PROHIBITED_WITH_RELAY</span> <span class="o">=</span> <span class="mi">64</span>
 
-    <span class="c1">#: OVERLAY_TTL_EXCEEDED [RFC 6079]</span>
+    <span class="c1">#: OVERLAY_TTL_EXCEEDED [:rfc:`6079`]</span>
     <span class="n">OVERLAY_TTL_EXCEEDED</span> <span class="o">=</span> <span class="mi">70</span>
 
-    <span class="c1">#: UNKNOWN_NEXT_HOP [RFC 6028]</span>
+    <span class="c1">#: UNKNOWN_NEXT_HOP [:rfc:`6028`]</span>
     <span class="n">UNKNOWN_NEXT_HOP</span> <span class="o">=</span> <span class="mi">90</span>
 
-    <span class="c1">#: NO_VALID_HIP_TRANSPORT_MODE [RFC 6261]</span>
+    <span class="c1">#: NO_VALID_HIP_TRANSPORT_MODE [:rfc:`6261`]</span>
     <span class="n">NO_VALID_HIP_TRANSPORT_MODE</span> <span class="o">=</span> <span class="mi">100</span>
 
-    <span class="c1">#: I2_ACKNOWLEDGEMENT [RFC 7401]</span>
+    <span class="c1">#: I2_ACKNOWLEDGEMENT [:rfc:`7401`]</span>
     <span class="n">I2_ACKNOWLEDGEMENT</span> <span class="o">=</span> <span class="mi">16384</span>
 
-    <span class="c1">#: NAT_KEEPALIVE [RFC 9028]</span>
+    <span class="c1">#: NAT_KEEPALIVE [:rfc:`9028`]</span>
     <span class="n">NAT_KEEPALIVE</span> <span class="o">=</span> <span class="mi">16385</span>
 
 <div class="viewcode-block" id="NotifyMessage._missing_">
@@ -654,13 +654,13 @@
             <span class="c1">#: Unassigned</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'Unassigned'</span><span class="p">)</span>
         <span class="k">if</span> <span class="mi">8192</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">16383</span><span class="p">:</span>
-            <span class="c1">#: Reserved for Private Use [RFC 7401]</span>
+            <span class="c1">#: Reserved for Private Use [:rfc:`7401`]</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'Reserved_for_Private_Use'</span><span class="p">)</span>
         <span class="k">if</span> <span class="mi">16386</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">40959</span><span class="p">:</span>
             <span class="c1">#: Unassigned</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'Unassigned'</span><span class="p">)</span>
         <span class="k">if</span> <span class="mi">40960</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">65535</span><span class="p">:</span>
-            <span class="c1">#: Reserved for Private Use [RFC 7401]</span>
+            <span class="c1">#: Reserved for Private Use [:rfc:`7401`]</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'Reserved_for_Private_Use'</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_missing_</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 </div>

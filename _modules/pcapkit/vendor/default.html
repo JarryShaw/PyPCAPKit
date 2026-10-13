@@ -722,6 +722,41 @@
         <span class="k">return</span> <span class="s1">'</span><span class="se">\n</span><span class="s1">    #: '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">textwrap</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="mi">76</span><span class="p">))</span></div>
 
 
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">split_references</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[str]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Split an IANA reference cell into its citations.</span>
+
+<span class="sd">        IANA's CSV exports have spelt a cell citing two documents in two ways</span>
+<span class="sd">        (:issue:`1664`). It used to be ``[RFC1072][RFC6247]``, or one citation</span>
+<span class="sd">        per line of a quoted cell. The port number registry began writing</span>
+<span class="sd">        ``RFC 3501`` by 2026-09-29, and every registry re-exported on 2026-10-13</span>
+<span class="sd">        (17:26Z to 17:54Z) now reads ``[RFC 1072]; [RFC 6247]``. Both give</span>
+<span class="sd">        ``['RFC1072', 'RFC6247']`` here, so every crawler renders them</span>
+<span class="sd">        identically:</span>
+
+<span class="sd">        * a segment of nothing but whitespace and ``;`` separates two</span>
+<span class="sd">          citations rather than being one, and is dropped;</span>
+<span class="sd">        * ``RFC`` followed by whitespace and a number loses the whitespace,</span>
+<span class="sd">          which is the spelling the crawlers render as an :rst:role:`rfc` role.</span>
+<span class="sd">          ``RFC Errata 5748`` and draft names such as</span>
+<span class="sd">          ``RFC-ietf-tcpm-accurate-ecn-34`` are left as they are.</span>
+
+<span class="sd">        Any other segment, including text outside the brackets, is returned</span>
+<span class="sd">        verbatim and in order, as :func:`re.split` on the brackets alone did.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            text: Raw reference cell.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The cell's citations, without their brackets.</span>
+
+<span class="sd">        """</span>
+        <span class="n">refs</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
+        <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">r</span><span class="s1">'\[|\]'</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="sa">r</span><span class="s1">'[\s;]*'</span><span class="p">,</span> <span class="n">ref</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">refs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">'\A(\s*)RFC\s+(?=\d)'</span><span class="p">,</span> <span class="sa">r</span><span class="s1">'\1RFC'</span><span class="p">,</span> <span class="n">ref</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">refs</span>
+
 <div class="viewcode-block" id="Vendor.safe_name">
 <a class="viewcode-back" href="../../../pcapkit/vendor/default.html#pcapkit.vendor.default.Vendor.safe_name">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">safe_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
@@ -803,7 +838,7 @@
             <span class="n">rfcs</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
 
             <span class="n">temp</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
-            <span class="k">for</span> <span class="n">rfc</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">r</span><span class="s1">'\[|\]'</span><span class="p">,</span> <span class="n">rfcs</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">rfc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">split_references</span><span class="p">(</span><span class="n">rfcs</span><span class="p">):</span>
                 <span class="k">if</span> <span class="s1">'RFC'</span> <span class="ow">in</span> <span class="n">rfc</span> <span class="ow">and</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s1">'\d+'</span><span class="p">,</span> <span class="n">rfc</span><span class="p">[</span><span class="mi">3</span><span class="p">:]):</span>
                     <span class="c1">#temp.append(f'[{rfc[:3]} {rfc[3:]}]')</span>
                     <span class="n">temp_split</span> <span class="o">=</span> <span class="n">rfc</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">', '</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>

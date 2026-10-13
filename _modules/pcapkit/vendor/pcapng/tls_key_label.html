@@ -595,8 +595,9 @@
             <span class="c1"># rows fetched as of 2026-09-28 are ``[RFC9850]``, so this always</span>
             <span class="c1"># takes the ``rfc == '9850'`` branch today; a future registry</span>
             <span class="c1"># change either still fits it or raises here for a human to look</span>
-            <span class="c1"># at, rather than rendering a citation nobody checked.</span>
-            <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s1">'\[RFC(\d+)\]\Z'</span><span class="p">,</span> <span class="n">ref</span><span class="p">)</span>
+            <span class="c1"># at, rather than rendering a citation nobody checked. IANA has</span>
+            <span class="c1"># spelt it ``[RFC 9850]`` since 2026-10-13, which fits too (#1664).</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="sa">r</span><span class="s1">'\[RFC\s*(\d+)\]'</span><span class="p">,</span> <span class="n">ref</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">match</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">label</span><span class="si">!r}</span><span class="s1"> cites </span><span class="si">{</span><span class="n">ref</span><span class="si">!r}</span><span class="s1">, which this crawler does not know how to '</span>

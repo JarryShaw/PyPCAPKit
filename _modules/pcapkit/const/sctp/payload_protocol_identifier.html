@@ -497,25 +497,25 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">PayloadProtocolIdentifier</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[PayloadProtocolIdentifier] SCTP Payload Protocol Identifiers"""</span>
 
-    <span class="c1">#: Reserved by SCTP [RFC 9260]</span>
+    <span class="c1">#: Reserved by SCTP [:rfc:`9260`]</span>
     <span class="n">Reserved_by_SCTP</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="c1">#: IUA [RFC 4233]</span>
+    <span class="c1">#: IUA [:rfc:`4233`]</span>
     <span class="n">IUA</span> <span class="o">=</span> <span class="mi">1</span>
 
-    <span class="c1">#: M2UA [RFC 3331]</span>
+    <span class="c1">#: M2UA [:rfc:`3331`]</span>
     <span class="n">M2UA</span> <span class="o">=</span> <span class="mi">2</span>
 
-    <span class="c1">#: M3UA [RFC 4666]</span>
+    <span class="c1">#: M3UA [:rfc:`4666`]</span>
     <span class="n">M3UA</span> <span class="o">=</span> <span class="mi">3</span>
 
-    <span class="c1">#: SUA [RFC 3868]</span>
+    <span class="c1">#: SUA [:rfc:`3868`]</span>
     <span class="n">SUA</span> <span class="o">=</span> <span class="mi">4</span>
 
-    <span class="c1">#: M2PA [RFC 4165]</span>
+    <span class="c1">#: M2PA [:rfc:`4165`]</span>
     <span class="n">M2PA</span> <span class="o">=</span> <span class="mi">5</span>
 
-    <span class="c1">#: V5UA [RFC 3807]</span>
+    <span class="c1">#: V5UA [:rfc:`3807`]</span>
     <span class="n">V5UA</span> <span class="o">=</span> <span class="mi">6</span>
 
     <span class="c1">#: H.248 [ITU-T Recommendation H.248 Annex H, "Transport over SCTP", November</span>
@@ -523,228 +523,220 @@
     <span class="n">H_248</span> <span class="o">=</span> <span class="mi">7</span>
 
     <span class="c1">#: BICC/Q.2150.3 [ITU-T Recommendation Q.1902.1, "Bearer Independent Call</span>
-    <span class="c1">#: Control protocol (Capability Set 2): Functional description", July 2001.][;</span>
-    <span class="c1">#: ][ITU-T Recommendation Q.2150.3, "Signalling Transport Converter On SCTP",</span>
-    <span class="c1">#: to be published.]</span>
+    <span class="c1">#: Control protocol (Capability Set 2): Functional description", July</span>
+    <span class="c1">#: 2001.][ITU-T Recommendation Q.2150.3, "Signalling Transport Converter On</span>
+    <span class="c1">#: SCTP", to be published.]</span>
     <span class="n">BICC_Q_2150_3</span> <span class="o">=</span> <span class="mi">8</span>
 
-    <span class="c1">#: TALI [RFC 3094]</span>
+    <span class="c1">#: TALI [:rfc:`3094`]</span>
     <span class="n">TALI</span> <span class="o">=</span> <span class="mi">9</span>
 
-    <span class="c1">#: DUA [RFC 4129]</span>
+    <span class="c1">#: DUA [:rfc:`4129`]</span>
     <span class="n">DUA</span> <span class="o">=</span> <span class="mi">10</span>
 
-    <span class="c1">#: ASAP [RFC 5352]</span>
+    <span class="c1">#: ASAP [:rfc:`5352`]</span>
     <span class="n">ASAP</span> <span class="o">=</span> <span class="mi">11</span>
 
-    <span class="c1">#: ENRP [RFC 5353]</span>
+    <span class="c1">#: ENRP [:rfc:`5353`]</span>
     <span class="n">ENRP</span> <span class="o">=</span> <span class="mi">12</span>
 
-    <span class="c1">#: H.323 [http://standard.pictel.com/ftp/avc-site/0206 Bru/AVD-2198.zip][;</span>
-    <span class="c1">#: ][H.323 over SCTP October 2002.]</span>
+    <span class="c1">#: H.323 [http://standard.pictel.com/ftp/avc-site/0206 Bru/AVD-2198.zip][H.323</span>
+    <span class="c1">#: over SCTP October 2002.]</span>
     <span class="n">H_323</span> <span class="o">=</span> <span class="mi">13</span>
 
     <span class="c1">#: Q.IPC/Q.2150.3 [ITU-T Recommendation Q.2631.1 "IP Connection Control</span>
-    <span class="c1">#: Signaling Protocol - Capability Set 1", to be published.][; ][ITU-T</span>
+    <span class="c1">#: Signaling Protocol - Capability Set 1", to be published.][ITU-T</span>
     <span class="c1">#: Recommendation Q.2150.3, "Signalling Transport Converter On SCTP", to be</span>
     <span class="c1">#: published.]</span>
     <span class="n">Q_IPC_Q_2150_3</span> <span class="o">=</span> <span class="mi">14</span>
 
     <span class="c1">#: SIMCO &lt;draft-kiesel-midcom-simco-sctp-00.txt&gt; [draft-kiesel-midcom-simco-</span>
-    <span class="c1">#: sctp-00][; ][Sebastian Kiesel]</span>
+    <span class="c1">#: sctp-00][Sebastian Kiesel]</span>
     <span class="n">SIMCO_draft_kiesel_midcom_simco_sctp_00_txt</span> <span class="o">=</span> <span class="mi">15</span>
 
-    <span class="c1">#: DDP Segment Chunk [RFC 5043]</span>
+    <span class="c1">#: DDP Segment Chunk [:rfc:`5043`]</span>
     <span class="n">DDP_Segment_Chunk</span> <span class="o">=</span> <span class="mi">16</span>
 
-    <span class="c1">#: DDP Stream Session Control [RFC 5043]</span>
+    <span class="c1">#: DDP Stream Session Control [:rfc:`5043`]</span>
     <span class="n">DDP_Stream_Session_Control</span> <span class="o">=</span> <span class="mi">17</span>
 
-    <span class="c1">#: S1 Application Protocol (S1AP) [3GPP TS 23.401][; ][3GPP TS 36.413][;</span>
-    <span class="c1">#: ][Rajeev Koodli]</span>
+    <span class="c1">#: S1 Application Protocol (S1AP) [3GPP TS 23.401][3GPP TS 36.413][Rajeev</span>
+    <span class="c1">#: Koodli]</span>
     <span class="n">S1_Application_Protocol</span> <span class="o">=</span> <span class="mi">18</span>
 
-    <span class="c1">#: RUA [3GPP TS 25.467][; ][3GPP TS 25.468][; ][Dongwook Kim]</span>
+    <span class="c1">#: RUA [3GPP TS 25.467][3GPP TS 25.468][Dongwook Kim]</span>
     <span class="n">RUA</span> <span class="o">=</span> <span class="mi">19</span>
 
-    <span class="c1">#: HNBAP [3GPP TS 25.467][; ][3GPP TS 25.469][; ][Dongwook Kim]</span>
+    <span class="c1">#: HNBAP [3GPP TS 25.467][3GPP TS 25.469][Dongwook Kim]</span>
     <span class="n">HNBAP</span> <span class="o">=</span> <span class="mi">20</span>
 
-    <span class="c1">#: ForCES-HP [RFC 5811]</span>
+    <span class="c1">#: ForCES-HP [:rfc:`5811`]</span>
     <span class="n">ForCES_HP</span> <span class="o">=</span> <span class="mi">21</span>
 
-    <span class="c1">#: ForCES-MP [RFC 5811]</span>
+    <span class="c1">#: ForCES-MP [:rfc:`5811`]</span>
     <span class="n">ForCES_MP</span> <span class="o">=</span> <span class="mi">22</span>
 
-    <span class="c1">#: ForCES-LP [RFC 5811]</span>
+    <span class="c1">#: ForCES-LP [:rfc:`5811`]</span>
     <span class="n">ForCES_LP</span> <span class="o">=</span> <span class="mi">23</span>
 
-    <span class="c1">#: SBc-AP [3GPP TS 29.168][; ][Kimmo Kymalainen]</span>
+    <span class="c1">#: SBc-AP [3GPP TS 29.168][Kimmo Kymalainen]</span>
     <span class="n">SBc_AP</span> <span class="o">=</span> <span class="mi">24</span>
 
-    <span class="c1">#: NBAP [3GPP TS 25.433][; ][Kimmo Kymalainen]</span>
+    <span class="c1">#: NBAP [3GPP TS 25.433][Kimmo Kymalainen]</span>
     <span class="n">NBAP</span> <span class="o">=</span> <span class="mi">25</span>
 
     <span class="c1">#: Unassigned</span>
     <span class="n">Unassigned_26</span> <span class="o">=</span> <span class="mi">26</span>
 
-    <span class="c1">#: X2AP [3GPP TS 36.423][; ][Kimmo Kymalainen]</span>
+    <span class="c1">#: X2AP [3GPP TS 36.423][Kimmo Kymalainen]</span>
     <span class="n">X2AP</span> <span class="o">=</span> <span class="mi">27</span>
 
     <span class="c1">#: IRCP - Inter Router Capability Protocol [Randall Stewart]</span>
     <span class="n">IRCP_Inter_Router_Capability_Protocol</span> <span class="o">=</span> <span class="mi">28</span>
 
-    <span class="c1">#: LCS-AP [3GPP TS 29.271][; ][Kimmo Kymalainen]</span>
+    <span class="c1">#: LCS-AP [3GPP TS 29.271][Kimmo Kymalainen]</span>
     <span class="n">LCS_AP</span> <span class="o">=</span> <span class="mi">29</span>
 
-    <span class="c1">#: MPICH2 [Michael Tuexen][;</span>
-    <span class="c1">#: ][http://www.mcs.anl.gov/research/projects/mpich2/]</span>
+    <span class="c1">#: MPICH2 [Michael Tuexen][http://www.mcs.anl.gov/research/projects/mpich2/]</span>
     <span class="n">MPICH2</span> <span class="o">=</span> <span class="mi">30</span>
 
-    <span class="c1">#: Service Area Broadcast Protocol (SABP) [3GPP TS 25.467][; ][3GPP TS</span>
-    <span class="c1">#: 25.419][; ][Dongwook Kim]</span>
+    <span class="c1">#: Service Area Broadcast Protocol (SABP) [3GPP TS 25.467][3GPP TS</span>
+    <span class="c1">#: 25.419][Dongwook Kim]</span>
     <span class="n">Service_Area_Broadcast_Protocol</span> <span class="o">=</span> <span class="mi">31</span>
 
-    <span class="c1">#: Fractal Generator Protocol (FGP) [Thomas Dreibholz][;</span>
-    <span class="c1">#: ][https://www.nntb.no/~dreibh/rserpool/]</span>
+    <span class="c1">#: Fractal Generator Protocol (FGP) [Thomas</span>
+    <span class="c1">#: Dreibholz][https://www.nntb.no/~dreibh/rserpool/]</span>
     <span class="n">Fractal_Generator_Protocol</span> <span class="o">=</span> <span class="mi">32</span>
 
-    <span class="c1">#: Ping Pong Protocol (PPP) [Thomas Dreibholz][;</span>
-    <span class="c1">#: ][https://www.nntb.no/~dreibh/rserpool/]</span>
+    <span class="c1">#: Ping Pong Protocol (PPP) [Thomas</span>
+    <span class="c1">#: Dreibholz][https://www.nntb.no/~dreibh/rserpool/]</span>
     <span class="n">Ping_Pong_Protocol</span> <span class="o">=</span> <span class="mi">33</span>
 
-    <span class="c1">#: CalcApp Protocol (CALCAPP) [Thomas Dreibholz][;</span>
-    <span class="c1">#: ][https://www.nntb.no/~dreibh/rserpool/]</span>
+    <span class="c1">#: CalcApp Protocol (CALCAPP) [Thomas</span>
+    <span class="c1">#: Dreibholz][https://www.nntb.no/~dreibh/rserpool/]</span>
     <span class="n">CalcApp_Protocol</span> <span class="o">=</span> <span class="mi">34</span>
 
-    <span class="c1">#: Scripting Service Protocol (SSP) [Thomas Dreibholz][;</span>
-    <span class="c1">#: ][https://www.nntb.no/~dreibh/rserpool/]</span>
+    <span class="c1">#: Scripting Service Protocol (SSP) [Thomas</span>
+    <span class="c1">#: Dreibholz][https://www.nntb.no/~dreibh/rserpool/]</span>
     <span class="n">Scripting_Service_Protocol</span> <span class="o">=</span> <span class="mi">35</span>
 
-    <span class="c1">#: NetPerfMeter Protocol Control Channel (NPMP-CONTROL) [Thomas Dreibholz][;</span>
-    <span class="c1">#: ][https://www.nntb.no/~dreibh/netperfmeter/]</span>
+    <span class="c1">#: NetPerfMeter Protocol Control Channel (NPMP-CONTROL) [Thomas</span>
+    <span class="c1">#: Dreibholz][https://www.nntb.no/~dreibh/netperfmeter/]</span>
     <span class="n">NetPerfMeter_Protocol_Control_Channel</span> <span class="o">=</span> <span class="mi">36</span>
 
-    <span class="c1">#: NetPerfMeter Protocol Data Channel (NPMP-DATA) [Thomas Dreibholz][;</span>
-    <span class="c1">#: ][https://www.nntb.no/~dreibh/netperfmeter/]</span>
+    <span class="c1">#: NetPerfMeter Protocol Data Channel (NPMP-DATA) [Thomas</span>
+    <span class="c1">#: Dreibholz][https://www.nntb.no/~dreibh/netperfmeter/]</span>
     <span class="n">NetPerfMeter_Protocol_Data_Channel</span> <span class="o">=</span> <span class="mi">37</span>
 
-    <span class="c1">#: Echo (ECHO) [Thomas Dreibholz][; ][https://www.nntb.no/~dreibh/rserpool/]</span>
+    <span class="c1">#: Echo (ECHO) [Thomas Dreibholz][https://www.nntb.no/~dreibh/rserpool/]</span>
     <span class="n">Echo</span> <span class="o">=</span> <span class="mi">38</span>
 
-    <span class="c1">#: Discard (DISCARD) [Thomas Dreibholz][;</span>
-    <span class="c1">#: ][https://www.nntb.no/~dreibh/rserpool/]</span>
+    <span class="c1">#: Discard (DISCARD) [Thomas Dreibholz][https://www.nntb.no/~dreibh/rserpool/]</span>
     <span class="n">Discard</span> <span class="o">=</span> <span class="mi">39</span>
 
-    <span class="c1">#: Daytime (DAYTIME) [Thomas Dreibholz][;</span>
-    <span class="c1">#: ][https://www.nntb.no/~dreibh/rserpool/]</span>
+    <span class="c1">#: Daytime (DAYTIME) [Thomas Dreibholz][https://www.nntb.no/~dreibh/rserpool/]</span>
     <span class="n">Daytime</span> <span class="o">=</span> <span class="mi">40</span>
 
-    <span class="c1">#: Character Generator (CHARGEN) [Thomas Dreibholz][;</span>
-    <span class="c1">#: ][https://www.nntb.no/~dreibh/rserpool/]</span>
+    <span class="c1">#: Character Generator (CHARGEN) [Thomas</span>
+    <span class="c1">#: Dreibholz][https://www.nntb.no/~dreibh/rserpool/]</span>
     <span class="n">Character_Generator</span> <span class="o">=</span> <span class="mi">41</span>
 
-    <span class="c1">#: 3GPP RNA [Tonesi][; ][3GPP TS 25.471]</span>
+    <span class="c1">#: 3GPP RNA [Tonesi][3GPP TS 25.471]</span>
     <span class="n">PayloadProtocolIdentifier_3GPP_RNA</span> <span class="o">=</span> <span class="mi">42</span>
 
-    <span class="c1">#: 3GPP M2AP [Tonesi][; ][3GPP TS 36.442][; ][3GPP TS 36.443]</span>
+    <span class="c1">#: 3GPP M2AP [Tonesi][3GPP TS 36.442][3GPP TS 36.443]</span>
     <span class="n">PayloadProtocolIdentifier_3GPP_M2AP</span> <span class="o">=</span> <span class="mi">43</span>
 
-    <span class="c1">#: 3GPP M3AP [Tonesi][; ][3GPP TS 36.442][; ][3GPP TS 36.444]</span>
+    <span class="c1">#: 3GPP M3AP [Tonesi][3GPP TS 36.442][3GPP TS 36.444]</span>
     <span class="n">PayloadProtocolIdentifier_3GPP_M3AP</span> <span class="o">=</span> <span class="mi">44</span>
 
     <span class="c1">#: SSH over SCTP [Michael Tuexen]</span>
     <span class="n">SSH_over_SCTP</span> <span class="o">=</span> <span class="mi">45</span>
 
-    <span class="c1">#: Diameter in a SCTP DATA chunk [RFC 6733]</span>
+    <span class="c1">#: Diameter in a SCTP DATA chunk [:rfc:`6733`]</span>
     <span class="n">Diameter_in_a_SCTP_DATA_chunk</span> <span class="o">=</span> <span class="mi">46</span>
 
-    <span class="c1">#: Diameter in a DTLS/SCTP DATA chunk [RFC 6733]</span>
+    <span class="c1">#: Diameter in a DTLS/SCTP DATA chunk [:rfc:`6733`]</span>
     <span class="n">Diameter_in_a_DTLS_SCTP_DATA_chunk</span> <span class="o">=</span> <span class="mi">47</span>
 
-    <span class="c1">#: R14P. BER Encoded ASN.1 over SCTP [Josip Djuricic][;</span>
-    <span class="c1">#: ][http://www.release14.org/wp-content/uploads/2012/07/r14p.asn]</span>
+    <span class="c1">#: R14P. BER Encoded ASN.1 over SCTP [Josip</span>
+    <span class="c1">#: Djuricic][http://www.release14.org/wp-content/uploads/2012/07/r14p.asn]</span>
     <span class="n">R14P_BER_Encoded_ASN_1_over_SCTP</span> <span class="o">=</span> <span class="mi">48</span>
 
-    <span class="c1">#: Generic Data Transfer (GDT) Protocol [Damir Franusic][;</span>
-    <span class="c1">#: ][https://github.com/link-mink]</span>
+    <span class="c1">#: Generic Data Transfer (GDT) Protocol [Damir</span>
+    <span class="c1">#: Franusic][https://github.com/link-mink]</span>
     <span class="n">Generic_Data_Transfer_Protocol</span> <span class="o">=</span> <span class="mi">49</span>
 
-    <span class="c1">#: WebRTC DCEP [RFC 8832]</span>
+    <span class="c1">#: WebRTC DCEP [:rfc:`8832`]</span>
     <span class="n">WebRTC_DCEP</span> <span class="o">=</span> <span class="mi">50</span>
 
-    <span class="c1">#: WebRTC String [RFC 8831]</span>
+    <span class="c1">#: WebRTC String [:rfc:`8831`]</span>
     <span class="n">WebRTC_String</span> <span class="o">=</span> <span class="mi">51</span>
 
-    <span class="c1">#: WebRTC Binary Partial (deprecated) [RFC 8831]</span>
+    <span class="c1">#: WebRTC Binary Partial (deprecated) [:rfc:`8831`]</span>
     <span class="n">WebRTC_Binary_Partial</span> <span class="o">=</span> <span class="mi">52</span>
 
-    <span class="c1">#: WebRTC Binary [RFC 8831]</span>
+    <span class="c1">#: WebRTC Binary [:rfc:`8831`]</span>
     <span class="n">WebRTC_Binary</span> <span class="o">=</span> <span class="mi">53</span>
 
-    <span class="c1">#: WebRTC String Partial (deprecated) [RFC 8831]</span>
+    <span class="c1">#: WebRTC String Partial (deprecated) [:rfc:`8831`]</span>
     <span class="n">WebRTC_String_Partial</span> <span class="o">=</span> <span class="mi">54</span>
 
-    <span class="c1">#: 3GPP PUA [Dario S Tonesi][; ][3GPP TS 25.470][; ][3GPP TS 25.467]</span>
+    <span class="c1">#: 3GPP PUA [Dario S Tonesi][3GPP TS 25.470][3GPP TS 25.467]</span>
     <span class="n">PayloadProtocolIdentifier_3GPP_PUA</span> <span class="o">=</span> <span class="mi">55</span>
 
-    <span class="c1">#: WebRTC String Empty [RFC 8831]</span>
+    <span class="c1">#: WebRTC String Empty [:rfc:`8831`]</span>
     <span class="n">WebRTC_String_Empty</span> <span class="o">=</span> <span class="mi">56</span>
 
-    <span class="c1">#: WebRTC Binary Empty [RFC 8831]</span>
+    <span class="c1">#: WebRTC Binary Empty [:rfc:`8831`]</span>
     <span class="n">WebRTC_Binary_Empty</span> <span class="o">=</span> <span class="mi">57</span>
 
-    <span class="c1">#: 3GPP XwAP [         3GPP TS 36.462][; ][KIMBA DIT ADAMOU Boubacar]</span>
+    <span class="c1">#: 3GPP XwAP [         3GPP TS 36.462][KIMBA DIT ADAMOU Boubacar]</span>
     <span class="n">PayloadProtocolIdentifier_3GPP_XwAP</span> <span class="o">=</span> <span class="mi">58</span>
 
-    <span class="c1">#: 3GPP Xw-Control Plane [         3GPP TS 36.462][; ][KIMBA DIT ADAMOU</span>
-    <span class="c1">#: Boubacar]</span>
+    <span class="c1">#: 3GPP Xw-Control Plane [         3GPP TS 36.462][KIMBA DIT ADAMOU Boubacar]</span>
     <span class="n">PayloadProtocolIdentifier_3GPP_Xw_Control_Plane</span> <span class="o">=</span> <span class="mi">59</span>
 
-    <span class="c1">#: 3GPP NG Application Protocol (NGAP) [         3GPP TS 38.413][; ][Luis</span>
-    <span class="c1">#: Lopes]</span>
+    <span class="c1">#: 3GPP NG Application Protocol (NGAP) [         3GPP TS 38.413][Luis Lopes]</span>
     <span class="n">PayloadProtocolIdentifier_3GPP_NG_Application_Protocol</span> <span class="o">=</span> <span class="mi">60</span>
 
-    <span class="c1">#: 3GPP Xn Application Protocol (XnAP) [         3GPP TS 38.423][; ][Luis</span>
-    <span class="c1">#: Lopes]</span>
+    <span class="c1">#: 3GPP Xn Application Protocol (XnAP) [         3GPP TS 38.423][Luis Lopes]</span>
     <span class="n">PayloadProtocolIdentifier_3GPP_Xn_Application_Protocol</span> <span class="o">=</span> <span class="mi">61</span>
 
-    <span class="c1">#: 3GPP F1 Application Protocol (F1 AP) [         3GPP TS 38.473][; ][Luis</span>
-    <span class="c1">#: Lopes]</span>
+    <span class="c1">#: 3GPP F1 Application Protocol (F1 AP) [         3GPP TS 38.473][Luis Lopes]</span>
     <span class="n">PayloadProtocolIdentifier_3GPP_F1_Application_Protocol</span> <span class="o">=</span> <span class="mi">62</span>
 
     <span class="c1">#: HTTP/SCTP [Michael Tuexen]</span>
     <span class="n">HTTP_SCTP</span> <span class="o">=</span> <span class="mi">63</span>
 
-    <span class="c1">#: 3GPP E1 Application Protocol (E1AP) [         3GPP TS 38.463][; ][Yang</span>
-    <span class="c1">#: Xudong]</span>
+    <span class="c1">#: 3GPP E1 Application Protocol (E1AP) [         3GPP TS 38.463][Yang Xudong]</span>
     <span class="n">PayloadProtocolIdentifier_3GPP_E1_Application_Protocol</span> <span class="o">=</span> <span class="mi">64</span>
 
-    <span class="c1">#: ELE2 Lawful Interception [http://ele2.io][; ][Damir Franusic]</span>
+    <span class="c1">#: ELE2 Lawful Interception [http://ele2.io][Damir Franusic]</span>
     <span class="n">ELE2_Lawful_Interception</span> <span class="o">=</span> <span class="mi">65</span>
 
-    <span class="c1">#: 3GPP NGAP over DTLS over SCTP [         3GPP TS 38.413][; ][Yang Xudong]</span>
+    <span class="c1">#: 3GPP NGAP over DTLS over SCTP [         3GPP TS 38.413][Yang Xudong]</span>
     <span class="n">PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP</span> <span class="o">=</span> <span class="mi">66</span>
 
-    <span class="c1">#: 3GPP XnAP over DTLS over SCTP [         3GPP TS 38.423][; ][Yang Xudong]</span>
+    <span class="c1">#: 3GPP XnAP over DTLS over SCTP [         3GPP TS 38.423][Yang Xudong]</span>
     <span class="n">PayloadProtocolIdentifier_3GPP_XnAP_over_DTLS_over_SCTP</span> <span class="o">=</span> <span class="mi">67</span>
 
-    <span class="c1">#: 3GPP F1AP over DTLS over SCTP [         3GPP TS 38.473][; ][Yang Xudong]</span>
+    <span class="c1">#: 3GPP F1AP over DTLS over SCTP [         3GPP TS 38.473][Yang Xudong]</span>
     <span class="n">PayloadProtocolIdentifier_3GPP_F1AP_over_DTLS_over_SCTP</span> <span class="o">=</span> <span class="mi">68</span>
 
-    <span class="c1">#: 3GPP E1AP over DTLS over SCTP [         3GPP TS 38.463][; ][Yang Xudong]</span>
+    <span class="c1">#: 3GPP E1AP over DTLS over SCTP [         3GPP TS 38.463][Yang Xudong]</span>
     <span class="n">PayloadProtocolIdentifier_3GPP_E1AP_over_DTLS_over_SCTP</span> <span class="o">=</span> <span class="mi">69</span>
 
-    <span class="c1">#: E2-CP [O-RAN Alliance][; ][Jun Hyuk Song]</span>
+    <span class="c1">#: E2-CP [O-RAN Alliance][Jun Hyuk Song]</span>
     <span class="n">E2_CP</span> <span class="o">=</span> <span class="mi">70</span>
 
-    <span class="c1">#: O-RAN D2 [O-RAN Alliance][; ][Jun Hyuk Song]</span>
+    <span class="c1">#: O-RAN D2 [O-RAN Alliance][Jun Hyuk Song]</span>
     <span class="n">O_RAN_D2</span> <span class="o">=</span> <span class="mi">71</span>
 
-    <span class="c1">#: E2-DU [O-RAN Alliance][; ][Jun Hyuk Song]</span>
+    <span class="c1">#: E2-DU [O-RAN Alliance][Jun Hyuk Song]</span>
     <span class="n">E2_DU</span> <span class="o">=</span> <span class="mi">72</span>
 
-    <span class="c1">#: 3GPP W1AP [3GPP TS 37.473][; ][Lionel Morand]</span>
+    <span class="c1">#: 3GPP W1AP [3GPP TS 37.473][Lionel Morand]</span>
     <span class="n">PayloadProtocolIdentifier_3GPP_W1AP</span> <span class="o">=</span> <span class="mi">73</span>
 
     <span class="c1">#: DTLS Chunk Key-Management Messages [draft-westerlund-tsvwg-sctp-dtls-</span>

@@ -533,125 +533,125 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s1">'&lt;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_value_</span><span class="si">}</span><span class="s1">&gt;'</span>
 
-    <span class="c1">#: ACL [RFC 3744, Section 8.1]</span>
+    <span class="c1">#: ACL [:rfc:`3744#section-8.1`]</span>
     <span class="n">ACL</span> <span class="o">=</span> <span class="s1">'ACL'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: BASELINE-CONTROL [RFC 3253, Section 12.6]</span>
+    <span class="c1">#: BASELINE-CONTROL [:rfc:`3253#section-12.6`]</span>
     <span class="n">BASELINE_CONTROL</span> <span class="o">=</span> <span class="s1">'BASELINE-CONTROL'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: BIND [RFC 5842, Section 4]</span>
+    <span class="c1">#: BIND [:rfc:`5842#section-4`]</span>
     <span class="n">BIND</span> <span class="o">=</span> <span class="s1">'BIND'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: CHECKIN [RFC 3253, Section 9.4]</span>
+    <span class="c1">#: CHECKIN [:rfc:`3253#section-9.4`]</span>
     <span class="n">CHECKIN</span> <span class="o">=</span> <span class="s1">'CHECKIN'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: CHECKOUT [RFC 3253, Section 8.8]</span>
+    <span class="c1">#: CHECKOUT [:rfc:`3253#section-8.8`]</span>
     <span class="n">CHECKOUT</span> <span class="o">=</span> <span class="s1">'CHECKOUT'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: CONNECT [RFC 9110, Section 9.3.6]</span>
+    <span class="c1">#: CONNECT [:rfc:`9110#section-9.3.6`]</span>
     <span class="n">CONNECT</span> <span class="o">=</span> <span class="s1">'CONNECT'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span>
 
-    <span class="c1">#: COPY [RFC 4918, Section 9.8]</span>
+    <span class="c1">#: COPY [:rfc:`4918#section-9.8`]</span>
     <span class="n">COPY</span> <span class="o">=</span> <span class="s1">'COPY'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: DELETE [RFC 9110, Section 9.3.5]</span>
+    <span class="c1">#: DELETE [:rfc:`9110#section-9.3.5`]</span>
     <span class="n">DELETE</span> <span class="o">=</span> <span class="s1">'DELETE'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: GET [RFC 9110, Section 9.3.1]</span>
+    <span class="c1">#: GET [:rfc:`9110#section-9.3.1`]</span>
     <span class="n">GET</span> <span class="o">=</span> <span class="s1">'GET'</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: HEAD [RFC 9110, Section 9.3.2]</span>
+    <span class="c1">#: HEAD [:rfc:`9110#section-9.3.2`]</span>
     <span class="n">HEAD</span> <span class="o">=</span> <span class="s1">'HEAD'</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: LABEL [RFC 3253, Section 8.2]</span>
+    <span class="c1">#: LABEL [:rfc:`3253#section-8.2`]</span>
     <span class="n">LABEL</span> <span class="o">=</span> <span class="s1">'LABEL'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: LINK [RFC 2068, Section 19.6.1.2]</span>
+    <span class="c1">#: LINK [:rfc:`2068#section-19.6.1.2`]</span>
     <span class="n">LINK</span> <span class="o">=</span> <span class="s1">'LINK'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: LOCK [RFC 4918, Section 9.10]</span>
+    <span class="c1">#: LOCK [:rfc:`4918#section-9.10`]</span>
     <span class="n">LOCK</span> <span class="o">=</span> <span class="s1">'LOCK'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span>
 
-    <span class="c1">#: MERGE [RFC 3253, Section 11.2]</span>
+    <span class="c1">#: MERGE [:rfc:`3253#section-11.2`]</span>
     <span class="n">MERGE</span> <span class="o">=</span> <span class="s1">'MERGE'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: MKACTIVITY [RFC 3253, Section 13.5]</span>
+    <span class="c1">#: MKACTIVITY [:rfc:`3253#section-13.5`]</span>
     <span class="n">MKACTIVITY</span> <span class="o">=</span> <span class="s1">'MKACTIVITY'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: MKCALENDAR [RFC 4791, Section 5.3.1][; ][RFC 8144, Section 2.3]</span>
+    <span class="c1">#: MKCALENDAR [:rfc:`4791#section-5.3.1`][:rfc:`8144#section-2.3`]</span>
     <span class="n">MKCALENDAR</span> <span class="o">=</span> <span class="s1">'MKCALENDAR'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: MKCOL [RFC 4918, Section 9.3][; ][RFC 5689, Section 3][; ][RFC 8144, Section</span>
-    <span class="c1">#: 2.3]</span>
+    <span class="c1">#: MKCOL</span>
+    <span class="c1">#: [:rfc:`4918#section-9.3`][:rfc:`5689#section-3`][:rfc:`8144#section-2.3`]</span>
     <span class="n">MKCOL</span> <span class="o">=</span> <span class="s1">'MKCOL'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: MKREDIRECTREF [RFC 4437, Section 6]</span>
+    <span class="c1">#: MKREDIRECTREF [:rfc:`4437#section-6`]</span>
     <span class="n">MKREDIRECTREF</span> <span class="o">=</span> <span class="s1">'MKREDIRECTREF'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: MKWORKSPACE [RFC 3253, Section 6.3]</span>
+    <span class="c1">#: MKWORKSPACE [:rfc:`3253#section-6.3`]</span>
     <span class="n">MKWORKSPACE</span> <span class="o">=</span> <span class="s1">'MKWORKSPACE'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: MOVE [RFC 4918, Section 9.9]</span>
+    <span class="c1">#: MOVE [:rfc:`4918#section-9.9`]</span>
     <span class="n">MOVE</span> <span class="o">=</span> <span class="s1">'MOVE'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: OPTIONS [RFC 9110, Section 9.3.7]</span>
+    <span class="c1">#: OPTIONS [:rfc:`9110#section-9.3.7`]</span>
     <span class="n">OPTIONS</span> <span class="o">=</span> <span class="s1">'OPTIONS'</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: ORDERPATCH [RFC 3648, Section 7]</span>
+    <span class="c1">#: ORDERPATCH [:rfc:`3648#section-7`]</span>
     <span class="n">ORDERPATCH</span> <span class="o">=</span> <span class="s1">'ORDERPATCH'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: PATCH [RFC 5789, Section 2]</span>
+    <span class="c1">#: PATCH [:rfc:`5789#section-2`]</span>
     <span class="n">PATCH</span> <span class="o">=</span> <span class="s1">'PATCH'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span>
 
-    <span class="c1">#: POST [RFC 9110, Section 9.3.3]</span>
+    <span class="c1">#: POST [:rfc:`9110#section-9.3.3`]</span>
     <span class="n">POST</span> <span class="o">=</span> <span class="s1">'POST'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span>
 
-    <span class="c1">#: PRI [RFC 9113, Section 3.4]</span>
+    <span class="c1">#: PRI [:rfc:`9113#section-3.4`]</span>
     <span class="n">PRI</span> <span class="o">=</span> <span class="s1">'PRI'</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: PROPFIND [RFC 4918, Section 9.1][; ][RFC 8144, Section 2.1]</span>
+    <span class="c1">#: PROPFIND [:rfc:`4918#section-9.1`][:rfc:`8144#section-2.1`]</span>
     <span class="n">PROPFIND</span> <span class="o">=</span> <span class="s1">'PROPFIND'</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: PROPPATCH [RFC 4918, Section 9.2][; ][RFC 8144, Section 2.2]</span>
+    <span class="c1">#: PROPPATCH [:rfc:`4918#section-9.2`][:rfc:`8144#section-2.2`]</span>
     <span class="n">PROPPATCH</span> <span class="o">=</span> <span class="s1">'PROPPATCH'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: PUT [RFC 9110, Section 9.3.4]</span>
+    <span class="c1">#: PUT [:rfc:`9110#section-9.3.4`]</span>
     <span class="n">PUT</span> <span class="o">=</span> <span class="s1">'PUT'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: QUERY [RFC 10008, Section 2]</span>
+    <span class="c1">#: QUERY [:rfc:`10008#section-2`]</span>
     <span class="n">QUERY</span> <span class="o">=</span> <span class="s1">'QUERY'</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: REBIND [RFC 5842, Section 6]</span>
+    <span class="c1">#: REBIND [:rfc:`5842#section-6`]</span>
     <span class="n">REBIND</span> <span class="o">=</span> <span class="s1">'REBIND'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: REPORT [RFC 3253, Section 3.6][; ][RFC 8144, Section 2.1]</span>
+    <span class="c1">#: REPORT [:rfc:`3253#section-3.6`][:rfc:`8144#section-2.1`]</span>
     <span class="n">REPORT</span> <span class="o">=</span> <span class="s1">'REPORT'</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: SEARCH [RFC 5323, Section 2]</span>
+    <span class="c1">#: SEARCH [:rfc:`5323#section-2`]</span>
     <span class="n">SEARCH</span> <span class="o">=</span> <span class="s1">'SEARCH'</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: TRACE [RFC 9110, Section 9.3.8]</span>
+    <span class="c1">#: TRACE [:rfc:`9110#section-9.3.8`]</span>
     <span class="n">TRACE</span> <span class="o">=</span> <span class="s1">'TRACE'</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: UNBIND [RFC 5842, Section 5]</span>
+    <span class="c1">#: UNBIND [:rfc:`5842#section-5`]</span>
     <span class="n">UNBIND</span> <span class="o">=</span> <span class="s1">'UNBIND'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: UNCHECKOUT [RFC 3253, Section 4.5]</span>
+    <span class="c1">#: UNCHECKOUT [:rfc:`3253#section-4.5`]</span>
     <span class="n">UNCHECKOUT</span> <span class="o">=</span> <span class="s1">'UNCHECKOUT'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: UNLINK [RFC 2068, Section 19.6.1.3]</span>
+    <span class="c1">#: UNLINK [:rfc:`2068#section-19.6.1.3`]</span>
     <span class="n">UNLINK</span> <span class="o">=</span> <span class="s1">'UNLINK'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: UNLOCK [RFC 4918, Section 9.11]</span>
+    <span class="c1">#: UNLOCK [:rfc:`4918#section-9.11`]</span>
     <span class="n">UNLOCK</span> <span class="o">=</span> <span class="s1">'UNLOCK'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: UPDATE [RFC 3253, Section 7.1]</span>
+    <span class="c1">#: UPDATE [:rfc:`3253#section-7.1`]</span>
     <span class="n">UPDATE</span> <span class="o">=</span> <span class="s1">'UPDATE'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: UPDATEREDIRECTREF [RFC 4437, Section 7]</span>
+    <span class="c1">#: UPDATEREDIRECTREF [:rfc:`4437#section-7`]</span>
     <span class="n">UPDATEREDIRECTREF</span> <span class="o">=</span> <span class="s1">'UPDATEREDIRECTREF'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
-    <span class="c1">#: VERSION-CONTROL [RFC 3253, Section 3.5]</span>
+    <span class="c1">#: VERSION-CONTROL [:rfc:`3253#section-3.5`]</span>
     <span class="n">VERSION_CONTROL</span> <span class="o">=</span> <span class="s1">'VERSION-CONTROL'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="Method._unregistered_member">

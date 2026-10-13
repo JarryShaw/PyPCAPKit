@@ -497,16 +497,16 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">FlowBindingIndicationTrigger</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[FlowBindingIndicationTrigger] Flow Binding Indication Triggers"""</span>
 
-    <span class="c1">#: Reserved [RFC 7109]</span>
+    <span class="c1">#: Reserved [:rfc:`7109`]</span>
     <span class="n">Reserved_0</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="c1">#: Unspecified [RFC 7109]</span>
+    <span class="c1">#: Unspecified [:rfc:`7109`]</span>
     <span class="n">Unspecified</span> <span class="o">=</span> <span class="mi">1</span>
 
-    <span class="c1">#: Administrative Reason [RFC 7109]</span>
+    <span class="c1">#: Administrative Reason [:rfc:`7109`]</span>
     <span class="n">Administrative_Reason</span> <span class="o">=</span> <span class="mi">2</span>
 
-    <span class="c1">#: Possible Out-of-Sync BCE State [RFC 7109]</span>
+    <span class="c1">#: Possible Out-of-Sync BCE State [:rfc:`7109`]</span>
     <span class="n">Possible_Out_of_Sync_BCE_State</span> <span class="o">=</span> <span class="mi">3</span>
 
 <div class="viewcode-block" id="FlowBindingIndicationTrigger._missing_">
@@ -525,7 +525,7 @@
             <span class="c1">#: Unassigned</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'Unassigned'</span><span class="p">)</span>
         <span class="k">if</span> <span class="mi">250</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">255</span><span class="p">:</span>
-            <span class="c1">#: Reserved for Testing Purposes Only [RFC 7109]</span>
+            <span class="c1">#: Reserved for Testing Purposes Only [:rfc:`7109`]</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'Reserved_for_Testing_Purposes_Only'</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_missing_</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 </div>

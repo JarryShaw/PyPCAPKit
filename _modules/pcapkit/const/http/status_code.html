@@ -521,16 +521,16 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
         <span class="k">return</span> <span class="s2">"[</span><span class="si">%s</span><span class="s2">] </span><span class="si">%s</span><span class="s2">"</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_value_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
 
-    <span class="c1">#: Continue [RFC 9110, Section 15.2.1]</span>
+    <span class="c1">#: Continue [:rfc:`9110#section-15.2.1`]</span>
     <span class="n">CODE_100</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="s1">'Continue'</span>
 
-    <span class="c1">#: Switching Protocols [RFC 9110, Section 15.2.2]</span>
+    <span class="c1">#: Switching Protocols [:rfc:`9110#section-15.2.2`]</span>
     <span class="n">CODE_101</span> <span class="o">=</span> <span class="mi">101</span><span class="p">,</span> <span class="s1">'Switching Protocols'</span>
 
-    <span class="c1">#: Processing [RFC 2518]</span>
+    <span class="c1">#: Processing [:rfc:`2518`]</span>
     <span class="n">CODE_102</span> <span class="o">=</span> <span class="mi">102</span><span class="p">,</span> <span class="s1">'Processing'</span>
 
-    <span class="c1">#: Early Hints [RFC 8297]</span>
+    <span class="c1">#: Early Hints [:rfc:`8297`]</span>
     <span class="n">CODE_103</span> <span class="o">=</span> <span class="mi">103</span><span class="p">,</span> <span class="s1">'Early Hints'</span>
 
     <span class="c1">#: Upload Resumption Supported (TEMPORARY - registered 2024-11-13, extension</span>
@@ -538,191 +538,191 @@
     <span class="c1">#: upload-05]</span>
     <span class="n">CODE_104</span> <span class="o">=</span> <span class="mi">104</span><span class="p">,</span> <span class="s1">'Upload Resumption Supported'</span>
 
-    <span class="c1">#: OK [RFC 9110, Section 15.3.1]</span>
+    <span class="c1">#: OK [:rfc:`9110#section-15.3.1`]</span>
     <span class="n">CODE_200</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span> <span class="s1">'OK'</span>
 
-    <span class="c1">#: Created [RFC 9110, Section 15.3.2]</span>
+    <span class="c1">#: Created [:rfc:`9110#section-15.3.2`]</span>
     <span class="n">CODE_201</span> <span class="o">=</span> <span class="mi">201</span><span class="p">,</span> <span class="s1">'Created'</span>
 
-    <span class="c1">#: Accepted [RFC 9110, Section 15.3.3]</span>
+    <span class="c1">#: Accepted [:rfc:`9110#section-15.3.3`]</span>
     <span class="n">CODE_202</span> <span class="o">=</span> <span class="mi">202</span><span class="p">,</span> <span class="s1">'Accepted'</span>
 
-    <span class="c1">#: Non-Authoritative Information [RFC 9110, Section 15.3.4]</span>
+    <span class="c1">#: Non-Authoritative Information [:rfc:`9110#section-15.3.4`]</span>
     <span class="n">CODE_203</span> <span class="o">=</span> <span class="mi">203</span><span class="p">,</span> <span class="s1">'Non-Authoritative Information'</span>
 
-    <span class="c1">#: No Content [RFC 9110, Section 15.3.5]</span>
+    <span class="c1">#: No Content [:rfc:`9110#section-15.3.5`]</span>
     <span class="n">CODE_204</span> <span class="o">=</span> <span class="mi">204</span><span class="p">,</span> <span class="s1">'No Content'</span>
 
-    <span class="c1">#: Reset Content [RFC 9110, Section 15.3.6]</span>
+    <span class="c1">#: Reset Content [:rfc:`9110#section-15.3.6`]</span>
     <span class="n">CODE_205</span> <span class="o">=</span> <span class="mi">205</span><span class="p">,</span> <span class="s1">'Reset Content'</span>
 
-    <span class="c1">#: Partial Content [RFC 9110, Section 15.3.7]</span>
+    <span class="c1">#: Partial Content [:rfc:`9110#section-15.3.7`]</span>
     <span class="n">CODE_206</span> <span class="o">=</span> <span class="mi">206</span><span class="p">,</span> <span class="s1">'Partial Content'</span>
 
-    <span class="c1">#: Multi-Status [RFC 4918]</span>
+    <span class="c1">#: Multi-Status [:rfc:`4918`]</span>
     <span class="n">CODE_207</span> <span class="o">=</span> <span class="mi">207</span><span class="p">,</span> <span class="s1">'Multi-Status'</span>
 
-    <span class="c1">#: Already Reported [RFC 5842]</span>
+    <span class="c1">#: Already Reported [:rfc:`5842`]</span>
     <span class="n">CODE_208</span> <span class="o">=</span> <span class="mi">208</span><span class="p">,</span> <span class="s1">'Already Reported'</span>
 
-    <span class="c1">#: IM Used [RFC 3229]</span>
+    <span class="c1">#: IM Used [:rfc:`3229`]</span>
     <span class="n">CODE_226</span> <span class="o">=</span> <span class="mi">226</span><span class="p">,</span> <span class="s1">'IM Used'</span>
 
-    <span class="c1">#: Multiple Choices [RFC 9110, Section 15.4.1]</span>
+    <span class="c1">#: Multiple Choices [:rfc:`9110#section-15.4.1`]</span>
     <span class="n">CODE_300</span> <span class="o">=</span> <span class="mi">300</span><span class="p">,</span> <span class="s1">'Multiple Choices'</span>
 
-    <span class="c1">#: Moved Permanently [RFC 9110, Section 15.4.2]</span>
+    <span class="c1">#: Moved Permanently [:rfc:`9110#section-15.4.2`]</span>
     <span class="n">CODE_301</span> <span class="o">=</span> <span class="mi">301</span><span class="p">,</span> <span class="s1">'Moved Permanently'</span>
 
-    <span class="c1">#: Found [RFC 9110, Section 15.4.3]</span>
+    <span class="c1">#: Found [:rfc:`9110#section-15.4.3`]</span>
     <span class="n">CODE_302</span> <span class="o">=</span> <span class="mi">302</span><span class="p">,</span> <span class="s1">'Found'</span>
 
-    <span class="c1">#: See Other [RFC 9110, Section 15.4.4]</span>
+    <span class="c1">#: See Other [:rfc:`9110#section-15.4.4`]</span>
     <span class="n">CODE_303</span> <span class="o">=</span> <span class="mi">303</span><span class="p">,</span> <span class="s1">'See Other'</span>
 
-    <span class="c1">#: Not Modified [RFC 9110, Section 15.4.5]</span>
+    <span class="c1">#: Not Modified [:rfc:`9110#section-15.4.5`]</span>
     <span class="n">CODE_304</span> <span class="o">=</span> <span class="mi">304</span><span class="p">,</span> <span class="s1">'Not Modified'</span>
 
-    <span class="c1">#: Use Proxy [RFC 9110, Section 15.4.6]</span>
+    <span class="c1">#: Use Proxy [:rfc:`9110#section-15.4.6`]</span>
     <span class="n">CODE_305</span> <span class="o">=</span> <span class="mi">305</span><span class="p">,</span> <span class="s1">'Use Proxy'</span>
 
-    <span class="c1">#: (Unused) [RFC 9110, Section 15.4.7]</span>
+    <span class="c1">#: (Unused) [:rfc:`9110#section-15.4.7`]</span>
     <span class="n">CODE_306</span> <span class="o">=</span> <span class="mi">306</span><span class="p">,</span> <span class="s1">'(Unused)'</span>
 
-    <span class="c1">#: Temporary Redirect [RFC 9110, Section 15.4.8]</span>
+    <span class="c1">#: Temporary Redirect [:rfc:`9110#section-15.4.8`]</span>
     <span class="n">CODE_307</span> <span class="o">=</span> <span class="mi">307</span><span class="p">,</span> <span class="s1">'Temporary Redirect'</span>
 
-    <span class="c1">#: Permanent Redirect [RFC 9110, Section 15.4.9]</span>
+    <span class="c1">#: Permanent Redirect [:rfc:`9110#section-15.4.9`]</span>
     <span class="n">CODE_308</span> <span class="o">=</span> <span class="mi">308</span><span class="p">,</span> <span class="s1">'Permanent Redirect'</span>
 
-    <span class="c1">#: Bad Request [RFC 9110, Section 15.5.1]</span>
+    <span class="c1">#: Bad Request [:rfc:`9110#section-15.5.1`]</span>
     <span class="n">CODE_400</span> <span class="o">=</span> <span class="mi">400</span><span class="p">,</span> <span class="s1">'Bad Request'</span>
 
-    <span class="c1">#: Unauthorized [RFC 9110, Section 15.5.2]</span>
+    <span class="c1">#: Unauthorized [:rfc:`9110#section-15.5.2`]</span>
     <span class="n">CODE_401</span> <span class="o">=</span> <span class="mi">401</span><span class="p">,</span> <span class="s1">'Unauthorized'</span>
 
-    <span class="c1">#: Payment Required [RFC 9110, Section 15.5.3]</span>
+    <span class="c1">#: Payment Required [:rfc:`9110#section-15.5.3`]</span>
     <span class="n">CODE_402</span> <span class="o">=</span> <span class="mi">402</span><span class="p">,</span> <span class="s1">'Payment Required'</span>
 
-    <span class="c1">#: Forbidden [RFC 9110, Section 15.5.4]</span>
+    <span class="c1">#: Forbidden [:rfc:`9110#section-15.5.4`]</span>
     <span class="n">CODE_403</span> <span class="o">=</span> <span class="mi">403</span><span class="p">,</span> <span class="s1">'Forbidden'</span>
 
-    <span class="c1">#: Not Found [RFC 9110, Section 15.5.5]</span>
+    <span class="c1">#: Not Found [:rfc:`9110#section-15.5.5`]</span>
     <span class="n">CODE_404</span> <span class="o">=</span> <span class="mi">404</span><span class="p">,</span> <span class="s1">'Not Found'</span>
 
-    <span class="c1">#: Method Not Allowed [RFC 9110, Section 15.5.6]</span>
+    <span class="c1">#: Method Not Allowed [:rfc:`9110#section-15.5.6`]</span>
     <span class="n">CODE_405</span> <span class="o">=</span> <span class="mi">405</span><span class="p">,</span> <span class="s1">'Method Not Allowed'</span>
 
-    <span class="c1">#: Not Acceptable [RFC 9110, Section 15.5.7]</span>
+    <span class="c1">#: Not Acceptable [:rfc:`9110#section-15.5.7`]</span>
     <span class="n">CODE_406</span> <span class="o">=</span> <span class="mi">406</span><span class="p">,</span> <span class="s1">'Not Acceptable'</span>
 
-    <span class="c1">#: Proxy Authentication Required [RFC 9110, Section 15.5.8]</span>
+    <span class="c1">#: Proxy Authentication Required [:rfc:`9110#section-15.5.8`]</span>
     <span class="n">CODE_407</span> <span class="o">=</span> <span class="mi">407</span><span class="p">,</span> <span class="s1">'Proxy Authentication Required'</span>
 
-    <span class="c1">#: Request Timeout [RFC 9110, Section 15.5.9]</span>
+    <span class="c1">#: Request Timeout [:rfc:`9110#section-15.5.9`]</span>
     <span class="n">CODE_408</span> <span class="o">=</span> <span class="mi">408</span><span class="p">,</span> <span class="s1">'Request Timeout'</span>
 
-    <span class="c1">#: Conflict [RFC 9110, Section 15.5.10]</span>
+    <span class="c1">#: Conflict [:rfc:`9110#section-15.5.10`]</span>
     <span class="n">CODE_409</span> <span class="o">=</span> <span class="mi">409</span><span class="p">,</span> <span class="s1">'Conflict'</span>
 
-    <span class="c1">#: Gone [RFC 9110, Section 15.5.11]</span>
+    <span class="c1">#: Gone [:rfc:`9110#section-15.5.11`]</span>
     <span class="n">CODE_410</span> <span class="o">=</span> <span class="mi">410</span><span class="p">,</span> <span class="s1">'Gone'</span>
 
-    <span class="c1">#: Length Required [RFC 9110, Section 15.5.12]</span>
+    <span class="c1">#: Length Required [:rfc:`9110#section-15.5.12`]</span>
     <span class="n">CODE_411</span> <span class="o">=</span> <span class="mi">411</span><span class="p">,</span> <span class="s1">'Length Required'</span>
 
-    <span class="c1">#: Precondition Failed [RFC 9110, Section 15.5.13]</span>
+    <span class="c1">#: Precondition Failed [:rfc:`9110#section-15.5.13`]</span>
     <span class="n">CODE_412</span> <span class="o">=</span> <span class="mi">412</span><span class="p">,</span> <span class="s1">'Precondition Failed'</span>
 
-    <span class="c1">#: Content Too Large [RFC 9110, Section 15.5.14]</span>
+    <span class="c1">#: Content Too Large [:rfc:`9110#section-15.5.14`]</span>
     <span class="n">CODE_413</span> <span class="o">=</span> <span class="mi">413</span><span class="p">,</span> <span class="s1">'Content Too Large'</span>
 
-    <span class="c1">#: URI Too Long [RFC 9110, Section 15.5.15]</span>
+    <span class="c1">#: URI Too Long [:rfc:`9110#section-15.5.15`]</span>
     <span class="n">CODE_414</span> <span class="o">=</span> <span class="mi">414</span><span class="p">,</span> <span class="s1">'URI Too Long'</span>
 
-    <span class="c1">#: Unsupported Media Type [RFC 9110, Section 15.5.16]</span>
+    <span class="c1">#: Unsupported Media Type [:rfc:`9110#section-15.5.16`]</span>
     <span class="n">CODE_415</span> <span class="o">=</span> <span class="mi">415</span><span class="p">,</span> <span class="s1">'Unsupported Media Type'</span>
 
-    <span class="c1">#: Range Not Satisfiable [RFC 9110, Section 15.5.17]</span>
+    <span class="c1">#: Range Not Satisfiable [:rfc:`9110#section-15.5.17`]</span>
     <span class="n">CODE_416</span> <span class="o">=</span> <span class="mi">416</span><span class="p">,</span> <span class="s1">'Range Not Satisfiable'</span>
 
-    <span class="c1">#: Expectation Failed [RFC 9110, Section 15.5.18]</span>
+    <span class="c1">#: Expectation Failed [:rfc:`9110#section-15.5.18`]</span>
     <span class="n">CODE_417</span> <span class="o">=</span> <span class="mi">417</span><span class="p">,</span> <span class="s1">'Expectation Failed'</span>
 
-    <span class="c1">#: (Unused) [RFC 9110, Section 15.5.19]</span>
+    <span class="c1">#: (Unused) [:rfc:`9110#section-15.5.19`]</span>
     <span class="n">CODE_418</span> <span class="o">=</span> <span class="mi">418</span><span class="p">,</span> <span class="s1">'(Unused)'</span>
 
-    <span class="c1">#: Misdirected Request [RFC 9110, Section 15.5.20]</span>
+    <span class="c1">#: Misdirected Request [:rfc:`9110#section-15.5.20`]</span>
     <span class="n">CODE_421</span> <span class="o">=</span> <span class="mi">421</span><span class="p">,</span> <span class="s1">'Misdirected Request'</span>
 
-    <span class="c1">#: Unprocessable Content [RFC 9110, Section 15.5.21]</span>
+    <span class="c1">#: Unprocessable Content [:rfc:`9110#section-15.5.21`]</span>
     <span class="n">CODE_422</span> <span class="o">=</span> <span class="mi">422</span><span class="p">,</span> <span class="s1">'Unprocessable Content'</span>
 
-    <span class="c1">#: Locked [RFC 4918]</span>
+    <span class="c1">#: Locked [:rfc:`4918`]</span>
     <span class="n">CODE_423</span> <span class="o">=</span> <span class="mi">423</span><span class="p">,</span> <span class="s1">'Locked'</span>
 
-    <span class="c1">#: Failed Dependency [RFC 4918]</span>
+    <span class="c1">#: Failed Dependency [:rfc:`4918`]</span>
     <span class="n">CODE_424</span> <span class="o">=</span> <span class="mi">424</span><span class="p">,</span> <span class="s1">'Failed Dependency'</span>
 
-    <span class="c1">#: Too Early [RFC 8470]</span>
+    <span class="c1">#: Too Early [:rfc:`8470`]</span>
     <span class="n">CODE_425</span> <span class="o">=</span> <span class="mi">425</span><span class="p">,</span> <span class="s1">'Too Early'</span>
 
-    <span class="c1">#: Upgrade Required [RFC 9110, Section 15.5.22]</span>
+    <span class="c1">#: Upgrade Required [:rfc:`9110#section-15.5.22`]</span>
     <span class="n">CODE_426</span> <span class="o">=</span> <span class="mi">426</span><span class="p">,</span> <span class="s1">'Upgrade Required'</span>
 
     <span class="c1">#: Unassigned</span>
     <span class="n">CODE_427</span> <span class="o">=</span> <span class="mi">427</span><span class="p">,</span> <span class="s1">'Unassigned'</span>
 
-    <span class="c1">#: Precondition Required [RFC 6585]</span>
+    <span class="c1">#: Precondition Required [:rfc:`6585`]</span>
     <span class="n">CODE_428</span> <span class="o">=</span> <span class="mi">428</span><span class="p">,</span> <span class="s1">'Precondition Required'</span>
 
-    <span class="c1">#: Too Many Requests [RFC 6585]</span>
+    <span class="c1">#: Too Many Requests [:rfc:`6585`]</span>
     <span class="n">CODE_429</span> <span class="o">=</span> <span class="mi">429</span><span class="p">,</span> <span class="s1">'Too Many Requests'</span>
 
     <span class="c1">#: Unassigned</span>
     <span class="n">CODE_430</span> <span class="o">=</span> <span class="mi">430</span><span class="p">,</span> <span class="s1">'Unassigned'</span>
 
-    <span class="c1">#: Request Header Fields Too Large [RFC 6585]</span>
+    <span class="c1">#: Request Header Fields Too Large [:rfc:`6585`]</span>
     <span class="n">CODE_431</span> <span class="o">=</span> <span class="mi">431</span><span class="p">,</span> <span class="s1">'Request Header Fields Too Large'</span>
 
-    <span class="c1">#: Unavailable For Legal Reasons [RFC 7725]</span>
+    <span class="c1">#: Unavailable For Legal Reasons [:rfc:`7725`]</span>
     <span class="n">CODE_451</span> <span class="o">=</span> <span class="mi">451</span><span class="p">,</span> <span class="s1">'Unavailable For Legal Reasons'</span>
 
-    <span class="c1">#: Internal Server Error [RFC 9110, Section 15.6.1]</span>
+    <span class="c1">#: Internal Server Error [:rfc:`9110#section-15.6.1`]</span>
     <span class="n">CODE_500</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span> <span class="s1">'Internal Server Error'</span>
 
-    <span class="c1">#: Not Implemented [RFC 9110, Section 15.6.2]</span>
+    <span class="c1">#: Not Implemented [:rfc:`9110#section-15.6.2`]</span>
     <span class="n">CODE_501</span> <span class="o">=</span> <span class="mi">501</span><span class="p">,</span> <span class="s1">'Not Implemented'</span>
 
-    <span class="c1">#: Bad Gateway [RFC 9110, Section 15.6.3]</span>
+    <span class="c1">#: Bad Gateway [:rfc:`9110#section-15.6.3`]</span>
     <span class="n">CODE_502</span> <span class="o">=</span> <span class="mi">502</span><span class="p">,</span> <span class="s1">'Bad Gateway'</span>
 
-    <span class="c1">#: Service Unavailable [RFC 9110, Section 15.6.4]</span>
+    <span class="c1">#: Service Unavailable [:rfc:`9110#section-15.6.4`]</span>
     <span class="n">CODE_503</span> <span class="o">=</span> <span class="mi">503</span><span class="p">,</span> <span class="s1">'Service Unavailable'</span>
 
-    <span class="c1">#: Gateway Timeout [RFC 9110, Section 15.6.5]</span>
+    <span class="c1">#: Gateway Timeout [:rfc:`9110#section-15.6.5`]</span>
     <span class="n">CODE_504</span> <span class="o">=</span> <span class="mi">504</span><span class="p">,</span> <span class="s1">'Gateway Timeout'</span>
 
-    <span class="c1">#: HTTP Version Not Supported [RFC 9110, Section 15.6.6]</span>
+    <span class="c1">#: HTTP Version Not Supported [:rfc:`9110#section-15.6.6`]</span>
     <span class="n">CODE_505</span> <span class="o">=</span> <span class="mi">505</span><span class="p">,</span> <span class="s1">'HTTP Version Not Supported'</span>
 
-    <span class="c1">#: Variant Also Negotiates [RFC 2295]</span>
+    <span class="c1">#: Variant Also Negotiates [:rfc:`2295`]</span>
     <span class="n">CODE_506</span> <span class="o">=</span> <span class="mi">506</span><span class="p">,</span> <span class="s1">'Variant Also Negotiates'</span>
 
-    <span class="c1">#: Insufficient Storage [RFC 4918]</span>
+    <span class="c1">#: Insufficient Storage [:rfc:`4918`]</span>
     <span class="n">CODE_507</span> <span class="o">=</span> <span class="mi">507</span><span class="p">,</span> <span class="s1">'Insufficient Storage'</span>
 
-    <span class="c1">#: Loop Detected [RFC 5842]</span>
+    <span class="c1">#: Loop Detected [:rfc:`5842`]</span>
     <span class="n">CODE_508</span> <span class="o">=</span> <span class="mi">508</span><span class="p">,</span> <span class="s1">'Loop Detected'</span>
 
     <span class="c1">#: Unassigned</span>
     <span class="n">CODE_509</span> <span class="o">=</span> <span class="mi">509</span><span class="p">,</span> <span class="s1">'Unassigned'</span>
 
-    <span class="c1">#: Not Extended (OBSOLETED) [RFC 2774][; ][Status change of HTTP experiments to</span>
+    <span class="c1">#: Not Extended (OBSOLETED) [:rfc:`2774`][Status change of HTTP experiments to</span>
     <span class="c1">#: Historic]</span>
     <span class="n">CODE_510</span> <span class="o">=</span> <span class="mi">510</span><span class="p">,</span> <span class="s1">'Not Extended'</span>
 
-    <span class="c1">#: Network Authentication Required [RFC 6585]</span>
+    <span class="c1">#: Network Authentication Required [:rfc:`6585`]</span>
     <span class="n">CODE_511</span> <span class="o">=</span> <span class="mi">511</span><span class="p">,</span> <span class="s1">'Network Authentication Required'</span>
 
 <div class="viewcode-block" id="StatusCode._unregistered_member">

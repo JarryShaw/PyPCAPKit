@@ -497,94 +497,94 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">OptionNumber</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[OptionNumber] IP Option Numbers"""</span>
 
-    <span class="c1">#: ``EOOL``, End of Options List [RFC 791][; ][Jon Postel]</span>
+    <span class="c1">#: ``EOOL``, End of Options List [:rfc:`791`][Jon Postel]</span>
     <span class="n">EOOL</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="c1">#: ``NOP``, No Operation [RFC 791][; ][Jon Postel]</span>
+    <span class="c1">#: ``NOP``, No Operation [:rfc:`791`][Jon Postel]</span>
     <span class="n">NOP</span> <span class="o">=</span> <span class="mi">1</span>
 
-    <span class="c1">#: ``SEC``, Security [RFC 1108]</span>
+    <span class="c1">#: ``SEC``, Security [:rfc:`1108`]</span>
     <span class="n">SEC</span> <span class="o">=</span> <span class="mi">130</span>
 
-    <span class="c1">#: ``LSR``, Loose Source Route [RFC 791][; ][Jon Postel]</span>
+    <span class="c1">#: ``LSR``, Loose Source Route [:rfc:`791`][Jon Postel]</span>
     <span class="n">LSR</span> <span class="o">=</span> <span class="mi">131</span>
 
-    <span class="c1">#: ``TS``, Time Stamp [RFC 791][; ][Jon Postel]</span>
+    <span class="c1">#: ``TS``, Time Stamp [:rfc:`791`][Jon Postel]</span>
     <span class="n">TS</span> <span class="o">=</span> <span class="mi">68</span>
 
-    <span class="c1">#: ``E-SEC``, Extended Security [RFC 1108]</span>
+    <span class="c1">#: ``E-SEC``, Extended Security [:rfc:`1108`]</span>
     <span class="n">E_SEC</span> <span class="o">=</span> <span class="mi">133</span>
 
     <span class="c1">#: ``CIPSO``, Commercial Security [draft-ietf-cipso-ipsecurity-01]</span>
     <span class="n">CIPSO</span> <span class="o">=</span> <span class="mi">134</span>
 
-    <span class="c1">#: ``RR``, Record Route [RFC 791][; ][Jon Postel]</span>
+    <span class="c1">#: ``RR``, Record Route [:rfc:`791`][Jon Postel]</span>
     <span class="n">RR</span> <span class="o">=</span> <span class="mi">7</span>
 
-    <span class="c1">#: ``SID``, Stream ID [RFC 791][; ][Jon Postel][; ][RFC 6814]</span>
+    <span class="c1">#: ``SID``, Stream ID [:rfc:`791`][Jon Postel][:rfc:`6814`]</span>
     <span class="n">SID</span> <span class="o">=</span> <span class="mi">136</span>
 
-    <span class="c1">#: ``SSR``, Strict Source Route [RFC 791][; ][Jon Postel]</span>
+    <span class="c1">#: ``SSR``, Strict Source Route [:rfc:`791`][Jon Postel]</span>
     <span class="n">SSR</span> <span class="o">=</span> <span class="mi">137</span>
 
     <span class="c1">#: ``ZSU``, Experimental Measurement [ZSu]</span>
     <span class="n">ZSU</span> <span class="o">=</span> <span class="mi">10</span>
 
-    <span class="c1">#: ``MTUP``, MTU Probe [RFC 1063][; ][RFC 1191]</span>
+    <span class="c1">#: ``MTUP``, MTU Probe [:rfc:`1063`][:rfc:`1191`]</span>
     <span class="n">MTUP</span> <span class="o">=</span> <span class="mi">11</span>
 
-    <span class="c1">#: ``MTUR``, MTU Reply [RFC 1063][; ][RFC 1191]</span>
+    <span class="c1">#: ``MTUR``, MTU Reply [:rfc:`1063`][:rfc:`1191`]</span>
     <span class="n">MTUR</span> <span class="o">=</span> <span class="mi">12</span>
 
     <span class="c1">#: ``FINN``, Experimental Flow Control [Greg Finn]</span>
     <span class="n">FINN</span> <span class="o">=</span> <span class="mi">205</span>
 
-    <span class="c1">#: ``VISA``, Experimental Access Control [Deborah Estrin][; ][RFC 6814]</span>
+    <span class="c1">#: ``VISA``, Experimental Access Control [Deborah Estrin][:rfc:`6814`]</span>
     <span class="n">VISA</span> <span class="o">=</span> <span class="mi">142</span>
 
-    <span class="c1">#: ``ENCODE``, ??? [VerSteeg][; ][RFC 6814]</span>
+    <span class="c1">#: ``ENCODE``, ??? [VerSteeg][:rfc:`6814`]</span>
     <span class="n">ENCODE</span> <span class="o">=</span> <span class="mi">15</span>
 
     <span class="c1">#: ``IMITD``, IMI Traffic Descriptor [Lee]</span>
     <span class="n">IMITD</span> <span class="o">=</span> <span class="mi">144</span>
 
-    <span class="c1">#: ``EIP``, Extended Internet Protocol [RFC 1385][; ][RFC 6814]</span>
+    <span class="c1">#: ``EIP``, Extended Internet Protocol [:rfc:`1385`][:rfc:`6814`]</span>
     <span class="n">EIP</span> <span class="o">=</span> <span class="mi">145</span>
 
-    <span class="c1">#: ``TR``, Traceroute [RFC 1393][; ][RFC 6814]</span>
+    <span class="c1">#: ``TR``, Traceroute [:rfc:`1393`][:rfc:`6814`]</span>
     <span class="n">TR</span> <span class="o">=</span> <span class="mi">82</span>
 
-    <span class="c1">#: ``ADDEXT``, Address Extension [Ullmann IPv7][; ][RFC 6814]</span>
+    <span class="c1">#: ``ADDEXT``, Address Extension [Ullmann IPv7][:rfc:`6814`]</span>
     <span class="n">ADDEXT</span> <span class="o">=</span> <span class="mi">147</span>
 
-    <span class="c1">#: ``RTRALT``, Router Alert [RFC 2113]</span>
+    <span class="c1">#: ``RTRALT``, Router Alert [:rfc:`2113`]</span>
     <span class="n">RTRALT</span> <span class="o">=</span> <span class="mi">148</span>
 
-    <span class="c1">#: ``SDB``, Selective Directed Broadcast [Charles Bud Graff][; ][RFC 6814]</span>
+    <span class="c1">#: ``SDB``, Selective Directed Broadcast [Charles Bud Graff][:rfc:`6814`]</span>
     <span class="n">SDB</span> <span class="o">=</span> <span class="mi">149</span>
 
     <span class="c1">#: Unassigned (Released 18 October 2005)</span>
     <span class="n">Unassigned_150</span> <span class="o">=</span> <span class="mi">150</span>
 
-    <span class="c1">#: ``DPS``, Dynamic Packet State [Andy Malis][; ][RFC 6814]</span>
+    <span class="c1">#: ``DPS``, Dynamic Packet State [Andy Malis][:rfc:`6814`]</span>
     <span class="n">DPS</span> <span class="o">=</span> <span class="mi">151</span>
 
-    <span class="c1">#: ``UMP``, Upstream Multicast Pkt. [Dino Farinacci][; ][RFC 6814]</span>
+    <span class="c1">#: ``UMP``, Upstream Multicast Pkt. [Dino Farinacci][:rfc:`6814`]</span>
     <span class="n">UMP</span> <span class="o">=</span> <span class="mi">152</span>
 
-    <span class="c1">#: ``QS``, Quick-Start [RFC 4782]</span>
+    <span class="c1">#: ``QS``, Quick-Start [:rfc:`4782`]</span>
     <span class="n">QS</span> <span class="o">=</span> <span class="mi">25</span>
 
-    <span class="c1">#: ``EXP``, RFC3692-style Experiment [RFC 4727]</span>
+    <span class="c1">#: ``EXP``, RFC3692-style Experiment [:rfc:`4727`]</span>
     <span class="n">EXP_30</span> <span class="o">=</span> <span class="mi">30</span>
 
-    <span class="c1">#: ``EXP``, RFC3692-style Experiment [RFC 4727]</span>
+    <span class="c1">#: ``EXP``, RFC3692-style Experiment [:rfc:`4727`]</span>
     <span class="n">EXP_94</span> <span class="o">=</span> <span class="mi">94</span>
 
-    <span class="c1">#: ``EXP``, RFC3692-style Experiment [RFC 4727]</span>
+    <span class="c1">#: ``EXP``, RFC3692-style Experiment [:rfc:`4727`]</span>
     <span class="n">EXP_158</span> <span class="o">=</span> <span class="mi">158</span>
 
-    <span class="c1">#: ``EXP``, RFC3692-style Experiment [RFC 4727]</span>
+    <span class="c1">#: ``EXP``, RFC3692-style Experiment [:rfc:`4727`]</span>
     <span class="n">EXP_222</span> <span class="o">=</span> <span class="mi">222</span>
 
 <div class="viewcode-block" id="OptionNumber._missing_">

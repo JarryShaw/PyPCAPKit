@@ -497,217 +497,217 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">Option</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[Option] Mobility Options"""</span>
 
-    <span class="c1">#: Pad1 [RFC 6275]</span>
+    <span class="c1">#: Pad1 [:rfc:`6275`]</span>
     <span class="n">Pad1</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="c1">#: PadN [RFC 6275]</span>
+    <span class="c1">#: PadN [:rfc:`6275`]</span>
     <span class="n">PadN</span> <span class="o">=</span> <span class="mi">1</span>
 
-    <span class="c1">#: Binding Refresh Advice [RFC 6275]</span>
+    <span class="c1">#: Binding Refresh Advice [:rfc:`6275`]</span>
     <span class="n">Binding_Refresh_Advice</span> <span class="o">=</span> <span class="mi">2</span>
 
-    <span class="c1">#: Alternate Care-of Address [RFC 6275]</span>
+    <span class="c1">#: Alternate Care-of Address [:rfc:`6275`]</span>
     <span class="n">Alternate_Care_of_Address</span> <span class="o">=</span> <span class="mi">3</span>
 
-    <span class="c1">#: Nonce Indices [RFC 6275]</span>
+    <span class="c1">#: Nonce Indices [:rfc:`6275`]</span>
     <span class="n">Nonce_Indices</span> <span class="o">=</span> <span class="mi">4</span>
 
-    <span class="c1">#: Authorization Data [RFC 6275]</span>
+    <span class="c1">#: Authorization Data [:rfc:`6275`]</span>
     <span class="n">Authorization_Data</span> <span class="o">=</span> <span class="mi">5</span>
 
-    <span class="c1">#: Mobile Network Prefix Option [RFC 3963]</span>
+    <span class="c1">#: Mobile Network Prefix Option [:rfc:`3963`]</span>
     <span class="n">Mobile_Network_Prefix_Option</span> <span class="o">=</span> <span class="mi">6</span>
 
-    <span class="c1">#: Mobility Header Link-Layer Address option [RFC 5568]</span>
+    <span class="c1">#: Mobility Header Link-Layer Address option [:rfc:`5568`]</span>
     <span class="n">Mobility_Header_Link_Layer_Address_option</span> <span class="o">=</span> <span class="mi">7</span>
 
-    <span class="c1">#: MN-ID-OPTION-TYPE [RFC 4283]</span>
+    <span class="c1">#: MN-ID-OPTION-TYPE [:rfc:`4283`]</span>
     <span class="n">MN_ID_OPTION_TYPE</span> <span class="o">=</span> <span class="mi">8</span>
 
-    <span class="c1">#: AUTH-OPTION-TYPE [RFC 4285]</span>
+    <span class="c1">#: AUTH-OPTION-TYPE [:rfc:`4285`]</span>
     <span class="n">AUTH_OPTION_TYPE</span> <span class="o">=</span> <span class="mi">9</span>
 
-    <span class="c1">#: MESG-ID-OPTION-TYPE [RFC 4285]</span>
+    <span class="c1">#: MESG-ID-OPTION-TYPE [:rfc:`4285`]</span>
     <span class="n">MESG_ID_OPTION_TYPE</span> <span class="o">=</span> <span class="mi">10</span>
 
-    <span class="c1">#: CGA Parameters Request [RFC 4866]</span>
+    <span class="c1">#: CGA Parameters Request [:rfc:`4866`]</span>
     <span class="n">CGA_Parameters_Request</span> <span class="o">=</span> <span class="mi">11</span>
 
-    <span class="c1">#: CGA Parameters [RFC 4866]</span>
+    <span class="c1">#: CGA Parameters [:rfc:`4866`]</span>
     <span class="n">CGA_Parameters</span> <span class="o">=</span> <span class="mi">12</span>
 
-    <span class="c1">#: Signature [RFC 4866]</span>
+    <span class="c1">#: Signature [:rfc:`4866`]</span>
     <span class="n">Signature</span> <span class="o">=</span> <span class="mi">13</span>
 
-    <span class="c1">#: Permanent Home Keygen Token [RFC 4866]</span>
+    <span class="c1">#: Permanent Home Keygen Token [:rfc:`4866`]</span>
     <span class="n">Permanent_Home_Keygen_Token</span> <span class="o">=</span> <span class="mi">14</span>
 
-    <span class="c1">#: Care-of Test Init [RFC 4866]</span>
+    <span class="c1">#: Care-of Test Init [:rfc:`4866`]</span>
     <span class="n">Care_of_Test_Init</span> <span class="o">=</span> <span class="mi">15</span>
 
-    <span class="c1">#: Care-of Test [RFC 4866]</span>
+    <span class="c1">#: Care-of Test [:rfc:`4866`]</span>
     <span class="n">Care_of_Test</span> <span class="o">=</span> <span class="mi">16</span>
 
-    <span class="c1">#: DNS-UPDATE-TYPE [RFC 5026]</span>
+    <span class="c1">#: DNS-UPDATE-TYPE [:rfc:`5026`]</span>
     <span class="n">DNS_UPDATE_TYPE</span> <span class="o">=</span> <span class="mi">17</span>
 
-    <span class="c1">#: Experimental Mobility Option [RFC 5096]</span>
+    <span class="c1">#: Experimental Mobility Option [:rfc:`5096`]</span>
     <span class="n">Experimental_Mobility_Option</span> <span class="o">=</span> <span class="mi">18</span>
 
-    <span class="c1">#: Vendor Specific Mobility Option [RFC 5094]</span>
+    <span class="c1">#: Vendor Specific Mobility Option [:rfc:`5094`]</span>
     <span class="n">Vendor_Specific_Mobility_Option</span> <span class="o">=</span> <span class="mi">19</span>
 
-    <span class="c1">#: Service Selection Mobility Option [RFC 5149]</span>
+    <span class="c1">#: Service Selection Mobility Option [:rfc:`5149`]</span>
     <span class="n">Service_Selection_Mobility_Option</span> <span class="o">=</span> <span class="mi">20</span>
 
-    <span class="c1">#: Binding Authorization Data for FMIPv6 (BADF) [RFC 5568]</span>
+    <span class="c1">#: Binding Authorization Data for FMIPv6 (BADF) [:rfc:`5568`]</span>
     <span class="n">Binding_Authorization_Data_for_FMIPv6</span> <span class="o">=</span> <span class="mi">21</span>
 
-    <span class="c1">#: Home Network Prefix Option [RFC 5213]</span>
+    <span class="c1">#: Home Network Prefix Option [:rfc:`5213`]</span>
     <span class="n">Home_Network_Prefix_Option</span> <span class="o">=</span> <span class="mi">22</span>
 
-    <span class="c1">#: Handoff Indicator Option [RFC 5213]</span>
+    <span class="c1">#: Handoff Indicator Option [:rfc:`5213`]</span>
     <span class="n">Handoff_Indicator_Option</span> <span class="o">=</span> <span class="mi">23</span>
 
-    <span class="c1">#: Access Technology Type Option [RFC 5213]</span>
+    <span class="c1">#: Access Technology Type Option [:rfc:`5213`]</span>
     <span class="n">Access_Technology_Type_Option</span> <span class="o">=</span> <span class="mi">24</span>
 
-    <span class="c1">#: Mobile Node Link-layer Identifier Option [RFC 5213]</span>
+    <span class="c1">#: Mobile Node Link-layer Identifier Option [:rfc:`5213`]</span>
     <span class="n">Mobile_Node_Link_layer_Identifier_Option</span> <span class="o">=</span> <span class="mi">25</span>
 
-    <span class="c1">#: Link-local Address Option [RFC 5213]</span>
+    <span class="c1">#: Link-local Address Option [:rfc:`5213`]</span>
     <span class="n">Link_local_Address_Option</span> <span class="o">=</span> <span class="mi">26</span>
 
-    <span class="c1">#: Timestamp Option [RFC 5213]</span>
+    <span class="c1">#: Timestamp Option [:rfc:`5213`]</span>
     <span class="n">Timestamp_Option</span> <span class="o">=</span> <span class="mi">27</span>
 
-    <span class="c1">#: Restart Counter [RFC 5847]</span>
+    <span class="c1">#: Restart Counter [:rfc:`5847`]</span>
     <span class="n">Restart_Counter</span> <span class="o">=</span> <span class="mi">28</span>
 
-    <span class="c1">#: IPv4 Home Address [RFC 5555]</span>
+    <span class="c1">#: IPv4 Home Address [:rfc:`5555`]</span>
     <span class="n">IPv4_Home_Address</span> <span class="o">=</span> <span class="mi">29</span>
 
-    <span class="c1">#: IPv4 Address Acknowledgement [RFC 5555]</span>
+    <span class="c1">#: IPv4 Address Acknowledgement [:rfc:`5555`]</span>
     <span class="n">IPv4_Address_Acknowledgement</span> <span class="o">=</span> <span class="mi">30</span>
 
-    <span class="c1">#: NAT Detection [RFC 5555]</span>
+    <span class="c1">#: NAT Detection [:rfc:`5555`]</span>
     <span class="n">NAT_Detection</span> <span class="o">=</span> <span class="mi">31</span>
 
-    <span class="c1">#: IPv4 Care-of Address [RFC 5555]</span>
+    <span class="c1">#: IPv4 Care-of Address [:rfc:`5555`]</span>
     <span class="n">IPv4_Care_of_Address</span> <span class="o">=</span> <span class="mi">32</span>
 
-    <span class="c1">#: GRE Key Option [RFC 5845]</span>
+    <span class="c1">#: GRE Key Option [:rfc:`5845`]</span>
     <span class="n">GRE_Key_Option</span> <span class="o">=</span> <span class="mi">33</span>
 
-    <span class="c1">#: Mobility Header IPv6 Address/Prefix [RFC 5568]</span>
+    <span class="c1">#: Mobility Header IPv6 Address/Prefix [:rfc:`5568`]</span>
     <span class="n">Mobility_Header_IPv6_Address_Prefix</span> <span class="o">=</span> <span class="mi">34</span>
 
-    <span class="c1">#: Binding Identifier [RFC 5648]</span>
+    <span class="c1">#: Binding Identifier [:rfc:`5648`]</span>
     <span class="n">Binding_Identifier</span> <span class="o">=</span> <span class="mi">35</span>
 
-    <span class="c1">#: IPv4 Home Address Request [RFC 5844]</span>
+    <span class="c1">#: IPv4 Home Address Request [:rfc:`5844`]</span>
     <span class="n">IPv4_Home_Address_Request</span> <span class="o">=</span> <span class="mi">36</span>
 
-    <span class="c1">#: IPv4 Home Address Reply [RFC 5844]</span>
+    <span class="c1">#: IPv4 Home Address Reply [:rfc:`5844`]</span>
     <span class="n">IPv4_Home_Address_Reply</span> <span class="o">=</span> <span class="mi">37</span>
 
-    <span class="c1">#: IPv4 Default-Router Address [RFC 5844]</span>
+    <span class="c1">#: IPv4 Default-Router Address [:rfc:`5844`]</span>
     <span class="n">IPv4_Default_Router_Address</span> <span class="o">=</span> <span class="mi">38</span>
 
-    <span class="c1">#: IPv4 DHCP Support Mode [RFC 5844]</span>
+    <span class="c1">#: IPv4 DHCP Support Mode [:rfc:`5844`]</span>
     <span class="n">IPv4_DHCP_Support_Mode</span> <span class="o">=</span> <span class="mi">39</span>
 
-    <span class="c1">#: Context Request Option [RFC 5949]</span>
+    <span class="c1">#: Context Request Option [:rfc:`5949`]</span>
     <span class="n">Context_Request_Option</span> <span class="o">=</span> <span class="mi">40</span>
 
-    <span class="c1">#: Local Mobility Anchor Address Option [RFC 5949]</span>
+    <span class="c1">#: Local Mobility Anchor Address Option [:rfc:`5949`]</span>
     <span class="n">Local_Mobility_Anchor_Address_Option</span> <span class="o">=</span> <span class="mi">41</span>
 
-    <span class="c1">#: Mobile Node Link-local Address Interface Identifier Option [RFC 5949]</span>
+    <span class="c1">#: Mobile Node Link-local Address Interface Identifier Option [:rfc:`5949`]</span>
     <span class="n">Mobile_Node_Link_local_Address_Interface_Identifier_Option</span> <span class="o">=</span> <span class="mi">42</span>
 
-    <span class="c1">#: Transient Binding [RFC 6058]</span>
+    <span class="c1">#: Transient Binding [:rfc:`6058`]</span>
     <span class="n">Transient_Binding</span> <span class="o">=</span> <span class="mi">43</span>
 
-    <span class="c1">#: Flow Summary Mobility Option [RFC 6089]</span>
+    <span class="c1">#: Flow Summary Mobility Option [:rfc:`6089`]</span>
     <span class="n">Flow_Summary_Mobility_Option</span> <span class="o">=</span> <span class="mi">44</span>
 
-    <span class="c1">#: Flow Identification Mobility Option [RFC 6089]</span>
+    <span class="c1">#: Flow Identification Mobility Option [:rfc:`6089`]</span>
     <span class="n">Flow_Identification_Mobility_Option</span> <span class="o">=</span> <span class="mi">45</span>
 
-    <span class="c1">#: Redirect-Capability Mobility Option [RFC 6463]</span>
+    <span class="c1">#: Redirect-Capability Mobility Option [:rfc:`6463`]</span>
     <span class="n">Redirect_Capability_Mobility_Option</span> <span class="o">=</span> <span class="mi">46</span>
 
-    <span class="c1">#: Redirect Mobility Option [RFC 6463]</span>
+    <span class="c1">#: Redirect Mobility Option [:rfc:`6463`]</span>
     <span class="n">Redirect_Mobility_Option</span> <span class="o">=</span> <span class="mi">47</span>
 
-    <span class="c1">#: Load Information Mobility Option [RFC 6463]</span>
+    <span class="c1">#: Load Information Mobility Option [:rfc:`6463`]</span>
     <span class="n">Load_Information_Mobility_Option</span> <span class="o">=</span> <span class="mi">48</span>
 
-    <span class="c1">#: Alternate IPv4 Care-of Address [RFC 6463]</span>
+    <span class="c1">#: Alternate IPv4 Care-of Address [:rfc:`6463`]</span>
     <span class="n">Alternate_IPv4_Care_of_Address</span> <span class="o">=</span> <span class="mi">49</span>
 
-    <span class="c1">#: Mobile Node Group Identifier [RFC 6602]</span>
+    <span class="c1">#: Mobile Node Group Identifier [:rfc:`6602`]</span>
     <span class="n">Mobile_Node_Group_Identifier</span> <span class="o">=</span> <span class="mi">50</span>
 
-    <span class="c1">#: MAG IPv6 Address [RFC 6705]</span>
+    <span class="c1">#: MAG IPv6 Address [:rfc:`6705`]</span>
     <span class="n">MAG_IPv6_Address</span> <span class="o">=</span> <span class="mi">51</span>
 
-    <span class="c1">#: Access Network Identifier [RFC 6757]</span>
+    <span class="c1">#: Access Network Identifier [:rfc:`6757`]</span>
     <span class="n">Access_Network_Identifier</span> <span class="o">=</span> <span class="mi">52</span>
 
-    <span class="c1">#: IPv4 Traffic Offload Selector [RFC 6909]</span>
+    <span class="c1">#: IPv4 Traffic Offload Selector [:rfc:`6909`]</span>
     <span class="n">IPv4_Traffic_Offload_Selector</span> <span class="o">=</span> <span class="mi">53</span>
 
-    <span class="c1">#: Dynamic IP Multicast Selector [RFC 7028]</span>
+    <span class="c1">#: Dynamic IP Multicast Selector [:rfc:`7028`]</span>
     <span class="n">Dynamic_IP_Multicast_Selector</span> <span class="o">=</span> <span class="mi">54</span>
 
-    <span class="c1">#: Delegated Mobile Network Prefix [RFC 7148]</span>
+    <span class="c1">#: Delegated Mobile Network Prefix [:rfc:`7148`]</span>
     <span class="n">Delegated_Mobile_Network_Prefix</span> <span class="o">=</span> <span class="mi">55</span>
 
-    <span class="c1">#: Active Multicast Subscription IPv4 [RFC 7161]</span>
+    <span class="c1">#: Active Multicast Subscription IPv4 [:rfc:`7161`]</span>
     <span class="n">Active_Multicast_Subscription_IPv4</span> <span class="o">=</span> <span class="mi">56</span>
 
-    <span class="c1">#: Active Multicast Subscription IPv6 [RFC 7161]</span>
+    <span class="c1">#: Active Multicast Subscription IPv6 [:rfc:`7161`]</span>
     <span class="n">Active_Multicast_Subscription_IPv6</span> <span class="o">=</span> <span class="mi">57</span>
 
-    <span class="c1">#: Quality-of-Service [RFC 7222]</span>
+    <span class="c1">#: Quality-of-Service [:rfc:`7222`]</span>
     <span class="n">Quality_of_Service</span> <span class="o">=</span> <span class="mi">58</span>
 
-    <span class="c1">#: LMA User-Plane Address [RFC 7389]</span>
+    <span class="c1">#: LMA User-Plane Address [:rfc:`7389`]</span>
     <span class="n">LMA_User_Plane_Address</span> <span class="o">=</span> <span class="mi">59</span>
 
-    <span class="c1">#: Multicast Mobility Option [RFC 7411]</span>
+    <span class="c1">#: Multicast Mobility Option [:rfc:`7411`]</span>
     <span class="n">Multicast_Mobility_Option</span> <span class="o">=</span> <span class="mi">60</span>
 
-    <span class="c1">#: Multicast Acknowledgement Option [RFC 7411]</span>
+    <span class="c1">#: Multicast Acknowledgement Option [:rfc:`7411`]</span>
     <span class="n">Multicast_Acknowledgement_Option</span> <span class="o">=</span> <span class="mi">61</span>
 
-    <span class="c1">#: LMA-Controlled MAG Parameters [RFC 8127]</span>
+    <span class="c1">#: LMA-Controlled MAG Parameters [:rfc:`8127`]</span>
     <span class="n">LMA_Controlled_MAG_Parameters</span> <span class="o">=</span> <span class="mi">62</span>
 
-    <span class="c1">#: MAG Multipath-Binding [RFC 8278]</span>
+    <span class="c1">#: MAG Multipath-Binding [:rfc:`8278`]</span>
     <span class="n">MAG_Multipath_Binding</span> <span class="o">=</span> <span class="mi">63</span>
 
-    <span class="c1">#: MAG Identifier [RFC 8278]</span>
+    <span class="c1">#: MAG Identifier [:rfc:`8278`]</span>
     <span class="n">MAG_Identifier</span> <span class="o">=</span> <span class="mi">64</span>
 
-    <span class="c1">#: Anchored Prefix [RFC 8885]</span>
+    <span class="c1">#: Anchored Prefix [:rfc:`8885`]</span>
     <span class="n">Anchored_Prefix</span> <span class="o">=</span> <span class="mi">65</span>
 
-    <span class="c1">#: Local Prefix [RFC 8885]</span>
+    <span class="c1">#: Local Prefix [:rfc:`8885`]</span>
     <span class="n">Local_Prefix</span> <span class="o">=</span> <span class="mi">66</span>
 
-    <span class="c1">#: Previous MAAR [RFC 8885]</span>
+    <span class="c1">#: Previous MAAR [:rfc:`8885`]</span>
     <span class="n">Previous_MAAR</span> <span class="o">=</span> <span class="mi">67</span>
 
-    <span class="c1">#: Serving MAAR [RFC 8885]</span>
+    <span class="c1">#: Serving MAAR [:rfc:`8885`]</span>
     <span class="n">Serving_MAAR</span> <span class="o">=</span> <span class="mi">68</span>
 
-    <span class="c1">#: DLIF Link-Local Address [RFC 8885]</span>
+    <span class="c1">#: DLIF Link-Local Address [:rfc:`8885`]</span>
     <span class="n">DLIF_Link_Local_Address</span> <span class="o">=</span> <span class="mi">69</span>
 
-    <span class="c1">#: DLIF Link-Layer Address [RFC 8885]</span>
+    <span class="c1">#: DLIF Link-Layer Address [:rfc:`8885`]</span>
     <span class="n">DLIF_Link_Layer_Address</span> <span class="o">=</span> <span class="mi">70</span>
 
 <div class="viewcode-block" id="Option._missing_">

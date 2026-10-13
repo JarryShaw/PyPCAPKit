@@ -497,34 +497,34 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">RevocationTrigger</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[RevocationTrigger] Revocation Trigger Values"""</span>
 
-    <span class="c1">#: Unspecified [RFC 5846]</span>
+    <span class="c1">#: Unspecified [:rfc:`5846`]</span>
     <span class="n">Unspecified</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="c1">#: Administrative Reason [RFC 5846]</span>
+    <span class="c1">#: Administrative Reason [:rfc:`5846`]</span>
     <span class="n">Administrative_Reason</span> <span class="o">=</span> <span class="mi">1</span>
 
-    <span class="c1">#: Inter-MAG Handover - same Access Type [RFC 5846]</span>
+    <span class="c1">#: Inter-MAG Handover - same Access Type [:rfc:`5846`]</span>
     <span class="n">Inter_MAG_Handover_same_Access_Type</span> <span class="o">=</span> <span class="mi">2</span>
 
-    <span class="c1">#: Inter-MAG Handover - different Access Type [RFC 5846]</span>
+    <span class="c1">#: Inter-MAG Handover - different Access Type [:rfc:`5846`]</span>
     <span class="n">Inter_MAG_Handover_different_Access_Type</span> <span class="o">=</span> <span class="mi">3</span>
 
-    <span class="c1">#: Inter-MAG Handover - Unknown [RFC 5846]</span>
+    <span class="c1">#: Inter-MAG Handover - Unknown [:rfc:`5846`]</span>
     <span class="n">Inter_MAG_Handover_Unknown</span> <span class="o">=</span> <span class="mi">4</span>
 
-    <span class="c1">#: User Initiated Session(s) Termination [RFC 5846]</span>
+    <span class="c1">#: User Initiated Session(s) Termination [:rfc:`5846`]</span>
     <span class="n">User_Initiated_Session_Termination</span> <span class="o">=</span> <span class="mi">5</span>
 
-    <span class="c1">#: Access Network Session(s) Termination [RFC 5846]</span>
+    <span class="c1">#: Access Network Session(s) Termination [:rfc:`5846`]</span>
     <span class="n">Access_Network_Session_Termination</span> <span class="o">=</span> <span class="mi">6</span>
 
-    <span class="c1">#: Possible Out-of Sync BCE State [RFC 5846]</span>
+    <span class="c1">#: Possible Out-of Sync BCE State [:rfc:`5846`]</span>
     <span class="n">Possible_Out_of_Sync_BCE_State</span> <span class="o">=</span> <span class="mi">7</span>
 
-    <span class="c1">#: Per-Peer Policy [RFC 5846]</span>
+    <span class="c1">#: Per-Peer Policy [:rfc:`5846`]</span>
     <span class="n">Per_Peer_Policy</span> <span class="o">=</span> <span class="mi">128</span>
 
-    <span class="c1">#: Revoking Mobility Node Local Policy [RFC 5846]</span>
+    <span class="c1">#: Revoking Mobility Node Local Policy [:rfc:`5846`]</span>
     <span class="n">Revoking_Mobility_Node_Local_Policy</span> <span class="o">=</span> <span class="mi">129</span>
 
 <div class="viewcode-block" id="RevocationTrigger._missing_">
@@ -546,7 +546,7 @@
             <span class="c1">#: Unassigned</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'Unassigned'</span><span class="p">)</span>
         <span class="k">if</span> <span class="mi">250</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">255</span><span class="p">:</span>
-            <span class="c1">#: Reserved for Testing Purposes Only [RFC 5846]</span>
+            <span class="c1">#: Reserved for Testing Purposes Only [:rfc:`5846`]</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'Reserved_for_Testing_Purposes_Only'</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_missing_</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 </div>

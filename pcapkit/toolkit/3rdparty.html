@@ -683,7 +683,9 @@ flow tracing (<a class="reference internal" href="../foundation/traceflow/tcp.ht
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> mapping of packet data. Each layer carries only the fields
+<dd class="field-odd"><p>A <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> mapping of packet data. Its <code class="docutils literal notranslate"><span class="pre">packet</span></code> is the octets of
+the frame (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_frame()</span></code>), none for a zero-length one. Each layer
+carries only the fields
 set on it (for a dissected packet, those read from the wire, with no
 defaults filled in). Field values that are themselves
 Scapy packets (e.g. IP options, DNS records), including those inside
@@ -719,8 +721,10 @@ the exact timestamp it reads the header’s resolution from.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The octets are <code class="docutils literal notranslate"><span class="pre">packet.original</span></code>, which <a class="reference external" href="https://scapy.net">Scapy</a>’s readers keep as read,
-rather than <code class="docutils literal notranslate"><span class="pre">bytes(packet)</span></code>, which rebuilds them. <code class="docutils literal notranslate"><span class="pre">orig_len</span></code> is
-<code class="docutils literal notranslate"><span class="pre">packet.wirelen</span></code>, the record’s original length.</p>
+rather than <code class="docutils literal notranslate"><span class="pre">bytes(packet)</span></code>, which rebuilds them; for a packet not read
+from a capture, such as one built by hand, they are the octets it builds
+into (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_frame()</span></code>). <code class="docutils literal notranslate"><span class="pre">orig_len</span></code> is <code class="docutils literal notranslate"><span class="pre">packet.wirelen</span></code>, the
+record’s original length.</p>
 <p>The fraction in <code class="docutils literal notranslate"><span class="pre">frame_info.ts_usec</span></code> is in the capture’s own resolution,
 as the default engine’s is. That resolution is the one
 <a class="reference internal" href="../foundation/engines/3rdparty.html#pcapkit.foundation.engines.scapy.Scapy" title="pcapkit.foundation.engines.scapy.Scapy"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scapy</span></code></a> attaches with
@@ -1071,7 +1075,8 @@ captured octets, neither of which the PDML carries; or
 <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> where it cannot. It is called only for a packet
 <code class="xref py py-data docutils literal notranslate"><span class="pre">OCTETS_FILTER</span></code> matches. The engine passes
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">PyShark._captured</span></code>; without
-it, such a packet is read as tshark dissects it.</p></li>
+it, or where it returns <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>, a packet is read as tshark
+dissects it.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -1083,10 +1088,11 @@ it, such a packet is read as tshark dissects it.</p></li>
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be used for TCP flow tracing. A packet can be reassembled
 if it contains TCP layer with a whole fixed header (see
 <code class="xref py py-func docutils literal notranslate"><span class="pre">_has_fixed_header()</span></code>), keyed by the IP layer that carries it – in an
-IP-in-IP tunnel, the innermost (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_carrier()</span></code>). In a frame with
-an AH or IPv6 extension header in IPv4, it is the TCP the default
-engine reads in the frame’s octets, by the frame’s link type in the
-capture file, instead (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_segment()</span></code>).</p></li>
+IP-in-IP tunnel, the innermost (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_carrier()</span></code>). Where
+<code class="docutils literal notranslate"><span class="pre">captured</span></code> has the frame, it is instead the TCP the default engine
+reads in the frame’s octets, by the frame’s link type in the capture
+file, and none where the default engine reads none: behind a link
+type, EtherType or tunnel it does not dissect (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_segment()</span></code>).</p></li>
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be reassembled, then the <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> mapping of data for TCP
 flow tracing (<a class="reference internal" href="../foundation/traceflow/tcp.html#term-trace.tcp.packet"><span class="xref std std-term">trace.tcp.packet</span></a>) will be returned; otherwise, returns <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p></li>
 </ul>
@@ -1534,6 +1540,16 @@ tunnelled (e.g. 6in4, 6in6) or not, is left out of
 <a class="reference internal" href="#pcapkit.toolkit.pypcapfile.tcp_reassembly" title="pcapkit.toolkit.pypcapfile.tcp_reassembly"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_reassembly()</span></code></a> and
 <a class="reference internal" href="#pcapkit.toolkit.pypcapfile.tcp_traceflow" title="pcapkit.toolkit.pypcapfile.tcp_traceflow"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_traceflow()</span></code></a>, with an
 <a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a> once per capture.</p>
+<p>Nor does it decode a link layer but Ethernet. The adapters read the IP packet
+of a BSD loopback (<code class="docutils literal notranslate"><span class="pre">NULL</span></code>, <code class="docutils literal notranslate"><span class="pre">LOOP</span></code>) or raw-IP (<code class="docutils literal notranslate"><span class="pre">RAW</span></code>, <code class="docutils literal notranslate"><span class="pre">IPV4</span></code>,
+<code class="docutils literal notranslate"><span class="pre">IPV6</span></code>) frame themselves, as the default engine dissects it (see
+<a class="reference internal" href="#pcapkit.toolkit.pypcapfile.READ_LINKTYPES" title="pcapkit.toolkit.pypcapfile.READ_LINKTYPES"><code class="xref py py-data docutils literal notranslate"><span class="pre">READ_LINKTYPES</span></code></a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1667">#1667</a>). Every
+other link type is left unread, as the default engine leaves it, and the
+engine warns of it with an <a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a>.
+Nor do the adapters read deeper than the default engine dissects: each VLAN
+tag, IP header, AH and IPv6 extension header is one of the
+<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.FRAME_LAYER_LIMIT" title="pcapkit.protocols.protocol.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a> layers of a frame, and
+nothing past the last of them is read (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1609">#1609</a>).</p>
 </div>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.pypcapfile.ipv4_reassembly">
@@ -1554,10 +1570,12 @@ tunnelled (e.g. 6in4, 6in6) or not, is left out of
 <ul class="simple">
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be used for IPv4 reassembly. A packet can be reassembled
 if it contains an IPv4 layer (<code class="xref py py-class docutils literal notranslate"><span class="pre">pcapfile.protocols.network.ip.IP</span></code>), behind
-802.1Q or 802.1ad VLAN tags or not, and the <strong>DF</strong> flag is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>. The
+802.1Q or 802.1ad VLAN tags or not, or in a frame of one of the
+<a class="reference internal" href="#pcapkit.toolkit.pypcapfile.READ_LINKTYPES" title="pcapkit.toolkit.pypcapfile.READ_LINKTYPES"><code class="xref py py-data docutils literal notranslate"><span class="pre">READ_LINKTYPES</span></code></a>, and the <strong>DF</strong> flag is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>. The
 layer is the first IPv4 packet of the frame, as for the default engine: one
 carried in IPv6 counts (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_ipv4_in_ipv6()</span></code>), and one whose header the
-default engine rejects does not (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_ipv4_accepted()</span></code>).</p></li>
+default engine rejects, or past its frame layer bound, does not (see
+<code class="xref py py-func docutils literal notranslate"><span class="pre">_ipv4_accepted()</span></code> and <code class="xref py py-func docutils literal notranslate"><span class="pre">_network_layer()</span></code>).</p></li>
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be reassembled, then the <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> mapping of data for IPv4
 reassembly (<a class="reference internal" href="../foundation/reassembly/ip/ipv4.html#term-reasm.ipv4.packet"><span class="xref std std-term">reasm.ipv4.packet</span></a>) will be returned; otherwise, returns <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p></li>
 </ul>
@@ -1613,7 +1631,8 @@ reassembly (<a class="reference internal" href="../foundation/reassembly/ip/ipv4
 <ul class="simple">
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be used for TCP reassembly. A packet can be reassembled
 if it contains an IPv4 layer carrying a TCP segment, directly or behind AH or
-IPv6 extension headers, and behind 802.1Q or 802.1ad VLAN tags or not (see
+IPv6 extension headers, and behind 802.1Q or 802.1ad VLAN tags or not, or in a
+frame of one of the <a class="reference internal" href="#pcapkit.toolkit.pypcapfile.READ_LINKTYPES" title="pcapkit.toolkit.pypcapfile.READ_LINKTYPES"><code class="xref py py-data docutils literal notranslate"><span class="pre">READ_LINKTYPES</span></code></a>, within the frame layer bound (see
 <code class="xref py py-func docutils literal notranslate"><span class="pre">_transport()</span></code>). In an IP-in-IP tunnel the IPv4 layer is the innermost
 IP layer, whose addresses key the segment (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_innermost()</span></code>); TCP over
 IPv6, tunnelled or not, cannot be, as <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> has no IPv6 decoder.</p></li>
@@ -1660,7 +1679,8 @@ warning.</p>
 <ul class="simple">
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be used for TCP flow tracing. A packet can be traced
 if it contains an IPv4 layer carrying a TCP segment, directly or behind AH or
-IPv6 extension headers, and behind 802.1Q or 802.1ad VLAN tags or not (see
+IPv6 extension headers, and behind 802.1Q or 802.1ad VLAN tags or not, or in a
+frame of one of the <a class="reference internal" href="#pcapkit.toolkit.pypcapfile.READ_LINKTYPES" title="pcapkit.toolkit.pypcapfile.READ_LINKTYPES"><code class="xref py py-data docutils literal notranslate"><span class="pre">READ_LINKTYPES</span></code></a>, within the frame layer bound (see
 <code class="xref py py-func docutils literal notranslate"><span class="pre">_transport()</span></code>). In an IP-in-IP tunnel the IPv4 layer is the innermost
 IP layer, whose addresses key the segment (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_innermost()</span></code>); TCP over
 IPv6, tunnelled or not, cannot be, as <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> has no IPv6 decoder.</p></li>
@@ -1791,11 +1811,29 @@ see the module notes.</p>
     <code class="docutils literal notranslate"><span class="pre">src</span></code>/<code class="docutils literal notranslate"><span class="pre">dst</span></code> cannot be parsed as a MAC address.</p>
 </dd>
 </dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A frame <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> left undecoded is hex-encoded, as the engine reads
+it (see <a class="reference internal" href="../foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._read_records" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._read_records"><code class="xref py py-meth docutils literal notranslate"><span class="pre">PyPCAPFile._read_records</span></code></a>), so
+it is un-hexed (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_maybe_unhex()</span></code>) and reported as its octets,
+not as twice as many characters of hex text (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1667">#1667</a>).</p>
+</div>
 </dd></dl>
 
 </section>
 <section id="internal-definitions">
 <h3>Internal Definitions<a class="headerlink" href="#internal-definitions" title="Link to this heading">¶</a></h3>
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.toolkit.pypcapfile.READ_LINKTYPES">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pypcapfile.</span></span><span class="sig-name descname"><span class="pre">READ_LINKTYPES</span></span><a class="headerlink" href="#pcapkit.toolkit.pypcapfile.READ_LINKTYPES" title="Link to this definition">¶</a></dt>
+<dd><p>Link types <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> has no decoder for, whose IP packet the default
+engine dissects all the same (see <a class="reference internal" href="../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame.__proto__" title="pcapkit.protocols.misc.pcap.frame.Frame.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Frame.__proto__</span></code></a>), and which the
+adapters therefore read themselves (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_link_network()</span></code>,
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1667">#1667</a>): BSD loopback, <code class="docutils literal notranslate"><span class="pre">NULL</span></code> and <code class="docutils literal notranslate"><span class="pre">LOOP</span></code>, and raw IP, <code class="docutils literal notranslate"><span class="pre">RAW</span></code>,
+<code class="docutils literal notranslate"><span class="pre">IPV4</span></code> and <code class="docutils literal notranslate"><span class="pre">IPV6</span></code>. Every other link type but <code class="docutils literal notranslate"><span class="pre">ETHERNET</span></code>, which
+<a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> decodes, is left unread, as the default engine leaves it raw.</p>
+</dd></dl>
+
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.toolkit.pypcapfile.TCP_MIN_HEADER_LEN">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pypcapfile.</span></span><span class="sig-name descname"><span class="pre">TCP_MIN_HEADER_LEN</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">20</span></span><a class="headerlink" href="#pcapkit.toolkit.pypcapfile.TCP_MIN_HEADER_LEN" title="Link to this definition">¶</a></dt>

@@ -1696,9 +1696,9 @@ there back out, as they do one the TCP parser rejected (<a class="extlink-issue 
 protocol constructed from its own octets is not counted itself, so the count
 starts at the first layer it dissects. One chain of extension headers is also bounded on
 its own, by <a class="reference internal" href="internet/internet.html#pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT" title="pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a>.
-The <code class="docutils literal notranslate"><span class="pre">pyshark</span></code> and <code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code> engines dissect with their own parsers,
-which do not apply this bound (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1609">#1609</a>). The <code class="docutils literal notranslate"><span class="pre">dpkt</span></code> and <code class="docutils literal notranslate"><span class="pre">scapy</span></code>
-toolkits count the layers they walk as the default engine does, and stop at it.</p>
+The <code class="docutils literal notranslate"><span class="pre">pyshark</span></code> engine dissects with its own parser, which does not apply this
+bound (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1609">#1609</a>). The <code class="docutils literal notranslate"><span class="pre">dpkt</span></code>, <code class="docutils literal notranslate"><span class="pre">scapy</span></code> and <code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code> toolkits
+count the layers they walk as the default engine does, and stop at it.</p>
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.FRAME_LAYER_LIMIT">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.protocol.</span></span><span class="sig-name descname"><span class="pre">FRAME_LAYER_LIMIT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">64</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.FRAME_LAYER_LIMIT" title="Link to this definition">¶</a></dt>

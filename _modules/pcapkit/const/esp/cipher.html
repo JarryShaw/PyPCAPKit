@@ -497,91 +497,91 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">Cipher</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[Cipher] Transform Type 1 - Encryption Algorithm Transform IDs"""</span>
 
-    <span class="c1">#: Reserved [RFC 7296]</span>
+    <span class="c1">#: Reserved [:rfc:`7296`]</span>
     <span class="n">Reserved_0</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="c1">#: ENCR_DES_IV64 (DEPRECATED [RFC 9395])</span>
+    <span class="c1">#: ENCR_DES_IV64 (DEPRECATED [:rfc:`9395`])</span>
     <span class="n">ENCR_DES_IV64</span> <span class="o">=</span> <span class="mi">1</span>
 
     <span class="c1">#: Alias of :attr:`Cipher.ENCR_DES_IV64`.</span>
     <span class="n">DES_IV64</span> <span class="o">=</span> <span class="mi">1</span>
 
-    <span class="c1">#: ENCR_DES [RFC 2405] (DEPRECATED [RFC 8247])</span>
+    <span class="c1">#: ENCR_DES [:rfc:`2405`] (DEPRECATED [:rfc:`8247`])</span>
     <span class="n">ENCR_DES</span> <span class="o">=</span> <span class="mi">2</span>
 
     <span class="c1">#: Alias of :attr:`Cipher.ENCR_DES`.</span>
     <span class="n">DES</span> <span class="o">=</span> <span class="mi">2</span>
 
-    <span class="c1">#: ENCR_3DES [RFC 2451]</span>
+    <span class="c1">#: ENCR_3DES [:rfc:`2451`]</span>
     <span class="n">ENCR_3DES</span> <span class="o">=</span> <span class="mi">3</span>
 
-    <span class="c1">#: ENCR_RC5 [RFC 2451] (DEPRECATED [RFC 9395])</span>
+    <span class="c1">#: ENCR_RC5 [:rfc:`2451`] (DEPRECATED [:rfc:`9395`])</span>
     <span class="n">ENCR_RC5</span> <span class="o">=</span> <span class="mi">4</span>
 
     <span class="c1">#: Alias of :attr:`Cipher.ENCR_RC5`.</span>
     <span class="n">RC5</span> <span class="o">=</span> <span class="mi">4</span>
 
-    <span class="c1">#: ENCR_IDEA [RFC 2451] (DEPRECATED [RFC 9395])</span>
+    <span class="c1">#: ENCR_IDEA [:rfc:`2451`] (DEPRECATED [:rfc:`9395`])</span>
     <span class="n">ENCR_IDEA</span> <span class="o">=</span> <span class="mi">5</span>
 
     <span class="c1">#: Alias of :attr:`Cipher.ENCR_IDEA`.</span>
     <span class="n">IDEA</span> <span class="o">=</span> <span class="mi">5</span>
 
-    <span class="c1">#: ENCR_CAST [RFC 2451] (DEPRECATED [RFC 9395])</span>
+    <span class="c1">#: ENCR_CAST [:rfc:`2451`] (DEPRECATED [:rfc:`9395`])</span>
     <span class="n">ENCR_CAST</span> <span class="o">=</span> <span class="mi">6</span>
 
     <span class="c1">#: Alias of :attr:`Cipher.ENCR_CAST`.</span>
     <span class="n">CAST</span> <span class="o">=</span> <span class="mi">6</span>
 
-    <span class="c1">#: ENCR_BLOWFISH [RFC 2451] (DEPRECATED [RFC 9395])</span>
+    <span class="c1">#: ENCR_BLOWFISH [:rfc:`2451`] (DEPRECATED [:rfc:`9395`])</span>
     <span class="n">ENCR_BLOWFISH</span> <span class="o">=</span> <span class="mi">7</span>
 
     <span class="c1">#: Alias of :attr:`Cipher.ENCR_BLOWFISH`.</span>
     <span class="n">BLOWFISH</span> <span class="o">=</span> <span class="mi">7</span>
 
-    <span class="c1">#: ENCR_3IDEA (DEPRECATED [RFC 9395])</span>
+    <span class="c1">#: ENCR_3IDEA (DEPRECATED [:rfc:`9395`])</span>
     <span class="n">ENCR_3IDEA</span> <span class="o">=</span> <span class="mi">8</span>
 
-    <span class="c1">#: ENCR_DES_IV32 (DEPRECATED [RFC 9395])</span>
+    <span class="c1">#: ENCR_DES_IV32 (DEPRECATED [:rfc:`9395`])</span>
     <span class="n">ENCR_DES_IV32</span> <span class="o">=</span> <span class="mi">9</span>
 
     <span class="c1">#: Alias of :attr:`Cipher.ENCR_DES_IV32`.</span>
     <span class="n">DES_IV32</span> <span class="o">=</span> <span class="mi">9</span>
 
-    <span class="c1">#: Reserved [RFC 7296]</span>
+    <span class="c1">#: Reserved [:rfc:`7296`]</span>
     <span class="n">Reserved_10</span> <span class="o">=</span> <span class="mi">10</span>
 
-    <span class="c1">#: ENCR_NULL [RFC 2410]</span>
+    <span class="c1">#: ENCR_NULL [:rfc:`2410`]</span>
     <span class="n">ENCR_NULL</span> <span class="o">=</span> <span class="mi">11</span>
 
     <span class="c1">#: Alias of :attr:`Cipher.ENCR_NULL`.</span>
     <span class="n">NULL</span> <span class="o">=</span> <span class="mi">11</span>
 
-    <span class="c1">#: ENCR_AES_CBC [RFC 3602]</span>
+    <span class="c1">#: ENCR_AES_CBC [:rfc:`3602`]</span>
     <span class="n">ENCR_AES_CBC</span> <span class="o">=</span> <span class="mi">12</span>
 
     <span class="c1">#: Alias of :attr:`Cipher.ENCR_AES_CBC`.</span>
     <span class="n">AES_CBC</span> <span class="o">=</span> <span class="mi">12</span>
 
-    <span class="c1">#: ENCR_AES_CTR [RFC 3686]</span>
+    <span class="c1">#: ENCR_AES_CTR [:rfc:`3686`]</span>
     <span class="n">ENCR_AES_CTR</span> <span class="o">=</span> <span class="mi">13</span>
 
     <span class="c1">#: Alias of :attr:`Cipher.ENCR_AES_CTR`.</span>
     <span class="n">AES_CTR</span> <span class="o">=</span> <span class="mi">13</span>
 
-    <span class="c1">#: ENCR_AES_CCM_8 [RFC 4309]</span>
+    <span class="c1">#: ENCR_AES_CCM_8 [:rfc:`4309`]</span>
     <span class="n">ENCR_AES_CCM_8</span> <span class="o">=</span> <span class="mi">14</span>
 
     <span class="c1">#: Alias of :attr:`Cipher.ENCR_AES_CCM_8`.</span>
     <span class="n">AES_CCM_8</span> <span class="o">=</span> <span class="mi">14</span>
 
-    <span class="c1">#: ENCR_AES_CCM_12 [RFC 4309]</span>
+    <span class="c1">#: ENCR_AES_CCM_12 [:rfc:`4309`]</span>
     <span class="n">ENCR_AES_CCM_12</span> <span class="o">=</span> <span class="mi">15</span>
 
     <span class="c1">#: Alias of :attr:`Cipher.ENCR_AES_CCM_12`.</span>
     <span class="n">AES_CCM_12</span> <span class="o">=</span> <span class="mi">15</span>
 
-    <span class="c1">#: ENCR_AES_CCM_16 [RFC 4309]</span>
+    <span class="c1">#: ENCR_AES_CCM_16 [:rfc:`4309`]</span>
     <span class="n">ENCR_AES_CCM_16</span> <span class="o">=</span> <span class="mi">16</span>
 
     <span class="c1">#: Alias of :attr:`Cipher.ENCR_AES_CCM_16`.</span>
@@ -590,25 +590,25 @@
     <span class="c1">#: Unassigned</span>
     <span class="n">Unassigned_17</span> <span class="o">=</span> <span class="mi">17</span>
 
-    <span class="c1">#: ENCR_AES_GCM_8 [RFC 4106]; [RFC 8247]</span>
+    <span class="c1">#: ENCR_AES_GCM_8 [:rfc:`4106`][:rfc:`8247`]</span>
     <span class="n">ENCR_AES_GCM_8</span> <span class="o">=</span> <span class="mi">18</span>
 
     <span class="c1">#: Alias of :attr:`Cipher.ENCR_AES_GCM_8`.</span>
     <span class="n">AES_GCM_8</span> <span class="o">=</span> <span class="mi">18</span>
 
-    <span class="c1">#: ENCR_AES_GCM_12 [RFC 4106]; [RFC 8247]</span>
+    <span class="c1">#: ENCR_AES_GCM_12 [:rfc:`4106`][:rfc:`8247`]</span>
     <span class="n">ENCR_AES_GCM_12</span> <span class="o">=</span> <span class="mi">19</span>
 
     <span class="c1">#: Alias of :attr:`Cipher.ENCR_AES_GCM_12`.</span>
     <span class="n">AES_GCM_12</span> <span class="o">=</span> <span class="mi">19</span>
 
-    <span class="c1">#: ENCR_AES_GCM_16 [RFC 4106]; [RFC 8247]</span>
+    <span class="c1">#: ENCR_AES_GCM_16 [:rfc:`4106`][:rfc:`8247`]</span>
     <span class="n">ENCR_AES_GCM_16</span> <span class="o">=</span> <span class="mi">20</span>
 
     <span class="c1">#: Alias of :attr:`Cipher.ENCR_AES_GCM_16`.</span>
     <span class="n">AES_GCM_16</span> <span class="o">=</span> <span class="mi">20</span>
 
-    <span class="c1">#: ENCR_NULL_AUTH_AES_GMAC [RFC 4543]</span>
+    <span class="c1">#: ENCR_NULL_AUTH_AES_GMAC [:rfc:`4543`]</span>
     <span class="n">ENCR_NULL_AUTH_AES_GMAC</span> <span class="o">=</span> <span class="mi">21</span>
 
     <span class="c1">#: Alias of :attr:`Cipher.ENCR_NULL_AUTH_AES_GMAC`.</span>
@@ -617,79 +617,79 @@
     <span class="c1">#: Reserved for IEEE P1619 XTS-AES [Matt Ball]</span>
     <span class="n">Reserved_for_IEEE_P1619_XTS_AES</span> <span class="o">=</span> <span class="mi">22</span>
 
-    <span class="c1">#: ENCR_CAMELLIA_CBC [RFC 5529]</span>
+    <span class="c1">#: ENCR_CAMELLIA_CBC [:rfc:`5529`]</span>
     <span class="n">ENCR_CAMELLIA_CBC</span> <span class="o">=</span> <span class="mi">23</span>
 
     <span class="c1">#: Alias of :attr:`Cipher.ENCR_CAMELLIA_CBC`.</span>
     <span class="n">CAMELLIA_CBC</span> <span class="o">=</span> <span class="mi">23</span>
 
-    <span class="c1">#: ENCR_CAMELLIA_CTR [RFC 5529]</span>
+    <span class="c1">#: ENCR_CAMELLIA_CTR [:rfc:`5529`]</span>
     <span class="n">ENCR_CAMELLIA_CTR</span> <span class="o">=</span> <span class="mi">24</span>
 
     <span class="c1">#: Alias of :attr:`Cipher.ENCR_CAMELLIA_CTR`.</span>
     <span class="n">CAMELLIA_CTR</span> <span class="o">=</span> <span class="mi">24</span>
 
-    <span class="c1">#: ENCR_CAMELLIA_CCM_8 [RFC 5529]; [RFC 8247]</span>
+    <span class="c1">#: ENCR_CAMELLIA_CCM_8 [:rfc:`5529`][:rfc:`8247`]</span>
     <span class="n">ENCR_CAMELLIA_CCM_8</span> <span class="o">=</span> <span class="mi">25</span>
 
     <span class="c1">#: Alias of :attr:`Cipher.ENCR_CAMELLIA_CCM_8`.</span>
     <span class="n">CAMELLIA_CCM_8</span> <span class="o">=</span> <span class="mi">25</span>
 
-    <span class="c1">#: ENCR_CAMELLIA_CCM_12 [RFC 5529]; [RFC 8247]</span>
+    <span class="c1">#: ENCR_CAMELLIA_CCM_12 [:rfc:`5529`][:rfc:`8247`]</span>
     <span class="n">ENCR_CAMELLIA_CCM_12</span> <span class="o">=</span> <span class="mi">26</span>
 
     <span class="c1">#: Alias of :attr:`Cipher.ENCR_CAMELLIA_CCM_12`.</span>
     <span class="n">CAMELLIA_CCM_12</span> <span class="o">=</span> <span class="mi">26</span>
 
-    <span class="c1">#: ENCR_CAMELLIA_CCM_16 [RFC 5529]; [RFC 8247]</span>
+    <span class="c1">#: ENCR_CAMELLIA_CCM_16 [:rfc:`5529`][:rfc:`8247`]</span>
     <span class="n">ENCR_CAMELLIA_CCM_16</span> <span class="o">=</span> <span class="mi">27</span>
 
     <span class="c1">#: Alias of :attr:`Cipher.ENCR_CAMELLIA_CCM_16`.</span>
     <span class="n">CAMELLIA_CCM_16</span> <span class="o">=</span> <span class="mi">27</span>
 
-    <span class="c1">#: ENCR_CHACHA20_POLY1305 [RFC 7634]</span>
+    <span class="c1">#: ENCR_CHACHA20_POLY1305 [:rfc:`7634`]</span>
     <span class="n">ENCR_CHACHA20_POLY1305</span> <span class="o">=</span> <span class="mi">28</span>
 
     <span class="c1">#: Alias of :attr:`Cipher.ENCR_CHACHA20_POLY1305`.</span>
     <span class="n">CHACHA20_POLY1305</span> <span class="o">=</span> <span class="mi">28</span>
 
-    <span class="c1">#: ENCR_AES_CCM_8_IIV [RFC 8750]</span>
+    <span class="c1">#: ENCR_AES_CCM_8_IIV [:rfc:`8750`]</span>
     <span class="n">ENCR_AES_CCM_8_IIV</span> <span class="o">=</span> <span class="mi">29</span>
 
     <span class="c1">#: Alias of :attr:`Cipher.ENCR_AES_CCM_8_IIV`.</span>
     <span class="n">AES_CCM_8_IIV</span> <span class="o">=</span> <span class="mi">29</span>
 
-    <span class="c1">#: ENCR_AES_GCM_16_IIV [RFC 8750]</span>
+    <span class="c1">#: ENCR_AES_GCM_16_IIV [:rfc:`8750`]</span>
     <span class="n">ENCR_AES_GCM_16_IIV</span> <span class="o">=</span> <span class="mi">30</span>
 
     <span class="c1">#: Alias of :attr:`Cipher.ENCR_AES_GCM_16_IIV`.</span>
     <span class="n">AES_GCM_16_IIV</span> <span class="o">=</span> <span class="mi">30</span>
 
-    <span class="c1">#: ENCR_CHACHA20_POLY1305_IIV [RFC 8750]</span>
+    <span class="c1">#: ENCR_CHACHA20_POLY1305_IIV [:rfc:`8750`]</span>
     <span class="n">ENCR_CHACHA20_POLY1305_IIV</span> <span class="o">=</span> <span class="mi">31</span>
 
     <span class="c1">#: Alias of :attr:`Cipher.ENCR_CHACHA20_POLY1305_IIV`.</span>
     <span class="n">CHACHA20_POLY1305_IIV</span> <span class="o">=</span> <span class="mi">31</span>
 
-    <span class="c1">#: ENCR_KUZNYECHIK_MGM_KTREE [RFC 9227]</span>
+    <span class="c1">#: ENCR_KUZNYECHIK_MGM_KTREE [:rfc:`9227`]</span>
     <span class="n">ENCR_KUZNYECHIK_MGM_KTREE</span> <span class="o">=</span> <span class="mi">32</span>
 
     <span class="c1">#: Alias of :attr:`Cipher.ENCR_KUZNYECHIK_MGM_KTREE`.</span>
     <span class="n">KUZNYECHIK_MGM_KTREE</span> <span class="o">=</span> <span class="mi">32</span>
 
-    <span class="c1">#: ENCR_MAGMA_MGM_KTREE [RFC 9227]</span>
+    <span class="c1">#: ENCR_MAGMA_MGM_KTREE [:rfc:`9227`]</span>
     <span class="n">ENCR_MAGMA_MGM_KTREE</span> <span class="o">=</span> <span class="mi">33</span>
 
     <span class="c1">#: Alias of :attr:`Cipher.ENCR_MAGMA_MGM_KTREE`.</span>
     <span class="n">MAGMA_MGM_KTREE</span> <span class="o">=</span> <span class="mi">33</span>
 
-    <span class="c1">#: ENCR_KUZNYECHIK_MGM_MAC_KTREE [RFC 9227]</span>
+    <span class="c1">#: ENCR_KUZNYECHIK_MGM_MAC_KTREE [:rfc:`9227`]</span>
     <span class="n">ENCR_KUZNYECHIK_MGM_MAC_KTREE</span> <span class="o">=</span> <span class="mi">34</span>
 
     <span class="c1">#: Alias of :attr:`Cipher.ENCR_KUZNYECHIK_MGM_MAC_KTREE`.</span>
     <span class="n">KUZNYECHIK_MGM_MAC_KTREE</span> <span class="o">=</span> <span class="mi">34</span>
 
-    <span class="c1">#: ENCR_MAGMA_MGM_MAC_KTREE [RFC 9227]</span>
+    <span class="c1">#: ENCR_MAGMA_MGM_MAC_KTREE [:rfc:`9227`]</span>
     <span class="n">ENCR_MAGMA_MGM_MAC_KTREE</span> <span class="o">=</span> <span class="mi">35</span>
 
     <span class="c1">#: Alias of :attr:`Cipher.ENCR_MAGMA_MGM_MAC_KTREE`.</span>
@@ -711,7 +711,7 @@
             <span class="c1">#: Unassigned</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'Unassigned'</span><span class="p">)</span>
         <span class="k">if</span> <span class="mi">1024</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">65535</span><span class="p">:</span>
-            <span class="c1">#: Reserved for Private Use [RFC 7296]</span>
+            <span class="c1">#: Reserved for Private Use [:rfc:`7296`]</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'Reserved_for_Private_Use'</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_missing_</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 </div>

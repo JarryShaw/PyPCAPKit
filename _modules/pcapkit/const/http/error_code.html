@@ -497,47 +497,48 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">ErrorCode</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[ErrorCode] HTTP/2 Error Code"""</span>
 
-    <span class="c1">#: NO_ERROR, Graceful shutdown [RFC 9113, Section 7]</span>
+    <span class="c1">#: NO_ERROR, Graceful shutdown [:rfc:`9113#section-7`]</span>
     <span class="n">NO_ERROR</span> <span class="o">=</span> <span class="mh">0x00000000</span>
 
-    <span class="c1">#: PROTOCOL_ERROR, Protocol error detected [RFC 9113, Section 7]</span>
+    <span class="c1">#: PROTOCOL_ERROR, Protocol error detected [:rfc:`9113#section-7`]</span>
     <span class="n">PROTOCOL_ERROR</span> <span class="o">=</span> <span class="mh">0x00000001</span>
 
-    <span class="c1">#: INTERNAL_ERROR, Implementation fault [RFC 9113, Section 7]</span>
+    <span class="c1">#: INTERNAL_ERROR, Implementation fault [:rfc:`9113#section-7`]</span>
     <span class="n">INTERNAL_ERROR</span> <span class="o">=</span> <span class="mh">0x00000002</span>
 
-    <span class="c1">#: FLOW_CONTROL_ERROR, Flow-control limits exceeded [RFC 9113, Section 7]</span>
+    <span class="c1">#: FLOW_CONTROL_ERROR, Flow-control limits exceeded [:rfc:`9113#section-7`]</span>
     <span class="n">FLOW_CONTROL_ERROR</span> <span class="o">=</span> <span class="mh">0x00000003</span>
 
-    <span class="c1">#: SETTINGS_TIMEOUT, Settings not acknowledged [RFC 9113, Section 7]</span>
+    <span class="c1">#: SETTINGS_TIMEOUT, Settings not acknowledged [:rfc:`9113#section-7`]</span>
     <span class="n">SETTINGS_TIMEOUT</span> <span class="o">=</span> <span class="mh">0x00000004</span>
 
-    <span class="c1">#: STREAM_CLOSED, Frame received for closed stream [RFC 9113, Section 7]</span>
+    <span class="c1">#: STREAM_CLOSED, Frame received for closed stream [:rfc:`9113#section-7`]</span>
     <span class="n">STREAM_CLOSED</span> <span class="o">=</span> <span class="mh">0x00000005</span>
 
-    <span class="c1">#: FRAME_SIZE_ERROR, Frame size incorrect [RFC 9113, Section 7]</span>
+    <span class="c1">#: FRAME_SIZE_ERROR, Frame size incorrect [:rfc:`9113#section-7`]</span>
     <span class="n">FRAME_SIZE_ERROR</span> <span class="o">=</span> <span class="mh">0x00000006</span>
 
-    <span class="c1">#: REFUSED_STREAM, Stream not processed [RFC 9113, Section 7]</span>
+    <span class="c1">#: REFUSED_STREAM, Stream not processed [:rfc:`9113#section-7`]</span>
     <span class="n">REFUSED_STREAM</span> <span class="o">=</span> <span class="mh">0x00000007</span>
 
-    <span class="c1">#: CANCEL, Stream cancelled [RFC 9113, Section 7]</span>
+    <span class="c1">#: CANCEL, Stream cancelled [:rfc:`9113#section-7`]</span>
     <span class="n">CANCEL</span> <span class="o">=</span> <span class="mh">0x00000008</span>
 
-    <span class="c1">#: COMPRESSION_ERROR, Compression state not updated [RFC 9113, Section 7]</span>
+    <span class="c1">#: COMPRESSION_ERROR, Compression state not updated [:rfc:`9113#section-7`]</span>
     <span class="n">COMPRESSION_ERROR</span> <span class="o">=</span> <span class="mh">0x00000009</span>
 
-    <span class="c1">#: CONNECT_ERROR, TCP connection error for CONNECT method [RFC 9113, Section 7]</span>
+    <span class="c1">#: CONNECT_ERROR, TCP connection error for CONNECT method</span>
+    <span class="c1">#: [:rfc:`9113#section-7`]</span>
     <span class="n">CONNECT_ERROR</span> <span class="o">=</span> <span class="mh">0x0000000A</span>
 
-    <span class="c1">#: ENHANCE_YOUR_CALM, Processing capacity exceeded [RFC 9113, Section 7]</span>
+    <span class="c1">#: ENHANCE_YOUR_CALM, Processing capacity exceeded [:rfc:`9113#section-7`]</span>
     <span class="n">ENHANCE_YOUR_CALM</span> <span class="o">=</span> <span class="mh">0x0000000B</span>
 
-    <span class="c1">#: INADEQUATE_SECURITY, Negotiated TLS parameters not acceptable [RFC 9113,</span>
-    <span class="c1">#: Section 7]</span>
+    <span class="c1">#: INADEQUATE_SECURITY, Negotiated TLS parameters not acceptable</span>
+    <span class="c1">#: [:rfc:`9113#section-7`]</span>
     <span class="n">INADEQUATE_SECURITY</span> <span class="o">=</span> <span class="mh">0x0000000C</span>
 
-    <span class="c1">#: HTTP_1_1_REQUIRED, Use HTTP/1.1 for the request [RFC 9113, Section 7]</span>
+    <span class="c1">#: HTTP_1_1_REQUIRED, Use HTTP/1.1 for the request [:rfc:`9113#section-7`]</span>
     <span class="n">HTTP_1_1_REQUIRED</span> <span class="o">=</span> <span class="mh">0x0000000D</span>
 
 <div class="viewcode-block" id="ErrorCode._missing_">

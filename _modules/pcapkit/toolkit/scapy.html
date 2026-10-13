@@ -636,7 +636,9 @@
 <span class="sd">        packet: Scapy packet.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        A :obj:`dict` mapping of packet data. Each layer carries only the fields</span>
+<span class="sd">        A :obj:`dict` mapping of packet data. Its ``packet`` is the octets of</span>
+<span class="sd">        the frame (see :func:`_frame`), none for a zero-length one. Each layer</span>
+<span class="sd">        carries only the fields</span>
 <span class="sd">        set on it (for a dissected packet, those read from the wire, with no</span>
 <span class="sd">        defaults filled in). Field values that are themselves</span>
 <span class="sd">        Scapy packets (e.g. IP options, DNS records), including those inside</span>
@@ -668,7 +670,7 @@
         <span class="k">return</span> <span class="n">dict_</span>
 
     <span class="k">return</span> <span class="p">{</span>
-        <span class="s1">'packet'</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span>
+        <span class="s1">'packet'</span><span class="p">:</span> <span class="n">_frame</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span>
         <span class="n">packet</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">wrapper</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span>
     <span class="p">}</span></div>
 
@@ -693,8 +695,10 @@
 
 <span class="sd">    Note:</span>
 <span class="sd">        The octets are ``packet.original``, which `Scapy`_'s readers keep as read,</span>
-<span class="sd">        rather than ``bytes(packet)``, which rebuilds them. ``orig_len`` is</span>
-<span class="sd">        ``packet.wirelen``, the record's original length.</span>
+<span class="sd">        rather than ``bytes(packet)``, which rebuilds them; for a packet not read</span>
+<span class="sd">        from a capture, such as one built by hand, they are the octets it builds</span>
+<span class="sd">        into (see :func:`_frame`). ``orig_len`` is ``packet.wirelen``, the</span>
+<span class="sd">        record's original length.</span>
 
 <span class="sd">        The fraction in ``frame_info.ts_usec`` is in the capture's own resolution,</span>
 <span class="sd">        as the default engine's is. That resolution is the one</span>
@@ -709,8 +713,7 @@
         <span class="k">raise</span> <span class="n">ModuleNotFound</span><span class="p">(</span><span class="s2">"No module named 'scapy'"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'scapy'</span><span class="p">)</span>
     <span class="n">mapping</span> <span class="o">=</span> <span class="n">packet2dict</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
-    <span class="n">original</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="s1">'original'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-    <span class="n">octets</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">original</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">original</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">))</span> <span class="k">else</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+    <span class="n">octets</span> <span class="o">=</span> <span class="n">_frame</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
     <span class="n">wirelen</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="s1">'wirelen'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="n">orig_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">octets</span><span class="p">)</span> <span class="k">if</span> <span class="n">wirelen</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">wirelen</span><span class="p">)</span>
 
@@ -728,6 +731,34 @@
         <span class="n">orig_len</span><span class="o">=</span><span class="n">orig_len</span><span class="p">,</span>
     <span class="p">),</span> <span class="n">time_epoch</span><span class="o">=</span><span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">epoch</span><span class="p">))</span></div>
 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_frame</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the octets of the frame a Scapy packet stands for.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: Scapy packet.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        For a packet read from a capture, which every `Scapy`_ reader gives a</span>
+<span class="sd">        ``wirelen``, the record's original length, ``packet.original``: the</span>
+<span class="sd">        octets of the record, which the readers keep as read. For any other,</span>
+<span class="sd">        such as one built by hand, ``bytes(packet)``: the octets it builds into.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        `Scapy`_ dissects a packet only from a non-empty string, so a</span>
+<span class="sd">        zero-length frame comes back as the first layer its link type names,</span>
+<span class="sd">        every field left to its default, as one built by hand with no fields</span>
+<span class="sd">        would be. ``bytes()`` of it builds a header out of nothing -- 20 octets</span>
+<span class="sd">        at ``RAW`` and ``IPV4``, of an IPv4 layer whose ``ihl``, ``len`` and</span>
+<span class="sd">        ``chksum`` are :data:`None` until then -- where the record has none</span>
+<span class="sd">        (:issue:`1676`).</span>
+
+<span class="sd">    """</span>
+    <span class="n">original</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="s1">'original'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="s1">'wirelen'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">original</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">original</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_within_datagrams</span><span class="p">(</span><span class="n">layer</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
@@ -772,7 +803,10 @@
                 <span class="c1"># a zero is a jumbogram's, or else it declares nothing</span>
                 <span class="n">length</span> <span class="o">=</span> <span class="n">carrier</span><span class="o">.</span><span class="n">plen</span> <span class="ow">or</span> <span class="n">jumbo_payload_length</span><span class="p">(</span><span class="n">carrier</span><span class="o">.</span><span class="n">nh</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">carrier</span><span class="o">.</span><span class="n">payload</span><span class="p">))</span> <span class="ow">or</span> <span class="mi">0</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">carrier</span><span class="p">,</span> <span class="n">IP</span><span class="p">)</span> <span class="ow">and</span> <span class="n">carrier</span><span class="o">.</span><span class="n">len</span><span class="p">:</span>   <span class="c1"># a zero is TSO's</span>
-            <span class="n">length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">carrier</span><span class="o">.</span><span class="n">len</span> <span class="o">-</span> <span class="n">carrier</span><span class="o">.</span><span class="n">ihl</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">ihl</span> <span class="o">=</span> <span class="n">carrier</span><span class="o">.</span><span class="n">ihl</span>
+            <span class="k">if</span> <span class="n">ihl</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>     <span class="c1"># on a layer built by hand, given a Total Length but no IHL</span>
+                <span class="n">ihl</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">carrier</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0x0F</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">carrier</span><span class="o">.</span><span class="n">len</span> <span class="o">-</span> <span class="n">ihl</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># ``bytes()`` of a layer spans it and every layer after it, padding</span>
             <span class="c1"># included, so the difference is the octets between the end of the</span>
@@ -796,10 +830,16 @@
 <span class="sd">        (:rfc:`9293#section-3.1`), since the default engine then reads no</span>
 <span class="sd">        segment at all.</span>
 
+<span class="sd">    Note:</span>
+<span class="sd">        The Data Offset is read off the octets, which for a dissected layer</span>
+<span class="sd">        carry the ``dataofs`` `Scapy`_ read, and for a layer built by hand the</span>
+<span class="sd">        one it builds, as it leaves ``dataofs`` :data:`None` until then</span>
+<span class="sd">        (:issue:`1676`).</span>
+
 <span class="sd">    """</span>
     <span class="n">segment</span> <span class="o">=</span> <span class="n">_within_datagrams</span><span class="p">(</span><span class="n">tcp</span><span class="p">)</span>
-    <span class="n">hdr_len</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">dataofs</span> <span class="o">*</span> <span class="mi">4</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">20</span> <span class="ow">or</span> <span class="n">hdr_len</span> <span class="o">&lt;</span> <span class="mi">20</span><span class="p">:</span>
+    <span class="n">hdr_len</span> <span class="o">=</span> <span class="p">(</span><span class="n">segment</span><span class="p">[</span><span class="mi">12</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">TCP_MIN_HEADER_LEN</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">hdr_len</span> <span class="o">&lt;</span> <span class="n">TCP_MIN_HEADER_LEN</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">return</span> <span class="n">segment</span><span class="p">[:</span><span class="n">hdr_len</span><span class="p">],</span> <span class="n">segment</span><span class="p">[</span><span class="n">hdr_len</span><span class="p">:]</span>
 
@@ -913,8 +953,9 @@
 <span class="sd">        for a raw IP link type; and for a BSD loopback header the IPv4 or IPv6</span>
 <span class="sd">        packet its address family names, as the default engine reads it (see</span>
 <span class="sd">        :data:`LOOPBACK_FAMILIES`). :data:`None` for any other link type, whose</span>
-<span class="sd">        frames the default engine leaves raw (:issue:`1650`), or a loopback</span>
-<span class="sd">        family it dissects nothing behind.</span>
+<span class="sd">        frames the default engine leaves raw (:issue:`1650`), a loopback</span>
+<span class="sd">        family it dissects nothing behind, or a zero-length frame, of which it</span>
+<span class="sd">        dissects nothing at all (:issue:`1676`).</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        The default engine dissects the first layer of the ``NULL``,</span>
@@ -923,6 +964,10 @@
 <span class="sd">        and ``RAW`` as IPv4 or IPv6 by its version nibble, as `Scapy`_ does.</span>
 <span class="sd">        `Scapy`_ dissects IP straight behind the headers of many others, such as</span>
 <span class="sd">        ``LINUX_SLL``, ``LINUX_SLL2``, ``PPP`` and the ``DLT_RAW`` of 12.</span>
+
+<span class="sd">        `Scapy`_ hands a zero-length frame back as a layer of defaults, which</span>
+<span class="sd">        at ``RAW`` and ``IPV4`` is an IPv4 header with no IHL (see</span>
+<span class="sd">        :func:`_frame`), so it is told by the frame's octets, not its layers.</span>
 
 <span class="sd">        A loopback header's family is read as</span>
 <span class="sd">        :func:`~pcapkit.protocols.link.loopback.family_byteorder` reads it --</span>
@@ -937,16 +982,19 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.layers.inet6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span>
 
     <span class="n">linktype</span> <span class="o">=</span> <span class="n">_linktype</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">linktype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">NULL</span><span class="p">,</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ETHERNET</span><span class="p">,</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">LOOP</span><span class="p">,</span>
+                        <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">RAW</span><span class="p">,</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV4</span><span class="p">,</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV6</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">octets</span> <span class="o">=</span> <span class="n">_frame</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">octets</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">linktype</span> <span class="o">==</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ETHERNET</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">packet</span><span class="o">.</span><span class="n">payload</span><span class="p">,</span> <span class="mi">2</span>
     <span class="k">if</span> <span class="n">linktype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">RAW</span><span class="p">,</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV4</span><span class="p">,</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV6</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">packet</span><span class="p">,</span> <span class="mi">1</span>
-    <span class="k">if</span> <span class="n">linktype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">NULL</span><span class="p">,</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">LOOP</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.loopback</span><span class="w"> </span><span class="kn">import</span> <span class="n">family_byteorder</span>  <span class="c1"># isort:skip</span>
 
-    <span class="n">octets</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">octets</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="n">version</span> <span class="o">=</span> <span class="n">LOOPBACK_FAMILIES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">octets</span><span class="p">[:</span><span class="mi">4</span><span class="p">],</span> <span class="n">family_byteorder</span><span class="p">(</span><span class="n">octets</span><span class="p">[:</span><span class="mi">4</span><span class="p">],</span> <span class="n">linktype</span><span class="p">)))</span>
@@ -1345,9 +1393,12 @@
         <span class="c1"># the default engine hands it only the octets inside the Payload Length</span>
         <span class="c1"># of each IPv6 packet above it, so those are all it keeps (:issue:`1623`)</span>
         <span class="n">octets</span> <span class="o">=</span> <span class="n">_within_datagrams</span><span class="p">(</span><span class="n">ipv4</span><span class="p">)</span>
-        <span class="n">ihl</span> <span class="o">=</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">ihl</span> <span class="o">*</span> <span class="mi">4</span>
+        <span class="c1"># NOTE: the IHL and Total Length are read off the octets, as Scapy</span>
+        <span class="c1"># leaves ``ihl`` and ``len`` None on a layer built by hand until it is</span>
+        <span class="c1"># built (:issue:`1676`)</span>
+        <span class="n">ihl</span> <span class="o">=</span> <span class="p">(</span><span class="n">octets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0x0F</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span> <span class="k">if</span> <span class="n">octets</span> <span class="k">else</span> <span class="n">IPV4_HEADER_LEN</span>
         <span class="c1"># the default engine dissects no IPv4 header those octets cut short</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">octets</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">ihl</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">_ipv4_accepted</span><span class="p">(</span><span class="n">ipv4</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">octets</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">max</span><span class="p">(</span><span class="n">ihl</span><span class="p">,</span> <span class="n">IPV4_HEADER_LEN</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">_ipv4_accepted</span><span class="p">(</span><span class="n">ipv4</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">IP_Packet</span><span class="p">(</span>
@@ -1368,7 +1419,7 @@
             <span class="n">fo</span><span class="o">=</span><span class="n">ipv4</span><span class="o">.</span><span class="n">frag</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>                          <span class="c1"># fragment offset</span>
             <span class="n">ihl</span><span class="o">=</span><span class="n">ihl</span><span class="p">,</span>                                   <span class="c1"># internet header length</span>
             <span class="n">mf</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">MF</span><span class="p">),</span>                    <span class="c1"># more fragment flag</span>
-            <span class="n">tl</span><span class="o">=</span><span class="n">ipv4</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>                               <span class="c1"># total length, header includes</span>
+            <span class="n">tl</span><span class="o">=</span><span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">octets</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">],</span> <span class="s1">'big'</span><span class="p">),</span>     <span class="c1"># total length, header includes</span>
             <span class="n">header</span><span class="o">=</span><span class="n">octets</span><span class="p">[:</span><span class="n">ihl</span><span class="p">],</span>                       <span class="c1"># raw bytes type header</span>
             <span class="c1"># NOTE: this keeps the octets past the Total Length, as the default</span>
             <span class="c1"># engine's adapter does, since the reassembly machinery cuts the</span>

@@ -813,20 +813,22 @@
 <span class="n">_BOOLEAN_FIELD</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'1'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">'0'</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">'True'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">'False'</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>  <span class="c1"># type: dict[str, bool]</span>
 
 <span class="c1">#: IPv4 protocol numbers that make :func:`tcp_traceflow` read a frame from its</span>
-<span class="c1">#: captured octets (see :func:`_extension_header_carrier`): the AH and IPv6</span>
-<span class="c1">#: extension headers. The default engine reads past those of the</span>
+<span class="c1">#: captured octets though tshark dissects no TCP segment in it (see</span>
+<span class="c1">#: :func:`_extension_header_carrier`): the AH and IPv6 extension headers. The</span>
+<span class="c1">#: default engine reads past those of the</span>
 <span class="c1">#: :data:`~pcapkit.toolkit.pypcapfile.IPV4_EXTENSION_HEADERS` by rules of its</span>
 <span class="c1">#: own, and past Shim6 not at all, as its parser refuses IPv4; tshark dissects</span>
 <span class="c1">#: the TCP behind any of them by its own rules.</span>
 <span class="n">OCTETS_PROTOCOLS</span> <span class="o">=</span> <span class="n">IPV4_EXTENSION_HEADERS</span> <span class="o">|</span> <span class="p">{</span><span class="n">Enum_TransType</span><span class="o">.</span><span class="n">Shim6</span><span class="p">}</span>
 
 <span class="c1">#: tshark display filter matching every frame :func:`tcp_traceflow` asks the</span>
-<span class="c1">#: captured octets of: one with an IPv4 header whose protocol is one of the</span>
-<span class="c1">#: :data:`OCTETS_PROTOCOLS`. It matches every ``ip.proto`` field of a frame, so</span>
-<span class="c1">#: it matches all of those frames and maybe others. The members are joined with</span>
+<span class="c1">#: captured octets of: one tshark dissects TCP in (see :func:`_traces`), or one</span>
+<span class="c1">#: with an IPv4 header whose protocol is one of the :data:`OCTETS_PROTOCOLS`.</span>
+<span class="c1">#: It matches every ``tcp`` layer and ``ip.proto`` field of a frame, so it</span>
+<span class="c1">#: matches all of those frames and maybe others. The members are joined with</span>
 <span class="c1">#: ``||`` rather than written as a set, as tshark 4.6.9 refuses a set whose</span>
 <span class="c1">#: members are separated by spaces only.</span>
-<span class="n">OCTETS_FILTER</span> <span class="o">=</span> <span class="s1">' || '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">'ip.proto == </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span> <span class="k">for</span> <span class="n">protocol</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">OCTETS_PROTOCOLS</span><span class="p">))</span>
+<span class="n">OCTETS_FILTER</span> <span class="o">=</span> <span class="s1">' || '</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">'tcp'</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="sa">f</span><span class="s1">'ip.proto == </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span> <span class="k">for</span> <span class="n">protocol</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">OCTETS_PROTOCOLS</span><span class="p">))])</span>
 
 <span class="c1">#: Length of an Ethernet header: two MAC addresses and the EtherType.</span>
 <span class="n">ETHERNET_HEADER_LEN</span> <span class="o">=</span> <span class="mi">14</span>
@@ -1106,6 +1108,20 @@
     <span class="p">)</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_traces</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whether tshark's dissection of a PyShark packet has a TCP segment to trace.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: PyShark packet.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Whether :func:`_from_layers` finds a segment in it, its flags unread.</span>
+
+<span class="sd">    """</span>
+    <span class="n">ip</span><span class="p">,</span> <span class="n">tcp</span> <span class="o">=</span> <span class="n">_carrier</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">tcp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_has_fixed_header</span><span class="p">(</span><span class="n">tcp</span><span class="p">)</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_extension_header_carrier</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Find the IPv4 layer of a PyShark packet whose protocol names an AH or IPv6 extension header.</span>
 
@@ -1258,10 +1274,21 @@
 <span class="sd">        The packet's IP version and its octets on, to the end of the frame, as</span>
 <span class="sd">        :func:`_network_start` finds it by the frame's link type, if tshark</span>
 <span class="sd">        dissected it too: the packet's first ``ip`` or ``ipv6`` layer is of that</span>
-<span class="sd">        version, and tshark reports its version field there, with the layer's</span>
-<span class="sd">        source and destination addresses in the octets. Else :data:`None`: the</span>
-<span class="sd">        default engine dissects no IP packet right after the link layer, or</span>
-<span class="sd">        tshark dissected that layer out of other octets, e.g. another frame's.</span>
+<span class="sd">        version, and tshark reports its version field there, the layer's source</span>
+<span class="sd">        address in the header's Source Address field, and its destination</span>
+<span class="sd">        address in the octets where tshark reports that field (see below).</span>
+<span class="sd">        Else :data:`None`: the default engine dissects no IP packet right after</span>
+<span class="sd">        the link layer, or tshark dissected none there, e.g. as it reads an</span>
+<span class="sd">        IPv6 packet over link type ``IPV4`` (228) as IPv6, or dissected that</span>
+<span class="sd">        layer out of other octets, e.g. another frame's.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The destination address is matched where tshark reports it, not in</span>
+<span class="sd">        the header's Destination Address field: with an LSRR or SSRR option</span>
+<span class="sd">        whose route is not yet used up (:rfc:`791#section-3.1`), tshark</span>
+<span class="sd">        reports the route's last address as ``ip.dst``, at its place in the</span>
+<span class="sd">        option, and the header's as ``ip.cur_rt``, measured with tshark 4.6.9.</span>
+<span class="sd">        The default engine keys the segment by the header's, as the octets do.</span>
 
 <span class="sd">    """</span>
     <span class="n">linktype</span><span class="p">,</span> <span class="n">octets</span> <span class="o">=</span> <span class="n">captured</span>
@@ -1275,13 +1302,15 @@
     <span class="k">if</span> <span class="n">ip</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">ip</span><span class="o">.</span><span class="n">layer_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="n">name</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">position</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
-        <span class="n">addresses</span> <span class="o">=</span> <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">raw_value</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">dst</span><span class="o">.</span><span class="n">raw_value</span><span class="p">))</span>
+        <span class="n">position</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">pos</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">dst</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
+        <span class="n">source</span><span class="p">,</span> <span class="n">destination</span> <span class="o">=</span> <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">raw_value</span><span class="p">)),</span> <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">dst</span><span class="o">.</span><span class="n">raw_value</span><span class="p">))</span>
     <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="mi">4</span> <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">4</span> <span class="k">else</span> <span class="mi">16</span>
     <span class="n">where</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="p">(</span><span class="mi">12</span> <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">4</span> <span class="k">else</span> <span class="mi">8</span><span class="p">)</span>  <span class="c1"># the source address</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">position</span> <span class="o">!=</span> <span class="n">start</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">addresses</span><span class="p">)</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">8</span> <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">4</span> <span class="k">else</span> <span class="mi">32</span><span class="p">)</span>
-            <span class="ow">or</span> <span class="n">octets</span><span class="p">[</span><span class="n">where</span><span class="p">:</span><span class="n">where</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">addresses</span><span class="p">)]</span> <span class="o">!=</span> <span class="n">addresses</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">position</span> <span class="o">!=</span> <span class="n">start</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">source</span><span class="p">)</span> <span class="o">!=</span> <span class="n">size</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">destination</span><span class="p">)</span> <span class="o">!=</span> <span class="n">size</span>
+            <span class="ow">or</span> <span class="n">octets</span><span class="p">[</span><span class="n">where</span><span class="p">:</span><span class="n">where</span> <span class="o">+</span> <span class="n">size</span><span class="p">]</span> <span class="o">!=</span> <span class="n">source</span>
+            <span class="ow">or</span> <span class="n">target</span> <span class="o">&lt;</span> <span class="n">start</span> <span class="ow">or</span> <span class="n">octets</span><span class="p">[</span><span class="n">target</span><span class="p">:</span><span class="n">target</span> <span class="o">+</span> <span class="n">size</span><span class="p">]</span> <span class="o">!=</span> <span class="n">destination</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">return</span> <span class="n">version</span><span class="p">,</span> <span class="n">octets</span><span class="p">[</span><span class="n">start</span><span class="p">:]</span>
 
@@ -1372,37 +1401,43 @@
 <span class="sd">            :func:`tcp_traceflow`).</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        If the packet has an IPv4 layer whose protocol names an AH or IPv6</span>
-<span class="sd">        extension header (see :func:`_extension_header_carrier`), the segment</span>
-<span class="sd">        read from the octets of the frame's outermost IP packet on (see</span>
-<span class="sd">        :func:`_network` and :func:`_from_octets`), wherever that layer is;</span>
-<span class="sd">        otherwise, or where the frame cannot be had or the default engine</span>
-<span class="sd">        dissects no IP packet after its link layer, the segment of tshark's</span>
-<span class="sd">        dissection (see :func:`_from_layers`). :data:`None` if there is none.</span>
+<span class="sd">        If tshark's dissection has a segment (see :func:`_traces`), or an IPv4</span>
+<span class="sd">        layer whose protocol names an AH or IPv6 extension header (see</span>
+<span class="sd">        :func:`_extension_header_carrier`), the segment read from the octets of</span>
+<span class="sd">        the frame's outermost IP packet on (see :func:`_network` and</span>
+<span class="sd">        :func:`_from_octets`), or :data:`None` where the default engine</span>
+<span class="sd">        dissects no IP packet after the frame's link layer or tshark dissects</span>
+<span class="sd">        none there. Otherwise, or where the frame cannot be had, the segment of</span>
+<span class="sd">        tshark's dissection (see :func:`_from_layers`). :data:`None` if there</span>
+<span class="sd">        is none.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        ProtocolError: If a TCP flag field of tshark's dissection is not a</span>
 <span class="sd">            boolean tshark spelling.</span>
 
 <span class="sd">    Note:</span>
-<span class="sd">        tshark dissects such a header and what its Next Header names by rules</span>
-<span class="sd">        of its own, and nothing past a Mobility (135) or HIP (139) header,</span>
-<span class="sd">        whose payload it leaves out of the PDML that PyShark reads. The</span>
-<span class="sd">        default engine dispatches IPv4's protocol through the registry IPv6</span>
-<span class="sd">        uses, reads TCP behind such a header only if its TCP parser accepts</span>
-<span class="sd">        it, and none behind Shim6 (140), whose parser refuses IPv4</span>
-<span class="sd">        (:issue:`1625`). Reading from the outermost IP packet, as the default</span>
-<span class="sd">        engine does, stops where it stops before such a header: at a tunnel it</span>
-<span class="sd">        does not dissect, such as GRE or VXLAN, which tshark does, or past</span>
+<span class="sd">        tshark dissects TCP inside encapsulations the default engine leaves</span>
+<span class="sd">        raw: link types 12 and 14, which it reads as raw IP (101), Linux SLL,</span>
+<span class="sd">        an EtherType such as MPLS or PPPoE, 802.3 LLC/SNAP, Cisco ISL, and</span>
+<span class="sd">        tunnels such as GRE, VXLAN and L2TP (:issue:`1639`). And it dissects</span>
+<span class="sd">        an AH or IPv6 extension header in IPv4 and what its Next Header names</span>
+<span class="sd">        by rules of its own, and nothing past a Mobility (135) or HIP (139)</span>
+<span class="sd">        header, whose payload it leaves out of the PDML that PyShark reads.</span>
+<span class="sd">        The default engine dispatches IPv4's protocol through the registry</span>
+<span class="sd">        IPv6 uses, reads TCP behind such a header only if its TCP parser</span>
+<span class="sd">        accepts it, and none behind Shim6 (140), whose parser refuses IPv4</span>
+<span class="sd">        (:issue:`1625`). Reading the frame from its link layer on, as the</span>
+<span class="sd">        default engine does, stops where it stops: at a link type, EtherType or</span>
+<span class="sd">        tunnel it does not dissect, or past</span>
 <span class="sd">        :data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT`</span>
-<span class="sd">        extension headers in a row of an IPv6 packet carrying it.</span>
+<span class="sd">        extension headers in a row of an IPv6 packet.</span>
 
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">captured</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_extension_header_carrier</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">captured</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">_traces</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span> <span class="ow">or</span> <span class="n">_extension_header_carrier</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
         <span class="n">frame</span> <span class="o">=</span> <span class="n">captured</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
-        <span class="n">network</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">frame</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">network</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">_from_octets</span><span class="p">(</span><span class="o">*</span><span class="n">network</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">network</span> <span class="o">=</span> <span class="n">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">frame</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">network</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">_from_octets</span><span class="p">(</span><span class="o">*</span><span class="n">network</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">_from_layers</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
 
@@ -1424,7 +1459,8 @@
 <span class="sd">            :data:`OCTETS_FILTER` matches. The engine passes</span>
 <span class="sd">            :meth:`PyShark._captured</span>
 <span class="sd">            &lt;pcapkit.foundation.engines.pyshark.PyShark._captured&gt;`; without</span>
-<span class="sd">            it, such a packet is read as tshark dissects it.</span>
+<span class="sd">            it, or where it returns :data:`None`, a packet is read as tshark</span>
+<span class="sd">            dissects it.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Data for TCP flow tracing.</span>
@@ -1432,10 +1468,11 @@
 <span class="sd">        * If the ``packet`` can be used for TCP flow tracing. A packet can be reassembled</span>
 <span class="sd">          if it contains TCP layer with a whole fixed header (see</span>
 <span class="sd">          :func:`_has_fixed_header`), keyed by the IP layer that carries it -- in an</span>
-<span class="sd">          IP-in-IP tunnel, the innermost (see :func:`_carrier`). In a frame with</span>
-<span class="sd">          an AH or IPv6 extension header in IPv4, it is the TCP the default</span>
-<span class="sd">          engine reads in the frame's octets, by the frame's link type in the</span>
-<span class="sd">          capture file, instead (see :func:`_segment`).</span>
+<span class="sd">          IP-in-IP tunnel, the innermost (see :func:`_carrier`). Where</span>
+<span class="sd">          ``captured`` has the frame, it is instead the TCP the default engine</span>
+<span class="sd">          reads in the frame's octets, by the frame's link type in the capture</span>
+<span class="sd">          file, and none where the default engine reads none: behind a link</span>
+<span class="sd">          type, EtherType or tunnel it does not dissect (see :func:`_segment`).</span>
 <span class="sd">        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP</span>
 <span class="sd">          flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.</span>
 
@@ -1485,8 +1522,8 @@
             <span class="c1"># NOTE: PyShark reports dissected *fields*, not the octets behind</span>
             <span class="c1"># them, so there is no header or payload to hand over -- which is</span>
             <span class="c1"># the same reason this module carries no ``tcp_reassembly`` at all.</span>
-            <span class="c1"># The octets ``_segment`` reads behind an extension header are of</span>
-            <span class="c1"># those few frames alone, so are not handed over either.</span>
+            <span class="c1"># The octets ``_segment`` reads are missing wherever the frame</span>
+            <span class="c1"># cannot be had, so are not handed over either.</span>
             <span class="c1"># ``Extractor`` refuses ``trace_analyse=True`` on this engine, so</span>
             <span class="c1"># nothing reads these two.</span>
             <span class="n">header</span><span class="o">=</span><span class="sa">b</span><span class="s1">''</span><span class="p">,</span>                                                          <span class="c1"># unavailable</span>

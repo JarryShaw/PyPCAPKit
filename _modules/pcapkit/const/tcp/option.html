@@ -497,52 +497,52 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">Option</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[Option] TCP Option Kind Numbers"""</span>
 
-    <span class="c1">#: End of Option List [RFC 9293]</span>
+    <span class="c1">#: End of Option List [:rfc:`9293`]</span>
     <span class="n">End_of_Option_List</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="c1">#: No-Operation [RFC 9293]</span>
+    <span class="c1">#: No-Operation [:rfc:`9293`]</span>
     <span class="n">No_Operation</span> <span class="o">=</span> <span class="mi">1</span>
 
-    <span class="c1">#: Maximum Segment Size [RFC 9293]</span>
+    <span class="c1">#: Maximum Segment Size [:rfc:`9293`]</span>
     <span class="n">Maximum_Segment_Size</span> <span class="o">=</span> <span class="mi">2</span>
 
-    <span class="c1">#: Window Scale [RFC 7323]</span>
+    <span class="c1">#: Window Scale [:rfc:`7323`]</span>
     <span class="n">Window_Scale</span> <span class="o">=</span> <span class="mi">3</span>
 
-    <span class="c1">#: SACK Permitted [RFC 2018]</span>
+    <span class="c1">#: SACK Permitted [:rfc:`2018`]</span>
     <span class="n">SACK_Permitted</span> <span class="o">=</span> <span class="mi">4</span>
 
-    <span class="c1">#: SACK [RFC 2018]</span>
+    <span class="c1">#: SACK [:rfc:`2018`]</span>
     <span class="n">SACK</span> <span class="o">=</span> <span class="mi">5</span>
 
-    <span class="c1">#: Echo (obsoleted by option 8) [RFC 1072][; ][RFC 6247]</span>
+    <span class="c1">#: Echo (obsoleted by option 8) [:rfc:`1072`][:rfc:`6247`]</span>
     <span class="n">Echo</span> <span class="o">=</span> <span class="mi">6</span>
 
-    <span class="c1">#: Echo Reply (obsoleted by option 8) [RFC 1072][; ][RFC 6247]</span>
+    <span class="c1">#: Echo Reply (obsoleted by option 8) [:rfc:`1072`][:rfc:`6247`]</span>
     <span class="n">Echo_Reply</span> <span class="o">=</span> <span class="mi">7</span>
 
-    <span class="c1">#: Timestamps [RFC 7323]</span>
+    <span class="c1">#: Timestamps [:rfc:`7323`]</span>
     <span class="n">Timestamps</span> <span class="o">=</span> <span class="mi">8</span>
 
-    <span class="c1">#: Partial Order Connection Permitted (obsolete) [RFC 1693][; ][RFC 6247]</span>
+    <span class="c1">#: Partial Order Connection Permitted (obsolete) [:rfc:`1693`][:rfc:`6247`]</span>
     <span class="n">Partial_Order_Connection_Permitted</span> <span class="o">=</span> <span class="mi">9</span>
 
-    <span class="c1">#: Partial Order Service Profile (obsolete) [RFC 1693][; ][RFC 6247]</span>
+    <span class="c1">#: Partial Order Service Profile (obsolete) [:rfc:`1693`][:rfc:`6247`]</span>
     <span class="n">Partial_Order_Service_Profile</span> <span class="o">=</span> <span class="mi">10</span>
 
-    <span class="c1">#: CC (obsolete) [RFC 1644][; ][RFC 6247]</span>
+    <span class="c1">#: CC (obsolete) [:rfc:`1644`][:rfc:`6247`]</span>
     <span class="n">CC</span> <span class="o">=</span> <span class="mi">11</span>
 
-    <span class="c1">#: CC.NEW (obsolete) [RFC 1644][; ][RFC 6247]</span>
+    <span class="c1">#: CC.NEW (obsolete) [:rfc:`1644`][:rfc:`6247`]</span>
     <span class="n">CC_NEW</span> <span class="o">=</span> <span class="mi">12</span>
 
-    <span class="c1">#: CC.ECHO (obsolete) [RFC 1644][; ][RFC 6247]</span>
+    <span class="c1">#: CC.ECHO (obsolete) [:rfc:`1644`][:rfc:`6247`]</span>
     <span class="n">CC_ECHO</span> <span class="o">=</span> <span class="mi">13</span>
 
-    <span class="c1">#: TCP Alternate Checksum Request (obsolete) [RFC 1146][; ][RFC 6247]</span>
+    <span class="c1">#: TCP Alternate Checksum Request (obsolete) [:rfc:`1146`][:rfc:`6247`]</span>
     <span class="n">TCP_Alternate_Checksum_Request</span> <span class="o">=</span> <span class="mi">14</span>
 
-    <span class="c1">#: TCP Alternate Checksum Data (obsolete) [RFC 1146][; ][RFC 6247]</span>
+    <span class="c1">#: TCP Alternate Checksum Data (obsolete) [:rfc:`1146`][:rfc:`6247`]</span>
     <span class="n">TCP_Alternate_Checksum_Data</span> <span class="o">=</span> <span class="mi">15</span>
 
     <span class="c1">#: Skeeter [Stev Knowles]</span>
@@ -551,10 +551,10 @@
     <span class="c1">#: Bubba [Stev Knowles]</span>
     <span class="n">Bubba</span> <span class="o">=</span> <span class="mi">17</span>
 
-    <span class="c1">#: Trailer Checksum Option [Subbu Subramaniam][; ][Monroe Bridges]</span>
+    <span class="c1">#: Trailer Checksum Option [Subbu Subramaniam][Monroe Bridges]</span>
     <span class="n">Trailer_Checksum_Option</span> <span class="o">=</span> <span class="mi">18</span>
 
-    <span class="c1">#: MD5 Signature Option (obsoleted by option 29) [RFC 2385]</span>
+    <span class="c1">#: MD5 Signature Option (obsoleted by option 29) [:rfc:`2385`]</span>
     <span class="n">MD5_Signature_Option</span> <span class="o">=</span> <span class="mi">19</span>
 
     <span class="c1">#: SCPS Capabilities [Keith Scott]</span>
@@ -578,16 +578,16 @@
     <span class="c1">#: TCP Compression Filter [Steve Bellovin]</span>
     <span class="n">TCP_Compression_Filter</span> <span class="o">=</span> <span class="mi">26</span>
 
-    <span class="c1">#: Quick-Start Response [RFC 4782]</span>
+    <span class="c1">#: Quick-Start Response [:rfc:`4782`]</span>
     <span class="n">Quick_Start_Response</span> <span class="o">=</span> <span class="mi">27</span>
 
-    <span class="c1">#: User Timeout Option (also, other known unauthorized use)  [RFC 5482]</span>
+    <span class="c1">#: User Timeout Option (also, other known unauthorized use)  [:rfc:`5482`]</span>
     <span class="n">User_Timeout_Option</span> <span class="o">=</span> <span class="mi">28</span>
 
-    <span class="c1">#: TCP Authentication Option (TCP-AO) [RFC 5925]</span>
+    <span class="c1">#: TCP Authentication Option (TCP-AO) [:rfc:`5925`]</span>
     <span class="n">TCP_Authentication_Option</span> <span class="o">=</span> <span class="mi">29</span>
 
-    <span class="c1">#: Multipath TCP (MPTCP) [RFC 8684]</span>
+    <span class="c1">#: Multipath TCP (MPTCP) [:rfc:`8684`]</span>
     <span class="n">Multipath_TCP</span> <span class="o">=</span> <span class="mi">30</span>
 
     <span class="c1">#: Reserved (known unauthorized use without proper IANA assignment)</span>
@@ -599,10 +599,10 @@
     <span class="c1">#: Reserved (known unauthorized use without proper IANA assignment)</span>
     <span class="n">Reserved_33</span> <span class="o">=</span> <span class="mi">33</span>
 
-    <span class="c1">#: TCP Fast Open Cookie [RFC 7413]</span>
+    <span class="c1">#: TCP Fast Open Cookie [:rfc:`7413`]</span>
     <span class="n">TCP_Fast_Open_Cookie</span> <span class="o">=</span> <span class="mi">34</span>
 
-    <span class="c1">#: Encryption Negotiation (TCP-ENO) [RFC 8547]</span>
+    <span class="c1">#: Encryption Negotiation (TCP-ENO) [:rfc:`8547`]</span>
     <span class="n">Encryption_Negotiation</span> <span class="o">=</span> <span class="mi">69</span>
 
     <span class="c1">#: Reserved (known unauthorized use without proper IANA assignment)</span>
@@ -617,21 +617,21 @@
     <span class="c1">#: Reserved (known unauthorized use without proper IANA assignment)</span>
     <span class="n">Reserved_78</span> <span class="o">=</span> <span class="mi">78</span>
 
-    <span class="c1">#: Accurate ECN Order 0 (AccECN0) [RFC 9768]</span>
+    <span class="c1">#: Accurate ECN Order 0 (AccECN0) [:rfc:`9768`]</span>
     <span class="n">Accurate_ECN_Order_0</span> <span class="o">=</span> <span class="mi">172</span>
 
     <span class="c1">#: Reserved</span>
     <span class="n">Reserved_173</span> <span class="o">=</span> <span class="mi">173</span>
 
-    <span class="c1">#: Accurate ECN Order 1 (AccECN1) [RFC 9768]</span>
+    <span class="c1">#: Accurate ECN Order 1 (AccECN1) [:rfc:`9768`]</span>
     <span class="n">Accurate_ECN_Order_1</span> <span class="o">=</span> <span class="mi">174</span>
 
     <span class="c1">#: RFC3692-style Experiment 1 (also improperly used for shipping</span>
-    <span class="c1">#: products)  [RFC 4727]</span>
+    <span class="c1">#: products)  [:rfc:`4727`]</span>
     <span class="n">RFC3692_style_Experiment_1</span> <span class="o">=</span> <span class="mi">253</span>
 
     <span class="c1">#: RFC3692-style Experiment 2 (also improperly used for shipping</span>
-    <span class="c1">#: products)  [RFC 4727]</span>
+    <span class="c1">#: products)  [:rfc:`4727`]</span>
     <span class="n">RFC3692_style_Experiment_2</span> <span class="o">=</span> <span class="mi">254</span>
 
 <div class="viewcode-block" id="Option._missing_">

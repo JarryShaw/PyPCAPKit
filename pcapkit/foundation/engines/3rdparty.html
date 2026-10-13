@@ -1660,7 +1660,9 @@ support, as is used by <a class="reference internal" href="../extraction.html#pc
 TCP and UDP and nothing else. IPv6 reassembly is therefore unavailable and is
 disabled – with an <a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a> –
 when requested; IPv4 and TCP reassembly and TCP flow tracing remain
-available. PCAP-NG is rejected with a
+available. The IP packet of a BSD loopback or raw-IP frame, which it does
+not decode, is read by <a class="reference internal" href="../../toolkit/3rdparty.html#module-pcapkit.toolkit.pypcapfile" title="pcapkit.toolkit.pypcapfile"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pypcapfile</span></code></a> instead
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1667">#1667</a>). PCAP-NG is rejected with a
 <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FormatError</span></code></a>. <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> 0.12.0 drops
 every record of a big-endian savefile, every record from a zero-length one
 on, and a truncated final record, so the engine reads the records itself,
@@ -1682,10 +1684,15 @@ no PCAP-NG support. Consequently this engine</p>
 objects, as <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> 0.12.0 drops records the <code class="docutils literal notranslate"><span class="pre">default</span></code> engine
 reads – see <a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._read_records" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._read_records"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_records()</span></code></a>,</p></li>
 <li><p>disables IPv6 reassembly, warning as it does so, while leaving IPv4 and
-TCP reassembly and TCP flow tracing in place, and</p></li>
+TCP reassembly and TCP flow tracing in place,</p></li>
 <li><p>leaves TCP over IPv6 out of TCP reassembly and flow tracing, with one
 <a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a> per capture – see
-<a class="reference internal" href="../../toolkit/3rdparty.html#module-pcapkit.toolkit.pypcapfile" title="pcapkit.toolkit.pypcapfile"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pypcapfile</span></code></a>.</p></li>
+<a class="reference internal" href="../../toolkit/3rdparty.html#module-pcapkit.toolkit.pypcapfile" title="pcapkit.toolkit.pypcapfile"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pypcapfile</span></code></a> – and</p></li>
+<li><p>leaves the frames of a link type <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> has no decoder for
+undecoded, from which <a class="reference internal" href="../../toolkit/3rdparty.html#module-pcapkit.toolkit.pypcapfile" title="pcapkit.toolkit.pypcapfile"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pypcapfile</span></code></a> reads the IP
+packet of the BSD loopback and raw-IP ones itself, as the <code class="docutils literal notranslate"><span class="pre">default</span></code>
+engine dissects it (see
+<a class="reference internal" href="../../toolkit/3rdparty.html#pcapkit.toolkit.pypcapfile.READ_LINKTYPES" title="pcapkit.toolkit.pypcapfile.READ_LINKTYPES"><code class="xref py py-data docutils literal notranslate"><span class="pre">READ_LINKTYPES</span></code></a>).</p></li>
 </ul>
 <p>The engine stops decoding at the network layer rather than descending into
 the transport layer. <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> decoders <em>replace</em> the payload bytes of
@@ -1786,8 +1793,10 @@ is provided as the PyPCAPFile engine does not
 support such operations.</p></li>
 <li><p>if IPv6 reassembly is enabled, as <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> has no IPv6
 decoder.</p></li>
-<li><p>if <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> has no decoder for the savefile’s link layer
-type, in which case frames are left undecoded.</p></li>
+<li><p>if the savefile’s link layer type is left unread: neither
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> has a decoder for it nor
+<a class="reference internal" href="../../toolkit/3rdparty.html#module-pcapkit.toolkit.pypcapfile" title="pcapkit.toolkit.pypcapfile"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pypcapfile</span></code></a> reads it (see
+<a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._get_decoder" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._get_decoder"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_get_decoder()</span></code></a>).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
@@ -1860,9 +1869,13 @@ for more operational information.</p>
 <dd class="field-odd"><p>The decoder class, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> when <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> has none.</p>
 </dd>
 <dt class="field-even">Warns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>AttributeWarning</strong> – If no decoder is available, as frames will then be
-left hexlified – see <a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile.run" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> – and no reassembly or flow
-tracing is possible.</p>
+<dd class="field-even"><p><strong>AttributeWarning</strong> – If no decoder is available and the link layer type
+is none of the <a class="reference internal" href="../../toolkit/3rdparty.html#pcapkit.toolkit.pypcapfile.READ_LINKTYPES" title="pcapkit.toolkit.pypcapfile.READ_LINKTYPES"><code class="xref py py-data docutils literal notranslate"><span class="pre">READ_LINKTYPES</span></code></a>,
+as frames will then be left hexlified – see <a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile.run" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> – and
+no reassembly or flow tracing is possible. The frames of those
+link types are left undecoded too, but reassembly and flow
+tracing read the IP packet in them, as the <code class="docutils literal notranslate"><span class="pre">default</span></code> engine
+does, so nothing is lost there to warn of.</p>
 </dd>
 </dl>
 </dd></dl>
