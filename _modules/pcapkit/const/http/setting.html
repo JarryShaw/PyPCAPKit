@@ -497,39 +497,38 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">Setting</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[Setting] HTTP/2 Settings"""</span>
 
-    <span class="c1">#: ``Reserved`` [:rfc:`9113`]</span>
+    <span class="c1">#: ``Reserved`` [RFC 9113]</span>
     <span class="n">Reserved_0x0000</span> <span class="o">=</span> <span class="mh">0x0000</span>
 
-    <span class="c1">#: ``HEADER_TABLE_SIZE`` [:rfc:`9113#section-6.5.2`] (Initial Value: 4096)</span>
+    <span class="c1">#: ``HEADER_TABLE_SIZE`` [RFC 9113, Section 6.5.2] (Initial Value: 4096)</span>
     <span class="n">HEADER_TABLE_SIZE</span> <span class="o">=</span> <span class="mh">0x0001</span>
 
-    <span class="c1">#: ``ENABLE_PUSH`` [:rfc:`9113#section-6.5.2`] (Initial Value: 1)</span>
+    <span class="c1">#: ``ENABLE_PUSH`` [RFC 9113, Section 6.5.2] (Initial Value: 1)</span>
     <span class="n">ENABLE_PUSH</span> <span class="o">=</span> <span class="mh">0x0002</span>
 
-    <span class="c1">#: ``MAX_CONCURRENT_STREAMS`` [:rfc:`9113#section-6.5.2`] (Initial Value:</span>
+    <span class="c1">#: ``MAX_CONCURRENT_STREAMS`` [RFC 9113, Section 6.5.2] (Initial Value:</span>
     <span class="c1">#: infinite)</span>
     <span class="n">MAX_CONCURRENT_STREAMS</span> <span class="o">=</span> <span class="mh">0x0003</span>
 
-    <span class="c1">#: ``INITIAL_WINDOW_SIZE`` [:rfc:`9113#section-6.5.2`] (Initial Value: 65535)</span>
+    <span class="c1">#: ``INITIAL_WINDOW_SIZE`` [RFC 9113, Section 6.5.2] (Initial Value: 65535)</span>
     <span class="n">INITIAL_WINDOW_SIZE</span> <span class="o">=</span> <span class="mh">0x0004</span>
 
-    <span class="c1">#: ``MAX_FRAME_SIZE`` [:rfc:`9113#section-6.5.2`] (Initial Value: 16384)</span>
+    <span class="c1">#: ``MAX_FRAME_SIZE`` [RFC 9113, Section 6.5.2] (Initial Value: 16384)</span>
     <span class="n">MAX_FRAME_SIZE</span> <span class="o">=</span> <span class="mh">0x0005</span>
 
-    <span class="c1">#: ``MAX_HEADER_LIST_SIZE`` [:rfc:`9113#section-6.5.2`] (Initial Value:</span>
-    <span class="c1">#: infinite)</span>
+    <span class="c1">#: ``MAX_HEADER_LIST_SIZE`` [RFC 9113, Section 6.5.2] (Initial Value: infinite)</span>
     <span class="n">MAX_HEADER_LIST_SIZE</span> <span class="o">=</span> <span class="mh">0x0006</span>
 
     <span class="c1">#: ``Unassigned``</span>
     <span class="n">Unassigned_0x0007</span> <span class="o">=</span> <span class="mh">0x0007</span>
 
-    <span class="c1">#: ``SETTINGS_ENABLE_CONNECT_PROTOCOL`` [:rfc:`8441`] (Initial Value: 0)</span>
+    <span class="c1">#: ``SETTINGS_ENABLE_CONNECT_PROTOCOL`` [RFC 8441] (Initial Value: 0)</span>
     <span class="n">SETTINGS_ENABLE_CONNECT_PROTOCOL</span> <span class="o">=</span> <span class="mh">0x0008</span>
 
-    <span class="c1">#: ``SETTINGS_NO_RFC7540_PRIORITIES`` [:rfc:`9218`] (Initial Value: 0)</span>
+    <span class="c1">#: ``SETTINGS_NO_RFC7540_PRIORITIES`` [RFC 9218] (Initial Value: 0)</span>
     <span class="n">SETTINGS_NO_RFC7540_PRIORITIES</span> <span class="o">=</span> <span class="mh">0x0009</span>
 
-    <span class="c1">#: ``TLS_RENEG_PERMITTED`` [MS-HTTP2E][Gabriel Montenegro] (Initial Value:</span>
+    <span class="c1">#: ``TLS_RENEG_PERMITTED`` [MS-HTTP2E][; ][Gabriel Montenegro] (Initial Value:</span>
     <span class="c1">#: 0x00)</span>
     <span class="n">TLS_RENEG_PERMITTED</span> <span class="o">=</span> <span class="mh">0x0010</span>
 
@@ -593,7 +592,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=65d3e7b0"></script>
+</div><script src="../../../../_static/documentation_options.js?v=2864e1d3"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

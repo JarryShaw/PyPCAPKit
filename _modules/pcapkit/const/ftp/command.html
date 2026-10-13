@@ -538,34 +538,34 @@
     <span class="c1">#: FTP Extensions for NAT/IPv6 [:rfc:`2428`].</span>
     <span class="n">nat6</span> <span class="o">=</span> <span class="s1">'&lt;nat6&gt;'</span>
 
-    <span class="c1">#: Authentication/Security Mechanism [2][:rfc:`2773`][:rfc:`4217`]</span>
+    <span class="c1">#: Authentication/Security Mechanism [2][RFC 2773][;][RFC 4217]</span>
     <span class="n">AUTH</span> <span class="o">=</span> <span class="s1">'AUTH'</span>
 
-    <span class="c1">#: Hostname [:rfc:`7151`]</span>
+    <span class="c1">#: Hostname [RFC 7151]</span>
     <span class="n">HOST</span> <span class="o">=</span> <span class="s1">'HOST'</span>
 
-    <span class="c1">#: Language (for Server Messages) [:rfc:`2640`]</span>
+    <span class="c1">#: Language (for Server Messages) [RFC 2640]</span>
     <span class="n">UTF8</span> <span class="o">=</span> <span class="s1">'UTF8'</span>
 
-    <span class="c1">#: File Modification Time [:rfc:`3659`]</span>
+    <span class="c1">#: File Modification Time [RFC 3659]</span>
     <span class="n">MDTM</span> <span class="o">=</span> <span class="s1">'MDTM'</span>
 
-    <span class="c1">#: List Directory (for machine) [:rfc:`3659`]</span>
+    <span class="c1">#: List Directory (for machine) [RFC 3659]</span>
     <span class="n">MLST</span> <span class="o">=</span> <span class="s1">'MLST'</span>
 
-    <span class="c1">#: Protection Buffer Size [:rfc:`4217`]</span>
+    <span class="c1">#: Protection Buffer Size [RFC 4217]</span>
     <span class="n">PBSZ</span> <span class="o">=</span> <span class="s1">'PBSZ'</span>
 
-    <span class="c1">#: Data Channel Protection Level [:rfc:`4217`]</span>
+    <span class="c1">#: Data Channel Protection Level [RFC 4217]</span>
     <span class="n">PROT</span> <span class="o">=</span> <span class="s1">'PROT'</span>
 
-    <span class="c1">#: Restart (for STREAM mode) [3][:rfc:`3659`]</span>
+    <span class="c1">#: Restart (for STREAM mode) [3][RFC 3659]</span>
     <span class="n">REST</span> <span class="o">=</span> <span class="s1">'REST'</span>
 
-    <span class="c1">#: File Size [:rfc:`3659`]</span>
+    <span class="c1">#: File Size [RFC 3659]</span>
     <span class="n">SIZE</span> <span class="o">=</span> <span class="s1">'SIZE'</span>
 
-    <span class="c1">#: Trivial Virtual File Store [:rfc:`3659`]</span>
+    <span class="c1">#: Trivial Virtual File Store [RFC 3659]</span>
     <span class="n">TVFS</span> <span class="o">=</span> <span class="s1">'TVFS'</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
@@ -768,184 +768,184 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s1">'&lt;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_name_</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">desc</span><span class="si">}</span><span class="s1">&gt;'</span>
 
-    <span class="c1">#: Abort [:rfc:`959`]</span>
+    <span class="c1">#: Abort [RFC 959]</span>
     <span class="n">ABOR</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'ABOR'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Abort'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
-    <span class="c1">#: Account [:rfc:`959`]</span>
+    <span class="c1">#: Account [RFC 959]</span>
     <span class="n">ACCT</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'ACCT'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Account'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
-    <span class="c1">#: Authentication/Security Data [:rfc:`2228`][:rfc:`2773`][:rfc:`4217`]</span>
+    <span class="c1">#: Authentication/Security Data [RFC 2228][;][RFC 2773][;][RFC 4217]</span>
     <span class="n">ADAT</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'ADAT'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">secu</span><span class="p">,</span> <span class="s1">'Authentication/Security Data'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
-    <span class="c1">#: FTP64 ALG status [:rfc:`6384`][Section 11]</span>
+    <span class="c1">#: FTP64 ALG status [RFC 6384, Section 11]</span>
     <span class="n">ALGS</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'ALGS'</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">'FTP64 ALG status'</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
-    <span class="c1">#: Allocate [:rfc:`959`]</span>
+    <span class="c1">#: Allocate [RFC 959]</span>
     <span class="n">ALLO</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'ALLO'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Allocate'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
-    <span class="c1">#: Append (with create) [:rfc:`959`]</span>
+    <span class="c1">#: Append (with create) [RFC 959]</span>
     <span class="n">APPE</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'APPE'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Append (with create)'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
-    <span class="c1">#: Authentication/Security Mechanism [2][:rfc:`2773`][:rfc:`4217`]</span>
+    <span class="c1">#: Authentication/Security Mechanism [2][RFC 2773][;][RFC 4217]</span>
     <span class="n">AUTH</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'AUTH'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">AUTH</span><span class="p">,</span> <span class="s1">'Authentication/Security Mechanism'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
-    <span class="c1">#: Clear Command Channel [:rfc:`2228`]</span>
+    <span class="c1">#: Clear Command Channel [RFC 2228]</span>
     <span class="n">CCC</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'CCC'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">secu</span><span class="p">,</span> <span class="s1">'Clear Command Channel'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
-    <span class="c1">#: Change to Parent Directory [:rfc:`959`]</span>
+    <span class="c1">#: Change to Parent Directory [RFC 959]</span>
     <span class="n">CDUP</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'CDUP'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Change to Parent Directory'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
-    <span class="c1">#: Confidentiality Protected Command [:rfc:`2228`]</span>
+    <span class="c1">#: Confidentiality Protected Command [RFC 2228]</span>
     <span class="n">CONF</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'CONF'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">secu</span><span class="p">,</span> <span class="s1">'Confidentiality Protected Command'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
-    <span class="c1">#: Change Working Directory [:rfc:`959`]</span>
+    <span class="c1">#: Change Working Directory [RFC 959]</span>
     <span class="n">CWD</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'CWD'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Change Working Directory'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
-    <span class="c1">#: Delete File [:rfc:`959`]</span>
+    <span class="c1">#: Delete File [RFC 959]</span>
     <span class="n">DELE</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'DELE'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Delete File'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
-    <span class="c1">#: Privacy Protected Command [:rfc:`2228`][:rfc:`2773`][:rfc:`4217`]</span>
+    <span class="c1">#: Privacy Protected Command [RFC 2228][;][RFC 2773][;][RFC 4217]</span>
     <span class="n">ENC</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'ENC'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">secu</span><span class="p">,</span> <span class="s1">'Privacy Protected Command'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
-    <span class="c1">#: Extended Port [:rfc:`2428`]</span>
+    <span class="c1">#: Extended Port [RFC 2428]</span>
     <span class="n">EPRT</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'EPRT'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">nat6</span><span class="p">,</span> <span class="s1">'Extended Port'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
-    <span class="c1">#: Extended Passive Mode [:rfc:`2428`]</span>
+    <span class="c1">#: Extended Passive Mode [RFC 2428]</span>
     <span class="n">EPSV</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'EPSV'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">nat6</span><span class="p">,</span> <span class="s1">'Extended Passive Mode'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
-    <span class="c1">#: Feature Negotiation [:rfc:`2389`]</span>
+    <span class="c1">#: Feature Negotiation [RFC 2389]</span>
     <span class="n">FEAT</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'FEAT'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">feat</span><span class="p">,</span> <span class="s1">'Feature Negotiation'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
-    <span class="c1">#: Help [:rfc:`959`]</span>
+    <span class="c1">#: Help [RFC 959]</span>
     <span class="n">HELP</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'HELP'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Help'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
-    <span class="c1">#: Hostname [:rfc:`7151`]</span>
+    <span class="c1">#: Hostname [RFC 7151]</span>
     <span class="n">HOST</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'HOST'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">HOST</span><span class="p">,</span> <span class="s1">'Hostname'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
-    <span class="c1">#: Language (for Server Messages) [:rfc:`2640`]</span>
+    <span class="c1">#: Language (for Server Messages) [RFC 2640]</span>
     <span class="n">LANG</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'LANG'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">UTF8</span><span class="p">,</span> <span class="s1">'Language (for Server Messages)'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
-    <span class="c1">#: List [:rfc:`959`][:rfc:`1123`]</span>
+    <span class="c1">#: List [RFC 959][;][RFC 1123]</span>
     <span class="n">LIST</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'LIST'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'List'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
-    <span class="c1">#: Data Port [:rfc:`1545`][:rfc:`1639`]</span>
+    <span class="c1">#: Data Port [RFC 1545][;][RFC 1639]</span>
     <span class="n">LPRT</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'LPRT'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">hist</span><span class="p">,</span> <span class="s1">'Data Port'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">H</span>
 
-    <span class="c1">#: Passive Mode [:rfc:`1545`][:rfc:`1639`]</span>
+    <span class="c1">#: Passive Mode [RFC 1545][;][RFC 1639]</span>
     <span class="n">LPSV</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'LPSV'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">hist</span><span class="p">,</span> <span class="s1">'Passive Mode'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">H</span>
 
-    <span class="c1">#: File Modification Time [:rfc:`3659`]</span>
+    <span class="c1">#: File Modification Time [RFC 3659]</span>
     <span class="n">MDTM</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'MDTM'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">MDTM</span><span class="p">,</span> <span class="s1">'File Modification Time'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
-    <span class="c1">#: Integrity Protected Command [:rfc:`2228`][:rfc:`2773`][:rfc:`4217`]</span>
+    <span class="c1">#: Integrity Protected Command [RFC 2228][;][RFC 2773][;][RFC 4217]</span>
     <span class="n">MIC</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'MIC'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">secu</span><span class="p">,</span> <span class="s1">'Integrity Protected Command'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
-    <span class="c1">#: Make Directory [:rfc:`959`]</span>
+    <span class="c1">#: Make Directory [RFC 959]</span>
     <span class="n">MKD</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'MKD'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Make Directory'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
-    <span class="c1">#: List Directory (for machine) [:rfc:`3659`]</span>
+    <span class="c1">#: List Directory (for machine) [RFC 3659]</span>
     <span class="n">MLSD</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'MLSD'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">MLST</span><span class="p">,</span> <span class="s1">'List Directory (for machine)'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
-    <span class="c1">#: List Single Object [:rfc:`3659`]</span>
+    <span class="c1">#: List Single Object [RFC 3659]</span>
     <span class="n">MLST</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'MLST'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">MLST</span><span class="p">,</span> <span class="s1">'List Single Object'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
-    <span class="c1">#: Transfer Mode [:rfc:`959`]</span>
+    <span class="c1">#: Transfer Mode [RFC 959]</span>
     <span class="n">MODE</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'MODE'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Transfer Mode'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
-    <span class="c1">#: Name List [:rfc:`959`][:rfc:`1123`]</span>
+    <span class="c1">#: Name List [RFC 959][;][RFC 1123]</span>
     <span class="n">NLST</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'NLST'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Name List'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
-    <span class="c1">#: No-Op [:rfc:`959`]</span>
+    <span class="c1">#: No-Op [RFC 959]</span>
     <span class="n">NOOP</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'NOOP'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'No-Op'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
-    <span class="c1">#: Options [:rfc:`2389`]</span>
+    <span class="c1">#: Options [RFC 2389]</span>
     <span class="n">OPTS</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'OPTS'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">feat</span><span class="p">,</span> <span class="s1">'Options'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
-    <span class="c1">#: Password [:rfc:`959`]</span>
+    <span class="c1">#: Password [RFC 959]</span>
     <span class="n">PASS</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'PASS'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Password'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
-    <span class="c1">#: Passive Mode [:rfc:`959`][:rfc:`1123`]</span>
+    <span class="c1">#: Passive Mode [RFC 959][;][RFC 1123]</span>
     <span class="n">PASV</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'PASV'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Passive Mode'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
-    <span class="c1">#: Protection Buffer Size [:rfc:`4217`]</span>
+    <span class="c1">#: Protection Buffer Size [RFC 4217]</span>
     <span class="n">PBSZ</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'PBSZ'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">PBSZ</span><span class="p">,</span> <span class="s1">'Protection Buffer Size'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
-    <span class="c1">#: Data Port [:rfc:`959`]</span>
+    <span class="c1">#: Data Port [RFC 959]</span>
     <span class="n">PORT</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'PORT'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Data Port'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
-    <span class="c1">#: Data Channel Protection Level [:rfc:`4217`]</span>
+    <span class="c1">#: Data Channel Protection Level [RFC 4217]</span>
     <span class="n">PROT</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'PROT'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">PROT</span><span class="p">,</span> <span class="s1">'Data Channel Protection Level'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
-    <span class="c1">#: Print Directory [:rfc:`959`]</span>
+    <span class="c1">#: Print Directory [RFC 959]</span>
     <span class="n">PWD</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'PWD'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Print Directory'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
-    <span class="c1">#: Logout [:rfc:`959`]</span>
+    <span class="c1">#: Logout [RFC 959]</span>
     <span class="n">QUIT</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'QUIT'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Logout'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
-    <span class="c1">#: Reinitialize [:rfc:`959`]</span>
+    <span class="c1">#: Reinitialize [RFC 959]</span>
     <span class="n">REIN</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'REIN'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Reinitialize'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
-    <span class="c1">#: Restart (for STREAM mode) [3][:rfc:`3659`]</span>
+    <span class="c1">#: Restart (for STREAM mode) [3][RFC 3659]</span>
     <span class="n">REST</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'REST'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">REST</span><span class="p">,</span> <span class="s1">'Restart (for STREAM mode)'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span> <span class="o">|</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
-    <span class="c1">#: Retrieve [:rfc:`959`]</span>
+    <span class="c1">#: Retrieve [RFC 959]</span>
     <span class="n">RETR</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'RETR'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Retrieve'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
-    <span class="c1">#: Remove Directory [:rfc:`959`]</span>
+    <span class="c1">#: Remove Directory [RFC 959]</span>
     <span class="n">RMD</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'RMD'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Remove Directory'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
-    <span class="c1">#: Rename From [:rfc:`959`]</span>
+    <span class="c1">#: Rename From [RFC 959]</span>
     <span class="n">RNFR</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'RNFR'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Rename From'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span> <span class="o">|</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
-    <span class="c1">#: Rename To [:rfc:`959`][RFC Errata 5748]</span>
+    <span class="c1">#: Rename To [RFC 959][;][RFC Errata 5748]</span>
     <span class="n">RNTO</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'RNTO'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Rename To'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
-    <span class="c1">#: Site Parameters [:rfc:`959`][:rfc:`1123`]</span>
+    <span class="c1">#: Site Parameters [RFC 959][;][RFC 1123]</span>
     <span class="n">SITE</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'SITE'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Site Parameters'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
-    <span class="c1">#: File Size [:rfc:`3659`]</span>
+    <span class="c1">#: File Size [RFC 3659]</span>
     <span class="n">SIZE</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'SIZE'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">SIZE</span><span class="p">,</span> <span class="s1">'File Size'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
-    <span class="c1">#: Structure Mount [:rfc:`959`]</span>
+    <span class="c1">#: Structure Mount [RFC 959]</span>
     <span class="n">SMNT</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'SMNT'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Structure Mount'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
-    <span class="c1">#: Status [:rfc:`959`]</span>
+    <span class="c1">#: Status [RFC 959]</span>
     <span class="n">STAT</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'STAT'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Status'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
-    <span class="c1">#: Store [:rfc:`959`]</span>
+    <span class="c1">#: Store [RFC 959]</span>
     <span class="n">STOR</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'STOR'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Store'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
-    <span class="c1">#: Store Unique [:rfc:`959`][:rfc:`1123`]</span>
+    <span class="c1">#: Store Unique [RFC 959][;][RFC 1123]</span>
     <span class="n">STOU</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'STOU'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Store Unique'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
-    <span class="c1">#: File Structure [:rfc:`959`]</span>
+    <span class="c1">#: File Structure [RFC 959]</span>
     <span class="n">STRU</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'STRU'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'File Structure'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
-    <span class="c1">#: System [:rfc:`959`]</span>
+    <span class="c1">#: System [RFC 959]</span>
     <span class="n">SYST</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'SYST'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'System'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
-    <span class="c1">#: Representation Type [4][:rfc:`959`]</span>
+    <span class="c1">#: Representation Type [4][RFC 959]</span>
     <span class="n">TYPE</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'TYPE'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Representation Type'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
-    <span class="c1">#: User Name [:rfc:`959`]</span>
+    <span class="c1">#: User Name [RFC 959]</span>
     <span class="n">USER</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'USER'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'User Name'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
-    <span class="c1">#: None [:rfc:`775`][:rfc:`1123`]</span>
+    <span class="c1">#: None [RFC 775][;][RFC 1123]</span>
     <span class="n">XCUP</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'XCUP'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">hist</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">H</span>
 
-    <span class="c1">#: None [:rfc:`775`][:rfc:`1123`]</span>
+    <span class="c1">#: None [RFC 775][;][RFC 1123]</span>
     <span class="n">XCWD</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'XCWD'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">hist</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">H</span>
 
-    <span class="c1">#: None [:rfc:`775`][:rfc:`1123`]</span>
+    <span class="c1">#: None [RFC 775][;][RFC 1123]</span>
     <span class="n">XMKD</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'XMKD'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">hist</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">H</span>
 
-    <span class="c1">#: None [:rfc:`775`][:rfc:`1123`]</span>
+    <span class="c1">#: None [RFC 775][;][RFC 1123]</span>
     <span class="n">XPWD</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'XPWD'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">hist</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">H</span>
 
-    <span class="c1">#: None [:rfc:`775`][:rfc:`1123`]</span>
+    <span class="c1">#: None [RFC 775][;][RFC 1123]</span>
     <span class="n">XRMD</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'XRMD'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">hist</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">H</span>
 
-    <span class="c1">#: Trivial Virtual File Store [:rfc:`3659`]</span>
+    <span class="c1">#: Trivial Virtual File Store [RFC 3659]</span>
     <span class="n">TVFS</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'TVFS'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">TVFS</span><span class="p">,</span> <span class="s1">'Trivial Virtual File Store'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
 <div class="viewcode-block" id="Command._unregistered_member">
@@ -1119,7 +1119,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=65d3e7b0"></script>
+</div><script src="../../../../_static/documentation_options.js?v=2864e1d3"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

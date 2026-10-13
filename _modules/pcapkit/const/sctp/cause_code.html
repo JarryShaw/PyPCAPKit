@@ -497,43 +497,43 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">CauseCode</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[CauseCode] SCTP Error Cause Codes"""</span>
 
-    <span class="c1">#: Invalid Stream Identifier [:rfc:`9260`]</span>
+    <span class="c1">#: Invalid Stream Identifier [RFC 9260]</span>
     <span class="n">Invalid_Stream_Identifier</span> <span class="o">=</span> <span class="mi">1</span>
 
-    <span class="c1">#: Missing Mandatory Parameter [:rfc:`9260`]</span>
+    <span class="c1">#: Missing Mandatory Parameter [RFC 9260]</span>
     <span class="n">Missing_Mandatory_Parameter</span> <span class="o">=</span> <span class="mi">2</span>
 
-    <span class="c1">#: Stale Cookie [:rfc:`9260`]</span>
+    <span class="c1">#: Stale Cookie [RFC 9260]</span>
     <span class="n">Stale_Cookie</span> <span class="o">=</span> <span class="mi">3</span>
 
-    <span class="c1">#: Out of Resource [:rfc:`9260`]</span>
+    <span class="c1">#: Out of Resource [RFC 9260]</span>
     <span class="n">Out_of_Resource</span> <span class="o">=</span> <span class="mi">4</span>
 
-    <span class="c1">#: Unresolvable Address [:rfc:`9260`]</span>
+    <span class="c1">#: Unresolvable Address [RFC 9260]</span>
     <span class="n">Unresolvable_Address</span> <span class="o">=</span> <span class="mi">5</span>
 
-    <span class="c1">#: Unrecognized Chunk Type [:rfc:`9260`]</span>
+    <span class="c1">#: Unrecognized Chunk Type [RFC 9260]</span>
     <span class="n">Unrecognized_Chunk_Type</span> <span class="o">=</span> <span class="mi">6</span>
 
-    <span class="c1">#: Invalid Mandatory Parameter [:rfc:`9260`]</span>
+    <span class="c1">#: Invalid Mandatory Parameter [RFC 9260]</span>
     <span class="n">Invalid_Mandatory_Parameter</span> <span class="o">=</span> <span class="mi">7</span>
 
-    <span class="c1">#: Unrecognized Parameters [:rfc:`9260`]</span>
+    <span class="c1">#: Unrecognized Parameters [RFC 9260]</span>
     <span class="n">Unrecognized_Parameters</span> <span class="o">=</span> <span class="mi">8</span>
 
-    <span class="c1">#: No User Data [:rfc:`9260`]</span>
+    <span class="c1">#: No User Data [RFC 9260]</span>
     <span class="n">No_User_Data</span> <span class="o">=</span> <span class="mi">9</span>
 
-    <span class="c1">#: Cookie Received While Shutting Down [:rfc:`9260`]</span>
+    <span class="c1">#: Cookie Received While Shutting Down [RFC 9260]</span>
     <span class="n">Cookie_Received_While_Shutting_Down</span> <span class="o">=</span> <span class="mi">10</span>
 
-    <span class="c1">#: Restart of an Association with New Addresses [:rfc:`9260`]</span>
+    <span class="c1">#: Restart of an Association with New Addresses [RFC 9260]</span>
     <span class="n">Restart_of_an_Association_with_New_Addresses</span> <span class="o">=</span> <span class="mi">11</span>
 
-    <span class="c1">#: User-Initiated Abort [:rfc:`9260`]</span>
+    <span class="c1">#: User-Initiated Abort [RFC 9260]</span>
     <span class="n">User_Initiated_Abort</span> <span class="o">=</span> <span class="mi">12</span>
 
-    <span class="c1">#: Protocol Violation [:rfc:`9260`]</span>
+    <span class="c1">#: Protocol Violation [RFC 9260]</span>
     <span class="n">Protocol_Violation</span> <span class="o">=</span> <span class="mi">13</span>
 
     <span class="c1">#: Missing DTLS Chunk Support (TEMPORARY - registered 2026-08-13, expires</span>
@@ -552,22 +552,22 @@
     <span class="c1">#: expires 2027-08-13) [draft-ietf-tsvwg-sctp-dtls-chunk-04]</span>
     <span class="n">Incompatible_DTLS_Key_Management_Roles</span> <span class="o">=</span> <span class="mi">103</span>
 
-    <span class="c1">#: Request to Delete Last Remaining IP Address [:rfc:`5061`]</span>
+    <span class="c1">#: Request to Delete Last Remaining IP Address [RFC 5061]</span>
     <span class="n">Request_to_Delete_Last_Remaining_IP_Address</span> <span class="o">=</span> <span class="mi">160</span>
 
-    <span class="c1">#: Operation Refused Due to Resource Shortage [:rfc:`5061`]</span>
+    <span class="c1">#: Operation Refused Due to Resource Shortage [RFC 5061]</span>
     <span class="n">Operation_Refused_Due_to_Resource_Shortage</span> <span class="o">=</span> <span class="mi">161</span>
 
-    <span class="c1">#: Request to Delete Source IP Address [:rfc:`5061`]</span>
+    <span class="c1">#: Request to Delete Source IP Address [RFC 5061]</span>
     <span class="n">Request_to_Delete_Source_IP_Address</span> <span class="o">=</span> <span class="mi">162</span>
 
-    <span class="c1">#: Association Aborted due to illegal ASCONF-ACK [:rfc:`5061`]</span>
+    <span class="c1">#: Association Aborted due to illegal ASCONF-ACK [RFC 5061]</span>
     <span class="n">Association_Aborted_due_to_illegal_ASCONF_ACK</span> <span class="o">=</span> <span class="mi">163</span>
 
-    <span class="c1">#: Request refused - no authorization [:rfc:`5061`]</span>
+    <span class="c1">#: Request refused - no authorization [RFC 5061]</span>
     <span class="n">Request_refused_no_authorization</span> <span class="o">=</span> <span class="mi">164</span>
 
-    <span class="c1">#: Unsupported HMAC Identifier [:rfc:`4895`]</span>
+    <span class="c1">#: Unsupported HMAC Identifier [RFC 4895]</span>
     <span class="n">Unsupported_HMAC_Identifier</span> <span class="o">=</span> <span class="mi">261</span>
 
 <div class="viewcode-block" id="CauseCode._missing_">
@@ -629,7 +629,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=65d3e7b0"></script>
+</div><script src="../../../../_static/documentation_options.js?v=2864e1d3"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

@@ -497,95 +497,95 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">Chunk</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[Chunk] SCTP Chunk Types"""</span>
 
-    <span class="c1">#: Payload Data (DATA) [:rfc:`9260`]</span>
+    <span class="c1">#: Payload Data (DATA) [RFC 9260]</span>
     <span class="n">Payload_Data</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="c1">#: Initiation (INIT) [:rfc:`9260`]</span>
+    <span class="c1">#: Initiation (INIT) [RFC 9260]</span>
     <span class="n">Initiation</span> <span class="o">=</span> <span class="mi">1</span>
 
-    <span class="c1">#: Initiation Acknowledgement (INIT ACK) [:rfc:`9260`]</span>
+    <span class="c1">#: Initiation Acknowledgement (INIT ACK) [RFC 9260]</span>
     <span class="n">Initiation_Acknowledgement</span> <span class="o">=</span> <span class="mi">2</span>
 
-    <span class="c1">#: Selective Acknowledgement (SACK) [:rfc:`9260`]</span>
+    <span class="c1">#: Selective Acknowledgement (SACK) [RFC 9260]</span>
     <span class="n">Selective_Acknowledgement</span> <span class="o">=</span> <span class="mi">3</span>
 
-    <span class="c1">#: Heartbeat Request (HEARTBEAT) [:rfc:`9260`]</span>
+    <span class="c1">#: Heartbeat Request (HEARTBEAT) [RFC 9260]</span>
     <span class="n">Heartbeat_Request</span> <span class="o">=</span> <span class="mi">4</span>
 
-    <span class="c1">#: Heartbeat Acknowledgement (HEARTBEAT ACK) [:rfc:`9260`]</span>
+    <span class="c1">#: Heartbeat Acknowledgement (HEARTBEAT ACK) [RFC 9260]</span>
     <span class="n">Heartbeat_Acknowledgement</span> <span class="o">=</span> <span class="mi">5</span>
 
-    <span class="c1">#: Abort (ABORT) [:rfc:`9260`]</span>
+    <span class="c1">#: Abort (ABORT) [RFC 9260]</span>
     <span class="n">Abort</span> <span class="o">=</span> <span class="mi">6</span>
 
-    <span class="c1">#: Shutdown (SHUTDOWN) [:rfc:`9260`]</span>
+    <span class="c1">#: Shutdown (SHUTDOWN) [RFC 9260]</span>
     <span class="n">Shutdown</span> <span class="o">=</span> <span class="mi">7</span>
 
-    <span class="c1">#: Shutdown Acknowledgement (SHUTDOWN ACK) [:rfc:`9260`]</span>
+    <span class="c1">#: Shutdown Acknowledgement (SHUTDOWN ACK) [RFC 9260]</span>
     <span class="n">Shutdown_Acknowledgement</span> <span class="o">=</span> <span class="mi">8</span>
 
-    <span class="c1">#: Operation Error (ERROR) [:rfc:`9260`]</span>
+    <span class="c1">#: Operation Error (ERROR) [RFC 9260]</span>
     <span class="n">Operation_Error</span> <span class="o">=</span> <span class="mi">9</span>
 
-    <span class="c1">#: State Cookie (COOKIE ECHO) [:rfc:`9260`]</span>
+    <span class="c1">#: State Cookie (COOKIE ECHO) [RFC 9260]</span>
     <span class="n">State_Cookie</span> <span class="o">=</span> <span class="mi">10</span>
 
-    <span class="c1">#: Cookie Acknowledgement (COOKIE ACK) [:rfc:`9260`]</span>
+    <span class="c1">#: Cookie Acknowledgement (COOKIE ACK) [RFC 9260]</span>
     <span class="n">Cookie_Acknowledgement</span> <span class="o">=</span> <span class="mi">11</span>
 
-    <span class="c1">#: Reserved for Explicit Congestion Notification Echo (ECNE) [:rfc:`9260`]</span>
+    <span class="c1">#: Reserved for Explicit Congestion Notification Echo (ECNE) [RFC 9260]</span>
     <span class="n">Reserved_for_Explicit_Congestion_Notification_Echo</span> <span class="o">=</span> <span class="mi">12</span>
 
-    <span class="c1">#: Reserved for Congestion Window Reduced (CWR) [:rfc:`9260`]</span>
+    <span class="c1">#: Reserved for Congestion Window Reduced (CWR) [RFC 9260]</span>
     <span class="n">Reserved_for_Congestion_Window_Reduced</span> <span class="o">=</span> <span class="mi">13</span>
 
-    <span class="c1">#: Shutdown Complete (SHUTDOWN COMPLETE) [:rfc:`9260`]</span>
+    <span class="c1">#: Shutdown Complete (SHUTDOWN COMPLETE) [RFC 9260]</span>
     <span class="n">Shutdown_Complete</span> <span class="o">=</span> <span class="mi">14</span>
 
-    <span class="c1">#: Authentication Chunk (AUTH) [:rfc:`4895`]</span>
+    <span class="c1">#: Authentication Chunk (AUTH) [RFC 4895]</span>
     <span class="n">Authentication_Chunk</span> <span class="o">=</span> <span class="mi">15</span>
 
-    <span class="c1">#: Reserved for IETF-defined Chunk Extensions [:rfc:`9260`]</span>
+    <span class="c1">#: Reserved for IETF-defined Chunk Extensions [RFC 9260]</span>
     <span class="n">Reserved_for_IETF_defined_Chunk_Extensions_63</span> <span class="o">=</span> <span class="mi">63</span>
 
-    <span class="c1">#: Payload Data supporting Interleaving (I-DATA) [:rfc:`8260`]</span>
+    <span class="c1">#: Payload Data supporting Interleaving (I-DATA) [RFC 8260]</span>
     <span class="n">Payload_Data_supporting_Interleaving</span> <span class="o">=</span> <span class="mi">64</span>
 
     <span class="c1">#: DTLS (TEMPORARY - registered 2026-02-20, expires 2027-02-20) [draft-ietf-</span>
     <span class="c1">#: tsvwg-sctp-dtls-chunk-01]</span>
     <span class="n">DTLS</span> <span class="o">=</span> <span class="mi">65</span>
 
-    <span class="c1">#: Reserved for IETF-defined Chunk Extensions [:rfc:`9260`]</span>
+    <span class="c1">#: Reserved for IETF-defined Chunk Extensions [RFC 9260]</span>
     <span class="n">Reserved_for_IETF_defined_Chunk_Extensions_127</span> <span class="o">=</span> <span class="mi">127</span>
 
-    <span class="c1">#: Address Configuration Acknowledgment (ASCONF-ACK) [:rfc:`5061`]</span>
+    <span class="c1">#: Address Configuration Acknowledgment (ASCONF-ACK) [RFC 5061]</span>
     <span class="n">Address_Configuration_Acknowledgment</span> <span class="o">=</span> <span class="mi">128</span>
 
     <span class="c1">#: Unassigned</span>
     <span class="n">Unassigned_129</span> <span class="o">=</span> <span class="mi">129</span>
 
-    <span class="c1">#: Re-configuration Chunk (RE-CONFIG) [:rfc:`6525`]</span>
+    <span class="c1">#: Re-configuration Chunk (RE-CONFIG) [RFC 6525]</span>
     <span class="n">Re_configuration_Chunk</span> <span class="o">=</span> <span class="mi">130</span>
 
     <span class="c1">#: Unassigned</span>
     <span class="n">Unassigned_131</span> <span class="o">=</span> <span class="mi">131</span>
 
-    <span class="c1">#: Padding Chunk (PAD) [:rfc:`4820`]</span>
+    <span class="c1">#: Padding Chunk (PAD) [RFC 4820]</span>
     <span class="n">Padding_Chunk</span> <span class="o">=</span> <span class="mi">132</span>
 
-    <span class="c1">#: Reserved for IETF-defined Chunk Extensions [:rfc:`9260`]</span>
+    <span class="c1">#: Reserved for IETF-defined Chunk Extensions [RFC 9260]</span>
     <span class="n">Reserved_for_IETF_defined_Chunk_Extensions_191</span> <span class="o">=</span> <span class="mi">191</span>
 
-    <span class="c1">#: Forward TSN [:rfc:`3758`]</span>
+    <span class="c1">#: Forward TSN [RFC 3758]</span>
     <span class="n">Forward_TSN</span> <span class="o">=</span> <span class="mi">192</span>
 
-    <span class="c1">#: Address Configuration Change Chunk (ASCONF) [:rfc:`5061`]</span>
+    <span class="c1">#: Address Configuration Change Chunk (ASCONF) [RFC 5061]</span>
     <span class="n">Address_Configuration_Change_Chunk</span> <span class="o">=</span> <span class="mi">193</span>
 
-    <span class="c1">#: I-FORWARD-TSN [:rfc:`8260`]</span>
+    <span class="c1">#: I-FORWARD-TSN [RFC 8260]</span>
     <span class="n">I_FORWARD_TSN</span> <span class="o">=</span> <span class="mi">194</span>
 
-    <span class="c1">#: Reserved for IETF-defined Chunk Extensions [:rfc:`9260`]</span>
+    <span class="c1">#: Reserved for IETF-defined Chunk Extensions [RFC 9260]</span>
     <span class="n">Reserved_for_IETF_defined_Chunk_Extensions_255</span> <span class="o">=</span> <span class="mi">255</span>
 
 <div class="viewcode-block" id="Chunk._missing_">
@@ -647,7 +647,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=65d3e7b0"></script>
+</div><script src="../../../../_static/documentation_options.js?v=2864e1d3"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>
