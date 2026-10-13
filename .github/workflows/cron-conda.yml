@@ -596,6 +596,14 @@ jobs:
       # GitHub's workflow-file rule checks main, not the commit Create Release
       # made the release at. The tag stays: the target is "Unused if the Git
       # tag already exists" (REST docs, Update a release).
+      #
+      # #1657: that update also sends ``name``, ``body``, ``prerelease`` and
+      # ``draft``, which unset inputs make the tag, "" and false
+      # (src/Inputs.ts:70-92,128-135,210-240), so each bump wiped the
+      # release's name and notes. Each ``omit*DuringUpdate`` makes its field
+      # undefined (:210-252), which Octokit drops from the request
+      # (dist/index.js:38369-38388), so the release keeps what Create Release
+      # wrote.
       - name: Upload package to GitHub Release
         if: ${{ matrix.os == 'ubuntu-latest' && steps.release.outputs.published == 'true' }}
         uses: ncipollo/release-action@v1.21.0
@@ -603,5 +611,9 @@ jobs:
           allowUpdates: true
           artifacts: ${{ steps.conda_build.outputs.packages_csv }}
           commit: ${{ github.ref_name }}
+          omitBodyDuringUpdate: true
+          omitDraftDuringUpdate: true
+          omitNameDuringUpdate: true
+          omitPrereleaseDuringUpdate: true
           tag: "v${{ needs.conda-update.outputs.PCAPKIT_VERSION }}"
           token: "${{ secrets.GITHUB_TOKEN }}"

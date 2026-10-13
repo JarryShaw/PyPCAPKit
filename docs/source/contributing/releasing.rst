@@ -203,13 +203,18 @@ names the default branch -- ``github.ref_name`` on both its triggers -- as
 stays put, as Update a release calls the target "Unused if the Git tag already
 exists". It also uploads only to a published release, read first with ``gh
 release view``. With none, the action would create one, and its tag, at
-``commit`` (``src/Action.ts:72-92``), and it would publish a draft, since an
-unset ``draft`` is ``false`` on update (``src/Inputs.ts:210-213``). Conda
+``commit`` (``src/Action.ts:72-92``), and it would give a draft ``commit`` as
+its target (``src/Action.ts:85-92,107-120``). Conda
 Update bumped 1.5.0b9's build three times while that run waited on approval;
 once ``conda-dist`` runs on every bump
 (`#1632 <https://github.com/JarryShaw/PyPCAPKit/issues/1632>`__), either path
 would tag the pending version at ``main``'s tip and fail Create Release's tag
-check. That build then goes to anaconda.org only, with a ``::notice``.
+check. That build then goes to anaconda.org only, with a ``::notice``. The
+update also sends the release's name, notes and ``prerelease`` and ``draft``
+flags, which unset inputs make the tag, ``""`` and ``false``
+(``src/Inputs.ts:70-92,128-135,210-240``), so the step sets the four
+``omit*DuringUpdate`` inputs that leave them out (`#1657
+<https://github.com/JarryShaw/PyPCAPKit/issues/1657>`__).
 
 The Release App
 ---------------
