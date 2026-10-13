@@ -91,10 +91,10 @@ def _as_string(node: 'Optional[ast.expr]') -> 'Iterator[tuple[str, int]]':
 #: :class:`ast.TypeAlias` where the running interpreter has it, else ``()``.
 #:
 #: ``ast.TypeAlias`` and ``ast.TypeVar`` are :pep:`695` nodes, new in Python 3.12,
-#: and CI's range starts at 3.8 (KTLO, #1633), the supported tier at 3.11 -- so
-#: naming either one directly raises :exc:`AttributeError` on 3.8-3.11, and does so
-#: in *every* test in this module rather
-#: than one, because :func:`bound_names` walks every node of every file. Resolving
+#: and the oldest CI leg to run the suite is 3.8 (KTLO, #1633), the oldest supported
+#: one 3.11 -- so naming either one directly raises :exc:`AttributeError` on 3.8-3.11,
+#: and does so in *every* test in this module rather than one, because
+#: :func:`bound_names` walks every node of every file. Resolving
 #: them through :func:`getattr` to an empty tuple instead leaves both branches
 #: fully live on 3.12+ and merely unreachable below it, since :func:`isinstance`
 #: against ``()`` is always :data:`False`.

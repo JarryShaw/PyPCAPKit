@@ -588,8 +588,8 @@ Test Cases
 
 **Largely done.** There is a systematic test suite under ``tests/``, and it runs
 in CI against Python 3.11 through 3.15, per
-``.github/workflows/unit-tests.yml``, and against the end-of-life 3.8 through 3.10
-on legs whose failures block nothing.
+``.github/workflows/unit-tests.yml``, and against the end-of-life 3.7 through 3.10
+on legs whose failures block nothing; 3.7's stop at the install.
 The module count is measurable rather than worth writing down:
 
 .. code-block:: shell

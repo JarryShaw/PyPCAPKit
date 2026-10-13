@@ -14,7 +14,8 @@ Where that depth is not needed, the same interface also drives six third-party
 extraction engines.
 
 The whole project declares **Python 3.6** or later. CI supports 3.11 to 3.15, and
-still tests the end-of-life 3.8 to 3.10 without letting a failure block anything.
+still tests the end-of-life 3.7 to 3.10 without letting a failure block anything;
+3.7 cannot import the package yet.
 
 ## Installation
 

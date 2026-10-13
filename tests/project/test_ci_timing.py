@@ -690,8 +690,10 @@ class TestTimingArtifacts(unittest.TestCase):
         for block in blocks:
             with self.subTest(step=block.split('\n', 3)[:3]):
                 # A failed upload of a diagnostic file must not fail a required leg.
+                # It runs after failed tests too, but not after a failed install
+                # (#1633), which leaves no file to upload.
                 self.assertIn('continue-on-error: true', block)
-                self.assertIn('if: ${{ !cancelled() }}', block)
+                self.assertIn("if: ${{ !cancelled() && steps.install.outcome == 'success' }}", block)
                 self.assertIn('path: ${{ runner.temp }}/junit.xml', block)
                 # tests/_dependency_gates.py reads exactly one pytest step per job.
                 self.assertNotIn('python -m pytest', block)

@@ -160,7 +160,7 @@ jobs:
       - uses: actions/checkout@v7
 
       # One interpreter, not a matrix. Unit Tests and Python Compatibility sweep
-      # 3.11-3.15, plus the non-blocking KTLO legs 3.8-3.10 (#1633), because
+      # 3.11-3.15, plus the non-blocking KTLO legs 3.7-3.10 (#1633), because
       # they check that the package *runs* everywhere; these tools read the
       # source, and running them several times over would produce several
       # copies of the same findings for several times the runner cost.

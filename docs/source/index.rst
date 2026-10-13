@@ -11,7 +11,8 @@ construction and analysis.
 .. important::
 
    The whole project declares **Python 3.6** or later. CI supports 3.11 to 3.15, and
-   still tests the end-of-life 3.8 to 3.10 without letting a failure block anything.
+   still tests the end-of-life 3.7 to 3.10 without letting a failure block anything;
+   3.7 cannot import the package yet.
 
 .. .. contents::
 ..    :depth: 2
@@ -258,9 +259,10 @@ Installation
 
 .. note::
 
-   3.8, 3.9 and 3.10 are end-of-life and best-effort: CI builds and tests them,
-   but a failure there blocks nothing. Individual *engines* also stop earlier than
-   the library does; see `Engine prerequisites`_.
+   3.7 to 3.10 are end-of-life and best-effort: CI builds and tests them, but a
+   failure there blocks nothing, and on 3.7 the import fails as described above.
+   Individual *engines* also stop earlier than the library does; see
+   `Engine prerequisites`_.
 
 Run the following to install the current version from PyPI:
 

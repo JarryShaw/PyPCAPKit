@@ -786,8 +786,8 @@ def _strip_comment(line: 'str') -> 'str':
 def _toml_array(text: 'str', name: 'str') -> 'Optional[tuple[Requirement, ...]]':
     """The ``name = [ ... ]`` array of double-quoted strings in ``text``.
 
-    A targeted scan rather than :mod:`tomllib`, which is 3.11+ while the
-    ``test`` job's matrix floor is 3.8 (a KTLO leg, #1633) -- and a guard that skips on
+    A targeted scan rather than :mod:`tomllib`, which is 3.11+ while the oldest
+    ``test`` leg to run the suite is 3.8 (a KTLO leg, #1633) -- and a guard that skips on
     some legs is the shape of invisibility this whole module exists to remove.
     Comments are stripped first, quote-aware, because the arrays here are
     heavily annotated; the brackets inside ``"requests[socks]"`` are what makes
