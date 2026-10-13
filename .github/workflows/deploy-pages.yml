@@ -29,8 +29,16 @@ permissions:
 # the newer one publishes, and deploying the older commit's docs after the newer
 # ones would actively be wrong. GitHub Pages also permits only one live
 # deployment, so serialising here is a requirement rather than a saving.
+#
+# A `workflow_run` is keyed on the commit `Unit Tests` verified instead (#1643).
+# One whose verdict is for an older commit only runs `verdict` and skips, and in
+# the shared group it would still displace a pending run whose verdict matches,
+# since "any existing pending job or workflow in the same concurrency group will
+# be canceled" (GitHub, "Control the concurrency of workflows and jobs"). The
+# coalescing and serialising above then happen in `deploy-pages`' own `ci-`
+# group, which only a run whose verdict covers its checkout reaches.
 concurrency:
-  group: pages-${{ github.ref }}
+  group: pages-${{ github.event.workflow_run.head_sha || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
@@ -48,8 +56,43 @@ jobs:
     with:
       gate-only: true
 
+  # #1643: `github.sha`, which every checkout here takes, is main's tip when the
+  # `workflow_run` was raised -- not the commit the completed `Unit Tests` run
+  # verified, and in a merge wave the two differ. This job compares them with
+  # util/verdict_covers_checkout.py, whose docstring gives the rule, and the job
+  # below acts on a `workflow_run` only when `verified` is 'true'. Its `if:` is
+  # that job's `workflow_run` clause, so a run raised by a pull request's or a
+  # failed `Unit Tests` run still concludes `skipped`, as before.
+  verdict:
+    name: Verdict covers this commit
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      verified: ${{ steps.verdict.outputs.verified }}
+    steps:
+      # The default ref, as the job below uses, so both see the same `github.sha`.
+      # Twenty commits leaves room for the bot commits the rule accepts; a verdict
+      # further back is not found, and so not accepted.
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 20
+          persist-credentials: false
+
+      - name: Compare the verified commit with this checkout
+        id: verdict
+        env:
+          VERDICT_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: python3 util/verdict_covers_checkout.py
+
   deploy-pages:
-    needs: [ unit-tests ]
+    needs: [ unit-tests, verdict ]
     # `needs` cannot itself be conditional, so a skipped gate (pull requests,
     # and now `workflow_run`) has to be accepted explicitly -- by default this
     # job would inherit the skip. `!cancelled()` rather than `always()` so that
@@ -57,8 +100,9 @@ jobs:
     # failed still blocks.
     #
     # The `workflow_run` clause is the real gate for a push to main now: it
-    # reads the verdict `Unit Tests` already reached for this exact commit
-    # instead of re-running it. `.event == 'push'` and `.head_branch == 'main'`
+    # reads the verdict `Unit Tests` already reached instead of re-running it,
+    # and `verdict` says whether that verdict covers the commit checked out
+    # below (#1643). `.event == 'push'` and `.head_branch == 'main'`
     # both matter -- `workflow_run` fires for *every* completion of that
     # workflow, including one triggered by a pull request, and without this
     # check a green PR would publish docs from that PR's tree.
@@ -67,7 +111,8 @@ jobs:
       (github.event_name != 'workflow_run' || (
         github.event.workflow_run.conclusion == 'success' &&
         github.event.workflow_run.event == 'push' &&
-        github.event.workflow_run.head_branch == 'main'
+        github.event.workflow_run.head_branch == 'main' &&
+        needs.verdict.outputs.verified == 'true'
       ))
     concurrency: ci-${{ github.ref }} # Recommended if you intend to make multiple deployments in quick succession.
     runs-on: macos-latest
@@ -86,6 +131,8 @@ jobs:
           # relying on CodeQL tracing through the guard. `main`'s tip is also
           # the *right* commit for docs, which should reflect current main,
           # not a slightly older one -- so this is not a compromise here.
+          # Whether this commit is one that verdict covers is `verdict`'s
+          # question (#1643).
           persist-credentials: false
 
       - uses: actions/setup-python@v7

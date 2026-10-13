@@ -196,8 +196,10 @@ itself (dotted, above) **only when its own trigger is not** ``workflow_run``
 (their gate jobs' ``if:`` guards this explicitly) -- i.e. only on the
 Saturday ``schedule`` path, where no completed Unit Tests run exists yet to
 read a verdict from. On the ``workflow_run`` path (thick arrows), each reads
-the verdict Unit Tests already reached for that same commit instead of
-re-running the gate a second time.
+the verdict Unit Tests already reached instead of re-running the gate a second
+time. Vendor Update, Conda Update and GitHub Pages act on it only once their
+``verdict`` job, described under the edge list below, says it is a verdict on
+the commit they build.
 
 ``workflow_run`` Edges
 ----------------------
@@ -224,6 +226,21 @@ and ``.head_branch`` (or, for Create Release and Coverage Comment, ``.conclusion
 doing anything with an outward effect; none of the filtering happens in the
 ``on:`` block.
 
+Those checks say nothing about *which* commit was verified. A ``workflow_run``
+checks out ``github.sha``, ``main``'s tip when the event is raised, not
+``github.event.workflow_run.head_sha``, the commit the completed run tested, and
+in a merge wave the two differ: Conda Update 38325136710 bumped 2e941bbb7 under
+the verdict for 9083163f5 (`#1643 <https://github.com/JarryShaw/PyPCAPKit/issues/1643>`__).
+So Vendor Update, Conda Update and GitHub Pages each run a ``verdict`` job first,
+and act only when the tip is the verified commit, or that commit plus bot commits
+to ``conda/build`` and ``conda/requirements.txt`` alone; otherwise they skip, and
+the tip's own Unit Tests run raises them again. The rule and its evidence are in
+``util/verdict_covers_checkout.py``. Conda Update also writes after the
+checkout, so it applies the same rule a second time: its push rebases onto
+``main``'s tip only when the commits that brings in pass it, and otherwise
+pushes nothing, and Conda Tag tags the commit that push landed rather than the
+tip (`#1632 <https://github.com/JarryShaw/PyPCAPKit/issues/1632>`__).
+
 Reusable-Workflow Calls (``uses:``)
 -----------------------------------
 
@@ -234,11 +251,11 @@ repository target the same reusable workflow, with the same input:
 
 * ``.github/workflows/create-release.yml:374`` -- job ``unit-tests`` calls
   ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
-* ``.github/workflows/cron-conda.yml:43`` -- job ``unit-tests`` calls
+* ``.github/workflows/cron-conda.yml:50`` -- job ``unit-tests`` calls
   ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
-* ``.github/workflows/cron-vendor.yml:49`` -- job ``unit-tests`` calls
+* ``.github/workflows/cron-vendor.yml:56`` -- job ``unit-tests`` calls
   ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
-* ``.github/workflows/deploy-pages.yml:47`` -- job ``unit-tests`` calls
+* ``.github/workflows/deploy-pages.yml:55`` -- job ``unit-tests`` calls
   ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
 
 ``gate-only: true`` selects **two** of ``unit-tests.yml``'s **ten** jobs,
