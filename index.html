@@ -496,7 +496,8 @@ construction and analysis.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>The whole project declares <strong>Python 3.6</strong> or later. CI supports 3.11 to 3.15, and
-still tests the end-of-life 3.8 to 3.10 without letting a failure block anything.</p>
+still tests the end-of-life 3.7 to 3.10 without letting a failure block anything;
+3.7 cannot import the package yet.</p>
 </div>
 <div class="toctree-wrapper compound">
 </div>
@@ -826,9 +827,10 @@ applied, <code class="docutils literal notranslate"><span class="pre">walrus</sp
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>3.8, 3.9 and 3.10 are end-of-life and best-effort: CI builds and tests them,
-but a failure there blocks nothing. Individual <em>engines</em> also stop earlier than
-the library does; see <a class="reference internal" href="#engine-prerequisites">Engine prerequisites</a>.</p>
+<p>3.7 to 3.10 are end-of-life and best-effort: CI builds and tests them, but a
+failure there blocks nothing, and on 3.7 the import fails as described above.
+Individual <em>engines</em> also stop earlier than the library does; see
+<a class="reference internal" href="#engine-prerequisites">Engine prerequisites</a>.</p>
 </div>
 <p>Run the following to install the current version from PyPI:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>pypcapkit
@@ -1088,7 +1090,7 @@ pip<span class="w"> </span>install<span class="w"> </span>pypcapkit<span class="
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=2864e1d3"></script>
+</div><script src="_static/documentation_options.js?v=812495b5"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

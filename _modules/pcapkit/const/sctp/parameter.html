@@ -497,64 +497,64 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">Parameter</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[Parameter] SCTP Chunk Parameter Types"""</span>
 
-    <span class="c1">#: Heartbeat Info [:rfc:`9260`]</span>
+    <span class="c1">#: Heartbeat Info [RFC 9260]</span>
     <span class="n">Heartbeat_Info</span> <span class="o">=</span> <span class="mi">1</span>
 
-    <span class="c1">#: IPv4 Address [:rfc:`9260`]</span>
+    <span class="c1">#: IPv4 Address [RFC 9260]</span>
     <span class="n">IPv4_Address</span> <span class="o">=</span> <span class="mi">5</span>
 
-    <span class="c1">#: IPv6 Address [:rfc:`9260`]</span>
+    <span class="c1">#: IPv6 Address [RFC 9260]</span>
     <span class="n">IPv6_Address</span> <span class="o">=</span> <span class="mi">6</span>
 
-    <span class="c1">#: State Cookie [:rfc:`9260`]</span>
+    <span class="c1">#: State Cookie [RFC 9260]</span>
     <span class="n">State_Cookie</span> <span class="o">=</span> <span class="mi">7</span>
 
-    <span class="c1">#: Unrecognized Parameter [:rfc:`9260`]</span>
+    <span class="c1">#: Unrecognized Parameter [RFC 9260]</span>
     <span class="n">Unrecognized_Parameter</span> <span class="o">=</span> <span class="mi">8</span>
 
-    <span class="c1">#: Cookie Preservative [:rfc:`9260`]</span>
+    <span class="c1">#: Cookie Preservative [RFC 9260]</span>
     <span class="n">Cookie_Preservative</span> <span class="o">=</span> <span class="mi">9</span>
 
     <span class="c1">#: Unassigned</span>
     <span class="n">Unassigned_10</span> <span class="o">=</span> <span class="mi">10</span>
 
-    <span class="c1">#: Host Name Address [:rfc:`9260`]</span>
+    <span class="c1">#: Host Name Address [RFC 9260]</span>
     <span class="n">Host_Name_Address</span> <span class="o">=</span> <span class="mi">11</span>
 
-    <span class="c1">#: Supported Address Types [:rfc:`9260`]</span>
+    <span class="c1">#: Supported Address Types [RFC 9260]</span>
     <span class="n">Supported_Address_Types</span> <span class="o">=</span> <span class="mi">12</span>
 
-    <span class="c1">#: Outgoing SSN Reset Request Parameter [:rfc:`6525`]</span>
+    <span class="c1">#: Outgoing SSN Reset Request Parameter [RFC 6525]</span>
     <span class="n">Outgoing_SSN_Reset_Request_Parameter</span> <span class="o">=</span> <span class="mi">13</span>
 
-    <span class="c1">#: Incoming SSN Reset Request Parameter [:rfc:`6525`]</span>
+    <span class="c1">#: Incoming SSN Reset Request Parameter [RFC 6525]</span>
     <span class="n">Incoming_SSN_Reset_Request_Parameter</span> <span class="o">=</span> <span class="mi">14</span>
 
-    <span class="c1">#: SSN/TSN Reset Request Parameter [:rfc:`6525`]</span>
+    <span class="c1">#: SSN/TSN Reset Request Parameter [RFC 6525]</span>
     <span class="n">SSN_TSN_Reset_Request_Parameter</span> <span class="o">=</span> <span class="mi">15</span>
 
-    <span class="c1">#: Re-configuration Response Parameter [:rfc:`6525`]</span>
+    <span class="c1">#: Re-configuration Response Parameter [RFC 6525]</span>
     <span class="n">Re_configuration_Response_Parameter</span> <span class="o">=</span> <span class="mi">16</span>
 
-    <span class="c1">#: Add Outgoing Streams Request Parameter [:rfc:`6525`]</span>
+    <span class="c1">#: Add Outgoing Streams Request Parameter [RFC 6525]</span>
     <span class="n">Add_Outgoing_Streams_Request_Parameter</span> <span class="o">=</span> <span class="mi">17</span>
 
-    <span class="c1">#: Add Incoming Streams Request Parameter [:rfc:`6525`]</span>
+    <span class="c1">#: Add Incoming Streams Request Parameter [RFC 6525]</span>
     <span class="n">Add_Incoming_Streams_Request_Parameter</span> <span class="o">=</span> <span class="mi">18</span>
 
-    <span class="c1">#: Reserved for ECN Capable (0x8000) [:rfc:`9260`]</span>
+    <span class="c1">#: Reserved for ECN Capable (0x8000) [RFC 9260]</span>
     <span class="n">Reserved_for_ECN_Capable</span> <span class="o">=</span> <span class="mi">32768</span>
 
-    <span class="c1">#: Zero Checksum Acceptable (0x8001) [:rfc:`9653`]</span>
+    <span class="c1">#: Zero Checksum Acceptable (0x8001) [RFC 9653]</span>
     <span class="n">Zero_Checksum_Acceptable</span> <span class="o">=</span> <span class="mi">32769</span>
 
-    <span class="c1">#: Random  (0x8002) [:rfc:`4895`]</span>
+    <span class="c1">#: Random  (0x8002) [RFC 4895]</span>
     <span class="n">Random</span> <span class="o">=</span> <span class="mi">32770</span>
 
-    <span class="c1">#: Chunk List  (0x8003) [:rfc:`4895`]</span>
+    <span class="c1">#: Chunk List  (0x8003) [RFC 4895]</span>
     <span class="n">Chunk_List</span> <span class="o">=</span> <span class="mi">32771</span>
 
-    <span class="c1">#: Requested HMAC Algorithm Parameter  (0x8004) [:rfc:`4895`]</span>
+    <span class="c1">#: Requested HMAC Algorithm Parameter  (0x8004) [RFC 4895]</span>
     <span class="n">Requested_HMAC_Algorithm_Parameter</span> <span class="o">=</span> <span class="mi">32772</span>
 
     <span class="c1">#: Padding  (0x8005)</span>
@@ -567,31 +567,31 @@
     <span class="c1">#: Unassigned</span>
     <span class="n">Unassigned_32775</span> <span class="o">=</span> <span class="mi">32775</span>
 
-    <span class="c1">#: Supported Extensions (0x8008) [:rfc:`5061`]</span>
+    <span class="c1">#: Supported Extensions (0x8008) [RFC 5061]</span>
     <span class="n">Supported_Extensions</span> <span class="o">=</span> <span class="mi">32776</span>
 
-    <span class="c1">#: Forward TSN supported  (0xC000) [:rfc:`3758`]</span>
+    <span class="c1">#: Forward TSN supported  (0xC000) [RFC 3758]</span>
     <span class="n">Forward_TSN_supported</span> <span class="o">=</span> <span class="mi">49152</span>
 
-    <span class="c1">#: Add IP Address  (0xC001) [:rfc:`5061`]</span>
+    <span class="c1">#: Add IP Address  (0xC001) [RFC 5061]</span>
     <span class="n">Add_IP_Address</span> <span class="o">=</span> <span class="mi">49153</span>
 
-    <span class="c1">#: Delete IP Address  (0xC002) [:rfc:`5061`]</span>
+    <span class="c1">#: Delete IP Address  (0xC002) [RFC 5061]</span>
     <span class="n">Delete_IP_Address</span> <span class="o">=</span> <span class="mi">49154</span>
 
-    <span class="c1">#: Error Cause Indication  (0xC003) [:rfc:`5061`]</span>
+    <span class="c1">#: Error Cause Indication  (0xC003) [RFC 5061]</span>
     <span class="n">Error_Cause_Indication</span> <span class="o">=</span> <span class="mi">49155</span>
 
-    <span class="c1">#: Set Primary Address  (0xC004) [:rfc:`5061`]</span>
+    <span class="c1">#: Set Primary Address  (0xC004) [RFC 5061]</span>
     <span class="n">Set_Primary_Address</span> <span class="o">=</span> <span class="mi">49156</span>
 
-    <span class="c1">#: Success Indication  (0xC005) [:rfc:`5061`]</span>
+    <span class="c1">#: Success Indication  (0xC005) [RFC 5061]</span>
     <span class="n">Success_Indication</span> <span class="o">=</span> <span class="mi">49157</span>
 
-    <span class="c1">#: Adaptation Layer Indication  (0xC006) [:rfc:`5061`]</span>
+    <span class="c1">#: Adaptation Layer Indication  (0xC006) [RFC 5061]</span>
     <span class="n">Adaptation_Layer_Indication</span> <span class="o">=</span> <span class="mi">49158</span>
 
-    <span class="c1">#: Reserved for IETF-defined Chunk Extensions [:rfc:`9260`]</span>
+    <span class="c1">#: Reserved for IETF-defined Chunk Extensions [RFC 9260]</span>
     <span class="n">Reserved_for_IETF_defined_Chunk_Extensions</span> <span class="o">=</span> <span class="mi">65535</span>
 
 <div class="viewcode-block" id="Parameter._missing_">
@@ -653,7 +653,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=2864e1d3"></script>
+</div><script src="../../../../_static/documentation_options.js?v=812495b5"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

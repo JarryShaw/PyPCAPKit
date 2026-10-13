@@ -497,22 +497,22 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">FlowIDSuboption</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[FlowIDSuboption] Flow Identification Sub-Options"""</span>
 
-    <span class="c1">#: Pad [:rfc:`6089`]</span>
+    <span class="c1">#: Pad [RFC 6089]</span>
     <span class="n">Pad</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="c1">#: PadN [:rfc:`6089`]</span>
+    <span class="c1">#: PadN [RFC 6089]</span>
     <span class="n">PadN</span> <span class="o">=</span> <span class="mi">1</span>
 
-    <span class="c1">#: BID Reference [:rfc:`6089`]</span>
+    <span class="c1">#: BID Reference [RFC 6089]</span>
     <span class="n">BID_Reference</span> <span class="o">=</span> <span class="mi">2</span>
 
-    <span class="c1">#: Traffic Selector [:rfc:`6089`]</span>
+    <span class="c1">#: Traffic Selector [RFC 6089]</span>
     <span class="n">Traffic_Selector</span> <span class="o">=</span> <span class="mi">3</span>
 
-    <span class="c1">#: Flow Binding Action [:rfc:`7109`]</span>
+    <span class="c1">#: Flow Binding Action [RFC 7109]</span>
     <span class="n">Flow_Binding_Action</span> <span class="o">=</span> <span class="mi">4</span>
 
-    <span class="c1">#: Target Care-of Address [:rfc:`7109`]</span>
+    <span class="c1">#: Target Care-of Address [RFC 7109]</span>
     <span class="n">Target_Care_of_Address</span> <span class="o">=</span> <span class="mi">5</span>
 
 <div class="viewcode-block" id="FlowIDSuboption._missing_">
@@ -531,7 +531,7 @@
             <span class="c1">#: Unassigned</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'Unassigned'</span><span class="p">)</span>
         <span class="k">if</span> <span class="mi">251</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">255</span><span class="p">:</span>
-            <span class="c1">#: Reserved for Experimental Use [:rfc:`6089`]</span>
+            <span class="c1">#: Reserved for Experimental Use [RFC 6089]</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'Reserved_for_Experimental_Use'</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_missing_</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 </div>
@@ -568,7 +568,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=2864e1d3"></script>
+</div><script src="../../../../_static/documentation_options.js?v=812495b5"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

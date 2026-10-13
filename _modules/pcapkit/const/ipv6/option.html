@@ -497,94 +497,94 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">Option</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[Option] Destination Options and Hop-by-Hop Options"""</span>
 
-    <span class="c1">#: Pad1 [:rfc:`2460`]</span>
+    <span class="c1">#: Pad1 [RFC 2460]</span>
     <span class="n">Pad1</span> <span class="o">=</span> <span class="mh">0x00</span>
 
-    <span class="c1">#: PadN [:rfc:`2460`]</span>
+    <span class="c1">#: PadN [RFC 2460]</span>
     <span class="n">PadN</span> <span class="o">=</span> <span class="mh">0x01</span>
 
-    <span class="c1">#: Jumbo Payload [:rfc:`2675`]</span>
+    <span class="c1">#: Jumbo Payload [RFC 2675]</span>
     <span class="n">Jumbo_Payload</span> <span class="o">=</span> <span class="mh">0xC2</span>
 
-    <span class="c1">#: RPL Option [:rfc:`9008`]</span>
+    <span class="c1">#: RPL Option [RFC 9008]</span>
     <span class="n">RPL_Option_0x23</span> <span class="o">=</span> <span class="mh">0x23</span>
 
-    <span class="c1">#: RPL Option (DEPRECATED) [:rfc:`6553`][:rfc:`9008`]</span>
+    <span class="c1">#: RPL Option (DEPRECATED) [RFC 6553][; ][RFC 9008]</span>
     <span class="n">RPL_Option_0x63</span> <span class="o">=</span> <span class="mh">0x63</span>
 
-    <span class="c1">#: Tunnel Encapsulation Limit [:rfc:`2473`]</span>
+    <span class="c1">#: Tunnel Encapsulation Limit [RFC 2473]</span>
     <span class="n">Tunnel_Encapsulation_Limit</span> <span class="o">=</span> <span class="mh">0x04</span>
 
-    <span class="c1">#: Router Alert (DEPRECATED for New Protocols) [:rfc:`2711`][:rfc:`9805`]</span>
+    <span class="c1">#: Router Alert (DEPRECATED for New Protocols) [RFC 2711][; ][RFC 9805]</span>
     <span class="n">Router_Alert</span> <span class="o">=</span> <span class="mh">0x05</span>
 
-    <span class="c1">#: Quick-Start [:rfc:`4782`][RFC Errata 2034]</span>
+    <span class="c1">#: Quick-Start [RFC 4782][; ][RFC Errata 2034]</span>
     <span class="n">Quick_Start</span> <span class="o">=</span> <span class="mh">0x26</span>
 
-    <span class="c1">#: CALIPSO [:rfc:`5570`]</span>
+    <span class="c1">#: CALIPSO [RFC 5570]</span>
     <span class="n">CALIPSO</span> <span class="o">=</span> <span class="mh">0x07</span>
 
-    <span class="c1">#: SMF_DPD [:rfc:`6621`]</span>
+    <span class="c1">#: SMF_DPD [RFC 6621]</span>
     <span class="n">SMF_DPD</span> <span class="o">=</span> <span class="mh">0x08</span>
 
-    <span class="c1">#: Home Address [:rfc:`6275`]</span>
+    <span class="c1">#: Home Address [RFC 6275]</span>
     <span class="n">Home_Address</span> <span class="o">=</span> <span class="mh">0xC9</span>
 
     <span class="c1">#: Endpoint Identification (DEPRECATED) [CHARLES LYNN]</span>
     <span class="n">Endpoint_Identification</span> <span class="o">=</span> <span class="mh">0x8A</span>
 
-    <span class="c1">#: ILNP Nonce [:rfc:`6744`]</span>
+    <span class="c1">#: ILNP Nonce [RFC 6744]</span>
     <span class="n">ILNP_Nonce</span> <span class="o">=</span> <span class="mh">0x8B</span>
 
-    <span class="c1">#: Line-Identification Option [:rfc:`6788`]</span>
+    <span class="c1">#: Line-Identification Option [RFC 6788]</span>
     <span class="n">Line_Identification_Option</span> <span class="o">=</span> <span class="mh">0x8C</span>
 
-    <span class="c1">#: Deprecated [:rfc:`7731`]</span>
+    <span class="c1">#: Deprecated [RFC 7731]</span>
     <span class="n">Deprecated</span> <span class="o">=</span> <span class="mh">0x4D</span>
 
-    <span class="c1">#: MPL Option [:rfc:`7731`]</span>
+    <span class="c1">#: MPL Option [RFC 7731]</span>
     <span class="n">MPL_Option</span> <span class="o">=</span> <span class="mh">0x6D</span>
 
-    <span class="c1">#: IP_DFF [:rfc:`6971`]</span>
+    <span class="c1">#: IP_DFF [RFC 6971]</span>
     <span class="n">IP_DFF</span> <span class="o">=</span> <span class="mh">0xEE</span>
 
-    <span class="c1">#: Performance and Diagnostic Metrics (PDM) [:rfc:`8250`]</span>
+    <span class="c1">#: Performance and Diagnostic Metrics (PDM) [RFC 8250]</span>
     <span class="n">PDM</span> <span class="o">=</span> <span class="mh">0x0F</span>
 
-    <span class="c1">#: Minimum Path MTU Hop-by-Hop Option [:rfc:`9268`]</span>
+    <span class="c1">#: Minimum Path MTU Hop-by-Hop Option [RFC 9268]</span>
     <span class="n">Minimum_Path_MTU_Hop_by_Hop_Option</span> <span class="o">=</span> <span class="mh">0x30</span>
 
-    <span class="c1">#: IOAM Destination Option and IOAM Hop-by-Hop Option [:rfc:`9486`]</span>
+    <span class="c1">#: IOAM Destination Option and IOAM Hop-by-Hop Option [RFC 9486]</span>
     <span class="n">IOAM_Destination_Option_and_IOAM_Hop_by_Hop_Option_0x11</span> <span class="o">=</span> <span class="mh">0x11</span>
 
-    <span class="c1">#: IOAM Destination Option and IOAM Hop-by-Hop Option [:rfc:`9486`]</span>
+    <span class="c1">#: IOAM Destination Option and IOAM Hop-by-Hop Option [RFC 9486]</span>
     <span class="n">IOAM_Destination_Option_and_IOAM_Hop_by_Hop_Option_0x31</span> <span class="o">=</span> <span class="mh">0x31</span>
 
-    <span class="c1">#: AltMark [:rfc:`9343`]</span>
+    <span class="c1">#: AltMark [RFC 9343]</span>
     <span class="n">AltMark</span> <span class="o">=</span> <span class="mh">0x12</span>
 
-    <span class="c1">#: RFC3692-style Experiment [:rfc:`4727`]</span>
+    <span class="c1">#: RFC3692-style Experiment [RFC 4727]</span>
     <span class="n">RFC3692_style_Experiment_0x1E</span> <span class="o">=</span> <span class="mh">0x1E</span>
 
-    <span class="c1">#: RFC3692-style Experiment [:rfc:`4727`]</span>
+    <span class="c1">#: RFC3692-style Experiment [RFC 4727]</span>
     <span class="n">RFC3692_style_Experiment_0x3E</span> <span class="o">=</span> <span class="mh">0x3E</span>
 
-    <span class="c1">#: RFC3692-style Experiment [:rfc:`4727`]</span>
+    <span class="c1">#: RFC3692-style Experiment [RFC 4727]</span>
     <span class="n">RFC3692_style_Experiment_0x5E</span> <span class="o">=</span> <span class="mh">0x5E</span>
 
-    <span class="c1">#: RFC3692-style Experiment [:rfc:`4727`]</span>
+    <span class="c1">#: RFC3692-style Experiment [RFC 4727]</span>
     <span class="n">RFC3692_style_Experiment_0x7E</span> <span class="o">=</span> <span class="mh">0x7E</span>
 
-    <span class="c1">#: RFC3692-style Experiment [:rfc:`4727`]</span>
+    <span class="c1">#: RFC3692-style Experiment [RFC 4727]</span>
     <span class="n">RFC3692_style_Experiment_0x9E</span> <span class="o">=</span> <span class="mh">0x9E</span>
 
-    <span class="c1">#: RFC3692-style Experiment [:rfc:`4727`]</span>
+    <span class="c1">#: RFC3692-style Experiment [RFC 4727]</span>
     <span class="n">RFC3692_style_Experiment_0xBE</span> <span class="o">=</span> <span class="mh">0xBE</span>
 
-    <span class="c1">#: RFC3692-style Experiment [:rfc:`4727`]</span>
+    <span class="c1">#: RFC3692-style Experiment [RFC 4727]</span>
     <span class="n">RFC3692_style_Experiment_0xDE</span> <span class="o">=</span> <span class="mh">0xDE</span>
 
-    <span class="c1">#: RFC3692-style Experiment [:rfc:`4727`]</span>
+    <span class="c1">#: RFC3692-style Experiment [RFC 4727]</span>
     <span class="n">RFC3692_style_Experiment_0xFE</span> <span class="o">=</span> <span class="mh">0xFE</span>
 
 <div class="viewcode-block" id="Option._missing_">
@@ -634,7 +634,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=2864e1d3"></script>
+</div><script src="../../../../_static/documentation_options.js?v=812495b5"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

@@ -964,9 +964,9 @@
 <span class="sd">            for more operational information.</span>
 
 <span class="sd">        """</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.dpkt</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">attach_buffer</span><span class="p">,</span> <span class="n">attach_timestamp</span><span class="p">,</span> <span class="n">ipv4_reassembly</span><span class="p">,</span>
-                                          <span class="n">ipv6_reassembly</span><span class="p">,</span> <span class="n">packet2dict</span><span class="p">,</span> <span class="n">tcp_reassembly</span><span class="p">,</span>
-                                          <span class="n">tcp_traceflow</span><span class="p">)</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.dpkt</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">attach_buffer</span><span class="p">,</span> <span class="n">attach_linktype</span><span class="p">,</span> <span class="n">attach_timestamp</span><span class="p">,</span>
+                                          <span class="n">ipv4_reassembly</span><span class="p">,</span> <span class="n">ipv6_reassembly</span><span class="p">,</span> <span class="n">packet2dict</span><span class="p">,</span>
+                                          <span class="n">tcp_reassembly</span><span class="p">,</span> <span class="n">tcp_traceflow</span><span class="p">)</span>
         <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>
 
         <span class="n">reader</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span>
@@ -1002,6 +1002,9 @@
         <span class="c1"># it again recomputes zeroed checksums and lengths into it, so keep those</span>
         <span class="c1"># too for the adapters to slice the wire octets out of.</span>
         <span class="n">attach_buffer</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">pkt</span><span class="p">)</span>
+        <span class="c1"># And a frame kept as raw data does not say what link layer its octets</span>
+        <span class="c1"># start with, which the adapters read them by (#1626).</span>
+        <span class="n">attach_linktype</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">linktype</span><span class="p">)</span>
 
         <span class="c1"># verbose output</span>
         <span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -1139,7 +1142,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=2864e1d3"></script>
+</div><script src="../../../../_static/documentation_options.js?v=812495b5"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>
