@@ -20,17 +20,17 @@ __all__ = ['OperatorID']
 class OperatorID(EnumRegistry, IntEnum):
     """[OperatorID] Operator-Identifier Type Registry"""
 
-    #: Reserved [RFC 6757]
+    #: Reserved [:rfc:`6757`]
     Reserved_0 = 0
 
     #: Operator-Identifier as a variable-length Private Enterprise Number (PEN)
-    #: [RFC 6757]
+    #: [:rfc:`6757`]
     Operator_Identifier_as_a_variable_length_Private_Enterprise_Number = 1
 
-    #: Realm of the Operator [RFC 6757]
+    #: Realm of the Operator [:rfc:`6757`]
     Realm_of_the_Operator = 2
 
-    #: Reserved [RFC 6757]
+    #: Reserved [:rfc:`6757`]
     Reserved_255 = 255
 
     @classmethod

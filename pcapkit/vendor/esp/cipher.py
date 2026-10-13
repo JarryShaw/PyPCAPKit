@@ -40,13 +40,16 @@ class Cipher(Vendor):
         Returns:
             The cell with its ``[RFCxxxx]`` citations turned into
             :rst:role:`rfc` roles, or an empty string when the cell names no
-            document at all.
+            document at all. IANA's ``[RFC xxxx]; [RFC yyyy]`` spelling of a
+            cell is rendered as its ``[RFCxxxx][RFCyyyy]`` one is, as
+            :meth:`~pcapkit.vendor.default.Vendor.split_references` does for
+            the other crawlers (:issue:`1664`).
 
         """
-        text = re.sub(r'\]\s+\[', '][', re.sub(r'\s+', ' ', text)).strip()
+        text = re.sub(r'\][\s;]*\[', '][', re.sub(r'\s+', ' ', text)).strip()
         if text.upper() in UNKNOWN:
             return ''
-        return re.sub(r'\[RFC(\d+)\]',
+        return re.sub(r'\[RFC\s*(\d+)\]',
                       lambda match: f'[:rfc:`{match.group(1)}`]', text).replace('_', ' ')
 
     def process(self, data: 'list[str]') -> 'tuple[list[str], list[str]]':

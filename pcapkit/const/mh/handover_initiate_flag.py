@@ -20,16 +20,16 @@ __all__ = ['HandoverInitiateFlag']
 class HandoverInitiateFlag(EnumRegistry, IntFlag):
     """[HandoverInitiateFlag] Handover Initiate Flags"""
 
-    #: Assigned Address Configuration flag [RFC 5568]
+    #: Assigned Address Configuration flag [:rfc:`5568`]
     S = 0x80
 
-    #: Buffer flag [RFC 5568]
+    #: Buffer flag [:rfc:`5568`]
     U = 0x40
 
-    #: Proxy flag [RFC 5949]
+    #: Proxy flag [:rfc:`5949`]
     P = 0x20
 
-    #: Forwarding flag [RFC 5949]
+    #: Forwarding flag [:rfc:`5949`]
     F = 0x10
 
     @classmethod

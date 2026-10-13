@@ -56,125 +56,125 @@ class Method(EnumRegistry, StrEnum):
     def __repr__(self) -> 'str':
         return f'<{self.__class__.__name__}.{self._value_}>'
 
-    #: ACL [RFC 3744, Section 8.1]
+    #: ACL [:rfc:`3744#section-8.1`]
     ACL = 'ACL', False, True
 
-    #: BASELINE-CONTROL [RFC 3253, Section 12.6]
+    #: BASELINE-CONTROL [:rfc:`3253#section-12.6`]
     BASELINE_CONTROL = 'BASELINE-CONTROL', False, True
 
-    #: BIND [RFC 5842, Section 4]
+    #: BIND [:rfc:`5842#section-4`]
     BIND = 'BIND', False, True
 
-    #: CHECKIN [RFC 3253, Section 9.4]
+    #: CHECKIN [:rfc:`3253#section-9.4`]
     CHECKIN = 'CHECKIN', False, True
 
-    #: CHECKOUT [RFC 3253, Section 8.8]
+    #: CHECKOUT [:rfc:`3253#section-8.8`]
     CHECKOUT = 'CHECKOUT', False, True
 
-    #: CONNECT [RFC 9110, Section 9.3.6]
+    #: CONNECT [:rfc:`9110#section-9.3.6`]
     CONNECT = 'CONNECT', False, False
 
-    #: COPY [RFC 4918, Section 9.8]
+    #: COPY [:rfc:`4918#section-9.8`]
     COPY = 'COPY', False, True
 
-    #: DELETE [RFC 9110, Section 9.3.5]
+    #: DELETE [:rfc:`9110#section-9.3.5`]
     DELETE = 'DELETE', False, True
 
-    #: GET [RFC 9110, Section 9.3.1]
+    #: GET [:rfc:`9110#section-9.3.1`]
     GET = 'GET', True, True
 
-    #: HEAD [RFC 9110, Section 9.3.2]
+    #: HEAD [:rfc:`9110#section-9.3.2`]
     HEAD = 'HEAD', True, True
 
-    #: LABEL [RFC 3253, Section 8.2]
+    #: LABEL [:rfc:`3253#section-8.2`]
     LABEL = 'LABEL', False, True
 
-    #: LINK [RFC 2068, Section 19.6.1.2]
+    #: LINK [:rfc:`2068#section-19.6.1.2`]
     LINK = 'LINK', False, True
 
-    #: LOCK [RFC 4918, Section 9.10]
+    #: LOCK [:rfc:`4918#section-9.10`]
     LOCK = 'LOCK', False, False
 
-    #: MERGE [RFC 3253, Section 11.2]
+    #: MERGE [:rfc:`3253#section-11.2`]
     MERGE = 'MERGE', False, True
 
-    #: MKACTIVITY [RFC 3253, Section 13.5]
+    #: MKACTIVITY [:rfc:`3253#section-13.5`]
     MKACTIVITY = 'MKACTIVITY', False, True
 
-    #: MKCALENDAR [RFC 4791, Section 5.3.1][; ][RFC 8144, Section 2.3]
+    #: MKCALENDAR [:rfc:`4791#section-5.3.1`][:rfc:`8144#section-2.3`]
     MKCALENDAR = 'MKCALENDAR', False, True
 
-    #: MKCOL [RFC 4918, Section 9.3][; ][RFC 5689, Section 3][; ][RFC 8144, Section
-    #: 2.3]
+    #: MKCOL
+    #: [:rfc:`4918#section-9.3`][:rfc:`5689#section-3`][:rfc:`8144#section-2.3`]
     MKCOL = 'MKCOL', False, True
 
-    #: MKREDIRECTREF [RFC 4437, Section 6]
+    #: MKREDIRECTREF [:rfc:`4437#section-6`]
     MKREDIRECTREF = 'MKREDIRECTREF', False, True
 
-    #: MKWORKSPACE [RFC 3253, Section 6.3]
+    #: MKWORKSPACE [:rfc:`3253#section-6.3`]
     MKWORKSPACE = 'MKWORKSPACE', False, True
 
-    #: MOVE [RFC 4918, Section 9.9]
+    #: MOVE [:rfc:`4918#section-9.9`]
     MOVE = 'MOVE', False, True
 
-    #: OPTIONS [RFC 9110, Section 9.3.7]
+    #: OPTIONS [:rfc:`9110#section-9.3.7`]
     OPTIONS = 'OPTIONS', True, True
 
-    #: ORDERPATCH [RFC 3648, Section 7]
+    #: ORDERPATCH [:rfc:`3648#section-7`]
     ORDERPATCH = 'ORDERPATCH', False, True
 
-    #: PATCH [RFC 5789, Section 2]
+    #: PATCH [:rfc:`5789#section-2`]
     PATCH = 'PATCH', False, False
 
-    #: POST [RFC 9110, Section 9.3.3]
+    #: POST [:rfc:`9110#section-9.3.3`]
     POST = 'POST', False, False
 
-    #: PRI [RFC 9113, Section 3.4]
+    #: PRI [:rfc:`9113#section-3.4`]
     PRI = 'PRI', True, True
 
-    #: PROPFIND [RFC 4918, Section 9.1][; ][RFC 8144, Section 2.1]
+    #: PROPFIND [:rfc:`4918#section-9.1`][:rfc:`8144#section-2.1`]
     PROPFIND = 'PROPFIND', True, True
 
-    #: PROPPATCH [RFC 4918, Section 9.2][; ][RFC 8144, Section 2.2]
+    #: PROPPATCH [:rfc:`4918#section-9.2`][:rfc:`8144#section-2.2`]
     PROPPATCH = 'PROPPATCH', False, True
 
-    #: PUT [RFC 9110, Section 9.3.4]
+    #: PUT [:rfc:`9110#section-9.3.4`]
     PUT = 'PUT', False, True
 
-    #: QUERY [RFC 10008, Section 2]
+    #: QUERY [:rfc:`10008#section-2`]
     QUERY = 'QUERY', True, True
 
-    #: REBIND [RFC 5842, Section 6]
+    #: REBIND [:rfc:`5842#section-6`]
     REBIND = 'REBIND', False, True
 
-    #: REPORT [RFC 3253, Section 3.6][; ][RFC 8144, Section 2.1]
+    #: REPORT [:rfc:`3253#section-3.6`][:rfc:`8144#section-2.1`]
     REPORT = 'REPORT', True, True
 
-    #: SEARCH [RFC 5323, Section 2]
+    #: SEARCH [:rfc:`5323#section-2`]
     SEARCH = 'SEARCH', True, True
 
-    #: TRACE [RFC 9110, Section 9.3.8]
+    #: TRACE [:rfc:`9110#section-9.3.8`]
     TRACE = 'TRACE', True, True
 
-    #: UNBIND [RFC 5842, Section 5]
+    #: UNBIND [:rfc:`5842#section-5`]
     UNBIND = 'UNBIND', False, True
 
-    #: UNCHECKOUT [RFC 3253, Section 4.5]
+    #: UNCHECKOUT [:rfc:`3253#section-4.5`]
     UNCHECKOUT = 'UNCHECKOUT', False, True
 
-    #: UNLINK [RFC 2068, Section 19.6.1.3]
+    #: UNLINK [:rfc:`2068#section-19.6.1.3`]
     UNLINK = 'UNLINK', False, True
 
-    #: UNLOCK [RFC 4918, Section 9.11]
+    #: UNLOCK [:rfc:`4918#section-9.11`]
     UNLOCK = 'UNLOCK', False, True
 
-    #: UPDATE [RFC 3253, Section 7.1]
+    #: UPDATE [:rfc:`3253#section-7.1`]
     UPDATE = 'UPDATE', False, True
 
-    #: UPDATEREDIRECTREF [RFC 4437, Section 7]
+    #: UPDATEREDIRECTREF [:rfc:`4437#section-7`]
     UPDATEREDIRECTREF = 'UPDATEREDIRECTREF', False, True
 
-    #: VERSION-CONTROL [RFC 3253, Section 3.5]
+    #: VERSION-CONTROL [:rfc:`3253#section-3.5`]
     VERSION_CONTROL = 'VERSION-CONTROL', False, True
 
     @classmethod

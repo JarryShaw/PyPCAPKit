@@ -20,64 +20,64 @@ __all__ = ['Parameter']
 class Parameter(EnumRegistry, IntEnum):
     """[Parameter] SCTP Chunk Parameter Types"""
 
-    #: Heartbeat Info [RFC 9260]
+    #: Heartbeat Info [:rfc:`9260`]
     Heartbeat_Info = 1
 
-    #: IPv4 Address [RFC 9260]
+    #: IPv4 Address [:rfc:`9260`]
     IPv4_Address = 5
 
-    #: IPv6 Address [RFC 9260]
+    #: IPv6 Address [:rfc:`9260`]
     IPv6_Address = 6
 
-    #: State Cookie [RFC 9260]
+    #: State Cookie [:rfc:`9260`]
     State_Cookie = 7
 
-    #: Unrecognized Parameter [RFC 9260]
+    #: Unrecognized Parameter [:rfc:`9260`]
     Unrecognized_Parameter = 8
 
-    #: Cookie Preservative [RFC 9260]
+    #: Cookie Preservative [:rfc:`9260`]
     Cookie_Preservative = 9
 
     #: Unassigned
     Unassigned_10 = 10
 
-    #: Host Name Address [RFC 9260]
+    #: Host Name Address [:rfc:`9260`]
     Host_Name_Address = 11
 
-    #: Supported Address Types [RFC 9260]
+    #: Supported Address Types [:rfc:`9260`]
     Supported_Address_Types = 12
 
-    #: Outgoing SSN Reset Request Parameter [RFC 6525]
+    #: Outgoing SSN Reset Request Parameter [:rfc:`6525`]
     Outgoing_SSN_Reset_Request_Parameter = 13
 
-    #: Incoming SSN Reset Request Parameter [RFC 6525]
+    #: Incoming SSN Reset Request Parameter [:rfc:`6525`]
     Incoming_SSN_Reset_Request_Parameter = 14
 
-    #: SSN/TSN Reset Request Parameter [RFC 6525]
+    #: SSN/TSN Reset Request Parameter [:rfc:`6525`]
     SSN_TSN_Reset_Request_Parameter = 15
 
-    #: Re-configuration Response Parameter [RFC 6525]
+    #: Re-configuration Response Parameter [:rfc:`6525`]
     Re_configuration_Response_Parameter = 16
 
-    #: Add Outgoing Streams Request Parameter [RFC 6525]
+    #: Add Outgoing Streams Request Parameter [:rfc:`6525`]
     Add_Outgoing_Streams_Request_Parameter = 17
 
-    #: Add Incoming Streams Request Parameter [RFC 6525]
+    #: Add Incoming Streams Request Parameter [:rfc:`6525`]
     Add_Incoming_Streams_Request_Parameter = 18
 
-    #: Reserved for ECN Capable (0x8000) [RFC 9260]
+    #: Reserved for ECN Capable (0x8000) [:rfc:`9260`]
     Reserved_for_ECN_Capable = 32768
 
-    #: Zero Checksum Acceptable (0x8001) [RFC 9653]
+    #: Zero Checksum Acceptable (0x8001) [:rfc:`9653`]
     Zero_Checksum_Acceptable = 32769
 
-    #: Random  (0x8002) [RFC 4895]
+    #: Random  (0x8002) [:rfc:`4895`]
     Random = 32770
 
-    #: Chunk List  (0x8003) [RFC 4895]
+    #: Chunk List  (0x8003) [:rfc:`4895`]
     Chunk_List = 32771
 
-    #: Requested HMAC Algorithm Parameter  (0x8004) [RFC 4895]
+    #: Requested HMAC Algorithm Parameter  (0x8004) [:rfc:`4895`]
     Requested_HMAC_Algorithm_Parameter = 32772
 
     #: Padding  (0x8005)
@@ -90,31 +90,31 @@ class Parameter(EnumRegistry, IntEnum):
     #: Unassigned
     Unassigned_32775 = 32775
 
-    #: Supported Extensions (0x8008) [RFC 5061]
+    #: Supported Extensions (0x8008) [:rfc:`5061`]
     Supported_Extensions = 32776
 
-    #: Forward TSN supported  (0xC000) [RFC 3758]
+    #: Forward TSN supported  (0xC000) [:rfc:`3758`]
     Forward_TSN_supported = 49152
 
-    #: Add IP Address  (0xC001) [RFC 5061]
+    #: Add IP Address  (0xC001) [:rfc:`5061`]
     Add_IP_Address = 49153
 
-    #: Delete IP Address  (0xC002) [RFC 5061]
+    #: Delete IP Address  (0xC002) [:rfc:`5061`]
     Delete_IP_Address = 49154
 
-    #: Error Cause Indication  (0xC003) [RFC 5061]
+    #: Error Cause Indication  (0xC003) [:rfc:`5061`]
     Error_Cause_Indication = 49155
 
-    #: Set Primary Address  (0xC004) [RFC 5061]
+    #: Set Primary Address  (0xC004) [:rfc:`5061`]
     Set_Primary_Address = 49156
 
-    #: Success Indication  (0xC005) [RFC 5061]
+    #: Success Indication  (0xC005) [:rfc:`5061`]
     Success_Indication = 49157
 
-    #: Adaptation Layer Indication  (0xC006) [RFC 5061]
+    #: Adaptation Layer Indication  (0xC006) [:rfc:`5061`]
     Adaptation_Layer_Indication = 49158
 
-    #: Reserved for IETF-defined Chunk Extensions [RFC 9260]
+    #: Reserved for IETF-defined Chunk Extensions [:rfc:`9260`]
     Reserved_for_IETF_defined_Chunk_Extensions = 65535
 
     @classmethod

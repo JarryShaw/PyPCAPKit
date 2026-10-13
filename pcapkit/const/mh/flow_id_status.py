@@ -20,25 +20,25 @@ __all__ = ['FlowIDStatus']
 class FlowIDStatus(EnumRegistry, IntEnum):
     """[FlowIDStatus] Flow Identification Mobility Option Status Codes"""
 
-    #: Flow binding successful [RFC 6089]
+    #: Flow binding successful [:rfc:`6089`]
     Flow_binding_successful = 0
 
-    #: Administratively prohibited [RFC 6089]
+    #: Administratively prohibited [:rfc:`6089`]
     Administratively_prohibited = 128
 
-    #: Flow binding rejected, reason unspecified [RFC 6089]
+    #: Flow binding rejected, reason unspecified [:rfc:`6089`]
     Flow_binding_rejected_reason_unspecified = 129
 
-    #: Flow identification mobility option malformed [RFC 6089]
+    #: Flow identification mobility option malformed [:rfc:`6089`]
     Flow_identification_mobility_option_malformed = 130
 
-    #: BID not found [RFC 6089]
+    #: BID not found [:rfc:`6089`]
     BID_not_found = 131
 
-    #: FID not found [RFC 6089]
+    #: FID not found [:rfc:`6089`]
     FID_not_found = 132
 
-    #: Traffic selector format not supported [RFC 6089]
+    #: Traffic selector format not supported [:rfc:`6089`]
     Traffic_selector_format_not_supported = 133
 
     @classmethod
@@ -58,6 +58,6 @@ class FlowIDStatus(EnumRegistry, IntEnum):
             #: Unassigned; available for reject codes
             return cls._unregistered_member(value, 'Unassigned_available_for_reject_codes')
         if 251 <= value <= 255:
-            #: Reserved for Experimental Use [RFC 6089]
+            #: Reserved for Experimental Use [:rfc:`6089`]
             return cls._unregistered_member(value, 'Reserved_for_Experimental_Use')
         return super()._missing_(value)

@@ -20,25 +20,25 @@ __all__ = ['BindingACKFlag']
 class BindingACKFlag(EnumRegistry, IntFlag):
     """[BindingACKFlag] Binding Acknowledgment Flags"""
 
-    #: K [RFC 6275]
+    #: K [:rfc:`6275`]
     K = 0x80
 
-    #: R [RFC 3963]
+    #: R [:rfc:`3963`]
     R = 0x40
 
-    #: P [RFC 5213]
+    #: P [:rfc:`5213`]
     P = 0x20
 
-    #: T [RFC 5845]
+    #: T [:rfc:`5845`]
     T = 0x10
 
-    #: B [RFC 6602]
+    #: B [:rfc:`6602`]
     B = 0x08
 
-    #: S [RFC 7161]
+    #: S [:rfc:`7161`]
     S = 0x04
 
-    #: D [RFC 8885]
+    #: D [:rfc:`8885`]
     D = 0x02
 
     @classmethod

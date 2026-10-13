@@ -20,28 +20,28 @@ __all__ = ['MNIDSubtype']
 class MNIDSubtype(EnumRegistry, IntEnum):
     """[MNIDSubtype] Mobile Node Identifier Option Subtypes"""
 
-    #: NAI [RFC 4283]
+    #: NAI [:rfc:`4283`]
     NAI = 1
 
-    #: IPv6 Address [RFC 8371]
+    #: IPv6 Address [:rfc:`8371`]
     IPv6_Address = 2
 
-    #: IMSI [RFC 8371]
+    #: IMSI [:rfc:`8371`]
     IMSI = 3
 
-    #: P-TMSI [RFC 8371]
+    #: P-TMSI [:rfc:`8371`]
     P_TMSI = 4
 
-    #: EUI-48 address [RFC 8371]
+    #: EUI-48 address [:rfc:`8371`]
     EUI_48_address = 5
 
-    #: EUI-64 address [RFC 8371]
+    #: EUI-64 address [:rfc:`8371`]
     EUI_64_address = 6
 
-    #: GUTI [RFC 8371]
+    #: GUTI [:rfc:`8371`]
     GUTI = 7
 
-    #: DUID [RFC 8371]
+    #: DUID [:rfc:`8371`]
     DUID = 8
 
     @classmethod
@@ -55,7 +55,7 @@ class MNIDSubtype(EnumRegistry, IntEnum):
         if not (isinstance(value, int) and 0 <= value <= 255):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 9 <= value <= 15:
-            #: Reserved [RFC 8371]
+            #: Reserved [:rfc:`8371`]
             return cls._unregistered_member(value, 'Reserved')
         if 16 <= value <= 255:
             #: Unassigned

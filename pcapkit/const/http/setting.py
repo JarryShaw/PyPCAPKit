@@ -20,38 +20,39 @@ __all__ = ['Setting']
 class Setting(EnumRegistry, IntEnum):
     """[Setting] HTTP/2 Settings"""
 
-    #: ``Reserved`` [RFC 9113]
+    #: ``Reserved`` [:rfc:`9113`]
     Reserved_0x0000 = 0x0000
 
-    #: ``HEADER_TABLE_SIZE`` [RFC 9113, Section 6.5.2] (Initial Value: 4096)
+    #: ``HEADER_TABLE_SIZE`` [:rfc:`9113#section-6.5.2`] (Initial Value: 4096)
     HEADER_TABLE_SIZE = 0x0001
 
-    #: ``ENABLE_PUSH`` [RFC 9113, Section 6.5.2] (Initial Value: 1)
+    #: ``ENABLE_PUSH`` [:rfc:`9113#section-6.5.2`] (Initial Value: 1)
     ENABLE_PUSH = 0x0002
 
-    #: ``MAX_CONCURRENT_STREAMS`` [RFC 9113, Section 6.5.2] (Initial Value:
+    #: ``MAX_CONCURRENT_STREAMS`` [:rfc:`9113#section-6.5.2`] (Initial Value:
     #: infinite)
     MAX_CONCURRENT_STREAMS = 0x0003
 
-    #: ``INITIAL_WINDOW_SIZE`` [RFC 9113, Section 6.5.2] (Initial Value: 65535)
+    #: ``INITIAL_WINDOW_SIZE`` [:rfc:`9113#section-6.5.2`] (Initial Value: 65535)
     INITIAL_WINDOW_SIZE = 0x0004
 
-    #: ``MAX_FRAME_SIZE`` [RFC 9113, Section 6.5.2] (Initial Value: 16384)
+    #: ``MAX_FRAME_SIZE`` [:rfc:`9113#section-6.5.2`] (Initial Value: 16384)
     MAX_FRAME_SIZE = 0x0005
 
-    #: ``MAX_HEADER_LIST_SIZE`` [RFC 9113, Section 6.5.2] (Initial Value: infinite)
+    #: ``MAX_HEADER_LIST_SIZE`` [:rfc:`9113#section-6.5.2`] (Initial Value:
+    #: infinite)
     MAX_HEADER_LIST_SIZE = 0x0006
 
     #: ``Unassigned``
     Unassigned_0x0007 = 0x0007
 
-    #: ``SETTINGS_ENABLE_CONNECT_PROTOCOL`` [RFC 8441] (Initial Value: 0)
+    #: ``SETTINGS_ENABLE_CONNECT_PROTOCOL`` [:rfc:`8441`] (Initial Value: 0)
     SETTINGS_ENABLE_CONNECT_PROTOCOL = 0x0008
 
-    #: ``SETTINGS_NO_RFC7540_PRIORITIES`` [RFC 9218] (Initial Value: 0)
+    #: ``SETTINGS_NO_RFC7540_PRIORITIES`` [:rfc:`9218`] (Initial Value: 0)
     SETTINGS_NO_RFC7540_PRIORITIES = 0x0009
 
-    #: ``TLS_RENEG_PERMITTED`` [MS-HTTP2E][; ][Gabriel Montenegro] (Initial Value:
+    #: ``TLS_RENEG_PERMITTED`` [MS-HTTP2E][Gabriel Montenegro] (Initial Value:
     #: 0x00)
     TLS_RENEG_PERMITTED = 0x0010
 

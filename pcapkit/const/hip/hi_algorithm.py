@@ -20,37 +20,37 @@ __all__ = ['HIAlgorithm']
 class HIAlgorithm(EnumRegistry, IntEnum):
     """[HIAlgorithm] HI Algorithm"""
 
-    #: RESERVED [RFC 7401]
+    #: RESERVED [:rfc:`7401`]
     RESERVED_0 = 0
 
-    #: NULL-ENCRYPT [RFC 2410]
+    #: NULL-ENCRYPT [:rfc:`2410`]
     NULL_ENCRYPT = 1
 
     #: Unassigned
     Unassigned_2 = 2
 
-    #: DSA [RFC 7401]
+    #: DSA [:rfc:`7401`]
     DSA = 3
 
     #: Unassigned
     Unassigned_4 = 4
 
-    #: RSA [RFC 7401]
+    #: RSA [:rfc:`7401`]
     RSA = 5
 
     #: Unassigned
     Unassigned_6 = 6
 
-    #: ECDSA [RFC 7401]
+    #: ECDSA [:rfc:`7401`]
     ECDSA = 7
 
     #: Unassigned
     Unassigned_8 = 8
 
-    #: ECDSA_LOW [RFC 7401]
+    #: ECDSA_LOW [:rfc:`7401`]
     ECDSA_LOW = 9
 
-    #: EdDSA [RFC 8032]
+    #: EdDSA [:rfc:`8032`]
     EdDSA = 13
 
     @classmethod

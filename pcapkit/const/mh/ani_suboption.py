@@ -20,28 +20,28 @@ __all__ = ['ANISuboption']
 class ANISuboption(EnumRegistry, IntEnum):
     """[ANISuboption] Access Network Information (ANI) Sub-Option Type Values"""
 
-    #: Reserved [RFC 6757]
+    #: Reserved [:rfc:`6757`]
     Reserved_0 = 0
 
-    #: Network-Identifier sub-option [RFC 6757]
+    #: Network-Identifier sub-option [:rfc:`6757`]
     Network_Identifier = 1
 
-    #: Geo-Location sub-option [RFC 6757]
+    #: Geo-Location sub-option [:rfc:`6757`]
     Geo_Location = 2
 
-    #: Operator-Identifier sub-option [RFC 6757]
+    #: Operator-Identifier sub-option [:rfc:`6757`]
     Operator_Identifier = 3
 
-    #: Civic-Location sub-option [RFC 7563]
+    #: Civic-Location sub-option [:rfc:`7563`]
     Civic_Location = 4
 
-    #: MAG-Group-Identifier sub-option [RFC 7563]
+    #: MAG-Group-Identifier sub-option [:rfc:`7563`]
     MAG_Group_Identifier = 5
 
-    #: ANI Update-Timer sub-option [RFC 7563]
+    #: ANI Update-Timer sub-option [:rfc:`7563`]
     ANI_Update_Timer = 6
 
-    #: Reserved [RFC 6757]
+    #: Reserved [:rfc:`6757`]
     Reserved_255 = 255
 
     @classmethod

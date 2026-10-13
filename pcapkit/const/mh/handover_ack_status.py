@@ -20,43 +20,43 @@ __all__ = ['HandoverACKStatus']
 class HandoverACKStatus(EnumRegistry, IntEnum):
     """[HandoverACKStatus] Handover Acknowledge Status Codes"""
 
-    #: Handover Accepted or Successful (when 'P' flag is set) [RFC 5949]
+    #: Handover Accepted or Successful (when 'P' flag is set) [:rfc:`5949`]
     Handover_Accepted_or_Successful = 0
 
-    #: Handover Accepted with NCoA valid [RFC 5568]
+    #: Handover Accepted with NCoA valid [:rfc:`5568`]
     Handover_Accepted_with_NCoA_valid = 0
 
-    #: Handover Accepted, NCoA not valid [RFC 5568]
+    #: Handover Accepted, NCoA not valid [:rfc:`5568`]
     Handover_Accepted_NCoA_not_valid = 1
 
-    #: Handover Accepted, NCoA assigned [RFC 5568]
+    #: Handover Accepted, NCoA assigned [:rfc:`5568`]
     Handover_Accepted_NCoA_assigned = 2
 
-    #: Handover Accepted, use PCoA [RFC 5568]
+    #: Handover Accepted, use PCoA [:rfc:`5568`]
     Handover_Accepted_use_PCoA = 3
 
-    #: Message sent unsolicited [RFC 5568]
+    #: Message sent unsolicited [:rfc:`5568`]
     Message_sent_unsolicited = 4
 
-    #: Context Transfer Accepted or Successful [RFC 5949]
+    #: Context Transfer Accepted or Successful [:rfc:`5949`]
     Context_Transfer_Accepted_or_Successful = 5
 
-    #: All available Context Transferred [RFC 5949]
+    #: All available Context Transferred [:rfc:`5949`]
     All_available_Context_Transferred = 6
 
-    #: Handover Not Accepted, reason unspecified [RFC 5568]
+    #: Handover Not Accepted, reason unspecified [:rfc:`5568`]
     Handover_Not_Accepted_reason_unspecified = 128
 
-    #: Administratively prohibited [RFC 5568]
+    #: Administratively prohibited [:rfc:`5568`]
     Administratively_prohibited = 129
 
-    #: Insufficient resources [RFC 5568]
+    #: Insufficient resources [:rfc:`5568`]
     Insufficient_resources = 130
 
-    #: Requested Context Not Available [RFC 5949]
+    #: Requested Context Not Available [:rfc:`5949`]
     Requested_Context_Not_Available = 131
 
-    #: Forwarding Not Available [RFC 5949]
+    #: Forwarding Not Available [:rfc:`5949`]
     Forwarding_Not_Available = 132
 
     @classmethod

@@ -20,31 +20,31 @@ __all__ = ['Certificate']
 class Certificate(EnumRegistry, IntEnum):
     """[Certificate] HIP Certificate Types"""
 
-    #: Reserved [RFC 8002]
+    #: Reserved [:rfc:`8002`]
     Reserved_0 = 0
 
-    #: X.509 v3 [RFC 8002]
+    #: X.509 v3 [:rfc:`8002`]
     X_509_v3 = 1
 
-    #: Obsoleted [RFC 8002]
+    #: Obsoleted [:rfc:`8002`]
     Obsoleted_2 = 2
 
-    #: Hash and URL of X.509 v3 [RFC 8002]
+    #: Hash and URL of X.509 v3 [:rfc:`8002`]
     Hash_and_URL_of_X_509_v3 = 3
 
-    #: Obsoleted [RFC 8002]
+    #: Obsoleted [:rfc:`8002`]
     Obsoleted_4 = 4
 
-    #: LDAP URL of X.509 v3 [RFC 8002]
+    #: LDAP URL of X.509 v3 [:rfc:`8002`]
     LDAP_URL_of_X_509_v3 = 5
 
-    #: Obsoleted [RFC 8002]
+    #: Obsoleted [:rfc:`8002`]
     Obsoleted_6 = 6
 
-    #: Distinguished Name of X.509 v3 [RFC 8002]
+    #: Distinguished Name of X.509 v3 [:rfc:`8002`]
     Distinguished_Name_of_X_509_v3 = 7
 
-    #: Obsoleted [RFC 8002]
+    #: Obsoleted [:rfc:`8002`]
     Obsoleted_8 = 8
 
     @classmethod

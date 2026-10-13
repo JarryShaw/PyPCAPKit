@@ -20,22 +20,22 @@ __all__ = ['HITSuite']
 class HITSuite(EnumRegistry, IntEnum):
     """[HITSuite] HIT Suite ID"""
 
-    #: RESERVED [RFC 7401]
+    #: RESERVED [:rfc:`7401`]
     RESERVED_0 = 0
 
-    #: RSA,DSA/SHA-256 [RFC 7401]
+    #: RSA,DSA/SHA-256 [:rfc:`7401`]
     RSA_DSA_SHA_256 = 1
 
-    #: ECDSA/SHA-384 [RFC 7401]
+    #: ECDSA/SHA-384 [:rfc:`7401`]
     ECDSA_SHA_384 = 2
 
-    #: ECDSA_LOW/SHA-1 [RFC 7401]
+    #: ECDSA_LOW/SHA-1 [:rfc:`7401`]
     ECDSA_LOW_SHA_1 = 3
 
     #: Unassigned
     Unassigned_4 = 4
 
-    #: EdDSA/cSHAKE128 [RFC 9374]
+    #: EdDSA/cSHAKE128 [:rfc:`9374`]
     EdDSA_cSHAKE128 = 5
 
     @classmethod

@@ -20,88 +20,88 @@ __all__ = ['Integrity']
 class Integrity(EnumRegistry, IntEnum):
     """[Integrity] Transform Type 3 - Integrity Algorithm Transform IDs"""
 
-    #: NONE [RFC 7296]
+    #: NONE [:rfc:`7296`]
     NONE = 0
 
-    #: AUTH_HMAC_MD5_96 [RFC 2403]; [RFC 7296] (DEPRECATED [RFC 8247])
+    #: AUTH_HMAC_MD5_96 [:rfc:`2403`][:rfc:`7296`] (DEPRECATED [:rfc:`8247`])
     AUTH_HMAC_MD5_96 = 1
 
     #: Alias of :attr:`Integrity.AUTH_HMAC_MD5_96`.
     HMAC_MD5_96 = 1
 
-    #: AUTH_HMAC_SHA1_96 [RFC 2404]; [RFC 7296]
+    #: AUTH_HMAC_SHA1_96 [:rfc:`2404`][:rfc:`7296`]
     AUTH_HMAC_SHA1_96 = 2
 
     #: Alias of :attr:`Integrity.AUTH_HMAC_SHA1_96`.
     HMAC_SHA1_96 = 2
 
-    #: AUTH_DES_MAC [UNSPECIFIED] (DEPRECATED [RFC 8247])
+    #: AUTH_DES_MAC [UNSPECIFIED] (DEPRECATED [:rfc:`8247`])
     AUTH_DES_MAC = 3
 
     #: Alias of :attr:`Integrity.AUTH_DES_MAC`.
     DES_MAC = 3
 
-    #: AUTH_KPDK_MD5 [UNSPECIFIED] (DEPRECATED [RFC 8247])
+    #: AUTH_KPDK_MD5 [UNSPECIFIED] (DEPRECATED [:rfc:`8247`])
     AUTH_KPDK_MD5 = 4
 
     #: Alias of :attr:`Integrity.AUTH_KPDK_MD5`.
     KPDK_MD5 = 4
 
-    #: AUTH_AES_XCBC_96 [RFC 3566]; [RFC 7296]
+    #: AUTH_AES_XCBC_96 [:rfc:`3566`][:rfc:`7296`]
     AUTH_AES_XCBC_96 = 5
 
     #: Alias of :attr:`Integrity.AUTH_AES_XCBC_96`.
     AES_XCBC_96 = 5
 
-    #: AUTH_HMAC_MD5_128 [RFC 4595] (DEPRECATED [RFC 9395])
+    #: AUTH_HMAC_MD5_128 [:rfc:`4595`] (DEPRECATED [:rfc:`9395`])
     AUTH_HMAC_MD5_128 = 6
 
     #: Alias of :attr:`Integrity.AUTH_HMAC_MD5_128`.
     HMAC_MD5_128 = 6
 
-    #: AUTH_HMAC_SHA1_160 [RFC 4595] (DEPRECATED [RFC 9395])
+    #: AUTH_HMAC_SHA1_160 [:rfc:`4595`] (DEPRECATED [:rfc:`9395`])
     AUTH_HMAC_SHA1_160 = 7
 
     #: Alias of :attr:`Integrity.AUTH_HMAC_SHA1_160`.
     HMAC_SHA1_160 = 7
 
-    #: AUTH_AES_CMAC_96 [RFC 4494]
+    #: AUTH_AES_CMAC_96 [:rfc:`4494`]
     AUTH_AES_CMAC_96 = 8
 
     #: Alias of :attr:`Integrity.AUTH_AES_CMAC_96`.
     AES_CMAC_96 = 8
 
-    #: AUTH_AES_128_GMAC [RFC 4543]
+    #: AUTH_AES_128_GMAC [:rfc:`4543`]
     AUTH_AES_128_GMAC = 9
 
     #: Alias of :attr:`Integrity.AUTH_AES_128_GMAC`.
     AES_128_GMAC = 9
 
-    #: AUTH_AES_192_GMAC [RFC 4543]
+    #: AUTH_AES_192_GMAC [:rfc:`4543`]
     AUTH_AES_192_GMAC = 10
 
     #: Alias of :attr:`Integrity.AUTH_AES_192_GMAC`.
     AES_192_GMAC = 10
 
-    #: AUTH_AES_256_GMAC [RFC 4543]
+    #: AUTH_AES_256_GMAC [:rfc:`4543`]
     AUTH_AES_256_GMAC = 11
 
     #: Alias of :attr:`Integrity.AUTH_AES_256_GMAC`.
     AES_256_GMAC = 11
 
-    #: AUTH_HMAC_SHA2_256_128 [RFC 4868]
+    #: AUTH_HMAC_SHA2_256_128 [:rfc:`4868`]
     AUTH_HMAC_SHA2_256_128 = 12
 
     #: Alias of :attr:`Integrity.AUTH_HMAC_SHA2_256_128`.
     HMAC_SHA2_256_128 = 12
 
-    #: AUTH_HMAC_SHA2_384_192 [RFC 4868]
+    #: AUTH_HMAC_SHA2_384_192 [:rfc:`4868`]
     AUTH_HMAC_SHA2_384_192 = 13
 
     #: Alias of :attr:`Integrity.AUTH_HMAC_SHA2_384_192`.
     HMAC_SHA2_384_192 = 13
 
-    #: AUTH_HMAC_SHA2_512_256 [RFC 4868]
+    #: AUTH_HMAC_SHA2_512_256 [:rfc:`4868`]
     AUTH_HMAC_SHA2_512_256 = 14
 
     #: Alias of :attr:`Integrity.AUTH_HMAC_SHA2_512_256`.
@@ -121,6 +121,6 @@ class Integrity(EnumRegistry, IntEnum):
             #: Unassigned
             return cls._unregistered_member(value, 'Unassigned')
         if 1024 <= value <= 65535:
-            #: Reserved for Private Use [RFC 7296]
+            #: Reserved for Private Use [:rfc:`7296`]
             return cls._unregistered_member(value, 'Reserved_for_Private_Use')
         return super()._missing_(value)

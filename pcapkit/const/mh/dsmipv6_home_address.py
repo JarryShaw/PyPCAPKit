@@ -20,25 +20,25 @@ __all__ = ['DSMIPv6HomeAddress']
 class DSMIPv6HomeAddress(EnumRegistry, IntEnum):
     """[DSMIPv6HomeAddress] Dual Stack MIPv6 (DSMIPv6) IPv4 Home Address Option Status Codes"""
 
-    #: Success [RFC 5555]
+    #: Success [:rfc:`5555`]
     Success = 0
 
-    #: Failure, reason unspecified [RFC 5555]
+    #: Failure, reason unspecified [:rfc:`5555`]
     Failure_reason_unspecified = 128
 
-    #: Administratively prohibited [RFC 5555]
+    #: Administratively prohibited [:rfc:`5555`]
     Administratively_prohibited = 129
 
-    #: Incorrect IPv4 home address [RFC 5555]
+    #: Incorrect IPv4 home address [:rfc:`5555`]
     Incorrect_IPv4_home_address = 130
 
-    #: Invalid IPv4 address [RFC 5555]
+    #: Invalid IPv4 address [:rfc:`5555`]
     Invalid_IPv4_address = 131
 
-    #: Dynamic IPv4 home address assignment not available [RFC 5555]
+    #: Dynamic IPv4 home address assignment not available [:rfc:`5555`]
     Dynamic_IPv4_home_address_assignment_not_available = 132
 
-    #: Prefix allocation unauthorized [RFC 5555]
+    #: Prefix allocation unauthorized [:rfc:`5555`]
     Prefix_allocation_unauthorized = 133
 
     @classmethod

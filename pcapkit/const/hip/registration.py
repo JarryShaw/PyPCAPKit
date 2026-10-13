@@ -23,16 +23,16 @@ class Registration(EnumRegistry, IntEnum):
     #: Unassigned
     Unassigned_0 = 0
 
-    #: RENDEZVOUS [RFC 8004]
+    #: RENDEZVOUS [:rfc:`8004`]
     RENDEZVOUS = 1
 
-    #: RELAY_UDP_HIP [RFC 5770]
+    #: RELAY_UDP_HIP [:rfc:`5770`]
     RELAY_UDP_HIP = 2
 
-    #: RELAY_UDP_ESP [RFC 9028]
+    #: RELAY_UDP_ESP [:rfc:`9028`]
     RELAY_UDP_ESP = 3
 
-    #: CANDIDATE_DISCOVERY [RFC 9028]
+    #: CANDIDATE_DISCOVERY [:rfc:`9028`]
     CANDIDATE_DISCOVERY = 4
 
     @classmethod
@@ -49,6 +49,6 @@ class Registration(EnumRegistry, IntEnum):
             #: Unassigned
             return cls._unregistered_member(value, 'Unassigned')
         if 201 <= value <= 255:
-            #: Reserved for Private Use [RFC 8003]
+            #: Reserved for Private Use [:rfc:`8003`]
             return cls._unregistered_member(value, 'Reserved_for_Private_Use')
         return super()._missing_(value)
