@@ -27,13 +27,13 @@ later without a gate, and a job renamed or reordered.
 
 Be clear about how far that generalises, though, because it is easy to overstate.
 :data:`PUBLISHING_MARKERS` is what decides "publishing", and it is a finite,
-hand-maintained list of four substrings. So the rule generalises across job
+hand-maintained list of five substrings. So the rule generalises across job
 *identity* and not across publishing *mechanism*: a job uploading by some route
-none of those four names -- ``twine upload``, ``gh release upload``, a fork of a
-pinned action under another name, a ``curl`` straight at an index -- matches no
-marker, and would pass this test while genuinely ungated.
-:class:`TestMarkersStillMatch` only keeps the existing four from going blind; it
-cannot invent a fifth. Adding a publishing route to this workflow therefore means
+none of those five names -- ``twine upload``, a fork of a pinned action under
+another name, a ``curl`` straight at an index -- matches no marker, and would
+pass this test while genuinely ungated.
+:class:`TestMarkersStillMatch` only keeps the existing five from going blind; it
+cannot invent a sixth. Adding a publishing route to this workflow therefore means
 adding its marker here, and that is a maintenance obligation rather than something
 the test enforces.
 
@@ -266,6 +266,8 @@ PUBLISHING_MARKERS = {
     'pypa/gh-action-pypi-publish': 'uploads a distribution to PyPI or TestPyPI',
     'anaconda/actions/upload-package': 'uploads a package to anaconda.org',
     'softprops/action-gh-release': 'creates a public GitHub Release, and the tag it names',
+    # ``pypi`` and ``conda`` attach their files this way since #1634.
+    'gh release upload': 'attaches a file to a public GitHub Release',
     'git push': 'pushes a commit or a tag to the repository',
 }
 
@@ -1002,6 +1004,16 @@ def _evaluate(node: 'tuple', context: 'dict[str, object]') -> 'object':
     raise UnsupportedExpression(f'no evaluation rule for {node!r}')  # pragma: no cover
 
 
+def evaluate_expression(expression: 'str', context: 'dict[str, object]') -> 'object':
+    """The value ``expression`` evaluates to in ``context``, not only its truthiness.
+
+    What a ``with:`` input receives, such as #1634's ``token:``, whose ``||``
+    returns an operand rather than a boolean.
+
+    """
+    return _evaluate(parse_condition(expression), context)
+
+
 def evaluate_condition(condition: 'str', context: 'dict[str, object]') -> 'bool':
     """Whether a job carrying this ``if:`` would run in ``context``.
 
@@ -1009,7 +1021,7 @@ def evaluate_condition(condition: 'str', context: 'dict[str, object]') -> 'bool'
     be checked -- as opposed to the text that produced it.
 
     """
-    return _truthy(_evaluate(parse_condition(condition), context))
+    return _truthy(evaluate_expression(condition, context))
 
 
 #: The four values a job's ``needs.<job>.result`` can take. The axis #962 is
@@ -1051,6 +1063,11 @@ PUBLISHING_PREDECESSORS = {
 #: skipped gate admitted here would publish untested.
 STRICT_PREDECESSORS = ('version_check', 'unit-tests')
 
+#: ``github.actor_id`` of a person, and ``vars.RELEASE_APP_BOT_ID``, the release
+#: App's bot (#1634). Made up: only whether the two are equal matters.
+HUMAN_ACTOR_ID = '1000001'
+RELEASE_APP_BOT_ID = '2000002'
+
 
 def release_context(version_check: 'str' = 'success',
                     unit_tests: 'str' = 'success',
@@ -1062,7 +1079,9 @@ def release_context(version_check: 'str' = 'success',
                     cancelled: 'bool' = False,
                     outputs_present: 'bool' = True,
                     event_name: 'str' = 'workflow_run',
-                    workflow_run_conclusion: 'str' = 'success') -> 'dict[str, object]':
+                    workflow_run_conclusion: 'str' = 'success',
+                    actor_id: 'str' = HUMAN_ACTOR_ID,
+                    release_app_bot_id: 'str' = RELEASE_APP_BOT_ID) -> 'dict[str, object]':
     """The ``needs``/``github``/status context one scenario row stands for.
 
     Every default is a value that, on its own, lets a gate run, so a row
@@ -1093,6 +1112,10 @@ def release_context(version_check: 'str' = 'success',
     ``v1.5.0`` is the other real value, from this workflow's ``push: tags:
     ['v*']`` trigger.
 
+    ``actor_id`` is a person's by default, and the release App's bot id is set
+    (#1634). ``release_app_bot_id=''`` is the variable unset, which the
+    ``vars`` docs give as "an empty string", not ``null``.
+
     """
     outputs = {}  # type: dict[str, object]
     if outputs_present:
@@ -1115,8 +1138,10 @@ def release_context(version_check: 'str' = 'success',
         'github': {
             'ref_name': ref_name,
             'event_name': event_name,
+            'actor_id': actor_id,
             'event': {'workflow_run': {'conclusion': workflow_run_conclusion}},
         },
+        'vars': {'RELEASE_APP_BOT_ID': release_app_bot_id},
         STATUS: {'cancelled': cancelled},
     }
 
@@ -2110,8 +2135,8 @@ class TestEvidenceBasedGating(WorkflowMixin, unittest.TestCase):
         Each dependency has to be checked for ``== 'success' || == 'skipped'``
         explicitly, not merely ``!= 'failure'``: the latter still admits
         ``cancelled``, and a cancelled ``tag`` would send ``conda`` into its
-        ``actions/checkout`` with ``ref: conda-<version>+0`` for a tag ``tag``
-        never pushed -- a checkout failure standing in for a clean skip,
+        check that ``conda-<version>+0`` names this run's commit (#1634), for a
+        tag ``tag`` never pushed -- a failed step standing in for a clean skip,
         found on the same cross-review as the two blocking defects above.
 
         """
@@ -2350,9 +2375,20 @@ class TestGateExpressionsEvaluateCorrectly(WorkflowMixin, unittest.TestCase):
     #: is the workflow's outermost gate -- held by ``unit-tests`` until #1052
     #: moved ``version_check`` ahead of it: a ``workflow_run`` trigger only
     #: proceeds when the Vendor Update run that triggered it concluded
-    #: ``success``, and every other trigger proceeds unconditionally.
+    #: ``success``, and every other trigger proceeds -- #1634 -- unless it is
+    #: the ``v*`` push the release App's token makes, whose run would rerun
+    #: the gate and ask for a second approval. A person's push, and a
+    #: ``workflow_run`` whatever its actor, still run.
     VERSION_CHECK_ROWS = [
         ('a v* tag push', release_context(event_name='push'), True),
+        ("a v* tag push by the release App's bot",
+         release_context(event_name='push', actor_id=RELEASE_APP_BOT_ID), False),
+        ('a v* tag push, no release App set up',
+         release_context(event_name='push', release_app_bot_id=''), True),
+        ("Vendor Update succeeded, the actor the release App's bot",
+         release_context(actor_id=RELEASE_APP_BOT_ID), True),
+        ("the App's bot, but Vendor Update found nothing to update",
+         release_context(actor_id=RELEASE_APP_BOT_ID, workflow_run_conclusion='skipped'), False),
         ('Vendor Update succeeded', release_context(), True),
         ('Vendor Update found nothing to update',
          release_context(workflow_run_conclusion='skipped'), False),
@@ -3006,6 +3042,8 @@ class TestReleaseStatusScriptExecutesCorrectly(WorkflowMixin, unittest.TestCase)
         env = {
             'PCAPKIT_EVENT_NAME': 'workflow_run',
             'PCAPKIT_WORKFLOW_RUN_CONCLUSION': 'success',
+            'PCAPKIT_ACTOR_ID': HUMAN_ACTOR_ID,
+            'PCAPKIT_RELEASE_APP_BOT_ID': RELEASE_APP_BOT_ID,
             'PCAPKIT_UNIT_TESTS': 'success',
             'PCAPKIT_VERSION_CHECK': 'success',
             'PCAPKIT_GITHUB_JOB': 'success',
@@ -3040,6 +3078,33 @@ class TestReleaseStatusScriptExecutesCorrectly(WorkflowMixin, unittest.TestCase)
             {'PCAPKIT_VERSION_CHECK': 'skipped', 'PCAPKIT_UNIT_TESTS': 'skipped',
              'PCAPKIT_WORKFLOW_RUN_CONCLUSION': 'failure'},
             '::warning title=Release skipped',
+            0,
+        ),
+        (
+            # #1634: the tag the release App's token made starts a push run
+            # that version_check skips by design, which is routine.
+            'release_app_pushed_the_tag',
+            {'PCAPKIT_VERSION_CHECK': 'skipped', 'PCAPKIT_UNIT_TESTS': 'skipped',
+             'PCAPKIT_EVENT_NAME': 'push', 'PCAPKIT_WORKFLOW_RUN_CONCLUSION': '',
+             'PCAPKIT_ACTOR_ID': RELEASE_APP_BOT_ID},
+            '::notice title=Nothing to release',
+            0,
+        ),
+        (
+            # A person's push that version_check skipped is still unexpected.
+            'a_persons_tag_push_was_skipped',
+            {'PCAPKIT_VERSION_CHECK': 'skipped', 'PCAPKIT_UNIT_TESTS': 'skipped',
+             'PCAPKIT_EVENT_NAME': 'push', 'PCAPKIT_WORKFLOW_RUN_CONCLUSION': ''},
+            '::warning title=Release skipped for an unexpected reason',
+            0,
+        ),
+        (
+            # With no App set up, an empty actor id matches nothing.
+            'no_release_app_and_no_actor',
+            {'PCAPKIT_VERSION_CHECK': 'skipped', 'PCAPKIT_UNIT_TESTS': 'skipped',
+             'PCAPKIT_EVENT_NAME': 'push', 'PCAPKIT_WORKFLOW_RUN_CONCLUSION': '',
+             'PCAPKIT_ACTOR_ID': '', 'PCAPKIT_RELEASE_APP_BOT_ID': ''},
+            '::warning title=Release skipped for an unexpected reason',
             0,
         ),
         (
@@ -3142,6 +3207,16 @@ class TestReleaseStatusScriptExecutesCorrectly(WorkflowMixin, unittest.TestCase)
             1,
         ),
     ]
+
+    def test_the_release_apps_tag_push_is_quiet(self) -> None:
+        """#1634: a notice naming the App, and no warning at all."""
+        overrides = dict(next(row[1] for row in self.VECTORS if row[0] == 'release_app_pushed_the_tag'))
+        result = self._run(overrides)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.splitlines(), [
+            "::notice title=Nothing to release::the release App's bot pushed this tag from the Create "
+            "Release run that released its commit, so this run correctly released nothing (#1634).",
+        ])
 
     def test_each_scenario_takes_the_right_branch(self) -> None:
         for name, overrides, expected_marker, expected_rc in self.VECTORS:

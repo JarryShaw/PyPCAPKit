@@ -69,9 +69,11 @@ concurrency:
 # an unintended publish -- a version number it has accepted cannot be reused, and
 # ``skip-existing: true`` below means a re-upload then *succeeds* having published
 # nothing, so the number the intended release wanted is gone regardless. ``github``
-# and ``tag`` were split on the same principle: ``github`` spends the run's own
-# ``GITHUB_TOKEN``, whereas ``tag`` spends a long-lived PAT and a deploy key to
-# write to the default branch.
+# and ``tag`` were split on the same principle: since #1634 ``github`` spends a
+# token of the release App, minted in the job from ``github-release``'s secret
+# and revoked when it ends (the run's ``GITHUB_TOKEN`` while no App is set up),
+# whereas ``tag`` spends a long-lived PAT and a deploy key to write to the
+# default branch.
 #
 # Two things about this that are not self-enforcing, and #641 is the first of them:
 #
@@ -125,8 +127,8 @@ concurrency:
 # ``!= 'failure'``: the two spellings differ only when a predecessor's own
 # result is ``cancelled``, which ``!= 'failure'`` still admits and the equality
 # pair does not. A cancelled ``tag`` would otherwise send ``conda`` into its
-# ``actions/checkout`` with ``ref: conda-<version>+0`` for a tag ``tag`` never
-# pushed, trading a clean skip for a checkout failure. ``version_check`` is held
+# check that ``conda-<version>+0`` names this run's commit, for a tag ``tag``
+# never pushed, trading a clean skip for a failed step. ``version_check`` is held
 # to a stricter bar still: all three require ``needs.version_check.result ==
 # 'success'`` with no ``|| 'skipped'``, since it produces the evidence the gates
 # below read, and a skipped or cancelled ``version_check`` leaves them nothing
@@ -166,6 +168,27 @@ concurrency:
 # that did not happen, reported by ``release_status``, never a release that
 # went out untested. ``tests/project/test_release_gates.py`` asserts both
 # halves.
+#
+# #1634: every job that checks out, tags, builds or publishes pins
+# ``github.sha``, the commit this run was created for, never a ref that moves
+# while the run waits on the ``github-release`` approval. On a ``v*`` push that
+# is the pushed tag's commit; on ``workflow_run`` it is ``main``'s tip when the
+# run was created, *not* ``github.event.workflow_run.head_sha``, which is the
+# commit Vendor Update ran on and so predates the bump it pushed (run
+# 38008819343: ``github.sha`` ``b6b95bc8e``, Vendor Update run 38008512299 on
+# ``945c3c3d8``). That run was approved three days later and tagged ``main``'s
+# tip ``2c0008c3c`` as both ``v1.5.0b9`` and ``conda-1.5.0b9+0``:
+# ``action-gh-release`` defaulted ``target_commitish`` to the default branch,
+# and ``tag`` ran ``git pull --rebase origin main`` before tagging. ``github``,
+# ``tag``, ``pypi`` and ``conda`` also refuse to publish under a tag naming any
+# other commit, so a later run for the same version fails loudly instead of
+# putting a second tree out under it; finishing a release means re-running the
+# run that tagged it. ``github`` creates the ``v*`` tag with the release App's
+# token once ``vars.RELEASE_APP_CLIENT_ID`` is set, since GitHub refuses
+# ``GITHUB_TOKEN`` a target that differs from ``main`` in a workflow file, and
+# ``version_check`` skips the tag-push run that tag starts.
+# ``tests/project/test_release_tags_the_run_sha_1634.py`` asserts all of this
+# and runs ``tag``'s scripts against a scratch repository.
 
 jobs:
   version_check:
@@ -176,13 +199,24 @@ jobs:
     # triggered it concluded ``success``, and a tag push always proceeds. This
     # job is read-only -- it installs the package and reads three public
     # endpoints -- so running it ahead of the test gate risks nothing.
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    #
+    # #1634: a ``v*`` push by the release App's bot skips too. That is the tag
+    # ``github``'s Create Release makes with the App's token, which, unlike
+    # ``GITHUB_TOKEN``'s, starts a run; the run that made it releases that
+    # commit. Without this the second run would rerun the gate, ask for a
+    # second approval, and race the first run's uploads from another
+    # concurrency group. Whether that push fires, and carries the bot's
+    # ``github.actor_id``, is unmeasured; if not, this never matches.
+    if: >-
+      ${{ (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') &&
+      !(github.event_name == 'push' && github.actor_id == vars.RELEASE_APP_BOT_ID) }}
     permissions:
       contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
         with:
+          ref: ${{ github.sha }}
           fetch-depth: 0
 
       - uses: actions/setup-python@v7
@@ -383,14 +417,17 @@ jobs:
   github:
     name: GitHub Release
     runs-on: ubuntu-latest
-    # Gated: publishes the Release, and creates the ``v*`` tag that every job
-    # below then checks out. Since #887 this is the release's only approval --
+    # Gated: publishes the Release, and creates the ``v*`` tag -- at
+    # ``github.sha`` since #1634 -- that every job below then verifies before
+    # publishing under it. Since #887 this is the release's only approval --
     # see the note above ``jobs:``. Still gated on ``PCAPKIT_TAG_EXISTS``,
     # unlike the three jobs below it: the tag that output answers for is this
     # job's own artefact, not a proxy for someone else's -- see the #888 note
     # above ``jobs:``. ``unit-tests`` is listed since #1052, when the gate stopped
     # preceding ``version_check``; this ``if:`` calls no status-check function,
-    # so the implicit ``success()`` requires the gate to have passed.
+    # so the implicit ``success()`` requires the gate to have passed. The
+    # release App's private key is a ``github-release`` environment secret, so
+    # no job reads it before this approval, and no other job reads it at all.
     environment: github-release
     permissions:
       contents: write
@@ -400,7 +437,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v7
         with:
-          # ref: v${{ needs.version_check.outputs.PCAPKIT_VERSION }}
+          ref: ${{ github.sha }}
           fetch-depth: 0
 
       # ``CHANGELOG.md`` is generated by ``util/changelog_md.py`` from the newest
@@ -452,11 +489,30 @@ jobs:
             echo "::warning title=Changelog entry is undated::The entry for ${PCAPKIT_VERSION} still reads 'unreleased', so the release body says so too. Date the heading in docs/source/changelog/${PCAPKIT_VERSION}.rst, regenerate CHANGELOG.md and the body can be corrected in place."
           fi
 
+      # #1634: for a target that "adds or modifies any file under
+      # .github/workflows/ relative to the repository's default branch",
+      # https://docs.github.com/en/rest/releases/releases#create-a-release
+      # requires of "GitHub App installation tokens" the "Workflows" repository
+      # permission (write), whereas "The GITHUB_TOKEN available to GitHub
+      # Actions cannot be authorized for this". With no ``owner`` or
+      # ``repositories`` the token is "scoped to only the current repository",
+      # and the action's ``post`` step revokes it (v3.3.0's README, which ``v3``
+      # names). Skipped while ``vars.RELEASE_APP_CLIENT_ID`` is unset, which
+      # reads as ``''``, so Create Release spends ``GITHUB_TOKEN`` until the App
+      # is set up.
+      - name: Mint the release App's token
+        id: app_token
+        if: ${{ vars.RELEASE_APP_CLIENT_ID != '' }}
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-workflows: write
+
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v3.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
           # allowUpdates: true
           # artifacts: |
@@ -472,7 +528,68 @@ jobs:
           name: PyPCAPKit v${{ needs.version_check.outputs.PCAPKIT_VERSION }}
           prerelease: ${{ needs.version_check.outputs.PCAPKIT_PRERELEASE }}
           tag_name: "v${{ needs.version_check.outputs.PCAPKIT_VERSION }}"
-          token: "${{ secrets.GITHUB_TOKEN }}"
+          # #1634: on ``workflow_run`` this step creates the tag, and an unset
+          # target would put it on the default branch -- whatever ``main`` had
+          # become by approval. On a ``v*`` push the tag already exists, and the
+          # check below proves it names ``github.sha``, so this is ``''``, which
+          # the action reads as unset: the REST docs apply the workflow-file rule
+          # to a given target, else to the default branch's latest commit, so a
+          # target here would expose a hand-pushed tag to it under
+          # ``GITHUB_TOKEN``. ``pypi`` and ``conda`` upload with ``gh release
+          # upload``, which never calls Update a release, so nothing here
+          # re-checks this target once the release exists. cron-conda.yml's
+          # upload does, naming the default branch as its target: see
+          # releasing.rst.
+          target_commitish: ${{ github.event_name == 'workflow_run' && github.sha || '' }}
+          # The App's token, or ``GITHUB_TOKEN`` when the step above skipped and
+          # left its output empty. "A non-empty explicit token overrides
+          # GITHUB_TOKEN" (3.0.2's ``action.yml``), so no ``env:`` names one.
+          token: ${{ steps.app_token.outputs.token || secrets.GITHUB_TOKEN }}
+
+      # #1634: the same check ``tag``, ``pypi`` and ``conda`` make before they
+      # publish under this tag. Here it catches the tag having existed already
+      # at another commit, which ``action-gh-release`` silently reuses.
+      - name: Check the release tags name this run's commit
+        env:
+          PCAPKIT_TAGS: v${{ needs.version_check.outputs.PCAPKIT_VERSION }}
+          PCAPKIT_RUN_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          run_commit="$(git rev-parse --verify "${PCAPKIT_RUN_SHA}^{commit}")"
+          for tag in ${PCAPKIT_TAGS}; do
+            git fetch --quiet --force origin "refs/tags/${tag}:refs/tags/${tag}" || true
+            tagged="$(git rev-parse -q --verify "refs/tags/${tag}^{commit}" || true)"
+            if [ "$tagged" != "$run_commit" ]; then
+              echo "::error title=${tag} is not this run's commit (#1634)::${tag} resolves to '${tagged:-no commit}', but this run was created for ${run_commit}. Refusing to publish this tree under it: every artefact of a release comes from its tag's commit, so finish that release by re-running the run created for that commit."
+              exit 1
+            fi
+            echo "${tag} -> ${run_commit}"
+          done
+
+      # #1634: a refusal here is most likely the workflow-file rule quoted above
+      # the token step, which GitHub's 2023-11-02 changelog words more narrowly
+      # -- a target that itself modifies a workflow file and has no branch head
+      # or tag; which reading is enforced is unmeasured. What to fix depends on
+      # the token Create Release spent: ``GITHUB_TOKEN`` cannot be authorized,
+      # so the release App needs setting up; the App's token can be, so its
+      # permissions or installation are wrong. For a final release the
+      # action creates a draft and publishes it with Update a release in this
+      # same step; a re-run would reuse a draft left behind, target and all, so
+      # it is deleted first.
+      - name: Explain a refused release tag
+        if: ${{ failure() && steps.create_release.outcome == 'failure' }}
+        env:
+          PCAPKIT_VERSION: ${{ needs.version_check.outputs.PCAPKIT_VERSION }}
+          PCAPKIT_RUN_SHA: ${{ github.sha }}
+          PCAPKIT_APP_TOKEN_OUTCOME: ${{ steps.app_token.outcome }}
+        run: |
+          if [ "$PCAPKIT_APP_TOKEN_OUTCOME" = success ]; then
+            fix="Create Release spent the release App's token, so check that the App still has Contents and Workflows read and write and is installed on this repository."
+          else
+            fix="Create Release spent GITHUB_TOKEN, which cannot be authorized for this, because vars.RELEASE_APP_CLIENT_ID is unset. Set up the release App once, as docs/source/contributing/releasing.rst describes: Contents and Workflows read and write, installed on this repository only; repository variables RELEASE_APP_CLIENT_ID and RELEASE_APP_BOT_ID; github-release environment secret RELEASE_APP_PRIVATE_KEY."
+          fi
+          echo "::error title=Could not create v${PCAPKIT_VERSION} at ${PCAPKIT_RUN_SHA} (#1634)::If Create Release failed with 404 Not Found or 403 'Resource not accessible by integration', the likely cause is GitHub's workflow-file rule: its REST docs for Create a release require a token authorized to modify workflows for a commit that adds or modifies a file under .github/workflows/ relative to the default branch, which this commit may if main has changed one since. ${fix} Then delete any draft release v${PCAPKIT_VERSION} this left behind, since a re-run would reuse it and its target, and re-run this job. Any other failure is not this."
 
   tag:
     # "(release)" distinguishes this from the identically named job in
@@ -493,6 +610,10 @@ jobs:
     # ``!cancelled()`` so that ``github`` legitimately skipping (its own tag
     # already existing) does not cascade-skip this job before its ``if:`` is
     # even evaluated -- see the #888 note above ``jobs:``.
+    #
+    # #1634: "Create Tag" tags ``github.sha`` before anything here looks at
+    # ``main``, and "Reset Build Number" is a separate commit on top of
+    # ``main`` that never moves the tag. Its rules are in its own comment.
     environment: conda-tag
     permissions: {}
     needs: [ github, unit-tests, version_check ]
@@ -507,49 +628,134 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.PYPCAPKIT_ACTIONS_DEPLOY_KEY }}
 
+      # A detached checkout of this run's commit. This job used to check out a
+      # local ``main`` and run ``git pull --rebase origin main`` before tagging,
+      # which fast-forwarded it onto ``main``'s tip first -- ``b6b95bc8e`` to
+      # ``2c0008c3c`` in job 115087308551 (#1634).
       - name: Checkout code
         uses: actions/checkout@v7
         with:
           token: ${{ secrets.PYPCAPKIT }}
-          # ref: v${{ needs.version_check.outputs.PCAPKIT_VERSION }}
+          ref: ${{ github.sha }}
           fetch-depth: 0
 
-      - name: Reset Build Number
+      # Everything after this step writes through the deploy key loaded above.
+      # Kept to these lines alone: the project test runs the two steps below
+      # against a scratch repository, standing in for this one.
+      - name: Configure git for the deploy key
         run: |
-          set -x
-
-          printf 0 > conda/build
-
-      - name: Commit Changes
-        run: |
-          set -x
-
+          git remote set-url origin git@github.com:JarryShaw/PyPCAPKit.git
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
 
-          git add conda/build
-          git commit -m"Reset conda build number" || true
-
-      - name: Push Changes
-        run: |
-          git remote set-url origin git@github.com:JarryShaw/PyPCAPKit.git
-          git pull --rebase origin main
-          git push origin HEAD:main
-
+      # ``conda-<version>+0`` goes on this run's commit, next to the ``v*`` tag
+      # ``github`` put there -- and only if that tag is there: a ``v*`` tag on
+      # another commit means the release belongs to that commit, not this one.
+      # An existing ``conda-<version>+0`` on this commit is a re-run and is left
+      # alone; one on another commit is never moved.
       - name: Create Tag
+        env:
+          PCAPKIT_VERSION: ${{ needs.version_check.outputs.PCAPKIT_VERSION }}
+          PCAPKIT_RUN_SHA: ${{ github.sha }}
         run: |
-          set -x
+          set -euo pipefail
 
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
+          run_commit="$(git rev-parse --verify "${PCAPKIT_RUN_SHA}^{commit}")"
 
-          git tag -d v${{ needs.version_check.outputs.PCAPKIT_VERSION }} || true
-          git tag "conda-${{ needs.version_check.outputs.PCAPKIT_VERSION }}+0" -m"Conda Build"
+          release_tag="v${PCAPKIT_VERSION}"
+          released="$(git rev-parse -q --verify "refs/tags/${release_tag}^{commit}" || true)"
+          if [ "$released" != "$run_commit" ]; then
+            echo "::error title=${release_tag} is not this run's commit (#1634)::${release_tag} resolves to '${released:-no commit}', not ${run_commit}, the commit this run was created for. That release is not this commit's, so this commit gets no conda tag either."
+            exit 1
+          fi
 
-      - name: Push Tag
+          conda_tag="conda-${PCAPKIT_VERSION}+0"
+          tagged="$(git rev-parse -q --verify "refs/tags/${conda_tag}^{commit}" || true)"
+          if [ -z "$tagged" ]; then
+            git tag "$conda_tag" -m"Conda Build" "$run_commit"
+            git push origin "refs/tags/${conda_tag}"
+            echo "${conda_tag} -> ${run_commit}"
+          elif [ "$tagged" = "$run_commit" ]; then
+            echo "::notice title=${conda_tag} already tagged::${conda_tag} already names ${run_commit}; nothing to tag."
+          else
+            echo "::error title=${conda_tag} is not this run's commit (#1634)::${conda_tag} already names ${tagged}, not ${run_commit}. A pushed tag is never moved here."
+            exit 1
+          fi
+
+      # The reset is a commit of its own on top of ``main``, never folded into
+      # the tag above and never a rewrite: ``main`` is only ever fast-forwarded,
+      # by a plain ``git push`` of one new commit whose parent is the tip just
+      # fetched. It sets the tip's ``conda/build`` to 0, so the next Conda
+      # Update bump of this version is ``+1`` -- unless:
+      #
+      #   * this run's commit is not on ``main`` (a ``v*`` tag on a side branch)
+      #     -- ``main`` is left alone, with a warning;
+      #   * the tip already says build 0 -- the usual case, since
+      #     ``util/bump_version.py`` writes 0 with every bump;
+      #   * the tip carries another ``__version__`` -- its counter belongs to
+      #     that version, left alone;
+      #   * origin already has a ``conda-<version>+N`` tag other than ``+0`` --
+      #     rewinding would let a later bump reuse that number, so ``main`` is
+      #     left alone, with a warning.
+      #
+      # #1634's own shape -- this commit at build 0, then three Conda Update
+      # bumps that #1632 left untagged -- gets the reset: the tip's 3 becomes 0.
+      # A rejected push means ``main`` moved in between; the whole decision is
+      # made again from a fresh fetch, three times at most.
+      - name: Reset Build Number
+        env:
+          PCAPKIT_VERSION: ${{ needs.version_check.outputs.PCAPKIT_VERSION }}
+          PCAPKIT_RUN_SHA: ${{ github.sha }}
         run: |
-          git remote set-url origin git@github.com:JarryShaw/PyPCAPKit.git
-          git push origin "conda-${{ needs.version_check.outputs.PCAPKIT_VERSION }}+0"
+          set -euo pipefail
+
+          run_commit="$(git rev-parse --verify "${PCAPKIT_RUN_SHA}^{commit}")"
+          run_version="$(git show "${run_commit}:pcapkit/__init__.py" | sed -n 's/^__version__ = //p')"
+          builds="refs/tags/conda-${PCAPKIT_VERSION}+"
+
+          for attempt in 1 2 3; do
+            git fetch --quiet origin "+refs/heads/main:refs/remotes/origin/main"
+            tip="$(git rev-parse refs/remotes/origin/main)"
+
+            if ! git merge-base --is-ancestor "$run_commit" "$tip"; then
+              echo "::warning title=conda/build not reset::${run_commit} is not on main (tip ${tip}), so main is left alone; its conda/build still reads what it did."
+              exit 0
+            fi
+            tip_build="$(git show "${tip}:conda/build" | tr -d '[:space:]')"
+            if [ "$tip_build" = "0" ]; then
+              echo "::notice title=No conda build reset needed::main (${tip}) already carries conda/build 0."
+              exit 0
+            fi
+            tip_version="$(git show "${tip}:pcapkit/__init__.py" | sed -n 's/^__version__ = //p')"
+            if [ "$tip_version" != "$run_version" ]; then
+              echo "::notice title=conda/build not reset::main (${tip}) has moved on to __version__ ${tip_version}; its conda/build ${tip_build} counts that version's builds."
+              exit 0
+            fi
+            tagged="$(git ls-remote --tags --refs origin "${builds}*")"
+            taken=""
+            while read -r _ ref; do
+              build="${ref#"$builds"}"
+              if [ "$build" != "$ref" ] && [ "$build" != "0" ]; then
+                taken="${taken:+${taken} }+${build}"
+              fi
+            done <<< "$tagged"
+            if [ -n "$taken" ]; then
+              echo "::warning title=conda/build not reset::conda-${PCAPKIT_VERSION} is already tagged at ${taken}; resetting conda/build ${tip_build} on main (${tip}) to 0 would let a later Conda Update bump reuse one of those build numbers."
+              exit 0
+            fi
+
+            git switch --quiet --force --detach "$tip"
+            printf 0 > conda/build
+            git commit --quiet -m"Reset conda build number" -m"conda-${PCAPKIT_VERSION}+0 was tagged at ${run_commit}." -- conda/build
+            if git push origin "HEAD:refs/heads/main"; then
+              echo "conda/build reset from ${tip_build} to 0 on main in $(git rev-parse HEAD), on top of ${tip}"
+              exit 0
+            fi
+            echo "push to main rejected on attempt ${attempt}; fetching again"
+          done
+
+          echo "::error title=conda/build not reset::main kept moving; three pushes were rejected. ${run_commit} is tagged regardless -- reset conda/build on main by hand if no conda-${PCAPKIT_VERSION}+N tag other than +0 exists."
+          exit 1
 
   pypi:
     name: PyPI distribution for Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}
@@ -611,11 +817,32 @@ jobs:
           - python-version: "pypy3.10"
             ktlo: true
     steps:
+      # #1634: this run's commit, not ``ref: v<version>`` -- that tag was
+      # whatever ``main`` had become by approval time -- and then the check
+      # below that the tag these files are filed under names it too.
       - name: Checkout code
         uses: actions/checkout@v7
         with:
-          ref: v${{ needs.version_check.outputs.PCAPKIT_VERSION }}
+          ref: ${{ github.sha }}
           fetch-depth: 0
+
+      - name: Check the release tags name this run's commit
+        env:
+          PCAPKIT_TAGS: v${{ needs.version_check.outputs.PCAPKIT_VERSION }}
+          PCAPKIT_RUN_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          run_commit="$(git rev-parse --verify "${PCAPKIT_RUN_SHA}^{commit}")"
+          for tag in ${PCAPKIT_TAGS}; do
+            git fetch --quiet --force origin "refs/tags/${tag}:refs/tags/${tag}" || true
+            tagged="$(git rev-parse -q --verify "refs/tags/${tag}^{commit}" || true)"
+            if [ "$tagged" != "$run_commit" ]; then
+              echo "::error title=${tag} is not this run's commit (#1634)::${tag} resolves to '${tagged:-no commit}', but this run was created for ${run_commit}. Refusing to publish this tree under it: every artefact of a release comes from its tag's commit, so finish that release by re-running the run created for that commit."
+              exit 1
+            fi
+            echo "${tag} -> ${run_commit}"
+          done
 
       - uses: actions/setup-python@v7
         id: setup
@@ -672,21 +899,65 @@ jobs:
           skip-existing: true
           attestations: false
 
+      # #1634: ``gh release upload``, not ``action-gh-release``, which calls
+      # Update a release before every upload (3.0.2's ``src/github.ts:631-683``).
+      # GitHub's REST docs re-check a release's existing target -- ``github.sha``
+      # on ``workflow_run`` -- against the workflow-file rule there, so a
+      # workflow change reaching ``main`` after ``github`` ran would fail this
+      # step after PyPI had published. Upload a release asset's docs state no
+      # such rule; ``gh`` reads the release and POSTs each file to its
+      # ``upload_url``. #1640: a file already on the release is left alone, where
+      # the action deleted and re-uploaded it, and a rebuild is not
+      # byte-identical -- but only an asset in state ``uploaded``: after a 502,
+      # Upload a release asset "may leave an empty asset with a state of
+      # starter", which ``--clobber`` deletes before uploading the file again.
+      # Two failures the action did not have: no release fails ``gh release
+      # view`` with "release not found", where the action created one with the
+      # default branch as its target, and a pattern matching nothing is an
+      # ``::error``, where it only warned. ``conda`` runs the same script.
       - name: Upload package to GitHub Release
         id: upload
         continue-on-error: ${{ matrix.ktlo == true }}
-        uses: softprops/action-gh-release@v3.0.2
-        with:
-          # allowUpdates: true
-          files: |
-            dist/*
-          tag_name: "v${{ needs.version_check.outputs.PCAPKIT_VERSION }}"
-          token: "${{ secrets.GITHUB_TOKEN }}"
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PCAPKIT_RELEASE_TAG: v${{ needs.version_check.outputs.PCAPKIT_VERSION }}
+          PCAPKIT_ASSETS: dist/*
+        run: |
+          set -euo pipefail
+
+          published="$(gh release view "$PCAPKIT_RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[] | [.name, .state] | @tsv')"
+          while IFS= read -r pattern; do
+            [ -n "$pattern" ] || continue
+            for file in $pattern; do
+              if [ ! -f "$file" ]; then
+                echo "::error title=Nothing to upload::'${pattern}' matches no file, so ${PCAPKIT_RELEASE_TAG} would go without it."
+                exit 1
+              fi
+              name="${file##*/}"
+              state=""
+              while IFS=$'\t' read -r asset asset_state; do
+                [ "$asset" != "$name" ] || state="$asset_state"
+              done <<< "$published"
+              if [ "$state" = uploaded ]; then
+                echo "::notice title=${name} already on ${PCAPKIT_RELEASE_TAG}::Left as published (#1640): this run's rebuild is not byte-identical to it."
+                continue
+              fi
+              if [ -n "$state" ]; then
+                echo "::warning title=${name} uploaded again::${PCAPKIT_RELEASE_TAG} holds it in state '${state}', not 'uploaded' -- an upload that failed partway -- so it is deleted and this file uploaded in its place."
+                gh release upload "$PCAPKIT_RELEASE_TAG" "$file" --repo "$GITHUB_REPOSITORY" --clobber
+              else
+                gh release upload "$PCAPKIT_RELEASE_TAG" "$file" --repo "$GITHUB_REPOSITORY"
+              fi
+              echo "${name} -> ${PCAPKIT_RELEASE_TAG}"
+            done
+          done <<< "$PCAPKIT_ASSETS"
 
       # #1633: what this KTLO leg's steps did before ``continue-on-error``,
       # for ``release_status`` -- ``steps.*.outcome`` covers the steps with an
       # ``id`` above, i.e. every one that can fail here except the TestPyPI
-      # upload, which no leg treats as a failure.
+      # upload, which no leg treats as a failure, and #1634's tag check, which
+      # fails every leg alike and so blocks every leg.
       - name: Record this KTLO leg's outcome
         id: ktlo
         if: ${{ !cancelled() && matrix.ktlo == true }}
@@ -748,10 +1019,31 @@ jobs:
           - "3.14"
           - "3.15"
     steps:
+      # #1634: this run's commit, not ``ref: conda-<version>+0``, then the check
+      # that both tags these packages are filed under name it.
       - uses: actions/checkout@v7
         with:
-          ref: conda-${{ needs.version_check.outputs.PCAPKIT_VERSION }}+0
+          ref: ${{ github.sha }}
           fetch-depth: 0
+
+      - name: Check the release tags name this run's commit
+        shell: bash
+        env:
+          PCAPKIT_TAGS: v${{ needs.version_check.outputs.PCAPKIT_VERSION }} conda-${{ needs.version_check.outputs.PCAPKIT_VERSION }}+0
+          PCAPKIT_RUN_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          run_commit="$(git rev-parse --verify "${PCAPKIT_RUN_SHA}^{commit}")"
+          for tag in ${PCAPKIT_TAGS}; do
+            git fetch --quiet --force origin "refs/tags/${tag}:refs/tags/${tag}" || true
+            tagged="$(git rev-parse -q --verify "refs/tags/${tag}^{commit}" || true)"
+            if [ "$tagged" != "$run_commit" ]; then
+              echo "::error title=${tag} is not this run's commit (#1634)::${tag} resolves to '${tagged:-no commit}', but this run was created for ${run_commit}. Refusing to publish this tree under it: every artefact of a release comes from its tag's commit, so finish that release by re-running the run created for that commit."
+              exit 1
+            fi
+            echo "${tag} -> ${run_commit}"
+          done
 
       # #888: this is the per-leg correctness fix -- see the job comment above.
       # Anaconda's read API reported ``cf-cache-status: DYNAMIC`` on every
@@ -887,6 +1179,9 @@ jobs:
         shell: bash -el {0}
         env:
           PCAPKIT_VERSION: ${{ needs.version_check.outputs.PCAPKIT_VERSION }}
+          # Build 0 because this is the build ``conda-<version>+0`` names, not
+          # because ``conda/build`` says so: at a hand-tagged commit it may still
+          # hold the previous version's counter until ``tag``'s reset (#1634).
           PCAPKIT_BUILD: "0"
         working-directory: conda/pypcapkit
         run: |
@@ -946,14 +1241,47 @@ jobs:
           packages: ${{ steps.conda_build.outputs.packages }}
           labels: ${{ needs.version_check.outputs.PCAPKIT_CONDA_LABEL }}
 
+      # ``pypi``'s upload script, for the same two reasons (#1634, #1640). Not
+      # gated on ``check_leg`` as the Anaconda upload is: a leg whose Anaconda
+      # upload landed and whose GitHub upload then failed would get no GitHub
+      # asset on any re-run. Skipping a file the release already has is what
+      # stops the replacement #1640 measured.
       - name: Upload package to GitHub Release
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        uses: softprops/action-gh-release@v3.0.2
-        with:
-          # allowUpdates: true
-          files: ${{ steps.conda_build.outputs.packages }}
-          tag_name: "v${{ needs.version_check.outputs.PCAPKIT_VERSION }}"
-          token: "${{ secrets.GITHUB_TOKEN }}"
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PCAPKIT_RELEASE_TAG: v${{ needs.version_check.outputs.PCAPKIT_VERSION }}
+          PCAPKIT_ASSETS: ${{ steps.conda_build.outputs.packages }}
+        run: |
+          set -euo pipefail
+
+          published="$(gh release view "$PCAPKIT_RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[] | [.name, .state] | @tsv')"
+          while IFS= read -r pattern; do
+            [ -n "$pattern" ] || continue
+            for file in $pattern; do
+              if [ ! -f "$file" ]; then
+                echo "::error title=Nothing to upload::'${pattern}' matches no file, so ${PCAPKIT_RELEASE_TAG} would go without it."
+                exit 1
+              fi
+              name="${file##*/}"
+              state=""
+              while IFS=$'\t' read -r asset asset_state; do
+                [ "$asset" != "$name" ] || state="$asset_state"
+              done <<< "$published"
+              if [ "$state" = uploaded ]; then
+                echo "::notice title=${name} already on ${PCAPKIT_RELEASE_TAG}::Left as published (#1640): this run's rebuild is not byte-identical to it."
+                continue
+              fi
+              if [ -n "$state" ]; then
+                echo "::warning title=${name} uploaded again::${PCAPKIT_RELEASE_TAG} holds it in state '${state}', not 'uploaded' -- an upload that failed partway -- so it is deleted and this file uploaded in its place."
+                gh release upload "$PCAPKIT_RELEASE_TAG" "$file" --repo "$GITHUB_REPOSITORY" --clobber
+              else
+                gh release upload "$PCAPKIT_RELEASE_TAG" "$file" --repo "$GITHUB_REPOSITORY"
+              fi
+              echo "${name} -> ${PCAPKIT_RELEASE_TAG}"
+            done
+          done <<< "$PCAPKIT_ASSETS"
 
   # #888: the point of this job is that a run which released nothing must say
   # why, in one place, regardless of which upstream job or gate is what made it
@@ -986,6 +1314,8 @@ jobs:
         env:
           PCAPKIT_EVENT_NAME: ${{ github.event_name }}
           PCAPKIT_WORKFLOW_RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          PCAPKIT_ACTOR_ID: ${{ github.actor_id }}
+          PCAPKIT_RELEASE_APP_BOT_ID: ${{ vars.RELEASE_APP_BOT_ID }}
           PCAPKIT_UNIT_TESTS: ${{ needs.unit-tests.result }}
           PCAPKIT_VERSION_CHECK: ${{ needs.version_check.result }}
           PCAPKIT_GITHUB_JOB: ${{ needs.github.result }}
@@ -1019,9 +1349,14 @@ jobs:
           # update (`skipped`), which is routine and gets a quiet notice; any
           # other conclusion gets a warning, because it means Vendor Update
           # itself needs attention, even though it is not #888 -- no tag exists
-          # here that could be left stranded.
+          # here that could be left stranded. On a push it is quiet only for
+          # the release App's own tag (#1634), which version_check skips by
+          # design; an unset bot id never matches here.
           if [ "$PCAPKIT_VERSION_CHECK" = "skipped" ]; then
-            if [ "$PCAPKIT_EVENT_NAME" = "workflow_run" ] && [ "$PCAPKIT_WORKFLOW_RUN_CONCLUSION" = "skipped" ]; then
+            if [ "$PCAPKIT_EVENT_NAME" = "push" ] && [ -n "$PCAPKIT_RELEASE_APP_BOT_ID" ] \
+               && [ "$PCAPKIT_ACTOR_ID" = "$PCAPKIT_RELEASE_APP_BOT_ID" ]; then
+              echo "::notice title=Nothing to release::the release App's bot pushed this tag from the Create Release run that released its commit, so this run correctly released nothing (#1634)."
+            elif [ "$PCAPKIT_EVENT_NAME" = "workflow_run" ] && [ "$PCAPKIT_WORKFLOW_RUN_CONCLUSION" = "skipped" ]; then
               echo "::notice title=Nothing to release::the triggering Vendor Update run found nothing to update, so this run correctly released nothing."
             elif [ "$PCAPKIT_EVENT_NAME" = "workflow_run" ]; then
               echo "::warning title=Release skipped::the triggering Vendor Update run concluded '${PCAPKIT_WORKFLOW_RUN_CONCLUSION}', not 'success', so version_check, the release test gate and every release job were skipped. Not #888 -- no tag was created that could be left stranded -- but Vendor Update likely needs attention."
