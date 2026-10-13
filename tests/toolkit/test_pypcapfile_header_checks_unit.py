@@ -254,10 +254,10 @@ class PyPCAPFileHeaderCheckTests(unittest.TestCase):
         ):
             with self.subTest(case=label), mock.patch.dict('sys.modules', base.fake_ip_decoder()) as modules:
                 IP = modules['pcapfile.protocols.network.ip'].IP
-                ipv4, _ = _innermost(base.make_packet(frame))
+                ipv4, _, depth = _innermost(base.make_packet(frame))
                 self.assertIsInstance(ipv4, IP)
                 self.assertEqual(IP.calls, [(inner, 0)])
-                self.assertEqual(_transport(ipv4), base.TCP_SEGMENT)
+                self.assertEqual(_transport(ipv4, depth), base.TCP_SEGMENT)
 
 
 if __name__ == '__main__':

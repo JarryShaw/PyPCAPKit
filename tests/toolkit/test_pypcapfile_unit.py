@@ -129,10 +129,11 @@ FakeEthernet.__qualname__ = 'Ethernet'
 
 
 def make_packet(layer, *, timestamp: int = 1511106545, timestamp_us: int = 471719,
-                ns_resolution: bool = False, capture_len: int = 86, packet_len: int = 86):
-    """Build a stand-in for :class:`pcapfile.structs.pcap_packet`."""
+                ns_resolution: bool = False, capture_len: int = 86, packet_len: int = 86,
+                linktype: int = 1):
+    """Build a stand-in for :class:`pcapfile.structs.pcap_packet`, of a capture of ``linktype``."""
     return types.SimpleNamespace(
-        header=[types.SimpleNamespace(ns_resolution=ns_resolution)],
+        header=[types.SimpleNamespace(ns_resolution=ns_resolution, ll_type=linktype)],
         timestamp=timestamp,
         timestamp_us=timestamp_us,
         capture_len=capture_len,
@@ -790,11 +791,11 @@ class PyPCAPFileEncapsulatedTCPTests(unittest.TestCase):
         ):
             with self.subTest(case=label), mock.patch.dict('sys.modules', fake_ip_decoder()) as modules:
                 IP = modules['pcapfile.protocols.network.ip'].IP
-                ipv4, upper = _innermost(make_packet(frame))
+                ipv4, upper, depth = _innermost(make_packet(frame))
                 self.assertIsInstance(ipv4, IP)
                 self.assertIsNone(upper)
                 self.assertEqual(IP.calls[-1], (inner, 0))
-                self.assertEqual(_transport(ipv4), segment)
+                self.assertEqual(_transport(ipv4, depth), segment)
 
     def test_no_warning_where_the_default_engine_finds_no_tcp(self) -> None:
         from unittest import mock
@@ -964,7 +965,7 @@ class PyPCAPFileEncapsulatedTCPTests(unittest.TestCase):
         packets = [make_packet(ipv6_frame(cut)) for _ in range(10)]  # a TCP header cut short in a tunnel
         for packet in packets[1:]:
             packet.header = packets[0].header  # one capture, which warns once
-        with mock.patch.object(toolkit, '_upper_layer', wraps=toolkit._upper_layer) as walk, \
+        with mock.patch.object(toolkit, '_walk_upper_layer', wraps=toolkit._walk_upper_layer) as walk, \
                 mock.patch.object(ProtocolBase, '__init__', spy_init), \
                 warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')

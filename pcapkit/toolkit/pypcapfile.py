@@ -42,6 +42,17 @@ cannot be used for it.
    :func:`_ipv4_in_ipv6`), and TCP behind AH or an IPv6 extension header inside
    IPv4 is read past them (see :func:`_transport`).
 
+   `PyPCAPFile`_ decodes no link layer but Ethernet. The default engine also
+   dissects the IP packet of the BSD loopback and raw-IP link types, so the
+   adapters read it there themselves (see :data:`READ_LINKTYPES`,
+   :issue:`1667`), and leave the rest of the link types unread, as it does.
+
+   Nor does it bound how deep it reads. The default engine dissects at most
+   :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT` layers of a frame,
+   each VLAN tag, IP header, AH and IPv6 extension header one of them, so the
+   adapters read nothing past that either (see :func:`_walk_upper_layer`,
+   :issue:`1609`).
+
    `PyPCAPFile`_ checks neither that an IPv4 header was captured whole nor its
    options, and the default engine rejects a header that fails either check, so
    such a header is left out of reassembly and flow tracing alike (see
@@ -75,6 +86,8 @@ from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
 from pcapkit.protocols.internet.internet import EXTENSION_HEADER_LIMIT
 from pcapkit.protocols.internet.ipv4 import IPv4 as Protocol_IPv4
+from pcapkit.protocols.link.loopback import family_byteorder
+from pcapkit.protocols.protocol import FRAME_LAYER_LIMIT
 from pcapkit.protocols.schema.internet.ipv6 import jumbo_payload_length
 from pcapkit.protocols.transport.tcp import TCP as Protocol_TCP
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall, stacklevel
@@ -145,6 +158,27 @@ VLAN_TAGS = frozenset((
 #: Length of a VLAN tag (IEEE 802.1Q): two octets of tag control information,
 #: then the EtherType of what follows the tag.
 VLAN_TAG_LEN = 4
+
+#: Link types `PyPCAPFile`_ has no decoder for, whose IP packet the default
+#: engine dissects all the same (see :attr:`Frame.__proto__
+#: <pcapkit.protocols.misc.pcap.frame.Frame.__proto__>`), and which the
+#: adapters therefore read themselves (see :func:`_link_network`,
+#: :issue:`1667`): BSD loopback, ``NULL`` and ``LOOP``, and raw IP, ``RAW``,
+#: ``IPV4`` and ``IPV6``. Every other link type but ``ETHERNET``, which
+#: `PyPCAPFile`_ decodes, is left unread, as the default engine leaves it raw.
+READ_LINKTYPES = frozenset((
+    Enum_LinkType.NULL, Enum_LinkType.LOOP, Enum_LinkType.RAW,
+    Enum_LinkType.IPV4, Enum_LinkType.IPV6,
+))
+
+#: Length of a BSD loopback header: the address family.
+LOOPBACK_HEADER_LEN = 4
+
+#: Address families of the IP packets the default engine dissects behind a BSD
+#: loopback header, each mapped to its IP version (see :attr:`Loopback.__proto__
+#: <pcapkit.protocols.link.loopback.Loopback.__proto__>`): ``AF_INET``, and the
+#: ``AF_INET6`` of each of the BSDs.
+LOOPBACK_IP_VERSIONS = {2: 4, 24: 6, 28: 6, 30: 6}  # type: dict[int, int]
 
 #: IP protocol numbers of the IP-in-IP tunnels the default engine dissects
 #: (see :attr:`Internet.__proto__
@@ -383,17 +417,21 @@ def _is_raw(layer: 'Any') -> 'bool':
     return isinstance(layer, (bytes, bytearray, memoryview))
 
 
-def _untag(link: 'Any') -> 'Optional[tuple[int, bytes]]':
+def _untag(link: 'Any') -> 'Optional[tuple[int, bytes, int]]':
     """Read past the VLAN tags of an Ethernet frame whose payload is undecoded.
 
     Args:
         link: Decoded PyPCAPFile link layer.
 
     Returns:
-        The EtherType after the last of the tags in :data:`VLAN_TAGS` and the
-        raw octets it heads -- for an untagged frame, the frame's own EtherType
-        and payload. :data:`None` if `PyPCAPFile`_ decoded the payload, or a tag
-        is cut short.
+        The EtherType after the last of the tags in :data:`VLAN_TAGS`, the raw
+        octets it heads, and their place in the frame (c.f.
+        :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT`), the Ethernet
+        header being the first layer and each tag one more -- for an untagged
+        frame, the frame's own EtherType and payload, and ``2``. :data:`None` if
+        `PyPCAPFile`_ decoded the payload, a tag is cut short, or what follows
+        the tags is past that bound, where the default engine dissects nothing
+        (:issue:`1609`).
 
     Note:
         `PyPCAPFile`_ leaves a payload it has no decoder for hex-encoded (see
@@ -407,12 +445,12 @@ def _untag(link: 'Any') -> 'Optional[tuple[int, bytes]]':
     if ethertype is None or not _is_raw(payload):
         return None
 
-    data = _maybe_unhex(bytes(payload))
+    data, depth = _maybe_unhex(bytes(payload)), 2
     while ethertype in VLAN_TAGS:
-        if len(data) < VLAN_TAG_LEN:
+        if depth == FRAME_LAYER_LIMIT or len(data) < VLAN_TAG_LEN:
             return None
-        ethertype, data = int.from_bytes(data[2:4], 'big'), data[VLAN_TAG_LEN:]
-    return ethertype, data
+        ethertype, data, depth = int.from_bytes(data[2:4], 'big'), data[VLAN_TAG_LEN:], depth + 1
+    return ethertype, data, depth
 
 
 @functools.lru_cache(maxsize=2)
@@ -478,19 +516,87 @@ def _ipv4_accepted(ipv4: 'IP') -> 'bool':
     return _default_accepts('IPv4', ipv4_header(ipv4))
 
 
+def _link_network(packet: 'Packet') -> 'Optional[tuple[int, bytes, int]]':
+    """Find the IP packet the default engine dissects in a frame `PyPCAPFile`_ has no decoder for.
+
+    Args:
+        packet: PyPCAPFile packet, whose frame `PyPCAPFile`_ left undecoded.
+
+    Returns:
+        The packet's IP version, its octets on to the end of the frame, and its
+        place in the frame (c.f.
+        :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT`), by the
+        capture's link type, if it is one of the :data:`READ_LINKTYPES`: ``2``
+        behind a BSD loopback header whose address family is one of the
+        :data:`LOOPBACK_IP_VERSIONS`, read in the byte order
+        :func:`~pcapkit.protocols.link.loopback.family_byteorder` gives --
+        ``LOOP``'s in network byte order, ``NULL``'s in the order its octets
+        show; and ``1`` for an ``IPV4`` or ``IPV6`` frame, or a ``RAW`` one of
+        the IP version its first octet gives, 4 or 6. :data:`None` for any other
+        link type, family or version, a frame cut short of its loopback header,
+        and an empty one, where the default engine dissects no IP either.
+
+    Note:
+        The frame is hex-encoded, as the engine reads it (see
+        :meth:`PyPCAPFile._read_records
+        <pcapkit.foundation.engines.pypcapfile.PyPCAPFile._read_records>`), and
+        the link type is the savefile header's, which the packet points at.
+
+    .. _PyPCAPFile: https://github.com/kisom/pypcapfile
+
+    """
+    linktype = packet.header[0].ll_type
+    if linktype not in READ_LINKTYPES:
+        return None
+    octets = _maybe_unhex(bytes(packet.packet))
+    if linktype in (Enum_LinkType.NULL, Enum_LinkType.LOOP):
+        if len(octets) < LOOPBACK_HEADER_LEN:
+            return None
+        family = octets[:LOOPBACK_HEADER_LEN]
+        version = LOOPBACK_IP_VERSIONS.get(int.from_bytes(family, family_byteorder(family, linktype)))
+        return None if version is None else (version, octets[LOOPBACK_HEADER_LEN:], 2)
+    if linktype == Enum_LinkType.RAW:
+        version = octets[0] >> 4 if octets else 0
+        if version not in (4, 6):
+            return None
+    else:
+        version = 4 if linktype == Enum_LinkType.IPV4 else 6
+    return version, octets, 1
+
+
 def _network(packet: 'Packet', count: 'int' = -1) -> 'Optional[IP]':
-    """Fetch the decoded IPv4 layer of a PyPCAPFile packet, if any.
+    """Fetch the outermost IPv4 layer of a PyPCAPFile packet, if any.
+
+    Args:
+        packet: PyPCAPFile packet.
+        count: Packet index, for the warning :func:`_network_layer` gives.
+
+    Returns:
+        The IPv4 layer :func:`_network_layer` fetches, or :data:`None`.
+
+    """
+    layer = _network_layer(packet, count)
+    return None if layer is None else layer[0]
+
+
+def _network_layer(packet: 'Packet', count: 'int' = -1) -> 'Optional[tuple[IP, int]]':
+    """Fetch the outermost IPv4 layer of a PyPCAPFile packet, and its place in the frame.
 
     Args:
         packet: PyPCAPFile packet.
         count: Packet index, for the warning below.
 
     Returns:
-        The decoded :class:`~pcapfile.protocols.network.ip.IP` layer, or
-        :data:`None` when the frame was not decoded that far -- which is the
-        case for every non-IPv4 frame, `PyPCAPFile`_ having no other network
-        layer decoder -- or the default engine rejects its header (see
-        :func:`_ipv4_accepted`).
+        The decoded :class:`~pcapfile.protocols.network.ip.IP` layer and its
+        place in the frame (c.f.
+        :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT`), or :data:`None`
+        when the frame carries no IPv4 right after its link layer --
+        `PyPCAPFile`_ having no other network layer decoder -- or the default
+        engine rejects its header (see :func:`_ipv4_accepted`). Behind an
+        Ethernet header that is ``2``, and one more for each VLAN tag (see
+        :func:`_untag`). A frame of a link type `PyPCAPFile`_ has no decoder for
+        is read by :func:`_link_network`, and its IPv4 packet decoded by
+        :func:`_decode_ipv4`.
 
     Warns:
         AttributeWarning: If an IPv4 packet behind VLAN tags will not decode,
@@ -508,18 +614,23 @@ def _network(packet: 'Packet', count: 'int' = -1) -> 'Optional[IP]':
         untagged frame, so the two decode alike; one that will not decode is
         left out with a warning, as an untagged one is. The engine warns of an
         untagged frame as it reads it, and this of a tagged one as reassembly or
-        flow tracing does.
+        flow tracing does. Over the other link types the engine decodes nothing,
+        so has nothing to warn of.
 
     .. _PyPCAPFile: https://github.com/kisom/pypcapfile
 
     """
     link = packet.packet
     if _is_raw(link):
-        return None
+        found = _link_network(packet)
+        if found is None or found[0] != 4:
+            return None
+        decoded = _decode_ipv4(found[1])
+        return None if decoded is None else (decoded, found[2])
 
     payload = getattr(link, 'payload', None)
     if type(payload).__name__ == 'IP':
-        return payload if _ipv4_accepted(payload) else None
+        return (payload, 2) if _ipv4_accepted(payload) else None
     if getattr(link, 'type', None) not in VLAN_TAGS:
         return None
 
@@ -542,7 +653,33 @@ def _network(packet: 'Packet', count: 'int' = -1) -> 'Optional[IP]':
             warn(f'Frame {count}: {Enum_LinkType.ETHERNET!r} decoding failed ({error!r}); '
                  'frame left undecoded', AttributeWarning, stacklevel=stacklevel())
         return None
-    return ipv4 if _ipv4_accepted(ipv4) else None
+    return (ipv4, untagged[2]) if _ipv4_accepted(ipv4) else None
+
+
+def _outer_ipv6(packet: 'Packet') -> 'Optional[tuple[bytes, int]]':
+    """Fetch the outermost IPv6 packet of a PyPCAPFile frame, which `PyPCAPFile`_ cannot decode.
+
+    Args:
+        packet: PyPCAPFile packet.
+
+    Returns:
+        The octets of the IPv6 packet right after the frame's link layer, on to
+        the end of the frame, and its place in the frame: behind an Ethernet
+        header and any VLAN tags (see :func:`_untag`), or in a frame of a link
+        type `PyPCAPFile`_ has no decoder for (see :func:`_link_network`).
+        :data:`None` if there is none.
+
+    .. _PyPCAPFile: https://github.com/kisom/pypcapfile
+
+    """
+    link = packet.packet
+    if _is_raw(link):
+        found = _link_network(packet)
+        return None if found is None or found[0] != 6 else (found[1], found[2])
+    untagged = _untag(link)
+    if untagged is None or untagged[0] != Enum_EtherType.Internet_Protocol_version_6:
+        return None
+    return untagged[1], untagged[2]
 
 
 def _ipv4_in_ipv6(packet: 'Packet') -> 'Optional[IP]':
@@ -556,9 +693,11 @@ def _ipv4_in_ipv6(packet: 'Packet') -> 'Optional[IP]':
         extension headers, or inside more IPv6 (6in6) -- decoded as
         :func:`_network` decodes one behind VLAN tags, or :data:`None` if there
         is none, it will not decode, or the default engine rejects its header
-        (see :func:`_ipv4_accepted`). The frame may be tagged (see
-        :func:`_untag`), and each IPv6 header is stepped over as
-        :func:`_upper_layer` does.
+        (see :func:`_ipv4_accepted`). The outer IPv6 packet is the one
+        :func:`_outer_ipv6` fetches, and each IPv6 header is stepped over as
+        :func:`_walk_upper_layer` does, so no IPv4 packet past
+        :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT` layers of the
+        frame is found (:issue:`1609`).
 
     Note:
         `PyPCAPFile`_ has no IPv6 decoder, so leaves the IPv4 inside undecoded.
@@ -571,25 +710,25 @@ def _ipv4_in_ipv6(packet: 'Packet') -> 'Optional[IP]':
     .. _PyPCAPFile: https://github.com/kisom/pypcapfile
 
     """
-    link = packet.packet
-    untagged = None if _is_raw(link) else _untag(link)
-    if untagged is None or untagged[0] != Enum_EtherType.Internet_Protocol_version_6:
+    outer = _outer_ipv6(packet)
+    if outer is None:
         return None
 
-    upper = _upper_layer(6, untagged[1])
+    upper = _walk_upper_layer(6, *outer)
     while upper is not None and upper[0] == Enum_TransType.IPv6:
-        upper = _upper_layer(6, upper[1])
+        upper = _walk_upper_layer(6, upper[1], upper[2])
     if upper is None or upper[0] != Enum_TransType.IPv4:
         return None
     return _decode_ipv4(upper[1])
 
 
 def _decode_ipv4(data: 'bytes') -> 'Optional[IP]':
-    """Decode an IPv4 packet that `PyPCAPFile`_ left undecoded inside another IP packet.
+    """Decode an IPv4 packet that `PyPCAPFile`_ left undecoded.
 
     Args:
         data: Raw octets from the IPv4 header on, as far as the IP packet
-            carrying it goes (see :func:`_upper_layer`).
+            carrying it goes (see :func:`_upper_layer`), or the frame of a link
+            type `PyPCAPFile`_ has no decoder for (see :func:`_link_network`).
 
     Returns:
         The packet, decoded as :func:`_network` decodes one behind VLAN tags, or
@@ -676,23 +815,30 @@ def _past_extension_headers(protocol: 'int', data: 'bytes') -> 'Optional[tuple[i
     return None if walked is None else walked[:2]
 
 
-def _walk_extension_headers(protocol: 'int', data: 'bytes') -> 'Optional[tuple[int, bytes, int]]':
+def _walk_extension_headers(protocol: 'int', data: 'bytes',
+                            limit: 'int' = EXTENSION_HEADER_LIMIT) -> 'Optional[tuple[int, bytes, int]]':
     """Step over the headers :func:`_past_extension_headers` steps over, and count them.
 
     Args:
         protocol: The IPv4 packet's protocol number.
         data: Raw octets of its payload.
+        limit: How many of them in a row the default engine dissects at most,
+            by default
+            :data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT`;
+            fewer where the frame has fewer layers left (see
+            :func:`_walk_ipv4_payload`).
 
     Returns:
         What :func:`_past_extension_headers` returns, then how many headers it
         stepped over, each of them one layer of the frame to the default engine
         (c.f. :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT`); or
-        :data:`None` where it returns :data:`None`.
+        :data:`None` where it returns :data:`None`, or a header past ``limit``
+        follows, which the default engine leaves undissected with the rest.
 
     """
     depth = 0
     while protocol in IPV4_EXTENSION_HEADERS:
-        if depth == EXTENSION_HEADER_LIMIT:
+        if depth >= limit:
             return None
         depth += 1
         if protocol == Enum_TransType.AH:
@@ -747,7 +893,37 @@ def _upper_layer(version: 'int', data: 'bytes') -> 'Optional[tuple[int, bytes]]'
         layer, tunnelled or not, it still reads out of the raw octets left
         behind (:func:`pcapkit.toolkit.pcap.tcp_segment`).
 
+        The header is read as the first layer of its frame, where
+        :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT` leaves room for
+        more headers than either chain bound allows, so that bound never applies
+        here; :func:`_walk_upper_layer` reads one deeper in a frame.
+
     """
+    walked = _walk_upper_layer(version, data, 1)
+    return None if walked is None else walked[:2]
+
+
+def _walk_upper_layer(version: 'int', data: 'bytes', depth: 'int') -> 'Optional[tuple[int, bytes, int]]':
+    """Step over an IP header to the upper-layer protocol it carries, and place that in the frame.
+
+    Args:
+        version: IP version of the header ``data`` starts with, ``4`` or ``6``.
+        data: Raw octets of the IP packet.
+        depth: The IP header's place in its frame, the first layer being ``1``
+            (c.f. :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT`), at
+            most that bound.
+
+    Returns:
+        What :func:`_upper_layer` returns, by its rules, then the upper layer's
+        place in the frame: one past the IP header and each header stepped over
+        after it, every one of them a layer of its own to the default engine. Or
+        :data:`None` where :func:`_upper_layer` returns :data:`None`, or the
+        upper layer is past
+        :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT`, where the default
+        engine dissects nothing (:issue:`1609`); no header past it is read.
+
+    """
+    room = FRAME_LAYER_LIMIT - depth  # layers the frame has left after the IP header
     if version == 4:
         if len(data) < IPV4_HEADER_LEN or data[0] >> 4 != 4:
             return None
@@ -757,7 +933,7 @@ def _upper_layer(version: 'int', data: 'bytes') -> 'Optional[tuple[int, bytes]]'
         if struct.unpack_from('!H', data, 6)[0] & 0x1FFF:  # a later fragment
             return None
         total = struct.unpack_from('!H', data, 2)[0]
-        return _past_extension_headers(data[9], data[ihl:max(total, ihl)] if total else data[ihl:])
+        return _walk_ipv4_payload(data[9], data[ihl:max(total, ihl)] if total else data[ihl:], depth)
 
     if len(data) < IPV6_HEADER_LEN:
         return None
@@ -765,11 +941,12 @@ def _upper_layer(version: 'int', data: 'bytes') -> 'Optional[tuple[int, bytes]]'
     if not extent:
         extent = jumbo_payload_length(data[6], data[IPV6_HEADER_LEN:]) or 0
     data = data[:IPV6_HEADER_LEN + extent]
-    nxt, offset, depth = data[6], IPV6_HEADER_LEN, 0
+    nxt, offset, headers = data[6], IPV6_HEADER_LEN, 0
+    bound = min(EXTENSION_HEADER_LIMIT, room)
     while nxt in IPV6_EXTENSION_HEADERS:
-        if depth == EXTENSION_HEADER_LIMIT or len(data) < offset + 8:
+        if headers >= bound or len(data) < offset + 8:
             return None
-        depth += 1
+        headers += 1
         if nxt == Enum_ExtensionHeader.IPv6_Frag:  # fixed length, second octet reserved
             if struct.unpack_from('!H', data, offset + 2)[0] >> 3:  # a later fragment
                 return None
@@ -779,31 +956,58 @@ def _upper_layer(version: 'int', data: 'bytes') -> 'Optional[tuple[int, bytes]]'
         else:  # length in 8-octet units, less one
             length = (data[offset + 1] + 1) * 8
         nxt, offset = data[offset], offset + length
-    if len(data) < offset:
+    if len(data) < offset or headers >= room:
         return None
-    return nxt, data[offset:]
+    return nxt, data[offset:], depth + headers + 1
 
 
-def _innermost(packet: 'Packet', count: 'int' = -1) -> 'tuple[Optional[IP], Optional[tuple[int, bytes]]]':
+def _walk_ipv4_payload(protocol: 'int', data: 'bytes', depth: 'int') -> 'Optional[tuple[int, bytes, int]]':
+    """Step over the headers at the head of an IPv4 payload, and place what follows in the frame.
+
+    Args:
+        protocol: The IPv4 packet's protocol number.
+        data: Raw octets of its payload.
+        depth: The IPv4 header's place in its frame, as for
+            :func:`_walk_upper_layer`.
+
+    Returns:
+        What :func:`_past_extension_headers` returns, then the place in the
+        frame of the layer it names: one past the IPv4 header and each header
+        stepped over. :data:`None` where :func:`_past_extension_headers` returns
+        :data:`None`, or that layer or a header before it is past
+        :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT` (:issue:`1609`).
+
+    """
+    room = FRAME_LAYER_LIMIT - depth  # layers the frame has left after the IPv4 header
+    walked = _walk_extension_headers(protocol, data, min(EXTENSION_HEADER_LIMIT, room))
+    if walked is None or walked[2] >= room:
+        return None
+    return walked[0], walked[1], depth + walked[2] + 1
+
+
+def _innermost(packet: 'Packet', count: 'int' = -1) -> 'tuple[Optional[IP], Optional[tuple[int, bytes]], int]':
     """Fetch the innermost IP layer of a PyPCAPFile frame, the one carrying its TCP.
 
     Args:
         packet: PyPCAPFile packet.
-        count: Packet index, for the warning :func:`_network` gives.
+        count: Packet index, for the warning :func:`_network_layer` gives.
 
     Returns:
         The innermost IPv4 packet and :data:`None`, if the innermost IP layer is
         IPv4; :data:`None` and the upper-layer protocol and octets of the
-        innermost IPv6 packet, as :func:`_upper_layer` gives them, if it is
-        IPv6; otherwise neither.
+        innermost IPv6 packet, as :func:`_walk_upper_layer` gives them, if it is
+        IPv6; otherwise neither. Then the innermost IP layer's place in the
+        frame (c.f. :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT`), for
+        :func:`_transport`; ``0`` if there is none.
 
-        The outermost IP layer is the IPv4 packet :func:`_network` fetches, or
-        an IPv6 packet, behind VLAN tags (see :func:`_untag`) or not. Each IPv4
-        or IPv6 packet one of them carries in the :data:`IP_TUNNELS`, directly
-        or behind the headers :func:`_upper_layer` steps over, is the next, as
-        deep as they go. An IPv4 packet in a tunnel is decoded by
-        :func:`_decode_ipv4`, and one it does not decode ends the walk with
-        neither, as the default engine then dissects no TCP past it.
+        The outermost IP layer is the IPv4 packet :func:`_network_layer`
+        fetches, or the IPv6 packet :func:`_outer_ipv6` does. Each IPv4 or IPv6
+        packet one of them carries in the :data:`IP_TUNNELS`, directly or behind
+        the headers :func:`_walk_upper_layer` steps over, is the next, as deep as
+        they go and no deeper than the frame's layer bound (:issue:`1609`). An
+        IPv4 packet in a tunnel is decoded by :func:`_decode_ipv4`, and one it
+        does not decode ends the walk with neither, as the default engine then
+        dissects no TCP past it.
 
     Note:
         The default engine keys a TCP segment by the IP layer nearest above it
@@ -812,30 +1016,31 @@ def _innermost(packet: 'Packet', count: 'int' = -1) -> 'tuple[Optional[IP], Opti
         (:issue:`1581`).
 
     """
-    ipv4 = _network(packet, count)
-    if ipv4 is not None:
+    ipv4 = None  # type: Optional[IP]
+    layer = _network_layer(packet, count)
+    if layer is not None:
+        outer4, depth = layer
         # a later fragment has no upper-layer header, see ``_upper_layer``
-        if (ipv4.off or (ipv4.p not in IP_TUNNELS and ipv4.p not in IPV4_EXTENSION_HEADERS)
-                or not _is_raw(ipv4.payload)):
-            return ipv4, None
-        upper = _past_extension_headers(ipv4.p, _ipv4_payload(ipv4))  # type: Optional[tuple[int, bytes]]
+        if (outer4.off or (outer4.p not in IP_TUNNELS and outer4.p not in IPV4_EXTENSION_HEADERS)
+                or not _is_raw(outer4.payload)):
+            return outer4, None, depth
+        ipv4, upper = outer4, _walk_ipv4_payload(outer4.p, _ipv4_payload(outer4), depth)
     else:
-        link = packet.packet
-        untagged = None if _is_raw(link) else _untag(link)
-        if untagged is None or untagged[0] != Enum_EtherType.Internet_Protocol_version_6:
-            return None, None
-        upper = _upper_layer(6, untagged[1])
+        outer6 = _outer_ipv6(packet)
+        if outer6 is None:
+            return None, None, 0
+        depth, upper = outer6[1], _walk_upper_layer(6, *outer6)
 
     while upper is not None and upper[0] in IP_TUNNELS:
-        version, data = IP_TUNNELS[upper[0]], upper[1]
-        upper = _upper_layer(version, data)
+        version, data, depth = IP_TUNNELS[upper[0]], upper[1], upper[2]
+        upper = _walk_upper_layer(version, data, depth)
         if version == 6:
             ipv4 = None
         elif (ipv4 := _decode_ipv4(data)) is None:
-            return None, None
+            return None, None, depth
     if ipv4 is not None:
-        return ipv4, None
-    return None, upper
+        return ipv4, None, depth
+    return None, None if upper is None else upper[:2], depth
 
 
 def _left_out(upper: 'Optional[tuple[int, bytes]]') -> 'Optional[str]':
@@ -959,11 +1164,13 @@ def _ipv4_payload(ipv4: 'IP') -> 'bytes':
     return payload[:max(ipv4.len - ipv4.hl * 4, 0)]
 
 
-def _transport(ipv4: 'IP') -> 'Optional[bytes]':
+def _transport(ipv4: 'IP', depth: 'int' = 1) -> 'Optional[bytes]':
     """Fetch the verbatim TCP segment carried by a PyPCAPFile IPv4 packet.
 
     Args:
         ipv4: PyPCAPFile IPv4 packet.
+        depth: Its place in the frame (see :func:`_innermost`), by default the
+            first layer, as for a packet read on its own.
 
     Returns:
         The raw TCP segment, as far as the Total Length (see
@@ -974,7 +1181,10 @@ def _transport(ipv4: 'IP') -> 'Optional[bytes]':
         carries none: from its offset on, its data is a slice of the datagram's
         payload, with no upper-layer header in it (:rfc:`791#section-3.2`,
         :issue:`1576`). Nor does a segment too short for a header, or whose Data
-        Offset is below 5 words (:issue:`1590`).
+        Offset is below 5 words (:issue:`1590`), or one past
+        :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT` layers of the
+        frame, counting each header stepped over (see
+        :func:`_walk_ipv4_payload`, :issue:`1609`).
 
         Behind those, the default engine reads TCP only as its TCP parser does, so
         the whole of the header its Data Offset gives must be there, and any
@@ -989,7 +1199,7 @@ def _transport(ipv4: 'IP') -> 'Optional[bytes]':
     if not _is_raw(ipv4.payload):
         return None
 
-    upper = _past_extension_headers(ipv4.p, _ipv4_payload(ipv4))
+    upper = _walk_ipv4_payload(ipv4.p, _ipv4_payload(ipv4), depth)
     if upper is None or upper[0] != Enum_TransType.TCP:
         return None
     segment = upper[1]
@@ -1134,12 +1344,24 @@ def packet2dict(packet: 'Packet', *, data_link: 'Enum_LinkType') -> 'dict[str, A
             parsed as an IPv4 address, or a decoded Ethernet layer's
             ``src``/``dst`` cannot be parsed as a MAC address.
 
+    Note:
+        A frame `PyPCAPFile`_ left undecoded is hex-encoded, as the engine reads
+        it (see :meth:`PyPCAPFile._read_records
+        <pcapkit.foundation.engines.pypcapfile.PyPCAPFile._read_records>`), so
+        it is un-hexed (see :func:`_maybe_unhex`) and reported as its octets,
+        not as twice as many characters of hex text (:issue:`1667`).
+
+    .. _PyPCAPFile: https://github.com/kisom/pypcapfile
+
     """
+    frame = packet.packet
+    if _is_raw(frame):
+        frame = _maybe_unhex(bytes(frame))
     return {
         'timestamp': packet2timestamp(packet),
         'capture_len': packet.capture_len,
         'packet_len': packet.packet_len,
-        data_link.name: _layer2dict(packet.packet),
+        data_link.name: _layer2dict(frame),
     }
 
 
@@ -1155,10 +1377,12 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
 
         * If the ``packet`` can be used for IPv4 reassembly. A packet can be reassembled
           if it contains an IPv4 layer (:class:`pcapfile.protocols.network.ip.IP`), behind
-          802.1Q or 802.1ad VLAN tags or not, and the **DF** flag is :data:`False`. The
+          802.1Q or 802.1ad VLAN tags or not, or in a frame of one of the
+          :data:`READ_LINKTYPES`, and the **DF** flag is :data:`False`. The
           layer is the first IPv4 packet of the frame, as for the default engine: one
           carried in IPv6 counts (see :func:`_ipv4_in_ipv6`), and one whose header the
-          default engine rejects does not (see :func:`_ipv4_accepted`).
+          default engine rejects, or past its frame layer bound, does not (see
+          :func:`_ipv4_accepted` and :func:`_network_layer`).
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv4
           reassembly (:term:`reasm.ipv4.packet`) will be returned; otherwise, returns :data:`None`.
 
@@ -1227,7 +1451,8 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
 
         * If the ``packet`` can be used for TCP reassembly. A packet can be reassembled
           if it contains an IPv4 layer carrying a TCP segment, directly or behind AH or
-          IPv6 extension headers, and behind 802.1Q or 802.1ad VLAN tags or not (see
+          IPv6 extension headers, and behind 802.1Q or 802.1ad VLAN tags or not, or in a
+          frame of one of the :data:`READ_LINKTYPES`, within the frame layer bound (see
           :func:`_transport`). In an IP-in-IP tunnel the IPv4 layer is the innermost
           IP layer, whose addresses key the segment (see :func:`_innermost`); TCP over
           IPv6, tunnelled or not, cannot be, as `PyPCAPFile`_ has no IPv6 decoder.
@@ -1251,8 +1476,8 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
     .. _PyPCAPFile: https://github.com/kisom/pypcapfile
 
     """
-    ipv4, upper = _innermost(packet, count)
-    if ipv4 is None or (segment := _transport(ipv4)) is None:
+    ipv4, upper, depth = _innermost(packet, count)
+    if ipv4 is None or (segment := _transport(ipv4, depth)) is None:
         _decline_tcp(packet, upper, count)
         return None
 
@@ -1300,7 +1525,8 @@ def tcp_traceflow(packet: 'Packet', *, data_link: 'Enum_LinkType',
 
         * If the ``packet`` can be used for TCP flow tracing. A packet can be traced
           if it contains an IPv4 layer carrying a TCP segment, directly or behind AH or
-          IPv6 extension headers, and behind 802.1Q or 802.1ad VLAN tags or not (see
+          IPv6 extension headers, and behind 802.1Q or 802.1ad VLAN tags or not, or in a
+          frame of one of the :data:`READ_LINKTYPES`, within the frame layer bound (see
           :func:`_transport`). In an IP-in-IP tunnel the IPv4 layer is the innermost
           IP layer, whose addresses key the segment (see :func:`_innermost`); TCP over
           IPv6, tunnelled or not, cannot be, as `PyPCAPFile`_ has no IPv6 decoder.
@@ -1324,8 +1550,8 @@ def tcp_traceflow(packet: 'Packet', *, data_link: 'Enum_LinkType',
     .. _PyPCAPFile: https://github.com/kisom/pypcapfile
 
     """
-    ipv4, upper = _innermost(packet, count)
-    if ipv4 is None or (segment := _transport(ipv4)) is None:
+    ipv4, upper, depth = _innermost(packet, count)
+    if ipv4 is None or (segment := _transport(ipv4, depth)) is None:
         _decline_tcp(packet, upper, count)
         return None
 
