@@ -14,9 +14,7 @@ and so a real ``TCP``: that TCP went to TCP reassembly and flow tracing (#1627),
 and that IPv4 to IPv4 reassembly. ``packet['IP']`` also reached the IPv4 inside
 the IPv6 packet a Redirected Header option holds, in a field rather than a payload.
 
-dpkt is compared with the default engine as well. Behind more than 32 extension
-headers, scapy still hands IPv4 reassembly the IPv4 the default engine leaves
-raw, which #1609 tracks, so that case is left out here.
+dpkt is compared with the default engine as well.
 
 Every capture is built here, so the module is in the unit tier.
 
@@ -67,9 +65,8 @@ def redirect(packet: bytes) -> bytes:
 
 
 def ipv4_cases() -> 'dict[str, list[bytes]]':
-    """#1615/#1616's frames by case, less #1609's, then those of #1623 and the ICMP quotes."""
+    """#1615/#1616's frames by case, then those of #1623 and the ICMP quotes."""
     built = ipv4_input.cases()
-    del built['4in6 behind 33 extension headers']   # #1609
     ethernet, ipv6 = ipv4_input.ethernet, ipv4_input.ipv6
 
     def first(ident: int) -> bytes:

@@ -14,18 +14,16 @@ and the PPP payload of L2TP raw. `Scapy`_ dissects IP and TCP inside all of them
 and its engine handed those to TCP reassembly and flow tracing, and to IPv4 and
 IPv6 reassembly (#1636).
 
-The first layer is the one the link type selects. scapy takes it to carry
-whatever `Scapy`_ dissects in it, and a layer behind it to carry IP only if it is
-a VLAN tag, IP or an extension header. So at link types the default engine
-leaves raw, where `Scapy`_ dissects two layers or more before IP -- HDLC-like
-framing then PPP, 802.11 then LLC -- scapy reads no IP either. At those where it
-dissects IP straight behind the first layer, such as LINUX_SLL, scapy still
-reads what the default engine leaves raw, so no case here is one of those.
+The first layer is the one the link type selects, and a layer behind it carries
+IP only if it is a VLAN tag, IP or an extension header. So at link types the
+default engine leaves raw, where `Scapy`_ dissects two layers or more before IP
+-- HDLC-like framing then PPP, 802.11 then LLC -- scapy reads no IP either. Nor
+does it at those where `Scapy`_ dissects IP straight behind the first layer,
+such as LINUX_SLL, which
+:mod:`tests.toolkit.test_scapy_linktype_and_layer_bounds_1609_1626_1650_unit`
+covers with the frame and extension header bounds (#1650, #1609).
 
-Only scapy is compared with the default engine: dpkt gives no IPv6 reassembly
-input for a 6in4 fragment (#1637). Behind more than 32 extension headers scapy
-still reads what the default engine leaves raw, which #1609 tracks, so no case
-here is that deep.
+Only scapy is compared with the default engine.
 
 Every capture is built here, so the module is in the unit tier.
 

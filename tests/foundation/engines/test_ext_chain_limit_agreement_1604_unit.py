@@ -14,11 +14,13 @@ inputs are compared with ``default``'s, as in
 over IPv6 out, so it is compared over IPv4 only, and ``declined`` checks that
 it warns of leaving out TCP over IPv6 exactly where ``default`` finds some. It
 imports on Python 3.11 only, and is skipped elsewhere. ``dpkt``'s adapters walk
-the chain off the octets, and stop at the same depth too (#1609).
+the chain off the octets, and stop at the same depth too. ``scapy`` walks the
+chain over the octets by the default engine's rules, rather than through Scapy's
+own layers, so stops there as well (#1609).
 
-The other parsers walk the chain themselves, and cannot be told where to stop,
-so where they find the TCP past the limit is recorded in :attr:`KNOWN_FAILURES`
-under #1609 rather than hidden. Measured on scapy 2.7.0 and tshark 4.6.9.
+The other parser, ``pyshark``, walks the chain through tshark, and cannot be
+told where to stop, so where it finds the TCP past the limit is recorded in
+:attr:`KNOWN_FAILURES` under #1609 rather than hidden. Measured on tshark 4.6.9.
 
 Every capture is built in a temporary directory, so no fixture is read.
 
@@ -156,10 +158,6 @@ class TestExtensionHeaderChainAgreement(harness.RoundTripBase):
 
     STATUSES = ('ERROR', 'INPUTS', 'DECLINED')
     KNOWN_FAILURES = (
-        Gap(1609, 'scapy dissects each extension header behind the last, with no limit of its own, '
-                  'so finds the TCP past EXTENSION_HEADER_LIMIT; it gives up near 245 layers at the '
-                  'default recursion limit, and so agrees at 1,000',
-            'INPUTS', 'extra, default has none', ('ipv6-33/scapy/*',)),
         Gap(1609, 'tshark dissects up to about 496 extension headers, so finds the TCP past '
                   'EXTENSION_HEADER_LIMIT, carried in IPv6; at 1,000 it gives up and agrees',
             'INPUTS', 'extra, default has none', ('ipv6-33/pyshark/trace',)),
