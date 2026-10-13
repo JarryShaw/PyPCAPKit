@@ -274,18 +274,18 @@ class TCPCarrierWalkTests(unittest.TestCase):
     def test_a_tunnel_dpkt_cannot_decode_ends_no_extraction(self) -> None:
         # dpkt 1.9.8 reads ``frag_off`` from whatever header follows an IPv6
         # Fragment header (#1351), so the IPv6 packet behind this Hop-by-Hop
-        # header raises AttributeError. The tunnel is left undecoded, as the
-        # engine leaves a frame it cannot decode, and the next frame is read.
-        # Whether TCP is read in it, as the default engine does, is #1626.
+        # header raises AttributeError. The next frame is still read, and the
+        # TCP in this one is read off the octets, as the default engine reads
+        # it (#1626).
         if not has('dpkt'):
             self.skipTest('dpkt not installed')
-        from pcapkit.toolkit import dpkt as toolkit
+        import dpkt
 
         inner = v6(fragment(0) + options(6) + tcp(1), 44)
-        self.assertIsNone(toolkit._decode_ip(41, inner))  # pylint: disable=protected-access
+        with self.assertRaises(AttributeError):
+            dpkt.ip6.IP6(inner)
         seen = read(self, 'dpkt', [eth(v4(options(41) + inner, 0)), eth(v4(tcp(2), 6))])
-        self.assertIn(2, seen['tcp'])
-        self.assertIn(2, seen['trace'])
+        self.assertEqual((sorted(seen['tcp']), sorted(seen['trace'])), ([1, 2], [1, 2]))
 
     def test_a_dpkt_payload_that_is_no_packet_is_leaf_data(self) -> None:
         # dpkt decodes IPv4 protocol 0 as IPv4, so this Hop-by-Hop header and the

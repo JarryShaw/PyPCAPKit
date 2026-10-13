@@ -76,42 +76,27 @@ class FakeIPv6:
         return b'I' * 40 + b'H' * 8 + b'F' * 8 + b'PAYLOAD'
 
 
-class TCP:
-    __hdr_fields__ = ('sport', 'dport', 'seq', 'ack', 'flags')
-    __hdr_len__ = 4
-    #: Data Offset, in 32-bit words. ``off * 4`` has to agree with the header
-    #: portion of :meth:`pack`, the way it does on a real :class:`dpkt.tcp.TCP`.
-    off = 1
-    sport = 2345
-    dport = 443
-    seq = 20
-    ack = 15
-    flags = 0b00010011
-    data = b'ip6'
+def _ipv6_frame(payload: bytes, nxt: int, *, src: str, dst: str, flow: int = 0):
+    """Build an Ethernet frame carrying IPv6, as the DPKT engine hands it over: its record octets attached."""
+    import dpkt
 
-    def pack(self) -> bytes:
-        return b'HEADip6'
+    from pcapkit.toolkit import dpkt as toolkit
+
+    octets = (b'\xbb' * 6 + b'\xaa' * 6 + b'\x86\xdd'
+              + struct.pack('>IHBB16s16s', 0x60000000 | flow, len(payload), nxt, 64,
+                            ip_address(src).packed, ip_address(dst).packed) + payload)
+    packet = dpkt.ethernet.Ethernet(octets)
+    toolkit.attach_buffer(packet, octets)
+    return packet
 
 
-class FakeTCPIPv6:
-    __hdr_fields__ = ('src', 'dst')
-    src = ip_address('2001:db8::10').packed
-    dst = ip_address('2001:db8::20').packed
-
-    def __init__(self) -> None:
-        self.data = TCP()
-
-
-class FakeDPKTPacket:
-    __hdr_fields__ = ('link',)
-    link = 1
-
-    def __init__(self) -> None:
-        self.ip6 = FakeTCPIPv6()
-        self.data = self.ip6
-
-    def pack(self) -> bytes:
-        return b'packet'
+def _fake_fragment_frame():
+    """A later IPv6 fragment, behind a Hop-by-Hop header, with the fields :class:`FakeFragment` pins."""
+    frag = FakeFragment()
+    payload = (bytes([44, 0, 1, 4, 0, 0, 0, 0])                            # Hop-by-Hop, one PadN
+               + struct.pack('>BBHI', frag.nxt, 0, frag.frag_off << 3 | frag.m_flag, frag.id)
+               + b'PAYLOAD')
+    return _ipv6_frame(payload, 0, src='2001:db8::1', dst='2001:db8::2', flow=FakeIPv6.flow)
 
 
 @unittest.skipUnless(HAS_RUNTIME and HAS_DPKT, 'runtime dependencies not installed')
@@ -233,8 +218,7 @@ class DPKTToolkitTests(unittest.TestCase):
             results = {
                 'ipv4': toolkit.ipv4_reassembly(self._make_ipv4_tcp_packet(fragmented=True),
                                                 stamp, count=1),
-                'ipv6': toolkit.ipv6_reassembly(types.SimpleNamespace(ip6=FakeIPv6(FakeFragment())),
-                                                stamp, count=1),
+                'ipv6': toolkit.ipv6_reassembly(_fake_fragment_frame(), stamp, count=1),
                 'tcp': toolkit.tcp_reassembly(packet, stamp, count=1),
                 'trace': toolkit.tcp_traceflow(packet, stamp, data_link=LinkType.ETHERNET, count=1),
             }
@@ -294,11 +278,13 @@ class DPKTToolkitTests(unittest.TestCase):
                          (99, True, bytes(20)))
         self.assertIsNone(toolkit.ipv4_reassembly(ipv6, 1.0, count=1))
 
-    def test_tcp_helpers_cover_ipv6_and_data_payload_fallback(self) -> None:
+    def test_tcp_helpers_cover_tcp_over_ipv6(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.toolkit import dpkt as toolkit
 
-        packet = FakeDPKTPacket()
+        # SYN and FIN set, with ACK
+        segment = struct.pack('>HHIIBBHHH', 2345, 443, 20, 15, 5 << 4, 0b00010011, 1024, 0, 0) + b'ip6'
+        packet = _ipv6_frame(segment, 6, src='2001:db8::10', dst='2001:db8::20')
         tcp = toolkit.tcp_reassembly(packet, 60.5, count=12)
         self.assertIsNotNone(tcp)
         assert tcp is not None
@@ -316,9 +302,9 @@ class DPKTToolkitTests(unittest.TestCase):
         self.assertEqual(flow.dst, ip_address('2001:db8::20'))
         self.assertTrue(flow.syn)
         self.assertTrue(flow.fin)
-        self.assertEqual(flow.frame['ETHERNET']['FakeTCPIPv6']['TCP']['sport'], 2345)
+        self.assertEqual(flow.frame['ETHERNET']['IP6']['TCP']['sport'], 2345)
 
-    def test_ipv6_header_length_and_reassembly_with_fragment_fake(self) -> None:
+    def test_ipv6_header_length_and_reassembly_of_a_fragment(self) -> None:
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.toolkit import dpkt as toolkit
 
@@ -326,7 +312,8 @@ class DPKTToolkitTests(unittest.TestCase):
         ipv6 = FakeIPv6(frag)
         self.assertEqual(toolkit.ipv6_hdr_len(ipv6), 48)
 
-        packet = types.SimpleNamespace(ip6=ipv6)
+        # the same fields on the wire, as the engine hands them over
+        packet = _fake_fragment_frame()
         reassembled = toolkit.ipv6_reassembly(packet, 0.0, count=5)
         self.assertIsNotNone(reassembled)
         assert reassembled is not None
@@ -350,6 +337,8 @@ class DPKTToolkitTests(unittest.TestCase):
         self.assertIsNone(toolkit.ipv6_reassembly(types.SimpleNamespace(), 0.0, count=1))
         self.assertIsNone(toolkit.ipv6_reassembly(types.SimpleNamespace(ip6=FakeIPv6()), 0.0,
                                                   count=1))
+        self.assertIsNone(toolkit.ipv6_reassembly(_ipv6_frame(b'PAYLOAD', 253, src='2001:db8::1',
+                                                              dst='2001:db8::2'), 0.0, count=1))
 
 
 # ---------------------------------------------------------------------------

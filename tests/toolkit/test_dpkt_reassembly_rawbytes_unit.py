@@ -12,10 +12,9 @@ Slicing needs the layer's offset in those octets, and that cannot be read off
 ``len()``: :meth:`dpkt.ip6.IP6.__len__` sums ``len()`` of the extension headers
 rather than their wire lengths, which is 12 octets plus the rest of the frame for
 an Authentication header and 8 octets short for a Routing header whose Hdr Ext
-Len is odd. :class:`~dpkt.ip6.IP6ExtensionHeader` records the wire length in
-``length``, which is what :meth:`dpkt.ip6.IP6.unpack` walks the buffer by, so
-that is what the offset is built from -- and the slice is then checked against
-the layer's own header before it is handed back.
+Len is odd. So the extension headers are walked off the octets, by the lengths
+their own fields declare (#1626), and the network layer's slice is checked
+against its own header before anything is read from it.
 
 Every frame below is written to a PCAP file and read back through the engine, so
 the tests exercise the path a capture actually takes rather than a packet with a
@@ -357,10 +356,11 @@ class DPKTUnbufferedFallbackTests(unittest.TestCase):
         self.assertEqual(bytes(data.header) + bytes(data.payload), IPV4_TCP_REPACKED)
         self.assertNotEqual(IPV4_TCP_REPACKED, IPV4_TCP)
 
-        # the TCP layer alone round-trips: dpkt.tcp.TCP.__bytes__ recomputes
-        # nothing, the pseudo-header checksum being dpkt.ip.IP.__bytes__'s doing
+        # the TCP segment is read out of the same serialisation of the network
+        # layer, so it carries the checksum dpkt.ip.IP.__bytes__ fills in with
+        # the IPv4 header's (#1626)
         tcp = toolkit.tcp_reassembly(dpkt.ethernet.Ethernet(ETH_IPV4 + IPV4_TCP), 0.0)
-        self.assertEqual(bytes(tcp.header), IPV4_TCP[20:40])
+        self.assertEqual(bytes(tcp.header), IPV4_TCP_REPACKED[20:40])
 
     def test_attaching_the_buffer_makes_the_octets_the_wires_again(self) -> None:
         import dpkt

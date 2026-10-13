@@ -13,11 +13,12 @@ inputs are compared with ``default``'s, as in
 ``pypcapfile`` walks the chain itself and stops at the same depth. It leaves TCP
 over IPv6 out, so it is compared over IPv4 only, and ``declined`` checks that
 it warns of leaving out TCP over IPv6 exactly where ``default`` finds some. It
-imports on Python 3.11 only, and is skipped elsewhere.
+imports on Python 3.11 only, and is skipped elsewhere. ``dpkt``'s adapters walk
+the chain off the octets, and stop at the same depth too (#1609).
 
 The other parsers walk the chain themselves, and cannot be told where to stop,
 so where they find the TCP past the limit is recorded in :attr:`KNOWN_FAILURES`
-under #1609 rather than hidden. Measured on dpkt 1.9.8, scapy 2.7.0 and tshark 4.6.9.
+under #1609 rather than hidden. Measured on scapy 2.7.0 and tshark 4.6.9.
 
 Every capture is built in a temporary directory, so no fixture is read.
 
@@ -155,9 +156,6 @@ class TestExtensionHeaderChainAgreement(harness.RoundTripBase):
 
     STATUSES = ('ERROR', 'INPUTS', 'DECLINED')
     KNOWN_FAILURES = (
-        Gap(1609, 'dpkt walks the whole extension header chain in a loop (dpkt.ip6.IP6.unpack), '
-                  'so finds the TCP past EXTENSION_HEADER_LIMIT that the default engine leaves raw',
-            'INPUTS', 'extra, default has none', ('ipv6-33/dpkt/*', 'ipv6-1000/dpkt/*')),
         Gap(1609, 'scapy dissects each extension header behind the last, with no limit of its own, '
                   'so finds the TCP past EXTENSION_HEADER_LIMIT; it gives up near 245 layers at the '
                   'default recursion limit, and so agrees at 1,000',
