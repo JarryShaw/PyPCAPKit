@@ -565,7 +565,9 @@ class PyShark(EngineBase['PySharkPacket']):
         """Read a frame's link type and octets as the default engine reads them, which the PDML :meth:`run` reads lacks.
 
         :func:`~pcapkit.toolkit.pyshark.tcp_traceflow` asks for one of a frame
-        :data:`~pcapkit.toolkit.pyshark.OCTETS_FILTER` matches only (:issue:`1625`).
+        :data:`~pcapkit.toolkit.pyshark.OCTETS_FILTER` matches only: one tshark
+        dissects TCP in (:issue:`1639`), or one with an AH or IPv6 extension
+        header in IPv4 (:issue:`1625`).
 
         Its link type is the one the default engine dissects it by, read from
         the capture file (see :func:`_linktypes`) for the frame of this engine's
@@ -593,8 +595,8 @@ class PyShark(EngineBase['PySharkPacket']):
                 be parsed, or lacks the frame asked for; or the capture file
                 cannot be read for the frame's link type. Both are then stopped,
                 and this and every later frame is traced as tshark dissects it,
-                as before :issue:`1625`, which can disagree with the default
-                engine.
+                as before :issue:`1625` and :issue:`1639`, which can disagree
+                with the default engine.
 
         Note:
             The second pass is a process of this engine's own rather than a
@@ -614,14 +616,14 @@ class PyShark(EngineBase['PySharkPacket']):
             return None
         frnum = self._extractor._frnum
         source = ('the capture file, read for the link type of a frame with an AH or IPv6 extension '
-                  'header in IPv4,')
+                  'header in IPv4, or with TCP,')
         try:
             linktype = self._read_linktype(frnum)
             if isinstance(linktype, str):
                 reason = linktype
             else:
                 source = ('the second tshark pass, which reads the captured octets of a frame with an AH '
-                          'or IPv6 extension header in IPv4,')
+                          'or IPv6 extension header in IPv4, or with TCP,')
                 octets = self._read_octets(int(packet.number))
                 if isinstance(octets, bytes):
                     return Captured(linktype, octets)

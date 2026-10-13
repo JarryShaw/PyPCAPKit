@@ -19,8 +19,8 @@ dissect, such as GRE or VXLAN, or the chain bound of an outer IPv6 header,
 stops the read as it stops the default engine. That layer is found by the link
 type in the capture file, which the engine reads for itself, as tshark reads
 link types 12 and 14 as it reads raw IP (101). A frame of a link type or
-EtherType the default engine dissects no IP over is read as tshark dissects
-it, as before.
+EtherType the default engine dissects no IP over is not traced, as the
+default engine traces none there (#1639).
 
 That pass is a process of the engine's own. If it fails, or the capture file
 cannot be read for a link type, the engine warns and traces such frames as
@@ -271,8 +271,8 @@ def sll(packet: bytes) -> bytes:
 #: builder as in :data:`CASES`, by a name for it. The default engine dissects IP
 #: over the link types and EtherTypes :func:`pcapkit.toolkit.pyshark._network_start`
 #: names only; a frame over any other, such as MPLS, Linux SLL, or the BSD raw
-#: IP of link types 12 and 14, which tshark reads as raw IP (101), is read as
-#: tshark dissects it, which reads no TCP past a Mobility or HIP header.
+#: IP of link types 12 and 14, which tshark reads as raw IP (101), is not
+#: traced (#1639).
 LINK_CASES = {
     'vlan, mobility': (1, True, lambda n: vlan(v4(mobility(6) + tcp(n), 135), 0x8100)),
     'qinq, hip': (1, True, lambda n: vlan(v4(hip(6) + tcp(n), 139), 0x88A8, 0x8100)),
@@ -522,7 +522,7 @@ class PySharkExtensionHeaderTraceTests(unittest.TestCase):
         self.assertEqual(sorted(seen['trace']), [1, 2, 4])
         messages = [call.args[0] for call in warn.call_args_list if call.args[1] is PySharkWarning]
         self.assertEqual(len(messages), 1, messages)
-        self.assertIn('Frame 2: the second tshark pass', messages[0])
+        self.assertIn('Frame 1: the second tshark pass', messages[0])  # the control frame's TCP asks first (#1639)
         self.assertIn('exited with status', messages[0])
 
     def test_an_early_close_leaves_no_tshark_behind(self) -> None:
@@ -728,9 +728,9 @@ class ToolkitOctetsTests(unittest.TestCase):
         self.assertIsNone(toolkit.tcp_traceflow(fake_packet(), captured=lambda p: toolkit.Captured(101, MOBILITY)))
         self.assertIsNone(toolkit.tcp_traceflow(packet, captured=lambda p: toolkit.Captured(1, RAW_MOBILITY)))
 
-    def test_a_link_type_the_default_engine_reads_no_ip_in_is_left_to_tshark(self) -> None:
-        # tshark dissects nothing past the Mobility header, so there is no TCP;
-        # an unknown link type of tshark's raises only once a segment is found
+    def test_a_link_type_the_default_engine_reads_no_ip_in_is_not_traced(self) -> None:
+        # the default engine reads no TCP there (#1639); an unknown link type
+        # of tshark's raises only once a segment is found
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.toolkit import pyshark as toolkit
         from pcapkit.utilities.exceptions import MissingKeyError
@@ -752,8 +752,9 @@ class ToolkitOctetsTests(unittest.TestCase):
         packet.frame_info.encap_type = '999'
         packet.layers.append(FakeLayer('tcp', urgent_pointer='0', srcport='1', dstport='2', seq_raw='3', ack_raw='4',
                                        flags_syn='True', flags_fin='False', flags_reset='False'))
-        with self.assertRaises(MissingKeyError):
-            toolkit.tcp_traceflow(packet, captured=lambda p: toolkit.Captured(113, MOBILITY))
+        with self.assertRaises(MissingKeyError):  # the frame cannot be had, so tshark's segment is traced
+            toolkit.tcp_traceflow(packet, captured=lambda p: None)
+        self.assertIsNone(toolkit.tcp_traceflow(packet, captured=lambda p: toolkit.Captured(113, MOBILITY)))
 
     def test_no_octets_leaves_tsharks_dissection(self) -> None:
         # tshark dissects nothing past the Mobility header, so there is no TCP
@@ -776,7 +777,7 @@ class ToolkitOctetsTests(unittest.TestCase):
         del packet.layers[2].version
         self.assertIsNone(toolkit.tcp_traceflow(packet, captured=lambda p: toolkit.Captured(1, MOBILITY)))
 
-    def test_only_an_ipv4_extension_header_asks_for_the_octets(self) -> None:
+    def test_without_tcp_only_an_ipv4_extension_header_asks_for_the_octets(self) -> None:
         from pcapkit.toolkit import pyshark as toolkit
 
         def refuse(packet: 'Any') -> 'Any':
@@ -807,7 +808,7 @@ class ToolkitOctetsTests(unittest.TestCase):
         from pcapkit.toolkit import pyshark as toolkit
         from pcapkit.toolkit.pypcapfile import IPV4_EXTENSION_HEADERS
 
-        self.assertEqual(toolkit.OCTETS_FILTER, 'ip.proto == 0 || ip.proto == 43 || ip.proto == 44 || '
+        self.assertEqual(toolkit.OCTETS_FILTER, 'tcp || ip.proto == 0 || ip.proto == 43 || ip.proto == 44 || '
                                                 'ip.proto == 51 || ip.proto == 60 || ip.proto == 135 || '
                                                 'ip.proto == 139 || ip.proto == 140')
         self.assertEqual(len(IPV4_EXTENSION_HEADERS), 7)

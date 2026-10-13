@@ -680,6 +680,7 @@ class PySharkTraceFieldTests(unittest.TestCase):
         engine = PyShark.__new__(PyShark)  # skip __init__, which imports pyshark
         engine._extractor = extractor
         engine._extmp = types.SimpleNamespace(next=lambda: next(stream))
+        engine._exraw_failed = True  # no capture file to read frames from: traced as tshark dissects them (#1639)
 
         counts = []
         while True:

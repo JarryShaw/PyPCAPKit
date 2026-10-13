@@ -338,20 +338,22 @@ FILTER_NAME_TO_LINKTYPE = {
 _BOOLEAN_FIELD = {'1': True, '0': False, 'True': True, 'False': False}  # type: dict[str, bool]
 
 #: IPv4 protocol numbers that make :func:`tcp_traceflow` read a frame from its
-#: captured octets (see :func:`_extension_header_carrier`): the AH and IPv6
-#: extension headers. The default engine reads past those of the
+#: captured octets though tshark dissects no TCP segment in it (see
+#: :func:`_extension_header_carrier`): the AH and IPv6 extension headers. The
+#: default engine reads past those of the
 #: :data:`~pcapkit.toolkit.pypcapfile.IPV4_EXTENSION_HEADERS` by rules of its
 #: own, and past Shim6 not at all, as its parser refuses IPv4; tshark dissects
 #: the TCP behind any of them by its own rules.
 OCTETS_PROTOCOLS = IPV4_EXTENSION_HEADERS | {Enum_TransType.Shim6}
 
 #: tshark display filter matching every frame :func:`tcp_traceflow` asks the
-#: captured octets of: one with an IPv4 header whose protocol is one of the
-#: :data:`OCTETS_PROTOCOLS`. It matches every ``ip.proto`` field of a frame, so
-#: it matches all of those frames and maybe others. The members are joined with
+#: captured octets of: one tshark dissects TCP in (see :func:`_traces`), or one
+#: with an IPv4 header whose protocol is one of the :data:`OCTETS_PROTOCOLS`.
+#: It matches every ``tcp`` layer and ``ip.proto`` field of a frame, so it
+#: matches all of those frames and maybe others. The members are joined with
 #: ``||`` rather than written as a set, as tshark 4.6.9 refuses a set whose
 #: members are separated by spaces only.
-OCTETS_FILTER = ' || '.join(f'ip.proto == {int(protocol)}' for protocol in sorted(OCTETS_PROTOCOLS))
+OCTETS_FILTER = ' || '.join(['tcp', *(f'ip.proto == {int(protocol)}' for protocol in sorted(OCTETS_PROTOCOLS))])
 
 #: Length of an Ethernet header: two MAC addresses and the EtherType.
 ETHERNET_HEADER_LEN = 14
@@ -628,6 +630,20 @@ def _from_layers(packet: 'Packet') -> 'Optional[_Segment]':
     )
 
 
+def _traces(packet: 'Packet') -> 'bool':
+    """Whether tshark's dissection of a PyShark packet has a TCP segment to trace.
+
+    Args:
+        packet: PyShark packet.
+
+    Returns:
+        Whether :func:`_from_layers` finds a segment in it, its flags unread.
+
+    """
+    ip, tcp = _carrier(packet)
+    return ip is not None and tcp is not None and _has_fixed_header(tcp)
+
+
 def _extension_header_carrier(packet: 'Packet') -> 'Any':
     """Find the IPv4 layer of a PyShark packet whose protocol names an AH or IPv6 extension header.
 
@@ -780,10 +796,21 @@ def _network(packet: 'Packet', captured: 'Captured') -> 'Optional[tuple[int, byt
         The packet's IP version and its octets on, to the end of the frame, as
         :func:`_network_start` finds it by the frame's link type, if tshark
         dissected it too: the packet's first ``ip`` or ``ipv6`` layer is of that
-        version, and tshark reports its version field there, with the layer's
-        source and destination addresses in the octets. Else :data:`None`: the
-        default engine dissects no IP packet right after the link layer, or
-        tshark dissected that layer out of other octets, e.g. another frame's.
+        version, and tshark reports its version field there, the layer's source
+        address in the header's Source Address field, and its destination
+        address in the octets where tshark reports that field (see below).
+        Else :data:`None`: the default engine dissects no IP packet right after
+        the link layer, or tshark dissected none there, e.g. as it reads an
+        IPv6 packet over link type ``IPV4`` (228) as IPv6, or dissected that
+        layer out of other octets, e.g. another frame's.
+
+    Note:
+        The destination address is matched where tshark reports it, not in
+        the header's Destination Address field: with an LSRR or SSRR option
+        whose route is not yet used up (:rfc:`791#section-3.1`), tshark
+        reports the route's last address as ``ip.dst``, at its place in the
+        option, and the header's as ``ip.cur_rt``, measured with tshark 4.6.9.
+        The default engine keys the segment by the header's, as the octets do.
 
     """
     linktype, octets = captured
@@ -797,13 +824,15 @@ def _network(packet: 'Packet', captured: 'Captured') -> 'Optional[tuple[int, byt
     if ip is None or ip.layer_name.lower() != name:
         return None
     try:
-        position = int(ip.version.pos)
-        addresses = bytes.fromhex(str(ip.src.raw_value) + str(ip.dst.raw_value))
+        position, target = int(ip.version.pos), int(ip.dst.pos)
+        source, destination = bytes.fromhex(str(ip.src.raw_value)), bytes.fromhex(str(ip.dst.raw_value))
     except (AttributeError, TypeError, ValueError):
         return None
+    size = 4 if version == 4 else 16
     where = start + (12 if version == 4 else 8)  # the source address
-    if (position != start or len(addresses) != (8 if version == 4 else 32)
-            or octets[where:where + len(addresses)] != addresses):
+    if (position != start or len(source) != size or len(destination) != size
+            or octets[where:where + size] != source
+            or target < start or octets[target:target + size] != destination):
         return None
     return version, octets[start:]
 
@@ -894,37 +923,43 @@ def _segment(packet: 'Packet', captured: 'Optional[Callable[[Packet], Optional[C
             :func:`tcp_traceflow`).
 
     Returns:
-        If the packet has an IPv4 layer whose protocol names an AH or IPv6
-        extension header (see :func:`_extension_header_carrier`), the segment
-        read from the octets of the frame's outermost IP packet on (see
-        :func:`_network` and :func:`_from_octets`), wherever that layer is;
-        otherwise, or where the frame cannot be had or the default engine
-        dissects no IP packet after its link layer, the segment of tshark's
-        dissection (see :func:`_from_layers`). :data:`None` if there is none.
+        If tshark's dissection has a segment (see :func:`_traces`), or an IPv4
+        layer whose protocol names an AH or IPv6 extension header (see
+        :func:`_extension_header_carrier`), the segment read from the octets of
+        the frame's outermost IP packet on (see :func:`_network` and
+        :func:`_from_octets`), or :data:`None` where the default engine
+        dissects no IP packet after the frame's link layer or tshark dissects
+        none there. Otherwise, or where the frame cannot be had, the segment of
+        tshark's dissection (see :func:`_from_layers`). :data:`None` if there
+        is none.
 
     Raises:
         ProtocolError: If a TCP flag field of tshark's dissection is not a
             boolean tshark spelling.
 
     Note:
-        tshark dissects such a header and what its Next Header names by rules
-        of its own, and nothing past a Mobility (135) or HIP (139) header,
-        whose payload it leaves out of the PDML that PyShark reads. The
-        default engine dispatches IPv4's protocol through the registry IPv6
-        uses, reads TCP behind such a header only if its TCP parser accepts
-        it, and none behind Shim6 (140), whose parser refuses IPv4
-        (:issue:`1625`). Reading from the outermost IP packet, as the default
-        engine does, stops where it stops before such a header: at a tunnel it
-        does not dissect, such as GRE or VXLAN, which tshark does, or past
+        tshark dissects TCP inside encapsulations the default engine leaves
+        raw: link types 12 and 14, which it reads as raw IP (101), Linux SLL,
+        an EtherType such as MPLS or PPPoE, 802.3 LLC/SNAP, Cisco ISL, and
+        tunnels such as GRE, VXLAN and L2TP (:issue:`1639`). And it dissects
+        an AH or IPv6 extension header in IPv4 and what its Next Header names
+        by rules of its own, and nothing past a Mobility (135) or HIP (139)
+        header, whose payload it leaves out of the PDML that PyShark reads.
+        The default engine dispatches IPv4's protocol through the registry
+        IPv6 uses, reads TCP behind such a header only if its TCP parser
+        accepts it, and none behind Shim6 (140), whose parser refuses IPv4
+        (:issue:`1625`). Reading the frame from its link layer on, as the
+        default engine does, stops where it stops: at a link type, EtherType or
+        tunnel it does not dissect, or past
         :data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT`
-        extension headers in a row of an IPv6 packet carrying it.
+        extension headers in a row of an IPv6 packet.
 
     """
-    if captured is not None and _extension_header_carrier(packet) is not None:
+    if captured is not None and (_traces(packet) or _extension_header_carrier(packet) is not None):
         frame = captured(packet)
-        network = None if frame is None else _network(packet, frame)
-        if network is not None:
-            return _from_octets(*network)
+        if frame is not None:
+            network = _network(packet, frame)
+            return None if network is None else _from_octets(*network)
     return _from_layers(packet)
 
 
@@ -944,7 +979,8 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1,
             :data:`OCTETS_FILTER` matches. The engine passes
             :meth:`PyShark._captured
             <pcapkit.foundation.engines.pyshark.PyShark._captured>`; without
-            it, such a packet is read as tshark dissects it.
+            it, or where it returns :data:`None`, a packet is read as tshark
+            dissects it.
 
     Returns:
         Data for TCP flow tracing.
@@ -952,10 +988,11 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1,
         * If the ``packet`` can be used for TCP flow tracing. A packet can be reassembled
           if it contains TCP layer with a whole fixed header (see
           :func:`_has_fixed_header`), keyed by the IP layer that carries it -- in an
-          IP-in-IP tunnel, the innermost (see :func:`_carrier`). In a frame with
-          an AH or IPv6 extension header in IPv4, it is the TCP the default
-          engine reads in the frame's octets, by the frame's link type in the
-          capture file, instead (see :func:`_segment`).
+          IP-in-IP tunnel, the innermost (see :func:`_carrier`). Where
+          ``captured`` has the frame, it is instead the TCP the default engine
+          reads in the frame's octets, by the frame's link type in the capture
+          file, and none where the default engine reads none: behind a link
+          type, EtherType or tunnel it does not dissect (see :func:`_segment`).
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
           flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
@@ -1005,8 +1042,8 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1,
             # NOTE: PyShark reports dissected *fields*, not the octets behind
             # them, so there is no header or payload to hand over -- which is
             # the same reason this module carries no ``tcp_reassembly`` at all.
-            # The octets ``_segment`` reads behind an extension header are of
-            # those few frames alone, so are not handed over either.
+            # The octets ``_segment`` reads are missing wherever the frame
+            # cannot be had, so are not handed over either.
             # ``Extractor`` refuses ``trace_analyse=True`` on this engine, so
             # nothing reads these two.
             header=b'',                                                          # unavailable

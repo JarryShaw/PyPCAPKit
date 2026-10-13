@@ -18,9 +18,8 @@ the chain off the octets, and stop at the same depth too. ``scapy`` walks the
 chain over the octets by the default engine's rules, rather than through Scapy's
 own layers, so stops there as well (#1609).
 
-The other parser, ``pyshark``, walks the chain through tshark, and cannot be
-told where to stop, so where it finds the TCP past the limit is recorded in
-:attr:`KNOWN_FAILURES` under #1609 rather than hidden. Measured on tshark 4.6.9.
+``pyshark`` reads a frame tshark finds TCP in from its octets, by the default
+engine's rules, so stops there too (#1639). Measured on tshark 4.6.9.
 
 Every capture is built in a temporary directory, so no fixture is read.
 
@@ -157,11 +156,7 @@ class TestExtensionHeaderChainAgreement(harness.RoundTripBase):
     """Every engine that runs stops the chain where ``default`` does, or is a recorded gap."""
 
     STATUSES = ('ERROR', 'INPUTS', 'DECLINED')
-    KNOWN_FAILURES = (
-        Gap(1609, 'tshark dissects up to about 496 extension headers, so finds the TCP past '
-                  'EXTENSION_HEADER_LIMIT, carried in IPv6; at 1,000 it gives up and agrees',
-            'INPUTS', 'extra, default has none', ('ipv6-33/pyshark/trace',)),
-    )
+    KNOWN_FAILURES = ()  # type: tuple[Gap, ...]
 
     @classmethod
     def setUpClass(cls) -> None:
