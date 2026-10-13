@@ -241,6 +241,16 @@ checkout, so it applies the same rule a second time: its push rebases onto
 pushes nothing, and Conda Tag tags the commit that push landed rather than the
 tip (`#1632 <https://github.com/JarryShaw/PyPCAPKit/issues/1632>`__).
 
+Vendor Update's own commit raises it again: the push gets a Unit Tests run, whose
+completion starts another crawl. The commit bumps the version only when the crawl
+changed code. If every change is to comments or docstrings, the commit is "Updated
+vendor documentation without a version bump", and the Create Release run that
+follows sees the same version, so it has nothing new to publish
+(`#1674 <https://github.com/JarryShaw/PyPCAPKit/issues/1674>`__). A crawl raised by
+such a commit's own Unit Tests run does not commit comment changes on top of it,
+so documentation commits cannot chain. The rule is in
+``util/vendor_code_changed.py``.
+
 Reusable-Workflow Calls (``uses:``)
 -----------------------------------
 

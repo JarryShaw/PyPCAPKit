@@ -249,8 +249,24 @@ jobs:
         uses: tj-actions/verify-changed-files@v17
         id: verify-changed-files
 
-      - name: Bump Version
+      # #1674: only a code change cuts a beta. util/vendor_code_changed.py,
+      # whose docstring gives the rule, writes `code_changed=false` when every
+      # change is to comments or docstrings; those are committed below without
+      # a bump. Anything else bumps, as before, including this step failing:
+      # `continue-on-error` leaves `code_changed` unset, and the bump reads
+      # `!= 'false'`.
+      - name: Classify Changed files
+        id: classify
         if: steps.verify-changed-files.outputs.files_changed == 'true'
+        continue-on-error: true
+        env:
+          CHANGED_FILES: ${{ steps.verify-changed-files.outputs.changed_files }}
+        run: python util/vendor_code_changed.py
+
+      - name: Bump Version
+        if: >-
+          steps.verify-changed-files.outputs.files_changed == 'true' &&
+          steps.classify.outputs.code_changed != 'false'
         run: |
           set -x
 
@@ -260,7 +276,10 @@ jobs:
           isort -l100 -ppcapkit $(find pcapkit/vendor -mindepth 2 -name '*.py')
 
       - name: Commit changes
-        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        id: commit
+        if: >-
+          steps.verify-changed-files.outputs.files_changed == 'true' &&
+          steps.classify.outputs.code_changed != 'false'
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
@@ -269,8 +288,48 @@ jobs:
           Updated vendor constant enumerations at $(date). The following files
           have been changed: ${{ steps.verify-changed-files.outputs.changed_files }}"
 
+      # #1674: the same commit without the bump. Create Release still runs when
+      # this workflow completes, as after a crawl that changed nothing, and sees
+      # the same version, so nothing new is published. The push starts Unit
+      # Tests, whose completion raises this workflow again on the commit made
+      # here. If that crawl changes comments once more, it does not commit them
+      # on top of this commit; the next push or schedule picks them up. So
+      # documentation commits cannot chain, however the registries behave. The
+      # Unit Tests run's head commit is in the `workflow_run` payload
+      # (octokit/webhooks' workflow-run.schema.json, `head_commit`).
+      - name: Commit documentation changes
+        id: commit-docs
+        if: >-
+          steps.verify-changed-files.outputs.files_changed == 'true' &&
+          steps.classify.outputs.code_changed == 'false'
+        env:
+          CHANGED_FILES: ${{ steps.verify-changed-files.outputs.changed_files }}
+          EVENT_NAME: ${{ github.event_name }}
+          VERIFIED_AUTHOR: ${{ github.event.workflow_run.head_commit.author.email }}
+          VERIFIED_MESSAGE: ${{ github.event.workflow_run.head_commit.message }}
+        run: |
+          bot="github-actions[bot]@users.noreply.github.com"
+          subject="Updated vendor documentation without a version bump"
+
+          verified_subject=$(printf '%s\n' "$VERIFIED_MESSAGE" | head -n 1)
+          if [ "$EVENT_NAME" = workflow_run ] && [ "$VERIFIED_AUTHOR" = "$bot" ] &&
+             [ "$verified_subject" = "$subject" ]; then
+            echo "::notice title=Documentation changes held::this run was raised by the Unit Tests run for a documentation-only commit of this workflow, so the comments it changed again wait for the next push or schedule"
+            exit 0
+          fi
+
+          git config --local user.email "$bot"
+          git config --local user.name "github-actions[bot]"
+          git commit -am"$subject
+
+          Updated vendor constant enumerations at $(date). Only comments and
+          docstrings changed, so the version stays at
+          $(python -c 'import pcapkit; print(pcapkit.__version__)') (#1674). The
+          following files have been changed: $CHANGED_FILES"
+          echo "committed=true" >> "$GITHUB_OUTPUT"
+
       - name: Push changes
-        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        if: steps.commit.outcome == 'success' || steps.commit-docs.outputs.committed == 'true'
         run: |
           git remote set-url origin git@github.com:JarryShaw/PyPCAPKit.git
           git pull --rebase origin "${GITHUB_REF#refs/heads/}"
