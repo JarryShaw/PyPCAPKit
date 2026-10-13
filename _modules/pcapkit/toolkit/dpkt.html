@@ -573,6 +573,13 @@
 <span class="sd">    carries those three. Reassembly and flow tracing are handed a plain</span>
 <span class="sd">    :obj:`float` of it, as by every other engine (:issue:`1501`).</span>
 
+<span class="sd">    A copy, a deep copy and a pickle at any protocol all rebuild a timestamp</span>
+<span class="sd">    from what its :meth:`~object.__reduce__` returns, so all keep the three.</span>
+<span class="sd">    This class answers each of those protocols itself, ahead of the numeric base</span>
+<span class="sd">    class: the pure-Python :class:`~decimal.Decimal` copies a subclass as</span>
+<span class="sd">    ``type(self)(str(self))``, with the constructor's defaults for the rest</span>
+<span class="sd">    (:issue:`1647`).</span>
+
 <span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
 
 <span class="sd">    """</span>
@@ -586,6 +593,20 @@
         <span class="n">resolution</span><span class="p">:</span> <span class="s1">'int'</span>
         <span class="c1">#: Original length of the packet, or :data:`None` if unknown.</span>
         <span class="n">orig_len</span><span class="p">:</span> <span class="s1">'Optional[int]'</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__reduce__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Any, ...]'</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> does not say how it is rebuilt'</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__reduce_ex__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Any, ...]'</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__reduce__</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+        <span class="n">factory</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__reduce__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">factory</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__deepcopy__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memo</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+        <span class="n">factory</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__reduce__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">factory</span><span class="p">(</span><span class="o">*</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">memo</span><span class="p">))</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">Timestamp</span><span class="p">(</span><span class="n">RecordTimestamp</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
