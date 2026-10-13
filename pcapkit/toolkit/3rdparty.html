@@ -520,11 +520,11 @@ cannot be used for it.</p>
 <ul class="simple">
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be used for IPv4 reassembly. A packet can be reassembled
 if it contains IPv4 layer (<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html#scapy.layers.inet.IP" title="(in Scapy v2.8.0.post5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.layers.inet.IP</span></code></a>) – the first of the
-frame, as for the default engine, so one carried in IPv6 counts but none an
-ICMP or ICMPv6 error quotes (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_first_ipv4()</span></code>) – whose header the
-default engine accepts (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_ipv4_accepted()</span></code>) and lies inside every
-IPv6 packet carrying it, and the <strong>DF</strong>
-(<code class="xref py py-attr docutils literal notranslate"><span class="pre">scapy.layers.inet.IP.flags.DF</span></code>) flag is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>.</p></li>
+frame the default engine dissects, so one carried in IPv6 counts but none an
+ICMP or ICMPv6 error quotes or a layer that engine leaves raw carries, such as
+GRE (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_first_ipv4()</span></code>) – whose header the default engine accepts (see
+<code class="xref py py-func docutils literal notranslate"><span class="pre">_ipv4_accepted()</span></code>) and lies inside every IPv6 packet carrying it, and the
+<strong>DF</strong> (<code class="xref py py-attr docutils literal notranslate"><span class="pre">scapy.layers.inet.IP.flags.DF</span></code>) flag is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>.</p></li>
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be reassembled, then the <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> mapping of data for IPv4
 reassembly (<a class="reference internal" href="../foundation/reassembly/ip/ipv4.html#term-reasm.ipv4.packet"><span class="xref std std-term">reasm.ipv4.packet</span></a>) will be returned; otherwise, returns <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p></li>
 </ul>
@@ -555,8 +555,12 @@ reassembly (<a class="reference internal" href="../foundation/reassembly/ip/ipv4
 <dd class="field-odd"><p><p>Data for IPv6 reassembly.</p>
 <ul class="simple">
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be used for IPv6 reassembly. A packet can be reassembled
-if it contains IPv6 layer (<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet6.html#scapy.layers.inet6.IPv6" title="(in Scapy v2.8.0.post5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.layers.inet6.IPv6</span></code></a>) and IPv6 Fragment
-header (<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.5"><strong>RFC 2460 Section 4.5</strong></a>, i.e., <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet6.html#scapy.layers.inet6.IPv6ExtHdrFragment" title="(in Scapy v2.8.0.post5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.layers.inet6.IPv6ExtHdrFragment</span></code></a>).</p></li>
+if it contains IPv6 layer (<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet6.html#scapy.layers.inet6.IPv6" title="(in Scapy v2.8.0.post5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.layers.inet6.IPv6</span></code></a>) – the first of the
+frame the default engine dissects, so one carried in IPv4 counts but none an ICMP
+or ICMPv6 error quotes, a later IPv4 fragment carries, or a layer that engine
+leaves raw carries, such as GRE (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_first_ipv6()</span></code>) – and IPv6 Fragment
+header (<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.5"><strong>RFC 2460 Section 4.5</strong></a>, i.e., <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet6.html#scapy.layers.inet6.IPv6ExtHdrFragment" title="(in Scapy v2.8.0.post5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.layers.inet6.IPv6ExtHdrFragment</span></code></a>)
+in that layer’s own extension header chain (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_fragment_header()</span></code>).</p></li>
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be reassembled, then the <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> mapping of data for IPv6
 reassembly (<a class="reference internal" href="../foundation/reassembly/ip/ipv6.html#term-reasm.ipv6.packet"><span class="xref std std-term">reasm.ipv6.packet</span></a>) will be returned; otherwise, returns <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p></li>
 </ul>
@@ -592,11 +596,11 @@ reassembly (<a class="reference internal" href="../foundation/reassembly/ip/ipv6
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be used for TCP reassembly. A packet can be reassembled
 if it contains TCP layer (<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html#scapy.layers.inet.TCP" title="(in Scapy v2.8.0.post5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.layers.inet.TCP</span></code></a>) whose fixed header
 lies inside its datagram, and whose Data Offset counts at least that header,
-behind no IPv4 header the default engine rejects, in no later IPv4 fragment and
-in no datagram an ICMP or ICMPv6 error quotes,
-or a TCP segment the default engine reads behind an AH or IPv6 extension header
-in IPv4. It is keyed by the IP layer that carries it – in an IP-in-IP tunnel,
-the innermost (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_tcp_carrier()</span></code>).</p></li>
+behind no IPv4 header the default engine rejects, in no later IPv4 fragment, in
+no datagram an ICMP or ICMPv6 error quotes and in no layer the default engine
+leaves raw, such as GRE, or a TCP segment the default engine reads behind an AH
+or IPv6 extension header in IPv4. It is keyed by the IP layer that carries it –
+in an IP-in-IP tunnel, the innermost (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_tcp_carrier()</span></code>).</p></li>
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be reassembled, then the <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> mapping of data for TCP
 reassembly (<a class="reference internal" href="../foundation/reassembly/tcp.html#term-reasm.tcp.packet"><span class="xref std std-term">reasm.tcp.packet</span></a>) will be returned; otherwise, returns <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p></li>
 </ul>
@@ -840,8 +844,14 @@ Handed on as a <a class="reference external" href="https://docs.python.org/3/bui
 <dd class="field-odd"><p><p>Data for IPv6 reassembly.</p>
 <ul class="simple">
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be used for IPv6 reassembly. A packet can be reassembled
-if it contains IPv6 layer (<a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip6.IP6" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.ip6.IP6</span></code></a>) and IPv6 Fragment header
-(<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.5"><strong>RFC 2460 Section 4.5</strong></a>, i.e., <a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip6.IP6FragmentHeader" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.ip6.IP6FragmentHeader</span></code></a>).</p></li>
+if it contains IPv6 layer (<a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip6.IP6" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.ip6.IP6</span></code></a>) – the first of the frame, as
+for the default engine, so one carried in IPv4 counts (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_first_ipv6()</span></code>)
+– and IPv6 Fragment header (<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.5"><strong>RFC 2460 Section 4.5</strong></a>, i.e.,
+<a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip6.IP6FragmentHeader" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.ip6.IP6FragmentHeader</span></code></a>) inside its Payload Length, and among its first
+<a class="reference internal" href="../protocols/internet/internet.html#pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT" title="pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a> extension
+headers, the most the default engine walks (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1604">#1604</a>), and inside the first
+<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.FRAME_LAYER_LIMIT" title="pcapkit.protocols.protocol.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a> layers of the frame, past
+which it dissects nothing (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1610">#1610</a>).</p></li>
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be reassembled, then the <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> mapping of data for IPv6
 reassembly (<a class="reference internal" href="../foundation/reassembly/ip/ipv6.html#term-reasm.ipv6.packet"><span class="xref std std-term">reasm.ipv6.packet</span></a>) will be returned; otherwise, returns <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p></li>
 </ul>
@@ -857,6 +867,11 @@ buffer, and its octets are then <code class="xref py py-mod docutils literal not
 which a zeroed checksum or length comes back recomputed –
 <code class="xref py py-func docutils literal notranslate"><span class="pre">attach_buffer()</span></code> is what makes them the wire’s again. The packet
 itself is left untouched either way.</p>
+<p>The captured octets end at the Payload Length, as the default engine
+cuts them, or at the Jumbo Payload Length (<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2675.html"><strong>RFC 2675</strong></a>) of a zero one.
+A zero Payload Length with no Jumbo Payload option leaves the default
+engine no extension header to read, and so no input; <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a> reads the
+rest of the frame instead.</p>
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
@@ -958,8 +973,8 @@ itself is left untouched either way.</p>
 </div>
 </dd></dl>
 
-<section id="id1">
-<h3>Auxiliary Functions<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<section id="id2">
+<h3>Auxiliary Functions<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.dpkt.ipv6_hdr_len">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.dpkt.</span></span><span class="sig-name descname"><span class="pre">ipv6_hdr_len</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ipv6</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/dpkt.html#ipv6_hdr_len"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.dpkt.ipv6_hdr_len" title="Link to this definition">¶</a></dt>
@@ -973,14 +988,14 @@ itself is left untouched either way.</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Length of headers before IPv6 Fragment header
-<a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip6.IP6FragmentHeader" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.ip6.IP6FragmentHeader</span></code></a> (<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.5"><strong>RFC 2460 Section 4.5</strong></a>).</p>
+<a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip6.IP6FragmentHeader" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.ip6.IP6FragmentHeader</span></code></a> (<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.5"><strong>RFC 2460 Section 4.5</strong></a>).</p>
 </dd>
 </dl>
-<p>As specified in <span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.1"><strong>RFC 2460 Section 4.1</strong></a>, such a header may be a Hop-by-Hop Options
-header <a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip6.IP6HopOptsHeader" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.ip6.IP6HopOptsHeader</span></code></a> (<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.3"><strong>RFC 2460 Section 4.3</strong></a>), a Destination
-Options header <a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip6.IP6DstOptsHeader" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.ip6.IP6DstOptsHeader</span></code></a> (<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.6"><strong>RFC 2460 Section 4.6</strong></a>) or a
-Routing header <a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip6.IP6RoutingHeader" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.ip6.IP6RoutingHeader</span></code></a> (<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.4"><strong>RFC 2460 Section 4.4</strong></a>). An
-Authentication header (<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4302.html"><strong>RFC 4302</strong></a>) reaches here as well, though, so the headers are
+<p>As specified in <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.1"><strong>RFC 2460 Section 4.1</strong></a>, such a header may be a Hop-by-Hop Options
+header <a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip6.IP6HopOptsHeader" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.ip6.IP6HopOptsHeader</span></code></a> (<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.3"><strong>RFC 2460 Section 4.3</strong></a>), a Destination
+Options header <a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip6.IP6DstOptsHeader" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.ip6.IP6DstOptsHeader</span></code></a> (<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.6"><strong>RFC 2460 Section 4.6</strong></a>) or a
+Routing header <a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip6.IP6RoutingHeader" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.ip6.IP6RoutingHeader</span></code></a> (<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.4"><strong>RFC 2460 Section 4.4</strong></a>). An
+Authentication header (<span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4302.html"><strong>RFC 4302</strong></a>) reaches here as well, though, so the headers are
 walked in the order they were parsed rather than looked up by a fixed list of types.
 Walking them is also what counts a header type occurring twice twice, and what leaves
 out one that sits <em>after</em> the Fragment header rather than before it.</p>
@@ -1044,7 +1059,7 @@ for lack of the corresponding <a class="reference external" href="https://kimine
 </div>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.pyshark.tcp_traceflow">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pyshark.</span></span><span class="sig-name descname"><span class="pre">tcp_traceflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pyshark.html#tcp_traceflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pyshark.tcp_traceflow" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pyshark.</span></span><span class="sig-name descname"><span class="pre">tcp_traceflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">captured</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pyshark.html#tcp_traceflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pyshark.tcp_traceflow" title="Link to this definition">¶</a></dt>
 <dd><p>Trace packet flow for TCP.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1053,6 +1068,13 @@ for lack of the corresponding <a class="reference external" href="https://kimine
 <li><p><strong>count</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Packet index. If not provided, default to <code class="docutils literal notranslate"><span class="pre">-1</span></code>. The engine
 passes its own frame count, not tshark’s <code class="docutils literal notranslate"><span class="pre">frame.number</span></code>, which
 also numbers records that are not packets (#1515).</p></li>
+<li><p><strong>captured</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Captured</span></code> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Fetches a frame as the default engine reads it from the
+capture file, given its packet: its link type there and its
+captured octets, neither of which the PDML carries; or
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> where it cannot. It is called only for a packet
+<code class="xref py py-data docutils literal notranslate"><span class="pre">OCTETS_FILTER</span></code> matches. The engine passes
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">PyShark._captured</span></code>; without
+it, such a packet is read as tshark dissects it.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -1064,7 +1086,10 @@ also numbers records that are not packets (#1515).</p></li>
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be used for TCP flow tracing. A packet can be reassembled
 if it contains TCP layer with a whole fixed header (see
 <code class="xref py py-func docutils literal notranslate"><span class="pre">_has_fixed_header()</span></code>), keyed by the IP layer that carries it – in an
-IP-in-IP tunnel, the innermost (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_carrier()</span></code>).</p></li>
+IP-in-IP tunnel, the innermost (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_carrier()</span></code>). In a frame with
+an AH or IPv6 extension header in IPv4, it is the TCP the default
+engine reads in the frame’s octets, by the frame’s link type in the
+capture file, instead (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_segment()</span></code>).</p></li>
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be reassembled, then the <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> mapping of data for TCP
 flow tracing (<a class="reference internal" href="../foundation/traceflow/tcp.html#term-trace.tcp.packet"><span class="xref std std-term">trace.tcp.packet</span></a>) will be returned; otherwise, returns <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p></li>
 </ul>
@@ -1115,6 +1140,13 @@ other 69 refused the rewrite, so they are untested. Those 157 yielded 153 distin
 152 of them are below; <code class="docutils literal notranslate"><span class="pre">frame.encap_type</span></code> 32 (<code class="docutils literal notranslate"><span class="pre">editcap</span> <span class="pre">-T</span> <span class="pre">hhdlc</span></code>, DLT 121) is left out
 because <code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code> has no member for 121. An encapsulation absent from this table raises
 rather than resolving to a near-miss DLT.</p>
+<p>In the read direction, one key can come from several DLTs. Measured with <code class="docutils literal notranslate"><span class="pre">tshark</span></code> 4.6.9 over
+every PCAP-NG link type from 0 to 65535 (bar 144 and 177, under which it rejected the test
+frame), <code class="docutils literal notranslate"><span class="pre">frame.encap_type</span></code> 7 is read from DLTs 12, 14 and 101, 4 from 9 and 50, 10 from 11
+and 100, 11 from 16, 18, 19 and 106, 28 from 104 and 112, and 38 from 13 and 109; each other
+key of this table from one DLT. So where <a class="reference internal" href="#pcapkit.toolkit.pyshark.tcp_traceflow" title="pcapkit.toolkit.pyshark.tcp_traceflow"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_traceflow()</span></code></a> reads a frame as the default
+engine does, it takes the link type from the capture file rather than from this table
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1625">#1625</a>).</p>
 </dd></dl>
 
 <dl class="py data">
@@ -1160,8 +1192,8 @@ Wireshark’s own registrations (<code class="docutils literal notranslate"><spa
 <code class="docutils literal notranslate"><span class="pre">WTAP_ENCAP_TOKEN_RING</span></code>).</p>
 </dd></dl>
 
-<section id="id3">
-<h3>Auxiliary Functions<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
+<section id="id4">
+<h3>Auxiliary Functions<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.pyshark.packet2dict">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pyshark.</span></span><span class="sig-name descname"><span class="pre">packet2dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pyshark.html#packet2dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pyshark.packet2dict" title="Link to this definition">¶</a></dt>
@@ -1278,8 +1310,8 @@ calling one fails with an explanatory
 </dl>
 </dd></dl>
 
-<section id="id8">
-<h3>Auxiliary Functions<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
+<section id="id9">
+<h3>Auxiliary Functions<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.pypcap.packet2chain">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pypcap.</span></span><span class="sig-name descname"><span class="pre">packet2chain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_link</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pypcap.html#packet2chain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pypcap.packet2chain" title="Link to this definition">¶</a></dt>
@@ -1430,8 +1462,8 @@ that calling one fails with an explanatory
 </dl>
 </dd></dl>
 
-<section id="id15">
-<h3>Auxiliary Functions<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h3>
+<section id="id16">
+<h3>Auxiliary Functions<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.pcap_ct.packet2chain">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pcap_ct.</span></span><span class="sig-name descname"><span class="pre">packet2chain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_link</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pcap_ct.html#packet2chain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pcap_ct.packet2chain" title="Link to this definition">¶</a></dt>
@@ -1658,8 +1690,8 @@ warning.</p>
 </div>
 </dd></dl>
 
-<section id="id21">
-<h3>Auxiliary Functions<a class="headerlink" href="#id21" title="Link to this heading">¶</a></h3>
+<section id="id22">
+<h3>Auxiliary Functions<a class="headerlink" href="#id22" title="Link to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.pypcapfile.packet2timestamp">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pypcapfile.</span></span><span class="sig-name descname"><span class="pre">packet2timestamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pypcapfile.html#packet2timestamp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pypcapfile.packet2timestamp" title="Link to this definition">¶</a></dt>
@@ -1850,23 +1882,23 @@ see the module notes.</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-pcapkit.toolkit.dpkt">DPKT Tools</a><ul>
-<li><a class="reference internal" href="#id1">Auxiliary Functions</a></li>
+<li><a class="reference internal" href="#id2">Auxiliary Functions</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-pcapkit.toolkit.pyshark">PyShark Tools</a><ul>
-<li><a class="reference internal" href="#id3">Auxiliary Functions</a></li>
+<li><a class="reference internal" href="#id4">Auxiliary Functions</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-pcapkit.toolkit.pypcap">PyPCAP Tools</a><ul>
-<li><a class="reference internal" href="#id8">Auxiliary Functions</a></li>
+<li><a class="reference internal" href="#id9">Auxiliary Functions</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-pcapkit.toolkit.pcap_ct">pcap-ct Tools</a><ul>
-<li><a class="reference internal" href="#id15">Auxiliary Functions</a></li>
+<li><a class="reference internal" href="#id16">Auxiliary Functions</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-pcapkit.toolkit.pypcapfile">PyPCAPFile Tools</a><ul>
-<li><a class="reference internal" href="#id21">Auxiliary Functions</a></li>
+<li><a class="reference internal" href="#id22">Auxiliary Functions</a></li>
 <li><a class="reference internal" href="#internal-definitions">Internal Definitions</a></li>
 </ul>
 </li>

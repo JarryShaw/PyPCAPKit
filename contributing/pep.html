@@ -1025,9 +1025,9 @@ each engine has a matching module.</p>
 <section id="test-cases">
 <h2>Test Cases<a class="headerlink" href="#test-cases" title="Link to this heading">¶</a></h2>
 <p><strong>Largely done.</strong> There is a systematic test suite under <code class="docutils literal notranslate"><span class="pre">tests/</span></code>, and it runs
-in CI against Python 3.10 through 3.14, per
-<code class="docutils literal notranslate"><span class="pre">.github/workflows/unit-tests.yml</span></code>. 3.15 is deliberately excluded there,
-because a leg outside the branch ruleset’s required checks cannot block a merge.
+in CI against Python 3.11 through 3.15, per
+<code class="docutils literal notranslate"><span class="pre">.github/workflows/unit-tests.yml</span></code>, and against the end-of-life 3.8 through 3.10
+on legs whose failures block nothing.
 The module count is measurable rather than worth writing down:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>find<span class="w"> </span>tests<span class="w"> </span>-name<span class="w"> </span><span class="s1">'test_*.py'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-l
 </pre></div>

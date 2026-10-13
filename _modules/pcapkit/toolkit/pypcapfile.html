@@ -1153,6 +1153,24 @@
 <span class="sd">        they are there.</span>
 
 <span class="sd">    """</span>
+    <span class="n">walked</span> <span class="o">=</span> <span class="n">_walk_extension_headers</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">walked</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">walked</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_walk_extension_headers</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[tuple[int, bytes, int]]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Step over the headers :func:`_past_extension_headers` steps over, and count them.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        protocol: The IPv4 packet's protocol number.</span>
+<span class="sd">        data: Raw octets of its payload.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        What :func:`_past_extension_headers` returns, then how many headers it</span>
+<span class="sd">        stepped over, each of them one layer of the frame to the default engine</span>
+<span class="sd">        (c.f. :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT`); or</span>
+<span class="sd">        :data:`None` where it returns :data:`None`.</span>
+
+<span class="sd">    """</span>
     <span class="n">depth</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">while</span> <span class="n">protocol</span> <span class="ow">in</span> <span class="n">IPV4_EXTENSION_HEADERS</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">depth</span> <span class="o">==</span> <span class="n">EXTENSION_HEADER_LIMIT</span><span class="p">:</span>
@@ -1168,7 +1186,7 @@
         <span class="k">if</span> <span class="n">header</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="n">protocol</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">header</span><span class="p">[</span><span class="mi">1</span><span class="p">]:]</span>
-    <span class="k">return</span> <span class="n">protocol</span><span class="p">,</span> <span class="n">data</span>
+    <span class="k">return</span> <span class="n">protocol</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">depth</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_upper_layer</span><span class="p">(</span><span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[tuple[int, bytes]]'</span><span class="p">:</span>

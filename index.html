@@ -495,7 +495,8 @@
 construction and analysis.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>The whole project supports <strong>Python 3.6</strong> or later; CI covers 3.10 to 3.14, and 3.15 as an allowed-to-fail leg.</p>
+<p>The whole project declares <strong>Python 3.6</strong> or later. CI supports 3.11 to 3.15, and
+still tests the end-of-life 3.8 to 3.10 without letting a failure block anything.</p>
 </div>
 <div class="toctree-wrapper compound">
 </div>
@@ -825,8 +826,9 @@ applied, <code class="docutils literal notranslate"><span class="pre">walrus</sp
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>3.8 and 3.9 are end-of-life and best-effort. Individual <em>engines</em> also stop
-earlier than the library does; see <a class="reference internal" href="#engine-prerequisites">Engine prerequisites</a>.</p>
+<p>3.8, 3.9 and 3.10 are end-of-life and best-effort: CI builds and tests them,
+but a failure there blocks nothing. Individual <em>engines</em> also stop earlier than
+the library does; see <a class="reference internal" href="#engine-prerequisites">Engine prerequisites</a>.</p>
 </div>
 <p>Run the following to install the current version from PyPI:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>pypcapkit
