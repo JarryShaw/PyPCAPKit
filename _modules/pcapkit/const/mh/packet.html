@@ -497,76 +497,76 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">Packet</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[Packet] Mobility Header Types - for the MH Type field in the Mobility Header"""</span>
 
-    <span class="c1">#: Binding Refresh Request [:rfc:`6275`]</span>
+    <span class="c1">#: Binding Refresh Request [RFC 6275]</span>
     <span class="n">Binding_Refresh_Request</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="c1">#: Home Test Init [:rfc:`6275`]</span>
+    <span class="c1">#: Home Test Init [RFC 6275]</span>
     <span class="n">Home_Test_Init</span> <span class="o">=</span> <span class="mi">1</span>
 
-    <span class="c1">#: Care-of Test Init [:rfc:`6275`]</span>
+    <span class="c1">#: Care-of Test Init [RFC 6275]</span>
     <span class="n">Care_of_Test_Init</span> <span class="o">=</span> <span class="mi">2</span>
 
-    <span class="c1">#: Home Test [:rfc:`6275`]</span>
+    <span class="c1">#: Home Test [RFC 6275]</span>
     <span class="n">Home_Test</span> <span class="o">=</span> <span class="mi">3</span>
 
-    <span class="c1">#: Care-of Test [:rfc:`6275`]</span>
+    <span class="c1">#: Care-of Test [RFC 6275]</span>
     <span class="n">Care_of_Test</span> <span class="o">=</span> <span class="mi">4</span>
 
-    <span class="c1">#: Binding Update [:rfc:`6275`]</span>
+    <span class="c1">#: Binding Update [RFC 6275]</span>
     <span class="n">Binding_Update</span> <span class="o">=</span> <span class="mi">5</span>
 
-    <span class="c1">#: Binding Acknowledgement [:rfc:`6275`]</span>
+    <span class="c1">#: Binding Acknowledgement [RFC 6275]</span>
     <span class="n">Binding_Acknowledgement</span> <span class="o">=</span> <span class="mi">6</span>
 
-    <span class="c1">#: Binding Error [:rfc:`6275`]</span>
+    <span class="c1">#: Binding Error [RFC 6275]</span>
     <span class="n">Binding_Error</span> <span class="o">=</span> <span class="mi">7</span>
 
-    <span class="c1">#: Fast Binding Update [:rfc:`5568`]</span>
+    <span class="c1">#: Fast Binding Update [RFC 5568]</span>
     <span class="n">Fast_Binding_Update</span> <span class="o">=</span> <span class="mi">8</span>
 
-    <span class="c1">#: Fast Binding Acknowledgment [:rfc:`5568`]</span>
+    <span class="c1">#: Fast Binding Acknowledgment [RFC 5568]</span>
     <span class="n">Fast_Binding_Acknowledgment</span> <span class="o">=</span> <span class="mi">9</span>
 
-    <span class="c1">#: Fast Neighbor Advertisement (Deprecated) [:rfc:`5568`]</span>
+    <span class="c1">#: Fast Neighbor Advertisement (Deprecated) [RFC 5568]</span>
     <span class="n">Fast_Neighbor_Advertisement</span> <span class="o">=</span> <span class="mi">10</span>
 
-    <span class="c1">#: Experimental Mobility Header [:rfc:`5096`]</span>
+    <span class="c1">#: Experimental Mobility Header [RFC 5096]</span>
     <span class="n">Experimental_Mobility_Header</span> <span class="o">=</span> <span class="mi">11</span>
 
-    <span class="c1">#: Home Agent Switch Message [:rfc:`5142`]</span>
+    <span class="c1">#: Home Agent Switch Message [RFC 5142]</span>
     <span class="n">Home_Agent_Switch_Message</span> <span class="o">=</span> <span class="mi">12</span>
 
-    <span class="c1">#: Heartbeat Message [:rfc:`5847`]</span>
+    <span class="c1">#: Heartbeat Message [RFC 5847]</span>
     <span class="n">Heartbeat_Message</span> <span class="o">=</span> <span class="mi">13</span>
 
-    <span class="c1">#: Handover Initiate Message [:rfc:`5568`]</span>
+    <span class="c1">#: Handover Initiate Message [RFC 5568]</span>
     <span class="n">Handover_Initiate_Message</span> <span class="o">=</span> <span class="mi">14</span>
 
-    <span class="c1">#: Handover Acknowledge Message [:rfc:`5568`]</span>
+    <span class="c1">#: Handover Acknowledge Message [RFC 5568]</span>
     <span class="n">Handover_Acknowledge_Message</span> <span class="o">=</span> <span class="mi">15</span>
 
-    <span class="c1">#: Binding Revocation Message [:rfc:`5846`]</span>
+    <span class="c1">#: Binding Revocation Message [RFC 5846]</span>
     <span class="n">Binding_Revocation_Message</span> <span class="o">=</span> <span class="mi">16</span>
 
-    <span class="c1">#: Localized Routing Initiation [:rfc:`6705`]</span>
+    <span class="c1">#: Localized Routing Initiation [RFC 6705]</span>
     <span class="n">Localized_Routing_Initiation</span> <span class="o">=</span> <span class="mi">17</span>
 
-    <span class="c1">#: Localized Routing Acknowledgment [:rfc:`6705`]</span>
+    <span class="c1">#: Localized Routing Acknowledgment [RFC 6705]</span>
     <span class="n">Localized_Routing_Acknowledgment</span> <span class="o">=</span> <span class="mi">18</span>
 
-    <span class="c1">#: Update Notification [:rfc:`7077`]</span>
+    <span class="c1">#: Update Notification [RFC 7077]</span>
     <span class="n">Update_Notification</span> <span class="o">=</span> <span class="mi">19</span>
 
-    <span class="c1">#: Update Notification Acknowledgement [:rfc:`7077`]</span>
+    <span class="c1">#: Update Notification Acknowledgement [RFC 7077]</span>
     <span class="n">Update_Notification_Acknowledgement</span> <span class="o">=</span> <span class="mi">20</span>
 
-    <span class="c1">#: Flow Binding Message [:rfc:`7109`]</span>
+    <span class="c1">#: Flow Binding Message [RFC 7109]</span>
     <span class="n">Flow_Binding_Message</span> <span class="o">=</span> <span class="mi">21</span>
 
-    <span class="c1">#: Subscription Query [:rfc:`7161`]</span>
+    <span class="c1">#: Subscription Query [RFC 7161]</span>
     <span class="n">Subscription_Query</span> <span class="o">=</span> <span class="mi">22</span>
 
-    <span class="c1">#: Subscription Response [:rfc:`7161`]</span>
+    <span class="c1">#: Subscription Response [RFC 7161]</span>
     <span class="n">Subscription_Response</span> <span class="o">=</span> <span class="mi">23</span>
 
 <div class="viewcode-block" id="Packet._missing_">
@@ -616,7 +616,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=812495b5"></script>
+</div><script src="../../../../_static/documentation_options.js?v=a1950f5e"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

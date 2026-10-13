@@ -497,35 +497,35 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">RegistrationFailure</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[RegistrationFailure] Registration Failure Types"""</span>
 
-    <span class="c1">#: Registration requires additional credentials [:rfc:`8003`]</span>
+    <span class="c1">#: Registration requires additional credentials [RFC 8003]</span>
     <span class="n">Registration_requires_additional_credentials</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="c1">#: Registration type unavailable [:rfc:`8003`]</span>
+    <span class="c1">#: Registration type unavailable [RFC 8003]</span>
     <span class="n">Registration_type_unavailable</span> <span class="o">=</span> <span class="mi">1</span>
 
-    <span class="c1">#: Insufficient resources [:rfc:`8003`]</span>
+    <span class="c1">#: Insufficient resources [RFC 8003]</span>
     <span class="n">Insufficient_resources</span> <span class="o">=</span> <span class="mi">2</span>
 
-    <span class="c1">#: Invalid certificate [:rfc:`8003`]</span>
+    <span class="c1">#: Invalid certificate [RFC 8003]</span>
     <span class="n">Invalid_certificate</span> <span class="o">=</span> <span class="mi">3</span>
 
-    <span class="c1">#: Bad certificate [:rfc:`8003`]</span>
+    <span class="c1">#: Bad certificate [RFC 8003]</span>
     <span class="n">Bad_certificate</span> <span class="o">=</span> <span class="mi">4</span>
 
-    <span class="c1">#: Unsupported certificate [:rfc:`8003`]</span>
+    <span class="c1">#: Unsupported certificate [RFC 8003]</span>
     <span class="n">Unsupported_certificate</span> <span class="o">=</span> <span class="mi">5</span>
 
-    <span class="c1">#: Certificate expired [:rfc:`8003`]</span>
+    <span class="c1">#: Certificate expired [RFC 8003]</span>
     <span class="n">Certificate_expired</span> <span class="o">=</span> <span class="mi">6</span>
 
-    <span class="c1">#: Certificate other [:rfc:`8003`]</span>
+    <span class="c1">#: Certificate other [RFC 8003]</span>
     <span class="n">Certificate_other</span> <span class="o">=</span> <span class="mi">7</span>
 
-    <span class="c1">#: Unknown CA [:rfc:`8003`]</span>
+    <span class="c1">#: Unknown CA [RFC 8003]</span>
     <span class="n">Unknown_CA</span> <span class="o">=</span> <span class="mi">8</span>
 
-    <span class="c1">#: Simultaneous Rendezvous and Control Relay Service usage prohibited</span>
-    <span class="c1">#: [:rfc:`9028`]</span>
+    <span class="c1">#: Simultaneous Rendezvous and Control Relay Service usage prohibited [RFC</span>
+    <span class="c1">#: 9028]</span>
     <span class="n">Simultaneous_Rendezvous_and_Control_Relay_Service_usage_prohibited</span> <span class="o">=</span> <span class="mi">9</span>
 
 <div class="viewcode-block" id="RegistrationFailure._missing_">
@@ -544,7 +544,7 @@
             <span class="c1">#: Unassigned</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'Unassigned'</span><span class="p">)</span>
         <span class="k">if</span> <span class="mi">201</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">255</span><span class="p">:</span>
-            <span class="c1">#: Reserved for Private Use [:rfc:`8003`]</span>
+            <span class="c1">#: Reserved for Private Use [RFC 8003]</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'Reserved_for_Private_Use'</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_missing_</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 </div>
@@ -581,7 +581,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=812495b5"></script>
+</div><script src="../../../../_static/documentation_options.js?v=a1950f5e"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>
