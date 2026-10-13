@@ -20,35 +20,35 @@ __all__ = ['RegistrationFailure']
 class RegistrationFailure(EnumRegistry, IntEnum):
     """[RegistrationFailure] Registration Failure Types"""
 
-    #: Registration requires additional credentials [RFC 8003]
+    #: Registration requires additional credentials [:rfc:`8003`]
     Registration_requires_additional_credentials = 0
 
-    #: Registration type unavailable [RFC 8003]
+    #: Registration type unavailable [:rfc:`8003`]
     Registration_type_unavailable = 1
 
-    #: Insufficient resources [RFC 8003]
+    #: Insufficient resources [:rfc:`8003`]
     Insufficient_resources = 2
 
-    #: Invalid certificate [RFC 8003]
+    #: Invalid certificate [:rfc:`8003`]
     Invalid_certificate = 3
 
-    #: Bad certificate [RFC 8003]
+    #: Bad certificate [:rfc:`8003`]
     Bad_certificate = 4
 
-    #: Unsupported certificate [RFC 8003]
+    #: Unsupported certificate [:rfc:`8003`]
     Unsupported_certificate = 5
 
-    #: Certificate expired [RFC 8003]
+    #: Certificate expired [:rfc:`8003`]
     Certificate_expired = 6
 
-    #: Certificate other [RFC 8003]
+    #: Certificate other [:rfc:`8003`]
     Certificate_other = 7
 
-    #: Unknown CA [RFC 8003]
+    #: Unknown CA [:rfc:`8003`]
     Unknown_CA = 8
 
-    #: Simultaneous Rendezvous and Control Relay Service usage prohibited [RFC
-    #: 9028]
+    #: Simultaneous Rendezvous and Control Relay Service usage prohibited
+    #: [:rfc:`9028`]
     Simultaneous_Rendezvous_and_Control_Relay_Service_usage_prohibited = 9
 
     @classmethod
@@ -65,6 +65,6 @@ class RegistrationFailure(EnumRegistry, IntEnum):
             #: Unassigned
             return cls._unregistered_member(value, 'Unassigned')
         if 201 <= value <= 255:
-            #: Reserved for Private Use [RFC 8003]
+            #: Reserved for Private Use [:rfc:`8003`]
             return cls._unregistered_member(value, 'Reserved_for_Private_Use')
         return super()._missing_(value)

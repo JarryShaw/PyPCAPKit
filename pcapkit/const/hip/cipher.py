@@ -20,19 +20,19 @@ __all__ = ['Cipher']
 class Cipher(EnumRegistry, IntEnum):
     """[Cipher] Cipher IDs"""
 
-    #: RESERVED [RFC 7401]
+    #: RESERVED [:rfc:`7401`]
     RESERVED_0 = 0
 
-    #: NULL-ENCRYPT [RFC 7401]
+    #: NULL-ENCRYPT [:rfc:`7401`]
     NULL_ENCRYPT = 1
 
-    #: AES-128-CBC [RFC 7401]
+    #: AES-128-CBC [:rfc:`7401`]
     AES_128_CBC = 2
 
-    #: RESERVED [RFC 7401]
+    #: RESERVED [:rfc:`7401`]
     RESERVED_3 = 3
 
-    #: AES-256-CBC [RFC 7401]
+    #: AES-256-CBC [:rfc:`7401`]
     AES_256_CBC = 4
 
     @classmethod

@@ -20,40 +20,40 @@ __all__ = ['BindingUpdateFlag']
 class BindingUpdateFlag(EnumRegistry, IntFlag):
     """[BindingUpdateFlag] Binding Update Flags"""
 
-    #: A [RFC 6275]
+    #: A [:rfc:`6275`]
     A = 0x8000
 
-    #: H [RFC 6275]
+    #: H [:rfc:`6275`]
     H = 0x4000
 
-    #: L [RFC 6275]
+    #: L [:rfc:`6275`]
     L = 0x2000
 
-    #: K [RFC 6275]
+    #: K [:rfc:`6275`]
     K = 0x1000
 
-    #: M [RFC 4140]
+    #: M [:rfc:`4140`]
     M = 0x0800
 
-    #: R [RFC 3963]
+    #: R [:rfc:`3963`]
     R = 0x0400
 
-    #: P [RFC 5213]
+    #: P [:rfc:`5213`]
     P = 0x0200
 
-    #: F [RFC 5555]
+    #: F [:rfc:`5555`]
     F = 0x0100
 
-    #: T [RFC 5845]
+    #: T [:rfc:`5845`]
     T = 0x0080
 
-    #: B [RFC 6602]
+    #: B [:rfc:`6602`]
     B = 0x0040
 
-    #: S [RFC 7161]
+    #: S [:rfc:`7161`]
     S = 0x0020
 
-    #: D [RFC 8885]
+    #: D [:rfc:`8885`]
     D = 0x0010
 
     @classmethod
