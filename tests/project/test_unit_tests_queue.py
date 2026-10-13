@@ -394,7 +394,7 @@ class TestClassifierAgainstARealMerge(_Scratch):
 class TestEngineCellLoops(_Scratch):
     """The two cell-loop steps of ``engine-tests``, with the cell script stubbed."""
 
-    #: Each loop step, and the output of .github/python-versions.json it loops over (#1660).
+    #: Each loop step, and the output of .github/python-versions.toml it loops over (#1660).
     LOOPS = {'Run the supported cells': 'engine-supported', 'Run the KTLO cells (non-blocking)': 'engine-ktlo'}
 
     def run_loop(self, name: 'str', fail: 'str') -> 'tuple[int, list[str]]':
@@ -654,8 +654,8 @@ BARE_ELSEWHERE: 'dict[str, dict[str, str]]' = {
     'docs/source/contributing/workflows.rst': {
         '60': '.github/workflows/python-compatibility.yml',
         '74': '.github/workflows/python-compatibility.yml',
-        '10-14': '.github/python-versions.json',
-        '6-9': '.github/python-versions.json',
+        '20-24': '.github/python-versions.toml',
+        '16-19': '.github/python-versions.toml',
     },
 }
 

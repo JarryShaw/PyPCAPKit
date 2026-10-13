@@ -31,7 +31,7 @@ import pcapkit: the ``test`` extra's ``pytest>=8`` needs 3.8, and the sources us
 annotation is parsed as the runner parses it. 3.6 stays out: setup-python builds
 it only for retired images.
 
-Since #1660 the tiers are declared once, in :file:`.github/python-versions.json`,
+Since #1660 the tiers are declared once, in :file:`.github/python-versions.toml`,
 and every matrix is read from it, so the expectations below are read from it
 too: what is pinned here is that each tier keeps its mechanics wherever the file
 puts a version. :mod:`tests.project.test_python_versions_1660` pins that the file
@@ -62,7 +62,7 @@ if TYPE_CHECKING:
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 WORKFLOWS = ROOT / '.github' / 'workflows'
 
-#: The tiers, from .github/python-versions.json (#1660); empty if it is missing.
+#: The tiers, from .github/python-versions.toml (#1660); empty if it is missing.
 try:
     TIERS = versions_script().load()
 except AssertionError:  # pragma: no cover

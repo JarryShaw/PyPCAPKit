@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""#1660: the Python version tiers are declared once, in :file:`.github/python-versions.json`.
+"""#1660: the Python version tiers are declared once, in :file:`.github/python-versions.toml`.
 
 Before #1660 every matrix spelt its versions out, so a tier change -- 3.11
 reaching end-of-life, a new pre-release -- meant editing some 27 files by hand.
@@ -9,7 +9,8 @@ step outputs. Four things are pinned here:
 
 * **The file and the script.** :func:`python_versions.load` rejects a malformed
   file, ``latest`` is the newest supported CPython (the owner's ruling on
-  #1661), and the script parses as the runners' own ``python3`` would read it.
+  #1661), each exemption's reason is the comment above it, and the script runs
+  on the ``python3`` of every runner that runs it.
 * **Nothing moved.** The tiers as this change introduced them expand to exactly
   the legs, in the same order, that ``main`` spelt out at :data:`MAIN`, apart
   from the one deliberate move: the coverage leg and the ``gate`` from 3.14 to
@@ -28,6 +29,13 @@ step outputs. Four things are pinned here:
   docs' version lists, the bug-report template, and the comments and docs
   naming the coverage leg's version or the release checks' counts.
 
+The script reads the file with :mod:`tomllib`, in the standard library from 3.11,
+so every test that reads it skips on the KTLO interpreters, 3.8-3.10 -- the
+:mod:`tests.project.test_python_matrix_tiers_1633` and
+:mod:`tests.project.test_ktlo_legs_stay_green_1672` modules and
+:mod:`tests.project.test_ci_timing` whole, since they read it on import. What
+they check is the repository's files, which read the same on any interpreter.
+
 """
 
 from __future__ import annotations
@@ -44,9 +52,15 @@ import shutil
 import subprocess  # nosec B404
 import sys
 import tempfile
+import textwrap
 import unittest
 from typing import TYPE_CHECKING
 from unittest import mock
+
+try:
+    import tomllib
+except ImportError:  # Python 3.10 and older
+    tomllib = None  # type: ignore[assignment]
 
 try:
     import yaml
@@ -59,8 +73,11 @@ if TYPE_CHECKING:
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 WORKFLOWS = ROOT / '.github' / 'workflows'
 SCRIPT = ROOT / 'util' / 'python_versions.py'
+TIER_FILE = ROOT / '.github' / 'python-versions.toml'
 #: How every workflow runs the script.
 SCRIPT_STEP = 'python3 util/python_versions.py --github-output'
+#: Why a test that reads the tier file skips where :mod:`tomllib` is missing.
+NO_TOMLLIB = 'tomllib, which reads .github/python-versions.toml, needs Python 3.11+'
 
 
 def load_script() -> 'Any':
@@ -72,14 +89,18 @@ def load_script() -> 'Any':
     return module
 
 
-#: Loaded once, so a missing script fails each test rather than the import.
+#: Loaded once, so a missing script fails each test rather than the import. It
+#: imports tomllib, so it is not loaded at all without one.
 try:
-    python_versions = load_script()
+    python_versions = None if tomllib is None else load_script()
 except FileNotFoundError:  # pragma: no cover
     python_versions = None
 
 
 def script() -> 'Any':
+    """The script; a test that needs it skips without :mod:`tomllib`, as on 3.8-3.10."""
+    if tomllib is None:
+        raise unittest.SkipTest(NO_TOMLLIB)
     if python_versions is None:
         raise AssertionError(f'{SCRIPT.relative_to(ROOT)} is missing')
     return python_versions
@@ -263,10 +284,34 @@ def render(template: 'str', leg: 'dict[str, Any]') -> 'str':
     return name
 
 
+def toml(value: 'Any') -> 'str':
+    """``value`` as a TOML value, every table inline; JSON's string escapes are TOML's."""
+    if isinstance(value, bool):
+        return 'true' if value else 'false'
+    if isinstance(value, str):
+        return json.dumps(value)
+    if isinstance(value, dict):
+        return '{%s}' % ', '.join(f'{json.dumps(key)} = {toml(item)}' for key, item in value.items())
+    if isinstance(value, list):
+        return '[%s]' % ', '.join(map(toml, value))
+    raise TypeError(f'no TOML for {value!r}')
+
+
 def write_tiers(directory: 'pathlib.Path', data: 'dict[str, Any]') -> 'pathlib.Path':
-    path = directory / 'python-versions.json'
-    path.write_text(json.dumps(data), encoding='utf-8')
+    """``data`` written as a tier file, one top-level key per line."""
+    path = directory / 'python-versions.toml'
+    path.write_text(''.join(f'{json.dumps(key)} = {toml(value)}\n' for key, value in data.items()), encoding='utf-8')
     return path
+
+
+#: :mod:`tomllib` is in the standard library from this version.
+TOMLLIB_FLOOR = (3, 11)
+#: The ``python3`` each runner label a job runs the script on puts on ``PATH``, every
+#: image it may mean: actions/runner-images at 2c421200c (2026-10-12), "Language and
+#: Runtime" in images/ubuntu/Ubuntu2404-Readme.md:28 (``ubuntu-latest`` today),
+#: Ubuntu2604-Readme.md:27 (from 2026-10-19) and images/macos/macos-26-arm64-Readme.md:28
+#: (``macos-latest``). Ubuntu2204-Readme.md:30's is 3.10.12, which has no tomllib.
+RUNNER_PYTHON3 = {'ubuntu-latest': ((3, 12), (3, 14)), 'macos-latest': ((3, 14),)}
 
 
 class TestTheFileAndTheScript(unittest.TestCase):
@@ -284,6 +329,23 @@ class TestTheFileAndTheScript(unittest.TestCase):
         self.assertEqual(data['latest'], max(supported, key=script().key))
         self.assertTrue(supported and script().tier(data, 'pypy', 'supported'))
 
+    def test_the_file_is_toml_and_the_json_is_gone(self) -> None:
+        """The owner asked for a format with comments (#1677); TOML is the repo's config format."""
+        self.assertEqual(script().FILE, TIER_FILE)
+        self.assertEqual(tomllib.loads(TIER_FILE.read_text(encoding='utf-8')), script().load())
+        self.assertFalse((ROOT / '.github' / 'python-versions.json').exists())
+        self.assertEqual(tomllib.loads(write_tiers(self.tmp, TIERS_AT_MAIN).read_text(encoding='utf-8')),
+                         TIERS_AT_MAIN)
+
+    def test_each_exemption_says_why_in_a_comment(self) -> None:
+        """tomllib drops comments, so the file's text is read: a comment heads each exemption."""
+        lines = TIER_FILE.read_text(encoding='utf-8').splitlines()
+        headers = [index for index, line in enumerate(lines) if line.strip() == '[[exemptions]]']
+        self.assertEqual(len(headers), len(script().load()['exemptions']))
+        for index in headers:
+            with self.subTest(line=index + 1):
+                self.assertTrue(index and lines[index - 1].startswith('# '), 'say why above the exemption')
+
     def test_a_malformed_file_is_refused_with_its_reason(self) -> None:
         cpython = TIERS_AT_MAIN['versions']['cpython']
         cases = {
@@ -299,14 +361,23 @@ class TestTheFileAndTheScript(unittest.TestCase):
                 data = dict(TIERS_AT_MAIN, versions=dict(TIERS_AT_MAIN['versions'], cpython=versions))
                 with self.assertRaises(ValueError):
                     script().load(write_tiers(self.tmp, data))
+        exemption = {'workflow': 'lint.yml', 'job': 'lint', 'where': 'x', 'value': '3.14'}
+        self.assertEqual(script().load(write_tiers(self.tmp, dict(TIERS_AT_MAIN, exemptions=[exemption])))[
+            'exemptions'], [exemption])
         for label, data in (('latest is not supported', dict(TIERS_AT_MAIN, latest='3.10')),
-                            ('an exemption has no reason', dict(TIERS_AT_MAIN, exemptions=[
-                                {'workflow': 'lint.yml', 'job': 'lint', 'where': 'x', 'value': '3.14', 'reason': ''}])),
+                            ('an exemption has no value', dict(TIERS_AT_MAIN, exemptions=[
+                                dict(exemption, value='')])),
+                            ('a reason is a comment, not a field', dict(TIERS_AT_MAIN, exemptions=[
+                                dict(exemption, reason='why')])),
                             ('an unknown top-level key', dict(TIERS_AT_MAIN, matrices={})),
                             ('no PyPy', dict(TIERS_AT_MAIN, versions={'cpython': cpython})),
                             ('PyPy lists nothing', dict(TIERS_AT_MAIN, versions={'cpython': cpython, 'pypy': {}}))):
             with self.subTest(case=label), self.assertRaises(ValueError):
                 script().load(write_tiers(self.tmp, data))
+        invalid = self.tmp / 'invalid.toml'
+        invalid.write_text('latest = 3.15\nlatest = "3.15"\n', encoding='utf-8')
+        with self.subTest(case='not TOML'), self.assertRaises(ValueError):
+            script().load(invalid)
 
     def test_a_supported_version_on_an_older_runner_is_refused(self) -> None:
         """A job pinned to ``ubuntu-latest`` would otherwise stop testing it without a word."""
@@ -369,16 +440,88 @@ class TestTheFileAndTheScript(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(self.parse_github_output(output.read_text(encoding='utf-8')), live_outputs())
 
-    def test_the_script_parses_as_python_38(self) -> None:
-        """Runners run it with their own ``python3``; 3.8 is older than any image's."""
-        ast.parse(SCRIPT.read_text(encoding='utf-8'), feature_version=(3, 8))
+    def test_the_script_runs_on_every_runners_own_python3(self) -> None:
+        """Standard library only, tomllib's 3.11 the floor, and each image that runs it newer.
+
+        Each job running :data:`SCRIPT_STEP` does so before any setup-python step,
+        so on the image's ``python3``: :data:`RUNNER_PYTHON3`.
+
+        """
+        ast.parse(SCRIPT.read_text(encoding='utf-8'), feature_version=TOMLLIB_FLOOR)
         tree = ast.parse(SCRIPT.read_text(encoding='utf-8'))
         imported = {alias.name.split('.')[0] for node in ast.walk(tree) if isinstance(node, ast.Import)
                     for alias in node.names}
         imported |= {node.module.split('.')[0] for node in ast.walk(tree)
                      if isinstance(node, ast.ImportFrom) and node.module and not node.level}
         self.assertLessEqual(imported, {'__future__', 'argparse', 'json', 'os', 'pathlib', 're', 'sys',
-                                        'typing', 'uuid'})
+                                        'tomllib', 'typing', 'uuid'})
+        self.assertIn('tomllib', imported)
+        found = 0
+        for name, spec in workflows():
+            for job_id, job in spec.get('jobs', {}).items():
+                steps = job.get('steps', [])
+                runs = [i for i, step in enumerate(steps) if str(step.get('run', '')).strip() == SCRIPT_STEP]
+                for index in runs:
+                    found += 1
+                    with self.subTest(workflow=name, job=job_id):
+                        self.assertEqual(setups({'steps': steps[:index]}), [])
+                        self.assertIn(job.get('runs-on'), RUNNER_PYTHON3)
+                        self.assertGreaterEqual(min(RUNNER_PYTHON3[job['runs-on']]), TOMLLIB_FLOOR)
+        self.assertGreaterEqual(found, 10)
+
+    def test_without_tomllib_the_tests_that_read_the_file_skip(self) -> None:
+        """On 3.8-3.10 these modules skip, or their tests do, rather than fail to import.
+
+        Run in a fresh interpreter whose ``import tomllib`` fails, as it does there,
+        where the two scripts that read the file cannot load at all.
+
+        """
+        probe = textwrap.dedent('''\
+            import importlib, importlib.util, json, sys, unittest
+            class NoTomllib:
+                def find_spec(self, name, path=None, target=None):
+                    if name == 'tomllib':
+                        raise ImportError('No module named tomllib')
+            assert 'tomllib' not in sys.modules
+            sys.meta_path.insert(0, NoTomllib())
+            found = {}
+            for name in sys.argv[1:]:
+                try:
+                    importlib.import_module(name)
+                    found[name] = 'imported'
+                except unittest.SkipTest as error:
+                    found[name] = f'skipped: {error}'
+            try:
+                importlib.import_module(sys.argv[1]).script()
+            except unittest.SkipTest as error:
+                found['script()'] = f'skipped: {error}'
+            for path in ('util/python_versions.py', 'util/ci_timing.py'):
+                spec = importlib.util.spec_from_file_location(path, path)
+                try:
+                    spec.loader.exec_module(importlib.util.module_from_spec(spec))
+                    found[path] = 'loaded'
+                except ImportError as error:
+                    found[path] = f'{type(error).__name__}: {error}'
+            print(json.dumps(found))
+        ''')
+        modules = ['tests.project.test_python_versions_1660', 'tests.project.test_python_matrix_tiers_1633',
+                   'tests.project.test_ktlo_legs_stay_green_1672', 'tests.project.test_ci_timing',
+                   'tests.project.test_unit_tests_queue', 'tests.project.test_workflow_apt_cache']
+        result = subprocess.run([sys.executable, '-c', probe, *modules], cwd=ROOT, capture_output=True,
+                                text=True, check=False, timeout=120)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        skipped = f'skipped: {NO_TOMLLIB}'
+        self.assertEqual(json.loads(result.stdout.splitlines()[-1]), {
+            'tests.project.test_python_versions_1660': 'imported',
+            'tests.project.test_python_matrix_tiers_1633': skipped,
+            'tests.project.test_ktlo_legs_stay_green_1672': skipped,
+            'tests.project.test_ci_timing': skipped,
+            'tests.project.test_unit_tests_queue': 'imported',
+            'tests.project.test_workflow_apt_cache': 'imported',
+            'script()': skipped,
+            'util/python_versions.py': 'ImportError: No module named tomllib',
+            'util/ci_timing.py': 'ImportError: No module named tomllib',
+        })
 
 
 class TestNothingMovedButLatest(unittest.TestCase):
@@ -611,7 +754,7 @@ class TestEveryVersionComesFromTheFile(unittest.TestCase):
                 checkout = job['steps'][0]
                 self.assertTrue(checkout['uses'].startswith('actions/checkout@'))
                 self.assertEqual(checkout['with']['sparse-checkout'].split(),
-                                 ['.github/python-versions.json', 'util/python_versions.py'])
+                                 ['.github/python-versions.toml', 'util/python_versions.py'])
                 self.assertIs(checkout['with']['sparse-checkout-cone-mode'], False)
                 self.assertEqual(job['steps'][1]['run'].strip(), SCRIPT_STEP)
                 self.assertNotIn('if', job)
@@ -721,6 +864,23 @@ class TestTheProseFollowsTheFile(unittest.TestCase):
         self.assertEqual(re.findall(r'and (\w+) for `Compat Python (3\.\d+)`-`(3\.\d+)`', comment),
                          [(['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven'][len(self.supported)],
                            self.supported[0], self.supported[-1])])
+
+    def test_the_workflows_page_cites_each_version_on_its_line(self) -> None:
+        """The required contexts' rows, and the two tiers' spans under them, cite the file by line."""
+        lines = TIER_FILE.read_text(encoding='utf-8').splitlines()
+        page = prose(ROOT / 'docs' / 'source' / 'contributing' / 'workflows.rst')
+        rows = re.findall(r'``Compat Python (3\.\d+)`` .*? ``\.github/python-versions\.toml:(\d+)``', page)
+        self.assertEqual([version for version, _ in rows], self.supported)
+        for version, line in rows:
+            with self.subTest(version=version):
+                self.assertTrue(lines[int(line) - 1].startswith(f'"{version}" = '), lines[int(line) - 1])
+        for label, versions in (('supported tier', self.supported), ('KTLO legs', self.ktlo)):
+            spans = re.findall(rf'its (?:\w+ )?{label} \(``:(\d+)-(\d+)``\)', page)
+            with self.subTest(tier=label):
+                self.assertEqual(len(spans), 1, spans)
+                first, last = map(int, spans[0])
+                self.assertEqual([line.split(' = ', 1)[0] for line in lines[first - 1:last]],
+                                 [f'"{version}"' for version in versions])
 
     def test_the_bug_report_template_offers_supported_versions(self) -> None:
         text = (ROOT / '.github' / 'ISSUE_TEMPLATE' / 'bug_report.md').read_text(encoding='utf-8')

@@ -135,7 +135,7 @@ jobs:
           # question (#1643).
           persist-credentials: false
 
-      # #1660: `latest` from .github/python-versions.json, read with the
+      # #1660: `latest` from .github/python-versions.toml, read with the
       # runner's own python3.
       - name: Read the Python versions
         id: python-versions

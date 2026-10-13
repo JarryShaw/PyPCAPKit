@@ -146,7 +146,7 @@ jobs:
           # live credential for anything running in between to find.
           persist-credentials: false
 
-      # #1660: `latest` from .github/python-versions.json, read with the
+      # #1660: `latest` from .github/python-versions.toml, read with the
       # runner's own python3.
       - name: Read the Python versions
         id: python-versions

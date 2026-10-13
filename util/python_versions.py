@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
-"""The Python version tiers in :file:`.github/python-versions.json`, as the workflows read them (#1660).
+"""The Python version tiers in :file:`.github/python-versions.toml`, as the workflows read them (#1660).
 
 Every workflow matrix that runs Python legs, and the version of every job that
 runs on one interpreter, comes from that file through this script. A workflow
-runs it with the runner's own ``python3`` -- so it is standard library only and
-parses on 3.8 -- as ``python3 util/python_versions.py --github-output``, which
-appends one step output per name below to ``$GITHUB_OUTPUT``:
+runs it with the runner's own ``python3``, before any setup-python step, as
+``python3 util/python_versions.py --github-output``, which appends one step
+output per name below to ``$GITHUB_OUTPUT``. So it is standard library only:
+:mod:`tomllib` needs 3.11, and each image it runs on has a newer ``python3`` --
+3.12.3 on ``ubuntu-latest`` (24.04), 3.14.4 on 26.04, which that label moves to
+from 2026-10-19, and 3.14.7 on ``macos-latest`` (macOS 26 arm64), per
+actions/runner-images' READMEs at 2c421200c.
 
 ``latest``
     The newest supported CPython, for the single-interpreter jobs.
@@ -43,6 +47,7 @@ import os
 import pathlib
 import re
 import sys
+import tomllib
 import uuid
 from typing import TYPE_CHECKING
 
@@ -50,7 +55,7 @@ if TYPE_CHECKING:
     from typing import Any, Callable, Optional
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-FILE = ROOT / '.github' / 'python-versions.json'
+FILE = ROOT / '.github' / 'python-versions.toml'
 
 #: Each implementation, and how its versions are spelled.
 SPELLING = {'cpython': re.compile(r'3\.(\d+)'), 'pypy': re.compile(r'pypy3\.(\d+)')}
@@ -75,16 +80,18 @@ def key(version: 'str') -> 'tuple[int, int]':
 def load(path: 'pathlib.Path' = FILE) -> 'dict[str, Any]':
     """The tier file, validated.
 
-    Raises :exc:`ValueError` naming the first problem: an unknown key or tier, a
-    misspelt version or runner, a ``latest`` that is not a supported CPython, an
-    exemption missing a field, or a pre-release entry -- no workflow has the
-    non-blocking pre-release legs one needs (``allow-prereleases``, a name of its
-    own) yet, so listing one fails here instead of running it as something else.
+    Raises :exc:`ValueError` naming the first problem: invalid TOML, an unknown
+    key or tier, a misspelt version or runner, a ``latest`` that is not a
+    supported CPython, an exemption missing a field, or a pre-release entry -- no
+    workflow has the non-blocking pre-release legs one needs
+    (``allow-prereleases``, a name of its own) yet, so listing one fails here
+    instead of running it as something else. An exemption's reason is the
+    comment above it, which :mod:`tomllib` does not keep.
 
     """
-    data = json.loads(pathlib.Path(path).read_text(encoding='utf-8'))
-    if not isinstance(data, dict) or set(data) - {'//', 'latest', 'versions', 'exemptions'}:
-        raise ValueError('the top level holds only "//", "latest", "versions" and "exemptions"')
+    data = tomllib.loads(pathlib.Path(path).read_text(encoding='utf-8'))
+    if set(data) - {'latest', 'versions', 'exemptions'}:
+        raise ValueError('the top level holds only "latest", "versions" and "exemptions"')
     versions = data.get('versions')
     if not isinstance(versions, dict) or set(versions) != set(SPELLING):
         raise ValueError(f'"versions" maps exactly {sorted(SPELLING)} to their versions')
@@ -109,7 +116,7 @@ def load(path: 'pathlib.Path' = FILE) -> 'dict[str, Any]':
     if data.get('latest') not in tier(data, 'cpython', 'supported'):
         raise ValueError(f'latest {data.get("latest")!r} is not a supported CPython version')
     for index, exemption in enumerate(data.get('exemptions', [])):
-        fields = ('workflow', 'job', 'where', 'value', 'reason')
+        fields = ('workflow', 'job', 'where', 'value')
         if (not isinstance(exemption, dict) or set(exemption) != set(fields)
                 or not all(isinstance(exemption[name], str) and exemption[name] for name in fields)):
             raise ValueError(f'exemption {index}: give each of {fields}, as a non-empty string')
@@ -234,7 +241,7 @@ def main(argv: 'Optional[list[str]]' = None) -> 'int':
         unknown = sorted(set(args.names) - set(values))
         if unknown:
             raise ValueError(f'no output named {", ".join(unknown)}; there are {", ".join(values)}')
-    except (OSError, ValueError) as error:  # json.JSONDecodeError is a ValueError
+    except (OSError, ValueError) as error:  # tomllib.TOMLDecodeError is a ValueError
         message = str(error).replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
         print(f'::error title=Cannot read the Python version tiers::{args.file}: {message}')
         return 1

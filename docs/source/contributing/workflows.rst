@@ -285,7 +285,7 @@ and ``project-tests``, and ``required-checks`` (see `Required Status
 Checks`_ below), gated out by their own ``if:`` rather than by having
 already run. ``changelog`` carries no
 ``if:`` at all and runs on every path regardless -- deliberately, per its own
-comment (``unit-tests.yml:1513-1519``): ``create-release.yml`` feeds
+comment (``unit-tests.yml:1515-1521``): ``create-release.yml`` feeds
 ``CHANGELOG.md`` to the GitHub Release body, so the release path is exactly
 where a drifted file must not go unchecked. Confirmed on run `36210743295
 <https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295>`__ (a
@@ -553,42 +553,42 @@ grepping every workflow file for its name:
      - Where
    * - ``Required checks passed``
      - job ``required-checks``
-     - ``unit-tests.yml:1839``
+     - ``unit-tests.yml:1841``
    * - ``Compat Python 3.11``
      - job ``compatibility``, matrix leg ``3.11``
-     - ``python-compatibility.yml:60``, ``.github/python-versions.json:10``
+     - ``python-compatibility.yml:60``, ``.github/python-versions.toml:20``
    * - ``Compat Python 3.12``
      - job ``compatibility``, matrix leg ``3.12``
-     - ``python-compatibility.yml:60``, ``.github/python-versions.json:11``
+     - ``python-compatibility.yml:60``, ``.github/python-versions.toml:21``
    * - ``Compat Python 3.13``
      - job ``compatibility``, matrix leg ``3.13``
-     - ``python-compatibility.yml:60``, ``.github/python-versions.json:12``
+     - ``python-compatibility.yml:60``, ``.github/python-versions.toml:22``
    * - ``Compat Python 3.14``
      - job ``compatibility``, matrix leg ``3.14``
-     - ``python-compatibility.yml:60``, ``.github/python-versions.json:13``
+     - ``python-compatibility.yml:60``, ``.github/python-versions.toml:23``
    * - ``Compat Python 3.15``
      - job ``compatibility``, matrix leg ``3.15``
-     - ``python-compatibility.yml:60``, ``.github/python-versions.json:14``
+     - ``python-compatibility.yml:60``, ``.github/python-versions.toml:24``
 
 That is the list after `#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__,
 which added ``Compat Python 3.15`` and removed ``Compat Python 3.10``. Moving a version
 between the tiers below means editing the ruleset in the same change.
 
 ``Required checks passed`` is defined by exactly one job
-(``unit-tests.yml:1839``). ``Compat Python`` is defined by one, the
+(``unit-tests.yml:1841``). ``Compat Python`` is defined by one, the
 ``compatibility`` job in ``python-compatibility.yml`` (``:60``), whose matrix
-(``:74``) comes from :file:`.github/python-versions.json`: the five required legs
-are its supported tier (``:10-14``), and its four KTLO legs (``:6-9``) have
+(``:74``) comes from :file:`.github/python-versions.toml`: the five required legs
+are its supported tier (``:20-24``), and its four KTLO legs (``:16-19``) have
 names ending in ``(KTLO)``, so no required context matches one. A comment at
-``unit-tests.yml:1750`` mentions the string without defining it.
+``unit-tests.yml:1752`` mentions the string without defining it.
 
 ``Required checks passed`` is an aggregate, not a single check run. The ruleset
 requires it and the five ``Compat Python 3.11``-``3.15`` legs, nothing else, as
-``unit-tests.yml``'s own comment (``unit-tests.yml:1749-1759``) records. It
+``unit-tests.yml``'s own comment (``unit-tests.yml:1751-1761``) records. It
 ``needs:`` the gating jobs of ``unit-tests.yml`` -- ``test``, ``integration``,
 ``engine-tests`` and ``pypcap-parity``, plus ``changes`` and ``project-tests``
 for the docs-only path -- and checks each result explicitly
-(``unit-tests.yml:1838-1892``). Rulesets match check names literally, with no
+(``unit-tests.yml:1840-1894``). Rulesets match check names literally, with no
 wildcard, so requiring the matrix cells one by one would mean editing the
 ruleset whenever a matrix changes; the aggregate keeps the required list fixed.
 It accepts the four legs as ``skipped`` only on a docs-only pull request, where
@@ -597,11 +597,11 @@ instead. The ``Compat`` legs stay required separately because they come from
 ``python-compatibility.yml``, and a job cannot ``needs:`` a job in another
 workflow file. This job runs on Unit Tests' own ``push``/``pull_request``
 triggers; the ``gate-only: true`` reusable calls documented above skip it via
-``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:1841``),
+``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:1843``),
 so it is never produced -- and never expected -- on those paths.
 
 Python versions come in two tiers (#1633), declared in
-:file:`.github/python-versions.json` (see `Python Versions`_). The **supported**
+:file:`.github/python-versions.toml` (see `Python Versions`_). The **supported**
 tier, 3.11-3.15, blocks: a failed leg fails ``Required checks passed`` or its own
 required ``Compat`` context. The **KTLO** tier -- end-of-life 3.7-3.10, still built and
 tested -- never blocks, is never a required context, and never shows a commit or a
@@ -610,7 +610,7 @@ pull request red (#1672). Each KTLO leg shares its job with supported legs, in
 every such job works the same way:
 
 * Every step that can fail on a KTLO leg has an ``id`` and
-  ``continue-on-error: ${{ matrix.ktlo == true }}`` (``unit-tests.yml:113-123``),
+  ``continue-on-error: ${{ matrix.ktlo == true }}`` (``unit-tests.yml:115-125``),
   unless it is masked on every leg, as the timings uploads are. Its ``outcome`` is
   then ``failure`` but its ``conclusion`` ``success``, so the job, its check run
   and ``required-checks`` read ``success``. A step that needs an earlier one's work
@@ -647,22 +647,25 @@ Python Versions
 ---------------
 
 Since `#1660 <https://github.com/JarryShaw/PyPCAPKit/issues/1660>`__,
-:file:`.github/python-versions.json` declares every Python version CI runs: one
+:file:`.github/python-versions.toml` declares every Python version CI runs: one
 line per version, with its tier -- ``supported``, ``ktlo``, or ``pre-release``,
 which none is today -- and, where ``ubuntu-latest`` cannot provide it, the
 ``runner`` it needs. ``latest`` names the newest supported CPython, which every
 job on one interpreter runs. :file:`util/python_versions.py` reads the file with
-the runner's own ``python3`` and writes each matrix as JSON: a ``python-versions``
+the runner's own ``python3`` -- its ``tomllib`` needs 3.11, and every image that
+runs it has 3.12 or newer -- and writes each matrix as JSON: a ``python-versions``
 job in ``unit-tests.yml`` and ``python-compatibility.yml``, ``version_check`` in
 ``create-release.yml`` and ``conda-update`` in ``cron-conda.yml`` hand theirs on
 through ``fromJSON``, and each single-interpreter job reads ``latest``.
 
 **A tier change is a one-line edit to that file, plus the matching edit to ruleset
 23497679's ``Compat`` contexts.** The file's ``exemptions`` list each pin kept
-off ``latest``, with its reason, such as ``lint.yml``'s 3.14.
-``tests/project/test_python_versions_1660.py`` fails on a pin the file does not
-list, and on a classifier, doc or comment that no longer matches the file -- the
-coverage leg's version, the release checks' counts. Two edits it names rather
+off ``latest``, with its reason in the comment above it, such as ``lint.yml``'s
+3.14. ``tests/project/test_python_versions_1660.py`` fails on a pin the file does
+not list, on an exemption with no comment, and on a classifier, doc or comment
+that no longer matches the file -- the coverage leg's version, the release
+checks' counts. Its tests, and the other tests that read the file, skip on the
+KTLO interpreters, which have no ``tomllib``. Two edits it names rather
 than makes: a new ``pypi`` KTLO leg needs its own ``ktlo_*`` output for
 ``release_status``, and a pre-release leg needs non-blocking mechanics no
 workflow has yet, so the script refuses one.

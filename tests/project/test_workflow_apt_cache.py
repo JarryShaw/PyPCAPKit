@@ -318,7 +318,7 @@ class TestOneSaverPerKey(unittest.TestCase):
         value = job_env('pypcap-parity', 'APT_CACHE_SAVE')
         match = re.fullmatch(r"\$\{\{ matrix\.python-version == '([\d.]+)' \}\}", value)
         self.assertIsNotNone(match, value)
-        # The parity matrix's legs, from .github/python-versions.json (#1660).
+        # The parity matrix's legs, from .github/python-versions.toml (#1660).
         versions = [leg['python-version'] for leg in legs(matrix('unit-tests.yml', 'pypcap-parity'))]
         self.assertIn(match.group(1), versions)  # type: ignore[union-attr]
         self.assertGreater(len(versions), 1)

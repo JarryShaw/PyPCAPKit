@@ -45,8 +45,14 @@ import urllib.parse
 import zipfile
 from unittest import mock
 
+from tests.project.test_python_versions_1660 import NO_TOMLLIB
 from tests.project.test_python_versions_1660 import legs as matrix_legs
-from tests.project.test_python_versions_1660 import matrix
+from tests.project.test_python_versions_1660 import matrix, tomllib
+
+# util/ci_timing.py reads .github/python-versions.toml with tomllib on import
+# (#1660), and runs on ``latest`` only (ci-timing.yml); on 3.8-3.10 nothing here can.
+if tomllib is None:
+    raise unittest.SkipTest(NO_TOMLLIB)
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 FIXTURES = pathlib.Path(__file__).resolve().parent / 'ci_timing_fixtures'
@@ -720,7 +726,7 @@ class TestTimingArtifacts(unittest.TestCase):
                 self.assertIn('--durations=', section)
 
     def test_the_legs_the_review_reads_exist(self) -> 'None':
-        """``test``'s legs, from .github/python-versions.json since #1660."""
+        """``test``'s legs, from .github/python-versions.toml since #1660."""
         found = matrix_legs(matrix('unit-tests.yml', 'test'))
         for leg in ci_timing.JUNIT_LEGS:
             with self.subTest(leg=leg):

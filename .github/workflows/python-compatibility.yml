@@ -23,7 +23,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  # #1660: the matrix below, from .github/python-versions.json -- see the job of
+  # #1660: the matrix below, from .github/python-versions.toml -- see the job of
   # the same name in unit-tests.yml.
   python-versions:
     name: Read the Python versions
@@ -35,12 +35,12 @@ jobs:
       - uses: actions/checkout@v7
         with:
           sparse-checkout: |
-            .github/python-versions.json
+            .github/python-versions.toml
             util/python_versions.py
           sparse-checkout-cone-mode: false
           persist-credentials: false
 
-      - name: Read .github/python-versions.json
+      - name: Read .github/python-versions.toml
         id: read
         run: python3 util/python_versions.py --github-output
 

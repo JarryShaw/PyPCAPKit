@@ -65,6 +65,7 @@ import re
 import statistics
 import sys
 import time
+import tomllib
 import traceback
 import urllib.error
 import urllib.parse
@@ -93,14 +94,15 @@ DEFAULT_TIMEOUT = 360
 
 #: The aggregate job the ruleset requires; its completion is "mergeable".
 REQUIRED_JOB = 'Required checks passed'
-#: The Python version tiers (#1660), which the two names below are read from.
-TIERS = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.github', 'python-versions.json')
+#: The Python version tiers (#1660), which the two names below are read from. This
+#: script runs on ``latest`` (ci-timing.yml), so :mod:`tomllib`, 3.11+, is there.
+TIERS = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.github', 'python-versions.toml')
 
 
 def _coverage_legs() -> 'tuple[str, tuple[str, ...]]':
     """The ``latest`` leg's job name, and the other supported legs', from :data:`TIERS`."""
-    with open(TIERS, encoding='utf-8') as file:
-        data = json.load(file)
+    with open(TIERS, 'rb') as file:
+        data = tomllib.load(file)
     paired = tuple(f'Python {version}' for version, entry in data['versions']['cpython'].items()
                    if entry['tier'] == 'supported' and version != data['latest'])
     return f"Python {data['latest']}", paired

@@ -40,10 +40,12 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  # #1660: the Python versions, from .github/python-versions.json. The matrix
+  # #1660: the Python versions, from .github/python-versions.toml. The matrix
   # jobs below read theirs from here with `fromJSON`, and `gate` reads `latest`
   # for its name. util/python_versions.py needs only the standard library, so
-  # the runner's own `python3` runs it, against a checkout of those two files.
+  # the runner's own `python3` runs it, against a checkout of those two files:
+  # its tomllib needs 3.11, and each image that runs it has 3.12 or newer (the
+  # script's docstring names each one's).
   # Runs on every path, `gate-only` included, and asks for no write permission,
   # since this file is a reusable workflow whose callers grant `contents: read`.
   #
@@ -71,12 +73,12 @@ jobs:
       - uses: actions/checkout@v7
         with:
           sparse-checkout: |
-            .github/python-versions.json
+            .github/python-versions.toml
             util/python_versions.py
           sparse-checkout-cone-mode: false
           persist-credentials: false
 
-      - name: Read .github/python-versions.json
+      - name: Read .github/python-versions.toml
         id: read
         run: python3 util/python_versions.py --github-output
 
@@ -98,7 +100,7 @@ jobs:
       ANNOTATION_LEVEL: ${{ matrix.ktlo && 'warning' || 'error' }}
     strategy:
       fail-fast: false
-      # #1660: .github/python-versions.json's CPython tiers, through the
+      # #1660: .github/python-versions.toml's CPython tiers, through the
       # `python-versions` job. The supported tier is the `python-version` axis
       # and blocks through `required-checks` (#1633); `include` marks one leg
       # `coverage: true` and adds each KTLO leg with `ktlo: true`.
@@ -1470,7 +1472,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # `latest` from .github/python-versions.json, read here rather than
+      # `latest` from .github/python-versions.toml, read here rather than
       # through `python-versions`: see that job's comment.
       - name: Read the Python versions
         id: python-versions
