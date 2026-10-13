@@ -283,6 +283,13 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
+          # #1685: `-a` stages tracked files only, so a module the crawl added
+          # for a new registry was bumped for but never committed, and every
+          # later crawl bumped for it again. Stage pcapkit-vendor's output first,
+          # new and deleted modules included; `-a` still takes the bump's files.
+          # Quoted, so git matches the pattern at any depth, not the shell at
+          # one; `.py` only, so a backup pcapkit-vendor could not remove stays out.
+          git add -A -- 'pcapkit/const/*.py'
           git commit -am"Bumped version to $(python -c 'import pcapkit; print(pcapkit.__version__)')
 
           Updated vendor constant enumerations at $(date). The following files
@@ -296,7 +303,9 @@ jobs:
       # on top of this commit; the next push or schedule picks them up. So
       # documentation commits cannot chain, however the registries behave. The
       # Unit Tests run's head commit is in the `workflow_run` payload
-      # (octokit/webhooks' workflow-run.schema.json, `head_commit`).
+      # (octokit/webhooks' workflow-run.schema.json, `head_commit`). `-a` is
+      # enough here: a new or deleted module is code to the classifier, so it
+      # takes the bump path above and never reaches this step (#1685).
       - name: Commit documentation changes
         id: commit-docs
         if: >-

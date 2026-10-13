@@ -249,7 +249,9 @@ follows sees the same version, so it has nothing new to publish
 (`#1674 <https://github.com/JarryShaw/PyPCAPKit/issues/1674>`__). A crawl raised by
 such a commit's own Unit Tests run does not commit comment changes on top of it,
 so documentation commits cannot chain. The rule is in
-``util/vendor_code_changed.py``.
+``util/vendor_code_changed.py``. A bump commit carries every module the crawl
+wrote, a new one included, so the crawl it raises does not find one untracked
+and bump again (`#1685 <https://github.com/JarryShaw/PyPCAPKit/issues/1685>`__).
 
 Reusable-Workflow Calls (``uses:``)
 -----------------------------------
