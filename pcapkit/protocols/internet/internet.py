@@ -12,6 +12,7 @@ which is a base class for internet layer protocols, eg. :class:`~pcapkit.protoco
 
 """
 import collections
+import contextvars
 import io
 from typing import TYPE_CHECKING, Generic, cast
 
@@ -19,7 +20,7 @@ from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_Extensio
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase
+from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase, _rebuilding
 from pcapkit.protocols.schema.schema import keep_short_read, replay_short_read
 from pcapkit.utilities.decorators import beholder
 from pcapkit.utilities.exceptions import stacklevel
@@ -29,6 +30,8 @@ if TYPE_CHECKING:
     from typing import IO, Any, Optional, Type
 
     from typing_extensions import Literal, Self
+
+    from pcapkit.protocols.data.data import Data
 
 __all__ = ['Internet']
 
@@ -48,7 +51,17 @@ __all__ = ['Internet']
 #: Destination Options header at most twice, so no compliant chain gets close.
 #: Without the bound, a chain dissected header by header stops wherever
 #: Python's recursion limit falls, which depends on the interpreter.
+#:
+#: Rebuilding a frame with :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data`
+#: stops where parsing it did, and warns once too (:issue:`1619`), c.f.
+#: :meth:`Internet._make_payload`.
 EXTENSION_HEADER_LIMIT = 32
+
+#: contextvars.ContextVar[int]: Where the payload :meth:`Internet._make_payload`
+#: rebuilds sits in a chain of IPv6 extension headers, should it be one: one past
+#: the layer it is the payload of, as :meth:`Internet._next_exthdr_depth` places
+#: it while parsing, c.f. :data:`EXTENSION_HEADER_LIMIT`.
+_exthdr_rebuilt = contextvars.ContextVar('_exthdr_rebuilt', default=0)
 
 
 class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-method
@@ -226,7 +239,9 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             _exthdr_depth (int): Where this layer is in a chain of IPv6
                 extension headers, counting from ``1``, or ``0`` if it is not
                 in one. Handed over by :meth:`_import_next_layer` while
-                parsing, c.f. :data:`EXTENSION_HEADER_LIMIT`.
+                parsing, c.f. :data:`EXTENSION_HEADER_LIMIT`; a layer
+                constructed instead, as :meth:`from_data` rebuilds one, takes it
+                from :meth:`_rebuilt_exthdr_depth` (:issue:`1619`).
             **kwargs: Arbitrary keyword arguments.
 
         Notes:
@@ -242,7 +257,8 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
 
         """
         # NOTE: Set before parsing, since parsing is what dissects the next layer.
-        self._exthdr_depth = cast('int', kwargs.pop('_exthdr_depth', 0))
+        depth = cast('int', kwargs.pop('_exthdr_depth', 0))
+        self._exthdr_depth = depth if file is not None else self._rebuilt_exthdr_depth()
 
         super().__post_init__(file, length, extension=extension, **kwargs)  # type: ignore[arg-type]
         keep_short_read(self)
@@ -295,6 +311,59 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             return 0
         return self._exthdr_depth + 1
 
+    @classmethod
+    def _rebuilt_exthdr_depth(cls) -> 'int':
+        """Place a layer :meth:`from_data` rebuilds in its chain of IPv6 extension headers.
+
+        Returns:
+            Where :meth:`_make_payload` of the layer it is the payload of puts
+            it, if it is an IPv6 extension header, or ``0`` if it is not, as
+            :meth:`_next_exthdr_depth` places a layer being parsed. A layer
+            rebuilt on its own is at ``0``, as one parsed from its own octets is.
+
+        Note:
+            The parse tells an extension header by the protocol number naming
+            it, which a rebuild does not have, so this tells one by its class:
+            :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` is the base
+            of every :class:`Internet` layer :attr:`__proto__` registers under
+            such a number.
+
+        """
+        from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext  # isort: skip # pylint: disable=import-outside-toplevel
+        return _exthdr_rebuilt.get() if issubclass(cls, IPv6_Ext) else 0
+
+    @classmethod
+    def _make_payload(cls, data: 'Data', exclude: 'tuple[str, ...]' = ()) -> 'ProtocolBase':
+        """Create payload from ``data`` for protocol construction.
+
+        As :meth:`ProtocolBase._make_payload
+        <pcapkit.protocols.protocol.ProtocolBase._make_payload>`, but the payload
+        is built at its place in its chain of IPv6 extension headers, one past
+        this layer's, since it parses its own octets again. So rebuilding a frame
+        stops at :data:`EXTENSION_HEADER_LIMIT` where parsing it did, rather
+        than that many headers past each header of the chain, and warns of the
+        limit once, as :meth:`_next_layer_class` describes (:issue:`1619`).
+
+        Args:
+            data: protocol data
+            exclude: keys of ``data`` that are not the payload, c.f.
+                :meth:`ProtocolBase._make_payload
+                <pcapkit.protocols.protocol.ProtocolBase._make_payload>`
+
+        Returns:
+            Payload for protocol construction.
+
+        """
+        # NOTE: IPv6 parses its upper layer after the headers it walked, not one
+        # past itself, but its walk stops short of an extension header only
+        # where that header is kept raw (at a limit, in a later fragment, or
+        # where it does not parse), so no rebuilt upper layer reads this place.
+        token = _exthdr_rebuilt.set(cls._rebuilt_exthdr_depth() + 1)
+        try:
+            return super()._make_payload(data, exclude)
+        finally:
+            _exthdr_rebuilt.reset(token)
+
     def _next_layer_class(self, proto: 'Optional[int]', file_: 'bytes', length: 'int',
                           extension: 'bool' = False) -> 'tuple[Type[ProtocolBase], dict[str, Any]]':
         r"""Pick the class the next layer is parsed with.
@@ -316,7 +385,8 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
 
         Warns:
             ProtocolWarning: If the next layer is past
-                :data:`EXTENSION_HEADER_LIMIT` (:issue:`1604`).
+                :data:`EXTENSION_HEADER_LIMIT` (:issue:`1604`), unless this
+                layer is inside a payload being rebuilt (:issue:`1619`).
 
         """
         if min(length, len(file_)) == 0:
@@ -333,7 +403,11 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             message = (f'{self.alias}: a chain of IPv6 extension headers reached the limit of '
                        f'{EXTENSION_HEADER_LIMIT} headers; the rest of the packet, from Next '
                        f'Header {int(cast("int", proto))}, is left undissected')
-            warn(message, ProtocolWarning, stacklevel=stacklevel())
+            # NOTE: Inside a payload being rebuilt, the layer it is rebuilt for
+            # warns of the same octets once its own parse gets here, as for
+            # :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT`.
+            if not _rebuilding.get():
+                warn(message, ProtocolWarning, stacklevel=stacklevel())
             return Raw, {'error': message}
 
         protocol = self._lookup_next_layer(self.__proto__, cast('int', proto))
