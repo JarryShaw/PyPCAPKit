@@ -20,34 +20,34 @@ __all__ = ['RevocationTrigger']
 class RevocationTrigger(EnumRegistry, IntEnum):
     """[RevocationTrigger] Revocation Trigger Values"""
 
-    #: Unspecified [RFC 5846]
+    #: Unspecified [:rfc:`5846`]
     Unspecified = 0
 
-    #: Administrative Reason [RFC 5846]
+    #: Administrative Reason [:rfc:`5846`]
     Administrative_Reason = 1
 
-    #: Inter-MAG Handover - same Access Type [RFC 5846]
+    #: Inter-MAG Handover - same Access Type [:rfc:`5846`]
     Inter_MAG_Handover_same_Access_Type = 2
 
-    #: Inter-MAG Handover - different Access Type [RFC 5846]
+    #: Inter-MAG Handover - different Access Type [:rfc:`5846`]
     Inter_MAG_Handover_different_Access_Type = 3
 
-    #: Inter-MAG Handover - Unknown [RFC 5846]
+    #: Inter-MAG Handover - Unknown [:rfc:`5846`]
     Inter_MAG_Handover_Unknown = 4
 
-    #: User Initiated Session(s) Termination [RFC 5846]
+    #: User Initiated Session(s) Termination [:rfc:`5846`]
     User_Initiated_Session_Termination = 5
 
-    #: Access Network Session(s) Termination [RFC 5846]
+    #: Access Network Session(s) Termination [:rfc:`5846`]
     Access_Network_Session_Termination = 6
 
-    #: Possible Out-of Sync BCE State [RFC 5846]
+    #: Possible Out-of Sync BCE State [:rfc:`5846`]
     Possible_Out_of_Sync_BCE_State = 7
 
-    #: Per-Peer Policy [RFC 5846]
+    #: Per-Peer Policy [:rfc:`5846`]
     Per_Peer_Policy = 128
 
-    #: Revoking Mobility Node Local Policy [RFC 5846]
+    #: Revoking Mobility Node Local Policy [:rfc:`5846`]
     Revoking_Mobility_Node_Local_Policy = 129
 
     @classmethod
@@ -67,6 +67,6 @@ class RevocationTrigger(EnumRegistry, IntEnum):
             #: Unassigned
             return cls._unregistered_member(value, 'Unassigned')
         if 250 <= value <= 255:
-            #: Reserved for Testing Purposes Only [RFC 5846]
+            #: Reserved for Testing Purposes Only [:rfc:`5846`]
             return cls._unregistered_member(value, 'Reserved_for_Testing_Purposes_Only')
         return super()._missing_(value)

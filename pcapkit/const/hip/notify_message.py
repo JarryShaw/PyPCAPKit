@@ -20,118 +20,118 @@ __all__ = ['NotifyMessage']
 class NotifyMessage(EnumRegistry, IntEnum):
     """[NotifyMessage] Notify Message Types"""
 
-    #: Reserved [RFC 7401]
+    #: Reserved [:rfc:`7401`]
     Reserved_0 = 0
 
-    #: UNSUPPORTED_CRITICAL_PARAMETER_TYPE [RFC 7401]
+    #: UNSUPPORTED_CRITICAL_PARAMETER_TYPE [:rfc:`7401`]
     UNSUPPORTED_CRITICAL_PARAMETER_TYPE = 1
 
-    #: INVALID_SYNTAX [RFC 7401]
+    #: INVALID_SYNTAX [:rfc:`7401`]
     INVALID_SYNTAX = 7
 
-    #: NO_DH_PROPOSAL_CHOSEN [RFC 7401]
+    #: NO_DH_PROPOSAL_CHOSEN [:rfc:`7401`]
     NO_DH_PROPOSAL_CHOSEN = 14
 
-    #: INVALID_DH_CHOSEN [RFC 7401]
+    #: INVALID_DH_CHOSEN [:rfc:`7401`]
     INVALID_DH_CHOSEN = 15
 
-    #: NO_HIP_PROPOSAL_CHOSEN [RFC 7401]
+    #: NO_HIP_PROPOSAL_CHOSEN [:rfc:`7401`]
     NO_HIP_PROPOSAL_CHOSEN = 16
 
-    #: INVALID_HIP_CIPHER_CHOSEN [RFC 7401]
+    #: INVALID_HIP_CIPHER_CHOSEN [:rfc:`7401`]
     INVALID_HIP_CIPHER_CHOSEN = 17
 
-    #: NO_ESP_PROPOSAL_CHOSEN [RFC 7402]
+    #: NO_ESP_PROPOSAL_CHOSEN [:rfc:`7402`]
     NO_ESP_PROPOSAL_CHOSEN = 18
 
-    #: INVALID_ESP_TRANSFORM_CHOSEN [RFC 7402]
+    #: INVALID_ESP_TRANSFORM_CHOSEN [:rfc:`7402`]
     INVALID_ESP_TRANSFORM_CHOSEN = 19
 
-    #: UNSUPPORTED_HIT_SUITE [RFC 7401]
+    #: UNSUPPORTED_HIT_SUITE [:rfc:`7401`]
     UNSUPPORTED_HIT_SUITE = 20
 
-    #: AUTHENTICATION_FAILED [RFC 7401]
+    #: AUTHENTICATION_FAILED [:rfc:`7401`]
     AUTHENTICATION_FAILED = 24
 
     #: Unassigned
     Unassigned_25 = 25
 
-    #: CHECKSUM_FAILED [RFC 7401]
+    #: CHECKSUM_FAILED [:rfc:`7401`]
     CHECKSUM_FAILED = 26
 
     #: Unassigned
     Unassigned_27 = 27
 
-    #: HIP_MAC_FAILED [RFC 7401]
+    #: HIP_MAC_FAILED [:rfc:`7401`]
     HIP_MAC_FAILED = 28
 
-    #: ENCRYPTION_FAILED [RFC 7401]
+    #: ENCRYPTION_FAILED [:rfc:`7401`]
     ENCRYPTION_FAILED = 32
 
-    #: INVALID_HIT [RFC 7401]
+    #: INVALID_HIT [:rfc:`7401`]
     INVALID_HIT = 40
 
     #: Unassigned
     Unassigned_41 = 41
 
-    #: BLOCKED_BY_POLICY [RFC 7401]
+    #: BLOCKED_BY_POLICY [:rfc:`7401`]
     BLOCKED_BY_POLICY = 42
 
     #: Unassigned
     Unassigned_43 = 43
 
-    #: RESPONDER_BUSY_PLEASE_RETRY [RFC 7401]
+    #: RESPONDER_BUSY_PLEASE_RETRY [:rfc:`7401`]
     RESPONDER_BUSY_PLEASE_RETRY = 44
 
     #: Unassigned
     Unassigned_45 = 45
 
-    #: LOCATOR_TYPE_UNSUPPORTED [RFC 8046]
+    #: LOCATOR_TYPE_UNSUPPORTED [:rfc:`8046`]
     LOCATOR_TYPE_UNSUPPORTED = 46
 
     #: Unassigned
     Unassigned_47 = 47
 
-    #: CREDENTIALS_REQUIRED [RFC 8002]
+    #: CREDENTIALS_REQUIRED [:rfc:`8002`]
     CREDENTIALS_REQUIRED = 48
 
     #: Unassigned
     Unassigned_49 = 49
 
-    #: INVALID_CERTIFICATE [RFC 8002]
+    #: INVALID_CERTIFICATE [:rfc:`8002`]
     INVALID_CERTIFICATE = 50
 
-    #: REG_REQUIRED [RFC 8003]
+    #: REG_REQUIRED [:rfc:`8003`]
     REG_REQUIRED = 51
 
-    #: NO_VALID_NAT_TRAVERSAL_MODE_PARAMETER [RFC 5770]
+    #: NO_VALID_NAT_TRAVERSAL_MODE_PARAMETER [:rfc:`5770`]
     NO_VALID_NAT_TRAVERSAL_MODE_PARAMETER = 60
 
-    #: CONNECTIVITY_CHECKS_FAILED [RFC 5770]
+    #: CONNECTIVITY_CHECKS_FAILED [:rfc:`5770`]
     CONNECTIVITY_CHECKS_FAILED = 61
 
-    #: MESSAGE_NOT_RELAYED [RFC 5770]
+    #: MESSAGE_NOT_RELAYED [:rfc:`5770`]
     MESSAGE_NOT_RELAYED = 62
 
-    #: SERVER_REFLEXIVE_CANDIDATE_ALLOCATION_FAILED [RFC 9028]
+    #: SERVER_REFLEXIVE_CANDIDATE_ALLOCATION_FAILED [:rfc:`9028`]
     SERVER_REFLEXIVE_CANDIDATE_ALLOCATION_FAILED = 63
 
-    #: RVS_HMAC_PROHIBITED_WITH_RELAY [RFC 9028]
+    #: RVS_HMAC_PROHIBITED_WITH_RELAY [:rfc:`9028`]
     RVS_HMAC_PROHIBITED_WITH_RELAY = 64
 
-    #: OVERLAY_TTL_EXCEEDED [RFC 6079]
+    #: OVERLAY_TTL_EXCEEDED [:rfc:`6079`]
     OVERLAY_TTL_EXCEEDED = 70
 
-    #: UNKNOWN_NEXT_HOP [RFC 6028]
+    #: UNKNOWN_NEXT_HOP [:rfc:`6028`]
     UNKNOWN_NEXT_HOP = 90
 
-    #: NO_VALID_HIP_TRANSPORT_MODE [RFC 6261]
+    #: NO_VALID_HIP_TRANSPORT_MODE [:rfc:`6261`]
     NO_VALID_HIP_TRANSPORT_MODE = 100
 
-    #: I2_ACKNOWLEDGEMENT [RFC 7401]
+    #: I2_ACKNOWLEDGEMENT [:rfc:`7401`]
     I2_ACKNOWLEDGEMENT = 16384
 
-    #: NAT_KEEPALIVE [RFC 9028]
+    #: NAT_KEEPALIVE [:rfc:`9028`]
     NAT_KEEPALIVE = 16385
 
     @classmethod
@@ -175,12 +175,12 @@ class NotifyMessage(EnumRegistry, IntEnum):
             #: Unassigned
             return cls._unregistered_member(value, 'Unassigned')
         if 8192 <= value <= 16383:
-            #: Reserved for Private Use [RFC 7401]
+            #: Reserved for Private Use [:rfc:`7401`]
             return cls._unregistered_member(value, 'Reserved_for_Private_Use')
         if 16386 <= value <= 40959:
             #: Unassigned
             return cls._unregistered_member(value, 'Unassigned')
         if 40960 <= value <= 65535:
-            #: Reserved for Private Use [RFC 7401]
+            #: Reserved for Private Use [:rfc:`7401`]
             return cls._unregistered_member(value, 'Reserved_for_Private_Use')
         return super()._missing_(value)

@@ -20,22 +20,22 @@ __all__ = ['UpdateNotificationACKStatus']
 class UpdateNotificationACKStatus(EnumRegistry, IntEnum):
     """[UpdateNotificationACKStatus] Update Notification Acknowledgement Status Registry"""
 
-    #: SUCCESS [RFC 7077]
+    #: SUCCESS [:rfc:`7077`]
     SUCCESS = 0
 
-    #: FAILED-TO-UPDATE-SESSION-PARAMETERS [RFC 7077]
+    #: FAILED-TO-UPDATE-SESSION-PARAMETERS [:rfc:`7077`]
     FAILED_TO_UPDATE_SESSION_PARAMETERS = 128
 
-    #: MISSING-VENDOR-SPECIFIC-OPTION [RFC 7077]
+    #: MISSING-VENDOR-SPECIFIC-OPTION [:rfc:`7077`]
     MISSING_VENDOR_SPECIFIC_OPTION = 129
 
-    #: CANNOT_MEET_QOS_SERVICE_REQUEST [RFC 7222]
+    #: CANNOT_MEET_QOS_SERVICE_REQUEST [:rfc:`7222`]
     CANNOT_MEET_QOS_SERVICE_REQUEST = 130
 
-    #: Reason unspecified. [RFC 7864]
+    #: Reason unspecified. [:rfc:`7864`]
     Reason_unspecified = 131
 
-    #: MN not attached. [RFC 7864]
+    #: MN not attached. [:rfc:`7864`]
     MN_not_attached = 132
 
     @classmethod

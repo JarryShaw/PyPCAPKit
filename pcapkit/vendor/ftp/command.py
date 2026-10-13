@@ -461,9 +461,14 @@ class Command(Vendor):
             temp = []  # type: list[str]
             #for rfc in filter(lambda s: 'RFC' in s, re.split(r'\[|\]', item[5])):
             #    temp.append(f'[{rfc[:3]} {rfc[3:]}]')
-            for rfc in filter(None, map(lambda s: s.strip(), re.split(r'\[|\]', item[5]))):
+            for rfc in map(str.strip, self.split_references(item[5])):
                 if 'RFC' in rfc and re.match(r'\d+', rfc[3:]):
-                    temp.append(f'[:rfc:`{rfc[3:]}`]')
+                    # NOTE: IANA has put a section inside the citation since
+                    # 2026-10-13 -- ``ALGS`` cites ``[RFC 6384, Section 11]``,
+                    # formerly ``[RFC6384] Section 11`` -- and the whole of
+                    # ``rfc[3:]`` would make that a role no RFC answers (#1664).
+                    num, _, sec = rfc[3:].partition(', Section ')
+                    temp.append(f'[:rfc:`{num}#section-{sec}`]' if sec else f'[:rfc:`{num}`]')
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
             cmmt = self.wrap_comment(f'{desc} {"".join(temp)}')

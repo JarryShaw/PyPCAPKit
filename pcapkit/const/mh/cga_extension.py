@@ -20,16 +20,16 @@ __all__ = ['CGAExtension']
 class CGAExtension(EnumRegistry, IntEnum):
     """[CGAExtension] CGA Extension Type Values"""
 
-    #: Multi-Prefix [RFC 5535]
+    #: Multi-Prefix [:rfc:`5535`]
     Multi_Prefix = 0x0012
 
-    #: Exp_FFFD (experimental) [RFC 4581]
+    #: Exp_FFFD (experimental) [:rfc:`4581`]
     Exp_FFFD = 0xFFFD
 
-    #: Exp_FFFE (experimental) [RFC 4581]
+    #: Exp_FFFE (experimental) [:rfc:`4581`]
     Exp_FFFE = 0xFFFE
 
-    #: Exp_FFFF (experimental) [RFC 4581]
+    #: Exp_FFFF (experimental) [:rfc:`4581`]
     Exp_FFFF = 0xFFFF
 
     @classmethod

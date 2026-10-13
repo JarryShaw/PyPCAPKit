@@ -54,7 +54,7 @@ class Parameter(Vendor):
             plen = f' (Length: {plen})' if re.match(r'\d+', plen) else ''
 
             temp = []  # type: list[str]
-            for rfc in filter(None, re.split(r'\[|\]', rfcs)):
+            for rfc in self.split_references(rfcs):
                 if 'RFC' in rfc and re.match(r'\d+', rfc[3:]):
                     #temp.append(f'[{rfc[:3]} {rfc[3:]}]')
                     temp.append(f'[:rfc:`{rfc[3:]}`]')

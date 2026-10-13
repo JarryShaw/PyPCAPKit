@@ -20,13 +20,13 @@ __all__ = ['EnumeratingAlgorithm']
 class EnumeratingAlgorithm(EnumRegistry, IntEnum):
     """[EnumeratingAlgorithm] Enumerating Algorithms"""
 
-    #: Reserved (not available for assignment) [RFC 4285]
+    #: Reserved (not available for assignment) [:rfc:`4285`]
     Reserved_0 = 0
 
-    #: HMAC_SHA1_SPI [RFC 4285]
+    #: HMAC_SHA1_SPI [:rfc:`4285`]
     HMAC_SHA1_SPI = 3
 
-    #: Reserved for use by 3GPP2 [RFC 4285]
+    #: Reserved for use by 3GPP2 [:rfc:`4285`]
     Reserved_for_use_by_3GPP2 = 5
 
     @classmethod

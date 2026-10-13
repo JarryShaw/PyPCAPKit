@@ -23,19 +23,19 @@ class Packet(EnumRegistry, IntEnum):
     #: Reserved
     Reserved_0 = 0
 
-    #: Hello [RFC 2328]
+    #: Hello [:rfc:`2328`]
     Hello = 1
 
-    #: Database Description [RFC 2328]
+    #: Database Description [:rfc:`2328`]
     Database_Description = 2
 
-    #: Link State Request [RFC 2328]
+    #: Link State Request [:rfc:`2328`]
     Link_State_Request = 3
 
-    #: Link State Update [RFC 2328]
+    #: Link State Update [:rfc:`2328`]
     Link_State_Update = 4
 
-    #: Link State Ack [RFC 2328]
+    #: Link State Ack [:rfc:`2328`]
     Link_State_Ack = 5
 
     @classmethod

@@ -20,16 +20,16 @@ __all__ = ['TaggerID']
 class TaggerID(EnumRegistry, IntEnum):
     """[TaggerID] TaggerID Types"""
 
-    #: NULL [RFC 6621]
+    #: NULL [:rfc:`6621`]
     NULL = 0
 
-    #: DEFAULT [RFC 6621]
+    #: DEFAULT [:rfc:`6621`]
     DEFAULT = 1
 
-    #: IPv4 [RFC 6621]
+    #: IPv4 [:rfc:`6621`]
     IPv4 = 2
 
-    #: IPv6 [RFC 6621]
+    #: IPv6 [:rfc:`6621`]
     IPv6 = 3
 
     @classmethod

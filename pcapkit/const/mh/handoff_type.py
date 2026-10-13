@@ -20,25 +20,25 @@ __all__ = ['HandoffType']
 class HandoffType(EnumRegistry, IntEnum):
     """[HandoffType] Handoff Indicator Option Type Values"""
 
-    #: Reserved [RFC 5213]
+    #: Reserved [:rfc:`5213`]
     Reserved_0 = 0
 
-    #: Attachment over a new interface [RFC 5213]
+    #: Attachment over a new interface [:rfc:`5213`]
     Attachment_over_a_new_interface = 1
 
-    #: Handoff between two different interfaces of the mobile node [RFC 5213]
+    #: Handoff between two different interfaces of the mobile node [:rfc:`5213`]
     Handoff_between_two_different_interfaces_of_the_mobile_node = 2
 
-    #: Handoff between mobile access gateways for the same interface [RFC 5213]
+    #: Handoff between mobile access gateways for the same interface [:rfc:`5213`]
     Handoff_between_mobile_access_gateways_for_the_same_interface = 3
 
-    #: Handoff state unknown [RFC 5213]
+    #: Handoff state unknown [:rfc:`5213`]
     Handoff_state_unknown = 4
 
-    #: Handoff state not changed (Re-registration) [RFC 5213]
+    #: Handoff state not changed (Re-registration) [:rfc:`5213`]
     Handoff_state_not_changed = 5
 
-    #: Attachment over a new interface sharing prefixes [RFC 7864]
+    #: Attachment over a new interface sharing prefixes [:rfc:`7864`]
     Attachment_over_a_new_interface_sharing_prefixes = 6
 
     @classmethod

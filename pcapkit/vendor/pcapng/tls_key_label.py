@@ -118,8 +118,9 @@ class TLSKeyLabel(Vendor):
             # rows fetched as of 2026-09-28 are ``[RFC9850]``, so this always
             # takes the ``rfc == '9850'`` branch today; a future registry
             # change either still fits it or raises here for a human to look
-            # at, rather than rendering a citation nobody checked.
-            match = re.match(r'\[RFC(\d+)\]\Z', ref)
+            # at, rather than rendering a citation nobody checked. IANA has
+            # spelt it ``[RFC 9850]`` since 2026-10-13, which fits too (#1664).
+            match = re.fullmatch(r'\[RFC\s*(\d+)\]', ref)
             if match is None:
                 raise ValueError(
                     f'{label!r} cites {ref!r}, which this crawler does not know how to '

@@ -20,16 +20,16 @@ __all__ = ['Transport']
 class Transport(EnumRegistry, IntEnum):
     """[Transport] HIP Transport Modes"""
 
-    #: RESERVED [RFC 6261]
+    #: RESERVED [:rfc:`6261`]
     RESERVED_0 = 0
 
-    #: DEFAULT [RFC 6261]
+    #: DEFAULT [:rfc:`6261`]
     DEFAULT = 1
 
-    #: ESP [RFC 6261]
+    #: ESP [:rfc:`6261`]
     ESP = 2
 
-    #: ESP-TCP [RFC 6261]
+    #: ESP-TCP [:rfc:`6261`]
     ESP_TCP = 3
 
     @classmethod

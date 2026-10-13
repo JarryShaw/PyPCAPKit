@@ -20,13 +20,13 @@ __all__ = ['ECDSACurve']
 class ECDSACurve(EnumRegistry, IntEnum):
     """[ECDSACurve] ECDSA Curve Label"""
 
-    #: RESERVED [RFC 7401]
+    #: RESERVED [:rfc:`7401`]
     RESERVED_0 = 0
 
-    #: NIST P-256 [RFC 7401]
+    #: NIST P-256 [:rfc:`7401`]
     NIST_P_256 = 1
 
-    #: NIST P-384 [RFC 7401]
+    #: NIST P-384 [:rfc:`7401`]
     NIST_P_384 = 2
 
     @classmethod

@@ -20,37 +20,37 @@ __all__ = ['Packet']
 class Packet(EnumRegistry, IntEnum):
     """[Packet] HIP Packet Types"""
 
-    #: Reserved [RFC 7401]
+    #: Reserved [:rfc:`7401`]
     Reserved_0 = 0
 
-    #: I1 the HIP Initiator Packet [RFC 7401]
+    #: I1 the HIP Initiator Packet [:rfc:`7401`]
     I1 = 1
 
-    #: R1 the HIP Responder Packet [RFC 7401]
+    #: R1 the HIP Responder Packet [:rfc:`7401`]
     R1 = 2
 
-    #: I2 the Second HIP Initiator Packet [RFC 7401]
+    #: I2 the Second HIP Initiator Packet [:rfc:`7401`]
     I2 = 3
 
-    #: R2 the Second HIP Responder Packet [RFC 7401]
+    #: R2 the Second HIP Responder Packet [:rfc:`7401`]
     R2 = 4
 
-    #: UPDATE the HIP Update Packet [RFC 7401]
+    #: UPDATE the HIP Update Packet [:rfc:`7401`]
     UPDATE = 16
 
-    #: NOTIFY the HIP Notify Packet [RFC 7401]
+    #: NOTIFY the HIP Notify Packet [:rfc:`7401`]
     NOTIFY = 17
 
-    #: CLOSE the HIP Association Closing Packet [RFC 7401]
+    #: CLOSE the HIP Association Closing Packet [:rfc:`7401`]
     CLOSE = 18
 
-    #: CLOSE_ACK the HIP Closing Acknowledgment Packet [RFC 7401]
+    #: CLOSE_ACK the HIP Closing Acknowledgment Packet [:rfc:`7401`]
     CLOSE_ACK = 19
 
-    #: HDRR (HIP Distributed Hash Table Resource Record) [RFC 6537]
+    #: HDRR (HIP Distributed Hash Table Resource Record) [:rfc:`6537`]
     HDRR = 20
 
-    #: HIP_DATA [RFC 6078]
+    #: HIP_DATA [:rfc:`6078`]
     HIP_DATA = 32
 
     @classmethod

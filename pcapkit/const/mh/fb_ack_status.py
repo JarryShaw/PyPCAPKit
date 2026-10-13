@@ -20,13 +20,13 @@ __all__ = ['FlowBindingACKStatus']
 class FlowBindingACKStatus(EnumRegistry, IntEnum):
     """[FlowBindingACKStatus] Flow Binding Acknowledgement Status Codes"""
 
-    #: Success [RFC 7109]
+    #: Success [:rfc:`7109`]
     Success = 0
 
-    #: Binding (target CoA) Does NOT Exist [RFC 7109]
+    #: Binding (target CoA) Does NOT Exist [:rfc:`7109`]
     Binding = 128
 
-    #: Action NOT Authorized [RFC 7109]
+    #: Action NOT Authorized [:rfc:`7109`]
     Action_NOT_Authorized = 129
 
     @classmethod

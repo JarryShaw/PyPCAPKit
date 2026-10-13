@@ -236,6 +236,41 @@ class Vendor(metaclass=VendorMeta):
         """
         return '\n    #: '.join(textwrap.wrap(text.strip(), 76))
 
+    @staticmethod
+    def split_references(text: 'str') -> 'list[str]':
+        """Split an IANA reference cell into its citations.
+
+        IANA's CSV exports have spelt a cell citing two documents in two ways
+        (:issue:`1664`). It used to be ``[RFC1072][RFC6247]``, or one citation
+        per line of a quoted cell. The port number registry began writing
+        ``RFC 3501`` by 2026-09-29, and every registry re-exported on 2026-10-13
+        (17:26Z to 17:54Z) now reads ``[RFC 1072]; [RFC 6247]``. Both give
+        ``['RFC1072', 'RFC6247']`` here, so every crawler renders them
+        identically:
+
+        * a segment of nothing but whitespace and ``;`` separates two
+          citations rather than being one, and is dropped;
+        * ``RFC`` followed by whitespace and a number loses the whitespace,
+          which is the spelling the crawlers render as an :rst:role:`rfc` role.
+          ``RFC Errata 5748`` and draft names such as
+          ``RFC-ietf-tcpm-accurate-ecn-34`` are left as they are.
+
+        Any other segment, including text outside the brackets, is returned
+        verbatim and in order, as :func:`re.split` on the brackets alone did.
+
+        Args:
+            text: Raw reference cell.
+
+        Returns:
+            The cell's citations, without their brackets.
+
+        """
+        refs = []  # type: list[str]
+        for ref in re.split(r'\[|\]', text):
+            if re.fullmatch(r'[\s;]*', ref) is None:
+                refs.append(re.sub(r'\A(\s*)RFC\s+(?=\d)', r'\1RFC', ref))
+        return refs
+
     def safe_name(self, name: 'str') -> 'str':
         """Convert enumeration name to :class:`enum.Enum` friendly.
 
@@ -309,7 +344,7 @@ class Vendor(metaclass=VendorMeta):
             rfcs = item[2]
 
             temp = []  # type: list[str]
-            for rfc in filter(None, re.split(r'\[|\]', rfcs)):
+            for rfc in self.split_references(rfcs):
                 if 'RFC' in rfc and re.match(r'\d+', rfc[3:]):
                     #temp.append(f'[{rfc[:3]} {rfc[3:]}]')
                     temp_split = rfc[3:].split(', ', maxsplit=1)

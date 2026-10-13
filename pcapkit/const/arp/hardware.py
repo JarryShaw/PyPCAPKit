@@ -20,7 +20,7 @@ __all__ = ['Hardware']
 class Hardware(EnumRegistry, IntEnum):
     """[Hardware] Hardware Types [:rfc:`826`][:rfc:`5494`]"""
 
-    #: Reserved [RFC 5494]
+    #: Reserved [:rfc:`5494`]
     Reserved_0 = 0
 
     #: Ethernet (10Mb) [Jon Postel]
@@ -41,7 +41,7 @@ class Hardware(EnumRegistry, IntEnum):
     #: IEEE 802 Networks [Jon Postel]
     IEEE_802_Networks = 6
 
-    #: ARCNET [RFC 1201]
+    #: ARCNET [:rfc:`1201`]
     ARCNET = 7
 
     #: Hyperchannel [Jon Postel]
@@ -74,10 +74,10 @@ class Hardware(EnumRegistry, IntEnum):
     #: HDLC [Jon Postel]
     HDLC = 17
 
-    #: Fibre Channel [RFC 4338]
+    #: Fibre Channel [:rfc:`4338`]
     Fibre_Channel = 18
 
-    #: Asynchronous Transmission Mode (ATM) [RFC 2225]
+    #: Asynchronous Transmission Mode (ATM) [:rfc:`2225`]
     Asynchronous_Transmission_Mode_19 = 19
 
     #: Serial Line [Jon Postel]
@@ -95,7 +95,7 @@ class Hardware(EnumRegistry, IntEnum):
     #: IEEE 1394.1995 [Myron Hattig]
     IEEE_1394_1995 = 24
 
-    #: MAPOS [Mitsuru Maruyama][; ][RFC 2176]
+    #: MAPOS [Mitsuru Maruyama][:rfc:`2176`]
     MAPOS = 25
 
     #: Twinaxial [Marion Pitts]
@@ -113,10 +113,10 @@ class Hardware(EnumRegistry, IntEnum):
     #: ARPSec [Jerome Etienne]
     ARPSec = 30
 
-    #: IPsec tunnel [RFC 3456]
+    #: IPsec tunnel [:rfc:`3456`]
     IPsec_tunnel = 31
 
-    #: InfiniBand (TM) [RFC 4391]
+    #: InfiniBand (TM) [:rfc:`4391`]
     InfiniBand = 32
 
     #: TIA-102 Project 25 Common Air Interface (CAI) [Jeff Anderson,
@@ -130,7 +130,7 @@ class Hardware(EnumRegistry, IntEnum):
     #: Pure IP [Inaky Perez-Gonzalez]
     Pure_IP = 35
 
-    #: HW_EXP1 [RFC 5494]
+    #: HW_EXP1 [:rfc:`5494`]
     HW_EXP1 = 36
 
     #: HFI [Tseng-Hui Lin]
@@ -139,13 +139,13 @@ class Hardware(EnumRegistry, IntEnum):
     #: Unified Bus (UB) [Wei Pan]
     Unified_Bus = 38
 
-    #: HW_EXP2 [RFC 5494]
+    #: HW_EXP2 [:rfc:`5494`]
     HW_EXP2 = 256
 
     #: AEthernet [Geoffroy Gramaize]
     AEthernet = 257
 
-    #: Reserved [RFC 5494]
+    #: Reserved [:rfc:`5494`]
     Reserved_65535 = 65535
 
     @classmethod

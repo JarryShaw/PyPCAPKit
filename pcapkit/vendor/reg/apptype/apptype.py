@@ -1137,7 +1137,7 @@ class AppType(Vendor):
             desc = item[3].strip()
 
             temp = []  # type: list[str]
-            for rfc in filter(None, map(lambda s: s.strip(), re.split(r'\[|\]', item[8]))):
+            for rfc in map(str.strip, self.split_references(item[8])):
                 if 'RFC' in rfc and re.match(r'\d+', rfc[3:]):
                     match = re.fullmatch(r'RFC(?P<rfc>\d+)(, Section (?P<sec>.*?))?', rfc)
                     if match is None:

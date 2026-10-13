@@ -20,16 +20,16 @@ __all__ = ['DNSStatusCode']
 class DNSStatusCode(EnumRegistry, IntEnum):
     """[DNSStatusCode] Status Codes (DNS Update Mobility Option)"""
 
-    #: DNS update performed [RFC 5026]
+    #: DNS update performed [:rfc:`5026`]
     DNS_update_performed = 0
 
-    #: Reason unspecified [RFC 5026]
+    #: Reason unspecified [:rfc:`5026`]
     Reason_unspecified = 128
 
-    #: Administratively prohibited [RFC 5026]
+    #: Administratively prohibited [:rfc:`5026`]
     Administratively_prohibited = 129
 
-    #: DNS Update Failed [RFC 5026]
+    #: DNS Update Failed [:rfc:`5026`]
     DNS_Update_Failed = 130
 
     @classmethod
