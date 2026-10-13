@@ -203,8 +203,9 @@ names the default branch -- ``github.ref_name`` on both its triggers -- as
 stays put, as Update a release calls the target "Unused if the Git tag already
 exists". It also uploads only to a published release, read first with ``gh
 release view``. With none, the action would create one, and its tag, at
-``commit`` (``src/Action.ts:72-92``), and it would give a draft ``commit`` as
-its target (``src/Action.ts:85-92,107-120``). Conda
+``commit`` (``src/Action.ts:72-92``), and it would retarget a draft at
+``commit`` (``src/Action.ts:85-92,107-120``), which stays a draft but which a
+re-run of Create Release would reuse, target and all. Conda
 Update bumped 1.5.0b9's build three times while that run waited on approval;
 once ``conda-dist`` runs on every bump
 (`#1632 <https://github.com/JarryShaw/PyPCAPKit/issues/1632>`__), either path

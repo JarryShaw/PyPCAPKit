@@ -1234,11 +1234,13 @@ class TestCondaUpdateNeverMakesTheRelease(CondaDistMixin, unittest.TestCase):
     ``conda-dist`` attaches its packages with ``ncipollo/release-action@v1.21.0``
     and ``allowUpdates: true``, kept so #1632's ``test_cron_conda_really_does_publish``
     still finds it. That action's ``createOrUpdateRelease`` (``src/Action.ts:53-70``)
-    reads the release by tag; on a 404 it updates a draft of that tag or else
-    calls ``createRelease`` (``:72-92``) with ``target_commitish: commit``
-    (``src/Releases.ts:76-99``), and its update sends ``draft: false`` unless
-    ``omitDraftDuringUpdate`` is set (``src/Inputs.ts:210-213``), publishing the
-    draft. Either way a bump made while Create Release waits on its approval --
+    reads the release by tag, which GitHub's REST docs give as "a published
+    release"; on a 404 it updates a draft of that tag or else calls
+    ``createRelease`` (``:72-92``), both with ``target_commitish: commit``
+    (``:107-120``, ``src/Releases.ts:76-99,150-174``). ``omitDraftDuringUpdate``
+    keeps the draft a draft (``src/Inputs.ts:210-213``), but retargeted at
+    ``commit``, which a re-run of Create Release would reuse, target and all.
+    Either way a bump made while Create Release waits on its approval --
     1.5.0b9 waited three days, and cron-conda bumped three times meanwhile --
     would put ``v<version>`` on ``main``'s tip, and Create Release's tag check
     would then fail. On an existing release it calls Update a release with
@@ -1336,7 +1338,8 @@ class TestTheReleaseCheckScript(CondaDistMixin, unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(outputs, {'published': 'false'})
         self.assertFalse(self.runs(outputs), 'the action would run, and create the release at main')
-        self.assertIn(f'::notice title=No GitHub upload for {self.TAG}::{self.TAG} does not exist', result.stdout)
+        self.assertIn(f'::notice title=No GitHub upload for {self.TAG}::{self.TAG} does not exist, and the '
+                      "upload would create it, tagging main's tip. Create Release makes it", result.stdout)
         self.assert_viewed_once()
 
     def test_a_draft_skips_the_github_upload(self) -> None:
@@ -1345,8 +1348,9 @@ class TestTheReleaseCheckScript(CondaDistMixin, unittest.TestCase):
         result, outputs = self.check(GH_DRAFT='true')
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(outputs, {'published': 'false'})
-        self.assertFalse(self.runs(outputs), 'the action would run, and publish the draft')
-        self.assertIn(f'{self.TAG} is a draft, which the upload would publish', result.stdout)
+        self.assertFalse(self.runs(outputs), 'the action would run, and retarget the draft at main')
+        self.assertIn(f'::notice title=No GitHub upload for {self.TAG}::{self.TAG} is a draft, which the '
+                      'upload would retarget at main. Create Release makes it', result.stdout)
 
     def test_a_published_release_is_uploaded_to(self) -> None:
         """With ``commit`` the default branch, so Update a release resolves ``main``."""

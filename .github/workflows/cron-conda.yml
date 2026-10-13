@@ -558,11 +558,12 @@ jobs:
 
       # #1634: the upload below never makes the release. ncipollo/release-action
       # v1.21.0 creates a missing one, and its tag, at ``commit``
-      # (src/Action.ts:72-92), and publishes a draft, since an unset ``draft``
-      # is false on update (src/Inputs.ts:210-213). A bump made while Create
-      # Release waits on approval would then tag the pending version at main's
-      # tip, and Create Release's tag check would fail. Only the GitHub upload
-      # is skipped; the build is on anaconda.org regardless.
+      # (src/Action.ts:72-92), and retargets a draft at ``commit``
+      # (:85-92,107-120): ``omitDraftDuringUpdate`` keeps it a draft, but a
+      # re-run of Create Release would reuse it, target and all. A bump made
+      # while Create Release waits on approval would then tag the pending
+      # version at main's tip, and Create Release's tag check would fail. Only
+      # the GitHub upload is skipped; the build is on anaconda.org regardless.
       - name: Check the GitHub release exists
         id: release
         if: ${{ matrix.os == 'ubuntu-latest' }}
@@ -579,15 +580,15 @@ jobs:
             exit 0
           fi
           if [ "$status" -eq 0 ] && [ "$draft" = true ]; then
-            why="is a draft, which the upload would publish"
+            why="is a draft, which the upload would retarget at main"
           elif [ "$(cat "$errors")" = 'release not found' ]; then
-            why="does not exist, and the upload would create it"
+            why="does not exist, and the upload would create it, tagging main's tip"
           else
             cat "$errors" >&2
             echo "::error title=Could not read ${PCAPKIT_RELEASE_TAG}::gh release view exited ${status}."
             exit 1
           fi
-          echo "::notice title=No GitHub upload for ${PCAPKIT_RELEASE_TAG}::${PCAPKIT_RELEASE_TAG} ${why}, tagging main's tip. Create Release makes it, at the commit its run was created for (#1634); this build is on anaconda.org only."
+          echo "::notice title=No GitHub upload for ${PCAPKIT_RELEASE_TAG}::${PCAPKIT_RELEASE_TAG} ${why}. Create Release makes it, at the commit its run was created for (#1634); this build is on anaconda.org only."
           echo "published=false" >> "$GITHUB_OUTPUT"
 
       # ``commit`` is sent to Update a release as ``target_commitish``
