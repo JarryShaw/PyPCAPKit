@@ -20,13 +20,13 @@ __all__ = ['BindingRevocation']
 class BindingRevocation(EnumRegistry, IntEnum):
     """[BindingRevocation] Binding Revocation Type"""
 
-    #: Reserved [:rfc:`5846`]
+    #: Reserved [RFC 5846]
     Reserved_0 = 0
 
-    #: Binding Revocation Indication [:rfc:`5846`]
+    #: Binding Revocation Indication [RFC 5846]
     Binding_Revocation_Indication = 1
 
-    #: Binding Revocation Acknowledgement [:rfc:`5846`]
+    #: Binding Revocation Acknowledgement [RFC 5846]
     Binding_Revocation_Acknowledgement = 2
 
     @classmethod

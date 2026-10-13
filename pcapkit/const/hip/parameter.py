@@ -20,190 +20,190 @@ __all__ = ['Parameter']
 class Parameter(EnumRegistry, IntEnum):
     """[Parameter] HIP Parameter Types"""
 
-    #: ESP_INFO [:rfc:`7402`] (Length: 12)
+    #: ESP_INFO [RFC 7402] (Length: 12)
     ESP_INFO = 65
 
-    #: R1_Counter (v1 only) [:rfc:`5201`] (Length: 12)
+    #: R1_Counter (v1 only) [RFC 5201] (Length: 12)
     R1_Counter = 128
 
-    #: R1_COUNTER [:rfc:`7401`] (Length: 12)
+    #: R1_COUNTER [RFC 7401] (Length: 12)
     R1_COUNTER = 129
 
-    #: LOCATOR_SET [:rfc:`8046`]
+    #: LOCATOR_SET [RFC 8046]
     LOCATOR_SET = 193
 
-    #: PUZZLE [:rfc:`7401`] (Length: 12)
+    #: PUZZLE [RFC 7401] (Length: 12)
     PUZZLE = 257
 
-    #: SOLUTION [:rfc:`7401`] (Length: 20)
+    #: SOLUTION [RFC 7401] (Length: 20)
     SOLUTION = 321
 
-    #: SEQ [:rfc:`7401`] (Length: 4)
+    #: SEQ [RFC 7401] (Length: 4)
     SEQ = 385
 
-    #: ACK [:rfc:`7401`]
+    #: ACK [RFC 7401]
     ACK = 449
 
-    #: DH_GROUP_LIST [:rfc:`7401`]
+    #: DH_GROUP_LIST [RFC 7401]
     DH_GROUP_LIST = 511
 
     #: Unassigned
     Unassigned_512 = 512
 
-    #: DIFFIE_HELLMAN [:rfc:`7401`]
+    #: DIFFIE_HELLMAN [RFC 7401]
     DIFFIE_HELLMAN = 513
 
-    #: HIP_TRANSFORM (v1 only) [:rfc:`5201`]
+    #: HIP_TRANSFORM (v1 only) [RFC 5201]
     HIP_TRANSFORM = 577
 
     #: Unassigned
     Unassigned_578 = 578
 
-    #: HIP_CIPHER [:rfc:`7401`]
+    #: HIP_CIPHER [RFC 7401]
     HIP_CIPHER = 579
 
-    #: NAT_TRAVERSAL_MODE [:rfc:`5770`]
+    #: NAT_TRAVERSAL_MODE [RFC 5770]
     NAT_TRAVERSAL_MODE = 608
 
     #: Unassigned
     Unassigned_609 = 609
 
-    #: TRANSACTION_PACING [:rfc:`5770`] (Length: 4)
+    #: TRANSACTION_PACING [RFC 5770] (Length: 4)
     TRANSACTION_PACING = 610
 
-    #: ENCRYPTED [:rfc:`7401`]
+    #: ENCRYPTED [RFC 7401]
     ENCRYPTED = 641
 
-    #: HOST_ID [:rfc:`7401`]
+    #: HOST_ID [RFC 7401]
     HOST_ID = 705
 
-    #: HIT_SUITE_LIST [:rfc:`7401`]
+    #: HIT_SUITE_LIST [RFC 7401]
     HIT_SUITE_LIST = 715
 
-    #: CERT [:rfc:`7401`][:rfc:`8002`]
+    #: CERT [RFC 7401][; ][RFC 8002]
     CERT = 768
 
-    #: NOTIFICATION [:rfc:`7401`]
+    #: NOTIFICATION [RFC 7401]
     NOTIFICATION = 832
 
-    #: ECHO_REQUEST_SIGNED [:rfc:`7401`]
+    #: ECHO_REQUEST_SIGNED [RFC 7401]
     ECHO_REQUEST_SIGNED = 897
 
-    #: REG_INFO [:rfc:`8003`]
+    #: REG_INFO [RFC 8003]
     REG_INFO = 930
 
     #: Unassigned
     Unassigned_931 = 931
 
-    #: REG_REQUEST [:rfc:`8003`]
+    #: REG_REQUEST [RFC 8003]
     REG_REQUEST = 932
 
     #: Unassigned
     Unassigned_933 = 933
 
-    #: REG_RESPONSE [:rfc:`8003`]
+    #: REG_RESPONSE [RFC 8003]
     REG_RESPONSE = 934
 
     #: Unassigned
     Unassigned_935 = 935
 
-    #: REG_FAILED [:rfc:`8003`]
+    #: REG_FAILED [RFC 8003]
     REG_FAILED = 936
 
-    #: REG_FROM [:rfc:`5770`] (Length: 20)
+    #: REG_FROM [RFC 5770] (Length: 20)
     REG_FROM = 950
 
-    #: ECHO_RESPONSE_SIGNED [:rfc:`7401`]
+    #: ECHO_RESPONSE_SIGNED [RFC 7401]
     ECHO_RESPONSE_SIGNED = 961
 
-    #: TRANSPORT_FORMAT_LIST [:rfc:`7401`]
+    #: TRANSPORT_FORMAT_LIST [RFC 7401]
     TRANSPORT_FORMAT_LIST = 2049
 
-    #: ESP_TRANSFORM [:rfc:`7402`]
+    #: ESP_TRANSFORM [RFC 7402]
     ESP_TRANSFORM = 4095
 
-    #: SEQ_DATA [:rfc:`6078`] (Length: 4)
+    #: SEQ_DATA [RFC 6078] (Length: 4)
     SEQ_DATA = 4481
 
-    #: ACK_DATA [:rfc:`6078`]
+    #: ACK_DATA [RFC 6078]
     ACK_DATA = 4545
 
-    #: PAYLOAD_MIC [:rfc:`6078`]
+    #: PAYLOAD_MIC [RFC 6078]
     PAYLOAD_MIC = 4577
 
-    #: TRANSACTION_ID [:rfc:`6078`]
+    #: TRANSACTION_ID [RFC 6078]
     TRANSACTION_ID = 4580
 
-    #: OVERLAY_ID [:rfc:`6079`]
+    #: OVERLAY_ID [RFC 6079]
     OVERLAY_ID = 4592
 
-    #: ROUTE_DST [:rfc:`6028`]
+    #: ROUTE_DST [RFC 6028]
     ROUTE_DST = 4601
 
-    #: RELAYED_ADDRESS [:rfc:`9028`] (Length: 20)
+    #: RELAYED_ADDRESS [RFC 9028] (Length: 20)
     RELAYED_ADDRESS = 4650
 
-    #: MAPPED_ADDRESS [:rfc:`9028`] (Length: 20)
+    #: MAPPED_ADDRESS [RFC 9028] (Length: 20)
     MAPPED_ADDRESS = 4660
 
-    #: PEER_PERMISSION [:rfc:`9028`] (Length: 48)
+    #: PEER_PERMISSION [RFC 9028] (Length: 48)
     PEER_PERMISSION = 4680
 
-    #: CANDIDATE_PRIORITY [:rfc:`9028`] (Length: 4)
+    #: CANDIDATE_PRIORITY [RFC 9028] (Length: 4)
     CANDIDATE_PRIORITY = 4700
 
-    #: NOMINATE [:rfc:`9028`] (Length: 4)
+    #: NOMINATE [RFC 9028] (Length: 4)
     NOMINATE = 4710
 
-    #: HIP_TRANSPORT_MODE [:rfc:`6261`]
+    #: HIP_TRANSPORT_MODE [RFC 6261]
     HIP_TRANSPORT_MODE = 7680
 
-    #: HIP_MAC [:rfc:`7401`]
+    #: HIP_MAC [RFC 7401]
     HIP_MAC = 61505
 
-    #: HIP_MAC_2 [:rfc:`7401`]
+    #: HIP_MAC_2 [RFC 7401]
     HIP_MAC_2 = 61569
 
-    #: HIP_SIGNATURE_2 [:rfc:`7401`]
+    #: HIP_SIGNATURE_2 [RFC 7401]
     HIP_SIGNATURE_2 = 61633
 
-    #: HIP_SIGNATURE [:rfc:`7401`]
+    #: HIP_SIGNATURE [RFC 7401]
     HIP_SIGNATURE = 61697
 
-    #: ECHO_REQUEST_UNSIGNED [:rfc:`7401`]
+    #: ECHO_REQUEST_UNSIGNED [RFC 7401]
     ECHO_REQUEST_UNSIGNED = 63661
 
-    #: ECHO_RESPONSE_UNSIGNED [:rfc:`7401`]
+    #: ECHO_RESPONSE_UNSIGNED [RFC 7401]
     ECHO_RESPONSE_UNSIGNED = 63425
 
-    #: RELAY_FROM [:rfc:`5770`] (Length: 20)
+    #: RELAY_FROM [RFC 5770] (Length: 20)
     RELAY_FROM = 63998
 
-    #: RELAY_TO [:rfc:`5770`] (Length: 20)
+    #: RELAY_TO [RFC 5770] (Length: 20)
     RELAY_TO = 64002
 
-    #: OVERLAY_TTL [:rfc:`6079`] (Length: 4)
+    #: OVERLAY_TTL [RFC 6079] (Length: 4)
     OVERLAY_TTL = 64011
 
-    #: ROUTE_VIA [:rfc:`6028`]
+    #: ROUTE_VIA [RFC 6028]
     ROUTE_VIA = 64017
 
-    #: FROM [:rfc:`8004`] (Length: 16)
+    #: FROM [RFC 8004] (Length: 16)
     FROM = 65498
 
     #: Unassigned
     Unassigned_65499 = 65499
 
-    #: RVS_HMAC [:rfc:`8004`]
+    #: RVS_HMAC [RFC 8004]
     RVS_HMAC = 65500
 
     #: Unassigned
     Unassigned_65501 = 65501
 
-    #: VIA_RVS [:rfc:`8004`]
+    #: VIA_RVS [RFC 8004]
     VIA_RVS = 65502
 
-    #: RELAY_HMAC [:rfc:`5770`]
+    #: RELAY_HMAC [RFC 5770]
     RELAY_HMAC = 65520
 
     @classmethod
@@ -319,7 +319,7 @@ class Parameter(EnumRegistry, IntEnum):
             #: Unassigned
             return cls._unregistered_member(value, 'Unassigned')
         if 32768 <= value <= 49151:
-            #: Reserved [:rfc:`7401`]
+            #: Reserved [RFC 7401]
             return cls._unregistered_member(value, 'Reserved')
         if 49152 <= value <= 61504:
             #: Unassigned

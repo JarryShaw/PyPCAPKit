@@ -20,13 +20,13 @@ __all__ = ['DITypes']
 class DITypes(EnumRegistry, IntEnum):
     """[DITypes] DI-Types"""
 
-    #: none included [:rfc:`7401`]
+    #: none included [RFC 7401]
     none_included = 0
 
-    #: FQDN [:rfc:`7401`]
+    #: FQDN [RFC 7401]
     FQDN = 1
 
-    #: NAI [:rfc:`7401`]
+    #: NAI [RFC 7401]
     NAI = 2
 
     @classmethod
