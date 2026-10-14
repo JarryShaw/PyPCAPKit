@@ -101,6 +101,11 @@ their row says otherwise:
 |                                                                 | PCAP savefiles only, otherwise                                |
 |                                                                 | :exc:`~pcapkit.utilities.exceptions.FormatError`              |
 +-----------------------------------------------------------------+---------------------------------------------------------------+
+| :class:`~pcapkit.foundation.engines.scapy.Scapy`                | reads IPv6 only as far as `Scapy`_ dissects it, without a     |
+|                                                                 | warning: behind a BSD loopback header only at the family      |
+|                                                                 | Scapy binds it to on the host it runs on, and no TCP or       |
+|                                                                 | Fragment header behind an AH, Mobility, HIP or Shim6 header   |
++-----------------------------------------------------------------+---------------------------------------------------------------+
 | :class:`~pcapkit.foundation.engines.dpkt.DPKT`,                 | no PCAP output, since each frame reaches the writer as a      |
 | :class:`~pcapkit.foundation.engines.scapy.Scapy`,               | plain :obj:`dict` -- ``json`` is written instead, with a      |
 | :class:`~pcapkit.foundation.engines.pyshark.PyShark`,           | :class:`~pcapkit.utilities.warnings.FormatWarning`            |

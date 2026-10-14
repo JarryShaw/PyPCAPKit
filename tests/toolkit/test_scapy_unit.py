@@ -23,15 +23,30 @@ TRAILER = bytes.fromhex('deadbeef')
 DATAGRAM = bytes(range(80))
 
 
-def write_pcap(frames: 'list[bytes]') -> 'str':
-    """Write ``frames`` to a temporary Ethernet PCAP file and return its path."""
+def write_pcap(frames: 'list[bytes]', linktype: 'int' = 1) -> 'str':
+    """Write ``frames`` to a temporary PCAP file, Ethernet unless ``linktype`` says otherwise, and return its path."""
     fd, path = tempfile.mkstemp(suffix='.pcap')
     with os.fdopen(fd, 'wb') as file:
-        file.write(struct.pack('<IHHiIII', 0xA1B2C3D4, 2, 4, 0, 0, 65535, 1))
+        file.write(struct.pack('<IHHiIII', 0xA1B2C3D4, 2, 4, 0, 0, 65535, linktype))
         for index, frame in enumerate(frames):
             file.write(struct.pack('<IIII', 1_600_000_000 + index, 0, len(frame), len(frame)))
             file.write(frame)
     return path
+
+
+def extract(test: 'unittest.TestCase', frames: 'list[bytes]', linktype: 'int' = 1, **kwargs: 'object'):
+    """Read ``frames``, a PCAP file of ``linktype``, with the scapy engine, which ``test`` closes after it."""
+    import pcapkit
+
+    path = write_pcap(frames, linktype)
+    test.addCleanup(os.remove, path)
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore')
+        extractor = pcapkit.extract(fin=path, nofile=True, engine='scapy', **kwargs)
+    test.addCleanup(close_extractor, extractor)
+    if extractor._exnam != 'scapy':  # pylint: disable=protected-access
+        test.skipTest('scapy did not run')
+    return extractor
 
 
 @unittest.skipUnless(HAS_RUNTIME and HAS_SCAPY, 'runtime dependencies not installed')
@@ -362,7 +377,7 @@ class ScapyTrailerTests(unittest.TestCase):
     ``Padding`` layer, and ``bytes()`` of every layer above it ends with them, so
     an IPv6 fragment's data and a TCP segment's payload both carried the frame's
     trailer. Every frame here is written to a capture and read back through the
-    engine, and the default engine reads the same capture for comparison.
+    engine.
 
     """
 
@@ -429,16 +444,8 @@ class ScapyTrailerTests(unittest.TestCase):
             tso[:16] + b'\x00\x00' + tso[18:],
         ]
 
-    def _extract(self, frames: 'list[bytes]', engine: 'str' = 'scapy', **kwargs: 'object'):
-        import pcapkit
-
-        path = write_pcap(frames)
-        self.addCleanup(os.remove, path)
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore')
-            extractor = pcapkit.extract(fin=path, nofile=True, engine=engine, **kwargs)
-        self.addCleanup(close_extractor, extractor)
-        return extractor
+    def _extract(self, frames: 'list[bytes]', **kwargs: 'object'):
+        return extract(self, frames, **kwargs)
 
     def test_ipv6_fragment_data_stops_at_the_payload_length(self) -> None:
         from pcapkit.toolkit import scapy as toolkit
@@ -485,88 +492,33 @@ class ScapyTrailerTests(unittest.TestCase):
                 self.assertEqual(flow.header, header)
 
     def test_tcp_reassembly_is_the_stream_sent(self) -> None:
-        def streams(engine: 'str') -> 'dict[tuple[str, int], bytes]':
-            extractor = self._extract(self._tcp_frames(), engine=engine, store=False,
-                                      reassembly=True, tcp=True)
-            return {(str(datagram.id.src[0]), datagram.id.src[1]): datagram.payload
-                    for datagram in extractor.reassembly.tcp}
-
-        scapy = streams('scapy')
+        extractor = self._extract(self._tcp_frames(), store=False, reassembly=True, tcp=True)
+        scapy = {(str(datagram.id.src[0]), datagram.id.src[1]): datagram.payload
+                 for datagram in extractor.reassembly.tcp}
         # ``b'X\x00\x00\x00\x00\x00\xef'`` before the fix: the first segment's
         # padding took the place of the second's data, and its trailer followed
         self.assertEqual(scapy.get(('192.0.2.1', 1)), b'XYZ')
         self.assertEqual(scapy.get(('2001:db8::1', 1)), b'six')
-        self.assertEqual(scapy, streams('default'))
-
-    def test_every_adapter_agrees_with_the_default_engine(self) -> None:
-        from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.toolkit import pcap as toolkit_pcap
-        from pcapkit.toolkit import scapy as toolkit
-
-        frames = self._ip_frames() + self._tcp_frames()
-        packets = self._extract(frames, store=True).frame
-        defaults = self._extract(frames, engine='default', store=True).frame
-        self.assertEqual(len(packets), len(defaults))
-
-        def fields(data: 'object', names: 'tuple[str, ...]') -> 'object':
-            if data is None:
-                return None
-            return {name: bytes(value) if isinstance(value, (bytes, bytearray)) else value
-                    for name, value in ((name, getattr(data, name)) for name in names)}
-
-        ip_fields = ('fo', 'ihl', 'mf', 'tl', 'header', 'payload')
-        tcp_fields = ('dsn', 'ack', 'header', 'payload', 'first', 'last', 'len')
-        trace_fields = ('seq', 'ack', 'header', 'payload')
-        compared = 0
-        for index, (packet, default) in enumerate(zip(packets, defaults)):
-            for adapter, expected, actual in (
-                ('ipv4', fields(toolkit_pcap.ipv4_reassembly(default), ip_fields),
-                 fields(toolkit.ipv4_reassembly(packet), ip_fields)),
-                ('ipv6', fields(toolkit_pcap.ipv6_reassembly(default), ip_fields),
-                 fields(toolkit.ipv6_reassembly(packet), ip_fields)),
-                ('tcp', fields(toolkit_pcap.tcp_reassembly(default), tcp_fields),
-                 fields(toolkit.tcp_reassembly(packet), tcp_fields)),
-                ('trace', fields(toolkit_pcap.tcp_traceflow(default, data_link=LinkType.ETHERNET),
-                                 trace_fields),
-                 fields(toolkit.tcp_traceflow(packet), trace_fields)),
-            ):
-                compared += expected is not None
-                with self.subTest(frame=index, adapter=adapter):
-                    self.assertEqual(actual, expected)
-        # every IPv4 frame here leaves DF clear, so each of the 7 makes an IPv4
-        # record; then the 2 IPv6 fragments, and a TCP and a trace record for
-        # each TCP frame
-        self.assertEqual(compared, 7 + 2 + 2 * len(self.TCP_PAYLOADS))
 
     def _assert_tcp_records(self, frames: 'list[bytes]', expected: 'list[bytes | None]') -> None:
-        """Each frame gives ``expected`` TCP payload, or no record, as on the default engine."""
-        from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.toolkit import pcap as toolkit_pcap
+        """Each frame gives ``expected`` TCP payload, or no record."""
         from pcapkit.toolkit import scapy as toolkit
 
-        def octets(record: 'object') -> 'object':
-            return None if record is None else (bytes(record.header), bytes(record.payload))
-
         packets = self._extract(frames, store=True).frame
-        defaults = self._extract(frames, engine='default', store=True).frame
         self.assertEqual(len(packets), len(expected))
-        for index, (packet, default, payload) in enumerate(zip(packets, defaults, expected)):
+        for index, (packet, payload) in enumerate(zip(packets, expected)):
             with self.subTest(frame=index):
                 segment = toolkit.tcp_reassembly(packet)
                 flow = toolkit.tcp_traceflow(packet)
                 self.assertEqual(None if segment is None else bytes(segment.payload), payload)
                 self.assertEqual(None if flow is None else bytes(flow.payload), payload)
-                self.assertEqual(octets(segment), octets(toolkit_pcap.tcp_reassembly(default)))
-                self.assertEqual(octets(flow), octets(toolkit_pcap.tcp_traceflow(
-                    default, data_link=LinkType.ETHERNET)))
 
     def test_a_data_offset_below_the_fixed_header_gives_no_segment(self) -> None:
         from scapy.layers.inet import IP, TCP
         from scapy.packet import Raw
 
-        # a header shorter than 20 octets is malformed (:rfc:`9293#section-3.1`),
-        # and the default engine reads no segment; the payload here had started
-        # with the last of the header's octets
+        # a header shorter than 20 octets is malformed (:rfc:`9293#section-3.1`);
+        # the payload here had started with the last of the header's octets
         self._assert_tcp_records([
             bytes(self._ether() / IP(src='192.0.2.1', dst='198.51.100.1') /
                   TCP(sport=1, dport=2, flags='PA', dataofs=dataofs) / Raw(b'abcdef')) + TRAILER
@@ -621,6 +573,159 @@ class ScapyTrailerTests(unittest.TestCase):
         fragment = toolkit.ipv6_reassembly(packet)
         assert fragment is not None
         self.assertEqual(bytes(fragment.payload), b'hand')
+
+
+@unittest.skipUnless(HAS_RUNTIME and HAS_SCAPY, 'runtime dependencies not installed')
+class ScapyFrameGuardTests(unittest.TestCase):
+    """Frames whose Scapy layers claim more than their octets hold (GitHub issue #1708).
+
+    Each guard here first came with a fix that #1708 reverted, as that fix's
+    aim was to read frames as the default engine does. They are kept because
+    they are the adapters' own job, whatever any other engine reads: to end no
+    extraction, and to hand on only the frame's own octets, as the datagram
+    the adapter reports them for.
+
+    """
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def _ether(self):
+        from scapy.layers.l2 import Ether
+
+        return Ether(src='aa:aa:aa:aa:aa:aa', dst='bb:bb:bb:bb:bb:bb')
+
+    def test_a_zero_length_frame_ends_no_extraction(self) -> None:
+        # #1676: Scapy hands a zero-length frame back as ``IP()`` at RAW (101)
+        # and IPV4 (228), whose ``ihl`` is None, and IPv4 reassembly raised
+        # TypeError on it, which ended the extraction
+        from pcapkit.toolkit import scapy as toolkit
+
+        frame = bytes.fromhex('4500001c00010000400600000a0000010a000002') + bytes(8)
+        for linktype in (101, 228):
+            with self.subTest(linktype=linktype):
+                extractor = extract(self, [b'', frame], linktype, store=True, reassembly=True, ipv4=True)
+                self.assertEqual(len(extractor.frame), 2)
+                self.assertIsNone(toolkit.ipv4_reassembly(extractor.frame[0]))
+                self.assertEqual([tuple(datagram.index) for datagram in extractor.reassembly.ipv4], [(2,)])
+
+    def test_a_zero_length_frame_carries_no_octets(self) -> None:
+        # #1676: ``bytes()`` of the layer of defaults Scapy hands a zero-length
+        # frame back as builds a header out of nothing, which ``packet2dict``
+        # reported as the frame's octets
+        from pcapkit.toolkit import scapy as toolkit
+
+        for linktype in (0, 1, 101, 108, 228, 229):
+            with self.subTest(linktype=linktype):
+                packet, = extract(self, [b''], linktype, store=True).frame
+                self.assertEqual(toolkit.packet2dict(packet)['packet'], b'')
+                record = toolkit.packet2frame(packet)
+                self.assertEqual((bytes(record.packet), record.frame_info.incl_len), (b'', 0))
+
+    def test_ipv4_in_ipv6_ends_at_the_payload_length(self) -> None:
+        # #1623: Scapy files what follows an IPv6 Payload Length as padding at the
+        # end of the packet, so ``bytes()`` of the IPv4 layer inside ended with
+        # the frame's trailer, and IPv4 reassembly took it for the datagram's data
+        from scapy.layers.inet import IP
+        from scapy.layers.inet6 import IPv6
+        from scapy.packet import Raw
+
+        from pcapkit.toolkit import scapy as toolkit
+
+        ip = {'src': '192.0.2.1', 'dst': '198.51.100.1', 'proto': 17}
+        ipv6 = {'src': '2001:db8::1', 'dst': '2001:db8::2', 'nh': 4}
+        tso = bytearray(bytes(IP(**ip, id=3) / Raw(b'A' * 16)))
+        tso[2:4] = b'\x00\x00'      # a Total Length of 0, as TCP segmentation offload leaves it
+        # an IPv4 header of 24 octets, its options cut short by a Payload Length of 22
+        fixed = bytes(IP(**ip, id=4, flags='MF', len=40))[:20]
+        options = bytes([0x46]) + fixed[1:] + b'\x01' * 4 + b'B' * 16
+        frames = [bytes(self._ether() / IPv6(**ipv6) / Raw(bytes(tso))) + TRAILER,
+                  bytes(self._ether() / IPv6(**ipv6, plen=22) / Raw(options)) + TRAILER]
+
+        extractor = extract(self, frames, store=True, reassembly=True, ipv4=True)
+        whole, cut = extractor.frame
+        data = toolkit.ipv4_reassembly(whole)
+        assert data is not None
+        self.assertEqual((bytes(data.header), bytes(data.payload)), (bytes(tso[:20]), b'A' * 16))
+        self.assertIsNone(toolkit.ipv4_reassembly(cut))
+        datagram, = extractor.reassembly.ipv4
+        # only ``Completion.COMPLETE`` is truthy
+        self.assertTrue(datagram.completed)
+        self.assertEqual(datagram.payload, b'A' * 16)
+
+    def test_a_packet_built_by_hand_is_read_as_the_octets_it_builds(self) -> None:
+        # #1676: Scapy leaves ``ihl``, ``len`` and ``dataofs`` None on a layer
+        # built by hand until it is built; IPv4 and TCP reassembly and TCP flow
+        # tracing raised TypeError on them, and the frame record that flow
+        # tracing hands on carried none of the packet's octets
+        from scapy.layers.inet import IP, TCP
+        from scapy.layers.inet6 import IPv6
+        from scapy.packet import Raw
+
+        from pcapkit.toolkit import scapy as toolkit
+
+        ip = {'src': '192.0.2.1', 'dst': '198.51.100.1'}
+        fragment = self._ether() / IP(**ip, id=5, flags='MF') / Raw(b'x' * 8)
+        self.assertIsNone(fragment[IP].ihl)
+        data = toolkit.ipv4_reassembly(fragment)
+        assert data is not None
+        self.assertEqual((data.ihl, data.tl, bytes(data.header), bytes(data.payload)),
+                         (20, 28, bytes(fragment)[14:34], b'x' * 8))
+
+        segment = TCP(sport=1, dport=2) / Raw(b'data')
+        for label, packet, start in (
+            ('ipv4', self._ether() / IP(**ip, flags='DF') / segment, 34),
+            ('ipv6', self._ether() / IPv6(src='2001:db8::1', dst='2001:db8::2') / segment, 54),
+            # given a Total Length but no IHL
+            ('ipv4 of a total length', self._ether() / IP(**ip, flags='DF', len=44) / segment, 34),
+        ):
+            with self.subTest(packet=label):
+                octets = bytes(packet)
+                record = toolkit.tcp_reassembly(packet)
+                assert record is not None
+                self.assertEqual((bytes(record.header), bytes(record.payload)), (octets[start:start + 20], b'data'))
+                flow = toolkit.tcp_traceflow(packet)
+                assert flow is not None
+                self.assertEqual((bytes(flow.header), bytes(flow.payload)), (octets[start:start + 20], b'data'))
+                self.assertEqual((bytes(flow.frame.packet), flow.frame.frame_info.incl_len), (octets, len(octets)))
+
+    def test_ipv6_reassembly_takes_only_its_own_fragment_header(self) -> None:
+        # The Fragment header of a packet the IPv6 layer carries, here the inner
+        # packet of 6in6, had been handed on with the outer packet's addresses,
+        # and both IPv6 headers as the part before the Fragment header
+        from scapy.layers.inet import IP
+        from scapy.layers.inet6 import IPv6, IPv6ExtHdrFragment
+        from scapy.layers.l2 import Ether
+        from scapy.packet import Raw
+
+        from pcapkit.toolkit import scapy as toolkit
+
+        inner = IPv6(src='fd00::1', dst='fd00::2') / IPv6ExtHdrFragment(nh=17, id=7, m=1) / Raw(b'B' * 16)
+        tunnelled = Ether(bytes(self._ether() / IPv6(src='2001:db8::1', dst='2001:db8::2') / inner))
+        self.assertIsNone(toolkit.ipv6_reassembly(tunnelled))
+        # carried in IPv4, the inner packet is the first IPv6 layer, and the Fragment header its own
+        data = toolkit.ipv6_reassembly(Ether(bytes(self._ether() / IP(src='192.0.2.1', dst='198.51.100.1') / inner)))
+        assert data is not None
+        self.assertEqual((str(data.bufid[0]), data.bufid[2], bytes(data.header)), ('fd00::1', 7, bytes(inner)[:40]))
+
+    def test_no_ipv6_fragment_is_read_in_a_later_ipv4_fragment(self) -> None:
+        # A later IPv4 fragment's data is a slice of the datagram's payload, with
+        # no upper-layer header in it (:rfc:`791#section-3.2`), but Scapy dissects
+        # IPv6 in it whatever the fragment offset
+        from scapy.layers.inet import IP
+        from scapy.layers.inet6 import IPv6, IPv6ExtHdrFragment
+        from scapy.layers.l2 import Ether
+        from scapy.packet import Raw
+
+        from pcapkit.toolkit import scapy as toolkit
+
+        ip = {'src': '192.0.2.1', 'dst': '198.51.100.1', 'proto': 41}
+        inner = IPv6(src='fd00::1', dst='fd00::2') / IPv6ExtHdrFragment(nh=17, id=7, m=1) / Raw(b'B' * 16)
+        later = Ether(bytes(self._ether() / IP(**ip, frag=5) / inner))
+        self.assertIsInstance(later[IP].payload, IPv6)
+        self.assertIsNone(toolkit.ipv6_reassembly(later))
+        # the first fragment's data does start with the IPv6 header
+        self.assertIsNotNone(toolkit.ipv6_reassembly(Ether(bytes(self._ether() / IP(**ip, flags='MF') / inner))))
 
 
 if __name__ == '__main__':

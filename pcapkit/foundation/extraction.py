@@ -1186,9 +1186,9 @@ class Extractor(Generic[_P]):
 
         # NOTE: the third-party engines' adapters hand the output writer each
         # frame as a plain :obj:`dict` built by ``packet2dict``, which carries
-        # neither the frame's octets nor its record header, so there is nothing
-        # for the PCAP writer to write. The flow tracer has the same limitation,
-        # and is given the same replacement below.
+        # no record header, so there is nothing for the PCAP writer to write.
+        # The flow tracer has the same limitation where an engine's adapters
+        # build no frame record, and is given the same replacement below.
         if (self._exnam in ('dpkt', 'scapy', 'pyshark', 'pypcap', 'pcap_ct', 'pypcapfile')
                 and format in ('pcap', 'cap')):
             warn(f"'Extractor(engine={self._exnam})' does not support 'format={format}'; "

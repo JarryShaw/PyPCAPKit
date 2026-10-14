@@ -19,7 +19,7 @@ cannot be used for it.
 
    Several functions here import a `Scapy`_ layer module lazily, inside the
    function body -- :func:`ipv6_reassembly` needs
-   :class:`scapy.layers.inet6.IPv6`, for instance. Those imports are
+   :class:`scapy.layers.inet6.IPv6ExtHdrFragment`, for instance. Those imports are
    for the *classes* they name and nothing more. They must not be mistaken for how
    `Scapy`_'s layer registries get populated, even though they do populate them as
    a side effect, because by the time any of these functions runs the engine has
@@ -37,10 +37,8 @@ cannot be used for it.
 """
 import decimal
 import ipaddress
-import struct
-from typing import TYPE_CHECKING, NamedTuple, cast
+from typing import TYPE_CHECKING, cast
 
-from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
@@ -48,12 +46,10 @@ from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.data import FrameRecord
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
 from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
-from pcapkit.protocols.internet.internet import EXTENSION_HEADER_LIMIT
-from pcapkit.protocols.protocol import FRAME_LAYER_LIMIT
 from pcapkit.protocols.schema.internet.ipv6 import jumbo_payload_length
 from pcapkit.toolkit.pypcapfile import (IP_TUNNELS, IPV4_EXTENSION_HEADERS, IPV4_HEADER_LEN,
-                                        IPV6_EXTENSION_HEADERS, IPV6_HEADER_LEN, TCP_MIN_HEADER_LEN,
-                                        _default_accepts, _walk_extension_headers)
+                                        IPV6_HEADER_LEN, TCP_MIN_HEADER_LEN, _default_accepts,
+                                        _walk_extension_headers)
 from pcapkit.utilities.compat import ModuleNotFoundError  # pylint: disable=redefined-builtin
 from pcapkit.utilities.exceptions import MissingKeyError, ModuleNotFound, stacklevel
 from pcapkit.utilities.warnings import ScapyWarning, warn
@@ -67,7 +63,7 @@ except ModuleNotFoundError:
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
-    from typing import Any, Iterator, Optional
+    from typing import Any
 
     from scapy.layers.inet import IP, TCP
     from scapy.layers.inet6 import IPv6
@@ -86,12 +82,6 @@ RESOLUTION_ATTR = '__pcapkit_resolution__'
 #: Attribute a packet's data link type is stashed under, as the capture's
 #: ``LINKTYPE_*`` number, by :func:`attach_linktype`.
 LINKTYPE_ATTR = '__pcapkit_linktype__'
-
-#: The BSD loopback address families the default engine dissects IP behind,
-#: each mapped to the IP version it carries, as
-#: :class:`~pcapkit.protocols.link.loopback.Loopback` reads them (:issue:`1574`):
-#: ``AF_INET``, and the ``AF_INET6`` of each of the BSDs.
-LOOPBACK_FAMILIES = {2: 4, 24: 6, 28: 6, 30: 6}
 
 
 def attach_resolution(packet: 'Packet', resolution: 'int') -> 'None':
@@ -211,8 +201,8 @@ def packet2frame(packet: 'Packet') -> 'FrameRecord':
         into (see :func:`_frame`). ``orig_len`` is ``packet.wirelen``, the
         record's original length.
 
-        The fraction in ``frame_info.ts_usec`` is in the capture's own resolution,
-        as the default engine's is. That resolution is the one
+        The fraction in ``frame_info.ts_usec`` is in the capture's own
+        resolution. That resolution is the one
         :class:`~pcapkit.foundation.engines.scapy.Scapy` attaches with
         :func:`attach_resolution`, never one guessed from the value: a
         nanosecond count that is a whole number of microseconds has the same
@@ -258,11 +248,9 @@ def _frame(packet: 'Packet') -> 'bytes':
     Note:
         `Scapy`_ dissects a packet only from a non-empty string, so a
         zero-length frame comes back as the first layer its link type names,
-        every field left to its default, as one built by hand with no fields
-        would be. ``bytes()`` of it builds a header out of nothing -- 20 octets
-        at ``RAW`` and ``IPV4``, of an IPv4 layer whose ``ihl``, ``len`` and
-        ``chksum`` are :data:`None` until then -- where the record has none
-        (:issue:`1676`).
+        every field left to its default. ``bytes()`` of it builds a header out
+        of nothing -- 20 octets at ``RAW`` and ``IPV4``, 14 at ``ETHERNET`` --
+        where the record has none (:issue:`1676`).
 
     """
     original = getattr(packet, 'original', None)
@@ -286,18 +274,19 @@ def _within_datagrams(layer: 'Packet') -> 'bytes':
         datagram's declared length as a :class:`~scapy.packet.Padding` layer --
         an Ethernet frame's padding up to its 60-octet minimum, or a trailer
         such as an FCS -- and ``bytes()`` of *any* layer above that one ends
-        with it. Those octets are no part of the datagram, and the default
-        engine never hands them over (:issue:`1584`), so they are cut off here
-        by the default engine's rules: an IPv4 Total Length of zero, as TCP
-        segmentation offload leaves, runs the datagram to the end of the frame
-        (:issue:`1547`), and an IPv6 Payload Length of zero gives way to a
-        Jumbo Payload option (:issue:`1434`). The latter is not left to Scapy,
-        which reads that option's length in host byte order and adds the
-        Hop-by-Hop Options header to it a second time.
+        with it. Those octets are no part of the datagram (:issue:`1584`), so
+        they are cut off here. An IPv4 Total Length of zero, as TCP
+        segmentation offload leaves, declares nothing, so the datagram runs to
+        the end of the frame (:issue:`1547`); an IPv6 Payload Length of zero
+        gives way to a Jumbo Payload option (:issue:`1434`), whose length is
+        read here rather than left to Scapy, which reads it in host byte order
+        and adds the Hop-by-Hop Options header to it a second time.
 
-        Every IP layer above ``layer`` bounds it, not only the nearest, as each
-        bounds what the default engine hands the next: a datagram tunnelled in
-        IP may declare more than the one carrying it holds, or nothing at all.
+        Every IP layer above ``layer`` bounds it, not only the nearest: a
+        datagram tunnelled in IP may declare more than the one carrying it
+        holds, or nothing at all. An IPv4 layer built by hand has no ``ihl``
+        until it is built, so one given a Total Length alone has its IHL read
+        off the octets it builds into (:issue:`1676`).
 
     """
     from scapy.layers.inet import IP
@@ -337,8 +326,7 @@ def _tcp_segment(tcp: 'TCP') -> 'tuple[bytes, bytes] | None':
         after it, up to the end of the datagrams that carry the segment, c.f.
         ``_within_datagrams()``; or :data:`None` if the datagrams hold fewer
         than the 20 octets of the fixed header, or the Data Offset counts fewer
-        (:rfc:`9293#section-3.1`), since the default engine then reads no
-        segment at all.
+        (:rfc:`9293#section-3.1`), as there is then no header to split off.
 
     Note:
         The Data Offset is read off the octets, which for a dissected layer
@@ -354,458 +342,25 @@ def _tcp_segment(tcp: 'TCP') -> 'tuple[bytes, bytes] | None':
     return segment[:hdr_len], segment[hdr_len:]
 
 
-def _ipv4_accepted(ipv4: 'IP') -> 'bool':
-    """Test if the default engine reads a Scapy IPv4 layer as an IPv4 layer.
-
-    Args:
-        ipv4: IPv4 layer of a dissected Scapy packet.
-
-    Returns:
-        :data:`False` if the default engine's IPv4 parser rejects its header --
-        its version is not 4, its IHL is below 5 or runs past the captured
-        octets, or its options are ones the parser rejects (:issue:`1607`) --
-        as the default engine then dissects nothing past it; else :data:`True`.
-
-    Note:
-        `Scapy`_ dissects what an IPv4 EtherType or tunnel carries as IPv4
-        whatever its version or IHL, and never checks its options, so the
-        header is asked of the parser itself (see
-        :func:`pcapkit.toolkit.pypcapfile._default_accepts`). Its octets
-        are those `Scapy`_ dissected the layer from, which ``bytes()`` gives
-        back as they were, as far as the IHL goes, and no fewer than the 20 of
-        the fixed header, as the default engine reads at least those. A header
-        of version 4 with an IHL of 5 is not parsed: `Scapy`_ dissects none
-        shorter than 20 octets, and the parser checks nothing else of one.
-
-    """
-    if ipv4.version == 4 and ipv4.ihl == 5:
-        return True
-    octets = bytes(ipv4)
-    return _default_accepts('IPv4', octets[:max((octets[0] & 0x0F) * 4, 20)])
-
-
-def _quoted(layer: 'Packet') -> 'bool':
-    """Test if a Scapy layer heads the datagram an ICMP or ICMPv6 error quotes.
-
-    Args:
-        layer: A layer of a dissected Scapy packet.
-
-    Returns:
-        :data:`True` if ``layer`` is a :class:`~scapy.layers.inet.IPerror` or
-        :class:`~scapy.layers.inet6.IPerror6`; else :data:`False`.
-
-    Note:
-        The default engine has no ICMP or ICMPv6 parser, so it dissects nothing
-        an ICMP message carries. `Scapy`_ dissects the datagram an error quotes
-        (:rfc:`792`, :rfc:`4443#section-3`) as ``IPerror`` or ``IPerror6``,
-        subclasses of :class:`~scapy.layers.inet.IP` and
-        :class:`~scapy.layers.inet6.IPv6`, and those bind the full layers of an
-        IP-in-IP tunnel: ``IPerror`` with protocol 41 binds an ``IPv6``, and
-        ``IPerror6`` with next header 4 or 41 an ``IP`` or an ``IPv6``, each of
-        which carries a real ``TCP`` (:issue:`1627`). Everything from such a
-        layer on is out of the default engine's reach.
-
-    """
-    from scapy.layers.inet import IPerror
-    from scapy.layers.inet6 import IPerror6
-
-    return isinstance(layer, (IPerror, IPerror6))
-
-
-def _linktype(packet: 'Packet') -> 'Optional[int]':
-    """The data link type of the capture a Scapy packet was read from.
-
-    Args:
-        packet: Scapy packet.
-
-    Returns:
-        The ``LINKTYPE_*`` number :class:`~pcapkit.foundation.engines.scapy.Scapy`
-        attached with :func:`attach_linktype`. A packet built by hand carries
-        none, so its first layer stands in for it: ``ETHERNET`` for an Ethernet
-        II or 802.3 frame, ``LOOP`` and ``NULL`` for the two kinds of BSD
-        loopback header `Scapy`_ has, and ``IPV4`` or ``IPV6`` for an IP
-        packet; and :data:`None` for any other, which no link type the default
-        engine dissects selects.
-
-    """
-    linktype = getattr(packet, LINKTYPE_ATTR, None)
-    if linktype is not None:
-        return int(linktype)
-
-    from scapy.layers.inet import IP
-    from scapy.layers.inet6 import IPv6
-    from scapy.layers.l2 import Dot3, Ether, Loopback, LoopbackOpenBSD
-
-    if isinstance(packet, (Ether, Dot3)):
-        return Enum_LinkType.ETHERNET
-    if isinstance(packet, LoopbackOpenBSD):
-        return Enum_LinkType.LOOP
-    if isinstance(packet, Loopback):
-        return Enum_LinkType.NULL
-    if isinstance(packet, IP):
-        return Enum_LinkType.IPV4
-    if isinstance(packet, IPv6):
-        return Enum_LinkType.IPV6
-    return None
-
-
-def _network(packet: 'Packet') -> 'Optional[tuple[Packet, int]]':
-    """Fetch the layer of a Scapy packet the default engine dissects behind its link layer.
-
-    Args:
-        packet: Scapy packet.
-
-    Returns:
-        That layer and its place in the frame, the first layer being ``1`` (c.f.
-        :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT`), by the
-        packet's link type (see :func:`_linktype`): the payload of an Ethernet
-        frame, which may be anything `Scapy`_ dissects there; the packet itself
-        for a raw IP link type; and for a BSD loopback header the IPv4 or IPv6
-        packet its address family names, as the default engine reads it (see
-        :data:`LOOPBACK_FAMILIES`). :data:`None` for any other link type, whose
-        frames the default engine leaves raw (:issue:`1650`), a loopback
-        family it dissects nothing behind, or a zero-length frame, of which it
-        dissects nothing at all (:issue:`1676`).
-
-    Note:
-        The default engine dissects the first layer of the ``NULL``,
-        ``ETHERNET``, ``LOOP``, ``RAW``, ``IPV4`` and ``IPV6`` link types alone
-        (:attr:`Frame.__proto__ <pcapkit.protocols.misc.pcap.frame.Frame.__proto__>`),
-        and ``RAW`` as IPv4 or IPv6 by its version nibble, as `Scapy`_ does.
-        `Scapy`_ dissects IP straight behind the headers of many others, such as
-        ``LINUX_SLL``, ``LINUX_SLL2``, ``PPP`` and the ``DLT_RAW`` of 12.
-
-        `Scapy`_ hands a zero-length frame back as a layer of defaults, which
-        at ``RAW`` and ``IPV4`` is an IPv4 header with no IHL (see
-        :func:`_frame`), so it is told by the frame's octets, not its layers.
-
-        A loopback header's family is read as
-        :func:`~pcapkit.protocols.link.loopback.family_byteorder` reads it --
-        ``LOOP``'s in network byte order, ``NULL``'s in the byte order its
-        octets show -- and the packet behind it is dissected from the octets
-        wherever `Scapy`_ dissects otherwise. `Scapy`_ binds IPv6 to the
-        ``AF_INET6`` of the host it runs on, and IPv4 to family ``0`` too, so
-        what it dissects there depends on the host.
-
-    """
-    from scapy.layers.inet import IP
-    from scapy.layers.inet6 import IPv6
-
-    linktype = _linktype(packet)
-    if linktype not in (Enum_LinkType.NULL, Enum_LinkType.ETHERNET, Enum_LinkType.LOOP,
-                        Enum_LinkType.RAW, Enum_LinkType.IPV4, Enum_LinkType.IPV6):
-        return None
-    octets = _frame(packet)
-    if not octets:
-        return None
-    if linktype == Enum_LinkType.ETHERNET:
-        return packet.payload, 2
-    if linktype in (Enum_LinkType.RAW, Enum_LinkType.IPV4, Enum_LinkType.IPV6):
-        return packet, 1
-
-    from pcapkit.protocols.link.loopback import family_byteorder  # isort:skip
-
-    if len(octets) < 4:
-        return None
-    version = LOOPBACK_FAMILIES.get(int.from_bytes(octets[:4], family_byteorder(octets[:4], linktype)))
-    if version is None:
-        return None
-    layer = packet.payload  # type: Packet
-    if not isinstance(layer, IP if version == 4 else IPv6):
-        data = octets[4:]
-        if len(data) < (IPV4_HEADER_LEN if version == 4 else IPV6_HEADER_LEN):
-            return None
-        layer = IP(data) if version == 4 else IPv6(data)
-    return layer, 2
-
-
-class _Chain(NamedTuple):
-    """The extension header chain of a Scapy IPv6 layer, as the default engine walks it."""
-
-    #: The octets of the IPv6 packet's payload, as far as its Payload Length and
-    #: every IP layer above it goes (see :func:`_within_datagrams`).
-    payload: 'bytes'
-    #: How many extension headers the default engine walks.
-    headers: 'int'
-    #: Where the first Fragment header it walks starts in :attr:`payload`, or
-    #: :data:`None` if it walks none.
-    fragment: 'Optional[int]'
-    #: The upper layer it dissects behind the chain: the `Scapy`_ layer, or one
-    #: dissected here from :attr:`payload`; or :data:`None` if it dissects no
-    #: TCP, IPv4 or IPv6 there.
-    upper: 'Optional[Packet]'
-
-
-def _ipv6_chain(ipv6: 'IPv6', depth: 'int') -> '_Chain':
-    """Walk the extension header chain of a Scapy IPv6 layer as the default engine walks it.
-
-    Args:
-        ipv6: IPv6 layer of a dissected Scapy packet.
-        depth: Its place in the frame (see :func:`_network`).
-
-    Returns:
-        The chain, walked over the octets by the default engine's rules: the
-        :data:`~pcapkit.toolkit.pypcapfile.IPV6_EXTENSION_HEADERS`, each sized
-        by its own length field, up to
-        :data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT` of
-        them (:issue:`1604`) and as far as
-        :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT`, each header being
-        one layer of the frame (:issue:`1610`), and no further than a later
-        fragment's Fragment header (:rfc:`8200#section-4.5`) or a header cut
-        short. The upper layer is a TCP, IPv4 or IPv6 one inside the frame
-        bound, dissected from the octets where `Scapy`_ dissected something
-        else there.
-
-    Note:
-        `Scapy`_ dissects the Hop-by-Hop Options, Routing, Fragment and
-        Destination Options headers, and AH, but no TCP and no IPv4 behind an
-        AH, and IPv4 where the Next Header is ``0``; the Mobility header but
-        nothing behind it; and neither HIP nor Shim6 (:issue:`1626`). Nor does
-        it stop at either bound (:issue:`1609`). Its layers are kept as far as
-        they are the ones the walk steps over, so the upper layer is its own
-        wherever it dissected the chain as the default engine does.
-
-    """
-    from scapy.layers.inet import IP, TCP
-    from scapy.layers.inet6 import IPv6, _IPv6ExtHdr
-    from scapy.layers.ipsec import AH
-
-    head = bytes(ipv6)[:IPV6_HEADER_LEN]
-    payload = _within_datagrams(ipv6.payload)
-    nxt = head[6] if len(head) == IPV6_HEADER_LEN else None
-    offset, headers, fragment = 0, 0, None  # type: int, int, Optional[int]
-    bound = min(EXTENSION_HEADER_LIMIT, FRAME_LAYER_LIMIT - depth)
-    # the headers Scapy dissects, as AH or one of its ``_IPv6ExtHdr`` layers
-    dissects = (Enum_ExtensionHeader.HOPOPT, Enum_ExtensionHeader.IPv6_Route, Enum_ExtensionHeader.IPv6_Frag,
-                Enum_ExtensionHeader.IPv6_Opts, Enum_ExtensionHeader.AH)
-    layer = ipv6.payload  # type: Optional[Packet] # Scapy's, while it walks the chain alike
-    while nxt in IPV6_EXTENSION_HEADERS:
-        if headers == bound or len(payload) < offset + 8:
-            return _Chain(payload, headers, fragment, None)
-        headers += 1
-        if nxt in dissects and isinstance(layer, AH if nxt == Enum_ExtensionHeader.AH else _IPv6ExtHdr):
-            layer = layer.payload
-        else:
-            layer = None
-        if nxt == Enum_ExtensionHeader.IPv6_Frag:  # fixed length, second octet reserved
-            if fragment is None:
-                fragment = offset
-            if struct.unpack_from('!H', payload, offset + 2)[0] >> 3:  # a later fragment
-                return _Chain(payload, headers, fragment, None)
-            length = 8
-        elif nxt == Enum_ExtensionHeader.AH:  # length in 4-octet units, less two
-            length = (payload[offset + 1] + 2) * 4
-        else:  # length in 8-octet units, less one
-            length = (payload[offset + 1] + 1) * 8
-        nxt, offset = payload[offset], offset + length
-
-    upper = None  # type: Optional[Packet]
-    data = payload[offset:]
-    if depth + headers + 1 > FRAME_LAYER_LIMIT or len(payload) < offset:
-        pass
-    elif nxt == Enum_TransType.TCP:
-        if isinstance(layer, TCP):
-            upper = layer
-        elif len(data) >= TCP_MIN_HEADER_LEN:
-            upper = TCP(data)
-    elif nxt in IP_TUNNELS:
-        version = IP_TUNNELS[nxt]
-        if isinstance(layer, IP if version == 4 else IPv6) and not _quoted(layer):
-            upper = layer
-        elif len(data) >= (IPV4_HEADER_LEN if version == 4 else IPV6_HEADER_LEN):
-            upper = IP(data) if version == 4 else IPv6(data)
-    return _Chain(payload, headers, fragment, upper)
-
-
-class _Layer(NamedTuple):
-    """A layer of a Scapy packet that the default engine dissects too."""
-
-    #: The `Scapy`_ layer, or one dissected here from the octets.
-    layer: 'Packet'
-    #: Its place in the frame, the first layer being ``1`` (c.f.
-    #: :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT`).
-    depth: 'int'
-    #: For a TCP layer the default engine reads behind an AH or IPv6 extension
-    #: header in IPv4, its header and payload as that engine splits them (see
-    #: :func:`_tcp_behind_extension_headers`); else :data:`None`.
-    segment: 'Optional[tuple[bytes, bytes]]' = None
-
-
-def _dissected(packet: 'Packet') -> 'Iterator[_Layer]':
-    """Walk the layers of a Scapy packet that the default engine dissects too.
-
-    Args:
-        packet: Scapy packet.
-
-    Yields:
-        The layer the default engine dissects behind the link layer (see
-        :func:`_network`), and each one on from it that it dissects as well,
-        up to the first that carries nothing it dissects: anything but an
-        802.1Q or 802.1ad tag, IPv4 or IPv6; an IPv4 layer that is a later
-        fragment, whose data is a slice of the datagram's payload with no
-        upper-layer header in it (:rfc:`791#section-3.2`, :issue:`1617`). It
-        stops short of an IPv4 layer whose header the default engine rejects
-        (see :func:`_ipv4_accepted`), of the datagram an ICMP or ICMPv6 error
-        quotes (see :func:`_quoted`), and of
-        :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT`, past which the
-        default engine dissects nothing (:issue:`1609`).
-
-        An IPv6 layer is followed by the upper layer behind its extension
-        headers (see :func:`_ipv6_chain`), which are not yielded. An IPv4 layer
-        whose protocol names an AH or IPv6 extension header carries what the
-        default engine reads past those headers, by its own rules and up to
-        :data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT` of
-        them in a row (see
-        :func:`~pcapkit.toolkit.pypcapfile._walk_extension_headers`): a tunnel,
-        or a TCP segment, each dissected from the octets (:issue:`1606`).
-
-    Note:
-        The default engine dissects IP only where its dispatch tables send it:
-        a link type, an EtherType of the link layer or of a VLAN tag
-        (:attr:`Link.__proto__ <pcapkit.protocols.link.link.Link.__proto__>`),
-        and a protocol number of IP or of an extension header
-        (:attr:`Internet.__proto__
-        <pcapkit.protocols.internet.internet.Internet.__proto__>`). It leaves
-        raw the other layers `Scapy`_ dissects IP inside -- GRE, PPPoE, an
-        802.3 frame's LLC/SNAP header, VXLAN, the PPP frame L2TPv2 carries,
-        and ICMP -- so it reads no IP, and no TCP, past one (:issue:`1636`).
-
-        Inside IPv4, `Scapy`_ dissects an AH alone of those headers, and behind
-        one only IPv6 and, for a Next Header of ``0``, IPv4, so the default
-        engine's rules are applied to the octets instead. It also dissects IPv6
-        and AH inside a later fragment, binding neither to a zero fragment
-        offset as it binds TCP.
-
-        The payloads are walked, not ``getlayer()``, which searches the
-        packets a field holds as well, such as the IPv6 packet a Redirected
-        Header option carries (:rfc:`4861#section-4.6.3`).
-
-    """
-    from scapy.layers.inet import IP, TCP
-    from scapy.layers.inet6 import IPv6
-    from scapy.layers.l2 import Dot1AD, Dot1Q
-    from scapy.packet import NoPayload
-
-    if (network := _network(packet)) is None:
-        return
-    layer, depth = network
-    while depth <= FRAME_LAYER_LIMIT and not isinstance(layer, NoPayload) and not _quoted(layer):
-        if isinstance(layer, IP):
-            if not _ipv4_accepted(layer):
-                return
-            yield _Layer(layer, depth)
-            if layer.frag:
-                return
-            if layer.proto not in IPV4_EXTENSION_HEADERS:
-                layer, depth = layer.payload, depth + 1
-                continue
-            if (walked := _walk_extension_headers(layer.proto, _within_datagrams(layer.payload))) is None:
-                return
-            proto, data, hops = walked
-            depth += hops + 1
-            if depth > FRAME_LAYER_LIMIT:
-                return
-            if proto == Enum_TransType.TCP:
-                if (segment := _tcp_behind_extension_headers(data)) is not None:
-                    yield _Layer(TCP(data), depth, segment)
-                return
-            if proto not in IP_TUNNELS:
-                return
-            version = IP_TUNNELS[proto]
-            if len(data) < (IPV4_HEADER_LEN if version == 4 else IPV6_HEADER_LEN):
-                return
-            layer = IP(data) if version == 4 else IPv6(data)
-        elif isinstance(layer, IPv6):
-            yield _Layer(layer, depth)
-            chain = _ipv6_chain(layer, depth)
-            if chain.upper is None:
-                return
-            layer, depth = chain.upper, depth + chain.headers + 1
-        else:
-            yield _Layer(layer, depth)
-            if not isinstance(layer, (Dot1Q, Dot1AD)):
-                return
-            layer, depth = layer.payload, depth + 1
-
-
-def _first_ipv4(packet: 'Packet') -> 'IP | None':
-    """Fetch the first IPv4 layer of a Scapy packet, as the default engine dissects it.
-
-    Args:
-        packet: Scapy packet.
-
-    Returns:
-        The first :class:`~scapy.layers.inet.IP` layer of the packet the default
-        engine dissects too, however deep -- e.g. one carried in IPv6
-        (:rfc:`2473`) -- or :data:`None` if there is none (see
-        :func:`_dissected`).
-
-    Note:
-        The default engine takes ``frame['IPv4']``
-        (:func:`pcapkit.toolkit.pcap.ipv4_reassembly`). ``packet['IP']`` finds
-        the same layer but for one inside an ICMPv6 error's quote, which it
-        reaches through the ``IPerror6`` there, or inside a layer the default
-        engine leaves raw, such as GRE (:issue:`1636`), or one past the frame's
-        layer bound (:issue:`1609`).
-
-    """
-    from scapy.layers.inet import IP
-
-    for found in _dissected(packet):
-        if isinstance(found.layer, IP):
-            return found.layer
-    return None
-
-
-def _first_ipv6(packet: 'Packet') -> 'Optional[_Layer]':
-    """Fetch the first IPv6 layer of a Scapy packet, as the default engine dissects it.
-
-    Args:
-        packet: Scapy packet.
-
-    Returns:
-        The first :class:`~scapy.layers.inet6.IPv6` layer of the packet the
-        default engine dissects too, however deep -- e.g. one carried in IPv4
-        (:rfc:`4213`) -- with its place in the frame, or :data:`None` if there
-        is none (see :func:`_dissected`).
-
-    Note:
-        The default engine takes ``frame['IPv6']``
-        (:func:`pcapkit.toolkit.pcap.ipv6_reassembly`). ``packet['IPv6']``
-        finds the same layer but for one inside an ICMP or ICMPv6 error's
-        quote, a later IPv4 fragment, or a layer the default engine leaves
-        raw, such as GRE (:issue:`1635`), or one past the frame's layer bound
-        (:issue:`1609`).
-
-    """
-    from scapy.layers.inet6 import IPv6
-
-    for found in _dissected(packet):
-        if isinstance(found.layer, IPv6):
-            return found
-    return None
-
-
 def _tcp_behind_extension_headers(segment: 'bytes') -> 'tuple[bytes, bytes] | None':
-    """Split a TCP segment the default engine reads behind an AH or IPv6 extension header in IPv4.
+    """Split a TCP segment carried behind an AH or IPv6 extension header in IPv4.
 
     Args:
         segment: Raw octets from the TCP header on, as far as the IPv4 layer
-            carrying it goes (see :func:`_dissected`).
+            carrying it goes (see :func:`_tcp_carrier`).
 
     Returns:
         The header, as many octets as the Data Offset counts, and the payload
-        after it; or :data:`None` if the default engine reads no TCP there:
-        fewer than :data:`TCP_MIN_HEADER_LEN
-        <pcapkit.toolkit.pypcapfile.TCP_MIN_HEADER_LEN>` octets, a Data Offset
-        counting fewer or more than were captured, or options its TCP parser
-        rejects (see :func:`~pcapkit.toolkit.pypcapfile._default_accepts`).
+        after it; or :data:`None` if there are fewer than
+        :data:`TCP_MIN_HEADER_LEN <pcapkit.toolkit.pypcapfile.TCP_MIN_HEADER_LEN>`
+        octets, the Data Offset counts fewer or more than were captured, or
+        pcapkit's own TCP parser rejects the options (see
+        :func:`~pcapkit.toolkit.pypcapfile._default_accepts`).
 
     Note:
-        Directly over IP, the default engine reads a TCP header its parser
-        rejects out of the raw octets left behind
-        (:func:`pcapkit.toolkit.pcap.tcp_segment`), but behind another header
-        it does not, so the parser's answer stands here.
+        `Scapy`_ dissects no TCP layer there (see :func:`_tcp_carrier`), so
+        the segment is read off the octets, and its options are left to
+        pcapkit's parser to check.
 
     """
     hdr_len = (segment[12] >> 4) * 4 if len(segment) >= TCP_MIN_HEADER_LEN else 0
@@ -827,40 +382,70 @@ def _tcp_carrier(packet: 'Packet') -> 'tuple[IP | IPv6, TCP, bytes, bytes] | Non
         :class:`~scapy.layers.inet6.IPv6` layer above the packet's TCP layer,
         that layer, and the segment's header and payload (see
         :func:`_tcp_segment`); or :data:`None` if there is no such IP layer, or
-        the default engine reads no TCP there: it dissects no TCP layer in the
-        frame (see :func:`_dissected`) -- one behind a link type it leaves raw
-        (:issue:`1650`), behind a layer it leaves raw, such as GRE
-        (:issue:`1636`), an IPv4 layer whose header it rejects, or a later IPv4
-        fragment (:issue:`1617`), in the datagram an ICMP or ICMPv6 error quotes
-        (see :func:`_quoted`, :issue:`1627`), or past the frame's layer bound or
-        an extension header chain's (:issue:`1609`). A TCP segment the default
-        engine reads behind an AH or IPv6 extension header in IPv4 is split by
-        :func:`_tcp_behind_extension_headers` instead (:issue:`1606`).
+        an IPv4 layer above it is a later fragment, whose data is a slice of
+        the datagram's payload with no upper-layer header in it
+        (:rfc:`791#section-3.2`, :issue:`1617`).
+
+        An IPv4 layer whose protocol names an AH or IPv6 extension header
+        (:data:`~pcapkit.toolkit.pypcapfile.IPV4_EXTENSION_HEADERS`) has those
+        headers stepped over in its octets, up to
+        :data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT` of
+        them in a row (see
+        :func:`~pcapkit.toolkit.pypcapfile._walk_extension_headers`), and what
+        follows them is dissected from the octets: a tunnel, walked on as
+        above, or a TCP segment (see :func:`_tcp_behind_extension_headers`,
+        :issue:`1606`). In the datagram an ICMP error quotes, they are left as
+        `Scapy`_ dissects them.
 
     Note:
         The nearest is the innermost IP layer of an IP-in-IP tunnel
         (:rfc:`2003`, :rfc:`2473`, :rfc:`4213`), whose addresses are the TCP
-        endpoints', as for the default engine
-        (:func:`pcapkit.toolkit.pcap.tcp_segment`). ``packet['IP']`` finds the
-        outermost IPv4 layer instead, which is the tunnel's, or with IPv4
-        carried in IPv6 the inner one (:issue:`1581`). The extension headers
-        between an IPv6 layer and its payload are not IP layers, so are
-        stepped over.
+        endpoints' (:issue:`1581`). ``packet['IP']`` finds the outermost IPv4
+        layer instead, which is the tunnel's, or with IPv4 carried in IPv6 the
+        inner one. The extension header layers `Scapy`_ dissects between an
+        IPv6 layer and its payload are not IP layers, so are stepped over.
+
+        Inside IPv4, `Scapy`_ dissects an AH alone of those headers, and behind
+        one only IPv6 and, for a Next Header of ``0``, IPv4, so the octets are
+        read instead. It also dissects IPv6 and AH inside a later fragment,
+        binding neither to a zero fragment offset as it binds TCP.
 
     """
-    from scapy.layers.inet import IP, TCP
+    from scapy.layers.inet import IP, TCP, IPerror
     from scapy.layers.inet6 import IPv6
+    from scapy.packet import NoPayload
 
+    tcp = cast('TCP | None', packet.getlayer('TCP'))
     carrier = None  # type: IP | IPv6 | None
-    for found in _dissected(packet):
-        if isinstance(found.layer, (IP, IPv6)):
-            carrier = found.layer
-        elif isinstance(found.layer, TCP):
-            if carrier is None:
+    layer = packet  # type: Packet
+    while layer is not tcp:
+        if isinstance(layer, NoPayload):
+            return None
+        if isinstance(layer, IP):
+            if layer.frag:
                 return None
-            segment = _tcp_segment(found.layer) if found.segment is None else found.segment
-            return None if segment is None else (carrier, found.layer, *segment)
-    return None
+            carrier = layer
+            # the datagram an ICMP error quotes is left as Scapy dissects it
+            if layer.proto in IPV4_EXTENSION_HEADERS and not isinstance(layer, IPerror):
+                upper = _walk_extension_headers(layer.proto, _within_datagrams(layer.payload))
+                if upper is not None and upper[0] == Enum_TransType.TCP:
+                    segment = _tcp_behind_extension_headers(upper[1])
+                    return None if segment is None else (carrier, TCP(upper[1]), *segment)
+                if upper is None or upper[0] not in IP_TUNNELS:
+                    return None
+                version, data = IP_TUNNELS[upper[0]], upper[1]
+                if len(data) < (IPV4_HEADER_LEN if version == 4 else IPV6_HEADER_LEN):
+                    return None
+                layer = IP(data) if version == 4 else IPv6(data)
+                tcp = cast('TCP | None', layer.getlayer('TCP'))
+                continue
+        elif isinstance(layer, IPv6):
+            carrier = layer
+        layer = layer.payload
+
+    if carrier is None or (segment := _tcp_segment(tcp)) is None:
+        return None
+    return carrier, tcp, *segment
 
 
 def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Address] | None':
@@ -874,13 +459,12 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
         Data for IPv4 reassembly.
 
         * If the ``packet`` can be used for IPv4 reassembly. A packet can be reassembled
-          if it contains IPv4 layer (:class:`scapy.layers.inet.IP`) -- the first of the
-          frame the default engine dissects, so one carried in IPv6 counts but none an
-          ICMP or ICMPv6 error quotes, a layer that engine leaves raw carries, such as
-          GRE, a link type it leaves raw carries, or one past the frame's layer bound (see
-          :func:`_first_ipv4`) -- whose header the default engine accepts (see
-          :func:`_ipv4_accepted`) and lies inside every IPv6 packet carrying it, and the
-          **DF** (:attr:`scapy.layers.inet.IP.flags.DF`) flag is :data:`False`.
+          if it contains IPv4 layer (:class:`scapy.layers.inet.IP`) whose header -- as
+          many octets as its IHL counts, and at least 20 -- lies inside the frame and
+          every IP datagram carrying it (see :func:`_within_datagrams`), and the **DF**
+          (:attr:`scapy.layers.inet.IP.flags.DF`) flag is :data:`False`. A zero-length
+          frame has none, though `Scapy`_ hands it back as an IPv4 layer of defaults at
+          the ``RAW`` and ``IPV4`` link types (see :func:`_frame`).
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv4
           reassembly (:term:`reasm.ipv4.packet`) will be returned; otherwise, returns :data:`None`.
 
@@ -888,23 +472,21 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
         :class:`pcapkit.foundation.reassembly.ipv4.IPv4`
 
     """
-    if scapy is None:
-        raise ModuleNotFound("No module named 'scapy'", name='scapy')
-
-    if (ipv4 := _first_ipv4(packet)) is not None:
+    if 'IP' in packet:
+        ipv4 = cast('IP', packet['IP'])
         if ipv4.flags.DF:       # dismiss not fragmented packet
             return None
+        if not _frame(packet):  # a zero-length frame (:issue:`1676`)
+            return None
         # NOTE: ``bytes(ipv4)`` ends with the frame's trailer, which Scapy files
-        # as padding at the end of the packet however deep the IPv4 layer, but
-        # the default engine hands it only the octets inside the Payload Length
-        # of each IPv6 packet above it, so those are all it keeps (:issue:`1623`)
+        # as padding at the end of the packet however deep the IPv4 layer, so
+        # only the octets inside every IP datagram above it are kept, the
+        # Payload Length of IPv6 carrying it included (:issue:`1623`). The IHL
+        # and Total Length are read off them, as Scapy leaves ``ihl`` and
+        # ``len`` None on a layer built by hand until it is built (:issue:`1676`).
         octets = _within_datagrams(ipv4)
-        # NOTE: the IHL and Total Length are read off the octets, as Scapy
-        # leaves ``ihl`` and ``len`` None on a layer built by hand until it is
-        # built (:issue:`1676`)
         ihl = (octets[0] & 0x0F) * 4 if octets else IPV4_HEADER_LEN
-        # the default engine dissects no IPv4 header those octets cut short
-        if len(octets) < max(ihl, IPV4_HEADER_LEN) or not _ipv4_accepted(ipv4):
+        if len(octets) < max(ihl, IPV4_HEADER_LEN):     # a header those octets cut short
             return None
 
         data = IP_Packet(
@@ -927,10 +509,10 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
             mf=bool(ipv4.flags.MF),                    # more fragment flag
             tl=int.from_bytes(octets[2:4], 'big'),     # total length, header includes
             header=octets[:ihl],                       # raw bytes type header
-            # NOTE: this keeps the octets past the Total Length, as the default
-            # engine's adapter does, since the reassembly machinery cuts the
-            # payload at ``tl - ihl`` itself. :func:`ipv6_reassembly` derives
-            # its ``tl`` from the payload, so it has to cut them (:issue:`1584`).
+            # NOTE: this keeps the octets past the Total Length, since the
+            # reassembly machinery cuts the payload at ``tl - ihl`` itself.
+            # :func:`ipv6_reassembly` derives its ``tl`` from the payload, so it
+            # has to cut them (:issue:`1584`).
             payload=bytearray(octets[ihl:]),           # raw bytearray type payload
             timestamp=float(packet.time),              # capture timestamp
         )
@@ -949,13 +531,10 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
         Data for IPv6 reassembly.
 
         * If the ``packet`` can be used for IPv6 reassembly. A packet can be reassembled
-          if it contains IPv6 layer (:class:`scapy.layers.inet6.IPv6`) -- the first of the
-          frame the default engine dissects, so one carried in IPv4 counts but none an ICMP
-          or ICMPv6 error quotes, a later IPv4 fragment carries, a layer that engine leaves
-          raw carries, such as GRE, a link type it leaves raw carries, or one past the
-          frame's layer bound (see :func:`_first_ipv6`) -- and IPv6 Fragment header
-          (:rfc:`2460#section-4.5`) in that layer's own extension header chain, as far as
-          the default engine walks it (see :func:`_ipv6_chain`).
+          if it contains IPv6 layer (:class:`scapy.layers.inet6.IPv6`), in no later IPv4
+          fragment, and IPv6 Fragment header (:rfc:`2460#section-4.5`, i.e.,
+          :class:`scapy.layers.inet6.IPv6ExtHdrFragment`) among the extension headers
+          `Scapy`_ dissects in that layer's own chain.
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv6
           reassembly (:term:`reasm.ipv6.packet`) will be returned; otherwise, returns :data:`None`.
 
@@ -965,27 +544,41 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
     See Also:
         :class:`pcapkit.foundation.reassembly.ipv6.IPv6`
 
+    Note:
+        A later IPv4 fragment's data is a slice of the datagram's payload, with
+        no upper-layer header in it (:rfc:`791#section-3.2`), but `Scapy`_
+        dissects IPv6 there whatever the fragment offset. And the header and
+        addresses handed on are those of the IPv6 layer the Fragment header
+        follows, so one inside a packet that layer carries, such as the inner
+        packet of 6in6, is not taken.
+
     """
     if scapy is None:
         raise ModuleNotFound("No module named 'scapy'", name='scapy')
+    from scapy.layers.inet import IP
+    from scapy.layers.inet6 import IPv6ExtHdrFragment, _IPv6ExtHdr
 
-    if (found := _first_ipv6(packet)) is not None:
-        ipv6 = cast('IPv6', found.layer)
-        chain = _ipv6_chain(ipv6, found.depth)
-        if chain.fragment is None:
+    if 'IPv6' in packet:
+        ipv6 = cast('IPv6', packet['IPv6'])
+        above = ipv6.underlayer
+        while above is not None:
+            if isinstance(above, IP) and above.frag:    # data of a later fragment
+                return None
+            above = above.underlayer
+        ipv6_frag = ipv6.payload
+        while isinstance(ipv6_frag, _IPv6ExtHdr) and not isinstance(ipv6_frag, IPv6ExtHdrFragment):
+            ipv6_frag = ipv6_frag.payload
+        if not isinstance(ipv6_frag, IPv6ExtHdrFragment):
             return None                        # dismiss not fragmented packet
 
-        # NOTE: The unfragmentable part is every octet before the Fragment
-        # header, which is the only part of the header the reassembled packet
-        # keeps (:rfc:`8200#section-4.5`). The walk read the Fragment header off
-        # the octets, as `Scapy`_ dissects none behind a Mobility, HIP or Shim6
-        # header (:issue:`1626`).
-        hdr_len = IPV6_HEADER_LEN + chain.fragment
-        ipv6_frag = chain.payload[chain.fragment:chain.fragment + 8]
-        field = int.from_bytes(ipv6_frag[2:4], 'big')
+        # NOTE: ``len()`` of a Scapy layer spans that layer and everything after
+        # it, so the difference is the unfragmentable part -- every octet before
+        # the Fragment header, which is the only part of the header the
+        # reassembled packet keeps (:rfc:`8200#section-4.5`).
+        hdr_len = len(ipv6) - len(ipv6_frag)
         # the fragment's data stops at the Payload Length, so neither it nor
         # ``tl`` below counts the frame's trailer (:issue:`1584`)
-        payload = bytearray(chain.payload[chain.fragment + 8:])
+        payload = bytearray(_within_datagrams(ipv6_frag.payload))
 
         data = IP_Packet(
             bufid=(
@@ -993,21 +586,22 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
                      ipaddress.ip_address(ipv6.src)),     # source IP address
                 cast('IPv6Address',
                      ipaddress.ip_address(ipv6.dst)),     # destination IP address
-                int.from_bytes(ipv6_frag[4:8], 'big'),    # identification
-                Enum_TransType.get(ipv6_frag[0]),         # next header field in IPv6 Fragment Header
+                ipv6_frag.id,                             # identification
+                Enum_TransType.get(ipv6_frag.nh),         # next header field in IPv6 Fragment Header
             ),
             num=count,                                    # original packet range number
-            # NOTE: The Fragment Offset counts on-wire 8-octet units
-            # (:rfc:`8200#section-4.5`), but the reassembly machinery indexes
+            # NOTE: Scapy reports ``IPv6ExtHdrFragment.offset`` in on-wire 8-octet
+            # units (:rfc:`8200#section-4.5`), but the reassembly machinery indexes
             # the datagram buffer with ``fo``, so it must be scaled into octets.
-            fo=(field >> 3) * 8,                          # fragment offset
+            fo=ipv6_frag.offset * 8,                      # fragment offset
             ihl=hdr_len,                                  # header length, only headers before IPv6-Frag
-            mf=bool(field & 1),                           # more fragment flag
-            # NOTE: the Fragment header is not counted, as the reassembly
-            # machinery writes the payload over the span ``tl - ihl``, so counting
-            # it would leave 8 octets of stray zeroes in every reassembled datagram.
+            mf=bool(ipv6_frag.m),                         # more fragment flag
+            # NOTE: ``len(ipv6)`` counts the Fragment header, so it overstates
+            # this by 8 -- and the reassembly machinery writes the payload over
+            # the span ``tl - ihl``, so using it would leave 8 octets of stray
+            # zeroes in every reassembled datagram.
             tl=hdr_len + len(payload),                    # total length, header includes
-            header=bytes(ipv6)[:IPV6_HEADER_LEN] + chain.payload[:chain.fragment],  # header before IPv6-Frag
+            header=bytes(ipv6)[:hdr_len],                 # raw bytes type header before IPv6-Frag
             payload=payload,                              # raw bytearray type payload after IPv6-Frag
             timestamp=float(packet.time),                 # capture timestamp
         )
@@ -1028,13 +622,9 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
         * If the ``packet`` can be used for TCP reassembly. A packet can be reassembled
           if it contains TCP layer (:class:`scapy.layers.inet.TCP`) whose fixed header
           lies inside its datagram, and whose Data Offset counts at least that header,
-          behind no IPv4 header the default engine rejects, in no later IPv4 fragment, in
-          no datagram an ICMP or ICMPv6 error quotes, in no layer or link type the default
-          engine leaves raw, such as GRE or ``LINUX_SLL``, and inside the frame's layer
-          bound and an extension header chain's; or a TCP segment the default engine reads
-          behind an AH or IPv6 extension header in IPv4, or behind an IPv6 extension header
-          `Scapy`_ dissects nothing behind. It is keyed by the IP layer that carries it --
-          in an IP-in-IP tunnel, the innermost (see :func:`_tcp_carrier`).
+          in no later IPv4 fragment; or a TCP segment behind an AH or IPv6 extension
+          header in IPv4, read off the octets. It is keyed by the IP layer that carries
+          it -- in an IP-in-IP tunnel, the innermost (see :func:`_tcp_carrier`).
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
           reassembly (:term:`reasm.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 

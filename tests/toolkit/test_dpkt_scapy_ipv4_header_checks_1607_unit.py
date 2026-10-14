@@ -8,9 +8,7 @@ it, a tunnel's header included (#1581). It does not check the header checksum,
 so a bad one is still read.
 
 The helpers here build those headers and read a capture of them with any
-engine; :mod:`tests.toolkit.test_dpkt_tcp_ns_flags_1618_unit` and
-:mod:`tests.toolkit.test_scapy_ipv6_fragment_and_encap_walk_1635_1636_unit`
-import them.
+engine; :mod:`tests.toolkit.test_dpkt_tcp_ns_flags_1618_unit` imports them.
 
 Every capture is built here, so the module is in the unit tier.
 
