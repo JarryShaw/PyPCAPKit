@@ -602,6 +602,7 @@ CITATIONS: 'dict[str, list[tuple[str, Optional[str]]]]' = {
 RELEASE_CITATIONS: 'dict[str, list[tuple[Optional[str], str, Optional[str]]]]' = {
     'docs/source/contributing/releasing.rst': [
         (None, 'push:', '- completed'),
+        (None, 'concurrency:', 'cancel-in-progress: false'),
         ('version_check', 'if: >-', 'vars.RELEASE_APP_BOT_ID) }}'),
         ('version_check', '- name: Checkout code', 'fetch-depth: 0'),
         ('version_check', 'print(pcapkit.__version__)', None),
@@ -628,6 +629,7 @@ RELEASE_CITATIONS: 'dict[str, list[tuple[Optional[str], str, Optional[str]]]]' =
     ],
     'docs/source/contributing/workflows.rst': [
         (None, 'workflow_run:', '- completed'),
+        (None, 'concurrency:', 'cancel-in-progress: false'),
         ('version_check', 'if: >-', 'vars.RELEASE_APP_BOT_ID) }}'),
         ('unit-tests', 'needs: [ version_check ]', None),
         ('unit-tests', 'uses: ./.github/workflows/unit-tests.yml', None),

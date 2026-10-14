@@ -12,23 +12,23 @@ on:
 
 name: Create Release
 
-# A `workflow_run` trigger runs against the tip of the default branch, not
-# against the sha of the run that triggered it, so two Vendor Update runs
-# completing close together produce two Create Release runs evaluating the
-# *same* tip -- observed on 78ec96afb (runs 34894022730 and 34894646592, six
-# minutes apart) and on 1e0ebc53b. Both would then read PCAPKIT_TAG_EXISTS
-# before either had tagged, which is a double-publish race. Serialise instead:
-# never cancel a release run, just make the second wait and find the tag
-# already there.
-# Deliberately still keyed on the ref, unlike the validation workflows, and the
-# distinction is the point: for them a dropped run means a commit nobody checked,
-# which is unrecoverable, whereas here a dropped run means a publish that did not
-# happen twice. This workflow tags, uploads to PyPI and uploads to Anaconda, and
-# unlike cron-conda and cron-vendor it has *no* job-level concurrency to fall back
-# on, so this group is the only thing serialising it. Keying it per run would let
-# two runs tag and publish concurrently, which is the worse failure.
+# One release run at a time per ref. A ``workflow_run`` runs on ``main``'s tip,
+# so two Vendor Update runs completing close together start two runs on one tip
+# (78ec96afb: runs 34894022730 and 34894646592, six minutes apart), and both
+# would read PCAPKIT_TAG_EXISTS before either had tagged. Unlike cron-conda and
+# cron-vendor, no job-level group backs this one up, so it never cancels a run in
+# progress, and a run that may release is keyed on its ref, never on itself.
+#
+# #1705: a group holds one pending run and cancels it when another joins, so a
+# run whose Vendor Update did not conclude ``success`` -- one ``version_check``
+# skips, so it releases nothing -- is keyed on its own ``github.run_id``. Keyed on
+# the ref, such a run, 38499295798, displaced the pending 38499150441. Now only a
+# run that may release can wait in ``main``'s group or displace the one waiting
+# there, evaluating ``main``'s newer tip instead. A tag push keeps its tag's group.
+# GitHub documents the one pending run, and ``github.run_id`` as unique per run:
+# https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency
 concurrency:
-  group: create-release-${{ github.ref }}
+  group: create-release-${{ (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') && github.ref || github.run_id }}
   cancel-in-progress: false
 
 # Every job below with an effect outside this run declares a deployment
