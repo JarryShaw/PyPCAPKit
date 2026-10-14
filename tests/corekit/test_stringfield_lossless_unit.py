@@ -35,6 +35,18 @@ from tests._support import reimport_once_per_class
 #: fallback through one would raise where ``'replace'`` does not.
 NO_SURROGATE_CHARSETS = ('utf-16', 'utf-16-le', 'utf-16-be', 'utf-32', 'utf-7')
 
+#: ``(octets, field keyword arguments, decoded text, whether it is a DecodedString)``
+#: for ``idna``, which raises under ``'replace'`` as well, on every Python (#1706):
+#: it supports ``'strict'`` alone, so another scheme, or octets it cannot decode,
+#: reach the UTF-8 fallback. The last row is valid ``idna`` under ``'strict'``.
+REPLACE_REJECTED = (
+    (b'a', {'errors': 'ignore'}, 'a', True),
+    (b'a', {'errors': 'replace'}, 'a', True),
+    (b'xn--caf-dma', {'errors': 'ignore'}, 'xn--caf-dma', True),
+    (b'caf\xe9', {}, 'caf�', True),
+    (b'xn--caf-dma', {}, 'café', False),
+)
+
 
 def pcapng(comment: bytes) -> bytes:
     """A minimal pcapng: SHB, IDB and one EPB, the first two carrying ``comment``.
@@ -110,6 +122,23 @@ class TestStringFieldLossless(unittest.TestCase):
             with self.subTest(charset=charset):
                 _, packed = self.roundtrip(b'\xff\xfe\x41', encoding=charset)
                 self.assertEqual(packed, b'\xff\xfe\x41')
+
+    def test_a_codec_that_rejects_replace_does_not_raise(self) -> None:
+        from pcapkit.corekit.fields.strings import DecodedString
+
+        for octets, kwargs, text, decoded in REPLACE_REJECTED:
+            with self.subTest(octets=octets, kwargs=kwargs):
+                value, packed = self.roundtrip(octets, encoding='idna', **kwargs)  # type: ignore[arg-type]
+                self.assertEqual(packed, octets)
+                self.assertEqual(str(value), text)
+                self.assertIs(isinstance(value, DecodedString), decoded)
+
+        # ``punycode`` raises under ``'replace'`` on non-ASCII octets only before
+        # Python 3.13, so its text differs by version; the octets do not.
+        for errors in ('strict', 'ignore', 'replace'):
+            with self.subTest(charset='punycode', errors=errors):
+                _, packed = self.roundtrip(b'caf\xe9', encoding='punycode', errors=errors)
+                self.assertEqual(packed, b'caf\xe9')
 
     def test_valid_text_decodes_to_a_plain_str(self) -> None:
         value, packed = self.roundtrip('héllo'.encode())
