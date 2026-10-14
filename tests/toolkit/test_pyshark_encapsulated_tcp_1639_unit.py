@@ -396,7 +396,8 @@ class PySharkEncapsulationTraceTests(unittest.TestCase):
         messages = [call.args[0] for call in warn.call_args_list if call.args[1] is PySharkWarning]
         self.assertEqual(len(messages), 1, messages)
         self.assertIn('Frame 1: the second tshark pass, which reads the captured octets of a frame with an AH '
-                      'or IPv6 extension header in IPv4, or with TCP,', messages[0])
+                      'or IPv6 extension header in IPv4, with TCP, or with more 802.1Q tags than tshark dissects,',
+                      messages[0])
 
 
 class FakeField(str):

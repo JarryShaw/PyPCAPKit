@@ -566,8 +566,9 @@ class PyShark(EngineBase['PySharkPacket']):
 
         :func:`~pcapkit.toolkit.pyshark.tcp_traceflow` asks for one of a frame
         :data:`~pcapkit.toolkit.pyshark.OCTETS_FILTER` matches only: one tshark
-        dissects TCP in (:issue:`1639`), or one with an AH or IPv6 extension
-        header in IPv4 (:issue:`1625`).
+        dissects TCP in (:issue:`1639`), one with an AH or IPv6 extension
+        header in IPv4 (:issue:`1625`), or one with more 802.1Q tags than
+        tshark dissects (:issue:`1609`).
 
         Its link type is the one the default engine dissects it by, read from
         the capture file (see :func:`_linktypes`) for the frame of this engine's
@@ -615,15 +616,15 @@ class PyShark(EngineBase['PySharkPacket']):
         if self._exraw_failed:
             return None
         frnum = self._extractor._frnum
-        source = ('the capture file, read for the link type of a frame with an AH or IPv6 extension '
-                  'header in IPv4, or with TCP,')
+        frames = ('a frame with an AH or IPv6 extension header in IPv4, with TCP, or with more 802.1Q tags '
+                  'than tshark dissects,')
+        source = f'the capture file, read for the link type of {frames}'
         try:
             linktype = self._read_linktype(frnum)
             if isinstance(linktype, str):
                 reason = linktype
             else:
-                source = ('the second tshark pass, which reads the captured octets of a frame with an AH '
-                          'or IPv6 extension header in IPv4, or with TCP,')
+                source = f'the second tshark pass, which reads the captured octets of {frames}'
                 octets = self._read_octets(int(packet.number))
                 if isinstance(octets, bytes):
                     return Captured(linktype, octets)
