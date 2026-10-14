@@ -52,7 +52,7 @@ Editing ``__version__`` by hand without also moving :file:`CITATION.cff`'s
 (``:494-514``) asserts the two agree, and ``create-release.yml``'s
 ``unit-tests`` job (``:467-481``) calls ``unit-tests.yml`` with
 ``gate-only: true``, which runs the **full** suite rather than the tiered
-subset an ordinary push runs (its ``gate`` job, ``unit-tests.yml:1721-1791``).
+subset an ordinary push runs (its ``gate`` job, ``unit-tests.yml:1717-1787``).
 That gate runs whenever a release will -- a moved ``__version__`` is exactly
 what makes ``version_check``'s evidence read "not yet published" -- and every
 publishing job requires it to have succeeded (``:500,685,850,1085``), so a
@@ -62,7 +62,7 @@ Either run the script, or move both fields by hand in the same commit.
 This is the **only** edit a person makes to get a release started -- the tag,
 the Release, and every upload are the workflow's job from here. Two other
 checks run unconditionally on the same path, though neither is a step in *this*
-process: the ``changelog`` job (``unit-tests.yml:1569-1588``) fails outright if
+process: the ``changelog`` job (``unit-tests.yml:1565-1584``) fails outright if
 ``CHANGELOG.md`` has drifted from its source entry under
 :file:`docs/source/changelog/`, and the release-body step warns, without
 failing, if that entry's heading still reads "unreleased"

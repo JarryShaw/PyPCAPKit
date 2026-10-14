@@ -5,10 +5,10 @@
 # and proposes each change, and the ruleset 23497679 edit it needs, as a PR.
 #
 # Tiers: supported (blocking), ktlo (end-of-life, non-blocking), pre-release
-# (non-blocking; none listed today) and experimental (non-blocking `test` legs;
-# see below). `runner` is the image a version needs when ubuntu-latest cannot
-# provide it. `latest` is the newest supported CPython, which the
-# single-interpreter jobs run on. See docs/source/contributing/workflows.rst.
+# (non-blocking; none listed today) and experimental (non-blocking, a workflow
+# of their own; see below). `runner` is the image a version needs when
+# ubuntu-latest cannot provide it. `latest` is the newest supported CPython,
+# which the single-interpreter jobs run on. See docs/source/contributing/workflows.rst.
 
 latest = "3.15"
 
@@ -30,11 +30,12 @@ latest = "3.15"
 
 # Experimental (#1660): free-threaded CPython (a `t` version, above) and
 # GraalPy, by its release line, spelt as setup-python reads them. Each runs as
-# one non-blocking leg of unit-tests.yml's `test` job, named `(experimental)`,
-# and in no other matrix: no wheel, conda build or required context. The weekly
-# job has no source for either, so it keeps these lines as written, after the
-# other versions of their table. Promoting one once its leg is green is a hand
-# edit, which util/python_versions.py refuses until it has those three.
+# one non-blocking leg of experimental.yml, named `(experimental)`, a workflow
+# of its own that nothing waits on (#1732), and in no other matrix:
+# no wheel, conda build or required context. The weekly job has no source for
+# either, so it keeps these lines as written, after the other versions of their
+# table. Promoting one once its leg is green is a hand edit, which
+# util/python_versions.py refuses until it has those three.
 [versions.graalpy]
 "graalpy-25.4" = { tier = "experimental" }
 

@@ -618,8 +618,9 @@ class TestTheExperimentalEntriesAreHandKept(unittest.TestCase):
         root = self.scratch()
         plan, texts = updater().compute_plan(root, as_of_the_file(snapshot()))
         self.assertEqual((plan['changes'], texts, plan['notes']), ([], {}, []))
-        self.assertIn('``test`` (eleven Python legs: five supported, four KTLO, two experimental)',
-                      ' '.join((root / 'docs/source/contributing/workflows.rst').read_text(encoding='utf-8').split()))
+        page = ' '.join((root / 'docs/source/contributing/workflows.rst').read_text(encoding='utf-8').split())
+        self.assertIn('``test`` (nine Python legs: five supported, four KTLO)', page)
+        self.assertIn('``experimental`` (two)', page)
 
     def test_a_tier_move_keeps_them_byte_for_byte_after_the_computed_versions(self) -> None:
         root = self.scratch()

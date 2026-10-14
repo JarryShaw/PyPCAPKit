@@ -1478,7 +1478,11 @@ def job_reaches(job: 'Job', gate: 'Gate') -> 'bool':
       answers it -- and
       :meth:`~tests.test_tier_guard.WorkflowAgreementTests\
 .test_ignore_flags_match_the_fixture_tier_constants`
-      is what keeps that equivalence true.
+      is what keeps that equivalence true. It is the ``latest`` leg's: the
+      others also skip :data:`~tests._tiers.ROUNDTRIP_SWEEP_GLOB` (#1732), which
+      changes no answer, since every leg shares the job's one install line. The
+      same holds for ``'fixture'``, whose legs off ``latest`` drop
+      :data:`~tests._tiers.ROUNDTRIP_RUNTIME_GLOB`'s modules.
     * ``'explicit'`` is exact membership in :attr:`Job.paths` -- the literal
       ``TEST_PATHS`` list a ``matrix.engine`` cell of ``engine-tests`` (#849)
       runs, at file granularity (that job names whole files, never node IDs).

@@ -1,0 +1,242 @@
+name: Experimental Tests
+
+# The experimental tier (#1660): free-threaded CPython and GraalPy, one leg each,
+# here and in no other workflow. #1732, the owner's option 2: nothing waits on
+# these legs. They used to be legs of unit-tests.yml, first of `test` and then of
+# a job of their own there, and either way the Unit Tests run stayed in progress
+# until GraalPy finished, up to 140 minutes. Every `workflow_run` consumer of
+# "Unit Tests" -- coverage-comment.yml, deploy-pages.yml, cron-vendor.yml and
+# cron-conda.yml -- fires only once that run completes, so each waited too. A
+# workflow of their own reports separately: no `workflow_run` names it, it has no
+# `workflow_call` trigger, and a job cannot `needs:` one in another workflow.
+#
+# Its check names are the ones the legs had in unit-tests.yml, `Python <version>
+# (experimental)`. No required context names one: ruleset 23497679 requires
+# `Required checks passed` and the `Compat` legs alone.
+#
+# The same events as unit-tests.yml's own, and the same `changes` job, so a
+# docs-only pull request skips the legs here as it skips `test` there.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# Only pull-request runs may be superseded, as in unit-tests.yml: every other
+# event gets a group of its own, by run id, so a push is never cancelled while
+# pending behind the next one.
+concurrency:
+  group: experimental-tests-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  # unit-tests.yml's job of the same name, reading the one output this file needs.
+  python-versions:
+    name: Read the Python versions
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      experimental: ${{ steps.read.outputs.experimental }}
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            .github/python-versions.toml
+            util/python_versions.py
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Read .github/python-versions.toml
+        id: read
+        run: python3 util/python_versions.py --github-output
+
+  # unit-tests.yml's `changes`, whose comment says how a file is classified; the
+  # script is the same, byte for byte (tests/project/test_sweeps_on_latest_only_1732.py
+  # pins it). This workflow is never called, so its own pull_request run is every
+  # pull_request run.
+  changes:
+    name: Classify changed files
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      code: ${{ steps.classify.outputs.code }}
+
+    steps:
+      - uses: actions/checkout@v7
+        if: ${{ github.event_name == 'pull_request' }}
+        with:
+          fetch-depth: 2
+
+      - name: Classify the diff
+        id: classify
+        env:
+          OWN_PR: ${{ github.event_name == 'pull_request' }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import subprocess
+
+          CODE_DIRS = ('.github/', 'pcapkit/', 'tests/', 'util/', 'examples/')
+
+          def is_docs(path):
+              if path.startswith(CODE_DIRS):
+                  return False
+              return path.startswith('docs/') or path.endswith('.md')
+
+          code = 'true'
+          if os.environ['OWN_PR'] != 'true':
+              print("Not this workflow's own pull_request run: everything runs.")
+          else:
+              # -z: names are NUL-terminated, so a name holding whitespace
+              # (or one git would otherwise quote) stays one path.
+              diff = subprocess.run(['git', 'diff', '--name-only', '-z', '--no-renames', 'HEAD^1', 'HEAD'],
+                                    capture_output=True, text=True)
+              files = [path for path in diff.stdout.split('\0') if path]
+              if diff.returncode != 0 or not files:
+                  print(f'::warning title=Could not list the changed files::git diff exited {diff.returncode} '
+                        f'with {len(files)} files: {diff.stderr.strip()}. Treating the diff as code.')
+              else:
+                  code_files = [path for path in files if not is_docs(path)]
+                  print(f'{len(files)} changed files, {len(code_files)} of them code:')
+                  for path in files:
+                      print(f"  {'code' if path in code_files else 'docs'}  {path}")
+                  if not code_files:
+                      code = 'false'
+          print(f'code={code}')
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as file:
+              print(f'code={code}', file=file)
+          PY
+
+  # Its legs never block, by the KTLO mechanics: every step that can fail has
+  # `continue-on-error: true`, so the job concludes success, and `Experimental
+  # summary` reports each failed step as a warning. A failure no step contains
+  # -- a lost runner -- fails the job, and its job-level `continue-on-error`
+  # then passes the run: "Prevents a workflow run from failing when a job
+  # fails" (docs.github.com, Workflow syntax, `jobs.<job_id>.continue-on-error`,
+  # whose own example is an experimental matrix leg). Its check run still reads
+  # `failure`, so the step-level guards stay for every failure a step can hold.
+  #
+  # A job past its `timeout-minutes` is cancelled (same page,
+  # `jobs.<job_id>.timeout-minutes`), and the page does not say whether the
+  # job-level guard covers that. So setup-python, the install and the tests
+  # carry caps of their own, 5, 10 and 120 minutes, under the job's 140: a step
+  # past its cap fails rather than cancels, and `continue-on-error` then applies
+  # as to any failure (actions/runner src/Runner.Worker/StepsRunner.cs:322-353,
+  # at 5f0b3ddcc). That leaves 5 minutes for the rest, which took at most 0.32,
+  # setup-python included, on every uncovered leg of runs
+  # 38569321543-38569522442.
+  #
+  # The tests' 120: GraalPy 25.4's tests step reached 26% of the unit tier's
+  # tests at its old 25-minute cap (job 115915976024; setup-python took 0.7
+  # minutes, the install 3.3). Those tests hold 20-26% of the tier's time, and
+  # the tier less the round-trip sweeps, which this job never runs (see `Run
+  # unit tests`), holds 3.5-4.5 times as much, by per-module times from a local
+  # 3.14 run and the 3.14, 3.15 and 3.14t legs of run 38581834697: 88-113
+  # minutes on GraalPy (estimate). 3.14t, which shares the caps, took 5.8
+  # minutes over the whole unit tier in that run.
+  experimental:
+    name: Python ${{ matrix.python-version }} (experimental)
+    if: ${{ needs.changes.outputs.code != 'false' }}
+    needs: [changes, python-versions]
+    runs-on: ${{ matrix.os || 'ubuntu-latest' }}
+    timeout-minutes: 140
+    continue-on-error: true
+    # #1672: every annotation a failing step writes is a warning.
+    env:
+      ANNOTATION_LEVEL: warning
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.python-versions.outputs.experimental) }}
+
+    steps:
+      - uses: actions/checkout@v7
+        id: checkout
+        continue-on-error: true
+
+      - uses: actions/setup-python@v7
+        id: python
+        continue-on-error: true
+        timeout-minutes: 5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      # As unit-tests.yml `test`'s install, for the same reasons.
+      - name: Install package and test dependencies
+        id: install
+        if: ${{ steps.python.outcome == 'success' }}
+        continue-on-error: true
+        timeout-minutes: 10
+        shell: bash
+        env:
+          LEG: Python ${{ matrix.python-version }} (experimental, non-blocking)
+        run: |
+          python -m pip install -U pip setuptools wheel
+          if ! python -m pip install -e '.[test,DPKT,crypto,NGAP]' 2>&1 | tee "$RUNNER_TEMP/pip-install.log"; then
+            reason=$(sed -n 's/^ERROR: //p' "$RUNNER_TEMP/pip-install.log" | tail -n 1)
+            if [ -z "$reason" ]; then reason="pip failed without an ERROR line; see this step's log"; fi
+            echo "::${ANNOTATION_LEVEL} title=pcapkit did not install on ${LEG//,/%2C}::${reason//%/%25}. The rest of this leg is skipped."
+            exit 1
+          fi
+
+      - name: Report available parallelism
+        id: parallelism
+        if: ${{ steps.install.outcome == 'success' }}
+        continue-on-error: true
+        run: |
+          nproc
+          python -c "import os; print('cpu_count', os.cpu_count())"
+
+      # unit-tests.yml `test`'s selection on every leg but `latest`: no
+      # experimental version is `latest`, which util/python_versions.py holds to
+      # a supported CPython, so the round-trip sweeps (#1732) are always left out
+      # here.
+      - name: Run unit tests
+        id: tests
+        if: ${{ steps.install.outcome == 'success' }}
+        continue-on-error: true
+        timeout-minutes: 120
+        run: |
+          set -- -q -n auto --dist load \
+            --durations=30 --durations-min=1.0 --junitxml="$RUNNER_TEMP/junit.xml" \
+            --ignore=tests/integration \
+            --ignore-glob='*_runtime.py' \
+            --ignore-glob='*_regression.py' \
+            --ignore-glob='*roundtrip*'
+          python -m pytest "$@"
+
+      # As `test`'s, under a name of its own: ci-timing.yml reads `test`'s
+      # `junit-unit-*` files alone, and this one is the record of GraalPy's
+      # runtime.
+      - name: Upload test timings
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        continue-on-error: true
+        uses: actions/upload-artifact@v7
+        with:
+          name: junit-experimental-${{ matrix.python-version }}
+          path: ${{ runner.temp }}/junit.xml
+          retention-days: 14
+
+      # #1660: an experimental leg's report, as unit-tests.yml `test`'s `KTLO
+      # summary` is a KTLO leg's, and for the same reasons.
+      - name: Experimental summary
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        shell: bash
+        env:
+          LEG: Python ${{ matrix.python-version }} (experimental, non-blocking)
+          STEPS: ${{ toJSON(steps) }}
+        run: |
+          failed=$(jq -r 'to_entries[] | select(.value.outcome == "failure") | .key' <<< "$STEPS")
+          if [ -z "$failed" ]; then
+            echo "$LEG: no step failed."
+            exit 0
+          fi
+          while IFS= read -r id; do
+            echo "::warning title=${id} failed on ${LEG//,/%2C}::Experimental legs never block (#1660), so this job still succeeds; see the ${id} step's log."
+            echo "- ${LEG}: step \`${id}\` failed; non-blocking, so this job still succeeds." >> "$GITHUB_STEP_SUMMARY"
+          done <<< "$failed"

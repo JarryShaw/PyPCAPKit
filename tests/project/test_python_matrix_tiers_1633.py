@@ -87,18 +87,16 @@ PARITY = tuple(v for v in SUPPORTED + KTLO_ON_LATEST if tuple(map(int, v.split('
 KTLO_GUARD = '${{ matrix.ktlo == true }}'
 #: The job-level level of every annotation a failing step writes (#1672).
 ANNOTATION_LEVEL = "${{ matrix.ktlo && 'warning' || 'error' }}"
-#: ``test``'s, which also hold on its experimental legs (#1660), and the guard of its
-#: ``Experimental summary``, which runs on those legs only.
-NONBLOCKING_GUARD = '${{ matrix.ktlo == true || matrix.experimental == true }}'
-EXPERIMENTAL_GUARD = '${{ matrix.experimental == true }}'
-NONBLOCKING_LEVEL = "${{ (matrix.ktlo || matrix.experimental) && 'warning' || 'error' }}"
-#: A step's ``LEG``, the leg's name in its annotations, in a KTLO job and in ``test``.
+#: The experimental job's guard, level and ``LEG`` (#1732): every leg of it is
+#: experimental, so each is a literal.
+EXPERIMENTAL_GUARD = True
+EXPERIMENTAL_LEVEL = 'warning'
+#: A step's ``LEG``, the leg's name in its annotations, in a KTLO job and in ``experimental``.
 LEG_TEMPLATE = "Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}"
-NONBLOCKING_LEG_TEMPLATE = ("Python ${{ matrix.python-version }}"
-                            "${{ matrix.experimental && ' (experimental, non-blocking)' || '' }}"
-                            "${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}")
-#: The job holding experimental legs, the only one (#1660).
-EXPERIMENTAL_JOB = ('unit-tests.yml', 'test')
+EXPERIMENTAL_LEG_TEMPLATE = 'Python ${{ matrix.python-version }} (experimental, non-blocking)'
+#: The job holding experimental legs, the only one (#1660), in a workflow of its own
+#: since #1732, so that nothing in unit-tests.yml waits on it.
+EXPERIMENTAL_JOB = ('experimental.yml', 'experimental')
 #: Ruleset 23497679's required contexts, which a tier change edits with the file.
 REQUIRED = frozenset({'Required checks passed'} | {f'Compat Python {v}' for v in SUPPORTED})
 
@@ -212,19 +210,19 @@ def is_nonblocking(leg: 'dict[str, Any]') -> 'bool':
     return is_ktlo(leg) or is_experimental(leg)
 
 
-def guard(name: 'str', job_id: 'str') -> 'str':
+def guard(name: 'str', job_id: 'str') -> 'Any':
     """The step-level guard of job ``job_id``'s failure-prone steps."""
-    return NONBLOCKING_GUARD if (name, job_id) == EXPERIMENTAL_JOB else KTLO_GUARD
+    return EXPERIMENTAL_GUARD if (name, job_id) == EXPERIMENTAL_JOB else KTLO_GUARD
 
 
 def annotation_level(name: 'str', job_id: 'str') -> 'str':
     """Job ``job_id``'s ``ANNOTATION_LEVEL``."""
-    return NONBLOCKING_LEVEL if (name, job_id) == EXPERIMENTAL_JOB else ANNOTATION_LEVEL
+    return EXPERIMENTAL_LEVEL if (name, job_id) == EXPERIMENTAL_JOB else ANNOTATION_LEVEL
 
 
 def leg_template(name: 'str', job_id: 'str') -> 'str':
     """Job ``job_id``'s ``LEG``, on each step that names the leg in an annotation."""
-    return NONBLOCKING_LEG_TEMPLATE if (name, job_id) == EXPERIMENTAL_JOB else LEG_TEMPLATE
+    return EXPERIMENTAL_LEG_TEMPLATE if (name, job_id) == EXPERIMENTAL_JOB else LEG_TEMPLATE
 
 
 def leg_label(leg: 'dict[str, Any]') -> 'str':
@@ -325,9 +323,8 @@ class TestTheKTLOTierNeverBlocks(unittest.TestCase):
                     continue  # only ever on a supported leg: the coverage one, the cache saver
                 if label in ('Checkout code', "Check the release tags name this run's commit"):
                     continue  # #1634: blocks every leg alike, pinned in its own test module
-                # Each summary's own guard: it runs on its tier's legs only.
-                expected = {'KTLO summary': KTLO_GUARD,
-                            'Experimental summary': EXPERIMENTAL_GUARD}.get(label, guard(name, job_id))
+                # The summary's own guard: it runs on KTLO legs only.
+                expected = {'KTLO summary': KTLO_GUARD}.get(label, guard(name, job_id))
                 with self.subTest(workflow=name, job=job_id, step=label):
                     self.assertIn(step.get('continue-on-error'), (True, expected))
 

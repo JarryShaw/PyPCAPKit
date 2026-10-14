@@ -901,9 +901,9 @@ CLAIMS = {
               lambda f: counted(len(f['ktlo']), lines_of(f, 'ktlo'))),
         Claim(r'and the (\w+) ``Compat Python (3\.\d+)``-``(3\.\d+)`` legs',
               lambda f: counted(len(f['required']) - 1, span(f['supported']))),
-        Claim(r'``test`` \((\w+) Python legs: (\w+) supported, (\w+) KTLO, (\w+) experimental\)',
-              lambda f: (Word(f['legs']['test']), Word(len(f['supported'])), Word(len(f['ktlo'])),
-                         Word(len(f['experimental'])))),
+        Claim(r'``test`` \((\w+) Python legs: (\w+) supported, (\w+) KTLO\)',
+              lambda f: (Word(f['legs']['test']), Word(len(f['supported'])), Word(len(f['ktlo'])))),
+        Claim(r'``experimental`` \((\w+)\)', lambda f: (Word(f['legs']['experimental']),)),
         Claim(r'``integration`` \((\w+)\)', lambda f: (Word(f['legs']['integration']),)),
         Claim(r'each looping over (\w+) Python versions', lambda f: (Word(f['engines']),)),
         Claim(r'``pypcap-parity`` \((\w+)\)', lambda f: (Word(f['legs']['pypcap-parity']),)),
@@ -1007,7 +1007,9 @@ def make_facts(data: 'dict[str, Any]', values: 'dict[str, str]', workflows: 'dic
         'experimental': [version for impl in data['versions'] for version in pv.tier(data, impl, 'experimental')],
         'wheels': len(values['pypi-wheels'].split()),
         'conda': len(json.loads(values['conda'])),
-        'legs': {job_id: len(found) for (name, job_id), found in legs.items() if name == 'unit-tests.yml'},
+        # #1732: experimental.yml's one job, which unit-tests.yml's prose counts with its own.
+        'legs': {job_id: len(found) for (name, job_id), found in legs.items()
+                 if name in ('unit-tests.yml', 'experimental.yml')},
         'engines': len(engines),
         'required': required_contexts(workflows, values),
         'tier_lines': tier_lines,
