@@ -10,141 +10,29 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 .. _PyShark: https://kiminewt.github.io/pyshark
 
 """
-import json
-import os
-import subprocess
 import sys
-import tempfile
 from typing import TYPE_CHECKING, cast
 
-from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
 from pcapkit.foundation.engines.engine import EngineBase
-from pcapkit.foundation.engines.pcap import PCAP as PCAP_Engine
-from pcapkit.foundation.engines.pcapng import PCAPNG as PCAPNG_Engine
 from pcapkit.foundation.reassembly import ReassemblyManager
-from pcapkit.protocols.misc.pcap.header import Header
-from pcapkit.utilities.exceptions import FormatError, stacklevel
+from pcapkit.utilities.exceptions import stacklevel
 from pcapkit.utilities.logging import get_logger
-from pcapkit.utilities.warnings import AttributeWarning, PySharkWarning, warn
+from pcapkit.utilities.warnings import AttributeWarning, warn
 
 __all__ = ['PyShark']
 
 if TYPE_CHECKING:
-    from typing import IO, Generator, Literal, Optional, Union
+    from typing import Optional
 
     from pyshark.capture.file_capture import FileCapture
     from pyshark.packet.layers.base import BaseLayer
     from pyshark.packet.packet import Packet as PySharkPacket
 
     from pcapkit.foundation.extraction import Extractor
-    from pcapkit.toolkit.pyshark import Captured
 
 #: logging.Logger: Module-level logger, a child of the package-wide
 #: :data:`pcapkit.utilities.logging.logger`.
 logger = get_logger(__name__)
-
-
-def _ek_record(line: 'bytes') -> 'Optional[Union[tuple[int, bytes], str]]':
-    """Parse a line of :program:`tshark`'s ``-T ek -x -J frame`` output.
-
-    Args:
-        line: One line of the output.
-
-    Returns:
-        :data:`None` for an index line, which each packet line follows; for a
-        packet line, its ``frame.number`` and its frame's captured octets, the
-        ``frame_raw`` that ``-x`` adds; otherwise, a phrase saying the line
-        cannot be parsed.
-
-    """
-    try:
-        record = json.loads(line)
-        if isinstance(record, dict) and set(record) == {'index'}:
-            return None
-        layers = record['layers']
-        number, octets = layers['frame']['frame_frame_number'], layers['frame_raw']
-        if isinstance(number, list):
-            number = number[0]
-        if isinstance(octets, list):
-            octets = octets[0]
-        return int(number), bytes.fromhex(octets)
-    except (ValueError, LookupError, TypeError):  # not JSON, a field missing, or not text
-        return f'gave output it cannot parse: {bytes(line[:80])!r}'
-
-
-def _linktypes(path: 'str') -> 'Generator[int, None, None]':
-    """Read the link type of each packet of a capture file, in order, as the default engine reads it.
-
-    Args:
-        path: The PCAP or PCAP-NG file.
-
-    Yields:
-        The link type the default engine dissects each packet by. A PCAP file
-        has one, in its global header. A PCAP-NG packet takes that of the
-        interface it was captured on, among the Interface Description Blocks of
-        its own section: an Enhanced or obsolete Packet Block names it by ID, and
-        a Simple Packet Block is the first's. These three are the packets the
-        default engine counts as frames; every other block is skipped.
-
-    Raises:
-        FormatError: If a PCAP-NG block is of no byte order a Section Header
-            Block declares, too short for its fields, or a packet block naming
-            an interface its section does not describe. A block cut short by
-            the end of the file ends the packets instead.
-
-    Note:
-        The file is opened at the first packet asked for, and closed at its end,
-        or when the generator is closed.
-
-    """
-    # length of the field after a block's type and length that names its link
-    # type (IDB) or interface (EPB, obsolete Packet Block), by block type
-    fields = {
-        int(Enum_BlockType.Interface_Description_Block): 2,
-        int(Enum_BlockType.Enhanced_Packet_Block): 4,
-        int(Enum_BlockType.Packet_Block): 2,
-    }  # type: dict[int, int]
-
-    with open(path, 'rb') as file:
-        if file.read(4) in PCAP_Engine.MAGIC_NUMBER:
-            file.seek(0)
-            linktype = int(Header(file).protocol)
-            while True:
-                yield linktype
-
-        file.seek(0)
-        byteorder = None  # type: Optional[Literal['big', 'little']]
-        interfaces = []  # type: list[int]
-        while True:
-            head = file.read(8)
-            if head[:4] == PCAPNG_Engine.MAGIC_NUMBER[0]:  # a palindrome, the same in either byte order
-                head += file.read(4)
-                if len(head) < 12:
-                    return
-                byteorder = PCAPNG_Engine.BYTE_ORDER_MAGIC.get(head[8:])
-                interfaces = []  # an interface ID counts the IDBs of its own section
-            elif len(head) < 8:
-                return
-            if byteorder is None:
-                raise FormatError(f'PCAP-NG: block of no known byte order: {head!r}')
-            kind, length = int.from_bytes(head[:4], byteorder), int.from_bytes(head[4:8], byteorder)
-            size = fields.get(kind, 0)
-            if length < len(head) + size + 4:  # the type, length, field, and trailing length
-                raise FormatError(f'PCAP-NG: [Block {kind}] invalid block length: {length}')
-
-            field = file.read(size)
-            file.seek(length - len(head) - size - 4, os.SEEK_CUR)
-            if len(field) < size or len(file.read(4)) < 4:
-                return
-
-            if kind == Enum_BlockType.Interface_Description_Block:
-                interfaces.append(int.from_bytes(field, byteorder))
-            elif kind in (Enum_BlockType.Enhanced_Packet_Block, Enum_BlockType.Packet_Block,
-                          Enum_BlockType.Simple_Packet_Block):
-                interface = int.from_bytes(field, byteorder)  # 0 for a Simple Packet Block, which has none
-                if interface >= len(interfaces):
-                    raise FormatError(f'PCAP-NG: [Block {kind}] invalid interface ID: {interface}')
-                yield interfaces[interface]
 
 
 def _frame_layer(packet: 'PySharkPacket') -> 'Optional[BaseLayer]':
@@ -200,21 +88,6 @@ class PyShark(EngineBase['PySharkPacket']):
         _expkg: 'pyshark'
         #: Engine extraction temporary storage.
         _extmp: 'FileCapture'
-        #: The second :program:`tshark` pass :meth:`_captured` reads captured
-        #: octets from, once it is first asked for some.
-        _exraw: 'Optional[subprocess.Popen[bytes]]'
-        #: Where that pass writes its standard error.
-        _exraw_err: 'Optional[IO[bytes]]'
-        #: The frame number and octets :meth:`_captured` last read from it.
-        _exraw_held: 'Optional[tuple[int, bytes]]'
-        #: The link type of each packet of the capture file (see
-        #: :func:`_linktypes`), which :meth:`_captured` reads, once it is first
-        #: asked for one.
-        _exlink: 'Optional[Generator[int, None, None]]'
-        #: The count and link type of the packet :meth:`_captured` last read from it.
-        _exlink_held: 'Optional[tuple[int, int]]'
-        #: Whether reading either has failed, so :meth:`_captured` reads no more.
-        _exraw_failed: 'bool'
 
     ##########################################################################
     # Defaults.
@@ -232,29 +105,6 @@ class PyShark(EngineBase['PySharkPacket']):
     #: :func:`asyncio.get_event_loop` raise :exc:`RuntimeError` when no current
     #: event loop exists instead of quietly creating one.
     PYTHON_CEILING = (3, 14)
-
-    #: :program:`tshark` preferences :meth:`run` overrides, through
-    #: ``pyshark``'s ``override_prefs``: IPv4 and IPv6 reassembly off. tshark
-    #: reassembles fragments by default and dissects what the datagram carries
-    #: at the frame that completes it, so TCP was traced at the last fragment.
-    #: The default engine reads each frame as captured, TCP from a first
-    #: fragment (:issue:`1612`), and pcapkit's own reassembly is disabled on
-    #: this engine.
-    #:
-    #: Turning tshark's off also changes its TCP analysis, which is not
-    #: confined to fragments. Measured with tshark 4.6.9: tshark sizes a
-    #: fragmented segment from its first fragment alone, so its sequence
-    #: analysis sees a gap after it. Later frames of that stream, fragments or
-    #: not, then gain ``tcp.analysis.lost_segment``, and their other
-    #: ``tcp.analysis`` fields, ``tcp.completeness``, ``tcp.time_delta`` and
-    #: ``tcp.stream.*.contiguity_count`` change. Those fields reach the frame
-    #: records :func:`~pcapkit.toolkit.pyshark.packet2dict` builds. But
-    #: :func:`~pcapkit.toolkit.pyshark.tcp_traceflow` reads none of them, so
-    #: flow tracing is unaffected. The 23 captures under
-    #: :file:`examples/captures` carry no fragmented TCP. On them, every field
-    #: of every frame is the same either way, except the first and last
-    #: fragments of the one fragmented UDP datagram in :file:`ipv6.pcap`.
-    OVERRIDE_PREFS = {'ip.defragment': 'FALSE', 'ipv6.defragment': 'FALSE'}  # type: dict[str, str]
 
     ##########################################################################
     # Class methods.
@@ -352,12 +202,6 @@ class PyShark(EngineBase['PySharkPacket']):
 
         self._expkg = pyshark
         self._extmp = cast('FileCapture', None)
-        self._exraw = None
-        self._exraw_err = None
-        self._exraw_held = None
-        self._exlink = None
-        self._exlink_held = None
-        self._exraw_failed = False
 
         super().__init__(extractor)
 
@@ -370,8 +214,7 @@ class PyShark(EngineBase['PySharkPacket']):
 
         This method assigns :attr:`self._expkg <PyShark._expkg>`
         as :mod:`pyshark` and :attr:`self._extmp <PyShark._extmp>`
-        as an iterator from :class:`pyshark.FileCapture`, with
-        :program:`tshark`'s IP reassembly off (:attr:`OVERRIDE_PREFS`).
+        as an iterator from :class:`pyshark.FileCapture`.
 
         The global header is parsed and dumped first, by
         :meth:`self.extractor.record_header <pcapkit.foundation.extraction.Extractor.record_header>`.
@@ -424,8 +267,7 @@ class PyShark(EngineBase['PySharkPacket']):
 
         # extract & analyse file
         logger.debug('pyshark: opening %s', ext._ifnm)
-        self._extmp = self._expkg.FileCapture(ext._ifnm, keep_packets=False,
-                                              override_prefs=dict(self.OVERRIDE_PREFS))
+        self._extmp = self._expkg.FileCapture(ext._ifnm, keep_packets=False)
 
     def read_frame(self) -> 'PySharkPacket':
         """Read frames with PyShark engine.
@@ -469,7 +311,7 @@ class PyShark(EngineBase['PySharkPacket']):
         # trace flows
         if ext._flag_t:
             if ext._tcp:
-                data_tf_tcp = tcp_traceflow(packet, count=ext._frnum, captured=self._captured)
+                data_tf_tcp = tcp_traceflow(packet, count=ext._frnum)
                 if data_tf_tcp is not None:
                     ext._trace.tcp(data_tf_tcp)
 
@@ -481,197 +323,11 @@ class PyShark(EngineBase['PySharkPacket']):
         # return frame record
         return packet
 
-    def _octets_command(self) -> 'list[str]':
-        """The command line of the second :program:`tshark` pass :meth:`_captured` reads.
-
-        Returns:
-            :program:`tshark`, found as `PyShark`_ finds it, reading the capture
-            with the preferences :meth:`run` gives `PyShark`_
-            (:attr:`OVERRIDE_PREFS`) and no name resolution, and writing the
-            frames :data:`~pcapkit.toolkit.pyshark.OCTETS_FILTER` matches as
-            Elasticsearch JSON, one line each, with their captured octets
-            (``-x``) and no protocol's fields but the frame's (``-J frame``).
-
-        .. _PyShark: https://kiminewt.github.io/pyshark
-
-        """
-        from pyshark.tshark.tshark import get_process_path  # isort:skip
-
-        from pcapkit.toolkit.pyshark import OCTETS_FILTER  # isort:skip
-
-        command = [get_process_path(), '-l', '-n', '-r', self._extractor._ifnm, '-Y', OCTETS_FILTER,
-                   '-T', 'ek', '-x', '-J', 'frame']
-        for name, value in self.OVERRIDE_PREFS.items():
-            command += ['-o', f'{name}:{value}']
-        return command
-
-    def _read_octets(self, number: 'int') -> 'Union[bytes, str]':
-        """Read the captured octets of a frame from the second :program:`tshark` pass.
-
-        Args:
-            number: The frame's ``frame.number``.
-
-        Returns:
-            The octets, or a phrase saying why there are none.
-
-        """
-        if self._exraw is None:
-            self._exraw_err = tempfile.TemporaryFile()  # pylint: disable=consider-using-with
-            self._exraw = subprocess.Popen(self._octets_command(), stdin=subprocess.DEVNULL,  # pylint: disable=consider-using-with
-                                           stdout=subprocess.PIPE, stderr=self._exraw_err)
-        held = self._exraw_held
-        while held is None or held[0] < number:
-            line = cast('IO[bytes]', self._exraw.stdout).readline()
-            if not line:
-                status = self._exraw.wait()
-                if not status:
-                    return f'ended before frame {number}'
-                error = cast('IO[bytes]', self._exraw_err)
-                error.seek(0)
-                last = error.read().decode('utf-8', 'replace').strip().splitlines()[-1:]
-                return f'exited with status {status}' + ''.join(f' ({text})' for text in last)
-            record = _ek_record(line)
-            if isinstance(record, str):
-                return record
-            if record is not None:
-                held = self._exraw_held = record
-        if held[0] != number:
-            return f'has no frame {number}'
-        return held[1]
-
-    def _read_linktype(self, count: 'int') -> 'Union[int, str]':
-        """Read the link type the default engine dissects a frame by, from the capture file.
-
-        Args:
-            count: The frame's count, as the default engine numbers frames.
-
-        Returns:
-            The link type, or a phrase saying why there is none.
-
-        """
-        if self._exlink is None:
-            self._exlink = _linktypes(self._extractor._ifnm)
-        held = self._exlink_held
-        while held is None or held[0] < count:
-            linktype = next(self._exlink, None)
-            if linktype is None:
-                return f'has no packet {count}'
-            held = self._exlink_held = ((0 if held is None else held[0]) + 1, linktype)
-        if held[0] != count:
-            return f'was read past packet {count}'
-        return held[1]
-
-    def _captured(self, packet: 'PySharkPacket') -> 'Optional[Captured]':
-        """Read a frame's link type and octets as the default engine reads them, which the PDML :meth:`run` reads lacks.
-
-        :func:`~pcapkit.toolkit.pyshark.tcp_traceflow` asks for one of a frame
-        :data:`~pcapkit.toolkit.pyshark.OCTETS_FILTER` matches only: one tshark
-        dissects TCP in (:issue:`1639`), one with an AH or IPv6 extension
-        header in IPv4 (:issue:`1625`), or one with more 802.1Q tags than
-        tshark dissects (:issue:`1609`).
-
-        Its link type is the one the default engine dissects it by, read from
-        the capture file (see :func:`_linktypes`) for the frame of this engine's
-        count, which numbers frames as the default engine does. tshark's
-        ``frame.encap_type`` cannot say which it is, as tshark reads several link
-        types as one (see :data:`~pcapkit.toolkit.pyshark.ENCAP_TYPE_TO_LINKTYPE`).
-
-        Its captured octets come from a second :program:`tshark` pass over the
-        capture (see :meth:`_octets_command`), started on the first request.
-        Both passes number frames alike and deliver them in order, so the second
-        is read forward to the frame asked for, and the last frame it read is
-        kept for the next request. The capture file is read forward likewise. A
-        capture with no such frame reads neither.
-
-        Args:
-            packet: PyShark packet of the first pass.
-
-        Returns:
-            The frame's link type and captured octets; :data:`None` once either
-            cannot be read.
-
-        Warns:
-            PySharkWarning: When the frame cannot be read: the second pass
-                cannot be started, exits with an error, gives output that cannot
-                be parsed, or lacks the frame asked for; or the capture file
-                cannot be read for the frame's link type. Both are then stopped,
-                and this and every later frame is traced as tshark dissects it,
-                as before :issue:`1625` and :issue:`1639`, which can disagree
-                with the default engine.
-
-        Note:
-            The second pass is a process of this engine's own rather than a
-            second :class:`pyshark.FileCapture`, for two reasons measured with
-            `PyShark`_ 0.6 and :program:`tshark` 4.6.9. Its JSON parser reads
-            ``frame.time_epoch``, which a Simple Packet Block lacks, and raises
-            :exc:`KeyError`. And each capture it creates sets a new
-            :class:`asyncio.SafeChildWatcher` (``Capture._setup_eventloop``), so
-            the process of the first is left unreaped once a second exists.
-
-        .. _PyShark: https://kiminewt.github.io/pyshark
-
-        """
-        from pcapkit.toolkit.pyshark import Captured  # isort:skip
-
-        if self._exraw_failed:
-            return None
-        frnum = self._extractor._frnum
-        frames = ('a frame with an AH or IPv6 extension header in IPv4, with TCP, or with more 802.1Q tags '
-                  'than tshark dissects,')
-        source = f'the capture file, read for the link type of {frames}'
-        try:
-            linktype = self._read_linktype(frnum)
-            if isinstance(linktype, str):
-                reason = linktype
-            else:
-                source = f'the second tshark pass, which reads the captured octets of {frames}'
-                octets = self._read_octets(int(packet.number))
-                if isinstance(octets, bytes):
-                    return Captured(linktype, octets)
-                reason = octets
-        except Exception as exc:  # pylint: disable=broad-except
-            reason = f'failed: {type(exc).__name__}: {exc}'
-
-        self._exraw_failed = True
-        self._stop_captured()
-        warn(f'Frame {frnum}: {source} {reason}; this and later such frames are traced as tshark '
-             'dissects them, which can disagree with the default engine',
-             PySharkWarning, stacklevel=stacklevel())
-        return None
-
-    def _stop_captured(self) -> 'None':
-        """Stop reading frames as :meth:`_captured` reads them.
-
-        The second :program:`tshark` pass, if it was started, is stopped and
-        reaped, and the capture file, if it was opened, closed.
-
-        """
-        process, self._exraw = self._exraw, None
-        error, self._exraw_err = self._exraw_err, None
-        linktypes, self._exlink = self._exlink, None
-        try:
-            if process is not None:
-                if process.poll() is None:
-                    process.kill()
-                process.wait()
-                cast('IO[bytes]', process.stdout).close()
-        finally:
-            try:
-                if error is not None:
-                    error.close()
-            finally:
-                if linktypes is not None:
-                    linktypes.close()
-
     def close(self) -> 'None':
         """Close engine.
 
         This method is to be used for closing the engine instance. It is to
-        close the engine instance after the extraction process is finished,
-        and what :meth:`_captured` reads frames from, if anything.
+        close the engine instance after the extraction process is finished.
 
         """
-        try:
-            self._extmp.close()
-        finally:
-            self._stop_captured()
+        self._extmp.close()
