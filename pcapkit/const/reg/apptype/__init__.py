@@ -41,6 +41,7 @@ itself, since they are most of its import time (GitHub issue :issue:`1538`).
 """
 
 import importlib
+import sys
 from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.apptype.apptype import AppType, TransportProtocol
@@ -136,13 +137,18 @@ class _Registries(dict):
         self._resolve_all()
         return dict.__ne__(self, other)
 
-    def __or__(self, other: 'Any') -> 'Any':
-        self._resolve_all()
-        return dict.__or__(self, other)
+    # NOTE: dict union is :pep:`584`, Python 3.9 and up, so a registry has it
+    # from 3.9 only, as :obj:`dict` does (GitHub issue :issue:`1694`): before
+    # 3.9, ``|`` and ``|=`` raise dict's :exc:`TypeError` and import nothing.
+    # ``|=`` stays dict's own, since it updates in place and reads no value.
+    if sys.version_info >= (3, 9):  # pragma: no branch -- Python 3.9 and up
+        def __or__(self, other: 'Any') -> 'Any':
+            self._resolve_all()
+            return dict.__or__(self, other)
 
-    def __ror__(self, other: 'Any') -> 'Any':
-        self._resolve_all()
-        return dict.__ror__(self, other)
+        def __ror__(self, other: 'Any') -> 'Any':
+            self._resolve_all()
+            return dict.__ror__(self, other)
 
     def __repr__(self) -> 'str':
         self._resolve_all()
@@ -182,6 +188,6 @@ def __getattr__(name: 'str') -> 'Any':
 
 def __dir__() -> 'list[str]':
     """The names an eager import of all four registries would list."""
-    helpers = {'importlib', 'TYPE_CHECKING', 'ModuleDescriptor', '_LAZY', '_Registries',
+    helpers = {'importlib', 'sys', 'TYPE_CHECKING', 'ModuleDescriptor', '_LAZY', '_Registries',
                '__getattr__', '__dir__'}
     return sorted({*globals(), *_LAZY, *_LAZY.values()} - helpers)

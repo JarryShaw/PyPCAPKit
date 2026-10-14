@@ -37,6 +37,7 @@ from tests._support import reimport_once_per_class
 
 if TYPE_CHECKING:
     from types import ModuleType
+    from typing import Any
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
@@ -46,6 +47,26 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 #: GitHub issue #1648) -- so :func:`eager_dir` reads them off the running one.
 PACKAGE_NAMES = ['AppType', 'DCCP', 'SCTP', 'TCP', 'TransportProtocol', 'UDP', '__all__',
                  'apptype', 'dccp', 'sctp', 'tcp', 'udp']
+
+#: Whether :obj:`dict` has union, :pep:`584`. Before Python 3.9, a registry has
+#: none either (GitHub issue #1694), so the union views run from 3.9 only.
+UNION = sys.version_info >= (3, 9)
+
+
+def merge(left: 'Any', right: 'Any') -> 'Any':
+    """``left |= right``, as an expression."""
+    left |= right
+    return left
+
+
+#: Each dict union operator, as a function of its two operands.
+UNIONS = {'|': lambda left, right: left | right, '|=': merge}
+
+
+def union_error(op: 'str', left: 'object', right: 'object') -> 'str':
+    """The :exc:`TypeError` message for ``left <op> right`` where neither supports it."""
+    return (f'unsupported operand type(s) for {op}: '
+            f'{type(left).__name__!r} and {type(right).__name__!r}')
 
 
 def import_system_names(module: 'ModuleType') -> 'list[str]':
@@ -188,12 +209,12 @@ class LazyAppTypeContractTests(unittest.TestCase):
                 'items': lambda: dict(registries.items()),
                 'copy': registries.copy,
                 'copy.copy': lambda: dict(copy.copy(registries)),
-                'or': lambda: registries | {},
-                'ror': lambda: {} | registries,
                 'repr': lambda: registries,
                 'eq': lambda: registries == populated,
                 'ne': lambda: registries != populated,
             }
+            if sys.version_info >= (3, 9):  # dict union, PEP 584
+                views.update({'or': lambda: registries | {}, 'ror': lambda: {} | registries})
             reprs = {}
             for name, view in views.items():
                 for proto in (TransportProtocol.tcp, TransportProtocol.udp):
@@ -203,6 +224,8 @@ class LazyAppTypeContractTests(unittest.TestCase):
             emit(shape=shape, reprs=reprs, default=registries.get(0, 'fallback'))
         ''')
         self.assertEqual(out['shape'], [4, [1, 2, 3, 4], True, True, []])
+        self.assertEqual(len(out['reprs']), 13 if UNION else 11)
+        self.assertEqual({'or', 'ror'} <= set(out['reprs']), UNION)
         for name, text in out['reprs'].items():
             with self.subTest(view=name):
                 self.assertNotIn('ModuleDescriptor', text)
@@ -313,18 +336,52 @@ class RegistriesMappingTests(unittest.TestCase):
             'dict': lambda registries: dict.__eq__(dict(registries), expected),
             'eq': lambda registries: registries == expected,
             'ne': lambda registries: (registries != expected) is False,
-            'or': lambda registries: dict.__eq__(registries | {}, expected),
-            'ror': lambda registries: dict.__eq__({} | registries, expected),
             'repr': lambda registries: 'ModuleDescriptor' not in repr(registries),
             'pop': lambda registries: registries.pop(proto.tcp) is classes[0],
             'popitem': lambda registries: registries.popitem() == (proto.dccp, classes[3]),
             'setdefault': lambda registries: registries.setdefault(proto.udp) is classes[1],
         }
+        if UNION:
+            views.update({
+                'or': lambda registries: dict.__eq__(registries | {}, expected),
+                'ror': lambda registries: dict.__eq__({} | registries, expected),
+            })
         for name, view in views.items():
             with self.subTest(view=name):
                 self.make()
                 self.assertTrue(view(self.registries))
                 self.assert_pending()
+
+    def test_union_is_dict_s_on_every_python(self) -> 'None':
+        # NOTE: GitHub issue #1694. Where dict has no union (Python < 3.9), a
+        # registry raises dict's TypeError, naming its own type, and imports
+        # nothing; where it does, ``registries |= other`` is dict's in-place
+        # update, which reads no value and so leaves the registry pending.
+        proto, expected = self.proto, dict(zip(list(self.proto)[1:], self.classes))
+        for op, side in (('|', 'left'), ('|', 'right'), ('|=', 'left'), ('|=', 'right')):
+            with self.subTest(op=op, side=side):
+                self.make()
+                operands = (self.registries, {}) if side == 'left' else ({}, self.registries)
+                if not UNION:
+                    with self.assertRaises(TypeError) as plain:
+                        UNIONS[op]({}, {})
+                    with self.assertRaises(TypeError) as registry:
+                        UNIONS[op](*operands)
+                    self.assertEqual(str(plain.exception), union_error(op, {}, {}))
+                    self.assertEqual(str(registry.exception), union_error(op, *operands))
+                    self.assert_pending(proto.tcp, proto.udp)
+                elif (op, side) == ('|=', 'left'):
+                    self.assertIs(UNIONS[op](*operands), self.registries)
+                    self.assert_pending(proto.tcp, proto.udp)
+                    self.assertEqual(self.registries, expected)
+                else:
+                    result = UNIONS[op](*operands)
+                    self.assertIs(type(result), dict)
+                    self.assertTrue(dict.__eq__(result, expected))
+                    self.assert_pending()
+        for name in ('__or__', '__ror__'):
+            self.assertIs(name in vars(type(self.registries)), UNION)
+        self.assertNotIn('__ior__', vars(type(self.registries)))
 
 
 class PackageGetattrTests(unittest.TestCase):
