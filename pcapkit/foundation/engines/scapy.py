@@ -63,6 +63,15 @@ logger = get_logger(__name__)
 #: :func:`_reader_type` overrides.
 _READER_HOOKS = ('_read_block', '_read_block_shb', '_read_block_idb', '_check_interface_id')
 
+#: The most octets a record can hold, as its captured length is 32 bits in a
+#: PCAP record header and in every PCAP-NG packet block. As the ``size`` a
+#: packet is read with, it cuts nothing (#1717).
+_CAPLEN_MAX = 0xFFFF_FFFF
+
+#: The most octets of a PCAP record read in one call, so that a forged captured
+#: length costs only the octets the file holds, as in Scapy 2.8 (#1717).
+_READ_CHUNK = 0x40000
+
 
 def _read_tsoffset(options: 'bytes', endian: 'str') -> 'int':
     """Read the ``if_tsoffset`` of a PCAP-NG Interface Description Block (#1549).
@@ -118,6 +127,15 @@ def _reader_type() -> 'Type[PcapReader]':
     ``if_tsoffset``, the seconds to add to each of its timestamps, so the
     subclass reads it and adds it (#1549).
 
+    Both subclasses read each record whole (#1717). ``sniff`` reads a packet
+    with ``recv()``, whose ``size`` defaults to `Scapy`_'s ``MTU``, 65,535
+    octets, and every reader cuts the record to ``size``, so ``recv`` defaults
+    to :data:`_CAPLEN_MAX` instead, as does a PCAP-NG block, which `Scapy`_ 2.6
+    reads at ``MTU`` whatever the ``size``. `Scapy`_ 2.8's PCAP reader also
+    reads at most ``MTU * 4`` octets of a record, 262,140, and skips the rest,
+    so the PCAP subclass reads the record itself, :data:`_READ_CHUNK` octets at
+    a time.
+
     Built when called, so that importing this module does not import `Scapy`_,
     and so that it always subclasses the :class:`scapy.utils.PcapReader` of the
     moment.
@@ -132,7 +150,8 @@ def _reader_type() -> 'Type[PcapReader]':
     .. _Scapy: https://scapy.net
 
     """
-    from scapy.utils import EDecimal, PcapNgReader, PcapReader  # isort:skip
+    from scapy.error import warning  # isort:skip
+    from scapy.utils import EDecimal, PcapNgReader, PcapReader, RawPcapReader  # isort:skip
 
     from pcapkit.toolkit.scapy import attach_linktype, attach_resolution  # isort:skip
 
@@ -154,14 +173,44 @@ def _reader_type() -> 'Type[PcapReader]':
                 self._closed = True
                 super().close()  # type: ignore[misc]
 
-    class _PcapReader(_Closing, PcapReader):
+    class _Uncapped(PcapReader):
+        # ``sniff`` calls ``recv()``, and Scapy's default ``size`` of ``MTU``
+        # cut every record to 65,535 octets (#1717); an explicit one is kept
+        def recv(self, size: 'int' = _CAPLEN_MAX, **kwargs: 'Any') -> 'ScapyPacket':  # type: ignore[override]
+            return super().recv(size, **kwargs)
+
+    class _PcapRecords(RawPcapReader):
+        # Scapy 2.8 reads at most ``MTU * 4`` octets of a record and skips the
+        # rest (#1717), so the record is read here: whole, but in chunks as 2.8
+        # reads it. ``PcapReader.read_packet`` calls ``super(PcapReader,
+        # self)._read_packet``, which looks in the classes after ``PcapReader``
+        # in the reader's MRO, so this one is a base listed after it.
+        def _read_packet(self, size: 'int' = _CAPLEN_MAX) -> 'tuple[bytes, Any]':
+            header = self.f.read(16)
+            if len(header) < 16:
+                raise EOFError
+            sec, usec, caplen, wirelen = struct.unpack(f'{self.endian}IIII', header)
+            chunks = []  # type: list[bytes]
+            remaining = caplen
+            while remaining:
+                chunk = self.f.read(min(remaining, _READ_CHUNK))
+                if not chunk:
+                    # the file ends inside the record, which Scapy 2.8 warns of
+                    warning('Pcap: packet has been truncated')
+                    break
+                chunks.append(chunk)
+                remaining -= len(chunk)
+            return (b''.join(chunks)[:size],
+                    self.PacketMetadata(sec=sec, usec=usec, wirelen=wirelen, caplen=caplen))
+
+    class _PcapReader(_Closing, _Uncapped, PcapReader, _PcapRecords):
         def read_packet(self, *args: 'Any', **kwargs: 'Any') -> 'ScapyPacket':
             packet = super().read_packet(*args, **kwargs)
             attach_resolution(packet, 1_000_000_000 if self.nano else 1_000_000)
             attach_linktype(packet, self.linktype)
             return packet
 
-    class _PcapNgReader(_Closing, PcapNgReader):
+    class _PcapNgReader(_Closing, _Uncapped, PcapNgReader):
         # the metaclass makes this ``_PcapReader``'s alternative in turn
         alternative = _PcapReader
 
@@ -195,8 +244,10 @@ def _reader_type() -> 'Type[PcapReader]':
             self._interface = intid
             return super()._check_interface_id(intid)
 
-        def _read_block(self, *args: 'Any', **kwargs: 'Any') -> 'Any':
-            block = super()._read_block(*args, **kwargs)
+        def _read_block(self, size: 'int' = _CAPLEN_MAX) -> 'Any':
+            # Scapy 2.6 reads each block with ``_read_block()``, so at ``MTU``
+            # whatever the packet's ``size`` (#1717)
+            block = super()._read_block(size)
             if block is not None:
                 self._resolution = block[1].tsresol
                 self._linktype = block[1].linktype
