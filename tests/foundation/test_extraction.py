@@ -1155,6 +1155,90 @@ class ExtractorTests(unittest.TestCase):
                     self.assertEqual(traced._trace.tcp._fdpext, '.pcap')
                     warn.assert_not_called()
 
+    def _warns_bullet_engines(self, lead: str, marker: str) -> 'set[str]':
+        """Engines named by the ``Extractor.__init__`` ``Warns:`` bullet opening ``lead``.
+
+        The bullet's continuation lines are joined, the list after ``marker`` is
+        split on ``,`` and ``or``, and each display name is mapped to its registry
+        key -- ``pcap-ct`` to ``pcap_ct``. Every name must be a registered engine,
+        so a misspelt or renamed one fails here rather than silently matching
+        nothing.
+
+        """
+        from pcapkit.foundation.extraction import Extractor
+
+        doc = inspect.getdoc(Extractor.__init__)
+        if doc is None:
+            self.skipTest('docstrings are stripped (-OO)')
+        lines = [line.strip() for line in doc.splitlines()]
+        starts = [index for index, line in enumerate(lines) if line.startswith(f'* {lead}')]
+        self.assertEqual(len(starts), 1, f'expected one Warns bullet opening {lead!r}')
+        bullet = [lines[starts[0]][2:]]
+        for line in lines[starts[0] + 1:]:
+            if not line or line.startswith('* '):
+                break
+            bullet.append(line)
+        text = ' '.join(bullet)
+        self.assertIn(marker, text)
+        listed = text.split(marker, 1)[1].rstrip('.').replace(' or ', ', ').split(', ')
+        engines = {label.strip().lower().replace('-', '_') for label in listed}
+        self.assertLessEqual(engines, set(Extractor.__engine__), text)
+        return engines
+
+    @staticmethod
+    def _warned(warn: mock.Mock, needle: str) -> bool:
+        """Whether the patched ``warn`` was called with a message holding ``needle``."""
+        return any(needle in str(call.args[0]) for call in warn.call_args_list)
+
+    def test_warns_bullet_for_pcap_trace_output_names_the_engines_its_guard_warns_for(self) -> None:
+        # The bullet lists engines by name and the guard lists them again as a
+        # tuple, and nothing tied the two: when DPKT and Scapy left the guard in
+        # #1507 the bullet kept naming them (#1719). Every engine is put through
+        # the guard -- ``_traced`` takes the requested engine as the one that runs
+        # -- and the set that warns is compared with the set the bullet names.
+        from pcapkit.foundation.extraction import Extractor
+
+        warned = set()
+        with tempfile.TemporaryDirectory() as tempdir:
+            temp = pathlib.Path(tempdir)
+            (temp / 'sample.pcap').write_bytes(b'\xa1\xb2\xc3\xd4payload')
+
+            for engine in sorted(set(Extractor.__engine__) | {'default', 'pcapkit'}):
+                _, warn = self._traced(temp, f'doc-{engine}', engine=engine, trace_format='pcap')
+                if self._warned(warn, "'trace_format=pcap'"):
+                    warned.add(engine)
+
+        self.assertTrue(warned, 'the guard warned for no engine, so the comparison proves nothing')
+        documented = self._warns_bullet_engines('If using PCAP output for TCP flow tracing',
+                                                'extraction engine is ')
+        self.assertEqual(documented, warned)
+
+    def test_warns_bullet_for_pcap_output_names_the_engines_its_guard_warns_for(self) -> None:
+        # The frame-output counterpart of the case above: the bullet naming the
+        # third-party engines whose ``format='pcap'`` is replaced has to match the
+        # guard that replaces it.
+        from pcapkit.foundation.extraction import Extractor
+
+        warned = set()
+        with tempfile.TemporaryDirectory() as tempdir:
+            temp = pathlib.Path(tempdir)
+            (temp / 'sample.pcap').write_bytes(b'\xa1\xb2\xc3\xd4payload')
+
+            for engine in sorted(set(Extractor.__engine__) | {'default', 'pcapkit'}):
+                with mock.patch.object(Extractor, 'run'), \
+                        mock.patch.object(Extractor, '_select_engine', return_value=None), \
+                        mock.patch('pcapkit.foundation.extraction.warn') as warn:
+                    extractor = Extractor(str(temp / 'sample.pcap'), str(temp / f'out-{engine}'),
+                                          format='pcap', engine=engine, auto=False,
+                                          nofile=True)  # type: ignore[arg-type]
+                self.addCleanup(extractor._ifile.close)
+                if self._warned(warn, "'format=pcap'"):
+                    warned.add(engine)
+
+        self.assertTrue(warned, 'the guard warned for no engine, so the comparison proves nothing')
+        documented = self._warns_bullet_engines('If using PCAP output while', 'i.e. ')
+        self.assertEqual(documented, warned)
+
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class DictFrameTraceEndToEndTests(unittest.TestCase):
