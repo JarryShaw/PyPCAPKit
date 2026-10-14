@@ -420,7 +420,9 @@ The available engines and the file formats they read:
    whatsoever, so they support neither reassembly nor flow tracing; `PyPCAPFile`_
    has no IPv6 decoder, so it supports IPv4 and TCP reassembly but not IPv6. What
    matters is that the gap is *announced* -- each engine warns, or raises, for the
-   capability it cannot provide, rather than silently producing an empty result. See
+   capability it cannot provide, rather than silently producing an empty result,
+   save that `PyPCAPFile`_ leaves TCP behind a VLAN tag, in a tunnel or behind an
+   extension header (an IPv6 one, or AH in IPv4) out without a warning. See
    :doc:`pcapkit/foundation/engines/index` for the full table.
 
 .. note::

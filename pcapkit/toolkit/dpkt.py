@@ -649,9 +649,8 @@ def _ipv4_header_accepted(header: 'bytes') -> 'bool':
 
     Note:
         A header of version 4 with no options is not parsed, as the parser
-        checks nothing else of one; any other is asked of the parser itself, as
-        the pypcapfile engine asks it (see
-        :func:`pcapkit.toolkit.pypcapfile._default_accepts`).
+        checks nothing else of one; any other is asked of the parser itself
+        (see :func:`pcapkit.toolkit.pypcapfile._default_accepts`).
 
     """
     return header[0] == 0x45 or _default_accepts('IPv4', bytes(header))
@@ -1023,11 +1022,10 @@ def _tcp_carrier(packet: 'Packet') -> 'Optional[_Segment]':
         (:func:`pcapkit.toolkit.pcap.tcp_segment`), as `DPKT`_ decodes one, and
         an IPv6 packet's extension headers do not come between, as it dissects
         them itself. Behind a header that is a layer of its own, it does not, so
-        the parser's answer stands there, as for the pypcapfile engine. The TCP
-        endpoints are the innermost IP layer's addresses, as for the default
-        engine; the outer ones are the tunnel's (:issue:`1581`). Each flag is
-        read from the flags octet alone, as the default engine reads it
-        (:issue:`1618`).
+        the parser's answer stands there. The TCP endpoints are the innermost IP
+        layer's addresses, as for the default engine; the outer ones are the
+        tunnel's (:issue:`1581`). Each flag is read from the flags octet alone,
+        as the default engine reads it (:issue:`1618`).
 
     .. _DPKT: https://dpkt.readthedocs.io
 

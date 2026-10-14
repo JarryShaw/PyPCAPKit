@@ -44,18 +44,15 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
     * reads PCAP savefiles only, raising
       :exc:`~pcapkit.utilities.exceptions.FormatError` on PCAP-NG,
     * reads the savefile's records itself, into `PyPCAPFile`_'s own packet
-      objects, as `PyPCAPFile`_ 0.12.0 drops records the ``default`` engine
-      reads -- see :meth:`_read_records`,
+      objects, as `PyPCAPFile`_ 0.12.0 drops some of them -- see
+      :meth:`_read_records`,
     * disables IPv6 reassembly, warning as it does so, while leaving IPv4 and
-      TCP reassembly and TCP flow tracing in place,
+      TCP reassembly and TCP flow tracing in place, and
     * leaves TCP over IPv6 out of TCP reassembly and flow tracing, with one
-      :exc:`~pcapkit.utilities.warnings.AttributeWarning` per capture -- see
-      :mod:`pcapkit.toolkit.pypcapfile` -- and
-    * leaves the frames of a link type `PyPCAPFile`_ has no decoder for
-      undecoded, from which :mod:`pcapkit.toolkit.pypcapfile` reads the IP
-      packet of the BSD loopback and raw-IP ones itself, as the ``default``
-      engine dissects it (see
-      :data:`~pcapkit.toolkit.pypcapfile.READ_LINKTYPES`).
+      :exc:`~pcapkit.utilities.warnings.AttributeWarning` per capture when the
+      IPv6 packet is straight over Ethernet, and TCP behind a VLAN tag, in a
+      tunnel or behind an extension header (an IPv6 one, or AH in IPv4) out
+      without one -- see :mod:`pcapkit.toolkit.pypcapfile`.
 
     The engine stops decoding at the network layer rather than descending into
     the transport layer. `PyPCAPFile`_ decoders *replace* the payload bytes of
@@ -189,10 +186,8 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
                   support such operations.
                 * if IPv6 reassembly is enabled, as :mod:`pcapfile` has no IPv6
                   decoder.
-                * if the savefile's link layer type is left unread: neither
-                  :mod:`pcapfile` has a decoder for it nor
-                  :mod:`pcapkit.toolkit.pypcapfile` reads it (see
-                  :meth:`_get_decoder`).
+                * if :mod:`pcapfile` has no decoder for the savefile's link layer
+                  type, in which case frames are left undecoded.
 
         Raises:
             FormatError: If the file format is not supported, i.e., not a PCAP
@@ -309,36 +304,29 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
             The decoder class, or :data:`None` when :mod:`pcapfile` has none.
 
         Warns:
-            AttributeWarning: If no decoder is available and the link layer type
-                is none of the :data:`~pcapkit.toolkit.pypcapfile.READ_LINKTYPES`,
-                as frames will then be left hexlified -- see :meth:`run` -- and
-                no reassembly or flow tracing is possible. The frames of those
-                link types are left undecoded too, but reassembly and flow
-                tracing read the IP packet in them, as the ``default`` engine
-                does, so nothing is lost there to warn of.
+            AttributeWarning: If no decoder is available, as frames will then be
+                left hexlified -- see :meth:`run` -- and no reassembly or flow
+                tracing is possible.
 
         """
-        from pcapkit.toolkit.pypcapfile import READ_LINKTYPES  # isort:skip
-
         try:
             decoder = self._expkg.linklayer.clookup(linktype)
         except IndexError:  # malformed entry in ``pcapfile.linklayer.__LL_TYPES__``
             decoder = None
 
         if not callable(decoder):
-            if linktype not in READ_LINKTYPES:
-                warn(f'unrecognised link layer protocol: {self._dlink!r}; frames will be left '
-                     'undecoded and all analysis functions ignored', AttributeWarning,
-                     stacklevel=stacklevel())
+            warn(f'unrecognised link layer protocol: {self._dlink!r}; frames will be left '
+                 'undecoded and all analysis functions ignored', AttributeWarning,
+                 stacklevel=stacklevel())
             return None
         return decoder
 
     def _read_records(self, file: 'NamedStream',
                       header: 'PCAPFileHeader') -> 'Iterator[PCAPFilePacket]':
-        """Read the savefile's records, as the ``default`` engine reads them.
+        """Read the savefile's records, every one of them.
 
         :func:`pcapfile.savefile._read_a_packet` (pypcapfile 0.12.0) drops
-        records the ``default`` engine reads, in two ways:
+        records in two ways:
 
         * It picks the byte order of each record header by testing
           ``hdrp[0].byteorder == 'big'`` -- :class:`bytes` against :class:`str`,
@@ -354,9 +342,8 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
         builds with ``layers=0`` -- the frame hexlified, pointing at the
         savefile's own header -- so :meth:`_decode` and
         :mod:`pcapkit.toolkit.pypcapfile` see what :mod:`pcapfile` hands them.
-        It stops where :class:`~pcapkit.protocols.misc.pcap.frame.Frame` stops,
-        at a tail too short for a record header, and keeps a record whose capture
-        length runs past the data as that does: the capture length as declared,
+        It stops at a tail too short for a record header, and keeps a record
+        whose capture length runs past the data: the capture length as declared,
         the octets present as the frame.
 
         Args:

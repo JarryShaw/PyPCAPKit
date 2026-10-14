@@ -70,7 +70,8 @@ class hierarchy of :mod:`pcapkit.foundation.engines`:
        click PyPCAPFile "/pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile"
 
 Not every engine can do everything :class:`~pcapkit.foundation.extraction.Extractor`
-offers, and the ones that cannot say so rather than quietly doing less:
+offers, and the ones that cannot say so rather than quietly doing less, unless
+their row says otherwise:
 
 +-----------------------------------------------------------------+---------------------------------------------------------------+
 | Engine                                                          | Gap, and how it is surfaced                                   |
@@ -92,11 +93,12 @@ offers, and the ones that cannot say so rather than quietly doing less:
 | :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile`      | no IPv6 decoder, hence no IPv6 reassembly -- disabled with an |
 |                                                                 | :class:`~pcapkit.utilities.warnings.AttributeWarning`, and    |
 |                                                                 | :func:`~pcapkit.toolkit.pypcapfile.ipv6_reassembly` raises;   |
-|                                                                 | TCP over IPv6, tunnelled in IP (e.g. 6in4) or not, is left    |
-|                                                                 | out of TCP reassembly and flow tracing, with an               |
+|                                                                 | TCP over IPv6 straight over Ethernet is left out of TCP       |
+|                                                                 | reassembly and flow tracing, with an                          |
 |                                                                 | :class:`~pcapkit.utilities.warnings.AttributeWarning` once    |
-|                                                                 | per capture; IPv4 behind 802.1Q/802.1ad VLAN tags is read as  |
-|                                                                 | it is untagged; PCAP savefiles only, otherwise                |
+|                                                                 | per capture, and TCP behind a VLAN tag, in a tunnel or behind |
+|                                                                 | an extension header (an IPv6 one, or AH in IPv4) without one; |
+|                                                                 | PCAP savefiles only, otherwise                                |
 |                                                                 | :exc:`~pcapkit.utilities.exceptions.FormatError`              |
 +-----------------------------------------------------------------+---------------------------------------------------------------+
 | :class:`~pcapkit.foundation.engines.dpkt.DPKT`,                 | no PCAP output, since each frame reaches the writer as a      |

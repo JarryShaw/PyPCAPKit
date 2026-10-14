@@ -10,8 +10,7 @@ segment, as Wireshark's TCP conversations do.
 
 Every capture is built here, so the module is in the unit tier. pyshark runs
 only where the interpreter supports it, with tshark on the path. The
-``pypcapfile`` engine's counterparts need `pypcapfile`, so live in
-:mod:`tests.toolkit.test_pypcapfile_unit`, which the PyPCAPFile CI cell runs.
+``pypcapfile`` engine decodes no tunnel, so has no counterpart (#1708).
 
 """
 from __future__ import annotations

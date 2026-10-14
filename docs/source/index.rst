@@ -147,8 +147,10 @@ Speed is not free. Every third-party engine supports **less** than the
 dissection at all, so they offer neither reassembly nor flow tracing, and
 :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile` has no IPv6 decoder,
 so IPv6 reassembly is unavailable. Each gap is announced with a warning or an
-exception rather than silently returning nothing;
-:doc:`pcapkit/foundation/engines/index` tabulates them.
+exception rather than silently returning nothing, save that
+:class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile` leaves TCP behind a
+VLAN tag, in a tunnel or behind an extension header (an IPv6 one, or AH in IPv4)
+out without one; :doc:`pcapkit/foundation/engines/index` tabulates them.
 
 Every engine also answers a preflight check --
 :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`, which
