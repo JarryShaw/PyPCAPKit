@@ -1765,7 +1765,7 @@ jobs:
 
       - name: Run the other tests that read docs/ or Markdown
         timeout-minutes: 5
-        run: python -m unittest -v tests.corekit.test_sentinel_exports_unit tests.utilities.test_config_unit
+        run: python -m unittest -v tests.corekit.test_sentinel_exports_unit tests.utilities.test_config_unit tests.vendor.test_vendor_variables_1726_unit
 
   # The verdict a shipping workflow asks for: the full suite, fixtures and
   # all, on one interpreter. It is deliberately not the matrix -- the matrix

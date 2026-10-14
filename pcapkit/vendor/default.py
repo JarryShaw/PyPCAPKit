@@ -7,17 +7,6 @@
 :mod:`pcapkit.vendor.default` contains :class:`~pcapkit.vendor.default.Vendor`
 only, which is the base meta class for all vendor crawlers.
 
-.. versionremoved:: 1.5.0
-
-   Moved to :mod:`pcapkit.utilities.config` (:issue:`1726`):
-
-   * ``pcapkit.vendor.default.MAX_RETRY``, now
-     :data:`pcapkit.utilities.config.VENDOR_RETRY`, set with
-     :envvar:`PCAPKIT_VENDOR_RETRY`;
-   * ``pcapkit.vendor.default.CI_MODE``, now
-     :data:`pcapkit.utilities.config.CI_MODE`, set with
-     :envvar:`PCAPKIT_CI_MODE`.
-
 """
 import abc
 import collections
@@ -46,6 +35,30 @@ if TYPE_CHECKING:
     from typing import Callable, Optional
 
 __all__ = ['Vendor']
+
+#: int: How many times :meth:`Vendor._request` asks for a crawler's page, both
+#: directly and then through the proxies of :func:`get_proxies`, before giving
+#: up, :envvar:`PCAPKIT_VENDOR_RETRY`.
+#:
+#: .. versionchanged:: 1.5.0
+#:
+#:    Read with :func:`~pcapkit.utilities.config.read_limit` (:issue:`1726`). A
+#:    value that is not an integer of at least ``1`` warns with
+#:    :exc:`~pcapkit.utilities.warnings.ConfigWarning` and falls back to ``5``,
+#:    where one that was not an integer crashed the import, and ``0`` was read
+#:    as ``1``.
+MAX_RETRY = config.read_limit('VENDOR_RETRY', 5, minimum=1)
+
+#: bool: Whether the crawlers run in CI, where a failed fetch fails the run
+#: instead of prompting, :envvar:`PCAPKIT_CI_MODE`.
+#:
+#: .. versionchanged:: 1.5.0
+#:
+#:    Read with :func:`~pcapkit.utilities.config.read_flag` (:issue:`1726`). A
+#:    value it does not accept warns with
+#:    :exc:`~pcapkit.utilities.warnings.ConfigWarning` and falls back to off,
+#:    where it was taken as off silently.
+CI_MODE = config.read_flag('CI_MODE')
 
 #: Distribution name of this package, i.e. the name its metadata is registered
 #: under, which is not the import name (:mod:`pcapkit`).
@@ -102,10 +115,8 @@ def get_proxies() -> 'dict[str, str]':
     """Get proxy for blocked sites.
 
     The function will read :envvar:`PCAPKIT_HTTP_PROXY` and
-    :envvar:`PCAPKIT_HTTPS_PROXY`, if any, on every call, through
-    :func:`~pcapkit.utilities.config.http_proxy` and
-    :func:`~pcapkit.utilities.config.https_proxy`, for the proxy settings of
-    |requests|_.
+    :envvar:`PCAPKIT_HTTPS_PROXY`, if any, on every call, for the proxy
+    settings of |requests|_.
 
     .. |requests| replace:: ``requests``
     .. _requests: https://requests.readthedocs.io
@@ -114,8 +125,8 @@ def get_proxies() -> 'dict[str, str]':
         Proxy settings for |requests|_.
 
     """
-    HTTP_PROXY = config.http_proxy()
-    HTTPS_PROXY = config.https_proxy()
+    HTTP_PROXY = os.getenv('PCAPKIT_HTTP_PROXY')
+    HTTPS_PROXY = os.getenv('PCAPKIT_HTTPS_PROXY')
     PROXIES = {}  # type: dict[str, str]
     if HTTP_PROXY is not None:
         PROXIES['http'] = HTTP_PROXY
@@ -607,19 +618,19 @@ class Vendor(metaclass=VendorMeta):
 
         # NOTE: both branches below send this. Wikimedia rejects ``requests``'
         # default agent with HTTP 403, so a crawler without it fetches 126 bytes
-        # of robot-policy text and retries config.VENDOR_RETRY times against a refusal
+        # of robot-policy text and retries MAX_RETRY times against a refusal
         # that no amount of retrying will lift; see #518.
         headers = {'User-Agent': get_user_agent()}
 
         try:
             counter = 1
             while True:
-                if counter > config.VENDOR_RETRY:
+                if counter > MAX_RETRY:
                     raise requests.exceptions.RequestException
 
                 page = requests.get(self.LINK, headers=headers)  # nosec: B113
                 if not page.ok or not page.text:
-                    warn(f'Connection failed; retry for {counter}/{config.VENDOR_RETRY}...',
+                    warn(f'Connection failed; retry for {counter}/{MAX_RETRY}...',
                          VendorRequestWarning, stacklevel=2)
 
                     counter += 1
@@ -636,19 +647,19 @@ class Vendor(metaclass=VendorMeta):
 
                 counter = 1
                 while True:
-                    if counter > config.VENDOR_RETRY:
+                    if counter > MAX_RETRY:
                         raise
 
                     page = requests.get(self.LINK, headers=headers, proxies=proxies)  # nosec: B113
                     if not page.ok or not page.text:
-                        warn(f'Connection failed; retry with proxy for {counter}/{config.VENDOR_RETRY}...',
+                        warn(f'Connection failed; retry with proxy for {counter}/{MAX_RETRY}...',
                              VendorRequestWarning, stacklevel=2)
 
                         counter += 1
                         continue
                     break
             except requests.RequestException as error:
-                if config.CI_MODE:
+                if CI_MODE:
                     warn('Connection failed; exit on CI mode...',
                          VendorRequestWarning, stacklevel=2)
                     raise
@@ -657,7 +668,7 @@ class Vendor(metaclass=VendorMeta):
                     # NOTE: manual intervention needs an operator, and a process
                     # with no terminal has none -- nobody to read the instructions
                     # below, nobody to save the page, so the wait it ends in could
-                    # only ever time out the whole run. Fail exactly as config.CI_MODE
+                    # only ever time out the whole run. Fail exactly as CI_MODE
                     # does rather than prompting into the void; see #522.
                     warn('Connection failed; exit as stdin is not interactive...',
                          VendorRequestWarning, stacklevel=2)
