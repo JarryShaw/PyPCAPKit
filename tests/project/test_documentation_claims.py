@@ -95,13 +95,15 @@ class TestNoEOFDocumentedOnce(unittest.TestCase):
                       f'no_eof is documented as {line!r}, but the flag suppresses '
                       'the EOF stop rather than raising')
 
-        tree = ast.parse(textwrap.dedent(inspect.getsource(Extractor.record_frames)))
+        text = textwrap.dedent(inspect.getsource(Extractor.record_frames))
+        tree = ast.parse(text)
 
         # Find the handler for EOFError and confirm it can `continue` on the flag.
+        # Each node is read back as written, since ``ast.unparse`` is 3.9+.
         handlers = [node for node in ast.walk(tree) if isinstance(node, ast.ExceptHandler)]
         eof_handlers = [
             h for h in handlers
-            if h.type is not None and 'EOFError' in ast.unparse(h.type)
+            if h.type is not None and 'EOFError' in ast.get_source_segment(text, h.type)
         ]
         self.assertTrue(eof_handlers, 'record_frames no longer handles EOFError')
 
@@ -109,7 +111,7 @@ class TestNoEOFDocumentedOnce(unittest.TestCase):
         for handler in eof_handlers:
             for node in ast.walk(handler):
                 if (isinstance(node, ast.If)
-                        and '_flag_n' in ast.unparse(node.test)
+                        and '_flag_n' in ast.get_source_segment(text, node.test)
                         and any(isinstance(inner, ast.Continue) for inner in node.body)):
                     continues_on_flag = True
         self.assertTrue(

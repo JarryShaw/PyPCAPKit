@@ -576,6 +576,8 @@ class VersionPortabilityTests(unittest.TestCase):
 
         Derived from the module's own ``if``, not matched against its text, so
         reformatting the guard does not fail this and moving the boundary does.
+        The guard's tree is compared with :func:`ast.dump`, which every supported
+        version has, rather than rendered with :func:`ast.unparse`, which is 3.9+.
 
         """
         import ast
@@ -585,7 +587,7 @@ class VersionPortabilityTests(unittest.TestCase):
 
         source = pathlib.Path(compat.__file__).read_text(encoding='utf-8')
         boundaries = [
-            ast.unparse(node.test)
+            ast.dump(node.test)
             for node in ast.walk(ast.parse(source))
             if isinstance(node, ast.If)
             for stmt in node.body
@@ -593,7 +595,7 @@ class VersionPortabilityTests(unittest.TestCase):
             and any(alias.name == 'final' for alias in stmt.names)
         ]
         self.assertEqual(
-            boundaries, ['sys.version_info < (3, 11)'],
+            boundaries, [ast.dump(ast.parse('sys.version_info < (3, 11)', mode='eval').body)],
             'pcapkit.utilities.compat must take `final` from typing_extensions below '
             '3.11, because that is the version at which typing.final began recording '
             '__final__ -- the marker Info.__init_subclass__ and '

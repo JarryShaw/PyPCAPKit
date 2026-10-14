@@ -178,10 +178,25 @@ def run_pytest(selection: 'list[str]') -> 'subprocess.CompletedProcess[str]':
 
     """
     return subprocess.run(
-        [sys.executable, '-m', 'pytest', '-p', 'no:cacheprovider', '-q', *selection],
+        [sys.executable, '-m', 'pytest', '-p', 'no:cacheprovider', '-q', '-rfE', *selection],
         cwd=str(ROOT), env=child_environ(), capture_output=True, text=True,
         timeout=600, check=False,
     )
+
+
+def nested_failures(stdout: str) -> 'list[str]':
+    """The tests a :func:`run_pytest` run's short summary reports as failed or errored.
+
+    Args:
+        stdout: The run's standard output, which ends with that summary because
+            :func:`run_pytest` passes ``-rfE``.
+
+    Returns:
+        Their node ids, without the reason pytest appends after `` - ``.
+
+    """
+    return [line.split(' ', 1)[1].split(' - ', 1)[0]
+            for line in stdout.splitlines() if line.startswith(('FAILED ', 'ERROR '))]
 
 
 def run_unittest(modules: 'list[str]') -> 'subprocess.CompletedProcess[str]':
@@ -217,13 +232,21 @@ class OrderIndependenceTests(unittest.TestCase):
     """Each selection that used to fail on collection order now passes."""
 
     def assert_selection_passes(self, label: str, selection: 'list[str]') -> None:
-        """Run ``selection`` and fail with its output if pytest did not exit 0."""
+        """Run ``selection`` and fail with its output if pytest did not exit 0.
+
+        The message names the nested tests that failed rather than blaming
+        collection order: a test that fails on its own fails here too, and that
+        is not #660.
+
+        """
         finished = run_pytest(selection)
+        failed = nested_failures(finished.stdout) or ['none named in the summary']
 
         self.assertEqual(
             finished.returncode, 0,
-            f'pytest exited {finished.returncode} on {label} -- the result still '
-            f'depends on collection order (#660).\n\n'
+            f'pytest exited {finished.returncode} on {label}; failing: '
+            f'{", ".join(failed)}. That is a collection-order dependence (#660) '
+            f'only if each of them passes when run on its own.\n\n'
             f'selection: {" ".join(selection)}\n\n'
             f'stdout:\n{finished.stdout[-4000:]}\n\nstderr:\n{finished.stderr[-2000:]}')
         self.assertNotIn('is not subscriptable', finished.stdout,

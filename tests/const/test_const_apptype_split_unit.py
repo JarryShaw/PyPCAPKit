@@ -1072,11 +1072,13 @@ class AppTypeSplitTests(unittest.TestCase):
             path = root / relative
             with self.subTest(module=relative):
                 self.assertTrue(path.is_file(), path)
-                tree = ast.parse(path.read_text(encoding='utf-8'), filename=str(path))
+                text = path.read_text(encoding='utf-8')
+                tree = ast.parse(text, filename=str(path))
+                # Each node is read back as written, since ``ast.unparse`` is 3.9+.
                 for node in ast.walk(tree):
                     # A ``TransportProtocol`` composite, however it is spelled.
                     if isinstance(node, ast.BinOp) and isinstance(node.op, ast.BitOr):
-                        if 'TransportProtocol' in ast.unparse(node):
+                        if 'TransportProtocol' in ast.get_source_segment(text, node):
                             composites.append((relative, node.lineno))
                     # What ``proto`` is bound to, for the port field that uses a
                     # local rather than passing the member straight in, and what
@@ -1088,9 +1090,9 @@ class AppTypeSplitTests(unittest.TestCase):
                                                          or relative.endswith('numbers.py')):
                         for target in node.targets:
                             if isinstance(target, ast.Name) and target.id == 'proto':
-                                bindings.append((relative, ast.unparse(node.value)))
+                                bindings.append((relative, ast.get_source_segment(text, node.value)))
                             if isinstance(target, ast.Attribute) and target.attr == '_proto':
-                                stored.append((relative, ast.unparse(node.value)))
+                                stored.append((relative, ast.get_source_segment(text, node.value)))
                     if not isinstance(node, ast.Call):
                         continue
                     name = (node.func.attr if isinstance(node.func, ast.Attribute) else
@@ -1102,7 +1104,8 @@ class AppTypeSplitTests(unittest.TestCase):
                     if name in ('_dispatch', '_make_port') and len(node.args) > 1:
                         arguments.append(node.args[1])
                     for argument in arguments:
-                        lookups.append('%s %s(proto=%s)' % (relative, name, ast.unparse(argument)))
+                        lookups.append('%s %s(proto=%s)' % (relative, name,
+                                                         ast.get_source_segment(text, argument)))
 
         self.assertEqual(composites, [])
 

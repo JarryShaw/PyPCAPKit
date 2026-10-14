@@ -189,7 +189,8 @@ class ExtractorTests(unittest.TestCase):
 
         # ``_exeng`` is annotated under ``TYPE_CHECKING`` only, so it is not visible
         # to ``get_type_hints``: read the annotation out of the module source.
-        tree = ast.parse(inspect.getsource(module))
+        text = inspect.getsource(module)
+        tree = ast.parse(text)
         klass = next(node for node in tree.body
                      if isinstance(node, ast.ClassDef) and node.name == 'Extractor')
         found = [node for node in ast.walk(klass)
@@ -197,8 +198,9 @@ class ExtractorTests(unittest.TestCase):
                  and isinstance(node.target, ast.Name) and node.target.id == '_exeng']
         self.assertEqual(len(found), 1)
         node = found[0].annotation
-        # quoted (``'EngineBase[_P]'``) or bare (``EngineBase[_P]``) spelling
-        source = node.value if isinstance(node, ast.Constant) else ast.unparse(node)
+        # quoted (``'EngineBase[_P]'``) or bare (``EngineBase[_P]``) spelling; the
+        # bare one is read back as written, since ``ast.unparse`` is 3.9+
+        source = node.value if isinstance(node, ast.Constant) else ast.get_source_segment(text, node)
         attribute = eval(source, vars(module))  # pylint: disable=eval-used
 
         declared = {
@@ -245,7 +247,7 @@ class ExtractorTests(unittest.TestCase):
         self.addCleanup(lambda: sys.modules.pop('unit_extraction_engine_mod', None))
 
         with mock.patch('pcapkit.foundation.extraction.Extractor.register_reassembly'):
-            class UnitReassembly(Reassembly[object, object, tuple[str], object],
+            class UnitReassembly(Reassembly[object, object, typing.Tuple[str], object],
                                  protocol='unit-reassembly'):
                 def reassembly(self, info: object) -> None:
                     pass
@@ -344,14 +346,14 @@ class ExtractorTests(unittest.TestCase):
             def read_frame(self) -> str:
                 return 'frame'
 
-        class BaseOnlyReassembly(ReassemblyBase[object, object, tuple[str], object]):
+        class BaseOnlyReassembly(ReassemblyBase[object, object, typing.Tuple[str], object]):
             def reassembly(self, info: object) -> None:
                 pass
 
             def submit(self, buf: object, **kwargs: object) -> list[object]:
                 return []
 
-        class PublicReassembly(Reassembly[object, object, tuple[str], object]):
+        class PublicReassembly(Reassembly[object, object, typing.Tuple[str], object]):
             def reassembly(self, info: object) -> None:
                 pass
 
@@ -524,7 +526,7 @@ class ExtractorTests(unittest.TestCase):
         from pcapkit.utilities.warnings import RegistryWarning
 
         with mock.patch('pcapkit.foundation.extraction.Extractor.register_reassembly'):
-            class UnitReassemblyIdentityA(Reassembly[object, object, tuple[str], object],
+            class UnitReassemblyIdentityA(Reassembly[object, object, typing.Tuple[str], object],
                                            protocol='unit-reassembly-identity-a'):
                 def reassembly(self, info: object) -> None:
                     pass
@@ -532,7 +534,7 @@ class ExtractorTests(unittest.TestCase):
                 def submit(self, buf: object, **kwargs: object) -> list[object]:
                     return []
 
-            class UnitReassemblyIdentityB(Reassembly[object, object, tuple[str], object],
+            class UnitReassemblyIdentityB(Reassembly[object, object, typing.Tuple[str], object],
                                            protocol='unit-reassembly-identity-b'):
                 def reassembly(self, info: object) -> None:
                     pass
