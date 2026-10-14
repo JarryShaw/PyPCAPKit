@@ -150,7 +150,10 @@ so IPv6 reassembly is unavailable. Each gap is announced with a warning or an
 exception rather than silently returning nothing, save that
 :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile` leaves TCP behind a
 VLAN tag, in a tunnel or behind an extension header (an IPv6 one, or AH in IPv4)
-out without one; :doc:`pcapkit/foundation/engines/index` tabulates them.
+out without one, and :class:`~pcapkit.foundation.engines.scapy.Scapy` reads IPv6
+only as far as `Scapy`_ dissects it, which leaves IPv6 behind some BSD loopback
+headers, and TCP and IPv6 fragments behind some IPv6 extension headers, out
+without one; :doc:`pcapkit/foundation/engines/index` tabulates them.
 
 Every engine also answers a preflight check --
 :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`, which

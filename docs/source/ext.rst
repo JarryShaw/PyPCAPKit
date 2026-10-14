@@ -422,7 +422,10 @@ The available engines and the file formats they read:
    matters is that the gap is *announced* -- each engine warns, or raises, for the
    capability it cannot provide, rather than silently producing an empty result,
    save that `PyPCAPFile`_ leaves TCP behind a VLAN tag, in a tunnel or behind an
-   extension header (an IPv6 one, or AH in IPv4) out without a warning. See
+   extension header (an IPv6 one, or AH in IPv4) out without a warning, and the
+   `Scapy`_ engine reads IPv6 only as far as `Scapy`_ dissects it, which leaves
+   IPv6 behind some BSD loopback headers, and TCP and IPv6 fragments behind some
+   IPv6 extension headers, out without one. See
    :doc:`pcapkit/foundation/engines/index` for the full table.
 
 .. note::

@@ -116,9 +116,10 @@ there back out, as they do one the TCP parser rejected (:issue:`1518`). A
 protocol constructed from its own octets is not counted itself, so the count
 starts at the first layer it dissects. One chain of extension headers is also bounded on
 its own, by :data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT`.
-The ``pyshark`` and ``pypcapfile`` engines dissect with their own parsers,
-which do not apply this bound (:issue:`1609`). The ``dpkt`` and ``scapy``
-toolkits count the layers they walk as the default engine does, and stop at it.
+The ``pyshark``, ``scapy`` and ``pypcapfile`` engines dissect with their own
+parsers, which do not apply the frame's layer bound (:issue:`1609`). The
+``dpkt`` toolkit counts the layers it walks as the default engine does, and
+stops at it.
 
 .. autodata:: pcapkit.protocols.protocol.FRAME_LAYER_LIMIT
 
