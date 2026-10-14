@@ -4,9 +4,9 @@
 
 from typing import TYPE_CHECKING
 
+from pcapkit.corekit.fields.byteorder import byteorder_callback
 from pcapkit.corekit.fields.misc import PayloadField
 from pcapkit.corekit.fields.numbers import UInt32Field
-from pcapkit.protocols.schema.misc.byteorder import byteorder_callback
 from pcapkit.protocols.schema.schema import Schema, schema_final
 
 __all__ = ['Frame']
