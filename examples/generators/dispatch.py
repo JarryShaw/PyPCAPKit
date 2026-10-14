@@ -786,7 +786,7 @@ class Outcome(NamedTuple):
     detail: 'str'
     #: The first ``'error'`` value found anywhere in the parsed frame's nested
     #: info mapping, or ``''`` if none is present. This is what
-    #: :func:`pcapkit.utilities.decorators.beholder` records when a dissector
+    #: :func:`pcapkit.corekit.decorators.beholder` records when a dissector
     #: raises and gets replaced with :class:`~pcapkit.protocols.misc.raw.Raw`,
     #: so it is the fragment :data:`KNOWN_DEGRADED` pins against.
     error: 'str'

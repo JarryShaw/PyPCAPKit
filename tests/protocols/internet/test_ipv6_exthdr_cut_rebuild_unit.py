@@ -3,7 +3,7 @@
 
 GitHub issue #1471: an upper layer cut short after an extension header fell
 back to :class:`~pcapkit.protocols.misc.raw.Raw` over the *whole* IPv6 payload,
-since :func:`~pcapkit.utilities.decorators.beholder` ignored the ``payload`` it
+since :func:`~pcapkit.corekit.decorators.beholder` ignored the ``payload`` it
 was handed, so the rebuild wrote the extension headers twice -- Destination
 Options, TCP cut at 57 octets rebuilt 65.
 

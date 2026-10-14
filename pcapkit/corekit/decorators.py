@@ -3,12 +3,17 @@
 """Decorator Functions
 =========================
 
-.. module:: pcapkit.utilities.decorators
+.. module:: pcapkit.corekit.decorators
 
-:mod:`pcapkit.utilities.decorators` contains several useful
-decorators, including :func:`~pcapkit.utilities.decorators.seekset`,
-:func:`~pcapkit.utilities.decorators.beholder` and
-:func:`~pcapkit.utilities.decorators.prepare`.
+:mod:`pcapkit.corekit.decorators` contains several useful
+decorators, including :func:`~pcapkit.corekit.decorators.seekset`,
+:func:`~pcapkit.corekit.decorators.beholder` and
+:func:`~pcapkit.corekit.decorators.prepare`.
+
+They act on a protocol's file and on the schema it unpacks, and
+:func:`~pcapkit.corekit.decorators.beholder` falls back to protocol classes,
+so they live with the packet model rather than in :mod:`pcapkit.utilities`
+(:issue:`1735`).
 
 """
 import functools

@@ -10,7 +10,8 @@ collection :class:`~pcapkit.corekit.protochain.ProtoChain`, the
 :class:`~pcapkit.corekit.multidict.MultiDict` family for multi-entry
 mappings, the :class:`~pcapkit.corekit.fields.field.Field` family for data
 parsing, the :class:`~pcapkit.corekit.context.ContextRegistry` channel for
-caller-supplied information a protocol needs but the wire does not carry, and
+caller-supplied information a protocol needs but the wire does not carry, the
+:mod:`~pcapkit.corekit.decorators` that protocols and schemas parse through, and
 the :class:`~pcapkit.corekit.enum.EnumLookup`/
 :class:`~pcapkit.corekit.enum.EnumRegistry` bases every constant enumeration
 inherits from.
@@ -20,6 +21,7 @@ inherits from.
 
    fields/index
    context
+   decorators
    enum
    infoclass
    io

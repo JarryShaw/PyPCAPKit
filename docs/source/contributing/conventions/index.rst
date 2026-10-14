@@ -13,6 +13,8 @@ House Conventions
    arisen. :ref:`sentinel-convention` governs :mod:`pcapkit.corekit`,
    :ref:`extension-header-subclassing` a protocol class hierarchy,
    :ref:`protocol-layer-placement` which subpackage a dissector belongs in,
+   :ref:`utilities-or-corekit` which of :mod:`pcapkit.utilities` and
+   :mod:`pcapkit.corekit` a support module belongs in,
    :ref:`process` the repository rather than any of its code,
    :ref:`documentation` the prose itself -- on these pages and in the API
    reference -- rather than any code at all, and :ref:`test-coverage` what the
@@ -37,3 +39,4 @@ House Conventions
    process
    documentation
    test-coverage
+   utilities-or-corekit

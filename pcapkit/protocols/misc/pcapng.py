@@ -1316,7 +1316,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             # copy and never against the file, so on a capture cut short it runs
             # past the real end -- and seeking past the end is legal and silent.
             # The *next* block read would then measure a negative remainder,
-            # since ``pcapkit.utilities.decorators.prepare`` derives it as the
+            # since ``pcapkit.corekit.decorators.prepare`` derives it as the
             # end of the stream less the current position, and a negative
             # ``__length__`` is what ``pcapng_block_selector`` hands to
             # :class:`~pcapkit.corekit.fields.misc.SchemaField`, which fails with
@@ -1530,7 +1530,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`,
         which has no catch point above it and would abort the whole extraction --
         this costs no frame that was actually in the file. It is the same signal
-        :func:`~pcapkit.utilities.decorators.prepare` raises for a *derived*
+        :func:`~pcapkit.corekit.decorators.prepare` raises for a *derived*
         remainder of exactly zero; a remainder of one, two or three octets
         passes that check and is caught here instead.
 

@@ -227,7 +227,7 @@ class L2TPVersionTests(unittest.TestCase):
         self.assertNotIn('l2tp', ipv4_info)
         self.assertNotIn('L2TPv2', str(frame.protochain))
 
-        # It degrades through :func:`~pcapkit.utilities.decorators.beholder`,
+        # It degrades through :func:`~pcapkit.corekit.decorators.beholder`,
         # which re-parses as ``Raw`` and passes ``alias=proto`` -- so an
         # enumeration key renders under its own name rather than as ``Raw``,
         # per that function's own note. The payload is preserved verbatim and

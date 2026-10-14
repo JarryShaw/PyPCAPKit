@@ -108,9 +108,10 @@ INDEX = CONVENTIONS_DIR / 'index.rst'
 #: lived only in that thread. ``protocol-layer-placement`` carries the other ruling
 #: that thread settled -- which subpackage a dissector belongs in, decided by designed
 #: function rather than by encapsulation -- and sits beside the other class-hierarchy
-#: page. ``test-coverage`` came last, carrying GitHub issue #1203's rules for what the
-#: test suite has to prove. Every anchor is the bare file stem, which is what
-#: :data:`PAGES` below depends on.
+#: page. ``test-coverage`` came next, carrying GitHub issue #1203's rules for what the
+#: test suite has to prove, and ``utilities-or-corekit`` came last, carrying GitHub
+#: issue #1712's rule for which of those two packages a module belongs in. Every
+#: anchor is the bare file stem, which is what :data:`PAGES` below depends on.
 ANCHORS = (
     'mint-criterion',
     'sentinel-convention',
@@ -120,6 +121,7 @@ ANCHORS = (
     'process',
     'documentation',
     'test-coverage',
+    'utilities-or-corekit',
 )
 
 #: Each anchor's own file, one-to-one since the split -- there is no longer a single

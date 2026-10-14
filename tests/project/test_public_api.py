@@ -79,8 +79,9 @@ of the commit that added this assertion -- among them the six
 :mod:`pcapkit.foundation` withheld while listing the other 27 registry functions,
 ``ReassemblyManager`` and ``TraceFlowManager``, which are defined *below* the
 :attr:`__all__` literal that forgot them and imported by name from six modules, and
-the three decorators :mod:`pcapkit.utilities` advertises in its own module
-docstring. The 22 that remain are listed with their reasons, and
+the three decorators :mod:`pcapkit.utilities` then advertised in its own module
+docstring (since moved to :mod:`pcapkit.corekit.decorators` and dropped from that
+package by #1735). The 22 that remain are listed with their reasons, and
 :meth:`~PublicAPISurfaceTests.test_the_non_export_allowlist_is_tight` stops the
 list rotting into a silencer: every entry has to name a package that exists, an
 attribute that package really holds, and a name its :attr:`__all__` really omits,

@@ -4,16 +4,14 @@ Module Utilities
 
 .. module:: pcapkit.utilities
 
-:mod:`pcapkit.utilities` contains several useful functions
-and classes which are foundations of :mod:`pcapkit`, including
-decorator function :func:`~pcapkit.utilities.decorators.seekset`
-and :func:`~pcapkit.utilities.decorators.beholder`, and
-several user-refined exceptions and warnings.
+:mod:`pcapkit.utilities` holds the cross-cutting services :mod:`pcapkit` is
+built with: user-refined exceptions and warnings, logging, a compatibility
+layer, and wrappers around third-party libraries. It imports nothing from
+:mod:`pcapkit` outside itself; see :ref:`utilities-or-corekit`.
 
 .. toctree::
    :maxdepth: 2
 
-   decorators
    exceptions
    warnings
    logging

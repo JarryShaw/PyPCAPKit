@@ -1571,7 +1571,7 @@ class Extractor(Generic[_P]):
         :issue:`620` reported.
 
         The signal is the input's own position. End of stream is raised by
-        :func:`~pcapkit.utilities.decorators.prepare` when the bytes remaining in
+        :func:`~pcapkit.corekit.decorators.prepare` when the bytes remaining in
         the stream measure zero, and it restores the position before raising, so
         the position at end of stream is stable. Two consecutive ends of stream at
         the *same* position therefore mean nothing arrived between them.

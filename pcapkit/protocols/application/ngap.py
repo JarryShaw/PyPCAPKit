@@ -30,7 +30,7 @@ it; an NGAP payload simply degrades to the opaque payload path, exactly as an
 unregistered PPID would, because
 :meth:`~pcapkit.protocols.protocol.Protocol._import_next_layer`, which
 :class:`~pcapkit.protocols.transport.sctp.SCTP` inherits, is wrapped in
-:func:`~pcapkit.utilities.decorators.beholder` and falls back to
+:func:`~pcapkit.corekit.decorators.beholder` and falls back to
 :class:`~pcapkit.protocols.misc.raw.Raw`.
 
 Decoder Dependency

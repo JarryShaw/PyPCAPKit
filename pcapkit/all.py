@@ -145,5 +145,4 @@ __all__ = [
     # pcapkit.utilities -- unlisted: its names stay reachable as attributes, but
     # ``import *`` leaves out generic helpers such as ``warn``, ``reset``,
     # ``configure`` and ``detect``
-    #'beholder_ng', 'seekset_ng',                            # Decorators
 ]
