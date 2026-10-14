@@ -373,7 +373,6 @@ class ScapyTrailerTests(unittest.TestCase):
         'pure-ack-padded': b'',
         'ipv6-ext-header-trailer': b'six',
         'ip-in-ip-trailers': b'in',
-        'jumbogram-trailer': b'jmb',
         'zero-total-length': b'tso-data',
     }
 
@@ -405,7 +404,7 @@ class ScapyTrailerTests(unittest.TestCase):
     def _tcp_frames(self) -> 'list[bytes]':
         """One frame per :attr:`TCP_PAYLOADS` entry, in its order."""
         from scapy.layers.inet import IP, TCP
-        from scapy.layers.inet6 import IPv6, IPv6ExtHdrDestOpt, IPv6ExtHdrHopByHop, Jumbo
+        from scapy.layers.inet6 import IPv6, IPv6ExtHdrDestOpt
         from scapy.packet import Raw
 
         ipv4 = {'src': '192.0.2.1', 'dst': '198.51.100.1'}
@@ -426,10 +425,6 @@ class ScapyTrailerTests(unittest.TestCase):
             bytes(self._ether() / IPv6(**ipv6) / IPv6ExtHdrDestOpt() /
                   TCP(sport=1, dport=2, flags='PA') / Raw(b'six')) + TRAILER,
             bytes(self._ether() / IP(**ipv4, proto=4) / Raw(inner)) + TRAILER,
-            # the Jumbo Payload Length counts the Hop-by-Hop Options header too
-            bytes(self._ether() / IPv6(**ipv6, plen=0, nh=0) /
-                  IPv6ExtHdrHopByHop(nh=6, options=[Jumbo(jumboplen=8 + 20 + 3)]) /
-                  TCP(sport=7, dport=8, flags='PA') / Raw(b'jmb')) + TRAILER,
             # a Total Length of 0 runs the datagram to the end of the frame
             tso[:16] + b'\x00\x00' + tso[18:],
         ]

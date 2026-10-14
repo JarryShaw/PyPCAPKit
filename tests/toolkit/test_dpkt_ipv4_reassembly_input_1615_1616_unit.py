@@ -102,7 +102,6 @@ def cases() -> 'dict[str, list[bytes]]':
     one('4in6 cut by the Payload Length', lambda p: ethernet(ipv6(p, 4, plen=30)), 7)
     one('4in6 cut by the outer Payload Length of 6in6',
         lambda p: ethernet(ipv6(ipv6(p, 4, plen=200), 41, plen=70)), 8)
-    one('4in6 jumbogram', lambda p: ethernet(ipv6(jumbo(4, 8 + 30) + p, 0, plen=0), trailer=b'\xee' * 4), 9)
     # where the default engine dissects no IPv4 inside the IPv6 packet
     one('4in6 in a later IPv6 fragment', lambda p: ethernet(ipv6(options(44) + fragment(4, 8, False) + p, 0)), 10)
     one('4in6 behind 33 extension headers', lambda p: ethernet(ipv6(options(60) * 32 + options(4) + p, 60)), 11)
@@ -211,7 +210,6 @@ class DPKTIPv4ReassemblyInputTests(unittest.TestCase):
             ('4in6 with a trailer', [16, 8]),
             ('4in6 cut by the Payload Length', [10]),
             ('4in6 cut by the outer Payload Length of 6in6', [10]),
-            ('4in6 jumbogram', [10]),
             ('Total Length 0 in 4in6, with a trailer', [16]),
         ):
             for seen in (base, dpkt):

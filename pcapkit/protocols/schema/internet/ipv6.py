@@ -17,7 +17,7 @@ __all__ = ['IPv6']
 
 if TYPE_CHECKING:
     from ipaddress import IPv6Address
-    from typing import Any, Optional
+    from typing import Any, Callable, Optional
 
     from pcapkit.protocols.protocol import ProtocolBase
 
@@ -142,4 +142,45 @@ def jumbo_payload_length(next: 'int', data: 'bytes') -> 'Optional[int]':  # pyli
         if code == Enum_Option.Jumbo_Payload and size == 4 and ptr + 6 <= end:
             return int.from_bytes(data[ptr + 2:ptr + 6], 'big', signed=False)
         ptr += 2 + size
+    return None
+
+
+def jumbogram_error(length: 'int', next: 'int', data: 'bytes',  # pylint: disable=redefined-builtin
+                    fragment: 'Optional[Callable[[], bool]]' = None) -> 'Optional[str]':
+    """Name the error :rfc:`2675#section-3` has a receiver detect in an IPv6 packet, if any.
+
+    The four errors that section lists for a node that understands the Jumbo
+    Payload option, each a packet the default engine rejects (:issue:`1687`):
+
+    * a Payload Length of zero, a Next Header of Hop-by-Hop Options, and no
+      Jumbo Payload option;
+    * a non-zero Payload Length and a Jumbo Payload option;
+    * a Jumbo Payload option whose Jumbo Payload Length is below 65,536;
+    * a Jumbo Payload option and a Fragment header.
+
+    The option counts only where :func:`jumbo_payload_length` finds it.
+
+    Args:
+        length: Payload Length of the IPv6 header.
+        next: Next Header of the IPv6 header.
+        data: Octets following the IPv6 header, as captured.
+        fragment: Tells whether the extension header chain, as the default
+            engine walks it, has a Fragment header; called only for a packet
+            carrying the option, so a caller walks the chain only for those.
+
+    Returns:
+        The error, or :data:`None` if the packet makes none of them.
+
+    """
+    jumbo = jumbo_payload_length(next, data)
+    if jumbo is None:
+        if not length and next == Enum_TransType.HOPOPT:
+            return 'Payload Length 0 and a Hop-by-Hop Options header with no Jumbo Payload option'
+        return None
+    if length:
+        return f'Jumbo Payload option with a non-zero Payload Length {length}'
+    if jumbo <= 0xFFFF:
+        return f'Jumbo Payload Length {jumbo}, not greater than 65,535'
+    if fragment is not None and fragment():
+        return 'Jumbo Payload option with a Fragment header'
     return None

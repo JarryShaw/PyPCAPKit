@@ -39,10 +39,9 @@ from pcapkit.protocols.internet.internet import EXTENSION_HEADER_LIMIT
 from pcapkit.protocols.internet.ip import IP
 from pcapkit.protocols.protocol import FRAME_LAYER_LIMIT, _frame_depth
 from pcapkit.protocols.schema.internet.ipv6 import IPv6 as Schema_IPv6
-from pcapkit.protocols.schema.internet.ipv6 import jumbo_payload_length
+from pcapkit.protocols.schema.internet.ipv6 import jumbo_payload_length, jumbogram_error
 from pcapkit.utilities.decorators import beholder
-from pcapkit.utilities.exceptions import stacklevel
-from pcapkit.utilities.warnings import ProtocolWarning, warn
+from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
@@ -197,10 +196,25 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         Returns:
             Parsed packet data.
 
+        Raises:
+            ProtocolError: If the packet is one of the errors
+                :rfc:`2675#section-3` has a receiver detect (see
+                :func:`~pcapkit.protocols.schema.internet.ipv6.jumbogram_error`).
+
         """
         if length is None:
             length = len(self)
         schema = self.__header__
+
+        # NOTE: A receiver treats each of these as an error (:issue:`1687`), so
+        # the frame stops here, c.f. :meth:`IPv4.read
+        # <pcapkit.protocols.internet.ipv4.IPv4.read>`. A Fragment header beside
+        # the Jumbo Payload option is caught on the walk, see
+        # :meth:`_decode_next_layer`.
+        rest = schema.get_payload() + schema.trailer
+        error = jumbogram_error(schema.length, schema.next, rest)
+        if error is not None:
+            raise ProtocolError(f'{self.alias}: {error}')
 
         ipv6 = Data_IPv6.from_dict({
             'version': schema.hextet['version'],
@@ -224,19 +238,9 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         # NOTE: A jumbogram's extent is its Jumbo Payload Length, not the zero
         # Payload Length, c.f. :meth:`Schema_IPv6.post_process
         # <pcapkit.protocols.schema.internet.ipv6.IPv6.post_process>`
-        # (:issue:`1434`). :rfc:`2675#section-2` makes a Jumbo Payload option
-        # beside a non-zero Payload Length an error; such a packet is still
-        # kept as captured, with the Payload Length deciding its extent, since
-        # that is what the receiver had to go by.
-        extent = schema.length
-        jumbo = jumbo_payload_length(schema.next, schema.get_payload() + schema.trailer)
-        if jumbo is not None:
-            if schema.length == 0:
-                extent = jumbo
-            else:
-                warn(f'{self.alias}: Jumbo Payload option with non-zero Payload Length '
-                     f'{schema.length}; ignoring the Jumbo Payload Length {jumbo}',
-                     ProtocolWarning, stacklevel=stacklevel())
+        # (:issue:`1434`); the check above leaves a zero one beside it.
+        jumbo = jumbo_payload_length(schema.next, rest)
+        extent = schema.length if jumbo is None else jumbo
 
         # update packet info
         if __packet__ is None:
@@ -276,7 +280,8 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             dst: Destination IP address.
             payload_length: Length of the payload, extension headers included;
                 computed from the payload when omitted, and zero (a jumbogram)
-                if that exceeds 65,535 octets.
+                if that exceeds 65,535 octets or the payload starts with a
+                Hop-by-Hop Options header carrying a Jumbo Payload option.
             payload: Payload data.
             trailer: Octets after the packet, outside the Payload Length, such
                 as link-layer padding; written as is.
@@ -294,12 +299,13 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         # length the sender declared instead of the one that was recorded
         # (:issue:`1155`). Computed from the octets at hand otherwise, which is
         # what a plain ``IPv6(payload=...)`` wants -- or zero for a payload too
-        # long for the field, i.e. a jumbogram, whose length the caller carries
-        # in a Jumbo Payload option of ``payload``'s Hop-by-Hop Options header
-        # (:rfc:`2675#section-2`).
+        # long for the field, or one whose Hop-by-Hop Options header carries a
+        # Jumbo Payload option, i.e. a jumbogram, whose length the caller gives
+        # there (:rfc:`2675#section-2`); its Payload Length must be zero
+        # (:issue:`1687`).
         if payload_length is None:
             payload_length = len(payload)
-            if payload_length > 0xFFFF:
+            if payload_length > 0xFFFF or jumbo_payload_length(next_val, bytes(payload)) is not None:
                 payload_length = 0
 
         return Schema_IPv6(
@@ -526,6 +532,11 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         Returns:
             Current protocol with next layer extracted.
 
+        Raises:
+            ProtocolError: If the walk reaches a Fragment header in a packet
+                carrying a Jumbo Payload option, an error by
+                :rfc:`2675#section-3` (:issue:`1687`).
+
         """
         #: Extension headers.
         self._exthdr = OrderedMultiDict()  # type: OrderedMultiDict[Enum_ExtensionHeader, ProtocolBase] # pylint: disable=attribute-defined-outside-init
@@ -634,6 +645,12 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
                 # reassembly, so ``fragment``, ``hdr_len`` and ``raw_len`` keep
                 # that split however far the walk goes on.
                 if split is None:
+                    # NOTE: Nor may a jumbogram carry one (:issue:`1687`), so the
+                    # frame stops here as for the errors :meth:`read` checks;
+                    # past those, its Jumbo Payload option is in the payload.
+                    error = jumbogram_error(ipv6.payload, ipv6.next, self.__header__.get_payload(), lambda: True)
+                    if error is not None:
+                        raise ProtocolError(f'{self.alias}: {error}')
                     split = (hdr_len, raw_len)
                     ipv6.__update__({
                         'fragment': self._read_packet(header=hdr_len, payload=raw_len),

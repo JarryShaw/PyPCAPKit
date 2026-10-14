@@ -132,6 +132,59 @@ class OptionCoverageCaptureTests(unittest.TestCase):
                 'examples/generators/make_samples.py to build them'
             )
 
+    def test_the_jumbo_payload_frame_is_a_genuine_jumbogram(self) -> None:
+        """HOPOPT's Jumbo Payload frame is a jumbogram RFC 2675 accepts, read whole.
+
+        The option behind a non-zero Payload Length is an error the default
+        engine rejects (#1687), and then the frame stops at IPv6 and the option
+        is never walked. So the generator makes this frame a jumbogram, and this
+        checks it is one: Payload Length 0, a Jumbo Payload Length above 65,535
+        that the octets after the IPv6 header make up exactly, a record no reader
+        has to cut, and a decode that walks the option and goes on to the end.
+
+        """
+        import pcapkit
+        from pcapkit.const.ipv6.option import Option
+        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.schema.internet.ipv6 import jumbo_payload_length
+
+        path = _capture('options-ipv6.pcap')
+        if path is None:
+            self.skipTest('options-ipv6.pcap not present')
+        with open(path, 'rb') as file:
+            ghdr = file.read(24)
+        # The global header's snaplen, in the byte order its magic number gives.
+        little = ghdr[:4] in (b'\xd4\xc3\xb2\xa1', b'\x4d\x3c\xb2\xa1')
+        snaplen = int.from_bytes(ghdr[16:20], 'little' if little else 'big')
+
+        with time_limit(EXTRACT_TIMEOUT):
+            extractor = pcapkit.extract(fin=path, nofile=True, format='tree',
+                                        store=True, ip=True, tcp=True)
+        self.addCleanup(close_extractor, extractor)
+
+        # Found from the octets after the Ethernet and IPv6 headers rather than
+        # from the decode, which is under test.
+        found = []  # type: list[tuple[Any, int]]
+        frames = list(extractor.frame)  # type: list[Any]
+        for frame in frames:
+            jumbo = jumbo_payload_length(frame.info.packet[20], frame.info.packet[54:])
+            if jumbo is not None:
+                found.append((frame, jumbo))
+        self.assertEqual(len(found), 1, 'expected one frame carrying a Jumbo Payload option')
+        frame, jumbo = found[0]
+        packet = frame.info.packet
+
+        self.assertEqual(packet[18:20], b'\x00\x00', 'Payload Length')
+        self.assertGreater(jumbo, 0xFFFF)
+        self.assertEqual(len(packet) - 14 - 40, jumbo)
+        self.assertEqual(frame.info.cap_len, frame.info.len)
+        self.assertLessEqual(frame.info.cap_len, snaplen)
+
+        self.assertEqual(str(frame.protochain), 'Ethernet:IPv6:HOPOPT:UDP:Raw')
+        ipv6 = frame[IPv6].info
+        self.assertEqual(ipv6.hopopt.options[Option.Jumbo_Payload].jumbo_len, jumbo)
+        self.assertEqual(ipv6.hdr_len + ipv6.raw_len, 40 + jumbo)
+
     def test_option_captures_dump_to_tree_and_json(self) -> None:
         """Each capture survives both dumpers, with reassembly turned on.
 
