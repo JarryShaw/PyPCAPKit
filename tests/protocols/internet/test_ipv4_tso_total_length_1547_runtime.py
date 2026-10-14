@@ -43,6 +43,8 @@ IPV4_FRAMES = (1, 2, 6, 7)
 
 #: The flows every engine traces in ``tcp.pcap``, TSO or not.
 FLOWS = [(1, 2, 6, 7), (3, 4, 5)]
+#: The frames of each TCP datagram every engine reassembles from ``tcp.pcap``, TSO or not.
+DATAGRAMS = [(2, 6), (3,), (4, 5)]
 
 
 def _checksum(header: 'bytes') -> 'bytes':
@@ -236,7 +238,7 @@ class TSOTotalLengthTests(unittest.TestCase):
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class TSOTraceTests(unittest.TestCase):
-    """The default engine traces a TSO capture's IPv4 flow, as dpkt and scapy do."""
+    """The default engine, dpkt and scapy each trace and reassemble a TSO capture's flows."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
@@ -264,8 +266,6 @@ class TSOTraceTests(unittest.TestCase):
         return extractor
 
     def test_flows_are_traced_and_reassembled(self) -> None:
-        baseline = self._extract(sample_path('tcp.pcap'), 'default')
-        expected_tcp = [tuple(datagram.index) for datagram in baseline.reassembly.tcp]
         for fix_checksum in (True, False):
             fin = self._write(f'tso-{fix_checksum}.pcap', *_tso_records(fix_checksum=fix_checksum))
             for engine in ('default',) + ENGINES:
@@ -273,7 +273,7 @@ class TSOTraceTests(unittest.TestCase):
                     extractor = self._extract(fin, engine)
                     self.assertEqual([tuple(flow.index) for flow in extractor.trace.tcp], FLOWS)
                     self.assertEqual([tuple(datagram.index) for datagram in extractor.reassembly.tcp],
-                                     expected_tcp)
+                                     DATAGRAMS)
 
 
 if __name__ == '__main__':

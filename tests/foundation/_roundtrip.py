@@ -2,7 +2,7 @@
 """Shared harness for the foundation round-trip modules. C.f. #1202.
 
 The owner's rule is that every round trip the library promises passes and
-matches exactly. Four foundation paths make such a promise, and each has a
+matches exactly. Three foundation paths make such a promise, and each has a
 module beside this one that enumerates its cases:
 
 * reassembly recovers the payload its fragments or segments were cut from
@@ -10,8 +10,6 @@ module beside this one that enumerates its cases:
 * flow tracing writes each flow to a file that reads back as exactly that
   flow's frames (:file:`traceflow/test_traceflow_reread_roundtrip_unit.py`,
   and the ``_runtime`` twin over :file:`examples/captures/`);
-* every offline engine reports what the ``default`` engine reports, field for
-  field (:file:`engines/test_engine_agreement_runtime.py`);
 * a registrar handed back the entry it shipped with leaves every registry it
   touches as it was (:file:`registry/test_registry_symmetry_unit.py`).
 

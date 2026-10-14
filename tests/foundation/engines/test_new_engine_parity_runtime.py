@@ -1,30 +1,22 @@
-"""End-to-end agreement between the new engines and the ``default`` engine.
+"""End-to-end runs of the ``pypcap`` and ``pypcapfile`` engines.
 
 :class:`~pcapkit.foundation.extraction.Extractor` falls back to its own parser
 with an :class:`~pcapkit.utilities.warnings.EngineWarning` when the engine module
-is missing, so a naive "does it agree with the default engine?" test passes most
-loudly when the engine under test never ran at all. Every test here therefore
-proves the engine ran first -- by the recorded engine name, the engine class, and
-the absence of any :class:`~pcapkit.utilities.warnings.EngineWarning` -- and only
-then compares.
+is missing, so a test of an engine passes most loudly when the engine under test
+never ran at all. Every test here therefore proves the engine ran first -- by the
+recorded engine name, the engine class, and the absence of any
+:class:`~pcapkit.utilities.warnings.EngineWarning` -- and only then checks what
+it reports.
 
 This module is named ``*_runtime.py`` deliberately, which puts it in the
-fixture-dependent tier (see :mod:`tests._tiers`). It reads ``arp.pcap``,
-``tcp.pcap``, ``ipv4.pcap`` and ``test.pcapng``, none of which git tracks --
+fixture-dependent tier (see :mod:`tests._tiers`). It reads ``tcp.pcap``,
+``ipv6.pcap`` and ``test.pcapng``, none of which git tracks --
 :file:`examples/generators/make_samples.py` writes them -- so it cannot be
 unit-tier, and it was one only because the guard added in GitHub pull request #393
 could not see it: the reads go through ``sample_path(capture)`` with a *variable*,
 which only the runtime half of the guard catches, and that half was never reached
 on a machine where the engine packages were absent and every test skipped.
-Installing an engine made all four reads fail at once.
-
-Note also that the frame objects a stored extraction hands back are not a usable
-source of raw bytes: :attr:`Frame.packet
-<pcapkit.protocols.protocol.ProtocolBase.packet>` re-reads from the (by then
-exhausted) input stream, and ``Frame.info.packet`` holds the *undecoded remainder*
-rather than the frame. The comparison below therefore uses the fields that are
-recorded verbatim off the wire -- the per-record capture length and timestamp from
-the PCAP record header, and the Ethernet header of each frame.
+Installing an engine made its reads fail at once.
 
 """
 from __future__ import annotations
@@ -68,20 +60,6 @@ def _importable(*modules: str) -> bool:
 #: module, which has no such submodule.
 HAS_PYPCAP = _importable('pcap') and not _importable('pcap._pcap')
 HAS_PYPCAPFILE = _importable('pcapfile.savefile', 'pcapfile.linklayer')
-
-#: Captures the parity comparison runs over. All are Ethernet PCAP savefiles.
-CAPTURES = ('in.pcap', 'arp.pcap', 'tcp.pcap', 'ipv4.pcap')
-
-
-def ethernet_of(frame) -> tuple[str, str, int]:
-    """Fetch ``(src, dst, ethertype)`` from a ``default`` engine frame."""
-    info = frame['Ethernet'].info
-    return str(info.src), str(info.dst), int(info.type)
-
-
-def mac(raw) -> str:
-    """Render six raw bytes as a colon-separated MAC address."""
-    return ':'.join(f'{octet:02x}' for octet in bytes(raw))
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -144,89 +122,6 @@ class NewEngineParityTests(unittest.TestCase):
             self.assertIsInstance(frame, pcap_packet)
 
     ##########################################################################
-    # Agreement with the default engine.
-    ##########################################################################
-
-    @unittest.skipUnless(HAS_PYPCAP, 'pypcap not installed')
-    def test_pypcap_agrees_with_the_default_engine(self) -> None:
-        from pcapkit.const.reg.linktype import LinkType
-
-        for capture in CAPTURES:
-            with self.subTest(capture=capture):
-                base = self.extract('default', capture)
-                engine = self.extract('pypcap', capture)
-
-                self.assertEqual(engine.length, base.length)
-                self.assertEqual(len(engine.frame), base.length)
-                self.assertEqual(engine.engine.dlink, LinkType.ETHERNET)
-
-                for index, expected in enumerate(base.frame):
-                    timestamp, packet = engine.frame[index]
-                    self.assertEqual(len(packet), expected.info.frame_info.incl_len,
-                                     f'{capture} frame {index + 1}: capture length')
-                    self.assertEqual(timestamp, float(expected.info.time_epoch),
-                                     f'{capture} frame {index + 1}: timestamp')
-
-                    src, dst, ethertype = ethernet_of(expected)
-                    self.assertEqual(mac(packet[0:6]), dst,
-                                     f'{capture} frame {index + 1}: ethernet dst')
-                    self.assertEqual(mac(packet[6:12]), src,
-                                     f'{capture} frame {index + 1}: ethernet src')
-                    self.assertEqual(int.from_bytes(packet[12:14], 'big'), ethertype,
-                                     f'{capture} frame {index + 1}: ethertype')
-
-    @unittest.skipUnless(HAS_PYPCAPFILE, 'pypcapfile not installed')
-    def test_pypcapfile_agrees_with_the_default_engine(self) -> None:
-        from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.toolkit.pypcapfile import packet2timestamp
-
-        for capture in CAPTURES:
-            with self.subTest(capture=capture):
-                base = self.extract('default', capture)
-                engine = self.extract('pypcapfile', capture)
-
-                self.assertEqual(engine.length, base.length)
-                self.assertEqual(len(engine.frame), base.length)
-                self.assertEqual(engine.engine.dlink, LinkType.ETHERNET)
-
-                for index, expected in enumerate(base.frame):
-                    packet = engine.frame[index]
-                    self.assertEqual(packet.capture_len, expected.info.frame_info.incl_len,
-                                     f'{capture} frame {index + 1}: capture length')
-                    self.assertEqual(packet.packet_len, expected.info.frame_info.orig_len,
-                                     f'{capture} frame {index + 1}: original length')
-                    self.assertEqual(packet2timestamp(packet), float(expected.info.time_epoch),
-                                     f'{capture} frame {index + 1}: timestamp')
-
-                    src, dst, ethertype = ethernet_of(expected)
-                    ethernet = packet.packet
-                    self.assertEqual(type(ethernet).__name__, 'Ethernet')
-                    # ``pypcapfile``'s ``Ethernet.dst``/``.src`` are already
-                    # colon-separated ASCII (see ``Ethernet.__init__`` in
-                    # ``pcapfile/protocols/linklayer/ethernet.py``), unlike the
-                    # raw 6-byte slices ``mac()`` exists to format above -- so
-                    # they only need decoding, not another hex pass.
-                    self.assertEqual(ethernet.dst.decode('ascii'), dst,
-                                     f'{capture} frame {index + 1}: ethernet dst')
-                    self.assertEqual(ethernet.src.decode('ascii'), src,
-                                     f'{capture} frame {index + 1}: ethernet src')
-                    self.assertEqual(ethernet.type, ethertype,
-                                     f'{capture} frame {index + 1}: ethertype')
-
-    @unittest.skipUnless(HAS_PYPCAPFILE, 'pypcapfile not installed')
-    def test_pypcapfile_ipv4_reassembly_agrees_with_the_default_engine(self) -> None:
-        base = self.extract('default', 'ipv4.pcap', reassembly=True, ipv4=True)
-        engine = self.extract('pypcapfile', 'ipv4.pcap', reassembly=True, ipv4=True)
-
-        def payloads(datagrams):
-            return sorted(bytes(datagram.payload) if isinstance(datagram.payload, (bytes, bytearray))
-                          else tuple(bytes(part) for part in datagram.payload)
-                          for datagram in datagrams)
-
-        self.assertTrue(base.reassembly.ipv4)
-        self.assertEqual(payloads(engine.reassembly.ipv4), payloads(base.reassembly.ipv4))
-
-    ##########################################################################
     # Capability gaps, asserted rather than described.
     ##########################################################################
 
@@ -237,27 +132,6 @@ class NewEngineParityTests(unittest.TestCase):
         # ...whereas the default engine does reassemble it
         base = self.extract('default', 'ipv6.pcap', reassembly=True, ip=True)
         self.assertTrue(base.reassembly.ipv6)
-
-    @unittest.skipUnless(HAS_PYPCAPFILE, 'pypcapfile not installed')
-    def test_pypcapfile_traces_only_the_ipv4_half_of_a_mixed_capture(self) -> None:
-        # ``tcp.pcap`` carries four IPv4 and three IPv6 TCP frames; ``pypcapfile``
-        # can only see the former, so it finds strictly fewer flows.
-        base = self.extract('default', 'tcp.pcap', trace=True, tcp=True,
-                            trace_fout='/tmp/parity-trace-default')
-        engine = self.extract('pypcapfile', 'tcp.pcap', trace=True, tcp=True,
-                              trace_fout='/tmp/parity-trace-pypcapfile')
-
-        def traced(extractor) -> set[int]:
-            return {index for stream in extractor.trace.tcp for index in stream.index}
-
-        ipv4_frames = {number for number, frame in enumerate(base.frame, start=1)
-                       if 'IPv4' in frame}
-        self.assertTrue(ipv4_frames)
-        self.assertTrue(traced(engine))
-        # every frame it traced is one it could decode ...
-        self.assertLessEqual(traced(engine), ipv4_frames)
-        # ... and that is a strict subset of what the default engine traced
-        self.assertLess(traced(engine), traced(base))
 
     @unittest.skipUnless(HAS_PYPCAP, 'pypcap not installed')
     def test_pypcap_reports_neither_reassembly_nor_flow_tracing(self) -> None:

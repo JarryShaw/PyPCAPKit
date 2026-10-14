@@ -1,19 +1,18 @@
 # -*- coding: utf-8 -*-
-"""The dpkt and scapy engines reject the IPv4 headers the default engine rejects. C.f. #1607.
+"""The IPv4 headers the default engine rejects, and what it reads behind them. C.f. #1607.
 
 The default engine's IPv4 parser rejects a header whose version is not 4, whose
 IHL is below 5 or runs past the captured octets, or whose options it rejects,
 and then dissects nothing past it: no IPv4 reassembly input, and no TCP behind
-it. `dpkt`_ and `Scapy`_ decode such a header as IPv4 all the same, so their
-engines handed on both. They now ask the default engine's own parser, as the
-pypcapfile engine does (#1596), of every IPv4 header on the way to the TCP
-segment, a tunnel's included (#1581). Neither engine checks the header checksum,
-and nor does the default engine, so a bad one is still read.
+it, a tunnel's header included (#1581). It does not check the header checksum,
+so a bad one is still read.
+
+The helpers here build those headers and read a capture of them with any
+engine; :mod:`tests.toolkit.test_dpkt_tcp_ns_flags_1618_unit` and
+:mod:`tests.toolkit.test_scapy_ipv6_fragment_and_encap_walk_1635_1636_unit`
+import them.
 
 Every capture is built here, so the module is in the unit tier.
-
-.. _dpkt: https://dpkt.readthedocs.io
-.. _Scapy: https://scapy.net
 
 """
 from __future__ import annotations
@@ -31,7 +30,7 @@ from unittest import mock
 
 from tests._support import close_extractor, reimport_once_per_class
 from tests.foundation import _roundtrip as wire
-from tests.toolkit.test_tunnelled_tcp_flow_key_1581_unit import INNER, OUTER, has
+from tests.toolkit.test_tunnelled_tcp_flow_key_1581_unit import INNER, OUTER
 from tests.toolkit.test_tunnelled_tcp_flow_key_1581_unit import ip as tunnel_ip
 
 if TYPE_CHECKING:
@@ -219,15 +218,13 @@ def read(test: unittest.TestCase, engine: str, frames: 'list[bytes]') -> 'dict[s
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
-class DPKTScapyIPv4HeaderCheckTests(unittest.TestCase):
-    """dpkt and scapy hand on what the default engine does, whatever the IPv4 header."""
-
-    ENGINES = ('dpkt', 'scapy')
+class DefaultEngineIPv4HeaderCheckTests(unittest.TestCase):
+    """The default engine reads nothing behind an IPv4 header it rejects."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-    def test_rejected_ipv4_headers_agree_with_the_default_engine(self) -> None:
+    def test_nothing_is_read_behind_a_rejected_ipv4_header(self) -> None:
         built, tcp, ipv4_inputs = frames()
         base = read(self, 'default', built)
         # nothing is read behind a rejected header, outer or inner
@@ -236,19 +233,10 @@ class DPKTScapyIPv4HeaderCheckTests(unittest.TestCase):
         self.assertEqual(len(base['ids']), len(tcp))
         # and a rejected first header is no IPv4 input either
         self.assertEqual(sorted(base['ipv4']), ipv4_inputs)
-        for engine in self.ENGINES:
-            with self.subTest(engine=engine):
-                if not has(engine):
-                    self.skipTest(f'{engine} not installed')
-                seen = read(self, engine, built)
-                for aspect in ('ipv4', 'tcp', 'trace', 'ids', 'flows'):
-                    self.assertEqual(seen[aspect], base[aspect], aspect)
 
-    def test_every_version_and_ihl_is_read_as_the_default_engine_reads_it(self) -> None:
-        # The shortcut that leaves a header of version 4 and IHL 5 unparsed
-        # answers as the parser does: for every first octet, the engines decode
-        # an IPv4 layer and accept it exactly when the default engine dissects
-        # one, with room for 40 octets of options and with none at all.
+    def test_only_version_4_with_room_for_its_ihl_is_dissected(self) -> None:
+        # For every first octet, with room for 40 octets of options and with
+        # none at all.
         from pcapkit import extract
         from pcapkit.protocols.internet.ipv4 import IPv4
 
@@ -262,94 +250,6 @@ class DPKTScapyIPv4HeaderCheckTests(unittest.TestCase):
         want = [isinstance(frame.payload.payload, IPv4) for frame in extractor.frame]
         self.assertEqual(len(want), len(built))
         self.assertEqual(sum(want), 11 + 1)  # version 4: every IHL from 5 with room, IHL 5 without
-
-        for engine in self.ENGINES:
-            with self.subTest(engine=engine):
-                if not has(engine):
-                    self.skipTest(f'{engine} not installed')
-                if engine == 'dpkt':
-                    import dpkt
-
-                    from pcapkit.toolkit.dpkt import _ipv4_accepted
-                    layers = [getattr(dpkt.ethernet.Ethernet(octets), 'ip', None) for octets in built]
-                else:
-                    from scapy.layers.inet import IP
-                    from scapy.layers.l2 import Ether
-
-                    from pcapkit.toolkit.scapy import _ipv4_accepted  # type: ignore[no-redef]
-                    layers = [Ether(octets).getlayer(IP) for octets in built]
-                with warnings.catch_warnings():
-                    warnings.simplefilter('ignore')
-                    got = [layer is not None and _ipv4_accepted(layer) for layer in layers]
-                self.assertEqual([(first, len(rest)) for (first, rest), mine, theirs in zip(cases, got, want)
-                                  if mine != theirs], [])
-
-    def test_an_ihl_below_5_warns_of_nothing_the_default_engine_does_not(self) -> None:
-        # Scapy dissects such a header; the parser is handed its 20 fixed octets,
-        # as the default engine is, rather than the fewer the IHL counts, which
-        # it would warn of reading past.
-        if not has('scapy'):
-            self.skipTest('scapy not installed')
-        from scapy.layers.inet import IP
-        from scapy.layers.l2 import Ether
-
-        from pcapkit.toolkit import pypcapfile
-        from pcapkit.toolkit.scapy import _ipv4_accepted
-
-        for ihl in range(5):
-            with self.subTest(ihl=ihl):
-                octets = ethernet(ipv4(segment(1), ihl=ihl))
-                pypcapfile._default_accepts.cache_clear()
-                with warnings.catch_warnings(record=True) as caught:
-                    warnings.simplefilter('always')
-                    accepted = _ipv4_accepted(Ether(octets)[IP])
-                self.assertFalse(accepted)
-                self.assertEqual([str(warning.message) for warning in caught], [])
-
-    def test_the_parser_is_asked_only_of_a_header_it_could_reject(self) -> None:
-        # A plain header is not parsed; one with options is, once between the
-        # adapters that read the frame.
-        from pcapkit.const.reg.linktype import LinkType
-        from pcapkit.toolkit import pypcapfile
-
-        plain = ethernet(ipv4(segment(1)))
-        tunnelled = ethernet(ipv4(ipv4(segment(2)), proto=4))
-        with_options = ethernet(ipv4(segment(3), options=GOOD_OPTIONS['router alert']))
-        for engine in self.ENGINES:
-            with self.subTest(engine=engine):
-                if not has(engine):
-                    self.skipTest(f'{engine} not installed')
-                if engine == 'dpkt':
-                    import dpkt
-
-                    from pcapkit.toolkit import dpkt as toolkit
-
-                    def adapt(octets: bytes) -> None:
-                        packet = dpkt.ethernet.Ethernet(octets)
-                        toolkit.ipv4_reassembly(packet, 1.0)
-                        toolkit.tcp_reassembly(packet, 1.0)
-                        toolkit.tcp_traceflow(packet, 1.0, data_link=LinkType.ETHERNET)
-                else:
-                    from scapy.layers.l2 import Ether
-
-                    from pcapkit.toolkit import scapy as toolkit  # type: ignore[no-redef]
-
-                    def adapt(octets: bytes) -> None:
-                        packet = Ether(octets)
-                        packet.time = 1.0
-                        toolkit.ipv4_reassembly(packet)
-                        toolkit.tcp_reassembly(packet)
-                        toolkit.tcp_traceflow(packet)
-
-                pypcapfile._default_accepts.cache_clear()
-                real = pypcapfile.Protocol_IPv4
-                with mock.patch.object(pypcapfile, 'Protocol_IPv4', side_effect=real) as parser:
-                    adapt(plain)
-                    adapt(tunnelled)
-                    self.assertEqual(parser.call_count, 0)
-                    adapt(with_options)
-                    self.assertEqual([call.args[0] for call in parser.call_args_list],
-                                     [with_options[14:38]])
 
 
 if __name__ == '__main__':

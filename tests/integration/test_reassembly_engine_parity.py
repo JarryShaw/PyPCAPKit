@@ -1,23 +1,20 @@
 # -*- coding: utf-8 -*-
-"""The four toolkit adapters must describe an IPv6 fragment identically.
+"""Each toolkit adapter describes an IPv6 fragment as :rfc:`8200` does.
 
 Each of :mod:`pcapkit.toolkit.pcap`, :mod:`pcapkit.toolkit.pcapng`,
 :mod:`pcapkit.toolkit.dpkt` and :mod:`pcapkit.toolkit.scapy` builds a
 :term:`reasm.ipv6.packet` from whatever object model its engine hands it, and
 each was only ever tested against itself. That is how #415 survived: for
 ``ipv6.pcap`` frame 13 the four reported ``ihl`` 48/48/40/40, ``len(header)``
-48/48/40/40 and ``tl`` 1496/1496/1488/1496 -- a *three*-way disagreement on
-``tl``, with no two adapters agreeing on all three fields.
+48/48/40/40 and ``tl`` 1496/1496/1488/1496, where the RFC calls for 40, 40 and
+1488.
 
-So the assertions here are on agreement rather than on constants: every adapter
-is run over the same octets and the results are compared with each other. The
-expected values are pinned as well, because agreement alone would be satisfied by
-all four being wrong in the same way.
+So every adapter is run over the same octets, and each one's result is checked
+against the values the RFC calls for and the capture's own octets.
 
 The PCAP-NG adapter has no fragmented sample capture of its own, so the frames of
-``ipv6.pcap`` are rewrapped into a PCAP-NG file here. That is deliberate: reading
-two different captures would compare two different datagrams and prove nothing
-about the adapters.
+``ipv6.pcap`` are rewrapped into a PCAP-NG file here, so that every adapter is
+checked over the same datagram.
 
 """
 from __future__ import annotations
@@ -195,40 +192,27 @@ class IPv6AdapterParityTests(EndToEndTestCase):
                 self.assertEqual([(data.fo, len(data.payload)) for data in fragments],
                                  list(FRAGMENTS))
 
-    def test_every_adapter_reports_the_same_ihl_header_and_tl(self) -> None:
-        """``ihl``, ``header`` and ``tl`` must not depend on the engine.
+    def test_every_adapter_reports_the_rfc_ihl_header_and_tl(self) -> None:
+        """``ihl``, ``header`` and ``tl`` leave the Fragment header out.
 
-        The three fields of #415, asserted both against each other and against
-        the values :rfc:`8200#section-4.5` calls for: the Fragment header is not
-        present in the reassembled packet, so none of the three may count its 8
-        octets.
+        The three fields of #415, asserted for every adapter against the values
+        :rfc:`8200#section-4.5` calls for: the Fragment header is not present in
+        the reassembled packet, so none of the three may count its 8 octets.
 
         """
         packets = self.adapter_packets()
 
-        for index, (offset, payload_len) in enumerate(FRAGMENTS):
-            described = {name: (data[index].ihl, data[index].header, data[index].tl)
-                         for name, data in packets.items()}
-
-            # a failure message naming the three numbers per adapter, since the
-            # raw ``header`` octets in ``described`` are unreadable in a diff
-            summary = {name: (ihl, len(header), tl)
-                       for name, (ihl, header, tl) in described.items()}
-
-            with self.subTest(fragment=offset):
-                # every adapter agrees ...
-                self.assertEqual(len(set(described.values())), 1,
-                                 f'adapters disagree on (ihl, len(header), tl): {summary}')
-
-                # ... and what they agree on excludes the Fragment header
-                ihl, header, tl = next(iter(described.values()))
-                self.assertEqual(ihl, IPV6_HDR_LEN)
-                self.assertEqual(len(header), IPV6_HDR_LEN)
-                self.assertEqual(tl, IPV6_HDR_LEN + payload_len)
-                # the invariant the reassembly machinery relies on: it writes the
-                # payload into its datagram buffer over the span ``tl - ihl``, so
-                # a ``tl`` 8 octets too large leaves 8 stray zeroes per fragment
-                self.assertEqual(tl - ihl, payload_len)
+        for name, fragments in packets.items():
+            self.assertEqual(len(fragments), len(FRAGMENTS), name)
+            for data, (offset, payload_len) in zip(fragments, FRAGMENTS):
+                with self.subTest(adapter=name, fragment=offset):
+                    self.assertEqual(data.ihl, IPV6_HDR_LEN)
+                    self.assertEqual(len(data.header), IPV6_HDR_LEN)
+                    self.assertEqual(data.tl, IPV6_HDR_LEN + payload_len)
+                    # the invariant the reassembly machinery relies on: it writes the
+                    # payload into its datagram buffer over the span ``tl - ihl``, so
+                    # a ``tl`` 8 octets too large leaves 8 stray zeroes per fragment
+                    self.assertEqual(data.tl - data.ihl, payload_len)
 
     def test_the_fragment_header_octets_are_the_ones_left_out(self) -> None:
         """The 40 octets kept are the IPv6 header, not an arbitrary prefix.
@@ -286,29 +270,29 @@ class IPv6DatagramHeaderTests(EndToEndTestCase):
                 self.assertNotEqual(datagram.header[6], NH_IPV6_FRAG)
                 self.assertEqual(int(datagram.id.proto), NH_UDP)
 
-    def test_every_engine_reassembles_the_same_payload(self) -> None:
+    def test_every_engine_reassembles_the_captured_payload(self) -> None:
         """The datagram itself, not only its header.
 
         ``scapy``'s ``tl`` counted the Fragment header while its ``ihl`` did not,
         so the reassembly machinery wrote each fragment's payload over a span 8
         octets too wide and the datagram came out 4786 octets instead of 4778 --
-        eight stray zeroes per fragment boundary, and a payload no other engine
-        agreed with.
+        eight stray zeroes per fragment boundary. Each engine's datagram is the
+        fragments' payloads as captured, read past the Ethernet, IPv6 and
+        Fragment headers of frames 13 to 16.
 
         """
-        payloads = {}  # type: dict[str, bytes]
+        captured = b''.join(frame[14 + IPV6_HDR_LEN + 8:]
+                            for frame in pcap_frames(sample_path('ipv6.pcap'))[12:16])
+        self.assertEqual(len(captured), sum(length for _, length in FRAGMENTS))
         for engine in self.engines():
-            extractor = self.extract(fin=sample_path('ipv6.pcap'), nofile=True,
-                                     store=False, ipv6=True, reassembly=True,
-                                     reasm_strict=True, engine=engine)
-            datagram, = extractor.reassembly.ipv6
-            payloads[engine] = bytes(datagram.payload)
-
-        for engine, payload in payloads.items():
             with self.subTest(engine=engine):
-                self.assertEqual(len(payload), sum(length for _, length in FRAGMENTS))
+                extractor = self.extract(fin=sample_path('ipv6.pcap'), nofile=True,
+                                         store=False, ipv6=True, reassembly=True,
+                                         reasm_strict=True, engine=engine)
+                datagram, = extractor.reassembly.ipv6
+                payload = bytes(datagram.payload)
                 self.assertEqual(len(payload), 4778)
-        self.assertEqual(len(set(payloads.values())), 1)
+                self.assertEqual(payload, captured)
 
 
 if __name__ == '__main__':
