@@ -4,7 +4,7 @@
 The default engine dispatches an IPv4 packet's protocol through the registry
 IPv6 uses, so it reads an AH or IPv6 extension header carried directly in IPv4,
 and the TCP segment or IP-in-IP tunnel behind it, up to
-:data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT` headers in a
+:data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` headers in a
 row (#1606).
 
 A later IPv4 fragment carries no upper-layer header (:rfc:`791#section-3.2`), so

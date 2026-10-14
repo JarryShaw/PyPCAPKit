@@ -10,6 +10,12 @@
 an abstract base class for all protocol family, with pre-defined
 utility arguments and methods of specified protocols.
 
+.. versionremoved:: 1.5.0
+
+   ``pcapkit.protocols.protocol.FRAME_LAYER_LIMIT``, now
+   :data:`pcapkit.utilities.config.FRAME_LAYER_LIMIT`, set with
+   :envvar:`PCAPKIT_FRAME_LAYER_LIMIT` (:issue:`1726`).
+
 """
 import abc
 import ast
@@ -47,6 +53,7 @@ from pcapkit.protocols.data.misc.raw import Raw as Data_Raw
 from pcapkit.protocols.data.protocol import Packet as Data_Packet
 from pcapkit.protocols.schema.misc.raw import Raw as Schema_Raw
 from pcapkit.protocols.schema.schema import Schema
+from pcapkit.utilities import config
 from pcapkit.utilities.chardet import detect
 from pcapkit.utilities.compat import cached_property, get_annotations
 from pcapkit.utilities.exceptions import (BaseError, ProtocolError, ProtocolNotFound,
@@ -396,34 +403,14 @@ def _check_construction_keywords(cls: 'type', kwargs: 'dict[str, Any]',
          UnknownFieldWarning)
 
 
-#: Most layers dissected in one frame (:issue:`1610`). A layer is one entry of
-#: the frame's protocol chain, counted from the first layer the frame record
-#: carries, usually its link layer; a protocol constructed from its own octets
-#: is not counted itself, so the count starts at the first layer it dissects.
-#: IPv6 extension headers are layers like any other, whether
-#: :class:`~pcapkit.protocols.internet.ipv6.IPv6` walks them or each dissects
-#: the next. What follows the last layer is kept as
-#: :class:`~pcapkit.protocols.misc.raw.Raw`, with one
-#: :exc:`~pcapkit.utilities.warnings.ProtocolWarning`, unless it would have been
-#: left raw anyway or there is nothing left.
-#:
-#: Each layer dissects the next from inside its own parse, so without the bound
-#: a deep enough frame, such as IP in IP or stacked 802.1Q tags, stops wherever
-#: Python's recursion limit falls, which depends on the interpreter and on how
-#: deep the caller's own stack is. A tunnel does not restart the count, and nor
-#: does the end of a chain of extension headers, which
-#: :data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT` bounds on
-#: its own.
-FRAME_LAYER_LIMIT = 64
-
 #: contextvars.ContextVar[int]: How many layers of the frame being dissected
 #: come before the next one :meth:`ProtocolBase._parse_next_layer` parses, c.f.
-#: :data:`FRAME_LAYER_LIMIT`.
+#: :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.
 _frame_depth = contextvars.ContextVar('_frame_depth', default=0)
 
 #: contextvars.ContextVar[bool]: Whether a payload is being rebuilt by
 #: :meth:`ProtocolBase._make_payload`, so that the layer it is rebuilt for
-#: parses the same octets again, c.f. :data:`FRAME_LAYER_LIMIT`.
+#: parses the same octets again, c.f. :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.
 _rebuilding = contextvars.ContextVar('_rebuilding', default=False)
 
 
@@ -574,7 +561,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     #: ``object.__new__(SomeProtocol)``) sees, so reading it is always safe.
     _exctx: 'Optional[ContextRegistry]' = None
 
-    #: Whether this layer is past :data:`FRAME_LAYER_LIMIT`, and so was kept as
+    #: Whether this layer is past :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`, and so was kept as
     #: :class:`~pcapkit.protocols.misc.raw.Raw` by :meth:`_parse_next_layer`
     #: without being parsed. Such a layer carries an ``error`` as one that
     #: failed to parse does, so this is what tells the two apart: what follows
@@ -2065,7 +2052,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         The payload is built one layer further into the frame than this
         protocol, as :meth:`_parse_next_layer` counts it, since each layer built
         parses its own octets again. So rebuilding a frame stops at
-        :data:`FRAME_LAYER_LIMIT` where parsing it did, rather than that many
+        :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` where parsing it did, rather than that many
         layers below each layer of it (:issue:`1610`). Nor does the payload's
         parse warn of the limit: this protocol's own parse goes over the same
         octets, so the rebuilt frame warns of it once, as the parsed one did.
@@ -2344,7 +2331,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         Returns:
             Instance of ``klass``, or of :class:`~pcapkit.protocols.misc.raw.Raw`
             when fewer octets were captured than its header needs, or when it is
-            past :data:`FRAME_LAYER_LIMIT`.
+            past :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.
 
         Note:
             :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`
@@ -2373,24 +2360,25 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             still warns. A layer captured at least as long as its hint cannot be
             replaced, and is parsed holding nothing, even inside one that holds.
 
-            A layer past :data:`FRAME_LAYER_LIMIT` in its frame is not parsed:
+            A layer past :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` in its frame is not parsed:
             it and the rest of the frame are kept as
             :class:`~pcapkit.protocols.misc.raw.Raw`, marked
             :attr:`_past_layer_limit`, with one
             :exc:`~pcapkit.utilities.warnings.ProtocolWarning` (:issue:`1610`).
 
         Warns:
-            ProtocolWarning: If the next layer is past :data:`FRAME_LAYER_LIMIT`.
+            ProtocolWarning: If the next layer is past :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.
 
         """
         depth = _frame_depth.get() + 1
-        if depth > FRAME_LAYER_LIMIT:
+        limit = config.FRAME_LAYER_LIMIT
+        if limit != -1 and depth > limit:
             from pcapkit.protocols.misc.null import NoPayload  # isort: skip # pylint: disable=import-outside-toplevel
             from pcapkit.protocols.misc.raw import Raw  # isort: skip # pylint: disable=import-outside-toplevel
 
             # NOTE: Nothing is lost if the next layer is raw already, or empty.
             if klass is not Raw and klass is not NoPayload:
-                message = (f'the frame reached the limit of {FRAME_LAYER_LIMIT} layers; the rest of it, '
+                message = (f'the frame reached the limit of {limit} layers; the rest of it, '
                            f'from {klass.__name__} on, is left undissected')
                 # NOTE: Inside a payload being rebuilt, the layer it is rebuilt
                 # for warns of the same octets once its own parse gets here.

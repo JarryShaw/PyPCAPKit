@@ -9,6 +9,12 @@ functions for :mod:`pcapkit.dumpkit` implementation, which is
 generally the customised hooks for :class:`dictdumper.Dumper`
 classes.
 
+.. versionremoved:: 1.5.0
+
+   ``pcapkit.dumpkit.common.FALLBACK_LIMIT``, now
+   :data:`pcapkit.utilities.config.FALLBACK_LIMIT`, set with
+   :envvar:`PCAPKIT_FALLBACK_LIMIT` (:issue:`1726`).
+
 """
 import collections
 import datetime
@@ -33,6 +39,7 @@ from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
 from pcapkit.corekit.sentinels import NoValueType, NullType
 from pcapkit.protocols.schema.schema import Schema
+from pcapkit.utilities import config
 from pcapkit.utilities.exceptions import UnsupportedCall
 from pcapkit.utilities.logging import get_logger
 
@@ -269,12 +276,6 @@ def _iter_slots(value: 'Any') -> 'Iterator[str]':
             except AttributeError:
                 continue
             yield name
-
-
-#: Most objects :meth:`DictDumper._append_fallback` expands for one top-level
-#: object, counting an object once per time it is met. No fallback object in the
-#: ``foundation``, ``dumpkit`` or ``interface`` test legs expands into more than 7.
-FALLBACK_LIMIT = 10_000
 
 
 def _object_name(value: 'Any') -> 'str':
@@ -728,7 +729,7 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
 
             Raises:
                 UnsupportedCall: If a top-level fallback object expands into
-                    more than :data:`FALLBACK_LIMIT` objects.
+                    more than :data:`~pcapkit.utilities.config.FALLBACK_LIMIT` objects.
 
             """
             if isinstance(value, (type, types.ModuleType)) or inspect.isroutine(value):
@@ -753,9 +754,10 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                 self._append_fallback_value(marker, file)
                 return
             self._fallback_count += 1
-            if self._fallback_count > FALLBACK_LIMIT:
+            limit = config.FALLBACK_LIMIT
+            if limit != -1 and self._fallback_count > limit:
                 raise UnsupportedCall(f'{type(self).__name__}: fallback object expands into more '
-                                      f'than {FALLBACK_LIMIT} objects; stopped at '
+                                      f'than {limit} objects; stopped at '
                                       f'{_object_name(type(value))}')
             path.add(key)
             try:

@@ -580,7 +580,9 @@ class PyPCAPFileToolkitTests(unittest.TestCase):
     def test_the_captures_warned_of_tcp_over_ipv6_are_bounded(self) -> None:
         from pcapkit.toolkit import pypcapfile as toolkit
 
-        self.assertEqual(toolkit.IPV6_TCP_WARNED_LIMIT, 32)
+        from pcapkit.utilities import config
+
+        self.assertEqual(config.IPV6_TCP_WARNED_LIMIT, 32)
         headers = [[types.SimpleNamespace(ns_resolution=False)] for _ in range(33)]
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')

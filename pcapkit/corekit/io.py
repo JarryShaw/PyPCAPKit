@@ -11,11 +11,18 @@ implementation to :class:`io.BufferedReader`, and the stream proxies
 seekable stream, and :class:`~pcapkit.corekit.io.NamedStream`, which gives
 a stream a ``name``.
 
+.. versionremoved:: 1.5.0
+
+   ``pcapkit.corekit.io._READ_CHUNK``, now
+   :data:`pcapkit.utilities.config.READ_CHUNK`, set with
+   :envvar:`PCAPKIT_READ_CHUNK` (:issue:`1726`).
+
 """
 import io
 import tempfile
 from typing import TYPE_CHECKING, cast
 
+from pcapkit.utilities import config
 from pcapkit.utilities.exceptions import (SeekError, TruncateError, UnsupportedCall,
                                           UnsupportedOperation, stacklevel)
 from pcapkit.utilities.warnings import SeekWarning, warn
@@ -27,10 +34,6 @@ if TYPE_CHECKING:
     from typing_extensions import Buffer
 
 __all__ = ['SeekableReader', 'PeekableStream', 'NamedStream']
-
-#: Most octets :class:`SeekableReader` asks of its stream in one read. A read
-#: allocates what it asks for up front, so a record's bogus length is read in pieces.
-_READ_CHUNK = 1 << 20
 
 
 class SeekableReader(io.BufferedReader):
@@ -179,8 +182,8 @@ class SeekableReader(io.BufferedReader):
             reads until ``minimum`` octets are in hand. Past that it does not wait:
             ``read1``, where the stream has it, returns what is already there. A
             non-blocking stream's :obj:`None` stops the reading. No one read asks for
-            more than ``_READ_CHUNK`` octets, so a bogus length read from a record allocates
-            only what the stream actually holds.
+            more than :data:`~pcapkit.utilities.config.READ_CHUNK` octets, so a bogus
+            length read from a record allocates only what the stream actually holds.
 
         """
         if size < 0:
@@ -191,10 +194,11 @@ class SeekableReader(io.BufferedReader):
         minimum = size if minimum is None else minimum
         read = getattr(self._stream, 'read1', self._stream.read)
 
+        limit = config.READ_CHUNK
         chunks = []  # type: list[bytes]
         count = 0
         while True:
-            chunk = read(min(size - count, _READ_CHUNK))
+            chunk = read(size - count if limit == -1 else min(size - count, limit))
             if not chunk:
                 break
             chunks.append(chunk)

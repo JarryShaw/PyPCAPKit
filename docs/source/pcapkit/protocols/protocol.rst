@@ -105,7 +105,7 @@ Layers per Frame
 ----------------
 
 A frame is dissected to at most
-:data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT` layers of its protocol
+:data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` layers of its protocol
 chain, counted from the first layer the frame record carries, through tunnels,
 VLAN tags and IPv6 extension headers alike. What follows is kept as
 :class:`~pcapkit.protocols.misc.raw.Raw`, with one
@@ -115,12 +115,16 @@ default engine's TCP reassembly and flow tracing do not read a TCP segment
 there back out, as they do one the TCP parser rejected (:issue:`1518`). A
 protocol constructed from its own octets is not counted itself, so the count
 starts at the first layer it dissects. One chain of extension headers is also bounded on
-its own, by :data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT`.
+its own, by :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`.
 The ``pyshark``, ``scapy`` and ``pypcapfile`` engines dissect with their own
 parsers, which do not apply the frame's layer bound (:issue:`1609`). The
 ``dpkt`` toolkit reads what :mod:`dpkt` decodes, which applies neither bound.
 
-.. autodata:: pcapkit.protocols.protocol.FRAME_LAYER_LIMIT
+.. versionremoved:: 1.5.0
+
+   ``pcapkit.protocols.protocol.FRAME_LAYER_LIMIT``, now
+   :data:`pcapkit.utilities.config.FRAME_LAYER_LIMIT`, set with
+   :envvar:`PCAPKIT_FRAME_LAYER_LIMIT` (:issue:`1726`).
 
 Data Models
 -----------

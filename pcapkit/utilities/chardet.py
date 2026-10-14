@@ -9,20 +9,25 @@ turning the bytes of a text field into a :obj:`str`.
 
 .. _chardet: https://chardet.readthedocs.io
 
+.. versionremoved:: 1.5.0
+
+   ``pcapkit.utilities.chardet.DETECT_CACHE_SIZE``, now
+   :data:`pcapkit.utilities.config.DETECT_CACHE_SIZE`, set with
+   :envvar:`PCAPKIT_DETECT_CACHE_SIZE` (:issue:`1726`).
+
 """
 
 import functools
 
 import chardet
 
+from pcapkit.utilities import config
+
 __all__ = ['detect']
 
-#: How many distinct bytestrings :func:`detect` will remember. Bounded so that a
-#: capture full of never-repeating text cannot retain all of it.
-DETECT_CACHE_SIZE = 1024
 
-
-@functools.lru_cache(maxsize=DETECT_CACHE_SIZE)
+# NOTE: The size is read once, here, since it is fixed when the cache is built.
+@functools.lru_cache(maxsize=None if config.DETECT_CACHE_SIZE == -1 else config.DETECT_CACHE_SIZE)
 def detect(value: 'bytes') -> 'str':
     """Detect the character set of ``value``.
 
@@ -38,7 +43,7 @@ def detect(value: 'bytes') -> 'str':
         it was keyed on: :func:`functools.lru_cache` caches an argument's *hash*
         but still keeps the argument, since a :obj:`dict` needs the key to settle
         equality on a hash collision. Measured, feeding 20 distinct 1 MB values
-        retains 19.1 MB. :data:`DETECT_CACHE_SIZE` therefore caps the entries
+        retains 19.1 MB. :data:`~pcapkit.utilities.config.DETECT_CACHE_SIZE` therefore caps the entries
         rather than the footprint, which matters because
         :meth:`ProtocolBase.decode
         <pcapkit.protocols.protocol.Protocol.decode>` is public and a caller

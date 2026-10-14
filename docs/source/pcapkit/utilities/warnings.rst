@@ -166,6 +166,10 @@ configured separately, through the :mod:`logging` module::
    :no-members:
    :show-inheritance:
 
+.. autoexception:: pcapkit.utilities.warnings.ConfigWarning
+   :no-members:
+   :show-inheritance:
+
 :exc:`ResourceWarning` Category
 -------------------------------
 

@@ -5,6 +5,7 @@ import io
 import logging
 import os
 import unittest
+import warnings
 
 from tests._support import load_module, reimport_once_per_class
 
@@ -57,7 +58,10 @@ class LoggingEnvironmentTests(unittest.TestCase):
         self.assertTrue(logging_module.VERBOSE)
         self.assertTrue(logging_module.SPHINX_TYPE_CHECKING)
 
-    def test_invalid_boolean_environment_values_fall_back_to_false(self) -> None:
+    def test_invalid_boolean_environment_values_fall_back_to_false_and_warn(self) -> None:
+        # GitHub issue #1726: the value used to be taken as off in silence.
+        # logging loads before warnings, so it records the value and warnings
+        # reports it once it has loaded, naming the variable and the value.
         os.environ['PCAPKIT_DEVMODE'] = 'maybe'
         os.environ['PCAPKIT_VERBOSE'] = 'sometimes'
         os.environ['PCAPKIT_SPHINX'] = 'idk'
@@ -67,6 +71,25 @@ class LoggingEnvironmentTests(unittest.TestCase):
         self.assertFalse(logging_module.DEVMODE)
         self.assertFalse(logging_module.VERBOSE)
         self.assertFalse(logging_module.SPHINX_TYPE_CHECKING)
+        self.assertEqual(logging_module._BAD_FLAGS,  # pylint: disable=protected-access
+                         [('PCAPKIT_DEVMODE', 'maybe'), ('PCAPKIT_VERBOSE', 'sometimes'),
+                          ('PCAPKIT_SPHINX', 'idk')])
+
+        load_module('pcapkit.utilities.compat', 'pcapkit/utilities/compat.py')
+        load_module('pcapkit.utilities.exceptions', 'pcapkit/utilities/exceptions.py')
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            warnings_module = load_module('pcapkit.utilities.warnings', 'pcapkit/utilities/warnings.py')
+
+        reported = [str(item.message) for item in caught
+                    if issubclass(item.category, warnings_module.ConfigWarning)]
+        self.assertEqual(len(reported), 3, reported)
+        for message, text in zip(reported, ("PCAPKIT_DEVMODE='maybe'", "PCAPKIT_VERBOSE='sometimes'",
+                                            "PCAPKIT_SPHINX='idk'")):
+            self.assertIn(text, message)
+            self.assertIn('using the default, False', message)
+        # Reported once: the record is drained as it is reported.
+        self.assertEqual(logging_module._BAD_FLAGS, [])  # pylint: disable=protected-access
 
     def test_utilities_package_re_exports_common_helpers(self) -> None:
         package = load_module('pcapkit.utilities', 'pcapkit/utilities/__init__.py')

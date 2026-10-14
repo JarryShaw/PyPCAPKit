@@ -36,7 +36,7 @@ CATEGORY_NAMES = [
     'FileWarning', 'LayerWarning', 'ProtocolWarning', 'AttributeWarning',
     'DevModeWarning', 'VendorRequestWarning', 'VendorRuntimeWarning',
     'UnknownFieldWarning', 'RegistryWarning', 'SchemaWarning', 'InfoWarning',
-    'SeekWarning', 'ExtractionWarning',
+    'SeekWarning', 'ExtractionWarning', 'ConfigWarning',
     'DPKTWarning', 'ScapyWarning', 'PySharkWarning', 'EmojiWarning',
     'VendorWarning',
     'DeprecatedFormatWarning',

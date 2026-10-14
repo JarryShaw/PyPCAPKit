@@ -389,7 +389,7 @@ def _tcp_carrier(packet: 'Packet') -> 'tuple[IP | IPv6, TCP, bytes, bytes] | Non
         An IPv4 layer whose protocol names an AH or IPv6 extension header
         (:data:`~pcapkit.toolkit.pypcapfile.IPV4_EXTENSION_HEADERS`) has those
         headers stepped over in its octets, up to
-        :data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT` of
+        :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` of
         them in a row (see
         :func:`~pcapkit.toolkit.pypcapfile._walk_extension_headers`), and what
         follows them is dissected from the octets: a tunnel, walked on as
@@ -729,8 +729,7 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
             # put the moment of parsing into every flow label -- so the same
             # capture traced twice would produce different label strings and
             # different output filenames. Scapy carries the record's
-            # own timestamp on ``Packet.time``, which is what every other
-            # engine's adapter reports.
+            # own timestamp on ``Packet.time``, so that is what is reported.
             timestamp=float(packet.time),                        # capture timestamp
             seq=tcp.seq,                                         # TCP sequence number
             ack=tcp.ack,                                         # TCP acknowledgement number

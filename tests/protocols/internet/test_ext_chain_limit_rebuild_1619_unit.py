@@ -2,7 +2,7 @@
 """Rebuilding a frame cut at the extension header chain limit warns once.
 
 GitHub issue #1619: #1604 bounded a chain of IPv6 extension headers at
-:data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT` headers,
+:data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` headers,
 with one :exc:`~pcapkit.utilities.warnings.ProtocolWarning`, and parsing a cut
 frame does warn once. But each layer :meth:`from_data
 <pcapkit.protocols.protocol.ProtocolBase.from_data>` rebuilds parses its own
