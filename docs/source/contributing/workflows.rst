@@ -383,6 +383,14 @@ skipping because the tag a *previous* run already created still exists): this
 one can skip the very first attempt, before any tag is ever created, purely
 because the upstream Vendor Update run did not itself conclude ``success``.
 
+Such a run is also kept out of the release's concurrency group
+(``create-release.yml:30-32``,
+`#1705 <https://github.com/JarryShaw/PyPCAPKit/issues/1705>`__). It is keyed on
+its own ``github.run_id`` rather than on the ref, so it cannot cancel a run
+waiting there with release work. Keyed on the ref, run 38499295798 joined at
+02:06:32Z on 2026-10-14, and the pending 38499150441, whose Vendor Update had
+succeeded, was cancelled a second later.
+
 ``pull_request_target``
 -----------------------
 

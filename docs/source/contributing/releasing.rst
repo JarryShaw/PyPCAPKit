@@ -116,6 +116,15 @@ when some target's evidence is not yet ``'true'``
 common Vendor Update run that bumped nothing costs a minute, not a full-suite
 run.
 
+A run that may release waits for the one ahead of it on the same ref and never
+cancels it (``create-release.yml:30-32``), since two Vendor Update runs
+completing close together raise two runs on the same tip. A group holds one
+pending run, which a newer one cancels, so a run whose Vendor Update did not
+conclude ``success`` is keyed on its own ``github.run_id`` instead
+(`#1705 <https://github.com/JarryShaw/PyPCAPKit/issues/1705>`__). It releases
+nothing, so it neither waits behind a release nor displaces a run waiting
+there; only a newer run that may release, reading ``main``'s newer tip, can.
+
 One Commit per Release
 ----------------------
 
