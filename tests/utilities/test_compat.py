@@ -54,9 +54,11 @@ from __future__ import annotations
 import decimal
 import enum
 import importlib
+import inspect
 import subprocess
 import sys
 import textwrap
+import types
 import unittest
 import urllib.parse
 from typing import Callable
@@ -345,6 +347,41 @@ class CompatTests(unittest.TestCase):
             self.assertIsNot(self.compat.unquote, urllib.parse.unquote)
         self.assert_unquotes_as_python39(self.compat.unquote)
 
+    def test_get_annotations_and_union_type_are_the_stdlib_ones_from_3_10(self) -> None:
+        """GitHub issue #1709: both are chosen by version, not by probing for them."""
+        if sys.version_info >= (3, 10):
+            self.assertIs(self.compat.get_annotations, inspect.get_annotations)
+            self.assertIs(self.compat.UnionType, types.UnionType)
+        else:
+            self.assertEqual(self.compat.get_annotations.__module__, self.compat.__name__)
+            self.assertIsNone(self.compat.UnionType)
+        self.assert_reads_own_annotations(self.compat.get_annotations)
+
+    def assert_reads_own_annotations(self, get_annotations: 'Callable[[type], dict]') -> None:
+        """``get_annotations`` gives each class only what its own body declares.
+
+        ``Bare`` declares nothing, so below 3.10 its ``__annotations__`` is
+        ``Base``'s (bpo-43901, issue #1692); the answer is still empty.
+
+        """
+        class Base:
+            a: int
+
+        class Bare(Base):
+            pass
+
+        class Left(Base):
+            b: int
+
+        class Diamond(Bare, Left):
+            d: int
+
+        self.assertEqual(get_annotations(Base), {'a': 'int'})
+        self.assertEqual(get_annotations(Bare), {})
+        self.assertEqual(get_annotations(Left), {'b': 'int'})
+        self.assertEqual(get_annotations(Diamond), {'d': 'int'})
+        self.assertEqual(get_annotations(object), {})
+
     def test_show_flag_values_returns_individual_bits(self) -> None:
         class DemoFlag(enum.IntFlag):
             READ = 1
@@ -440,6 +477,17 @@ class CompatTests(unittest.TestCase):
 
         self.assertTrue(issubclass(compat.ModuleNotFoundError, ImportError))
         self.assertIsNone(compat.default_threading_excepthook)
+        self.assertIsNone(compat.UnionType)
+
+        # The reader infoclass and protocol used below 3.10 (#1692, #1709): the
+        # class's own ``__dict__`` entry, returned as it is rather than copied.
+        self.assertEqual(compat.get_annotations.__module__, compat.__name__)
+        self.assert_reads_own_annotations(compat.get_annotations)
+
+        class Annotated:
+            a: int
+
+        self.assertIs(compat.get_annotations(Annotated), Annotated.__dict__['__annotations__'])
 
         class CollectionLike:
             def __len__(self): return 0

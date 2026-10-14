@@ -23,6 +23,7 @@ imported inside each test, after
 """
 
 import importlib
+import sys
 import unittest
 import unittest.mock
 from typing import TYPE_CHECKING
@@ -232,6 +233,18 @@ class TestMakeIndexPerArgument(unittest.TestCase):
         module = importlib.import_module('pcapkit.protocols.protocol')
         # a builtin has no Python source
         self.assertEqual(module._make_index_calls(len), ())
+
+    def test_call_spans_to_its_last_line(self) -> None:
+        """A call split over lines ends on its last one, from Python 3.8 (#1709)."""
+        module = importlib.import_module('pcapkit.protocols.protocol')
+
+        def make_split(self: 'Any', a: 'Any', a_namespace: 'Any' = None) -> 'Any':
+            return self._make_index(a,
+                                    namespace=a_namespace)
+
+        first = make_split.__code__.co_firstlineno + 1
+        last = first + 1 if sys.version_info >= (3, 8) else first
+        self.assertEqual(module._make_index_calls(make_split), ((first, last, 'a'),))
 
 
 if __name__ == '__main__':

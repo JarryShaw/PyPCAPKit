@@ -186,14 +186,28 @@ class OwnAnnotationsTests(unittest.TestCase):
                 info = cls({'a': 1}, b=2)
                 self.assertEqual(list(info.items()), [('a', 1), ('b', 2)])
 
+    def test_annotations_are_read_through_the_compat_shim(self) -> None:
+        """GitHub issue #1709: one version-gated reader, from :mod:`pcapkit.utilities.compat`."""
+        from pcapkit.corekit import infoclass
+        from pcapkit.protocols import protocol
+        from pcapkit.utilities import compat
+
+        self.assertIs(infoclass.get_annotations, compat.get_annotations)
+        self.assertIs(protocol.get_annotations, compat.get_annotations)
+
     def test_the_pre_3_10_reader_gives_the_same_signatures(self) -> None:
-        # NOTE: ``_get_annotations`` set to ``None`` selects the reader Python
-        # 3.6-3.9 use, so every leg checks that branch. It is sound on 3.14 too
-        # because this module's ``from __future__ import annotations`` stores a
-        # class's own annotations in its ``__dict__`` there as well.
+        # NOTE: a stand-in for ``compat.get_annotations`` below 3.10 -- the
+        # class's own ``__dict__`` entry, as ``tests.utilities.test_compat`` pins
+        # the real fallback to be -- so every leg checks that branch. It is sound
+        # on 3.14 too because this module's ``from __future__ import
+        # annotations`` stores a class's own annotations in its ``__dict__``
+        # there as well.
         from pcapkit.corekit import infoclass
 
-        with mock.patch.object(infoclass, '_get_annotations', None):
+        def pre_3_10_reader(obj: type) -> dict:
+            return obj.__dict__.get('__annotations__', {})
+
+        with mock.patch.object(infoclass, 'get_annotations', pre_3_10_reader):
             self.assertEqual(self._signatures(), self.EXPECTED)
 
     def test_from_dict_rebuilds_a_field_inherited_by_a_field_less_subclass(self) -> None:

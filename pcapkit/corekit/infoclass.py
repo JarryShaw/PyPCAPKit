@@ -17,7 +17,6 @@ import abc
 import collections.abc
 import contextlib
 import enum
-import inspect
 import itertools
 import sys
 import types
@@ -26,7 +25,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar
 
 from pcapkit.corekit.enum import EnumLookup
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict, iter_multi_items
-from pcapkit.utilities.compat import Mapping, final
+from pcapkit.utilities.compat import Mapping, UnionType, final, get_annotations
 from pcapkit.utilities.exceptions import InfoError, UnsupportedCall, stacklevel
 from pcapkit.utilities.warnings import InfoWarning, warn
 
@@ -68,33 +67,6 @@ class FinalisedState(EnumLookup, enum.IntEnum):
     #: marked final by hand, never finalised, and so missing the generated
     #: ``__init__`` that makes the class usable at all.
     FINAL = enum.auto()
-
-
-#: :func:`inspect.get_annotations`, new in Python 3.10, or :data:`None` below it.
-_get_annotations = getattr(inspect, 'get_annotations', None)
-
-
-def _own_annotations(cls: 'type') -> 'dict[str, Any]':
-    """Return the annotations ``cls`` declares itself, never those of a base.
-
-    Below Python 3.10 (bpo-43901), ``cls.__annotations__`` of a class whose body
-    declares none is its nearest base's, so a field-less :class:`Info`
-    subclass read :class:`Info`'s own ``__finalised__``, ``__additional__`` and
-    ``__excluded__`` as its fields (:issue:`1692`). There, a class's own
-    annotations are in its ``__dict__``; from 3.10 on, they are read with
-    :func:`inspect.get_annotations`, as from 3.14 they are evaluated lazily and
-    are not in ``__dict__`` at all.
-
-    Args:
-        cls: Class to read.
-
-    Returns:
-        The annotations ``cls``'s own body declares, which may be empty.
-
-    """
-    if _get_annotations is None:
-        return cls.__dict__.get('__annotations__', {})
-    return _get_annotations(cls)
 
 
 def info_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
@@ -195,9 +167,13 @@ def info_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
 
             # NOTE: We iterate in reversed order to ensure that the type
             # annotations of the superclasses are considered first. Each class
-            # contributes only the annotations it declares itself (see
-            # :func:`_own_annotations`), on every Python version.
-            for key in reversed(_own_annotations(cls_)):
+            # contributes only the annotations it declares itself, on every
+            # Python version: below 3.10 (bpo-43901), ``__annotations__`` of a
+            # class declaring none is its nearest base's, so a field-less
+            # subclass read Info's ``__finalised__``, ``__additional__`` and
+            # ``__excluded__`` as its fields (:issue:`1692`). See
+            # :func:`~pcapkit.utilities.compat.get_annotations`.
+            for key in reversed(get_annotations(cls_)):
                 # NOTE: We skip duplicated annotations to avoid duplicate
                 # argument in function definition.
                 if key in args_:
@@ -899,7 +875,7 @@ class MultiInfo(_MultiInfo[KT, VT], MultiDict[KT, VT]):
     __iter__ = MultiDict.__iter__  # type: ignore[assignment]
     __len__ = MultiDict.__len__
     __contains__ = MultiDict.__contains__
-    if hasattr(dict, '__reversed__'):  # pragma: no branch -- Python 3.8 and up
+    if sys.version_info >= (3, 8):  # pragma: no branch -- dict reversal is Python 3.8 and up
         __reversed__ = MultiDict.__reversed__
     __hash__ = None  # type: ignore[assignment]
     __repr__ = MultiDict.__repr__
@@ -990,7 +966,7 @@ class OrderedMultiInfo(_MultiInfo[KT, VT], OrderedMultiDict[KT, VT]):
     __iter__ = OrderedMultiDict.__iter__  # type: ignore[assignment]
     __len__ = OrderedMultiDict.__len__
     __contains__ = OrderedMultiDict.__contains__
-    if hasattr(dict, '__reversed__'):  # pragma: no branch -- Python 3.8 and up
+    if sys.version_info >= (3, 8):  # pragma: no branch -- dict reversal is Python 3.8 and up
         __reversed__ = OrderedMultiDict.__reversed__
     __eq__ = OrderedMultiDict.__eq__
     __ne__ = _ne
@@ -1060,11 +1036,6 @@ _NESTED_INFO_CACHE = '__nested_info_types__'
 #: Name of the per-class attribute :func:`_nested_types` caches its answer in.
 _NESTED_CACHE = '__nested_types__'
 
-#: :pep:`604` union type, i.e. the origin of ``int | None``. It is absent below
-#: Python 3.10, where only :data:`typing.Optional` spells a union, and is the
-#: same object as :data:`typing.Union` from 3.14 on.
-_UNION_TYPE = getattr(types, 'UnionType', None)
-
 #: Type of :data:`None`, i.e. the member ``Optional`` adds to a union.
 _NONE_TYPE = type(None)
 
@@ -1105,7 +1076,7 @@ def _as_info_type(hint: 'Any') -> 'Optional[Type[Info]]':
         # NOTE: a union of exactly one non-``None`` member is ``Optional`` of
         # that member, so it unwraps to it; anything else is not an ``Info``.
         args = [arg for arg in getattr(hint, '__args__', ()) if arg is not _NONE_TYPE]
-        is_union = origin is typing.Union or (_UNION_TYPE is not None and origin is _UNION_TYPE)
+        is_union = origin is typing.Union or (UnionType is not None and origin is UnionType)
         hint = args[0] if is_union and len(args) == 1 else None
 
     if not isinstance(hint, type):
@@ -1191,7 +1162,7 @@ def _nested_types(cls: 'Type[Info]') -> 'dict[str, Type[Info]]':
         module = sys.modules.get(cls_.__module__)
         globalns = dict(vars(module)) if module is not None else {}
         localns = dict(vars(cls_))
-        for (key, ann) in _own_annotations(cls_).items():
+        for (key, ann) in get_annotations(cls_).items():
             if key in seen:
                 continue
             seen.add(key)

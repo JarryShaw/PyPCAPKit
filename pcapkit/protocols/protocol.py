@@ -26,6 +26,7 @@ import os
 import shutil
 import string
 import struct
+import sys
 import textwrap
 import types
 import urllib.parse
@@ -46,7 +47,7 @@ from pcapkit.protocols.data.protocol import Packet as Data_Packet
 from pcapkit.protocols.schema.misc.raw import Raw as Schema_Raw
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.chardet import detect
-from pcapkit.utilities.compat import cached_property
+from pcapkit.utilities.compat import cached_property, get_annotations
 from pcapkit.utilities.decorators import beholder, seekset
 from pcapkit.utilities.exceptions import (BaseError, ProtocolError, ProtocolNotFound,
                                           ProtocolNotImplemented, RegistryError, StructError,
@@ -93,8 +94,12 @@ def _make_index_calls(func: 'Callable[..., Any]') -> 'tuple[tuple[int, int, str]
         tree = ast.parse(textwrap.dedent(''.join(lines)))
     except (OSError, TypeError, SyntaxError):
         return ()
+    # NOTE: ``end_lineno`` is new in Python 3.8, where ``ast.parse`` always sets
+    # it on a call; below that a call's last line is not known, only its first.
     return tuple(
-        (node.lineno + start - 1, getattr(node, 'end_lineno', node.lineno) + start - 1, node.args[0].id)
+        (node.lineno + start - 1,
+         (cast('int', node.end_lineno) if sys.version_info >= (3, 8) else node.lineno) + start - 1,
+         node.args[0].id)
         for node in ast.walk(tree)
         if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
         and node.func.attr == '_make_index' and node.args and isinstance(node.args[0], ast.Name)
@@ -2168,17 +2173,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             The keys, in the order of ``data``.
 
         """
-        # NOTE: :func:`inspect.get_annotations` is new in Python 3.10; below it
-        # a class's own annotations are in its ``__dict__``, where from 3.14 on
-        # they are evaluated lazily and may not be.
-        get_annotations = getattr(inspect, 'get_annotations', None)
-
         declared = set()  # type: set[str]
         for klass in type(data).mro():
-            if get_annotations is None:
-                declared.update(klass.__dict__.get('__annotations__', {}))
-            else:
-                declared.update(get_annotations(klass))
+            declared.update(get_annotations(klass))
         return [key for key in data
                 if key not in declared and isinstance(data[key], collections.abc.Mapping)]
 
