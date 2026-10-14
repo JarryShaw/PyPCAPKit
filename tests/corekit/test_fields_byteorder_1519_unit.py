@@ -3,24 +3,37 @@
 
 GitHub issue #1519. The PCAP frame header and the PCAP-NG blocks each had a
 ``byteorder_callback``, and the PCAP-NG one additionally fell back to an
-enclosing ``__packet__``. One helper now serves both, in
-:mod:`pcapkit.protocols.schema.misc.byteorder`, with the PCAP-NG body: a
+enclosing ``__packet__``. One helper now serves both, with the PCAP-NG body: a
 superset that gives the frame header the same answer on every packet the
 library hands it, since :meth:`Frame.pack
 <pcapkit.protocols.misc.pcap.frame.Frame.pack>` and :meth:`Frame.unpack
 <pcapkit.protocols.misc.pcap.frame.Frame.unpack>` always seed ``byteorder``.
 This pins the helper, its ``__packet__`` fallback, and that both schemas use it.
 
+GitHub issue #1711 then moved the helper from
+``pcapkit.protocols.schema.misc.byteorder`` to
+:mod:`pcapkit.corekit.fields.byteorder`, with no re-export left behind. This
+also pins that the old path no longer imports, and that the new module reaches
+no higher than :mod:`pcapkit.corekit`.
+
 """
 
+import ast
 import importlib
+import pathlib
 import struct
 import sys
 import unittest
 
 from tests._support import reimport_once_per_class
 
-SHARED = 'pcapkit.protocols.schema.misc.byteorder'
+SHARED = 'pcapkit.corekit.fields.byteorder'
+
+#: Where the helper lived before #1711; removed, not re-exported.
+OLD_PATH = 'pcapkit.protocols.schema.misc.byteorder'
+
+#: Source of :data:`SHARED`, read with :mod:`ast` rather than imported.
+MODULE = pathlib.Path(__file__).resolve().parents[2] / 'pcapkit' / 'corekit' / 'fields' / 'byteorder.py'
 
 #: The byte order that is not the host's, so a fallback to the host is visible.
 OTHER = 'big' if sys.byteorder == 'little' else 'little'
@@ -84,6 +97,30 @@ class TestSchemaByteorder(unittest.TestCase):
                 header = frame.Frame.unpack(raw, len(raw), dict(packet))
                 self.assertEqual((header.ts_sec, header.ts_usec), (1, 2))
                 self.assertEqual(header.pack(dict(packet)), raw)
+
+    def test_the_old_import_path_no_longer_imports(self) -> None:
+        """#1711: the move leaves no re-export at the old path."""
+        with self.assertRaises(ModuleNotFoundError) as ctx:
+            importlib.import_module(OLD_PATH)
+        self.assertEqual(ctx.exception.name, OLD_PATH)
+
+        package = importlib.import_module(OLD_PATH.rpartition('.')[0])
+        self.assertFalse(hasattr(package, 'byteorder'))
+
+    def test_the_module_imports_nothing_from_foundation_or_protocols(self) -> None:
+        """``corekit`` sits below both, so the helper may not reach up to either."""
+        tree = ast.parse(MODULE.read_text(encoding='utf-8'))
+        imported = []
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                imported.extend(alias.name for alias in node.names)
+            elif isinstance(node, ast.ImportFrom):
+                self.assertEqual(node.level, 0, f'relative import at line {node.lineno}')
+                imported.append(node.module or '')
+        self.assertTrue(imported)
+        for name in imported:
+            with self.subTest(module=name):
+                self.assertFalse(name.startswith(('pcapkit.foundation', 'pcapkit.protocols')), name)
 
 
 if __name__ == '__main__':

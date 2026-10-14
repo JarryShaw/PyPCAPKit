@@ -13,7 +13,7 @@ That is what GitHub issue #605 was.
 :meth:`Frame.unpack <pcapkit.protocols.misc.pcap.frame.Frame.unpack>` seeded the
 order under the key ``bytesorder``, while ``byteorder_callback`` -- then in
 :file:`pcapkit/protocols/schema/misc/pcap/frame.py`, now in
-:file:`pcapkit/protocols/schema/misc/byteorder.py` -- reads ``byteorder``, so the
+:file:`pcapkit/corekit/fields/byteorder.py` -- reads ``byteorder``, so the
 ``.get()`` never found the key and always fell back to the host's order -- the
 sibling :meth:`Frame.pack <pcapkit.protocols.misc.pcap.frame.Frame.pack>`
 eleven lines earlier spelled it correctly, which is what marks it as a slip

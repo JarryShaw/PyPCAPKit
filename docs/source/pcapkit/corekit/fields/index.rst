@@ -15,6 +15,7 @@ describe the structure of protocol headers.
    ipaddress
    collections
    misc
+   byteorder
 
 Every field class is a :class:`~pcapkit.corekit.fields.field.FieldBase`
 subclass, responsible for parsing and/or formatting the field value. The class
