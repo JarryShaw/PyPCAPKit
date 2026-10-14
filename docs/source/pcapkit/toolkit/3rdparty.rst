@@ -2,6 +2,11 @@
 3rd-Party Support
 =================
 
+The adapters below are best effort (:issue:`1687`): they need not match the
+:doc:`builtin` adapters one to one, since protocol rules belong in the default
+engine only, so the same capture can reassemble or trace differently from one
+engine to the next. :doc:`../foundation/engines/index` tabulates the gaps.
+
 Scapy Tools
 ===========
 

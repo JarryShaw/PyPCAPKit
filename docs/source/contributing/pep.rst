@@ -492,9 +492,9 @@ each has a matching :mod:`pcapkit.toolkit` module
 ``all`` includes -- ``all`` carries core addons only, and ``PyPCAP`` also has
 the installability problem below), docs
 under :doc:`/pcapkit/foundation/engines/index`, and tests under
-``tests/foundation/engines/`` and ``tests/toolkit/``. Both were verified
-end-to-end against the sample captures: each agrees with the ``default`` engine
-on frame count, per-record capture length, timestamp and Ethernet header.
+``tests/foundation/engines/`` and ``tests/toolkit/``. Like every third-party
+engine, both are best effort: they need not match the ``default`` engine, and
+protocol rules belong in the ``default`` engine only (:issue:`1687`).
 
 Neither library, though, is usable straight from PyPI on a current Python, and
 both of the following are worth knowing before reaching for them:

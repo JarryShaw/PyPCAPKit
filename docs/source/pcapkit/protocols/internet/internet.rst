@@ -41,8 +41,9 @@ kept as :class:`~pcapkit.protocols.misc.raw.Raw`, with one
 so it may still find the upper layer past it (:issue:`1609`). So may the
 ``dpkt`` toolkit, which reads the chain as :mod:`dpkt` decodes it. So does the
 ``scapy`` engine behind IPv6, where Scapy dissects each extension header itself;
-behind IPv4, its toolkit steps over them in the octets to find TCP, and stops at
-the same depth. The ``pypcapfile`` toolkit walks no extension header chain, so
+behind IPv4, its toolkit steps over them in the octets to find TCP, up to
+:data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT` of them in a
+row. The ``pypcapfile`` toolkit walks no extension header chain, so
 it finds no upper layer behind one.
 
 .. autodata:: pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT
