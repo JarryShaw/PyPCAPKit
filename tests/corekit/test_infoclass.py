@@ -103,5 +103,120 @@ class InfoClassTests(unittest.TestCase):
         self.assertEqual(Info.from_dict(c=3).to_dict().to_dict(), {'c': 3})
 
 
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class OwnAnnotationsTests(unittest.TestCase):
+    """GitHub issue #1692: each class contributes only the annotations it declares.
+
+    Below Python 3.10 (bpo-43901), ``cls.__annotations__`` of a class declaring
+    none is its nearest base's. These pin the 3.10+ answers on every version.
+
+    """
+
+    #: Generated ``__init__`` signature of each class :meth:`_signatures` builds.
+    EXPECTED = {
+        'Bare': '(self, dict_=None, **kwargs)',
+        'BareChild': '(self, dict_=None, **kwargs)',
+        'Point': '(self, x, y)',
+        'PointChild': '(self, x, y)',
+        'Chain': '(self, a, c)',
+        # NOTE: MRO ``Diamond, B, C, A``. Reading ``B.__annotations__`` gave
+        # ``A``'s ``a`` ahead of ``C``'s ``c``, i.e. ``(self, c, a, d)``.
+        'Diamond': '(self, a, c, d)',
+    }
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    @staticmethod
+    def _signatures() -> dict[str, str]:
+        """Build fresh classes, finalise them, and return each ``__init__`` signature."""
+        import inspect
+
+        from pcapkit.corekit.infoclass import Info, info_final
+
+        class Bare(Info):
+            pass
+
+        class BareChild(Bare):
+            pass
+
+        class Point(Info):
+            x: int
+            y: int
+
+        class PointChild(Point):
+            pass
+
+        class A(Info):
+            a: int
+
+        class B(A):
+            pass
+
+        class Chain(B):
+            c: int
+
+        class C(A):
+            c: int
+
+        class Diamond(B, C):
+            d: int
+
+        signatures = {}
+        for cls in (Bare, BareChild, Point, PointChild, Chain, Diamond):
+            # NOTE: ``_finalised=False`` is what :meth:`Info.__new__` passes; it
+            # leaves the class open, so ``BareChild`` can follow ``Bare``.
+            info_final(cls, _finalised=False)
+            signatures[cls.__name__] = str(inspect.signature(cls.__init__))
+        return signatures
+
+    def test_generated_signature_is_the_same_on_every_version(self) -> None:
+        self.assertEqual(self._signatures(), self.EXPECTED)
+
+        from pcapkit.corekit.infoclass import Info
+
+        class Bare(Info):
+            pass
+
+        class BareChild(Bare):
+            pass
+
+        for cls in (Bare, BareChild):
+            with self.subTest(cls=cls.__name__):
+                info = cls({'a': 1}, b=2)
+                self.assertEqual(list(info.items()), [('a', 1), ('b', 2)])
+
+    def test_the_pre_3_10_reader_gives_the_same_signatures(self) -> None:
+        # NOTE: ``_get_annotations`` set to ``None`` selects the reader Python
+        # 3.6-3.9 use, so every leg checks that branch. It is sound on 3.14 too
+        # because this module's ``from __future__ import annotations`` stores a
+        # class's own annotations in its ``__dict__`` there as well.
+        from pcapkit.corekit import infoclass
+
+        with mock.patch.object(infoclass, '_get_annotations', None):
+            self.assertEqual(self._signatures(), self.EXPECTED)
+
+    def test_from_dict_rebuilds_a_field_inherited_by_a_field_less_subclass(self) -> None:
+        from pcapkit.corekit.infoclass import Info
+
+        class Leaf(Info):
+            v: int
+
+        class Holder(Info):
+            # NOTE: an annotation is resolved in the namespace of the class
+            # declaring it; ``Kind`` stands in for a base module's globals.
+            # Below 3.10, ``Sub`` read ``child`` as its own and resolved it in
+            # its own namespace, where ``Kind`` is unknown, so it was skipped.
+            Kind = Leaf
+            child: Kind
+
+        class Sub(Holder):
+            pass
+
+        sub = Sub.from_dict(child={'v': 1})
+        self.assertIsInstance(sub['child'], Leaf)
+        self.assertEqual(sub['child']['v'], 1)
+
+
 if __name__ == '__main__':
     unittest.main()
