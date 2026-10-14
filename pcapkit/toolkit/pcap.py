@@ -164,8 +164,7 @@ def tcp_segment(frame: 'ProtocolBase') -> 'Optional[TCPSegment]':
         return None
 
     # A later fragment's payload starts mid-datagram, with no TCP header in it.
-    # NOTE: the layer's class says which header it is, not its Version field:
-    # IPv6 keeps whatever Version it reads, 4 included (#1666).
+    # NOTE: the layer's class says which header it is (#1666).
     if isinstance(ip, IPv4):
         offset = ip.info.offset
     else:
