@@ -8,12 +8,12 @@ old value. Now each is a ``PCAPKIT_*`` environment variable read once by
 :mod:`pcapkit.utilities.config`, every reader looks it up there at call time,
 and the old import paths are gone. A bad value warns and falls back to the
 default; ``-1`` lifts a limit, and that or any value above the default warns of
-the risk.
+the risk. The :mod:`pcapkit.vendor` crawlers' variables are not held here:
+``tests/vendor/test_vendor_variables_1726_unit.py`` covers them.
 
 """
 
 import ast
-import collections
 import contextlib
 import importlib
 import io
@@ -51,13 +51,18 @@ MOVED = {
     'pcapkit.corekit.io': ['_READ_CHUNK'],
     'pcapkit.corekit.fields.field': ['_MAX_ZERO_PAD_LENGTH', '_MAX_ZERO_PAD_SHORTFALL',
                                      '_ZERO_PAD_BUDGET_RATIO'],
-    'pcapkit.vendor.default': ['MAX_RETRY', 'CI_MODE'],
 }
 
-#: Every integer variable :mod:`pcapkit.utilities.config` declares, as
-#: ``(name, default, minimum, a phrase of its risk)``, the risk :data:`None` where
-#: ``-1`` is refused. Written out rather than read back, so that a changed name,
-#: default, minimum or risk fails.
+#: What :mod:`pcapkit.utilities.config` held for the :mod:`pcapkit.vendor`
+#: crawlers before they kept their own variables again (:issue:`1726`).
+VENDOR_NAMES = ('VENDOR_RETRY', 'CI_MODE', 'http_proxy', 'https_proxy')
+
+#: The public readers of :mod:`pcapkit.utilities.config`, which are not variables.
+READERS = frozenset({'read_limit', 'read_flag'})
+
+#: Every variable :mod:`pcapkit.utilities.config` declares, as
+#: ``(name, default, minimum, a phrase of its risk)``. Written out rather than
+#: read back, so that a changed name, default, minimum or risk fails.
 DECLARED = (
     ('FRAME_LAYER_LIMIT', 64, 0, 'RecursionError (#1610)'),
     ('EXTENSION_HEADER_LIMIT', 32, 0, 'RecursionError (#1610)'),
@@ -68,7 +73,6 @@ DECLARED = (
     ('MAX_ZERO_PAD_LENGTH', 262_144, 0, 'declare a field that long'),
     ('MAX_ZERO_PAD_SHORTFALL', 65_536, 0, 'without being charged to the running budget'),
     ('ZERO_PAD_BUDGET_RATIO', 16, 0, 'amplify each octet read'),
-    ('VENDOR_RETRY', 5, 1, None),
 )
 
 
@@ -105,7 +109,7 @@ class ReadingTests(unittest.TestCase):
         values = {} if text is None else {'TEST': text}
         with environ(**values), warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            value = self.config._read_limit('TEST', default, **kwargs)  # pylint: disable=protected-access
+            value = self.config.read_limit('TEST', default, **kwargs)
         self.assertTrue(all(issubclass(item.category, self.ConfigWarning) for item in caught), caught)
         return value, [str(item.message) for item in caught]
 
@@ -138,6 +142,12 @@ class ReadingTests(unittest.TestCase):
                 self.assertEqual(len(messages), 1)
                 self.assertIn(f'PCAPKIT_TEST={text!r}', messages[0])
 
+    def test_the_readers_are_public(self) -> None:
+        self.assertLessEqual(READERS, set(self.config.__all__))
+        for name in READERS:
+            with self.subTest(name=name):
+                self.assertFalse(hasattr(self.config, f'_{name}'))
+
     def test_without_a_risk_minus_one_is_refused(self) -> None:
         value, messages = self.read('-1', default=5, minimum=1)
         self.assertEqual((value, len(messages)), (5, 1))
@@ -145,10 +155,10 @@ class ReadingTests(unittest.TestCase):
 
     def test_a_flag(self) -> None:
         with environ(TEST='Yes'):
-            self.assertIs(self.config._read_flag('TEST'), True)  # pylint: disable=protected-access
+            self.assertIs(self.config.read_flag('TEST'), True)
         with environ(TEST='maybe'), warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            self.assertIs(self.config._read_flag('TEST'), False)  # pylint: disable=protected-access
+            self.assertIs(self.config.read_flag('TEST'), False)
         self.assertEqual([item.category for item in caught], [self.ConfigWarning])
 
     def test_both_flag_readers_strip_whitespace(self) -> None:
@@ -158,7 +168,7 @@ class ReadingTests(unittest.TestCase):
         for text, expected in ((' yes ', True), ('\tOff\n', False)):
             with self.subTest(text=text), environ(TEST=text), warnings.catch_warnings(record=True) as caught:
                 warnings.simplefilter('always')
-                self.assertIs(self.config._read_flag('TEST'), expected)  # pylint: disable=protected-access
+                self.assertIs(self.config.read_flag('TEST'), expected)
                 self.assertIs(logging._read_flag('PCAPKIT_TEST'), expected)  # pylint: disable=protected-access
             self.assertEqual(caught, [])
             self.assertEqual(logging._BAD_FLAGS, bad)  # pylint: disable=protected-access
@@ -179,14 +189,14 @@ class ReadingTests(unittest.TestCase):
         self.assertEqual(self.config.FRAME_LAYER_LIMIT, 64)
 
     def test_a_bad_value_does_not_break_the_import(self) -> None:
-        with environ(VENDOR_RETRY='lots', FALLBACK_LIMIT='-7'), \
+        with environ(READ_CHUNK='lots', FALLBACK_LIMIT='-7'), \
                 warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
             try:
                 importlib.reload(self.config)
-                self.assertEqual((self.config.VENDOR_RETRY, self.config.FALLBACK_LIMIT), (5, 10_000))
+                self.assertEqual((self.config.READ_CHUNK, self.config.FALLBACK_LIMIT), (1 << 20, 10_000))
             finally:
-                os.environ.pop('PCAPKIT_VENDOR_RETRY')
+                os.environ.pop('PCAPKIT_READ_CHUNK')
                 os.environ.pop('PCAPKIT_FALLBACK_LIMIT')
                 importlib.reload(self.config)
         self.assertEqual(len([item for item in caught if issubclass(item.category, self.ConfigWarning)]), 2)
@@ -220,27 +230,23 @@ class DeclarationTests(unittest.TestCase):
                 importlib.reload(self.config)
 
     def test_the_table_names_every_variable(self) -> None:
-        names = {row[0] for row in DECLARED} | {'CI_MODE'}
-        self.assertEqual(names, set(self.config.__all__) - {'http_proxy', 'https_proxy'})
+        names = {row[0] for row in DECLARED}
+        self.assertEqual(names, set(self.config.__all__) - READERS)
 
     def test_each_variable_is_read_by_its_own_name(self) -> None:
         for name, default, _, _ in DECLARED:
             with self.subTest(name=name):
                 self.assertEqual(self.load(name, str(default - 1)), (default - 1, []))
-        with self.subTest(name='CI_MODE'):
-            self.assertEqual(self.load('CI_MODE', 'yes'), (True, []))
 
     def test_each_default(self) -> None:
         for name, default, _, _ in DECLARED:
             with self.subTest(name=name):
                 self.assertEqual(self.load(name, None), (default, []))
-        with self.subTest(name='CI_MODE'):
-            self.assertEqual(self.load('CI_MODE', None), (False, []))
 
     def test_below_the_minimum_falls_back(self) -> None:
-        for name, default, minimum, risk in DECLARED:
-            # Where -1 means no limit, the first value refused is -2.
-            below = -2 if risk is not None and minimum == 0 else minimum - 1
+        for name, default, minimum, _ in DECLARED:
+            # -1 means no limit, so the first value refused is -2.
+            below = -2 if minimum == 0 else minimum - 1
             with self.subTest(name=name):
                 self.assertEqual(self.load(name, str(minimum)), (minimum, []))
                 value, messages = self.load(name, str(below))
@@ -252,11 +258,6 @@ class DeclarationTests(unittest.TestCase):
     def test_minus_one_and_above_the_default_warn_of_the_risk(self) -> None:
         for name, default, _, risk in DECLARED:
             with self.subTest(name=name):
-                if risk is None:
-                    value, messages = self.load(name, '-1')
-                    self.assertEqual((value, len(messages)), (default, 1), messages)
-                    self.assertEqual(self.load(name, str(default + 1)), (default + 1, []))
-                    continue
                 for text, lifted in (('-1', 'lifts the limit'),
                                      (str(default + 1), f'is above the default of {default}')):
                     value, messages = self.load(name, text)
@@ -299,10 +300,22 @@ class LayoutTests(unittest.TestCase):
         from pcapkit.utilities import config
 
         docs = (PACKAGE.parent / 'docs' / 'source' / 'pcapkit' / 'utilities' / 'config.rst').read_text('utf-8')
-        # A limit is named after its variable; a proxy accessor is its lowercase.
-        for name in config.__all__:
+        # A limit is named after its variable.
+        for name in set(config.__all__) - READERS:
             with self.subTest(name=name):
-                self.assertIn(f'.. envvar:: PCAPKIT_{name.upper()}\n', docs)
+                self.assertIn(f'.. envvar:: PCAPKIT_{name}\n', docs)
+        for name in READERS:
+            with self.subTest(name=name):
+                self.assertIn(f'.. autofunction:: pcapkit.utilities.config.{name}\n', docs)
+
+    def test_the_vendor_names_are_not_here(self) -> None:
+        # #1726: the crawlers keep their variables in pcapkit.vendor.default.
+        from pcapkit.utilities import config
+
+        for name in VENDOR_NAMES:
+            with self.subTest(name=name):
+                self.assertFalse(hasattr(config, name))
+                self.assertNotIn(name, config.__all__)
 
 
 class ReaderTests(unittest.TestCase):
@@ -523,78 +536,6 @@ class ReaderTests(unittest.TestCase):
                 make_dumper(dictdumper.JSON)(path)({'node': node}, name='x')
             with mock.patch.object(self.config, 'FALLBACK_LIMIT', -1):
                 make_dumper(dictdumper.JSON)(path)({'node': node}, name='x')
-
-    def fetch(self, retry: int, proxies: 'dict[str, str]') -> 'tuple[list[object], list[str]]':
-        """The proxies of every request a failing crawl makes, and its retry notices.
-
-        ``VENDOR_RETRY`` is patched to ``retry``.
-
-        """
-        import requests
-
-        from pcapkit.vendor import default
-
-        class Crawler(default.Vendor):
-            FLAG = 'isinstance(value, int)'
-            LINK = 'https://example.invalid/registry'
-
-            def count(self, data: object) -> 'collections.Counter[str]':
-                return collections.Counter()
-
-            def process(self, data: object) -> 'tuple[list[str], list[str]]':
-                return [], []
-
-        fetched = []  # type: list[object]
-
-        def fail(url: object, **kwargs: object) -> object:
-            fetched.append(kwargs.get('proxies'))
-            return mock.Mock(ok=False, text='')
-
-        with mock.patch.object(requests, 'get', fail), \
-                mock.patch.object(default, 'get_proxies', return_value=proxies), \
-                mock.patch.object(self.config, 'CI_MODE', True), \
-                mock.patch.object(self.config, 'VENDOR_RETRY', retry), \
-                warnings.catch_warnings(record=True) as caught, \
-                self.assertRaises(requests.RequestException):
-            warnings.simplefilter('always')
-            Crawler.__new__(Crawler)._request()  # pylint: disable=protected-access
-        notices = [str(item.message) for item in caught]
-        return fetched, [text for text in notices if text.startswith((
-            'Connection failed; retry for ', 'Connection failed; retry with proxy for '))]
-
-    def test_vendor_retry_in_vendor(self) -> None:
-        for retry in (2, 3):
-            with self.subTest(retry=retry):
-                fetched, notices = self.fetch(retry, {})
-                self.assertEqual(fetched, [None] * retry)
-                # The notice counts against the configured retry, not the default 5.
-                self.assertEqual(notices, [f'Connection failed; retry for {count}/{retry}...'
-                                           for count in range(1, retry + 1)])
-
-    def test_vendor_retry_in_the_proxy_loop(self) -> None:
-        proxies = {'http': 'http://proxy.invalid'}
-        for retry in (2, 3):
-            with self.subTest(retry=retry):
-                fetched, notices = self.fetch(retry, proxies)
-                self.assertEqual(fetched, [None] * retry + [proxies] * retry)
-                self.assertEqual(notices, [f'Connection failed; retry for {count}/{retry}...'
-                                           for count in range(1, retry + 1)]
-                                 + [f'Connection failed; retry with proxy for {count}/{retry}...'
-                                    for count in range(1, retry + 1)])
-
-    def test_proxies_are_read_at_call_time(self) -> None:
-        from pcapkit.vendor import default
-
-        # Set after the import, as #1726 keeps it: the variables are read on
-        # every call, as get_proxies always read them.
-        with mock.patch.dict(os.environ, {'PCAPKIT_HTTP_PROXY': 'http://late'}):
-            os.environ.pop('PCAPKIT_HTTPS_PROXY', None)
-            self.assertEqual(self.config.http_proxy(), 'http://late')
-            self.assertIsNone(self.config.https_proxy())
-            self.assertEqual(default.get_proxies(), {'http': 'http://late'})
-        with mock.patch.dict(os.environ, {'PCAPKIT_HTTPS_PROXY': 'http://later'}):
-            os.environ.pop('PCAPKIT_HTTP_PROXY', None)
-            self.assertEqual(default.get_proxies(), {'https': 'http://later'})
 
 
 def run(code: str, **values: str) -> 'subprocess.CompletedProcess[str]':

@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 # The dead ``-02`` URL,
 # https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html, serves a
 # 77968-byte HTML error page rather than a clean refusal, so ``Vendor._request``
-# rejects it on ``page.ok`` and retries config.VENDOR_RETRY times against a page that will
+# rejects it on ``page.ok`` and retries MAX_RETRY times against a page that will
 # never come back. On ``-02`` the registries are ASCII art inside ``<pre>`` and
 # the only HTML ``<table>`` is the running-header one, so
 # ``soup.select('table#table-9')`` below finds nothing and raises ``IndexError``.

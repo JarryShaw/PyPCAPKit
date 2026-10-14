@@ -4,10 +4,9 @@
 
 .. module:: pcapkit.utilities.config
 
-:mod:`pcapkit.utilities.config` holds every tunable limit of :mod:`pcapkit`,
-and the settings of the :mod:`pcapkit.vendor` crawlers (:issue:`1726`). Each
-limit is read from a ``PCAPKIT_*`` environment variable once, when this module
-is imported, and validated there:
+:mod:`pcapkit.utilities.config` holds every tunable limit of :mod:`pcapkit`
+(:issue:`1726`). Each limit is read from a ``PCAPKIT_*`` environment variable
+once, when this module is imported, and validated there:
 
 * A value that is not an integer, or is below the variable's minimum, is
   reported with a :exc:`~pcapkit.utilities.warnings.ConfigWarning`, and the
@@ -24,8 +23,12 @@ out-of-range value makes ``import pcapkit`` raise
 
 Every reader looks the value up here at call time, as ``config.<NAME>``, so
 patching one name in this module reaches every engine and every protocol that
-reads it. The proxy addresses are the exception: :func:`http_proxy` and
-:func:`https_proxy` read their variables on every call.
+reads it.
+
+:func:`read_limit` and :func:`read_flag` read and validate the variables, and
+are public so that a module keeping variables of its own validates them the same
+way: :mod:`pcapkit.vendor.default` reads the crawlers' variables with them, and
+documents those variables itself.
 
 Besides the standard library, this module imports
 :mod:`pcapkit.utilities.warnings` and nothing else from :mod:`pcapkit`, which is
@@ -50,8 +53,8 @@ __all__ = [
     'FRAME_LAYER_LIMIT', 'EXTENSION_HEADER_LIMIT', 'IPV6_TCP_WARNED_LIMIT',
     'FALLBACK_LIMIT', 'DETECT_CACHE_SIZE', 'READ_CHUNK',
     'MAX_ZERO_PAD_LENGTH', 'MAX_ZERO_PAD_SHORTFALL', 'ZERO_PAD_BUDGET_RATIO',
-    # vendor crawlers
-    'VENDOR_RETRY', 'CI_MODE', 'http_proxy', 'https_proxy',
+    # readers
+    'read_limit', 'read_flag',
 ]
 
 #: Strings a boolean variable may take, case-insensitively.
@@ -65,9 +68,13 @@ _RECURSION_RISK = ("each layer is dissected from inside the parse of the one bef
                    "frame may hit Python's recursion limit and raise RecursionError (#1610)")
 
 
-def _read_limit(name: 'str', default: 'int', *, minimum: 'int' = 0,
+def read_limit(name: 'str', default: 'int', *, minimum: 'int' = 0,
                risk: 'Optional[str]' = None) -> 'int':
     """Read the integer environment variable ``PCAPKIT_<name>``.
+
+    A value that is not an integer, or is below ``minimum``, is reported with a
+    :exc:`~pcapkit.utilities.warnings.ConfigWarning` naming the variable and the
+    value, and ``default`` is used instead.
 
     Args:
         name: Variable name, without the ``PCAPKIT_`` prefix.
@@ -79,6 +86,8 @@ def _read_limit(name: 'str', default: 'int', *, minimum: 'int' = 0,
 
     Returns:
         The value of the variable, or ``default``.
+
+    .. versionadded:: 1.5.0
 
     """
     variable = f'PCAPKIT_{name}'
@@ -103,8 +112,14 @@ def _read_limit(name: 'str', default: 'int', *, minimum: 'int' = 0,
     return value
 
 
-def _read_flag(name: 'str', default: 'bool' = False) -> 'bool':
+def read_flag(name: 'str', default: 'bool' = False) -> 'bool':
     """Read the boolean environment variable ``PCAPKIT_<name>``.
+
+    The value is read with surrounding whitespace stripped and
+    case-insensitively, and is one of ``1``, ``yes``, ``true`` or ``on``, or of
+    ``0``, ``no``, ``false`` or ``off``. Any other value is reported with a
+    :exc:`~pcapkit.utilities.warnings.ConfigWarning` naming the variable and the
+    value, and ``default`` is used instead.
 
     Args:
         name: Variable name, without the ``PCAPKIT_`` prefix.
@@ -112,6 +127,8 @@ def _read_flag(name: 'str', default: 'bool' = False) -> 'bool':
 
     Returns:
         The value of the variable, or ``default``.
+
+    .. versionadded:: 1.5.0
 
     """
     variable = f'PCAPKIT_{name}'
@@ -153,7 +170,7 @@ def _read_flag(name: 'str', default: 'bool' = False) -> 'bool':
 #: .. versionadded:: 1.5.0
 #:
 #:    Moved from ``pcapkit.protocols.protocol.FRAME_LAYER_LIMIT`` (:issue:`1726`).
-FRAME_LAYER_LIMIT = _read_limit('FRAME_LAYER_LIMIT', 64, risk=_RECURSION_RISK)
+FRAME_LAYER_LIMIT = read_limit('FRAME_LAYER_LIMIT', 64, risk=_RECURSION_RISK)
 
 #: int: Most IPv6 extension headers dissected in one chain, i.e. one after
 #: another with no other layer between them (:issue:`1604`),
@@ -185,7 +202,7 @@ FRAME_LAYER_LIMIT = _read_limit('FRAME_LAYER_LIMIT', 64, risk=_RECURSION_RISK)
 #: .. versionadded:: 1.5.0
 #:
 #:    Moved from ``pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT`` (:issue:`1726`).
-EXTENSION_HEADER_LIMIT = _read_limit('EXTENSION_HEADER_LIMIT', 32, risk=_RECURSION_RISK)
+EXTENSION_HEADER_LIMIT = read_limit('EXTENSION_HEADER_LIMIT', 32, risk=_RECURSION_RISK)
 
 #: int: How many captures the ``pypcapfile`` engine remembers having warned
 #: about for TCP over IPv6, :envvar:`PCAPKIT_IPV6_TCP_WARNED_LIMIT`.
@@ -197,7 +214,7 @@ EXTENSION_HEADER_LIMIT = _read_limit('EXTENSION_HEADER_LIMIT', 32, risk=_RECURSI
 #: .. versionadded:: 1.5.0
 #:
 #:    Moved from ``pcapkit.toolkit.pypcapfile.IPV6_TCP_WARNED_LIMIT`` (:issue:`1726`).
-IPV6_TCP_WARNED_LIMIT = _read_limit('IPV6_TCP_WARNED_LIMIT', 32, risk=(
+IPV6_TCP_WARNED_LIMIT = read_limit('IPV6_TCP_WARNED_LIMIT', 32, risk=(
     'each capture remembered pins one of its packets in memory'))
 
 #: int: Most objects :meth:`DictDumper._append_fallback
@@ -212,7 +229,7 @@ IPV6_TCP_WARNED_LIMIT = _read_limit('IPV6_TCP_WARNED_LIMIT', 32, risk=(
 #: .. versionadded:: 1.5.0
 #:
 #:    Moved from ``pcapkit.dumpkit.common.FALLBACK_LIMIT`` (:issue:`1726`).
-FALLBACK_LIMIT = _read_limit('FALLBACK_LIMIT', 10_000, risk=(
+FALLBACK_LIMIT = read_limit('FALLBACK_LIMIT', 10_000, risk=(
     'an object that expands into a large or endless object graph is written out '
     'in full, which takes memory and time without bound'))
 
@@ -227,7 +244,7 @@ FALLBACK_LIMIT = _read_limit('FALLBACK_LIMIT', 10_000, risk=(
 #: .. versionadded:: 1.5.0
 #:
 #:    Moved from ``pcapkit.utilities.chardet.DETECT_CACHE_SIZE`` (:issue:`1726`).
-DETECT_CACHE_SIZE = _read_limit('DETECT_CACHE_SIZE', 1024, risk=(
+DETECT_CACHE_SIZE = read_limit('DETECT_CACHE_SIZE', 1024, risk=(
     'the cache keeps every bytestring it was asked about, so a capture full of '
     'never-repeating text is retained in memory'))
 
@@ -241,7 +258,7 @@ DETECT_CACHE_SIZE = _read_limit('DETECT_CACHE_SIZE', 1024, risk=(
 #: .. versionadded:: 1.5.0
 #:
 #:    Moved from ``pcapkit.corekit.io._READ_CHUNK`` (:issue:`1726`).
-READ_CHUNK = _read_limit('READ_CHUNK', 1 << 20, minimum=1, risk=(
+READ_CHUNK = read_limit('READ_CHUNK', 1 << 20, minimum=1, risk=(
     'a bogus record length allocates up to that many octets in one read'))
 
 #: int: Ceiling on the zero-padding :meth:`FieldBase.unpack
@@ -279,7 +296,7 @@ READ_CHUNK = _read_limit('READ_CHUNK', 1 << 20, minimum=1, risk=(
 #: .. versionadded:: 1.5.0
 #:
 #:    Moved from ``pcapkit.corekit.fields.field._MAX_ZERO_PAD_LENGTH`` (:issue:`1726`).
-MAX_ZERO_PAD_LENGTH = _read_limit('MAX_ZERO_PAD_LENGTH', 0x40_000, risk=(
+MAX_ZERO_PAD_LENGTH = read_limit('MAX_ZERO_PAD_LENGTH', 0x40_000, risk=(
     'a hostile capture can declare a field that long and have it zero-filled in memory'))
 
 #: int: Shortfall :meth:`FieldBase.unpack
@@ -330,7 +347,7 @@ MAX_ZERO_PAD_LENGTH = _read_limit('MAX_ZERO_PAD_LENGTH', 0x40_000, risk=(
 #: .. versionadded:: 1.5.0
 #:
 #:    Moved from ``pcapkit.corekit.fields.field._MAX_ZERO_PAD_SHORTFALL`` (:issue:`1726`).
-MAX_ZERO_PAD_SHORTFALL = _read_limit('MAX_ZERO_PAD_SHORTFALL', 0x10_000, risk=(
+MAX_ZERO_PAD_SHORTFALL = read_limit('MAX_ZERO_PAD_SHORTFALL', 0x10_000, risk=(
     'shortfalls up to that size are zero-filled without being charged to the running budget, '
     'so a capture of many lying lengths can amplify into that much memory each'))
 
@@ -360,60 +377,6 @@ MAX_ZERO_PAD_SHORTFALL = _read_limit('MAX_ZERO_PAD_SHORTFALL', 0x10_000, risk=(
 #: .. versionadded:: 1.5.0
 #:
 #:    Moved from ``pcapkit.corekit.fields.field._ZERO_PAD_BUDGET_RATIO`` (:issue:`1726`).
-ZERO_PAD_BUDGET_RATIO = _read_limit('ZERO_PAD_BUDGET_RATIO', 0x10, risk=(
+ZERO_PAD_BUDGET_RATIO = read_limit('ZERO_PAD_BUDGET_RATIO', 0x10, risk=(
     'a capture whose blocks all lie about their lengths can amplify each octet read '
     'into that many zero octets in memory'))
-
-###############################################################################
-# Vendor Crawlers
-###############################################################################
-
-#: int: How many times a :mod:`pcapkit.vendor` crawler retries a failed request,
-#: :envvar:`PCAPKIT_VENDOR_RETRY`.
-#:
-#: .. versionadded:: 1.5.0
-#:
-#:    Moved from ``pcapkit.vendor.default.MAX_RETRY`` (:issue:`1726`), which
-#:    crashed the import on a value that was not an integer, and read ``0`` as
-#:    ``1``.
-VENDOR_RETRY = _read_limit('VENDOR_RETRY', 5, minimum=1)
-
-#: bool: Whether a :mod:`pcapkit.vendor` crawler runs in CI, where a failed
-#: fetch fails the run instead of prompting, :envvar:`PCAPKIT_CI_MODE`.
-#:
-#: .. versionadded:: 1.5.0
-#:
-#:    Moved from ``pcapkit.vendor.default.CI_MODE`` (:issue:`1726`).
-CI_MODE = _read_flag('CI_MODE')
-
-
-def http_proxy() -> 'Optional[str]':
-    """HTTP proxy address for the :mod:`pcapkit.vendor` crawlers.
-
-    Unlike the limits, :envvar:`PCAPKIT_HTTP_PROXY` is read on every call, as
-    :func:`~pcapkit.vendor.default.get_proxies` always has, so a proxy set after
-    :mod:`pcapkit` is imported is still honoured.
-
-    Returns:
-        The value of :envvar:`PCAPKIT_HTTP_PROXY`, or :data:`None` if unset.
-
-    .. versionadded:: 1.5.0
-
-    """
-    return os.environ.get('PCAPKIT_HTTP_PROXY')
-
-
-def https_proxy() -> 'Optional[str]':
-    """HTTPS proxy address for the :mod:`pcapkit.vendor` crawlers.
-
-    Unlike the limits, :envvar:`PCAPKIT_HTTPS_PROXY` is read on every call, as
-    :func:`~pcapkit.vendor.default.get_proxies` always has, so a proxy set after
-    :mod:`pcapkit` is imported is still honoured.
-
-    Returns:
-        The value of :envvar:`PCAPKIT_HTTPS_PROXY`, or :data:`None` if unset.
-
-    .. versionadded:: 1.5.0
-
-    """
-    return os.environ.get('PCAPKIT_HTTPS_PROXY')

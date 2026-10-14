@@ -75,7 +75,7 @@ def _read_flag(variable: 'str') -> 'bool':
     """Read the boolean environment variable ``variable``, off by default.
 
     The value is read with surrounding whitespace stripped and
-    case-insensitively, as :func:`pcapkit.utilities.config._read_flag` reads
+    case-insensitively, as :func:`pcapkit.utilities.config.read_flag` reads
     one. A value that is not then one of :data:`BOOLEAN_STATES` is taken as off
     and recorded in :data:`_BAD_FLAGS`.
 

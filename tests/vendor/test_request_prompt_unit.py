@@ -376,7 +376,7 @@ class ManualIntervenePromptTests(unittest.TestCase):
         with contextlib.ExitStack() as stack:
             stack.enter_context(mock.patch.object(self.requests, 'get', fake_get))
             stack.enter_context(mock.patch.object(self.default, 'get_proxies', return_value={}))
-            stack.enter_context(mock.patch.object(self.default.config, 'CI_MODE', ci_mode))
+            stack.enter_context(mock.patch.object(self.default, 'CI_MODE', ci_mode))
             stack.enter_context(mock.patch.object(self.default, 'stdin_is_interactive',
                                                   return_value=interactive))
             stack.enter_context(mock.patch.object(self.default.webbrowser, 'open', fake_open))

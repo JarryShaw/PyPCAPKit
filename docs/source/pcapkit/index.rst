@@ -148,16 +148,16 @@ Environment Variables
 
       :data:`pcapkit.utilities.logging.SPHINX_TYPE_CHECKING`
 
-The tunable limits, and the :mod:`pcapkit.vendor` crawlers'
-:envvar:`PCAPKIT_VENDOR_RETRY`, :envvar:`PCAPKIT_CI_MODE`,
-:envvar:`PCAPKIT_HTTP_PROXY` and :envvar:`PCAPKIT_HTTPS_PROXY`, are read by
-:mod:`pcapkit.utilities.config`, which lists each with its default, its
-accepted range and its risks.
+The tunable limits are read by :mod:`pcapkit.utilities.config`, which lists each
+with its default, its accepted range and its risks. The :mod:`pcapkit.vendor`
+crawlers' :envvar:`PCAPKIT_VENDOR_RETRY`, :envvar:`PCAPKIT_CI_MODE`,
+:envvar:`PCAPKIT_HTTP_PROXY` and :envvar:`PCAPKIT_HTTPS_PROXY` are read by
+:mod:`pcapkit.vendor.default`, and listed under :ref:`vendor-variables`.
 
 .. versionchanged:: 1.5.0
 
    :envvar:`PCAPKIT_HTTP_PROXY` and :envvar:`PCAPKIT_HTTPS_PROXY` are documented
-   with :mod:`pcapkit.utilities.config` rather than here, and are still read on
+   with :mod:`pcapkit.vendor.default` rather than here, and are still read on
    every request. The tunable limits are new as variables (:issue:`1726`). A
    bad value of :envvar:`PCAPKIT_DEVMODE`, :envvar:`PCAPKIT_VERBOSE`,
    :envvar:`PCAPKIT_SPHINX`, :envvar:`PCAPKIT_CI_MODE` or

@@ -7,7 +7,7 @@ proxy branch. Wikimedia rejects |requests|_' default ``python-requests/<version>
 agent outright -- measured 2026-09-19 as HTTP 403 and 126 bytes of robot-policy
 text, against 200 for a descriptive agent, reproduced on four separate articles
 with nothing but the header changing -- so four crawlers could not fetch their
-registry at all, and burned ``config.VENDOR_RETRY`` attempts against a refusal that no
+registry at all, and burned ``MAX_RETRY`` attempts against a refusal that no
 amount of retrying lifts.
 
 .. |requests| replace:: ``requests``
