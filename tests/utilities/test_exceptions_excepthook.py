@@ -35,6 +35,8 @@ directory uses.
 """
 from __future__ import annotations
 
+import contextlib
+import io
 import os
 import subprocess
 import sys
@@ -62,8 +64,18 @@ def run_in_subprocess(code: 'str', devmode: 'bool' = False) -> 'subprocess.Compl
     actually proves something about the tree under review rather than about
     whatever happens to be on ``sys.path`` by default.
 
+    It also binds ``DEFAULT_THREADING_HOOK`` to the interpreter's own default
+    :data:`threading.excepthook`. :data:`threading.__excepthook__` names it only
+    from Python 3.10 (GitHub issue #1691); before that it is the hook a fresh
+    interpreter starts with, so it is read before ``import pcapkit``, whose
+    ``tbtrim`` rule replaces it.
+
     """
     preamble = textwrap.dedent(f'''
+        import sys as _sys
+        import threading as _threading
+        DEFAULT_THREADING_HOOK = (_threading.__excepthook__ if _sys.version_info >= (3, 10)
+                                  else _threading.excepthook)
         import pcapkit
         assert pcapkit.__file__.startswith({REPO_ROOT!r}), (
             'wrong tree', pcapkit.__file__, {REPO_ROOT!r})
@@ -543,7 +555,7 @@ class ThreadingExcepthookTests(unittest.TestCase):
                     raise error
                 captured = io.StringIO()
                 saved_hook = threading.excepthook
-                threading.excepthook = threading.__excepthook__
+                threading.excepthook = DEFAULT_THREADING_HOOK
                 sys.tracebacklimit = 0
                 try:
                     t = threading.Thread(target=boom, name=name)
@@ -603,7 +615,7 @@ class ThreadingExcepthookTests(unittest.TestCase):
                     raise error
                 captured = io.StringIO()
                 saved_hook = threading.excepthook
-                threading.excepthook = threading.__excepthook__
+                threading.excepthook = DEFAULT_THREADING_HOOK
                 sys.tracebacklimit = 0
                 try:
                     t = threading.Thread(target=boom, name=name)
@@ -648,7 +660,7 @@ class ThreadingExcepthookTests(unittest.TestCase):
 
             def previous_hook(args):
                 print('PREVIOUS_THREADING_HOOK_RAN', file=sys.stderr)
-                threading.__excepthook__(args)
+                DEFAULT_THREADING_HOOK(args)
             threading.excepthook = previous_hook
 
             try:
@@ -684,7 +696,7 @@ class ThreadingExcepthookTests(unittest.TestCase):
 
             def previous_hook(args):
                 print('PREVIOUS_THREADING_HOOK_RAN', file=sys.stderr)
-                threading.__excepthook__(args)
+                DEFAULT_THREADING_HOOK(args)
             threading.excepthook = previous_hook
 
             exc._install_excepthook()
@@ -728,6 +740,74 @@ class ThreadingExcepthookTests(unittest.TestCase):
         proc = run_in_subprocess(code)
         self.assertEqual(proc.returncode, 0, proc.stderr)
         self.assertEqual(int(proc.stdout.strip()), 1)
+
+    def test_a_non_base_error_with_no_previous_hook_goes_to_the_default_hook(self) -> None:
+        """Nothing captured yet: the default hook's own output, on every Python.
+
+        GitHub issue #1691: this delegate was ``threading.__excepthook__``,
+        which Python 3.8 and 3.9 lack, so the call raised instead of printing.
+
+        """
+        code = '''
+            import io
+            import sys
+            import threading
+            import contextlib
+            import pcapkit.utilities.exceptions as exc
+            exc.logger.disabled = True
+            assert exc._previous_threading_excepthook is None, 'precondition'
+
+            try:
+                raise ValueError('no previous hook')
+            except ValueError:
+                etype, value, tb = sys.exc_info()
+            args = threading.ExceptHookArgs([etype, value, tb, threading.current_thread()])
+
+            def output(hook):
+                captured = io.StringIO()
+                with contextlib.redirect_stderr(captured):
+                    hook(args)
+                return captured.getvalue()
+
+            expected = output(DEFAULT_THREADING_HOOK)
+            actual = output(exc._threading_excepthook)
+            print('MATCH' if actual == expected else 'MISMATCH')
+            print(repr(expected))
+            print(repr(actual))
+        '''
+        proc = run_in_subprocess(code)
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertEqual(proc.stdout.splitlines()[0], 'MATCH', proc.stdout)
+        self.assertIn('ValueError: no previous hook', proc.stdout)
+
+    def test_the_fallback_is_the_interpreter_default_despite_an_earlier_hook(self) -> None:
+        """A hook installed before pcapkit is imported is not mistaken for the default.
+
+        On 3.10 and later that is :data:`threading.__excepthook__` for free;
+        on 3.8 and 3.9 it must not come from whatever :data:`threading.excepthook`
+        held at import, or the two would disagree.
+
+        """
+        code = '''
+            import sys
+            import threading
+
+            def host_hook(args):
+                pass
+            threading.excepthook = host_hook
+
+            for name in [name for name in sys.modules
+                         if name == 'pcapkit' or name.startswith('pcapkit.')]:
+                del sys.modules[name]
+            import pcapkit.utilities.exceptions as exc
+
+            print('IS_DEFAULT:', exc.default_threading_excepthook is DEFAULT_THREADING_HOOK)
+            print('IS_HOST:', exc.default_threading_excepthook is host_hook)
+        '''
+        proc = run_in_subprocess(code)
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertIn('IS_DEFAULT: True', proc.stdout)
+        self.assertIn('IS_HOST: False', proc.stdout)
 
     def test_two_threads_raising_concurrently_do_not_confuse_each_others_guard(self) -> None:
         """The per-thread (not shared) re-entrancy flag, under real concurrency.
@@ -787,6 +867,52 @@ class ThreadingExcepthookTests(unittest.TestCase):
         self.assertIn('2 threads completed', proc.stdout)
         self.assertIn('T0 completed without raising', proc.stdout)
         self.assertIn('T1 completed without raising', proc.stdout)
+
+
+class ThreadingDefaultHookInProcessTests(unittest.TestCase):
+    """Both fallbacks to the default thread hook, run where coverage can see them.
+
+    GitHub issue #1691. The subprocess tests above compare the printed output
+    exactly; these drive the same two branches of
+    :func:`~pcapkit.utilities.exceptions._threading_excepthook` in this process,
+    on a freshly loaded module that has never captured a previous hook.
+
+    """
+
+    def setUp(self) -> None:
+        self._saved_devmode = os.environ.get('PCAPKIT_DEVMODE')
+        self.exc = bootstrap(devmode=False)['exceptions']
+        try:
+            raise ValueError('in-process default hook')
+        except ValueError:
+            etype, value, tb = sys.exc_info()
+        self.args = threading.ExceptHookArgs([etype, value, tb, threading.current_thread()])
+
+    def tearDown(self) -> None:
+        if self._saved_devmode is None:
+            os.environ.pop('PCAPKIT_DEVMODE', None)
+        else:
+            os.environ['PCAPKIT_DEVMODE'] = self._saved_devmode
+
+    def assert_hook_prints_the_default_output(self) -> None:
+        captured = io.StringIO()
+        with contextlib.redirect_stderr(captured):
+            self.exc._threading_excepthook(self.args)
+        output = captured.getvalue()
+        self.assertIn(f'Exception in thread {threading.current_thread().name}:', output)
+        self.assertIn('ValueError: in-process default hook', output)
+
+    def test_with_no_previous_hook_a_non_base_error_goes_to_the_default(self) -> None:
+        self.assertIsNone(self.exc._previous_threading_excepthook,
+                          'precondition: a fresh module has captured nothing')
+        self.assert_hook_prints_the_default_output()
+
+    def test_on_reentry_the_hook_falls_back_to_the_default(self) -> None:
+        self.exc._threading_hook_state.running = True
+        try:
+            self.assert_hook_prints_the_default_output()
+        finally:
+            self.exc._threading_hook_state.running = False
 
 
 if __name__ == '__main__':

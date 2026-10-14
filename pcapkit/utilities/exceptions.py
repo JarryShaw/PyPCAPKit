@@ -24,6 +24,7 @@ import traceback
 from typing import TYPE_CHECKING
 
 from pcapkit.utilities.compat import ModuleNotFoundError  # pylint: disable=redefined-builtin
+from pcapkit.utilities.compat import default_threading_excepthook
 from pcapkit.utilities.logging import DEVMODE, VERBOSE, get_logger
 
 if TYPE_CHECKING:
@@ -341,9 +342,10 @@ def _threading_excepthook(args: 'ExceptHookArgs') -> 'None':
     traceback -- then its own message tersely, with ``limit=0`` against the real
     traceback so a chained exception still comes out right. Anything else is
     handed to ``_previous_threading_excepthook`` -- or
-    :data:`threading.__excepthook__`, the interpreter's own default, if nothing
-    was previously installed -- unchanged, header included, since that path
-    does not touch the default hook's own printing at all.
+    :data:`~pcapkit.utilities.compat.default_threading_excepthook`, the
+    interpreter's own default, if nothing was previously installed --
+    unchanged, header included, since that path does not touch the default
+    hook's own printing at all.
 
     This hook is needed because the interpreter's *default*
     :data:`threading.excepthook` consults :data:`sys.tracebacklimit`, which
@@ -352,7 +354,7 @@ def _threading_excepthook(args: 'ExceptHookArgs') -> 'None':
 
     """
     if getattr(_threading_hook_state, 'running', False):
-        threading.__excepthook__(args)
+        default_threading_excepthook(args)
         return
 
     _threading_hook_state.running = True
@@ -368,7 +370,7 @@ def _threading_excepthook(args: 'ExceptHookArgs') -> 'None':
             print(f'Exception in thread {name}:', file=sys.stderr)
             traceback.print_exception(args.exc_type, args.exc_value, args.exc_traceback, 0)
         else:
-            delegate = _previous_threading_excepthook or threading.__excepthook__
+            delegate = _previous_threading_excepthook or default_threading_excepthook
             delegate(args)
     finally:
         _threading_hook_state.running = False
