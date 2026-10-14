@@ -12,9 +12,8 @@ decimal context. dpkt on a microsecond PCAP must too: at ``ts_sec=1500000000`` a
 context of 12 digits gave ``1500000000.12``, and of 10 ``1500000000.0``.
 
 Every capture is built here, at ``ts_sec=1`` or ``1500000000``, so the module is
-in the unit tier. The pypcapfile engine imports on Python 3.11 only and is
-skipped elsewhere, but :func:`~pcapkit.toolkit.pypcapfile.packet2timestamp` is
-checked on a stand-in packet everywhere.
+in the unit tier. :func:`~pcapkit.toolkit.pypcapfile.packet2timestamp` is
+checked on a stand-in packet, so needs no pypcapfile.
 
 """
 from __future__ import annotations
@@ -244,20 +243,6 @@ class DPKTTimestampAgreementTests(_Agreement):
     """dpkt hands over the default engine's timestamp, on PCAP and PCAP-NG alike."""
 
     ENGINE = 'dpkt'
-
-
-@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
-@unittest.skipUnless(pypcapfile_unit.HAS_PYPCAPFILE, 'pypcapfile not importable')
-class PyPCAPFileTimestampAgreementTests(_Agreement):
-    """pypcapfile hands over the default engine's timestamp.
-
-    It reads no PCAP-NG, and has no IPv6 reassembly.
-
-    """
-
-    ENGINE = 'pypcapfile'
-    KINDS = ('ipv4', 'tcp', 'trace')
-    CONTAINERS = ('pcap',)
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')

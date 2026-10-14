@@ -5,9 +5,9 @@ and :func:`pcapfile.linklayer.clookup`, so that the routing decisions -- format
 gating, the IPv6 capability gap, per-frame decoding and its failure path, output,
 reassembly, tracing, storage -- are covered whether or not `pypcapfile`_ is
 installed. One test runs the real `pypcapfile`_ where it imports, over savefiles
-built in memory, to pin the engine's record reader to the ``default`` engine's
-reading in both byte orders (#1512, #1571). End-to-end agreement with the ``default`` engine lives in
-:mod:`tests.foundation.engines.test_new_engine_parity`.
+built in memory, to pin the engine's record reader to every record of the
+savefile in both byte orders (#1512, #1571). End-to-end runs of the engine live in
+:mod:`tests.foundation.engines.test_new_engine_parity_runtime`.
 
 .. _pypcapfile: https://github.com/kisom/pypcapfile
 
@@ -123,10 +123,10 @@ def build_savefile(records, *, byteorder: str, nanosecond: bool = False,
 
 
 def reference_records(data: bytes) -> list:
-    """Every record of a savefile, read with :mod:`struct` alone, as the ``default``
-    engine reads them: to a tail too short for a record header, keeping a record
-    whose capture length runs past the data as ``(seconds, fraction, captured
-    length, original length, the octets present)``."""
+    """Every record of a savefile, read with :mod:`struct` alone: to a tail too
+    short for a record header, keeping a record whose capture length runs past the
+    data as ``(seconds, fraction, captured length, original length, the octets
+    present)``."""
     byteorder, _ = next(key for key, magic in MAGIC.items() if magic == data[:4])
     order = '<' if byteorder == 'little' else '>'
     records, offset = [], 24
@@ -301,24 +301,6 @@ class PyPCAPFileEngineTests(unittest.TestCase):
                 self.assertIn('unrecognised link layer protocol', warn.call_args.args[0])
                 self.assertIs(warn.call_args.args[1], AttributeWarning)
 
-    def test_run_warns_only_of_a_link_layer_left_unread(self) -> None:
-        # C.f. #1667: pcapfile decodes none of NULL, LOOP, RAW, IPV4 and IPV6,
-        # but the toolkit reads the IP packet in their frames, as the default
-        # engine does, so nothing is lost to warn of. Every other link type it
-        # has no decoder for, e.g. PPP (9), 12, 105, LINUX_SLL and 147, stays unread.
-        for linktype, unread in ((0, False), (108, False), (101, False), (228, False), (229, False),
-                                 (9, True), (12, True), (105, True), (113, True), (147, True),
-                                 (1, True)):
-            with self.subTest(linktype=linktype):
-                extractor, _ = self.make_extractor()
-                engine = self.engine(extractor, savefile=FakeSaveFile(ll_type=linktype), decoder=None)
-                with mock.patch('pcapkit.foundation.engines.pypcapfile.warn') as warn:
-                    engine.run()
-                self.assertIsNone(engine._declf)
-                messages = [call.args[0] for call in warn.call_args_list]
-                self.assertEqual(any('unrecognised link layer protocol' in message for message in messages),
-                                 unread, messages)
-
     def test_run_survives_the_malformed_upstream_link_layer_table(self) -> None:
         # ``pcapfile.linklayer.__LL_TYPES__`` carries a three-element entry for
         # LINKTYPE_IEEE802_11_RADIOTAP, so ``clookup`` raises IndexError for it.
@@ -415,8 +397,8 @@ class PyPCAPFileEngineTests(unittest.TestCase):
                                  1500000000 + 123456789 / 1_000_000_000)
 
     def test_a_zero_length_record_is_read_and_left_undecoded(self) -> None:
-        """pcapfile ends the savefile at a zero-length record (#1571); the ``default``
-        engine reads it, and every record after it, without a warning."""
+        """pcapfile ends the savefile at a zero-length record (#1571); the engine
+        reads it, and every record after it, without a warning."""
         cases = {
             'middle': [(1, 0, b'first', 5), (2, 0, b'', 0), (3, 0, b'third', 5)],
             'first': [(1, 0, b'', 0), (2, 0, b'second', 6), (3, 0, b'third', 5)],
@@ -438,8 +420,8 @@ class PyPCAPFileEngineTests(unittest.TestCase):
 
     def test_a_truncated_final_record_is_kept_as_captured(self) -> None:
         """pcapfile drops a final record whose capture length runs past the data
-        (#1571); the ``default`` engine keeps it, as declared, with the octets that
-        are there, and warns."""
+        (#1571); the engine keeps it, as declared, with the octets that are there,
+        and warns."""
         from pcapkit.utilities.warnings import ProtocolWarning
 
         for byteorder in ('little', 'big'):
@@ -469,7 +451,7 @@ class PyPCAPFileEngineTests(unittest.TestCase):
                 self.assertEqual(warned, [])
 
     @unittest.skipUnless(HAS_PYPCAPFILE, 'pypcapfile not installed, or not importable here')
-    def test_records_agree_with_the_default_engine_against_the_real_pcapfile(self) -> None:
+    def test_every_record_is_read_against_the_real_pcapfile(self) -> None:
         """Against the real :mod:`pcapfile`, in both byte orders and resolutions:
         the engine reads every record :func:`reference_records` reads, field for
         field and octet for octet, into :mod:`pcapfile`'s own packet objects --

@@ -352,7 +352,7 @@ DEPENDENCY_GATE_EXCLUSIONS = {
             'real coverage bought with exactly the false confidence #745 exists to '
             "remove.\n\n"
             "#751's ruling was to take that trade: engine-tests installs PyPCAPFile on its "
-            'own PyPCAPFile cell, covering the 9 HAS_PYPCAPFILE methods in '
+            'own PyPCAPFile cell, covering the 10 HAS_PYPCAPFILE methods in '
             'test_pypcapfile_unit.py (plus test_pypcapfile_engine.py) genuinely on every '
             "one of the matrix's Python versions rather than only two of five -- #849's "
             "rebuild is exactly what closes the partial-coverage problem this paragraph "

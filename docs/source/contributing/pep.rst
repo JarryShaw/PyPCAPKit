@@ -563,13 +563,15 @@ both of the following are worth knowing before reaching for them:
   sends the loader to ``find_library("pcap")``. No compiler and no
   :file:`pcap.h` are needed; a ``libpcap.so.1`` is.
 
-Both engines support less than the ``default`` engine does, deliberately and
-noisily: `pypcap`_ performs no protocol dissection, so it disables reassembly
-*and* flow tracing; `pypcapfile`_ has no IPv6 decoder, so it disables IPv6
-reassembly while keeping IPv4 and TCP. Each gap is announced through an
+Both engines support less than the ``default`` engine does, deliberately:
+`pypcap`_ performs no protocol dissection, so it disables reassembly *and* flow
+tracing; `pypcapfile`_ has no IPv6 decoder, so it disables IPv6 reassembly while
+keeping IPv4 and TCP. Each gap is announced through an
 :class:`~pcapkit.utilities.warnings.AttributeWarning` or an outright exception
-rather than by silently returning nothing --
-:doc:`/pcapkit/foundation/engines/index` tabulates them.
+rather than by silently returning nothing, save that `pypcapfile`_ leaves TCP
+behind a VLAN tag, in a tunnel or behind an extension header (an IPv6 one, or AH
+in IPv4) out without one -- :doc:`/pcapkit/foundation/engines/index` tabulates
+them.
 
 Adding a further engine does not mean adding handler methods to
 :class:`~pcapkit.foundation.extraction.Extractor`, as the thread describes. A new engine subclasses

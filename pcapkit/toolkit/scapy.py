@@ -369,8 +369,8 @@ def _ipv4_accepted(ipv4: 'IP') -> 'bool':
     Note:
         `Scapy`_ dissects what an IPv4 EtherType or tunnel carries as IPv4
         whatever its version or IHL, and never checks its options, so the
-        header is asked of the parser itself, as the pypcapfile engine asks it
-        (see :func:`pcapkit.toolkit.pypcapfile._default_accepts`). Its octets
+        header is asked of the parser itself (see
+        :func:`pcapkit.toolkit.pypcapfile._default_accepts`). Its octets
         are those `Scapy`_ dissected the layer from, which ``bytes()`` gives
         back as they were, as far as the IHL goes, and no fewer than the 20 of
         the fixed header, as the default engine reads at least those. A header
@@ -544,8 +544,7 @@ def _ipv6_chain(ipv6: 'IPv6', depth: 'int') -> '_Chain':
         depth: Its place in the frame (see :func:`_network`).
 
     Returns:
-        The chain, walked over the octets by the default engine's rules, as
-        :func:`pcapkit.toolkit.pypcapfile._upper_layer` walks it: the
+        The chain, walked over the octets by the default engine's rules: the
         :data:`~pcapkit.toolkit.pypcapfile.IPV6_EXTENSION_HEADERS`, each sized
         by its own length field, up to
         :data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT` of
@@ -806,8 +805,7 @@ def _tcp_behind_extension_headers(segment: 'bytes') -> 'tuple[bytes, bytes] | No
         Directly over IP, the default engine reads a TCP header its parser
         rejects out of the raw octets left behind
         (:func:`pcapkit.toolkit.pcap.tcp_segment`), but behind another header
-        it does not, so the parser's answer stands here, as for the pypcapfile
-        engine.
+        it does not, so the parser's answer stands here.
 
     """
     hdr_len = (segment[12] >> 4) * 4 if len(segment) >= TCP_MIN_HEADER_LEN else 0

@@ -399,9 +399,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    TCP and UDP and nothing else. IPv6 reassembly is therefore unavailable and is
    disabled -- with an :class:`~pcapkit.utilities.warnings.AttributeWarning` --
    when requested; IPv4 and TCP reassembly and TCP flow tracing remain
-   available. The IP packet of a BSD loopback or raw-IP frame, which it does
-   not decode, is read by :mod:`pcapkit.toolkit.pypcapfile` instead
-   (:issue:`1667`). PCAP-NG is rejected with a
+   available. PCAP-NG is rejected with a
    :exc:`~pcapkit.utilities.exceptions.FormatError`. `PyPCAPFile`_ 0.12.0 drops
    every record of a big-endian savefile, every record from a zero-length one
    on, and a truncated final record, so the engine reads the records itself,
