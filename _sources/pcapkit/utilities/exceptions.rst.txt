@@ -284,6 +284,11 @@ It is still an ordinary exception carrying its message, so ``except`` clauses an
    :no-members:
    :show-inheritance:
 
+Error Handling Utilities
+------------------------
+
+.. autofunction:: pcapkit.utilities.exceptions.stacklevel
+
 .. rubric:: Footnotes
 
 .. [*] See |tbtrim|_ project for a modern Pythonic implementation.

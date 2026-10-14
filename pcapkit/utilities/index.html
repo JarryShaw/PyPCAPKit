@@ -9,7 +9,7 @@
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="pcapkit.utilities contains several useful functions and classes which are foundations of pcapkit, including decorator function seekset() and beholder(), and several user-refined exceptions and warn..." />
 <meta name="description" content="pcapkit.utilities contains several useful functions and classes which are foundations of pcapkit, including decorator function seekset() and beholder(), and several user-refined exceptions and warn..." />
-<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Auxiliary Functions" href="functools.html"><link rel="prev" title="Common Utilities" href="../dumpkit/common.html">
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Decorator Functions" href="decorators.html"><link rel="prev" title="Common Utilities" href="../dumpkit/common.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
         <title>Module Utilities - PyPCAPKit</title>
@@ -334,7 +334,7 @@
 </ul>
 </li>
 <li class="toctree-l2 current has-children current-page"><a class="current reference internal" href="#">Module Utilities</a><input aria-label="Toggle navigation of Module Utilities" checked="" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="functools.html">Auxiliary Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="decorators.html">Decorator Functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="logging.html">Logging System</a></li>
@@ -493,14 +493,13 @@
 <span id="module-utilities"></span><h1>Module Utilities<a class="headerlink" href="#module-pcapkit.utilities" title="Link to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.utilities" title="pcapkit.utilities"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities</span></code></a> contains several useful functions
 and classes which are foundations of <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, including
-decorator function <a class="reference internal" href="functools.html#pcapkit.utilities.decorators.seekset" title="pcapkit.utilities.decorators.seekset"><code class="xref py py-func docutils literal notranslate"><span class="pre">seekset()</span></code></a>
-and <a class="reference internal" href="functools.html#pcapkit.utilities.decorators.beholder" title="pcapkit.utilities.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a>, and
+decorator function <a class="reference internal" href="decorators.html#pcapkit.utilities.decorators.seekset" title="pcapkit.utilities.decorators.seekset"><code class="xref py py-func docutils literal notranslate"><span class="pre">seekset()</span></code></a>
+and <a class="reference internal" href="decorators.html#pcapkit.utilities.decorators.beholder" title="pcapkit.utilities.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a>, and
 several user-refined exceptions and warnings.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="functools.html">Auxiliary Functions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="functools.html#module-pcapkit.utilities.decorators">Decorators</a></li>
-<li class="toctree-l2"><a class="reference internal" href="functools.html#error-handling-utilities">Error Handling Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="decorators.html">Decorator Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="decorators.html#type-variables">Type Variables</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="exceptions.html">User Defined Exceptions</a><ul>
@@ -518,6 +517,7 @@ several user-refined exceptions and warnings.</p>
 <li class="toctree-l2"><a class="reference internal" href="exceptions.html#keyerror-category"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code> Category</a></li>
 <li class="toctree-l2"><a class="reference internal" href="exceptions.html#modulenotfounderror-category"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code> Category</a></li>
 <li class="toctree-l2"><a class="reference internal" href="exceptions.html#io-unsupportedoperation-category"><code class="xref py py-exc docutils literal notranslate"><span class="pre">io.UnsupportedOperation</span></code> Category</a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#error-handling-utilities">Error Handling Utilities</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="warnings.html">User Defined Warnings</a><ul>
@@ -602,12 +602,12 @@ following objects and functions:</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="functools.html">
+          <a class="next-page" href="decorators.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Auxiliary Functions</div>
+                <div class="title">Decorator Functions</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>

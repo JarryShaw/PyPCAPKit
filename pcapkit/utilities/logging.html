@@ -334,7 +334,7 @@
 </ul>
 </li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="index.html">Module Utilities</a><input aria-label="Toggle navigation of Module Utilities" checked="" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="functools.html">Auxiliary Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="decorators.html">Decorator Functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Logging System</a></li>
@@ -877,7 +877,7 @@ stream and hide it until the consumer configured a handler.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The warning channel is documented in <a class="reference internal" href="warnings.html"><span class="doc">User Defined Warnings</span></a>. In short,
-<a class="reference internal" href="functools.html#pcapkit.utilities.warnings.warn" title="pcapkit.utilities.warnings.warn"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.warn()</span></code></a> reports each warning exactly once per
+<a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.warn" title="pcapkit.utilities.warnings.warn"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.warn()</span></code></a> reports each warning exactly once per
 channel – one <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.WARNING" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">logging.WARNING</span></code></a> record and one <a class="reference external" href="https://docs.python.org/3/library/warnings.html#warnings.warn" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">warnings.warn()</span></code></a>
 – and constructing a warning does not touch the process-wide warning
 filters, so suppression is the application’s to configure.</p>

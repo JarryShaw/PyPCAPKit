@@ -9,7 +9,7 @@
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="pcapkit.utilities.exceptions refined built-in exceptions. Make it possible to show only user error stack information*, when exception raised on user’s operation. Loud and Quiet Errors: Raising a Ba..." />
 <meta name="description" content="pcapkit.utilities.exceptions refined built-in exceptions. Make it possible to show only user error stack information*, when exception raised on user’s operation. Loud and Quiet Errors: Raising a Ba..." />
-<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="User Defined Warnings" href="warnings.html"><link rel="prev" title="Auxiliary Functions" href="functools.html">
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="User Defined Warnings" href="warnings.html"><link rel="prev" title="Decorator Functions" href="decorators.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
         <title>User Defined Exceptions - PyPCAPKit</title>
@@ -334,7 +334,7 @@
 </ul>
 </li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="index.html">Module Utilities</a><input aria-label="Toggle navigation of Module Utilities" checked="" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="functools.html">Auxiliary Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="decorators.html">Decorator Functions</a></li>
 <li class="toctree-l3 current current-page"><a class="current reference internal" href="#">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="logging.html">Logging System</a></li>
@@ -563,7 +563,7 @@ A traceback a caller formats itself with <a class="reference external" href="htt
 than letting it reach the top level uncaught – passes through
 neither. See GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>.</p></li>
 <li><p>The <code class="docutils literal notranslate"><span class="pre">stacklevel</span></code> of the log record is the relative level
-<a class="reference internal" href="functools.html#pcapkit.utilities.exceptions.stacklevel" title="pcapkit.utilities.exceptions.stacklevel"><code class="xref py py-func docutils literal notranslate"><span class="pre">stacklevel()</span></code></a> computes, so the record is attributed to the caller
+<a class="reference internal" href="#pcapkit.utilities.exceptions.stacklevel" title="pcapkit.utilities.exceptions.stacklevel"><code class="xref py py-func docutils literal notranslate"><span class="pre">stacklevel()</span></code></a> computes, so the record is attributed to the caller
 whose operation failed rather than to this module. It must not be
 negated: <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger.findCaller" title="(in Python v3.15)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">logging.Logger.findCaller()</span></code></a> reads that as “do not walk
 out at all” and would blame <a class="reference external" href="https://docs.python.org/3/library/logging.html#module-logging" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">logging</span></code></a> itself for every error.</p></li>
@@ -571,7 +571,7 @@ out at all” and would blame <a class="reference external" href="https://docs.p
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><a class="reference internal" href="functools.html#pcapkit.utilities.exceptions.stacklevel" title="pcapkit.utilities.exceptions.stacklevel"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.utilities.exceptions.stacklevel()</span></code></a></p>
+<p><a class="reference internal" href="#pcapkit.utilities.exceptions.stacklevel" title="pcapkit.utilities.exceptions.stacklevel"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.utilities.exceptions.stacklevel()</span></code></a></p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -919,7 +919,7 @@ derive from different builtins.</p>
 <span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.exceptions.</span></span><span class="sig-name descname"><span class="pre">StreamEOFError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/exceptions.html#StreamEOFError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.exceptions.StreamEOFError" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.utilities.exceptions.BaseError" title="pcapkit.utilities.exceptions.BaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseError</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#EOFError" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">EOFError</span></code></a></p>
 <p>Underlying stream exhausted; no data left to read.</p>
-<p>Raised by <a class="reference internal" href="functools.html#pcapkit.utilities.decorators.prepare" title="pcapkit.utilities.decorators.prepare"><code class="xref py py-func docutils literal notranslate"><span class="pre">prepare()</span></code></a> when the <em>length</em>
+<p>Raised by <a class="reference internal" href="decorators.html#pcapkit.utilities.decorators.prepare" title="pcapkit.utilities.decorators.prepare"><code class="xref py py-func docutils literal notranslate"><span class="pre">prepare()</span></code></a> when the <em>length</em>
 of a schema’s read was derived by measuring what is actually left in the
 stream – rather than declared by the caller – and that measurement came
 back zero. This is the frame reader’s “no more packets” signal, so it
@@ -930,7 +930,7 @@ that wants to be more specific can catch this instead.</p>
 nothing to read – is a different situation and does not raise this.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p><a class="reference internal" href="functools.html#pcapkit.utilities.decorators.prepare" title="pcapkit.utilities.decorators.prepare"><code class="xref py py-func docutils literal notranslate"><span class="pre">prepare()</span></code></a> always raises this with
+<p><a class="reference internal" href="decorators.html#pcapkit.utilities.decorators.prepare" title="pcapkit.utilities.decorators.prepare"><code class="xref py py-func docutils literal notranslate"><span class="pre">prepare()</span></code></a> always raises this with
 <code class="docutils literal notranslate"><span class="pre">quiet=True</span></code>: reaching end of stream is the frame reader’s ordinary
 way of finding out there is nothing left to parse, not a fault to
 log – the same convention
@@ -1015,6 +1015,74 @@ from a packet dict that has no such field.</p>
 <p>Unsupported operation.</p>
 </dd></dl>
 
+</section>
+<section id="error-handling-utilities">
+<h2>Error Handling Utilities<a class="headerlink" href="#error-handling-utilities" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.utilities.exceptions.stacklevel">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.exceptions.</span></span><span class="sig-name descname"><span class="pre">stacklevel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/exceptions.html#stacklevel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.exceptions.stacklevel" title="Link to this definition">¶</a></dt>
+<dd><p>Stack level of the innermost frame outside <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>.</p>
+<p>The value is a <em>relative</em> level, in the sense both <a class="reference external" href="https://docs.python.org/3/library/warnings.html#warnings.warn" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">warnings.warn()</span></code></a> and
+the <a class="reference external" href="https://docs.python.org/3/library/logging.html#module-logging" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">logging</span></code></a> module use: level <code class="docutils literal notranslate"><span class="pre">1</span></code> is the frame that called
+<a class="reference internal" href="#pcapkit.utilities.exceptions.stacklevel" title="pcapkit.utilities.exceptions.stacklevel"><code class="xref py py-func docutils literal notranslate"><span class="pre">stacklevel()</span></code></a>, level <code class="docutils literal notranslate"><span class="pre">2</span></code> its caller, and so on outwards. Handing it to
+either of them attributes the complaint to the caller who reached into
+<a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, rather than to whichever <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> internal happened to
+notice the problem – which is the whole point of the function, since the
+internal frames are noise to the user reading the report.</p>
+<p>The arithmetic, since it is easy to get backwards. Number the frames outwards
+from this one, so that a number <em>is</em> the relative level a consumer wants:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>level 0             stacklevel() itself
+level 1             whoever called stacklevel()
+...
+level ``boundary``  the outermost frame inside pcapkit
+...
+level ``outermost`` the interpreter entry point
+</pre></div>
+</div>
+<p>The frame to name is the first one <em>past</em> the boundary, hence
+<code class="docutils literal notranslate"><span class="pre">boundary</span> <span class="pre">+</span> <span class="pre">1</span></code>. <code class="docutils literal notranslate"><span class="pre">boundary</span></code> is measured from the <em>inside</em> out: it depends
+only on how deep the <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> frames run, never on how deep the caller’s
+own stack is. Numbering from the outside in would grow with the outer stack,
+so the frame named would drift one further out for every extra frame above the
+boundary – under <strong class="program">pytest</strong>, dozens of them.</p>
+<p>Both bounds are enforced, as neither consumer copes with a level outside them:</p>
+<ul class="simple">
+<li><p>Never below <code class="docutils literal notranslate"><span class="pre">1</span></code>. <code class="docutils literal notranslate"><span class="pre">0</span></code> and negative values mean “do not walk out at all”
+to <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger.findCaller" title="(in Python v3.15)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">logging.Logger.findCaller()</span></code></a>, which then attributes the record to
+<a class="reference external" href="https://docs.python.org/3/library/logging.html#module-logging" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">logging</span></code></a> itself; <a class="reference external" href="https://docs.python.org/3/library/warnings.html#warnings.warn" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">warnings.warn()</span></code></a> treats them as <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></li>
+<li><p>Never above <code class="docutils literal notranslate"><span class="pre">outermost</span></code>. That bound is reached when the whole stack is
+inside <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, e.g. running the package as a script, and walking
+past the outermost frame makes <a class="reference external" href="https://docs.python.org/3/library/warnings.html#warnings.warn" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">warnings.warn()</span></code></a> fall back to blaming
+the <a class="reference external" href="https://docs.python.org/3/library/sys.html#module-sys" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sys</span></code></a> module.</p></li>
+</ul>
+<p>The walk goes through <a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.currentframe" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">inspect.currentframe()</span></code></a> and <code class="docutils literal notranslate"><span class="pre">f_back</span></code> rather than
+<a class="reference external" href="https://docs.python.org/3/library/traceback.html#traceback.extract_stack" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">traceback.extract_stack()</span></code></a>: it skips building the
+<a class="reference external" href="https://docs.python.org/3/library/traceback.html#traceback.FrameSummary" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameSummary</span></code></a> objects and the <a class="reference external" href="https://docs.python.org/3/library/linecache.html#module-linecache" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">linecache</span></code></a> lookups
+<a class="reference external" href="https://docs.python.org/3/library/traceback.html#traceback.extract_stack" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">traceback.extract_stack()</span></code></a> does for every frame, which is worth avoiding on
+a function called once per warning. It is also immune to
+<a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.tracebacklimit" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.tracebacklimit</span></code></a>, which <a class="reference external" href="https://docs.python.org/3/library/traceback.html#traceback.StackSummary.extract" title="(in Python v3.15)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">traceback.StackSummary.extract()</span></code></a>
+honours: a limit of <code class="docutils literal notranslate"><span class="pre">0</span></code> would make <code class="docutils literal notranslate"><span class="pre">extract_stack()</span></code> return an <em>empty</em> list
+and silently break the attribution of every warning. <a class="reference internal" href="#pcapkit.utilities.exceptions.BaseError" title="pcapkit.utilities.exceptions.BaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseError</span></code></a> does not
+set that limit (it prints its terse line through an exception hook instead), but
+user code may.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The level is relative to the <em>caller</em> of <a class="reference internal" href="#pcapkit.utilities.exceptions.stacklevel" title="pcapkit.utilities.exceptions.stacklevel"><code class="xref py py-func docutils literal notranslate"><span class="pre">stacklevel()</span></code></a>. A function
+that forwards it to <a class="reference external" href="https://docs.python.org/3/library/warnings.html#warnings.warn" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">warnings.warn()</span></code></a> on its caller’s behalf has to
+add one for its own frame – see <a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.warn" title="pcapkit.utilities.warnings.warn"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.warn()</span></code></a>,
+which does exactly that.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Number of frames from the caller of <a class="reference internal" href="#pcapkit.utilities.exceptions.stacklevel" title="pcapkit.utilities.exceptions.stacklevel"><code class="xref py py-func docutils literal notranslate"><span class="pre">stacklevel()</span></code></a> outwards to the
+innermost frame whose path does not contain <code class="docutils literal notranslate"><span class="pre">/pcapkit/</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
 <p class="rubric">Footnotes</p>
 <aside class="footnote-list brackets">
 <aside class="footnote brackets" id="id2" role="doc-footnote">
@@ -1039,14 +1107,14 @@ from a packet dict that has no such field.</p>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="functools.html">
+          <a class="prev-page" href="decorators.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Auxiliary Functions</div>
+                <div class="title">Decorator Functions</div>
                 
               </div>
             </a>
@@ -1095,6 +1163,7 @@ from a packet dict that has no such field.</p>
 <li><a class="reference internal" href="#keyerror-category"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code> Category</a></li>
 <li><a class="reference internal" href="#modulenotfounderror-category"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code> Category</a></li>
 <li><a class="reference internal" href="#io-unsupportedoperation-category"><code class="xref py py-exc docutils literal notranslate"><span class="pre">io.UnsupportedOperation</span></code> Category</a></li>
+<li><a class="reference internal" href="#error-handling-utilities">Error Handling Utilities</a></li>
 </ul>
 </li>
 </ul>

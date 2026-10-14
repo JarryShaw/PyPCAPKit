@@ -1,9 +1,5 @@
+Decorator Functions
 ===================
-Auxiliary Functions
-===================
-
-Decorators
-==========
 
 .. module:: pcapkit.utilities.decorators
 
@@ -35,13 +31,3 @@ Type Variables
 
 .. data:: pcapkit.utilities.decorators.R_prepare
    :type: pcapkit.protocols.schema.schema.Schema
-
-Error Handling Utilities
-========================
-
-.. autofunction:: pcapkit.utilities.exceptions.stacklevel
-
-.. autofunction:: pcapkit.utilities.warnings.warn
-
-.. autoclass:: pcapkit.utilities.warnings.hold_warnings
-   :members: discard, holding

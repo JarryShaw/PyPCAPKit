@@ -3,16 +3,16 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta property="og:title" content="Auxiliary Functions" />
+<meta property="og:title" content="Decorator Functions" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/utilities/functools.html" />
+<meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/utilities/decorators.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="Decorators: pcapkit.utilities.decorators contains several useful decorators, including seekset(), beholder() and prepare(). Type Variables: Error Handling Utilities:" />
-<meta name="description" content="Decorators: pcapkit.utilities.decorators contains several useful decorators, including seekset(), beholder() and prepare(). Type Variables: Error Handling Utilities:" />
+<meta property="og:description" content="pcapkit.utilities.decorators contains several useful decorators, including seekset(), beholder() and prepare(). Type Variables:" />
+<meta name="description" content="pcapkit.utilities.decorators contains several useful decorators, including seekset(), beholder() and prepare(). Type Variables:" />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="User Defined Exceptions" href="exceptions.html"><link rel="prev" title="Module Utilities" href="index.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>Auxiliary Functions - PyPCAPKit</title>
+        <title>Decorator Functions - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -334,7 +334,7 @@
 </ul>
 </li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="index.html">Module Utilities</a><input aria-label="Toggle navigation of Module Utilities" checked="" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Auxiliary Functions</a></li>
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Decorator Functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="logging.html">Logging System</a></li>
@@ -467,12 +467,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/main/docs/source/pcapkit/utilities/functools.rst?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/main/docs/source/pcapkit/utilities/decorators.rst?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/main/docs/source/pcapkit/utilities/functools.rst" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/main/docs/source/pcapkit/utilities/decorators.rst" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -489,10 +489,8 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="auxiliary-functions">
-<h1>Auxiliary Functions<a class="headerlink" href="#auxiliary-functions" title="Link to this heading">¶</a></h1>
-<section id="module-pcapkit.utilities.decorators">
-<span id="decorators"></span><h2>Decorators<a class="headerlink" href="#module-pcapkit.utilities.decorators" title="Link to this heading">¶</a></h2>
+          <section id="module-pcapkit.utilities.decorators">
+<span id="decorator-functions"></span><h1>Decorator Functions<a class="headerlink" href="#module-pcapkit.utilities.decorators" title="Link to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.utilities.decorators" title="pcapkit.utilities.decorators"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.decorators</span></code></a> contains several useful
 decorators, including <a class="reference internal" href="#pcapkit.utilities.decorators.seekset" title="pcapkit.utilities.decorators.seekset"><code class="xref py py-func docutils literal notranslate"><span class="pre">seekset()</span></code></a>,
 <a class="reference internal" href="#pcapkit.utilities.decorators.beholder" title="pcapkit.utilities.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a> and
@@ -621,7 +619,7 @@ For more information, please refer to the documentation of each
 decorator function.</p>
 </div>
 <section id="type-variables">
-<h3>Type Variables<a class="headerlink" href="#type-variables" title="Link to this heading">¶</a></h3>
+<h2>Type Variables<a class="headerlink" href="#type-variables" title="Link to this heading">¶</a></h2>
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.utilities.decorators.pcapkit.utilities.decorators.R_seekset">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.decorators.</span></span><span class="sig-name descname"><span class="pre">R_seekset</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a></span><a class="headerlink" href="#pcapkit.utilities.decorators.pcapkit.utilities.decorators.R_seekset" title="Link to this definition">¶</a></dt>
@@ -636,169 +634,6 @@ decorator function.</p>
 <dt class="sig sig-object py" id="pcapkit.utilities.decorators.pcapkit.utilities.decorators.R_prepare">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.decorators.</span></span><span class="sig-name descname"><span class="pre">R_prepare</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><span class="pre">pcapkit.protocols.schema.schema.Schema</span></a></span><a class="headerlink" href="#pcapkit.utilities.decorators.pcapkit.utilities.decorators.R_prepare" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
-
-</section>
-</section>
-<section id="error-handling-utilities">
-<h2>Error Handling Utilities<a class="headerlink" href="#error-handling-utilities" title="Link to this heading">¶</a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.utilities.exceptions.stacklevel">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.exceptions.</span></span><span class="sig-name descname"><span class="pre">stacklevel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/exceptions.html#stacklevel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.exceptions.stacklevel" title="Link to this definition">¶</a></dt>
-<dd><p>Stack level of the innermost frame outside <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>.</p>
-<p>The value is a <em>relative</em> level, in the sense both <a class="reference external" href="https://docs.python.org/3/library/warnings.html#warnings.warn" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">warnings.warn()</span></code></a> and
-the <a class="reference external" href="https://docs.python.org/3/library/logging.html#module-logging" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">logging</span></code></a> module use: level <code class="docutils literal notranslate"><span class="pre">1</span></code> is the frame that called
-<a class="reference internal" href="#pcapkit.utilities.exceptions.stacklevel" title="pcapkit.utilities.exceptions.stacklevel"><code class="xref py py-func docutils literal notranslate"><span class="pre">stacklevel()</span></code></a>, level <code class="docutils literal notranslate"><span class="pre">2</span></code> its caller, and so on outwards. Handing it to
-either of them attributes the complaint to the caller who reached into
-<a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, rather than to whichever <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> internal happened to
-notice the problem – which is the whole point of the function, since the
-internal frames are noise to the user reading the report.</p>
-<p>The arithmetic, since it is easy to get backwards. Number the frames outwards
-from this one, so that a number <em>is</em> the relative level a consumer wants:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>level 0             stacklevel() itself
-level 1             whoever called stacklevel()
-...
-level ``boundary``  the outermost frame inside pcapkit
-...
-level ``outermost`` the interpreter entry point
-</pre></div>
-</div>
-<p>The frame to name is the first one <em>past</em> the boundary, hence
-<code class="docutils literal notranslate"><span class="pre">boundary</span> <span class="pre">+</span> <span class="pre">1</span></code>. <code class="docutils literal notranslate"><span class="pre">boundary</span></code> is measured from the <em>inside</em> out: it depends
-only on how deep the <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> frames run, never on how deep the caller’s
-own stack is. Numbering from the outside in would grow with the outer stack,
-so the frame named would drift one further out for every extra frame above the
-boundary – under <strong class="program">pytest</strong>, dozens of them.</p>
-<p>Both bounds are enforced, as neither consumer copes with a level outside them:</p>
-<ul class="simple">
-<li><p>Never below <code class="docutils literal notranslate"><span class="pre">1</span></code>. <code class="docutils literal notranslate"><span class="pre">0</span></code> and negative values mean “do not walk out at all”
-to <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger.findCaller" title="(in Python v3.15)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">logging.Logger.findCaller()</span></code></a>, which then attributes the record to
-<a class="reference external" href="https://docs.python.org/3/library/logging.html#module-logging" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">logging</span></code></a> itself; <a class="reference external" href="https://docs.python.org/3/library/warnings.html#warnings.warn" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">warnings.warn()</span></code></a> treats them as <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></li>
-<li><p>Never above <code class="docutils literal notranslate"><span class="pre">outermost</span></code>. That bound is reached when the whole stack is
-inside <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, e.g. running the package as a script, and walking
-past the outermost frame makes <a class="reference external" href="https://docs.python.org/3/library/warnings.html#warnings.warn" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">warnings.warn()</span></code></a> fall back to blaming
-the <a class="reference external" href="https://docs.python.org/3/library/sys.html#module-sys" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sys</span></code></a> module.</p></li>
-</ul>
-<p>The walk goes through <a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.currentframe" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">inspect.currentframe()</span></code></a> and <code class="docutils literal notranslate"><span class="pre">f_back</span></code> rather than
-<a class="reference external" href="https://docs.python.org/3/library/traceback.html#traceback.extract_stack" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">traceback.extract_stack()</span></code></a>: it skips building the
-<a class="reference external" href="https://docs.python.org/3/library/traceback.html#traceback.FrameSummary" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameSummary</span></code></a> objects and the <a class="reference external" href="https://docs.python.org/3/library/linecache.html#module-linecache" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">linecache</span></code></a> lookups
-<a class="reference external" href="https://docs.python.org/3/library/traceback.html#traceback.extract_stack" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">traceback.extract_stack()</span></code></a> does for every frame, which is worth avoiding on
-a function called once per warning. It is also immune to
-<a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.tracebacklimit" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.tracebacklimit</span></code></a>, which <a class="reference external" href="https://docs.python.org/3/library/traceback.html#traceback.StackSummary.extract" title="(in Python v3.15)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">traceback.StackSummary.extract()</span></code></a>
-honours: a limit of <code class="docutils literal notranslate"><span class="pre">0</span></code> would make <code class="docutils literal notranslate"><span class="pre">extract_stack()</span></code> return an <em>empty</em> list
-and silently break the attribution of every warning. <a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.BaseError" title="pcapkit.utilities.exceptions.BaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseError</span></code></a> does not
-set that limit (it prints its terse line through an exception hook instead), but
-user code may.</p>
-<div class="admonition important">
-<p class="admonition-title">Important</p>
-<p>The level is relative to the <em>caller</em> of <a class="reference internal" href="#pcapkit.utilities.exceptions.stacklevel" title="pcapkit.utilities.exceptions.stacklevel"><code class="xref py py-func docutils literal notranslate"><span class="pre">stacklevel()</span></code></a>. A function
-that forwards it to <a class="reference external" href="https://docs.python.org/3/library/warnings.html#warnings.warn" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">warnings.warn()</span></code></a> on its caller’s behalf has to
-add one for its own frame – see <a class="reference internal" href="#pcapkit.utilities.warnings.warn" title="pcapkit.utilities.warnings.warn"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.warn()</span></code></a>,
-which does exactly that.</p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Number of frames from the caller of <a class="reference internal" href="#pcapkit.utilities.exceptions.stacklevel" title="pcapkit.utilities.exceptions.stacklevel"><code class="xref py py-func docutils literal notranslate"><span class="pre">stacklevel()</span></code></a> outwards to the
-innermost frame whose path does not contain <code class="docutils literal notranslate"><span class="pre">/pcapkit/</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.utilities.warnings.warn">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.warnings.</span></span><span class="sig-name descname"><span class="pre">warn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">category</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/warnings.html#warn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.warnings.warn" title="Link to this definition">¶</a></dt>
-<dd><p>Wrapper function of <a class="reference external" href="https://docs.python.org/3/library/warnings.html#warnings.warn" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">warnings.warn()</span></code></a>.</p>
-<p>The warning is reported once on the <a class="reference internal" href="logging.html#pcapkit.utilities.logging.logger" title="pcapkit.utilities.logging.logger"><code class="xref py py-data docutils literal notranslate"><span class="pre">logger</span></code></a>
-logger, then once through <a class="reference external" href="https://docs.python.org/3/library/warnings.html#warnings.warn" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">warnings.warn()</span></code></a>. The logger call does not
-consult <code class="xref py py-data docutils literal notranslate"><span class="pre">warnings.filters</span></code>, so a log-based consumer sees the complaint
-even when the application has filtered the category out; the
-<a class="reference external" href="https://docs.python.org/3/library/warnings.html#warnings.warn" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">warnings.warn()</span></code></a> call is filtered normally, so the application keeps
-full control of that channel – including turning the warning into an error
-with <a class="reference external" href="https://docs.python.org/3/using/cmdline.html#cmdoption-W" title="(in Python v3.15)"><code class="xref std std-option docutils literal notranslate"><span class="pre">-W</span> <span class="pre">error</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>message</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#Warning" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Warning</span></code></a></span>) – Warning message.</p></li>
-<li><p><strong>category</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#Warning" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Warning</span></code></a>]</span>) – Warning category.</p></li>
-<li><p><strong>stacklevel</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Warning stack level, <strong>relative to the caller of this
-function</strong> – <code class="docutils literal notranslate"><span class="pre">1</span></code> blames the line that called <a class="reference internal" href="#pcapkit.utilities.warnings.warn" title="pcapkit.utilities.warnings.warn"><code class="xref py py-func docutils literal notranslate"><span class="pre">warn()</span></code></a>, <code class="docutils literal notranslate"><span class="pre">2</span></code>
-its caller, and so on, exactly as the argument of the same name reads
-on <a class="reference external" href="https://docs.python.org/3/library/warnings.html#warnings.warn" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">warnings.warn()</span></code></a> itself. Defaults to
-<a class="reference internal" href="#pcapkit.utilities.exceptions.stacklevel" title="pcapkit.utilities.exceptions.stacklevel"><code class="xref py py-func docutils literal notranslate"><span class="pre">stacklevel()</span></code></a>, i.e. the innermost
-frame outside <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>.</p></li>
-</ul>
-</dd>
-</dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<p><a class="reference internal" href="warnings.html#module-pcapkit.utilities.warnings" title="pcapkit.utilities.warnings"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings</span></code></a> for the emission model in full, and for
-how to silence either channel.</p>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Inside a <a class="reference internal" href="#pcapkit.utilities.warnings.hold_warnings" title="pcapkit.utilities.warnings.hold_warnings"><code class="xref py py-class docutils literal notranslate"><span class="pre">hold_warnings</span></code></a> block the warning is held back instead,
-with the frame it is attributed to, and reported from there only if the
-block keeps it.</p>
-</div>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.utilities.warnings.hold_warnings">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.warnings.</span></span><span class="sig-name descname"><span class="pre">hold_warnings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/warnings.html#hold_warnings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.warnings.hold_warnings" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>Hold back the warnings a parse reports until it is known to be kept.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>hold</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Hold the warnings reported inside the block. When false, they are
-reported at once instead, even inside an enclosing block that holds.</p>
-</dd>
-</dl>
-<p>Every <a class="reference internal" href="#pcapkit.utilities.warnings.warn" title="pcapkit.utilities.warnings.warn"><code class="xref py py-func docutils literal notranslate"><span class="pre">warn()</span></code></a> call inside the block is held, with the frame it is
-attributed to. On leaving the block they are reported in order, with the
-same message and category and attributed to the same frame on both
-channels, unless <a class="reference internal" href="#pcapkit.utilities.warnings.hold_warnings.discard" title="pcapkit.utilities.warnings.hold_warnings.discard"><code class="xref py py-attr docutils literal notranslate"><span class="pre">discard</span></code></a> was set, in which case they are dropped. A
-block left by an <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#Exception" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">Exception</span></code></a> reports them whatever <a class="reference internal" href="#pcapkit.utilities.warnings.hold_warnings.discard" title="pcapkit.utilities.warnings.hold_warnings.discard"><code class="xref py py-attr docutils literal notranslate"><span class="pre">discard</span></code></a>
-says; one left by any other <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#BaseException" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BaseException</span></code></a> – <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyboardInterrupt" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyboardInterrupt</span></code></a>,
-<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#SystemExit" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemExit</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#GeneratorExit" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">GeneratorExit</span></code></a> – drops them, so that a filter
-turning them into errors cannot replace it.</p>
-<p>The line named is the frame’s line when the block is left. For the frame
-<a class="reference internal" href="#pcapkit.utilities.exceptions.stacklevel" title="pcapkit.utilities.exceptions.stacklevel"><code class="xref py py-func docutils literal notranslate"><span class="pre">stacklevel()</span></code></a> names – the caller of
-<a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, still inside that call – it is the line named when held.</p>
-<p>Blocks nest, and each reports what it keeps when it is left, never handing
-it to an enclosing block. Under a filter turning warnings into errors, the
-error is then raised where the block that kept them is left – the end of
-the trial parse, inside the guard it was raised in when nothing was held.</p>
-<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase._parse_next_layer</span></code> uses this for the
-trial parse it replaces with <a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> when the
-header was not captured: the warnings describe a layer the result does not
-have (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1580">#1580</a>).</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Nothing here touches <code class="xref py py-data docutils literal notranslate"><span class="pre">warnings.filters</span></code> or a module’s
-<code class="docutils literal notranslate"><span class="pre">__warningregistry__</span></code>; <code class="xref py py-func docutils literal notranslate"><span class="pre">warnings.catch_warnings()</span></code> would, which is
-what made unrelated warnings re-fire up to v1.4.1 (see
-<a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.BaseWarning" title="pcapkit.utilities.warnings.BaseWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseWarning</span></code></a>).</p>
-<p>A block left while one opened inside it is still open – a generator
-suspended inside its own block – stays in place for that one, which
-steps over it when it is left. While it is suspended, though, the
-generator’s block holds its caller’s warnings too: a context variable
-follows the thread, not the frame.</p>
-</div>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.utilities.warnings.hold_warnings.discard">
-<span class="sig-name descname"><span class="pre">discard</span></span><a class="headerlink" href="#pcapkit.utilities.warnings.hold_warnings.discard" title="Link to this definition">¶</a></dt>
-<dd><p>Drop the held warnings on leaving the block, rather than report them.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.utilities.warnings.hold_warnings.holding">
-<span class="sig-name descname"><span class="pre">holding</span></span><a class="headerlink" href="#pcapkit.utilities.warnings.hold_warnings.holding" title="Link to this definition">¶</a></dt>
-<dd><p>Whether warnings reported inside the block are held.</p>
-</dd></dl>
-
-</dd></dl>
 
 </section>
 </section>
@@ -858,12 +693,8 @@ follows the thread, not the frame.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Auxiliary Functions</a><ul>
-<li><a class="reference internal" href="#module-pcapkit.utilities.decorators">Decorators</a><ul>
+<li><a class="reference internal" href="#">Decorator Functions</a><ul>
 <li><a class="reference internal" href="#type-variables">Type Variables</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#error-handling-utilities">Error Handling Utilities</a></li>
 </ul>
 </li>
 </ul>

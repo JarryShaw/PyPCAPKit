@@ -334,7 +334,7 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../pcapkit/utilities/index.html">Module Utilities</a><input aria-label="Toggle navigation of Module Utilities" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/functools.html">Auxiliary Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/decorators.html">Decorator Functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/logging.html">Logging System</a></li>
@@ -927,7 +927,7 @@ file without descending into per-field parsing.</p></li>
 <p>See <a class="reference internal" href="../pcapkit/utilities/logging.html"><span class="doc">Logging System</span></a> for the configuration recipes, including
 the one-line restore of <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stderr" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sys.stderr</span></code></a> output.</p>
 <p>One item remains wanted, called out there as deliberately out of scope:
-<a class="reference internal" href="../pcapkit/utilities/functools.html#pcapkit.utilities.warnings.warn" title="pcapkit.utilities.warnings.warn"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.warn()</span></code></a> still reports every warning twice, once
+<a class="reference internal" href="../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.warn" title="pcapkit.utilities.warnings.warn"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.warn()</span></code></a> still reports every warning twice, once
 through <a class="reference external" href="https://docs.python.org/3/library/logging.html#module-logging" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">logging</span></code></a> and once through <a class="reference external" href="https://docs.python.org/3/library/warnings.html#module-warnings" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">warnings</span></code></a>, so an application that
 has routed <a class="reference external" href="https://docs.python.org/3/library/warnings.html#module-warnings" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">warnings</span></code></a> into <a class="reference external" href="https://docs.python.org/3/library/logging.html#module-logging" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">logging</span></code></a> sees each one of them twice.</p>
 </section>
