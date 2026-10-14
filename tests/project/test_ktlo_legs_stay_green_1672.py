@@ -38,6 +38,7 @@ from typing import TYPE_CHECKING, NamedTuple
 from tests.project.test_python_matrix_tiers_1633 import (ANNOTATION_LEVEL, KTLO_GUARD, KTLO_LEGS,
                                                          LEG_37, TITLE_37, is_ktlo, job, legs,
                                                          titles, workflow, workflow_commands)
+from tests.project.test_python_versions_1660 import live_outputs, resolve
 from tests.project.test_release_gates import NULL, STATUS, evaluate_condition, evaluate_expression
 
 if TYPE_CHECKING:
@@ -67,14 +68,18 @@ MASKED_ON_EVERY_LEG = {
     ('unit-tests.yml', 'integration'): ('Upload test timings',),
     ('create-release.yml', 'pypi'): ('Publish package to TestPyPI',),
 }
-#: ``engine-tests``'s KTLO steps: the 3.10 interpreter, and the 3.10 cell.
-ENGINE_KTLO = ('Run the 3.10 cell (KTLO, non-blocking)',)
+#: ``engine-tests``'s KTLO steps: the KTLO cells, and the setup step of their
+#: interpreters, which reads :data:`ENGINE_KTLO_OUTPUT` (#1660).
+ENGINE_KTLO = ('Run the KTLO cells (non-blocking)',)
+ENGINE_KTLO_OUTPUT = '${{ needs.python-versions.outputs.engine-ktlo }}'
 #: The workflow commands a step a KTLO leg runs may write.
 KTLO_COMMANDS = frozenset({'${ANNOTATION_LEVEL}', 'warning', 'notice', 'group', 'endgroup'})
 #: A workflow command a script writes, by its name.
 COMMAND = re.compile(r'''(?:echo|printf|print\(f?)\s*["']::([^\s:"']+)''')
 #: A status-check function: an ``if:`` holding none gets ``success() &&`` prepended.
 STATUS_FUNCTION = re.compile(r'\b(?:success|failure|cancelled|always)\(\)')
+#: A ``needs`` output a step's ``if:`` reads, such as the tier file's (#1660).
+NEEDS = re.compile(r'needs\.([\w-]+)\.outputs\.([\w-]+)')
 #: The outputs a step with an ``id`` is taken to set: ones that let every later step run.
 OUTPUTS = {
     'apt-plan': {'key': 'apt-debs-ImageOS-X64-set-0123456789abcdef', 'restore-prefix': 'apt-debs-ImageOS-X64-set-'},
@@ -107,8 +112,8 @@ def summary_step(spec: 'dict[str, Any]') -> 'dict[str, Any]':
 
 
 def is_engine_ktlo(step: 'dict[str, Any]') -> 'bool':
-    """Whether ``step`` is one of ``engine-tests``'s, which run only the KTLO interpreter."""
-    return label(step) in ENGINE_KTLO or str(step.get('with', {}).get('python-version')) == '3.10'
+    """Whether ``step`` is one of ``engine-tests``'s, which run only the KTLO interpreters."""
+    return label(step) in ENGINE_KTLO or step.get('with', {}).get('python-version') == ENGINE_KTLO_OUTPUT
 
 
 def stringify(value: 'object') -> 'str':
@@ -134,12 +139,29 @@ def leg_env(name: 'str', spec: 'dict[str, Any]', leg: 'dict[str, Any]') -> 'dict
             for key, value in merged.items()}
 
 
+def needs_context(name: 'str', job_id: 'str', spec: 'dict[str, Any]') -> 'dict[str, Any]':
+    """The ``needs`` outputs the job's steps test, each as the tier file sets it (#1660).
+
+    An output that does not come from :file:`util/python_versions.py` is unset.
+
+    """
+    found = {}  # type: dict[str, Any]
+    for step in spec['steps']:
+        for target, output in NEEDS.findall(str(step.get('if', ''))):
+            try:
+                value = resolve(name, job_id, f'${{{{ needs.{target}.outputs.{output} }}}}')
+            except AssertionError:
+                value = None
+            found.setdefault(target, {'outputs': {}})['outputs'][output] = NULL if value is None else value
+    return found
+
+
 def continue_on_error(step: 'dict[str, Any]', context: 'dict[str, Any]') -> 'bool':
     value = step.get('continue-on-error', False)
     return value if isinstance(value, bool) else evaluate_condition(str(value), context)
 
 
-def run_leg(name: 'str', spec: 'dict[str, Any]', leg: 'dict[str, Any]',
+def run_leg(name: 'str', job_id: 'str', spec: 'dict[str, Any]', leg: 'dict[str, Any]',
             failing: 'int' = -1) -> 'tuple[str, list[Step]]':
     """The job's conclusion on ``leg``, and each step's, with step ``failing`` failing.
 
@@ -149,11 +171,12 @@ def run_leg(name: 'str', spec: 'dict[str, Any]', leg: 'dict[str, Any]',
 
     """
     env = leg_env(name, spec, leg)
+    needs = needs_context(name, job_id, spec)
     steps = {}  # type: dict[str, dict[str, Any]]
     failed = False
     record = []  # type: list[Step]
     for index, step in enumerate(spec['steps']):
-        context = {'matrix': leg, 'env': env, 'steps': steps, 'inputs': {},
+        context = {'matrix': leg, 'env': env, 'steps': steps, 'inputs': {}, 'needs': needs,
                    STATUS: {'success': not failed, 'failure': failed, 'cancelled': False}}
         condition = '' if step.get('if') is None else str(step['if'])
         runs = STATUS_FUNCTION.search(condition) is not None or not failed
@@ -172,11 +195,12 @@ def run_leg(name: 'str', spec: 'dict[str, Any]', leg: 'dict[str, Any]',
     return ('failure' if failed else 'success'), record
 
 
-def scenarios(name: 'str', spec: 'dict[str, Any]', leg: 'dict[str, Any]') -> 'list[tuple[int, str, list[Step]]]':
+def scenarios(name: 'str', job_id: 'str', spec: 'dict[str, Any]',
+              leg: 'dict[str, Any]') -> 'list[tuple[int, str, list[Step]]]':
     """``(failing step, job conclusion, steps)`` for each step that runs on ``leg``."""
     found = []
     for index in range(len(spec['steps'])):
-        conclusion, record = run_leg(name, spec, leg, failing=index)
+        conclusion, record = run_leg(name, job_id, spec, leg, failing=index)
         if record[index].outcome != 'skipped':
             found.append((index, conclusion, record))
     return found
@@ -207,16 +231,17 @@ class TestNoKTLOFailureTurnsAJobRed(unittest.TestCase):
         for name, job_id in KTLO_JOBS:
             spec = job(name, job_id)
             blocking = BLOCKS_EVERY_LEG.get((name, job_id), ())
-            for leg in filter(is_ktlo, legs(spec)):
-                runs = scenarios(name, spec, leg)
+            for leg in filter(is_ktlo, legs(name, job_id)):
+                runs = scenarios(name, job_id, spec, leg)
                 self.assertGreater(len(runs), 3, f'{job_id} on {leg} runs almost nothing')
                 for index, conclusion, _ in runs:
                     step = label(spec['steps'][index])
                     with self.subTest(workflow=name, job=job_id, python=leg['python-version'], step=step):
                         self.assertEqual(conclusion, 'failure' if step in blocking else 'success')
         spec = job('unit-tests.yml', 'engine-tests')
-        for leg in legs(spec):
-            ktlo = [(index, conclusion) for index, conclusion, _ in scenarios('unit-tests.yml', spec, leg)
+        for leg in legs('unit-tests.yml', 'engine-tests'):
+            ktlo = [(index, conclusion)
+                    for index, conclusion, _ in scenarios('unit-tests.yml', 'engine-tests', spec, leg)
                     if is_engine_ktlo(spec['steps'][index])]
             self.assertEqual(len(ktlo), 2, leg)
             for index, conclusion in ktlo:
@@ -243,8 +268,8 @@ class TestNoKTLOFailureTurnsAJobRed(unittest.TestCase):
                 self.assertEqual(summary.get('env'), SUMMARY_ENV)
             scripts.add(summary['run'])
             blocking = BLOCKS_EVERY_LEG.get((name, job_id), ())
-            for leg in filter(is_ktlo, legs(spec)):
-                for index, _, record in scenarios(name, spec, leg):
+            for leg in filter(is_ktlo, legs(name, job_id)):
+                for index, _, record in scenarios(name, job_id, spec, leg):
                     step = spec['steps'][index]
                     if step is summary or label(step) in blocking:
                         continue
@@ -270,7 +295,7 @@ class TestAKTLOFailureIsAWarning(unittest.TestCase):
             spec = job(name, job_id)
             with self.subTest(workflow=name, job=job_id):
                 self.assertEqual((spec.get('env') or {}).get('ANNOTATION_LEVEL'), ANNOTATION_LEVEL)
-            for leg in legs(spec):
+            for leg in legs(name, job_id):
                 with self.subTest(workflow=name, job=job_id, python=leg['python-version']):
                     self.assertEqual(leg_env(name, spec, leg)['ANNOTATION_LEVEL'],
                                      'warning' if is_ktlo(leg) else 'error')
@@ -280,8 +305,8 @@ class TestAKTLOFailureIsAWarning(unittest.TestCase):
             spec = job(name, job_id)
             blocking = BLOCKS_EVERY_LEG.get((name, job_id), ())
             reached = set()  # type: set[int]
-            for leg in filter(is_ktlo, legs(spec)):
-                for _, _, record in scenarios(name, spec, leg):
+            for leg in filter(is_ktlo, legs(name, job_id)):
+                for _, _, record in scenarios(name, job_id, spec, leg):
                     reached.update(index for index, step in enumerate(record) if step.outcome != 'skipped')
             for index in sorted(reached):
                 step = spec['steps'][index]
@@ -371,33 +396,35 @@ class TestAKTLOFailureIsAWarning(unittest.TestCase):
                               cwd=self.tmp, capture_output=True, text=True, check=False, timeout=60)
 
     def test_the_engine_ktlo_cell_warns(self) -> None:
-        """The 3.10 cell's step, and the cell script it runs, write no error; 3.12's does."""
+        """A KTLO cell's step, and the cell script it runs, write no error; a supported cell's does."""
         steps = {label(step): step for step in job('unit-tests.yml', 'engine-tests')['steps']}
-        ktlo = steps['Run the 3.10 cell (KTLO, non-blocking)']
-        self.assertEqual(ktlo.get('env'), {'ANNOTATION_LEVEL': 'warning'})
+        ktlo = steps['Run the KTLO cells (non-blocking)']
+        self.assertEqual(ktlo.get('env'), {'PYTHONS': ENGINE_KTLO_OUTPUT, 'ANNOTATION_LEVEL': 'warning'})
+        ktlo_py = live_outputs()['engine-ktlo'].split()[0]
+        supported_py = live_outputs()['engine-supported'].split()[0]
         self.assertLessEqual(commands(ktlo['run']), {'group', 'endgroup', 'warning'})
         cell = steps['Write the per-cell script']['run'].split("<<'CELL'\n", 1)[1].split('\nCELL\n', 1)[0]
         self.assertLessEqual(commands(cell), {'${ANNOTATION_LEVEL}', 'notice'})
         expected = ("::{} title=Scapy failed to install on Python {}::This cell expects 'supported', "
                     'which requires a successful install. pip exited 1.')
-        for py, level in (('3.10', 'warning'), ('3.12', 'error')):
+        for py, level in ((ktlo_py, 'warning'), (supported_py, 'error')):
             with self.subTest(python=py):
                 result = self.engine_cell(py, level)
                 self.assertEqual(result.returncode, 1, result.stderr)
                 self.assertEqual(workflow_commands(result.stdout), [expected.format(level, py)])
-        unset = self.engine_cell('3.10', None)
+        unset = self.engine_cell(ktlo_py, None)
         self.assertNotEqual(unset.returncode, 0)
         self.assertIn('ANNOTATION_LEVEL: unbound variable', unset.stderr)
 
         (self.tmp / 'engine-cell.sh').write_text('exit 1\n', encoding='utf-8')
         page = self.tmp / 'cells.md'
-        result = bash(ktlo['run'], {'RUNNER_TEMP': str(self.tmp), 'ENGINE': 'Scapy',
+        result = bash(ktlo['run'], {'RUNNER_TEMP': str(self.tmp), 'ENGINE': 'Scapy', 'PYTHONS': ktlo_py,
                                     'GITHUB_STEP_SUMMARY': str(page)}, self.tmp)
         self.assertEqual(result.returncode, 1, result.stderr)
         self.assertEqual(workflow_commands(result.stdout)[-1],
-                         '::warning title=Scapy failed on Python 3.10 (KTLO%2C non-blocking)::3.10 is '
+                         f'::warning title=Scapy failed on Python {ktlo_py} (KTLO%2C non-blocking)::{ktlo_py} is '
                          'end-of-life and KTLO per #1633; this does not fail the job.')
-        self.assertEqual(page.read_text(encoding='utf-8'), '| 3.10 | Scapy | | FAILED (KTLO, non-blocking) |\n')
+        self.assertEqual(page.read_text(encoding='utf-8'), f'| {ktlo_py} | Scapy | | FAILED (KTLO, non-blocking) |\n')
 
 
 class TestASupportedLegStillFails(unittest.TestCase):
@@ -417,13 +444,13 @@ class TestASupportedLegStillFails(unittest.TestCase):
             masked = [label(step) for step in spec['steps'] if step.get('continue-on-error') is True]
             with self.subTest(workflow=name, job=job_id):
                 self.assertEqual(masked, list(MASKED_ON_EVERY_LEG.get((name, job_id), ())))
-            for leg in (leg for leg in legs(spec) if not is_ktlo(leg)):
-                clean, record = run_leg(name, spec, leg)
+            for leg in (leg for leg in legs(name, job_id) if not is_ktlo(leg)):
+                clean, record = run_leg(name, job_id, spec, leg)
                 with self.subTest(workflow=name, job=job_id, python=leg['python-version']):
                     self.assertEqual(clean, 'success')
                     self.assertEqual(record[summary].outcome, 'skipped')
                 context = {'matrix': leg, 'env': leg_env(name, spec, leg)}
-                for index, conclusion, record in scenarios(name, spec, leg):
+                for index, conclusion, record in scenarios(name, job_id, spec, leg):
                     step = spec['steps'][index]
                     with self.subTest(workflow=name, job=job_id, python=leg['python-version'], step=label(step)):
                         self.assertEqual(conclusion, 'success' if step.get('continue-on-error') is True else 'failure')
@@ -433,10 +460,11 @@ class TestASupportedLegStillFails(unittest.TestCase):
 
     def test_a_supported_engine_cell_still_fails_its_job_as_an_error(self) -> None:
         spec = job('unit-tests.yml', 'engine-tests')
-        loop = next(step for step in spec['steps'] if step.get('name') == 'Run the 3.11-3.15 cells')
-        self.assertEqual(loop.get('env'), {'ANNOTATION_LEVEL': 'error'})
-        for leg in legs(spec):
-            for index, conclusion, _ in scenarios('unit-tests.yml', spec, leg):
+        loop = next(step for step in spec['steps'] if step.get('name') == 'Run the supported cells')
+        self.assertEqual(loop.get('env'), {'PYTHONS': '${{ needs.python-versions.outputs.engine-supported }}',
+                                           'ANNOTATION_LEVEL': 'error'})
+        for leg in legs('unit-tests.yml', 'engine-tests'):
+            for index, conclusion, _ in scenarios('unit-tests.yml', 'engine-tests', spec, leg):
                 step = spec['steps'][index]
                 if is_engine_ktlo(step):
                     continue

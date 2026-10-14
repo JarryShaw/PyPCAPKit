@@ -135,9 +135,15 @@ jobs:
           # question (#1643).
           persist-credentials: false
 
+      # #1660: `latest` from .github/python-versions.toml, read with the
+      # runner's own python3.
+      - name: Read the Python versions
+        id: python-versions
+        run: python3 util/python_versions.py --github-output
+
       - uses: actions/setup-python@v7
         with:
-          python-version: '3.14'
+          python-version: ${{ steps.python-versions.outputs.latest }}
 
       # Builds the Sphinx documentation into `docs/build/html`, which the deploy
       # step below publishes. `PCAPKIT_SPHINX` is what makes the

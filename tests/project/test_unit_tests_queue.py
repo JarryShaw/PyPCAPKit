@@ -11,7 +11,7 @@ These fail silently if they drift, so they are pinned here:
   code, and a Markdown file under a code directory code too.
 * ``unittest-ordering`` stays off pull requests and out of the required set,
   and queues behind ``test`` without needing it to pass (#1538);
-  ``engine-tests``'s KTLO 3.10 cell stays non-blocking through a step-level
+  ``engine-tests``'s KTLO cells stay non-blocking through a step-level
   ``continue-on-error`` rather than a job-level one (#1633), and the job has no
   ``DPKT`` cell (#1538).
 * The classifier, the engine cell loops and the apt retry are executed too: the
@@ -38,6 +38,8 @@ import tempfile
 import textwrap
 import unittest
 from typing import TYPE_CHECKING
+
+from tests.project.test_python_versions_1660 import live_outputs
 
 if TYPE_CHECKING:
     from typing import Callable, Optional
@@ -190,7 +192,7 @@ class TestJobGating(unittest.TestCase):
             with self.subTest(job=name):
                 head = header(job(name))
                 self.assertIn("needs.changes.outputs.code != 'false'", head)
-                self.assertRegex(head, r'(?m)^    needs: \[changes\]$')
+                self.assertRegex(head, r'(?m)^    needs: \[changes, python-versions\]$')
 
     def test_project_tests_runs_only_on_a_docs_only_diff(self) -> None:
         """``project-tests`` never duplicates ``test`` on a code change."""
@@ -214,17 +216,18 @@ class TestJobGating(unittest.TestCase):
         self.assertRegex(run_step, r'(?m)^        timeout-minutes: \d+$')
 
     def test_engine_tests_is_one_job_per_engine_with_a_non_blocking_ktlo_step(self) -> None:
-        """E: matrix on engine only; KTLO 3.10 blocks nothing, 3.11-3.15 do (#1633)."""
+        """E: matrix on engine only; the KTLO cells block nothing, the supported ones do (#1633)."""
         section = job('engine-tests')
         head = header(section)
-        self.assertNotIn('python-version', head)
+        self.assertNotIn('python-version:', head)  # no axis; `needs` names `python-versions`
         self.assertNotIn('continue-on-error', head)
         self.assertRegex(section, r'(?m)^        engine:$')
-        ktlo = section.split('- name: Run the 3.10 cell', 1)[1]
+        ktlo = section.split('- name: Run the KTLO cells (non-blocking)', 1)[1]
         self.assertRegex(ktlo, r'(?m)^        continue-on-error: true$')
-        gating = section.split('- name: Run the 3.11-3.15 cells', 1)[1].split('      - name:', 1)[0]
+        gating = section.split('- name: Run the supported cells', 1)[1].split('      - name:', 1)[0]
         self.assertNotIn('continue-on-error', gating)
-        self.assertIn('for py in 3.11 3.12 3.13 3.14 3.15;', gating)
+        self.assertIn('PYTHONS: ${{ needs.python-versions.outputs.engine-supported }}', gating)
+        self.assertIn('for py in $PYTHONS;', gating)
 
     def test_unittest_ordering_queues_behind_test_and_survives_its_failure(self) -> None:
         """#1538 P4(a): queued after ``test``, and ``!cancelled()`` so a red ``test`` still runs it.
@@ -240,7 +243,7 @@ class TestJobGating(unittest.TestCase):
 
     def test_the_ktlo_cell_runs_on_every_event(self) -> None:
         """#1633: 3.10 still runs wherever it did; #1538's main-only cut was for prerelease 3.15."""
-        ktlo = step(job('engine-tests'), 'Run the 3.10 cell (KTLO, non-blocking)')
+        ktlo = step(job('engine-tests'), 'Run the KTLO cells (non-blocking)')
         self.assertNotRegex(ktlo, r'(?m)^        if:')
 
     def test_engine_tests_has_no_dpkt_cell(self) -> None:
@@ -391,33 +394,54 @@ class TestClassifierAgainstARealMerge(_Scratch):
 class TestEngineCellLoops(_Scratch):
     """The two cell-loop steps of ``engine-tests``, with the cell script stubbed."""
 
+    #: Each loop step, and the output of .github/python-versions.toml it loops over (#1660).
+    LOOPS = {'Run the supported cells': 'engine-supported', 'Run the KTLO cells (non-blocking)': 'engine-ktlo'}
+
     def run_loop(self, name: 'str', fail: 'str') -> 'tuple[int, list[str]]':
         """Run loop step ``name`` with the cell for ``fail`` failing; status and cells run."""
         (self.tmp / 'engine-cell.sh').write_text(
             'echo "$1" >> "$RUNNER_TEMP/calls"\n[ "$1" != "$FAIL_PY" ]\n', encoding='utf-8')
         status = bash(step_script(job('engine-tests'), name),
                       {'RUNNER_TEMP': str(self.tmp), 'ENGINE': 'Scapy', 'FAIL_PY': fail,
-                       'GITHUB_STEP_SUMMARY': str(self.tmp / 'summary')})
+                       'GITHUB_STEP_SUMMARY': str(self.tmp / 'summary'), 'PYTHONS': self.versions(name)})
         calls = self.tmp / 'calls'
         return status, calls.read_text(encoding='utf-8').split() if calls.exists() else []
 
+    def versions(self, name: 'str') -> 'str':
+        """What step ``name``'s ``PYTHONS`` holds: one version per line, as the job output does."""
+        expression = f'PYTHONS: ${{{{ needs.python-versions.outputs.{self.LOOPS[name]} }}}}'
+        self.assertIn(expression, step(job('engine-tests'), name))
+        return live_outputs()[self.LOOPS[name]]
+
     def test_every_gating_cell_runs_and_passing_passes(self) -> None:
-        """All five gating interpreters run; none failing exits 0."""
-        status, calls = self.run_loop('Run the 3.11-3.15 cells', fail='none')
+        """Every supported interpreter runs; none failing exits 0."""
+        status, calls = self.run_loop('Run the supported cells', fail='none')
         self.assertEqual(status, 0)
-        self.assertEqual(calls, ['3.11', '3.12', '3.13', '3.14', '3.15'])
+        self.assertEqual(calls, self.versions('Run the supported cells').split())
+        self.assertGreater(len(calls), 1)
 
     def test_one_failing_cell_fails_the_step_after_the_rest_ran(self) -> None:
         """A failure is not swallowed, and does not stop the later cells."""
-        status, calls = self.run_loop('Run the 3.11-3.15 cells', fail='3.12')
+        expected = self.versions('Run the supported cells').split()
+        status, calls = self.run_loop('Run the supported cells', fail=expected[1])
         self.assertNotEqual(status, 0)
-        self.assertEqual(calls, ['3.11', '3.12', '3.13', '3.14', '3.15'])
+        self.assertEqual(calls, expected)
+        self.assertIn(f'| {expected[1]} | Scapy | | FAILED |', (self.tmp / 'summary').read_text(encoding='utf-8'))
 
     def test_a_failing_ktlo_cell_fails_its_own_step(self) -> None:
         """The step fails; its ``continue-on-error`` keeps the job green, its annotation is a warning (#1672)."""
-        status, calls = self.run_loop('Run the 3.10 cell (KTLO, non-blocking)', fail='3.10')
+        expected = self.versions('Run the KTLO cells (non-blocking)').split()
+        status, calls = self.run_loop('Run the KTLO cells (non-blocking)', fail=expected[0])
         self.assertNotEqual(status, 0)
-        self.assertEqual(calls, ['3.10'])
+        self.assertEqual(calls, expected)
+
+    def test_no_ktlo_cell_is_a_passing_no_op(self) -> None:
+        """A KTLO tier with no cell on ``ubuntu-latest`` loops over nothing, rather than failing."""
+        (self.tmp / 'engine-cell.sh').write_text('exit 1\n', encoding='utf-8')
+        status = bash(step_script(job('engine-tests'), 'Run the KTLO cells (non-blocking)'),
+                      {'RUNNER_TEMP': str(self.tmp), 'ENGINE': 'Scapy', 'PYTHONS': '',
+                       'GITHUB_STEP_SUMMARY': str(self.tmp / 'summary')})
+        self.assertEqual(status, 0)
 
 
 #: The two apt steps, as (job, step name, extra env).
@@ -565,7 +589,7 @@ CITATIONS: 'dict[str, list[tuple[str, Optional[str]]]]' = {
         ("# Ruleset 23497679's required_status_checks", '# them.'),
         ('  required-checks:', 'echo "All required jobs reported an accepted result."'),
         ('if: ${{ always() && inputs.gate-only != true }}', None),
-        ('# The KTLO tier (#1633)', '# `ubuntu-latest` moves to 26.04'),
+        ('# The KTLO tier (#1633)', '`ubuntu-latest` moves to 26.04 from 2026-10-19.'),
     ],
 }
 
@@ -628,9 +652,10 @@ BARE_ELSEWHERE: 'dict[str, dict[str, str]]' = {
         '631-647': "softprops/action-gh-release 3.0.2's src/github.ts",
     },
     'docs/source/contributing/workflows.rst': {
-        '39': '.github/workflows/python-compatibility.yml',
-        '47-51': '.github/workflows/python-compatibility.yml',
-        '56-66': '.github/workflows/python-compatibility.yml',
+        '60': '.github/workflows/python-compatibility.yml',
+        '74': '.github/workflows/python-compatibility.yml',
+        '20-24': '.github/python-versions.toml',
+        '16-19': '.github/python-versions.toml',
     },
 }
 

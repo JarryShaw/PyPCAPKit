@@ -1167,7 +1167,7 @@ class TestTheUploadScript(WorkflowMixin, unittest.TestCase):
                 self.assertEqual(self.on_release(), [f'{self.CONDA}\tuploaded'])
 
     def test_only_the_files_the_release_lacks_go_up(self) -> None:
-        """``pypi``'s own ``dist/*``: the 3.14 leg's sdist, after its wheel landed."""
+        """``pypi``'s own ``dist/*``: the 3.15 leg's sdist, after its wheel landed."""
         self.build(self.WHEEL, self.SDIST)
         self.published(self.WHEEL)
         result = self.upload('pypi')

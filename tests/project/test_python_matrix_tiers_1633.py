@@ -31,11 +31,17 @@ import pcapkit: the ``test`` extra's ``pytest>=8`` needs 3.8, and the sources us
 annotation is parsed as the runner parses it. 3.6 stays out: setup-python builds
 it only for retired images.
 
+Since #1660 the tiers are declared once, in :file:`.github/python-versions.toml`,
+and every matrix is read from it, so the expectations below are read from it
+too: what is pinned here is that each tier keeps its mechanics wherever the file
+puts a version. :mod:`tests.project.test_python_versions_1660` pins that the file
+reproduces the matrices ``main`` spelt out before.
+
 """
 
 from __future__ import annotations
 
-import ast
+import importlib.util
 import json
 import os
 import pathlib
@@ -46,10 +52,9 @@ import tempfile
 import unittest
 from typing import TYPE_CHECKING
 
-try:
-    import yaml
-except ImportError:  # pragma: no cover
-    yaml = None  # type: ignore[assignment]
+from tests.project.test_python_versions_1660 import legs as expand
+from tests.project.test_python_versions_1660 import matrix, resolve, setups, workflow
+from tests.project.test_python_versions_1660 import script as versions_script
 
 if TYPE_CHECKING:
     from typing import Any, Optional
@@ -57,21 +62,41 @@ if TYPE_CHECKING:
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 WORKFLOWS = ROOT / '.github' / 'workflows'
 
-SUPPORTED = ('3.11', '3.12', '3.13', '3.14', '3.15')
+#: The tiers, from .github/python-versions.toml (#1660); empty if it is missing.
+try:
+    TIERS = versions_script().load()
+except AssertionError:  # pragma: no cover
+    TIERS = {'latest': None, 'versions': {'cpython': {}, 'pypy': {}}}
+
+
+def tier(impl: 'str', name: 'str') -> 'tuple[str, ...]':
+    return tuple(v for v, entry in TIERS['versions'][impl].items() if entry['tier'] == name)
+
+
+SUPPORTED = tier('cpython', 'supported')
+KTLO = tier('cpython', 'ktlo')
+#: The image each version needs where ``ubuntu-latest`` cannot provide it:
+#: setup-python has no Ubuntu 26.04 build of 3.7-3.9, and ubuntu-22.04, 3.7's, is
+#: deprecated and retires 2027-04-17.
+PINNED_OS = {v: entry['runner'] for v, entry in TIERS['versions']['cpython'].items() if 'runner' in entry}
+#: The KTLO versions a job pinned to ``ubuntu-latest`` runs.
+KTLO_ON_LATEST = tuple(v for v in KTLO if v not in PINNED_OS)
+#: PyPCAP/PyPCAPFile's ``python_version < '3.12'`` marker bounds ``pypcap-parity``.
+PARITY = tuple(v for v in SUPPORTED + KTLO_ON_LATEST if tuple(map(int, v.split('.'))) < (3, 12))
 #: The step-level guard every failure-prone step of a KTLO leg's job carries.
 KTLO_GUARD = '${{ matrix.ktlo == true }}'
 #: The job-level level of every annotation a failing step writes (#1672).
 ANNOTATION_LEVEL = "${{ matrix.ktlo && 'warning' || 'error' }}"
-#: Ruleset 23497679's required contexts once the owner applies #1633's edit.
+#: Ruleset 23497679's required contexts, which a tier change edits with the file.
 REQUIRED = frozenset({'Required checks passed'} | {f'Compat Python {v}' for v in SUPPORTED})
 
 #: Every Python matrix, as (workflow, job, the blocking versions it must run).
 MATRICES = (
     ('unit-tests.yml', 'test', SUPPORTED),
     ('unit-tests.yml', 'integration', SUPPORTED),
-    ('unit-tests.yml', 'pypcap-parity', ('3.11',)),  # PyPCAP/PyPCAPFile's `< '3.12'` marker
+    ('unit-tests.yml', 'pypcap-parity', tuple(v for v in PARITY if v in SUPPORTED)),
     ('python-compatibility.yml', 'compatibility', SUPPORTED),
-    ('create-release.yml', 'pypi', SUPPORTED + ('pypy3.11',)),
+    ('create-release.yml', 'pypi', SUPPORTED + tier('pypy', 'supported')),
     ('create-release.yml', 'conda', SUPPORTED),
     ('cron-conda.yml', 'conda-dist', SUPPORTED),
 )
@@ -80,15 +105,12 @@ AGGREGATED = (('unit-tests.yml', 'test'), ('unit-tests.yml', 'integration'),
               ('unit-tests.yml', 'pypcap-parity'), ('create-release.yml', 'pypi'))
 #: Where each KTLO leg must be, as (workflow, job, KTLO versions).
 KTLO_LEGS = (
-    ('unit-tests.yml', 'test', ('3.7', '3.8', '3.9', '3.10')),
-    ('unit-tests.yml', 'integration', ('3.7', '3.8', '3.9', '3.10')),
-    ('unit-tests.yml', 'pypcap-parity', ('3.10',)),
-    ('python-compatibility.yml', 'compatibility', ('3.7', '3.8', '3.9', '3.10')),
-    ('create-release.yml', 'pypi', ('3.10', 'pypy3.10')),
+    ('unit-tests.yml', 'test', KTLO),
+    ('unit-tests.yml', 'integration', KTLO),
+    ('unit-tests.yml', 'pypcap-parity', tuple(v for v in PARITY if v in KTLO)),
+    ('python-compatibility.yml', 'compatibility', KTLO),
+    ('create-release.yml', 'pypi', KTLO_ON_LATEST + tier('pypy', 'ktlo')),
 )
-#: The newest Ubuntu each pinned KTLO version has a setup-python build for; the
-#: rest run on ``ubuntu-latest``. ubuntu-22.04 is deprecated and retires 2027-04-17.
-PINNED_OS = {'3.7': 'ubuntu-22.04', '3.8': 'ubuntu-24.04', '3.9': 'ubuntu-24.04'}
 #: The jobs 3.7 joins (#1633), each as (workflow, job, install-or-verify step).
 LEGACY_37 = (
     ('unit-tests.yml', 'test', 'Install package and test dependencies'),
@@ -148,44 +170,20 @@ WORDS = {'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
          'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10}
 
 
-def workflow(name: 'str') -> 'dict[str, Any]':
-    """``name`` parsed, or the test skipped when PyYAML (the ``test`` extra) is absent."""
-    if yaml is None:  # pragma: no cover
-        raise unittest.SkipTest('PyYAML, from the test extra, is not installed')
-    return yaml.safe_load((WORKFLOWS / name).read_text(encoding='utf-8'))
-
-
 def job(name: 'str', job_id: 'str') -> 'dict[str, Any]':
     """One job of a workflow."""
     return workflow(name)['jobs'][job_id]
 
 
-def legs(spec: 'dict[str, Any]') -> 'list[dict[str, Any]]':
-    """The matrix combinations GitHub expands ``spec`` to.
+def legs(name: 'str', job_id: 'str') -> 'list[dict[str, Any]]':
+    """The legs GitHub expands job ``job_id``'s matrix to, read from the tier file (#1660)."""
+    return expand(matrix(name, job_id))
 
-    The base axes' product, then each ``include`` entry: merged into every
-    combination whose original values it matches, or added as one of its own --
-    GitHub's documented ``include`` rule, which is what lets ``ktlo: true`` mark
-    an existing leg as well as add a new one.
 
-    """
-    matrix = dict(spec['strategy']['matrix'])
-    include = matrix.pop('include', [])
-    combos = [{}]  # type: list[dict[str, Any]]
-    for key, values in matrix.items():
-        combos = [dict(combo, **{key: str(value)}) for combo in combos for value in values]
-    for entry in include:
-        entry = {key: str(value) if key in matrix else value for key, value in entry.items()}
-        matched = [combo for combo in combos
-                   if all(combo.get(key) == value for key, value in entry.items() if key in matrix)]
-        added = False
-        for combo in matched:
-            if all(key in matrix or key not in combo for key in entry):
-                combo.update(entry)
-                added = True
-        if not added:
-            combos.append(dict(entry))
-    return combos
+def engine_inputs() -> 'list[tuple[dict[str, Any], str]]':
+    """engine-tests' setup-python steps, each with the versions its input reads."""
+    return [(step, resolve('unit-tests.yml', 'engine-tests', step['with']['python-version']))
+            for step in setups(job('unit-tests.yml', 'engine-tests'))]
 
 
 def is_ktlo(leg: 'dict[str, Any]') -> 'bool':
@@ -199,27 +197,27 @@ def bash(script: 'str', env: 'dict[str, str]') -> 'subprocess.CompletedProcess[s
 
 
 class TestTheSupportedTierBlocks(unittest.TestCase):
-    """3.11-3.15 everywhere, and nothing softens a supported leg."""
+    """The supported tier everywhere, and nothing softens a supported leg."""
 
     def test_every_matrix_runs_the_supported_tier_as_blocking(self) -> None:
+        self.assertTrue(SUPPORTED, 'the tier file lists no supported CPython')
         for name, job_id, blocking in MATRICES:
             with self.subTest(workflow=name, job=job_id):
                 spec = job(name, job_id)
-                versions = sorted({leg['python-version'] for leg in legs(spec) if not is_ktlo(leg)})
+                versions = sorted({leg['python-version'] for leg in legs(name, job_id) if not is_ktlo(leg)})
                 self.assertEqual(versions, sorted(blocking))
                 # #1672: not even KTLO-only; job-level, a failed leg's check run is red.
                 self.assertNotIn('continue-on-error', spec)
 
     def test_engine_tests_runs_every_supported_cell_in_its_blocking_step(self) -> None:
         steps = job('unit-tests.yml', 'engine-tests')['steps']
-        setups = [step for step in steps if str(step.get('uses', '')).startswith('actions/setup-python@')]
-        blocking = [step for step in setups if 'continue-on-error' not in step]
-        self.assertEqual(len(blocking), 1)
-        self.assertEqual(blocking[0]['with']['python-version'].split(), list(SUPPORTED))
-        loop = next(step for step in steps if step.get('name') == 'Run the 3.11-3.15 cells')
+        blocking = [versions for step, versions in engine_inputs() if 'continue-on-error' not in step]
+        self.assertEqual([versions.split() for versions in blocking], [list(SUPPORTED)])
+        loop = next(step for step in steps if step.get('name') == 'Run the supported cells')
         self.assertNotIn('continue-on-error', loop)
         self.assertNotIn('if', loop)
-        self.assertIn(f"for py in {' '.join(SUPPORTED)};", loop['run'])
+        self.assertEqual(resolve('unit-tests.yml', 'engine-tests', loop['env']['PYTHONS']).split(), list(SUPPORTED))
+        self.assertIn('for py in $PYTHONS;', loop['run'])
 
     def test_the_supported_tier_is_what_the_classifiers_list(self) -> None:
         text = (ROOT / 'pyproject.toml').read_text(encoding='utf-8')
@@ -232,26 +230,39 @@ class TestTheSupportedTierBlocks(unittest.TestCase):
         self.assertEqual(re.findall(r'(?m)^requires-python = (.+)$', text), ['">=3.6, <4"'])
 
     def test_ci_timing_pairs_the_coverage_leg_with_supported_legs_only(self) -> None:
-        text = (ROOT / 'util' / 'ci_timing.py').read_text(encoding='utf-8')
-        coverage = ast.literal_eval(re.search(r'(?m)^COVERAGE_JOB = (.+)$', text).group(1))  # type: ignore[union-attr]
-        paired = ast.literal_eval(re.search(r'(?m)^PAIRED_JOBS = (\(.+\))$', text).group(1))  # type: ignore[union-attr]
-        self.assertEqual(sorted((coverage,) + paired), [f'Python {v}' for v in SUPPORTED])
+        spec = importlib.util.spec_from_file_location('ci_timing_1633', ROOT / 'util' / 'ci_timing.py')
+        assert spec is not None and spec.loader is not None
+        ci_timing = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(ci_timing)  # type: ignore[union-attr]
+        self.assertEqual(ci_timing.COVERAGE_JOB, f"Python {TIERS['latest']}")
+        self.assertEqual(sorted((ci_timing.COVERAGE_JOB,) + ci_timing.PAIRED_JOBS),
+                         sorted(f'Python {v}' for v in SUPPORTED))
+
+    def test_pypcap_parity_stops_where_the_engines_markers_do(self) -> None:
+        """The script's ``PARITY_BELOW`` is pyproject.toml's PyPCAP and PyPCAPFile marker."""
+        text = (ROOT / 'pyproject.toml').read_text(encoding='utf-8')
+        for extra in ('PyPCAP', 'PyPCAPFile'):
+            with self.subTest(extra=extra):
+                marker = re.search(rf"(?m)^{extra} = \[ \"\w+; python_version < '(3\.\d+)'\" \]$", text)
+                self.assertIsNotNone(marker)
+                self.assertEqual(tuple(map(int, marker.group(1).split('.'))), versions_script().PARITY_BELOW)  # type: ignore[union-attr]
 
 
 class TestTheKTLOTierNeverBlocks(unittest.TestCase):
     """Each KTLO leg exists, and none of them can fail what aggregates it."""
 
     def test_each_ktlo_leg_is_there(self) -> None:
+        self.assertTrue(KTLO, 'the tier file lists no KTLO CPython')
         for name, job_id, versions in KTLO_LEGS:
             with self.subTest(workflow=name, job=job_id):
-                found = sorted(leg['python-version'] for leg in legs(job(name, job_id)) if is_ktlo(leg))
+                found = sorted(leg['python-version'] for leg in legs(name, job_id) if is_ktlo(leg))
                 self.assertEqual(found, sorted(versions))
 
     def test_37_to_39_run_where_setup_python_still_builds_them(self) -> None:
         """No Ubuntu 26.04 build of any, and ``ubuntu-latest`` moves to 26.04."""
         for name, job_id, _ in KTLO_LEGS:
             spec = job(name, job_id)
-            for leg in legs(spec):
+            for leg in legs(name, job_id):
                 if leg['python-version'] in PINNED_OS:
                     with self.subTest(workflow=name, job=job_id, python=leg['python-version']):
                         self.assertEqual(leg.get('os'), PINNED_OS[leg['python-version']])
@@ -274,26 +285,26 @@ class TestTheKTLOTierNeverBlocks(unittest.TestCase):
                     self.assertIn(step.get('continue-on-error'), (True, KTLO_GUARD))
 
     def test_engine_tests_isolates_the_ktlo_interpreter_and_cell(self) -> None:
+        """The KTLO versions ``ubuntu-latest`` can run, in steps of their own that cannot fail the job."""
         steps = job('unit-tests.yml', 'engine-tests')['steps']
-        setup = [step for step in steps if str(step.get('uses', '')).startswith('actions/setup-python@')
-                 and step.get('continue-on-error') is True]
-        self.assertEqual([step['with']['python-version'] for step in setup], ['3.10'])
-        cell = next(step for step in steps if step.get('name') == 'Run the 3.10 cell (KTLO, non-blocking)')
+        setup = [versions for step, versions in engine_inputs() if step.get('continue-on-error') is True]
+        self.assertEqual([versions.split() for versions in setup], [list(KTLO_ON_LATEST)])
+        cell = next(step for step in steps if step.get('name') == 'Run the KTLO cells (non-blocking)')
         self.assertIs(cell.get('continue-on-error'), True)
-        self.assertIn('engine-cell.sh" 3.10', cell['run'])
+        self.assertEqual(resolve('unit-tests.yml', 'engine-tests', cell['env']['PYTHONS']).split(),
+                         list(KTLO_ON_LATEST))
+        self.assertIn('engine-cell.sh" "$py"', cell['run'])
 
     def test_no_ktlo_leg_is_a_required_context(self) -> None:
         spec = job('python-compatibility.yml', 'compatibility')
         template = spec['name']
         names = {}
-        for leg in legs(spec):
+        for leg in legs('python-compatibility.yml', 'compatibility'):
             names[template.replace('${{ matrix.python-version }}', leg['python-version'])
                   .replace("${{ matrix.ktlo && ' (KTLO)' || '' }}", ' (KTLO)' if is_ktlo(leg) else '')] = leg
         self.assertNotIn('${{', ''.join(names), template)
         self.assertEqual({n for n, leg in names.items() if not is_ktlo(leg)}, REQUIRED - {'Required checks passed'})
         self.assertFalse({n for n, leg in names.items() if is_ktlo(leg)} & REQUIRED)
-        comment = (WORKFLOWS / 'unit-tests.yml').read_text(encoding='utf-8')
-        self.assertIn('five for `Compat Python 3.11`-`3.15`', comment)
 
 
 class TestNoKTLOLegCanFailTheRelease(unittest.TestCase):
@@ -307,9 +318,16 @@ class TestNoKTLOLegCanFailTheRelease(unittest.TestCase):
         self.tmp = pathlib.Path(tmp.name)
 
     def pypi_complete(self, files: 'list[str]') -> 'str':
-        """``PCAPKIT_PYPI_COMPLETE`` for a release holding ``files``, ``curl`` stubbed."""
+        """``PCAPKIT_PYPI_COMPLETE`` for a release holding ``files``, ``curl`` stubbed.
+
+        The supported wheel tags reach the step as ``PCAPKIT_PYPI_WHEELS``, read
+        from the tier file as the workflow reads it (#1660).
+
+        """
         steps = job('create-release.yml', 'version_check')['steps']
-        script = next(step for step in steps if step.get('name') == 'Check PyPI publish completeness')['run']
+        step = next(step for step in steps if step.get('name') == 'Check PyPI publish completeness')
+        script = step['run']
+        wheels = resolve('create-release.yml', 'version_check', step['env']['PCAPKIT_PYPI_WHEELS'])
         reply = self.tmp / 'reply.json'
         reply.write_text(json.dumps({'urls': [{'filename': name} for name in files]}), encoding='utf-8')
         bin_dir = self.tmp / 'bin'
@@ -322,14 +340,17 @@ class TestNoKTLOLegCanFailTheRelease(unittest.TestCase):
         output.write_text('', encoding='utf-8')
         result = bash(script.replace('/tmp/pypi_release.json', str(self.tmp / 'release.json')),
                       {'PATH': f'{bin_dir}{os.pathsep}{os.environ["PATH"]}', 'REPLY': str(reply),
-                       'GITHUB_OUTPUT': str(output), 'PCAPKIT_VERSION': '1.5.0'})
+                       'GITHUB_OUTPUT': str(output), 'PCAPKIT_VERSION': '1.5.0',
+                       'PCAPKIT_PYPI_WHEELS': wheels})
         self.assertEqual(result.returncode, 0, result.stderr)
         return dict(line.split('=', 1) for line in output.read_text(encoding='utf-8').split())['PCAPKIT_PYPI_COMPLETE']
 
     def test_pypi_completeness_counts_the_supported_tier_only(self) -> None:
-        supported = [f'pypcapkit-1.5.0-{tag}-none-any.whl'
-                     for tag in ('cp311', 'cp312', 'cp313', 'cp314', 'cp315', 'pp311')]
-        ktlo = ['pypcapkit-1.5.0-cp310-none-any.whl', 'pypcapkit-1.5.0-pp310-none-any.whl']
+        tags = {leg['python-version']: versions_script().wheel_tag(leg['python-version'])
+                for leg in legs('create-release.yml', 'pypi')}
+        supported = [f'pypcapkit-1.5.0-{tags[v]}-none-any.whl' for v in SUPPORTED + tier('pypy', 'supported')]
+        ktlo = [f'pypcapkit-1.5.0-{tags[v]}-none-any.whl' for v in KTLO_ON_LATEST + tier('pypy', 'ktlo')]
+        self.assertTrue(supported and ktlo)
         sdist = ['pypcapkit-1.5.0.tar.gz']
         self.assertEqual(self.pypi_complete(supported + sdist), 'true')
         self.assertEqual(self.pypi_complete(supported + ktlo + sdist), 'true')
@@ -340,7 +361,7 @@ class TestNoKTLOLegCanFailTheRelease(unittest.TestCase):
         spec = job('create-release.yml', 'pypi')
         record = next(step for step in spec['steps'] if step.get('id') == 'ktlo')
         status = job('create-release.yml', 'release_status')['steps'][0]['env']
-        for leg in (leg for leg in legs(spec) if is_ktlo(leg)):
+        for leg in (leg for leg in legs('create-release.yml', 'pypi') if is_ktlo(leg)):
             key = 'ktlo_' + leg['python-version'].replace('.', '')
             with self.subTest(leg=leg['python-version']):
                 self.assertEqual(spec['outputs'][key], f'${{{{ steps.ktlo.outputs.{key} }}}}')
@@ -378,7 +399,7 @@ class TestNoKTLOLegCanFailTheRelease(unittest.TestCase):
         for name, job_id in (('create-release.yml', 'conda'), ('cron-conda.yml', 'conda-dist')):
             spec = job(name, job_id)
             with self.subTest(workflow=name, job=job_id):
-                self.assertFalse([leg for leg in legs(spec) if is_ktlo(leg)])
+                self.assertFalse([leg for leg in legs(name, job_id) if is_ktlo(leg)])
                 setup = next(step for step in spec['steps']
                              if str(step.get('uses', '')).startswith('conda-incubator/setup-miniconda@'))
                 self.assertEqual(setup['with']['python-version'],
@@ -531,13 +552,12 @@ class TestPython37IsKTLO(unittest.TestCase):
         for name, job_id, _ in LEGACY_37:
             spec = job(name, job_id)
             with self.subTest(workflow=name, job=job_id):
-                found = [leg for leg in legs(spec) if leg['python-version'] == '3.7']
+                found = [leg for leg in legs(name, job_id) if leg['python-version'] == '3.7']
                 self.assertEqual(found, [{'python-version': '3.7', 'ktlo': True, 'os': 'ubuntu-22.04'}])
                 self.assertTrue(spec['name'].endswith("${{ matrix.ktlo && ' (KTLO)' || '' }}"))
         joined = {(name, job_id) for name, job_id, _ in MATRICES
-                  if '3.7' in [leg['python-version'] for leg in legs(job(name, job_id))]}
-        engines = [str(step['with']['python-version']) for step in job('unit-tests.yml', 'engine-tests')['steps']
-                   if str(step.get('uses', '')).startswith('actions/setup-python@')]
+                  if '3.7' in [leg['python-version'] for leg in legs(name, job_id)]}
+        engines = [versions for _, versions in engine_inputs()]
         if '3.7' in ' '.join(engines).split():
             joined.add(('unit-tests.yml', 'engine-tests'))
         self.assertEqual(joined, {(name, job_id) for name, job_id, _ in LEGACY_37})
@@ -562,7 +582,7 @@ class TestPython37IsKTLO(unittest.TestCase):
             for step in steps[index + 1:]:
                 condition = str(step.get('if', ''))
                 if 'matrix.coverage' in condition:
-                    continue  # the 3.14 leg only, which a failed install fails anyway
+                    continue  # the `latest` leg only, which a failed install fails anyway
                 if step.get('name') == 'KTLO summary':
                     continue
                 with self.subTest(workflow=name, job=job_id, step=step.get('name') or step.get('uses')):
@@ -706,13 +726,11 @@ class TestTheProseFollowsTheTiers(unittest.TestCase):
 
     def test_the_workflows_page_counts_each_matrix_jobs_legs(self) -> None:
         page = prose(ROOT / 'docs' / 'source' / 'contributing' / 'workflows.rst')
-        engines = {version for step in job('unit-tests.yml', 'engine-tests')['steps']
-                   if str(step.get('uses', '')).startswith('actions/setup-python@')
-                   for version in str(step['with']['python-version']).split()}
+        engines = {version for _, versions in engine_inputs() for version in versions.split()}
         claims = {
-            r'``test`` \((\w+) Python legs': len(legs(job('unit-tests.yml', 'test'))),
-            r'``integration`` \((\w+)\)': len(legs(job('unit-tests.yml', 'integration'))),
-            r'``pypcap-parity`` \((\w+)\)': len(legs(job('unit-tests.yml', 'pypcap-parity'))),
+            r'``test`` \((\w+) Python legs': len(legs('unit-tests.yml', 'test')),
+            r'``integration`` \((\w+)\)': len(legs('unit-tests.yml', 'integration')),
+            r'``pypcap-parity`` \((\w+)\)': len(legs('unit-tests.yml', 'pypcap-parity')),
             r'each looping over (\w+) Python versions': len(engines),
         }
         for pattern, count in claims.items():

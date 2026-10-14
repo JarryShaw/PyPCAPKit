@@ -219,9 +219,16 @@ jobs:
           ref: ${{ github.sha }}
           fetch-depth: 0
 
+      # #1660: .github/python-versions.toml, read with the runner's own python3:
+      # `latest` for this job, the ``pypi`` and ``conda`` matrices, and the tags
+      # the two completeness checks below count, all from this run's commit.
+      - name: Read the Python versions
+        id: python-versions
+        run: python3 util/python_versions.py --github-output
+
       - uses: actions/setup-python@v7
         with:
-          python-version: '3.14'
+          python-version: ${{ steps.python-versions.outputs.latest }}
 
       - name: Install and Setup
         run: |
@@ -256,9 +263,10 @@ jobs:
           tag: "conda-${{ steps.get_version.outputs.PCAPKIT_VERSION }}+0"
 
       # PyPI evidence: compare the file count for this version against the 7
-      # expected -- the 6 supported legs (``pypi``'s ``strategy.matrix.python-version``)
-      # each producing a wheel, plus the sdist that the "No Source Distribution"
-      # step keeps only on the 3.14 leg. A release-level 200 only proves *some*
+      # expected -- the 6 supported legs (``pypi``'s ``python-version`` axis,
+      # whose wheel tags ``PCAPKIT_PYPI_WHEELS`` lists) each producing a wheel,
+      # plus the sdist that the "No Source Distribution" step keeps only on the
+      # 3.15 leg, ``latest``. A release-level 200 only proves *some*
       # file landed, not all of them, so presence alone -- ``PCAPKIT_TAG_EXISTS``'s
       # mistake, repeated -- is not enough. Only the supported tier's wheels are
       # counted (#1633): a KTLO leg's wheel neither completes the release nor,
@@ -284,10 +292,13 @@ jobs:
         id: check_pypi
         env:
           PCAPKIT_VERSION: ${{ steps.get_version.outputs.PCAPKIT_VERSION }}
+          PCAPKIT_PYPI_WHEELS: ${{ steps.python-versions.outputs.pypi-wheels }}
         run: |
           set -euo pipefail
 
-          expected=7
+          # One wheel per supported leg, plus the sdist.
+          read -r -a wheels <<< "$PCAPKIT_PYPI_WHEELS"
+          expected=$(( ${#wheels[@]} + 1 ))
           # `--retry-connrefused` and the `|| status=000` fallback keep a
           # transient pypi.org outage from failing this step outright: under
           # `set -e` a bare curl failure here would fail `version_check`,
@@ -313,10 +324,10 @@ jobs:
             # `python3 -` reads from stdin, so nothing is indented that
             # Python did not itself put there.
             count="$(printf '%s\n' \
-              "import json" \
+              "import json, os" \
               "with open('/tmp/pypi_release.json') as f:" \
               "    data = json.load(f)" \
-              "supported = {'cp311', 'cp312', 'cp313', 'cp314', 'cp315', 'pp311'}" \
+              "supported = set(os.environ['PCAPKIT_PYPI_WHEELS'].split())" \
               "names = [u.get('filename', '') for u in data.get('urls', [])]" \
               "wheels = {n.split('-')[2] for n in names if n.endswith('.whl') and n.count('-') == 4}" \
               "print(len(wheels & supported) + any(n.endswith('.tar.gz') for n in names))" \
@@ -343,10 +354,13 @@ jobs:
         id: check_conda
         env:
           PCAPKIT_VERSION: ${{ steps.get_version.outputs.PCAPKIT_VERSION }}
+          PCAPKIT_CONDA_BUILDS: ${{ steps.python-versions.outputs.conda-builds }}
         run: |
           set -euo pipefail
 
-          expected=10
+          # Each of ``conda``'s two platforms, for each supported version.
+          read -r -a builds <<< "$PCAPKIT_CONDA_BUILDS"
+          expected=$(( 2 * ${#builds[@]} ))
           # Same coupling risk, and the same fix, as the PyPI check above.
           status="$(curl -s --retry 3 --retry-connrefused \
             -o /tmp/anaconda_release.json -w '%{http_code}' \
@@ -358,11 +372,11 @@ jobs:
             # one line per `printf` argument, no line indented in the actual
             # source `python3 -` reads.
             count="$(printf '%s\n' \
-              "import json" \
+              "import json, os" \
               "with open('/tmp/anaconda_release.json') as f:" \
               "    data = json.load(f)" \
               "platforms = {'linux-64', 'osx-64'}" \
-              "py_tags = {'py311', 'py312', 'py313', 'py314', 'py315'}" \
+              "py_tags = set(os.environ['PCAPKIT_CONDA_BUILDS'].split())" \
               "seen = {" \
               "    (d.get('attrs', {}).get('subdir'), tag)" \
               "    for d in data.get('distributions', [])" \
@@ -390,6 +404,10 @@ jobs:
       PCAPKIT_PYPI_COMPLETE: ${{ steps.check_pypi.outputs.PCAPKIT_PYPI_COMPLETE }}
       PCAPKIT_CONDA_COMPLETE: ${{ steps.check_conda.outputs.PCAPKIT_CONDA_COMPLETE }}
       PCAPKIT_CONDA_LABEL: ${{ steps.get_version.outputs.PCAPKIT_CONDA_LABEL }}
+      # #1660: from .github/python-versions.toml, for ``pypi`` and ``conda``.
+      PYTHON_LATEST: ${{ steps.python-versions.outputs.latest }}
+      PYTHON_PYPI: ${{ steps.python-versions.outputs.pypi }}
+      PYTHON_CONDA: ${{ steps.python-versions.outputs.conda }}
 
   # No ``environment:`` here, and none needed: this is a test gate with no outward
   # effect, and a job that calls a reusable workflow may not declare one anyway.
@@ -797,29 +815,22 @@ jobs:
       ## one leg failing must not cancel its siblings: each leg still has its own
       ## wheel to attach to the GitHub Release, and a cancelled leg never does
       fail-fast: false
-      matrix:
-        # #1633: the supported tier, whose wheels version_check counts.
-        python-version:
-          - "3.11"
-          - "3.12"
-          - "3.13"
-          - "3.14"
-          - "3.15"
-          - "pypy3.11"
-        # The KTLO tier: Python 3.10 language level, end-of-life, still built
-        # and published but never blocking. Each step that can fail on one
-        # carries `continue-on-error: ${{ matrix.ktlo == true }}`, the
-        # step-level form, so ``needs.pypi.result`` cannot see it -- see the
-        # same choice in unit-tests.yml's ``test`` job. #1672: each step after
-        # setup-python waits on the ``outcome`` of the one it needs, so a KTLO
-        # leg stops at its first failure, where a supported leg stops, rather
-        # than building with the image's ``python`` or uploading nothing; and
-        # ``KTLO summary`` reports each failed step as a warning.
-        include:
-          - python-version: "3.10"
-            ktlo: true
-          - python-version: "pypy3.10"
-            ktlo: true
+      # #1660: CPython and PyPy from .github/python-versions.toml, through
+      # ``version_check``. #1633: the supported tier is the ``python-version``
+      # axis, whose wheels version_check counts. The KTLO tier -- end-of-life,
+      # still built and published but never blocking -- is added by
+      # ``include``, without the versions that need an older runner than this
+      # job's ``ubuntu-latest``: Python 3.10 language level today. Each step
+      # that can fail on one carries `continue-on-error: ${{ matrix.ktlo ==
+      # true }}`, the step-level form, so ``needs.pypi.result`` cannot see it
+      # -- see the same choice in unit-tests.yml's ``test`` job. #1672: each
+      # step after setup-python waits on the ``outcome`` of the one it needs,
+      # so a KTLO leg stops at its first failure, where a supported leg stops,
+      # rather than building with the image's ``python`` or uploading nothing;
+      # and ``KTLO summary`` reports each failed step as a warning. A KTLO leg
+      # also needs its own ``ktlo_*`` output above, which
+      # tests/project/test_python_matrix_tiers_1633.py checks.
+      matrix: ${{ fromJSON(needs.version_check.outputs.PYTHON_PYPI) }}
     steps:
       # #1634: this run's commit, not ``ref: v<version>`` -- that tag was
       # whatever ``main`` had become by approval time -- and then the check
@@ -878,7 +889,7 @@ jobs:
 
       - name: No Source Distribution for Python ${{ matrix.python-version }}
         id: no_sdist
-        if: ${{ matrix.python-version != '3.14' && steps.build.outcome == 'success' }}
+        if: ${{ matrix.python-version != needs.version_check.outputs.PYTHON_LATEST && steps.build.outcome == 'success' }}
         continue-on-error: ${{ matrix.ktlo == true }}
         run: |
           rm dist/*.tar.gz
@@ -1037,16 +1048,12 @@ jobs:
           - macos-latest
           - ubuntu-latest
           # - windows-latest  # skip for now
-        # #1633: the supported tier only. There is no KTLO 3.10 leg because it
+        # #1633: the supported tier only, from .github/python-versions.toml
+        # through ``version_check`` (#1660). There is no KTLO 3.10 leg because it
         # can only fail: conda/requirements.txt pins soupsieve==3.0.3
         # (Requires-Python >=3.11.5), and util/conda-dist.py pins the newest
         # release of every dependency, so that floor only rises.
-        python-version:
-          - "3.11"
-          - "3.12"
-          - "3.13"
-          - "3.14"
-          - "3.15"
+        python-version: ${{ fromJSON(needs.version_check.outputs.PYTHON_CONDA) }}
     steps:
       # #1634: this run's commit, not ``ref: conda-<version>+0``, then the check
       # that both tags these packages are filed under name it.

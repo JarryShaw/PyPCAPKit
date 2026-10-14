@@ -165,13 +165,22 @@ jobs:
       # source, and running them several times over would produce several
       # copies of the same findings for several times the runner cost.
       #
-      # 3.14 specifically, matching cron-vendor.yml, because it is the version
-      # the recorded counts above were measured on -- so a count that moves
-      # means the code moved, not the interpreter. 3.15 is newer, and supported
-      # since #1633, but moving to it would re-baseline every count above.
+      # `latest` from .github/python-versions.toml, like every single-interpreter
+      # job (#1661). Moving off 3.14 changes no count. Measured at 0bc157660
+      # on setup-python's 3.14.8 and 3.15.0 builds: pylint 4.1.3 (astroid
+      # 4.3.4) reports the same 515 C, 71 E and 4970 W, message for message;
+      # only R0401 cyclic-import differs, as it does between two runs on one
+      # interpreter (see the header). bandit, mypy and vermin print identical
+      # reports. To test a 3.15 without C `_decimal`, use setup-python's build,
+      # which has none: faking it with `sys.modules['_decimal'] = None` makes
+      # astroid crash on pcapkit/toolkit/dpkt.py on 3.14.8 too (#1677).
+      - name: Read the Python versions
+        id: python-versions
+        run: python3 util/python_versions.py --github-output
+
       - uses: actions/setup-python@v7
         with:
-          python-version: '3.14'
+          python-version: ${{ steps.python-versions.outputs.latest }}
 
       # `.[all,dev]` rather than a bare install: pylint and mypy resolve imports,
       # so findings depend on what is importable. #910 narrowed `all` to core

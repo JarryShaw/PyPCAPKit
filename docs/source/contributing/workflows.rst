@@ -259,7 +259,7 @@ the caller's own workflow run, as one of the caller's own jobs, rather than
 starting an independent run after the caller finishes. All four calls in this
 repository target the same reusable workflow, with the same input:
 
-* ``.github/workflows/create-release.yml:413`` -- job ``unit-tests`` calls
+* ``.github/workflows/create-release.yml:431`` -- job ``unit-tests`` calls
   ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
 * ``.github/workflows/cron-conda.yml:50`` -- job ``unit-tests`` calls
   ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
@@ -268,9 +268,10 @@ repository target the same reusable workflow, with the same input:
 * ``.github/workflows/deploy-pages.yml:55`` -- job ``unit-tests`` calls
   ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
 
-``gate-only: true`` selects **two** of ``unit-tests.yml``'s **ten** jobs,
-not one: ``gate`` (the full suite, one Python version) and ``changelog``
-(checks ``CHANGELOG.md`` against its source entry). It skips the other
+``gate-only: true`` selects **three** of ``unit-tests.yml``'s **eleven** jobs,
+not one: ``gate`` (the full suite, on ``latest``), ``changelog``
+(checks ``CHANGELOG.md`` against its source entry) and ``python-versions``,
+which reads ``gate``'s version (see `Python Versions`_ below). It skips the other
 **eight** -- the five matrix jobs, ``test`` (nine Python legs: five
 supported, four KTLO), ``integration`` (nine), ``engine-tests`` (one job
 for each of five engines, each looping over six Python versions),
@@ -284,7 +285,7 @@ and ``project-tests``, and ``required-checks`` (see `Required Status
 Checks`_ below), gated out by their own ``if:`` rather than by having
 already run. ``changelog`` carries no
 ``if:`` at all and runs on every path regardless -- deliberately, per its own
-comment (``unit-tests.yml:1493-1499``): ``create-release.yml`` feeds
+comment (``unit-tests.yml:1515-1521``): ``create-release.yml`` feeds
 ``CHANGELOG.md`` to the GitHub Release body, so the release path is exactly
 where a drifted file must not go unchecked. Confirmed on run `36210743295
 <https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295>`__ (a
@@ -315,13 +316,13 @@ anything other than ``success`` -- including
 ``skipped``, which is exactly what Vendor Update's *own* jobs report when
 *their* ``workflow_run``-path guards decline (see ``cron-vendor.yml``'s
 ``vendor-update`` job). ``unit-tests`` then depends on that job with
-``needs: [ version_check ]`` (``create-release.yml:403``) and an ``if:`` that
+``needs: [ version_check ]`` (``create-release.yml:421``) and an ``if:`` that
 calls no status-check function, so a skipped dependency skips it too -- and
 every job past it is gated the same way: ``github`` needs ``[ unit-tests,
-version_check ]`` (``:434``), ``tag`` needs ``[ github, unit-tests,
-version_check ]`` (``:619``), ``pypi`` needs ``[ github, unit-tests,
-version_check ]`` (``:784``), and ``conda`` needs ``[ tag, github,
-unit-tests, version_check ]`` (``:1026``).
+version_check ]`` (``:452``), ``tag`` needs ``[ github, unit-tests,
+version_check ]`` (``:637``), ``pypi`` needs ``[ github, unit-tests,
+version_check ]`` (``:802``), and ``conda`` needs ``[ tag, github,
+unit-tests, version_check ]`` (``:1037``).
 
 .. mermaid::
 
@@ -347,7 +348,7 @@ unit-tests, version_check ]`` (``:1026``).
 
 This is a transitive reduction, as in :doc:`releasing`: ``version_check`` and
 ``unit-tests`` are also direct ``needs:`` of ``tag`` and ``pypi``
-(``create-release.yml:619,784``) and of ``conda`` (``:1026``), but ``github``
+(``create-release.yml:637,802``) and of ``conda`` (``:1037``), but ``github``
 already implies those edges, since it depends on both itself. Drawing them
 would add lines without changing which job can start before which, or which
 job a skip in ``version_check`` reaches.
@@ -386,7 +387,7 @@ Coverage (`#1063 <https://github.com/JarryShaw/PyPCAPKit/issues/1063>`__)
 -------------------------------------------------------------------------
 
 Coverage is measured inside an existing leg rather than by a workflow of its
-own: the ``Python 3.14`` leg of ``test`` (matrix key ``coverage: true``) runs
+own: the ``Python 3.15`` leg of ``test`` (matrix key ``coverage: true``) runs
 its unchanged pytest selection under ``coverage run
 --rcfile=.github/coverage.toml``. That rcfile repeats
 :file:`pyproject.toml`'s ``[tool.coverage.*]`` settings
@@ -552,41 +553,42 @@ grepping every workflow file for its name:
      - Where
    * - ``Required checks passed``
      - job ``required-checks``
-     - ``unit-tests.yml:1806``
+     - ``unit-tests.yml:1841``
    * - ``Compat Python 3.11``
      - job ``compatibility``, matrix leg ``3.11``
-     - ``python-compatibility.yml:39,47``
+     - ``python-compatibility.yml:60``, ``.github/python-versions.toml:20``
    * - ``Compat Python 3.12``
      - job ``compatibility``, matrix leg ``3.12``
-     - ``python-compatibility.yml:39,48``
+     - ``python-compatibility.yml:60``, ``.github/python-versions.toml:21``
    * - ``Compat Python 3.13``
      - job ``compatibility``, matrix leg ``3.13``
-     - ``python-compatibility.yml:39,49``
+     - ``python-compatibility.yml:60``, ``.github/python-versions.toml:22``
    * - ``Compat Python 3.14``
      - job ``compatibility``, matrix leg ``3.14``
-     - ``python-compatibility.yml:39,50``
+     - ``python-compatibility.yml:60``, ``.github/python-versions.toml:23``
    * - ``Compat Python 3.15``
      - job ``compatibility``, matrix leg ``3.15``
-     - ``python-compatibility.yml:39,51``
+     - ``python-compatibility.yml:60``, ``.github/python-versions.toml:24``
 
 That is the list after `#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__,
 which added ``Compat Python 3.15`` and removed ``Compat Python 3.10``. Moving a version
 between the tiers below means editing the ruleset in the same change.
 
 ``Required checks passed`` is defined by exactly one job
-(``unit-tests.yml:1806``). ``Compat Python`` is defined by one, the
-``compatibility`` job in ``python-compatibility.yml`` (``:39``), expanding to
-the five required legs at ``:47-51`` and to four KTLO legs at ``:56-66`` whose
-names end in ``(KTLO)``, so no required context matches one. A comment at
-``unit-tests.yml:1717`` mentions the string without defining it.
+(``unit-tests.yml:1841``). ``Compat Python`` is defined by one, the
+``compatibility`` job in ``python-compatibility.yml`` (``:60``), whose matrix
+(``:74``) comes from :file:`.github/python-versions.toml`: the five required legs
+are its supported tier (``:20-24``), and its four KTLO legs (``:16-19``) have
+names ending in ``(KTLO)``, so no required context matches one. A comment at
+``unit-tests.yml:1752`` mentions the string without defining it.
 
 ``Required checks passed`` is an aggregate, not a single check run. The ruleset
 requires it and the five ``Compat Python 3.11``-``3.15`` legs, nothing else, as
-``unit-tests.yml``'s own comment (``unit-tests.yml:1716-1726``) records. It
+``unit-tests.yml``'s own comment (``unit-tests.yml:1751-1761``) records. It
 ``needs:`` the gating jobs of ``unit-tests.yml`` -- ``test``, ``integration``,
 ``engine-tests`` and ``pypcap-parity``, plus ``changes`` and ``project-tests``
 for the docs-only path -- and checks each result explicitly
-(``unit-tests.yml:1805-1859``). Rulesets match check names literally, with no
+(``unit-tests.yml:1840-1894``). Rulesets match check names literally, with no
 wildcard, so requiring the matrix cells one by one would mean editing the
 ruleset whenever a matrix changes; the aggregate keeps the required list fixed.
 It accepts the four legs as ``skipped`` only on a docs-only pull request, where
@@ -595,19 +597,20 @@ instead. The ``Compat`` legs stay required separately because they come from
 ``python-compatibility.yml``, and a job cannot ``needs:`` a job in another
 workflow file. This job runs on Unit Tests' own ``push``/``pull_request``
 triggers; the ``gate-only: true`` reusable calls documented above skip it via
-``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:1808``),
+``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:1843``),
 so it is never produced -- and never expected -- on those paths.
 
-Python versions come in two tiers (#1633). The **supported** tier, 3.11-3.15,
-blocks: a failed leg fails ``Required checks passed`` or its own required
-``Compat`` context. The **KTLO** tier -- end-of-life 3.7-3.10, still built and
+Python versions come in two tiers (#1633), declared in
+:file:`.github/python-versions.toml` (see `Python Versions`_). The **supported**
+tier, 3.11-3.15, blocks: a failed leg fails ``Required checks passed`` or its own
+required ``Compat`` context. The **KTLO** tier -- end-of-life 3.7-3.10, still built and
 tested -- never blocks, is never a required context, and never shows a commit or a
 pull request red (#1672). Each KTLO leg shares its job with supported legs, in
 ``unit-tests.yml``, ``python-compatibility.yml`` and ``create-release.yml``, and
 every such job works the same way:
 
 * Every step that can fail on a KTLO leg has an ``id`` and
-  ``continue-on-error: ${{ matrix.ktlo == true }}`` (``unit-tests.yml:78-87``),
+  ``continue-on-error: ${{ matrix.ktlo == true }}`` (``unit-tests.yml:115-125``),
   unless it is masked on every leg, as the timings uploads are. Its ``outcome`` is
   then ``failure`` but its ``conclusion`` ``success``, so the job, its check run
   and ``required-checks`` read ``success``. A step that needs an earlier one's work
@@ -616,8 +619,8 @@ every such job works the same way:
 * The last step, ``KTLO summary``, runs on KTLO legs only and reports each failed
   ``outcome`` as a warning and a job-summary line. A step's own annotations take
   ``ANNOTATION_LEVEL``: ``warning`` on a KTLO leg, ``error`` on a supported one.
-  ``engine-tests``' 3.10 cell, a step of its own with ``continue-on-error: true``,
-  reports the same way.
+  ``engine-tests``' KTLO cells, a step of their own with ``continue-on-error: true``,
+  report the same way.
 * Never job-level ``continue-on-error``: it passes the *run*, but the leg's check
   run still concludes ``failure``, which showed every commit red while
   ``Compat Python 3.7 (KTLO)`` carried it.
@@ -640,16 +643,43 @@ in no matrix: setup-python builds it only for retired Ubuntu images. Nor are
 are they in ``pypcap-parity``, which also runs on ``ubuntu-latest``; none of them
 was measured on that job.
 
+Python Versions
+---------------
+
+Since `#1660 <https://github.com/JarryShaw/PyPCAPKit/issues/1660>`__,
+:file:`.github/python-versions.toml` declares every Python version CI runs: one
+line per version, with its tier -- ``supported``, ``ktlo``, or ``pre-release``,
+which none is today -- and, where ``ubuntu-latest`` cannot provide it, the
+``runner`` it needs. ``latest`` names the newest supported CPython, which every
+job on one interpreter runs. :file:`util/python_versions.py` reads the file with
+the runner's own ``python3`` -- its ``tomllib`` needs 3.11, and every image that
+runs it has 3.12 or newer -- and writes each matrix as JSON: a ``python-versions``
+job in ``unit-tests.yml`` and ``python-compatibility.yml``, ``version_check`` in
+``create-release.yml`` and ``conda-update`` in ``cron-conda.yml`` hand theirs on
+through ``fromJSON``, and each single-interpreter job reads ``latest``.
+
+**A tier change is a one-line edit to that file, plus the matching edit to ruleset
+23497679's ``Compat`` contexts.** The file's ``exemptions`` list each pin kept
+off ``latest``, with its reason in the comment above it, such as the conda
+jobs' ``!= '3.15'``. ``tests/project/test_python_versions_1660.py`` fails on a
+pin the file does not list, on an exemption with no comment, and on a
+classifier, doc or comment that no longer matches the file -- the coverage
+leg's version, the release checks' counts. Its tests, and the other tests that
+read the file, skip on the KTLO interpreters, which have no ``tomllib``. Two
+edits it names rather than makes: a new ``pypi`` KTLO leg needs its own
+``ktlo_*`` output for ``release_status``, and a pre-release leg needs
+non-blocking mechanics no workflow has yet, so the script refuses one.
+
 Deployment ``environment:``
 ----------------------------
 
 Four jobs, all in ``create-release.yml``, declare a deployment
 ``environment:`` and can therefore pause for an approval:
 
-* ``github`` -- ``environment: github-release`` (``create-release.yml:431``)
-* ``tag`` -- ``environment: conda-tag`` (``create-release.yml:617``)
-* ``pypi`` -- ``environment: pypi`` (``create-release.yml:779``)
-* ``conda`` -- ``environment: anaconda`` (``create-release.yml:1023``)
+* ``github`` -- ``environment: github-release`` (``create-release.yml:449``)
+* ``tag`` -- ``environment: conda-tag`` (``create-release.yml:635``)
+* ``pypi`` -- ``environment: pypi`` (``create-release.yml:797``)
+* ``conda`` -- ``environment: anaconda`` (``create-release.yml:1034``)
 
 No other workflow in scope here declares one -- including
 ``deploy-pages.yml``, whose ``deploy-pages`` job pushes straight to the
