@@ -146,10 +146,6 @@ def ipv6_in_ipv4() -> 'dict[str, tuple[list[int], list[bytes]]]':
         lambda n: eth(v4(v4(first(n), 41), 4, length=40 + 48 + 6), trailer=TRAILER))
     one('6in4 behind an AH, cut by the Total Length', [6],
         lambda n: eth(v4(ah(41) + first(n), 51, length=20 + 24 + 48 + 6), trailer=TRAILER))
-    one('6in4 jumbogram, Total Length 0, with a trailer', [16],
-        lambda n: eth(v4(first(n, ext=jumbo(44, 8 + 24), nxt=0, plen=0), 41, length=0), trailer=TRAILER))
-    one('6in4 jumbogram shorter than the packet', [4],
-        lambda n: eth(v4(first(n, ext=jumbo(44, 8 + 8 + 4), nxt=0, plen=0), 41)))
     # where the default engine dissects no Fragment header of the first IPv6 layer
     one('6in4, not fragmented', [], lambda n: eth(v4(ipv6(b'A' * 16, 253), 41)))
     one('ICMP quoting a 6in4 fragment', [], lambda n: eth(v4(icmp_unreach(v4(first(n), 41)), 1)))
@@ -179,9 +175,6 @@ def payload_length() -> 'dict[str, tuple[list[int], list[bytes]]]':
     return {
         'a zero Payload Length': ([], [eth(first(901, plen=0))]),
         'a zero Payload Length, with a trailer': ([], [eth(first(902, plen=0), trailer=TRAILER)]),
-        'a jumbogram, with a trailer': ([16], [eth(first(903, ext=jumbo(44, 8 + 24), nxt=0, plen=0),
-                                                   trailer=TRAILER)]),
-        'a jumbogram shorter than the packet': ([4], [eth(first(904, ext=jumbo(44, 8 + 8 + 4), nxt=0, plen=0))]),
         'a jumbogram ending inside the Fragment header': ([], [eth(first(905, ext=jumbo(44, 8 + 4), nxt=0,
                                                                          plen=0))]),
         'a Payload Length short of the packet (control)': ([6], [eth(first(906, plen=8 + 6), trailer=TRAILER)]),

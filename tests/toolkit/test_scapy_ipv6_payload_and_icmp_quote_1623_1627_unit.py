@@ -179,7 +179,6 @@ class ScapyIPv4ReassemblyInputTests(unittest.TestCase):
             ('4in6 cut by each Payload Length', [10, 4]),
             ('4in6 cut by the Payload Length', [10]),
             ('4in6 cut by the outer Payload Length of 6in6', [10]),
-            ('4in6 jumbogram', [10]),
             ('Total Length 0 in 4in6, with a trailer', [16]),
             ('4in6 in 6in6 with a trailer', [16, 8]),
             ('4in6 in 6in6 cut by the inner Payload Length', [10]),

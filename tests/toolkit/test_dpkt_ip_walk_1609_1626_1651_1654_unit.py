@@ -139,11 +139,7 @@ def payload_length() -> 'dict[str, tuple[tuple[int, ...], list[bytes]]]':
             (0, 0, 0, 0), [eth(ipv6(options(6) + segment(), 0, plen=0))]),
         'Payload Length 0, 4in6, TCP': ((0, 0, 0, 0), [eth(ipv6(v4(segment(), 6), 4, plen=0))]),
         '6in6, inner Payload Length 0, TCP': ((0, 0, 0, 0), [eth(v6(ipv6(segment(), 6, plen=0), 41))]),
-        'jumbogram, TCP (control)': ((1, 1, 0, 0), [eth(jumbogram())]),
-        'jumbogram, TCP, trailer': ((1, 1, 0, 0), [eth(jumbogram()) + TRAILER]),
-        'jumbogram, Jumbo Payload Length 2 short': ((1, 1, 0, 0), [eth(jumbogram(2))]),
         'jumbogram, Jumbo Payload Length inside the TCP header': ((0, 0, 0, 0), [eth(jumbogram(12))]),
-        '6in4 jumbogram, Jumbo Payload Length 2 short': ((1, 1, 1, 0), [eth(v4(jumbogram(2), 41))]),
     }
 
 

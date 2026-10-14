@@ -248,6 +248,9 @@ MAKE_CASES = (
 REJECTED = {
     'ipv4/version-6': Reject('ProtocolError', '[IPv4] invalid version: 6'),
     'ipv4/ihl-4': Reject('ProtocolError', 'resolved to a negative length'),
+    # a Jumbo Payload option beside a non-zero Payload Length, an RFC 2675 error (#1687)
+    'hopopt/jumbo-payload-0/in-ipv6': Reject('ProtocolError', 'Jumbo Payload option with a non-zero Payload '
+                                                              'Length 8'),
 }
 
 KNOWN_FAILURES = ()  # type: tuple[edge.Gap, ...]

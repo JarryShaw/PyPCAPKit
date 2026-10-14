@@ -27,7 +27,8 @@ Ethernet envelope around octets that :mod:`pcapkit` itself constructed, rather
 than a packet assembled by :mod:`scapy` from its own protocol model. That is the
 point: the octets under test are the library's own output, so a capture is a
 record of what this version of ``pcapkit`` builds, and re-parsing it exercises
-``_read_*`` against ``_make_*``.
+``_read_*`` against ``_make_*``. The one frame with more in it is HOPOPT's Jumbo
+Payload case, a genuine jumbogram -- see :func:`_jumbogram_datagram`.
 
 Only the codes that construct *successfully* can appear in a capture -- there
 are no octets for the ones that do not. A failing case in a captured family
@@ -151,6 +152,18 @@ DST_IP = '198.51.100.1'
 SRC_IP6 = '2001:db8::1'
 #: Destination address for every generated IPv6 envelope.
 DST_IP6 = '2001:db8::2'
+
+#: Jumbo Payload Length of the ``hopopt-option/Jumbo_Payload`` case: the least
+#: a jumbogram may carry, one more than the 16-bit Payload Length holds
+#: (:rfc:`2675#section-2`). See :func:`_jumbogram_datagram`.
+JUMBO_LEN = 0x10000
+#: Snapshot length of a capture whose frames all fit in it: scapy's default,
+#: which keeps every capture but a jumbogram's as it always was.
+SNAPLEN = 0xFFFF
+#: Snapshot length of a capture holding a longer frame: libpcap's
+#: ``MAXIMUM_SNAPLEN``. A libpcap reader cuts a record to the file's snaplen, so
+#: a jumbogram under :data:`SNAPLEN` would reach it truncated.
+JUMBO_SNAPLEN = 262144
 
 #: Seconds a single case may take before :func:`roundtrip` gives up on it and
 #: records ``'TIMEOUT'``, before :data:`TIMEOUT_SCALE_ENV` stretches it. A working
@@ -575,7 +588,8 @@ def _ipv6_option_overrides() -> 'dict[Any, dict[str, Any]]':
     from pcapkit.const.ipv6.option import Option as Enum_Option
 
     # HOPOPT and IPv6-Opts key on the same enumeration and behave identically
-    # on every code, so one table serves both.
+    # on every code, so one table serves both; ``_hopopt_overrides`` adds the
+    # one value that matters only in a Hop-by-Hop Options header.
     return {
         # The nonce is sized to its bit length rounded up to whole octets, at
         # least one, so the default ``nonce=0`` is a one-octet zero. A
@@ -584,6 +598,17 @@ def _ipv6_option_overrides() -> 'dict[Any, dict[str, Any]]':
         Enum_Option.ILNP_Nonce: {'nonce': 0xFFFFFF},
         Enum_Option.Line_Identification_Option: {'id': b'line-1'},
     }
+
+
+def _hopopt_overrides() -> 'dict[Any, dict[str, Any]]':
+    from pcapkit.const.ipv6.option import Option as Enum_Option
+
+    # A Jumbo Payload option in the Hop-by-Hop Options header after an IPv6
+    # header makes the packet a jumbogram, and one whose Jumbo Payload Length is
+    # not above 65,535 is an error (RFC 2675 section 3) the default engine
+    # rejects (#1687). So the option carries a legal length, and ``_frame``
+    # builds the jumbogram around it. In IPv6-Opts the option is just an option.
+    return {**_ipv6_option_overrides(), Enum_Option.Jumbo_Payload: {'len': JUMBO_LEN}}
 
 
 def _hopopt_base() -> 'dict[str, Any]':
@@ -1588,7 +1613,7 @@ FAMILIES = (
     Family('ipv4-option', _ipv4_registry, _ipv4_overrides,
            _ipv4_build, _ipv4_parse, _ipv4_extract, _ipv4_rebuild,
            capture='options-ipv4.pcap', envelope='ethernet-ipv4'),
-    Family('hopopt-option', _hopopt_registry, _ipv6_option_overrides,
+    Family('hopopt-option', _hopopt_registry, _hopopt_overrides,
            _hopopt_build, _hopopt_parse, _ipv6_extract, _hopopt_rebuild,
            capture='options-ipv6.pcap', envelope='ipv6', proto=0),
     Family('ipv6-opts-option', _ipv6_opts_registry, _ipv6_option_overrides,
@@ -1880,6 +1905,54 @@ def outcomes(families: 'Optional[tuple[Family, ...]]' = None,
         yield roundtrip(case, deadline)
 
 
+def _jumbogram_datagram(octets: 'bytes', jumbo: 'int') -> 'bytes':
+    """The UDP datagram that makes a jumbogram up to its Jumbo Payload Length.
+
+    With a Payload Length of 0 it is the Jumbo Payload Length that says where
+    the packet ends, so the octets after the Hop-by-Hop Options header have to
+    fill it, or the frame is a jumbogram cut short. The header names UDP as its
+    next header, as :func:`_hopopt_base` has every HOPOPT case do, so they are a
+    datagram of zeros to the Discard port [:rfc:`863`], with the checksum
+    :rfc:`8200#section-8.1` has a receiver verify. Its length fits UDP's Length
+    field, which :rfc:`2675#section-4` therefore leaves as is. The checksum is
+    the one's complement sum of :rfc:`1071`, computed here rather than by
+    :mod:`scapy`, so that the unit-tier test can build the datagram on a leg
+    that installs no :mod:`scapy`.
+
+    Args:
+        octets: The Hop-by-Hop Options header, as :func:`roundtrip` built it.
+        jumbo: Its Jumbo Payload Length.
+
+    Returns:
+        The datagram, ``jumbo - len(octets)`` octets long.
+
+    Raises:
+        ValueError: If the header does not name UDP, or the octets it leaves
+            are not the length of a UDP datagram.
+
+    """
+    import ipaddress
+
+    size = jumbo - len(octets)
+    if octets[0] != 17 or not 8 <= size <= 0xFFFF:
+        raise ValueError(f'cannot fill a {jumbo}-octet jumbogram after a {len(octets)}-octet '
+                         f'header naming next header {octets[0]} with a UDP datagram')
+
+    head = (50000).to_bytes(2, 'big') + (9).to_bytes(2, 'big') + size.to_bytes(2, 'big')
+    data = bytes(size - 8)
+    pseudo = (ipaddress.IPv6Address(SRC_IP6).packed + ipaddress.IPv6Address(DST_IP6).packed
+              + size.to_bytes(4, 'big') + bytes(3) + bytes([17]))
+    # The sum of the 16-bit words, an odd octet padded with a zero, with every
+    # carry folded back in; the checksum is its complement.
+    covered = pseudo + head + bytes(2) + data + bytes(size % 2)
+    total = sum(int.from_bytes(covered[i:i + 2], 'big') for i in range(0, len(covered), 2))
+    while total >> 16:
+        total = (total & 0xFFFF) + (total >> 16)
+    # A computed checksum of zero goes out as all ones, since zero means none.
+    value = (~total & 0xFFFF) or 0xFFFF
+    return head + value.to_bytes(2, 'big') + data
+
+
 def _frame(family: 'Family', octets: 'bytes', index: 'int') -> 'Any':
     """Wrap constructed octets in the envelope that makes them decodable.
 
@@ -1911,8 +1984,18 @@ def _frame(family: 'Family', octets: 'bytes', index: 'int') -> 'Any':
         frame = link / IP(src=SRC_IP, dst=DST_IP, proto=family.proto,
                           id=index, ttl=64) / Raw(octets)
     elif family.envelope == 'ipv6':
-        frame = link / IPv6(src=SRC_IP6, dst=DST_IP6, nh=family.proto,
-                            hlim=64) / Raw(octets)
+        from pcapkit.protocols.schema.internet.ipv6 import jumbo_payload_length
+
+        # A Jumbo Payload option where it makes the packet a jumbogram gets a
+        # genuine one: a Payload Length of 0 (RFC 2675 section 3, #1687), and
+        # octets to make up the Jumbo Payload Length.
+        jumbo = None if family.proto is None else jumbo_payload_length(family.proto, octets)
+        if jumbo is None:
+            frame = link / IPv6(src=SRC_IP6, dst=DST_IP6, nh=family.proto,
+                                hlim=64) / Raw(octets)
+        else:
+            frame = link / IPv6(src=SRC_IP6, dst=DST_IP6, nh=family.proto, hlim=64,
+                                plen=0) / Raw(octets + _jumbogram_datagram(octets, jumbo))
     elif family.envelope == 'tcp':
         frame = (link / IP(src=SRC_IP, dst=DST_IP, id=index, ttl=64)
                  / TCP(sport=50000, dport=80, flags='A', seq=1, ack=1)
@@ -1973,7 +2056,9 @@ def generate(dest: 'pathlib.Path | None' = None) -> 'list[pathlib.Path]':
     written = []  # type: list[pathlib.Path]
     for name in sorted(buckets):
         path = dest / name
-        wrpcap(str(path), buckets[name])
+        frames = buckets[name]
+        snaplen = SNAPLEN if max(len(frame) for frame in frames) <= SNAPLEN else JUMBO_SNAPLEN
+        wrpcap(str(path), frames, snaplen=snaplen)
         written.append(path)
 
     total = sum(len(frames) for frames in buckets.values())
