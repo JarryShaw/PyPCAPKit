@@ -27,6 +27,7 @@ import os
 import pickle
 import tempfile
 import unittest
+import urllib.parse
 
 from tests._support import reimport_once_per_class
 
@@ -150,6 +151,90 @@ class TestStringFieldLossless(unittest.TestCase):
         self.assertEqual(value, 'été')
         self.assertEqual(hash(value), hash('été'))
         self.assertEqual({value: 1}['été'], 1)
+
+
+#: ``(octets, field keyword arguments, decoded text, whether it is a DecodedString)``
+#: for ``unquote=True``, each as Python 3.9+ decodes it. A text holding a literal
+#: ``\xE9`` is the ``UnicodeError`` fallback, which decodes with ``%`` turned into ``\x``.
+UNQUOTED = (
+    (b'', {}, '', False),
+    (b'a%2fb%2F', {}, 'a/b/', True),
+    (b'%C3%A9', {}, 'é', False),
+    (b'caf%E9', {'encoding': 'latin-1'}, 'café', False),
+    (b'a+b%20c', {}, 'a+b c', True),
+    (b'%zz%', {}, '%zz%', True),
+    (b'%E9', {'errors': 'replace'}, '�', True),
+    (b'%E9', {'errors': 'ignore'}, '', True),
+    (b'%FF%FEa%00', {'encoding': 'utf-16'}, 'a', True),
+    (b'%E9', {}, '\\xE9', True),
+    (b'\xff%41', {}, '�\\x41', True),
+    (b'%ED%A0%80', {}, '\\xED\\xA0\\x80', True),
+    (b'%C3%A9', {'encoding': 'ascii'}, '\\xC3\\xA9', True),
+    (b'%E9', {'encoding': 'idna'}, '\\xE9', True),
+)
+
+
+class TestStringFieldUnquote(unittest.TestCase):
+    """``unquote=True`` decodes alike on every Python (#1693).
+
+    :func:`urllib.parse.unquote` accepts :obj:`bytes` only from Python 3.9, and
+    every value a field unpacks is :obj:`bytes`, so on 3.8 each of these raised
+    ``TypeError: Expected str, got bytes``.
+    """
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def check_table(self) -> None:
+        from pcapkit.corekit.fields.strings import DecodedString, StringField
+
+        for octets, kwargs, text, decoded in UNQUOTED:
+            with self.subTest(octets=octets, kwargs=kwargs):
+                field = StringField(length=len(octets), unquote=True, **kwargs)  # type: ignore[arg-type]
+                value = field.unpack(octets, {})
+                self.assertEqual(str(value), text)
+                self.assertIs(isinstance(value, DecodedString), decoded)
+                self.assertEqual(field.pack(value, {}), octets)
+
+    def test_unquote_decodes_as_python_3_9_does(self) -> None:
+        self.check_table()
+
+    def test_unquote_is_the_compat_one(self) -> None:
+        """The field unquotes through :func:`pcapkit.utilities.compat.unquote`.
+
+        That is where the version gate lives, and
+        :mod:`tests.utilities.test_compat` runs both of its branches, the pre-3.9
+        one included, on every Python.
+        """
+        from pcapkit.corekit.fields import strings
+        from pcapkit.utilities import compat
+
+        self.assertIs(strings.unquote, compat.unquote)
+
+    def test_a_value_that_is_not_bytes_still_goes_to_urllib(self) -> None:
+        """Only :obj:`bytes` take the 3.9 path; the fix leaves anything else as it was.
+
+        A field never unpacks one, but :meth:`post_process` is public: text is
+        unquoted, while a :obj:`bytearray` or :obj:`memoryview` raises exactly what
+        :func:`urllib.parse.unquote` raises on it.
+        """
+        from pcapkit.corekit.fields.strings import DecodedString, StringField
+
+        field = StringField(length=5, unquote=True)
+        value = field.post_process('a%20b', {})  # type: ignore[arg-type]
+        self.assertIsInstance(value, DecodedString)
+        self.assertEqual((str(value), value.raw), ('a b', 'a%20b'))
+        latin = StringField(length=6, unquote=True, encoding='latin-1')
+        self.assertEqual(latin.post_process('caf%E9', {}), 'café')  # type: ignore[arg-type]
+
+        for octets, error in ((bytearray(b'a%20b'), TypeError),
+                              (memoryview(b'a%20b'), AttributeError)):
+            with self.subTest(type=type(octets).__name__):
+                with self.assertRaises(error) as expected:
+                    urllib.parse.unquote(octets, 'utf-8', 'strict')  # type: ignore[arg-type]
+                with self.assertRaises(error) as raised:
+                    field.post_process(octets, {})  # type: ignore[arg-type]
+                self.assertEqual(str(raised.exception), str(expected.exception))
 
 
 class TestStringFieldDumpers(unittest.TestCase):

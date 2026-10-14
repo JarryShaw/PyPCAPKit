@@ -58,6 +58,8 @@ import subprocess
 import sys
 import textwrap
 import unittest
+import urllib.parse
+from typing import Callable
 from unittest import mock
 
 from tests._support import load_module, purge_modules, reimport_once_per_class
@@ -110,10 +112,10 @@ from tests._tiers import ROOT
 #: running the test until it stopped complaining, and that distinction is the
 #: point of having it. Every import statement on a branch reachable at ``(3, 5)``:
 #: :mod:`collections.abc` (line 34), :mod:`pathlib` (63), :mod:`threading` (67),
-#: :mod:`typing` (4, 68, 126), :mod:`aenum` (154), :mod:`typing_extensions` (172,
-#: 226), :mod:`contextlib` (177), :mod:`decimal` (178), :mod:`enum` (203). A fake
-#: ``(3, 9)`` reaches three more: :mod:`builtins` (31), :mod:`functools` (123) and
-#: :mod:`_thread` (251).
+#: :mod:`typing` (4, 68, 126), :mod:`urllib.parse` (137, 138), :mod:`aenum` (173),
+#: :mod:`typing_extensions` (191, 245), :mod:`contextlib` (196), :mod:`decimal`
+#: (197), :mod:`enum` (222). A fake ``(3, 9)`` reaches three more: :mod:`builtins`
+#: (31), :mod:`functools` (123) and :mod:`_thread` (270).
 #:
 #: Four of those never actually surface, and *why* is the point. Three --
 #: :mod:`collections.abc`, :mod:`contextlib` and :mod:`pathlib` -- are imported at
@@ -125,10 +127,12 @@ from tests._tiers import ROOT
 #: and nothing else. Measured: with only the five that do surface warmed and
 #: :mod:`pathlib` forced cold, the window leaks ``['pathlib', 'pathlib._os']``;
 #: with the full list, then nine names, it is empty even with five of them forced
-#: cold.
+#: cold. :mod:`urllib.parse`, added since for issue #1693, is warm before this
+#: module runs on 3.8 to 3.10, where :mod:`pathlib` imports it, and cold on 3.14
+#: (both under ``python -S``).
 WARM_BEFORE_FAKING = ('_thread', 'aenum', 'builtins', 'collections.abc', 'contextlib',
                       'decimal', 'enum', 'functools', 'pathlib', 'threading', 'typing',
-                      'typing_extensions')
+                      'typing_extensions', 'urllib.parse')
 
 #: Prefix of the names the loaders themselves write, which are excluded from the
 #: "nothing was imported under the fake" check. :func:`tests._support.load_module`
@@ -148,6 +152,31 @@ WARM_BEFORE_FAKING = ('_thread', 'aenum', 'builtins', 'collections.abc', 'contex
 #: module is never purged, which is exactly why its cache is permanent and why the
 #: assertion is aimed there.
 OWN_MODULE_PREFIX = 'pcapkit'
+
+#: ``(value, encoding, errors, outcome)`` for ``compat.unquote``, each as Python
+#: 3.9's :func:`urllib.parse.unquote` has it: the text returned, or the exception
+#: type and message raised. ``None`` keywords leave the defaults in place. Before
+#: 3.9 every :obj:`bytes` row raised ``TypeError: Expected str, got bytes`` (#1693).
+UNQUOTED = (
+    (b'', 'utf-8', 'strict', ''),
+    (b'a%2fb%2F', 'utf-8', 'strict', 'a/b/'),
+    (b'a+b%20c', 'utf-8', 'strict', 'a+b c'),
+    (b'%zz%', 'utf-8', 'strict', '%zz%'),
+    (b'caf%E9', 'latin-1', 'strict', 'café'),
+    (b'%FF%FEa%00', 'utf-16', 'strict', 'a'),
+    (b'%E9', 'utf-8', 'ignore', ''),
+    (b'%E9', None, None, '\ufffd'),
+    (b'caf%C3%A9', None, None, 'café'),
+    (b'%E9', 'utf-8', 'strict',
+     (UnicodeDecodeError, "'utf-8' codec can't decode byte 0xe9 in position 0: unexpected end of data")),
+    (b'\xff%41', 'utf-8', 'strict',
+     (UnicodeDecodeError, "'utf-8' codec can't decode byte 0xff in position 0: invalid start byte")),
+    ('a%20b', 'utf-8', 'strict', 'a b'),
+    ('caf%E9', 'latin-1', 'strict', 'café'),
+    ('%E9', None, None, '\ufffd'),
+    (bytearray(b'a%20b'), 'utf-8', 'strict', (TypeError, "a bytes-like object is required, not 'str'")),
+    (memoryview(b'a%20b'), 'utf-8', 'strict', (AttributeError, "'memoryview' object has no attribute 'split'")),
+)
 
 
 def aenum_pyver_readings() -> 'dict[str, tuple[int, ...]]':
@@ -295,6 +324,26 @@ class CompatTests(unittest.TestCase):
             self.assertEqual(ctx.prec, 7)
             self.assertEqual(decimal.getcontext().prec, 7)
         self.assertEqual(decimal.getcontext().prec, original_prec)
+
+    def assert_unquotes_as_python39(self, unquote: 'Callable[..., str]') -> None:
+        """``unquote`` gives each :data:`UNQUOTED` row its outcome."""
+        for value, encoding, errors, outcome in UNQUOTED:
+            kwargs = {} if encoding is None else {'encoding': encoding, 'errors': errors}
+            with self.subTest(value=value, **kwargs):
+                if isinstance(outcome, str):
+                    self.assertEqual(unquote(value, **kwargs), outcome)
+                else:
+                    with self.assertRaises(outcome[0]) as raised:
+                        unquote(value, **kwargs)
+                    self.assertEqual(str(raised.exception), outcome[1])
+
+    def test_unquote_decodes_bytes_as_python39_does(self) -> None:
+        """From 3.9 the name is :func:`urllib.parse.unquote` itself (#1693)."""
+        if sys.version_info >= (3, 9):
+            self.assertIs(self.compat.unquote, urllib.parse.unquote)
+        else:
+            self.assertIsNot(self.compat.unquote, urllib.parse.unquote)
+        self.assert_unquotes_as_python39(self.compat.unquote)
 
     def test_show_flag_values_returns_individual_bits(self) -> None:
         class DemoFlag(enum.IntFlag):
@@ -453,6 +502,19 @@ class CompatTests(unittest.TestCase):
         with compat.localcontext(prec=9) as ctx:
             self.assertEqual(ctx.prec, 9)
         self.assertEqual(decimal.getcontext().prec, original_prec)
+
+        # The table again with the bytes rows kept from an unquote that rejects
+        # them, as every interpreter's did before 3.9 (#1693).
+        self.assertIsNot(compat.unquote, urllib.parse.unquote)
+        self.assert_unquotes_as_python39(compat.unquote)
+
+        def unquote_before_3_9(string: 'str', *args: 'str') -> 'str':
+            if isinstance(string, bytes):
+                raise TypeError('Expected str, got bytes')
+            return urllib.parse.unquote(string, *args)
+
+        with mock.patch.object(compat, '_unquote', unquote_before_3_9):
+            self.assert_unquotes_as_python39(compat.unquote)
 
         class OldFlag(enum.IntFlag):
             READ = 1

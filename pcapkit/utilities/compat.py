@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     # functions
-    'final', 'localcontext', 'show_flag_values', 'default_threading_excepthook',
+    'final', 'localcontext', 'show_flag_values', 'default_threading_excepthook', 'unquote',
 
     # exceptions
     'ModuleNotFoundError',
@@ -130,6 +130,25 @@ else:
     Tuple: 'TypeAlias' = tuple
     List: 'TypeAlias' = list
     Dict: 'TypeAlias' = dict
+
+# urllib.parse.unquote accepts bytes from 3.9; before it, it raises
+# ``TypeError: Expected str, got bytes`` on them (issue #1693)
+if sys.version_info < (3, 9):
+    from urllib.parse import unquote as _unquote
+    from urllib.parse import unquote_to_bytes as _unquote_to_bytes
+
+    def unquote(string: 'str | bytes', encoding: 'str' = 'utf-8', errors: 'str' = 'replace') -> 'str':
+        """Replace %xx escapes by their single-character equivalent. The optional
+        encoding and errors parameters specify how to decode percent-encoded
+        sequences into Unicode characters, as accepted by the bytes.decode()
+        method. A bytes string is unquoted to octets first and then decoded,
+        as from Python 3.9; anything else goes to this interpreter's own
+        unquote unchanged."""
+        if isinstance(string, bytes):
+            return _unquote_to_bytes(string).decode(encoding, errors)
+        return _unquote(string, encoding, errors)
+else:
+    from urllib.parse import unquote
 
 # The ``else`` branch of each ``sys.version_info`` guard below imports a name
 # that only exists on the newer interpreter, so it never executes on the older
