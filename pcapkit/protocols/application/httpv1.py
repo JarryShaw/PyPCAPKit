@@ -32,6 +32,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.http.method import Method as Enum_Method
 from pcapkit.const.http.status_code import StatusCode as Enum_StatusCode
+from pcapkit.corekit.chardet import detect
 from pcapkit.corekit.enum import EnumLookup
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.application.http import (_HTTP2_PREFACE_HEADER, _RE_METHOD, _RE_STATUS,
@@ -41,7 +42,6 @@ from pcapkit.protocols.data.application.httpv1 import HTTP as Data_HTTP
 from pcapkit.protocols.data.application.httpv1 import RequestHeader as Data_RequestHeader
 from pcapkit.protocols.data.application.httpv1 import ResponseHeader as Data_ResponseHeader
 from pcapkit.protocols.schema.application.httpv1 import HTTP as Schema_HTTP
-from pcapkit.utilities.chardet import detect
 from pcapkit.utilities.compat import StrEnum, auto
 from pcapkit.utilities.exceptions import ProtocolError
 

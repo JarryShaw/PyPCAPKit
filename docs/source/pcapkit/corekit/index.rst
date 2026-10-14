@@ -19,6 +19,7 @@ inherits from.
    :maxdepth: 2
 
    fields/index
+   chardet
    context
    enum
    infoclass

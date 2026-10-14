@@ -3,7 +3,7 @@
 
 GitHub issue #1293: :class:`~pcapkit.corekit.fields.strings.StringField` was
 lossy three ways. Without an ``encoding`` it decoded with the charset
-:func:`~pcapkit.utilities.chardet.detect` guessed and packed the text back as
+:func:`~pcapkit.corekit.chardet.detect` guessed and packed the text back as
 UTF-8; an octet the charset could not decode became U+FFFD and was packed as
 U+FFFD's own three octets; and a length of ``-1`` was taken from the *character*
 count, so multi-octet text lost its tail.

@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.ftp.command import Command as Enum_Command
 from pcapkit.const.ftp.return_code import ReturnCode as Enum_ReturnCode
+from pcapkit.corekit.chardet import detect
 from pcapkit.corekit.enum import EnumLookup
 from pcapkit.protocols.application.application import Application
 from pcapkit.protocols.data.application.ftp import FTP as Data_FTP
@@ -26,7 +27,6 @@ from pcapkit.protocols.data.application.ftp import Request as Data_Request
 from pcapkit.protocols.data.application.ftp import Response as Data_Response
 from pcapkit.protocols.misc.raw import Raw
 from pcapkit.protocols.schema.application.ftp import FTP as Schema_FTP
-from pcapkit.utilities.chardet import detect
 from pcapkit.utilities.compat import StrEnum, auto
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 

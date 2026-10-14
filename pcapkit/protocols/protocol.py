@@ -33,6 +33,7 @@ from typing import TYPE_CHECKING, Any, Generic, Optional, Type, TypeVar, cast, o
 
 import aenum
 
+from pcapkit.corekit.chardet import detect
 from pcapkit.corekit.context import ContextRegistry
 from pcapkit.corekit.fields.misc import ConditionalField, SchemaField, SwitchField
 from pcapkit.corekit.module import ModuleDescriptor
@@ -45,7 +46,6 @@ from pcapkit.protocols.data.misc.raw import Raw as Data_Raw
 from pcapkit.protocols.data.protocol import Packet as Data_Packet
 from pcapkit.protocols.schema.misc.raw import Raw as Schema_Raw
 from pcapkit.protocols.schema.schema import Schema
-from pcapkit.utilities.chardet import detect
 from pcapkit.utilities.compat import cached_property
 from pcapkit.utilities.decorators import beholder, seekset
 from pcapkit.utilities.exceptions import (BaseError, ProtocolError, ProtocolNotFound,

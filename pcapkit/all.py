@@ -143,7 +143,7 @@ __all__ = [
                                                             # Scapy engine
 
     # pcapkit.utilities -- unlisted: its names stay reachable as attributes, but
-    # ``import *`` leaves out generic helpers such as ``warn``, ``reset``,
-    # ``configure`` and ``detect``
+    # ``import *`` leaves out generic helpers such as ``warn``, ``reset`` and
+    # ``configure``
     #'beholder_ng', 'seekset_ng',                            # Decorators
 ]

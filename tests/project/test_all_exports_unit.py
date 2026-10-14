@@ -24,12 +24,12 @@ ALL_PY = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'pcapkit'
 #: Names an aggregated package exports and :mod:`pcapkit.all` deliberately does
 #: not list, keyed by the package. :mod:`pcapkit.utilities` has been unlisted
 #: since ``769a17c78`` (2022-05-29), which commented its group out: its exports
-#: are generic helpers -- ``warn``, ``reset``, ``configure``, ``detect`` -- that
+#: are generic helpers -- ``warn``, ``reset``, ``configure`` -- that
 #: ``import *`` should not drop into the caller's namespace. A name added here is
 #: an API decision.
 DELIBERATE_NON_EXPORTS = {
     'pcapkit.utilities': ('logger', 'get_logger', 'configure', 'reset', 'ensure_output',
-                          'warn', 'stacklevel', 'detect', 'beholder', 'prepare', 'seekset'),
+                          'warn', 'stacklevel', 'beholder', 'prepare', 'seekset'),
 }
 
 

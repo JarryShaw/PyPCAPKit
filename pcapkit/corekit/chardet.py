@@ -2,9 +2,9 @@
 """Character Set Detection
 =============================
 
-.. module:: pcapkit.utilities.chardet
+.. module:: pcapkit.corekit.chardet
 
-:mod:`pcapkit.utilities.chardet` wraps `chardet`_ with a bounded cache, for
+:mod:`pcapkit.corekit.chardet` wraps `chardet`_ with a bounded cache, for
 turning the bytes of a text field into a :obj:`str`.
 
 .. _chardet: https://chardet.readthedocs.io

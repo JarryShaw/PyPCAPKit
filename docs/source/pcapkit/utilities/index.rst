@@ -17,7 +17,6 @@ several user-refined exceptions and warnings.
    exceptions
    warnings
    logging
-   chardet
 
 Version Compatibility
 =====================
