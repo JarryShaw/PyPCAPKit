@@ -270,6 +270,11 @@ class EdgeRoundTripBase(unittest.TestCase):
                 f'detail was {outcome.detail!r}')
 
     def _run(self, func: 'Any', case: 'Any') -> 'Outcome':
+        # Import before arming the deadline (#1736). ``setUp`` purges
+        # :mod:`pcapkit`, so the class's first case would otherwise carry the
+        # whole package import -- a hundred times the case itself -- and a
+        # loaded runner timed that import out, not the case.
+        resolve(case.cls)
         try:
             with time_limit(CASE_TIMEOUT):
                 return func(case)
