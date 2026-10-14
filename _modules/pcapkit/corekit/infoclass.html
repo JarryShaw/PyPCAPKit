@@ -492,6 +492,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections.abc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">types</span>
@@ -542,6 +543,33 @@
     <span class="c1">#: marked final by hand, never finalised, and so missing the generated</span>
     <span class="c1">#: ``__init__`` that makes the class usable at all.</span>
     <span class="n">FINAL</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
+
+
+<span class="c1">#: :func:`inspect.get_annotations`, new in Python 3.10, or :data:`None` below it.</span>
+<span class="n">_get_annotations</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">inspect</span><span class="p">,</span> <span class="s1">'get_annotations'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_own_annotations</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="s1">'type'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Any]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the annotations ``cls`` declares itself, never those of a base.</span>
+
+<span class="sd">    Below Python 3.10 (bpo-43901), ``cls.__annotations__`` of a class whose body</span>
+<span class="sd">    declares none is its nearest base's, so a field-less :class:`Info`</span>
+<span class="sd">    subclass read :class:`Info`'s own ``__finalised__``, ``__additional__`` and</span>
+<span class="sd">    ``__excluded__`` as its fields (:issue:`1692`). There, a class's own</span>
+<span class="sd">    annotations are in its ``__dict__``; from 3.10 on, they are read with</span>
+<span class="sd">    :func:`inspect.get_annotations`, as from 3.14 they are evaluated lazily and</span>
+<span class="sd">    are not in ``__dict__`` at all.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        cls: Class to read.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The annotations ``cls``'s own body declares, which may be empty.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">_get_annotations</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__annotations__'</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="k">return</span> <span class="n">_get_annotations</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="info_final">
@@ -643,8 +671,10 @@
                 <span class="k">break</span>
 
             <span class="c1"># NOTE: We iterate in reversed order to ensure that the type</span>
-            <span class="c1"># annotations of the superclasses are considered first.</span>
-            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">cls_</span><span class="o">.</span><span class="vm">__annotations__</span><span class="p">):</span>
+            <span class="c1"># annotations of the superclasses are considered first. Each class</span>
+            <span class="c1"># contributes only the annotations it declares itself (see</span>
+            <span class="c1"># :func:`_own_annotations`), on every Python version.</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">_own_annotations</span><span class="p">(</span><span class="n">cls_</span><span class="p">)):</span>
                 <span class="c1"># NOTE: We skip duplicated annotations to avoid duplicate</span>
                 <span class="c1"># argument in function definition.</span>
                 <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">args_</span><span class="p">:</span>
@@ -1675,7 +1705,7 @@
         <span class="n">module</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cls_</span><span class="o">.</span><span class="vm">__module__</span><span class="p">)</span>
         <span class="n">globalns</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">vars</span><span class="p">(</span><span class="n">module</span><span class="p">))</span> <span class="k">if</span> <span class="n">module</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{}</span>
         <span class="n">localns</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">vars</span><span class="p">(</span><span class="n">cls_</span><span class="p">))</span>
-        <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">ann</span><span class="p">)</span> <span class="ow">in</span> <span class="n">cls_</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__annotations__'</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cls_</span><span class="p">,</span> <span class="s1">'__annotations__'</span><span class="p">,</span> <span class="p">{}))</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">ann</span><span class="p">)</span> <span class="ow">in</span> <span class="n">_own_annotations</span><span class="p">(</span><span class="n">cls_</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
                 <span class="k">continue</span>
             <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
