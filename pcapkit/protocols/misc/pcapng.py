@@ -111,6 +111,9 @@ from pcapkit.protocols.data.misc.pcapng import ZigBeeAPSKey as Data_ZigBeeAPSKey
 from pcapkit.protocols.data.misc.pcapng import ZigBeeNWKKey as Data_ZigBeeNWKKey
 from pcapkit.protocols.data.protocol import Packet as Data_Packet
 from pcapkit.protocols.protocol import ProtocolBase
+from pcapkit.protocols.schema.misc.pcap.header import RESOLUTION
+from pcapkit.protocols.schema.misc.pcapng import (BLOCK_MINIMUM, BYTE_ORDER_MAGIC,
+                                                  DEFAULT_RESOLUTION, GENERIC_BLOCK_MINIMUM)
 from pcapkit.protocols.schema.misc.pcapng import PCAPNG as Schema_PCAPNG
 from pcapkit.protocols.schema.misc.pcapng import BlockType as Schema_BlockType
 from pcapkit.protocols.schema.misc.pcapng import CommentOption as Schema_CommentOption
@@ -678,10 +681,12 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
     #: Header blocks mapped to the octets their fixed fields span, so that a
     #: shorter Block Total Length is kept as captured (see
-    #: :meth:`_read_block_short_header`).
+    #: :meth:`_read_block_short_header`). The lengths are read from their one
+    #: home, :data:`pcapkit.protocols.schema.misc.pcapng.BLOCK_MINIMUM`
+    #: (:issue:`1739`).
     SHORT_HEADER_TYPES = {
-        Enum_BlockType.Section_Header_Block: 28,
-        Enum_BlockType.Interface_Description_Block: 20,
+        block: BLOCK_MINIMUM[block] for block in (Enum_BlockType.Section_Header_Block,
+                                                  Enum_BlockType.Interface_Description_Block)
     }
 
     #: Blocks that resolve an interface of their section, mapped to the tag used
@@ -932,7 +937,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
     @property
     def nanosecond(self) -> 'bool':
         """Whether the timestamp is in nanosecond."""
-        return self.ts_resolution > 1_000_000
+        return self.ts_resolution > RESOLUTION[False]
 
     @property
     def ts_resolution(self) -> 'int':
@@ -941,7 +946,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             #raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'ts_resolution'")
             warn(f"'{self.__class__.__name__}' object has no attribute 'ts_resolution'",
                  AttributeWarning, stacklevel=stacklevel())
-            return 1_000_000
+            return DEFAULT_RESOLUTION
 
         info = cast('Packet', self._info)
         return self._get_resolution(info.interface_id)
@@ -1258,7 +1263,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         schema = self.__header__
 
-        if schema.block.length < 12 or schema.block.length % 4 != 0:
+        if schema.block.length < GENERIC_BLOCK_MINIMUM or schema.block.length % 4 != 0:
             raise ProtocolError(f'PCAP-NG: [Block {schema.type}] invalid length: {schema.block.length}')
         self._type = schema.type
 
@@ -1267,7 +1272,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             self._ctx = None
 
         name = self._lookup_registry(self.__block__, schema.type)
-        if schema.type in self.SHORT_PACKET_TYPES and schema.block.length < 32:
+        if schema.type in self.SHORT_PACKET_TYPES and schema.block.length < BLOCK_MINIMUM[schema.type]:
             meth = cast('BlockParser', self._read_block_short)
         elif schema.block.length < self.SHORT_HEADER_TYPES.get(schema.type, 0):
             meth = cast('BlockParser', self._read_block_short_header)
@@ -1472,7 +1477,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
     def __length_hint__(self) -> 'Literal[12]':
         """Return an estimated length for the object."""
-        return 12
+        return GENERIC_BLOCK_MINIMUM  # type: ignore[return-value]
 
     # NOTE: This is a hack to make the ``__index__`` method work both as a
     # class method and an instance method.
@@ -1553,9 +1558,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             length = self._file.seek(0, io.SEEK_END) - current
             self._file.seek(current, io.SEEK_SET)
 
-        if length < 12:
+        if length < GENERIC_BLOCK_MINIMUM:
             raise StreamEOFError(f'PCAP-NG: block truncated: {length} octet(s) left, '
-                                 'fewer than the 12 a block needs', quiet=True)
+                                 f'fewer than the {GENERIC_BLOCK_MINIMUM} a block needs', quiet=True)
 
     def _captured(self, offset: 'int') -> 'int':
         """Count the octets left in the stream from ``offset`` on.
@@ -1594,7 +1599,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         current = self._file.tell()
         self._file.seek(offset + 8, io.SEEK_SET)
-        body = self._read_fileng(header.block.length - 12)
+        body = self._read_fileng(header.block.length - GENERIC_BLOCK_MINIMUM)
         self._file.seek(current, io.SEEK_SET)
 
         return Data_UnknownBlock(
@@ -1706,13 +1711,13 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             # raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_get_resolution'")
             warn(f"'{self.__class__.__name__}' object has no attribute '_get_resolution'",
                  AttributeWarning, stacklevel=stacklevel())
-            return 1_000_000
+            return DEFAULT_RESOLUTION
 
         options = self._get_interface(interface_id).options
         tsresol = cast('Optional[Data_IF_TSResolOption]',
                        options.get(Enum_OptionType.if_tsresol))
         if tsresol is None:
-            return 1_000_000
+            return DEFAULT_RESOLUTION
         return tsresol.resolution
 
     def _get_offset(self, interface_id: 'int' = 0) -> 'int':
@@ -4308,7 +4313,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         # NOTE: The body is padded to 32 bits, and Block Total Length counts it
         # together with the 12 octets of block type and both length fields.
         data += bytes(-len(data) % 4)
-        length = len(data) + 12
+        length = len(data) + GENERIC_BLOCK_MINIMUM
 
         return Schema_UnknownBlock(
             length=length,
@@ -4364,13 +4369,13 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         total_length += self._make_options_trailer(block, options_value)
 
         return Schema_SectionHeaderBlock(
-            length=total_length + 28,
-            magic=0x1A2B3C4D,
+            length=total_length + BLOCK_MINIMUM[Enum_BlockType.Section_Header_Block],
+            magic=BYTE_ORDER_MAGIC,
             major=major_version,
             minor=minor_version,
             section_length=section_length,
             options=options_value,
-            length2=total_length + 28,
+            length2=total_length + BLOCK_MINIMUM[Enum_BlockType.Section_Header_Block],
         )
 
     def _make_block_idb(self, block: 'Optional[Data_InterfaceDescriptionBlock]' = None, *,
@@ -4414,11 +4419,11 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         total_length += self._make_options_trailer(block, options_value)
 
         return self._make_padding(Schema_InterfaceDescriptionBlock(
-            length=total_length + 20,
+            length=total_length + BLOCK_MINIMUM[Enum_BlockType.Interface_Description_Block],
             linktype=linktype_val,
             snaplen=snaplen,
             options=options_value,
-            length2=total_length + 20,
+            length2=total_length + BLOCK_MINIMUM[Enum_BlockType.Interface_Description_Block],
         ), block, 'reserved')
 
     def _make_block_epb(self, block: 'Optional[Data_EnhancedPacketBlock]' = None, *,
@@ -4479,7 +4484,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         total_length += self._make_options_trailer(block, options_value)
 
         return self._make_padding(Schema_EnhancedPacketBlock(
-            length=total_length + 32 + packet_len,
+            length=total_length + BLOCK_MINIMUM[Enum_BlockType.Enhanced_Packet_Block] + packet_len,
             interface_id=interface_id,
             timestamp_high=timestamp_high,
             timestamp_low=timestamp_low,
@@ -4487,7 +4492,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             original_len=original_len,
             packet_data=packet_data,
             options=options_value,
-            length2=total_length + 32 + packet_len,
+            length2=total_length + BLOCK_MINIMUM[Enum_BlockType.Enhanced_Packet_Block] + packet_len,
         ), block, 'padding_data')
 
     def _make_block_spb(self, block: 'Optional[Data_SimplePacketBlock]' = None, *,
@@ -4528,10 +4533,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         packet_len = math.ceil(len(packet_data) / 4) * 4
 
         return self._make_padding(Schema_SimplePacketBlock(
-            length=packet_len + 16,
+            length=packet_len + BLOCK_MINIMUM[Enum_BlockType.Simple_Packet_Block],
             original_len=original_len,
             packet_data=packet_data,
-            length2=packet_len + 16,
+            length2=packet_len + BLOCK_MINIMUM[Enum_BlockType.Simple_Packet_Block],
         ), block, 'padding', 'padding_data')
 
     def _make_block_short(
@@ -4582,10 +4587,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         options_length += self._make_options_trailer(block, options_value)
 
         return Schema_NameResolutionBlock(
-            length=options_length + records_length + 12,
+            length=options_length + records_length + GENERIC_BLOCK_MINIMUM,
             records=records_value,
             options=options_value,
-            length2=options_length + records_length + 12,
+            length2=options_length + records_length + GENERIC_BLOCK_MINIMUM,
         )
 
     def _make_block_isb(self, block: 'Optional[Data_InterfaceStatisticsBlock]' = None, *,
@@ -4623,12 +4628,12 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         total_length += self._make_options_trailer(block, options_value)
 
         return Schema_InterfaceStatisticsBlock(
-            length=total_length + 24,
+            length=total_length + BLOCK_MINIMUM[Enum_BlockType.Interface_Statistics_Block],
             interface_id=interface_id,
             timestamp_high=timestamp_high,
             timestamp_low=timestamp_low,
             options=options_value,
-            length2=total_length + 24,
+            length2=total_length + BLOCK_MINIMUM[Enum_BlockType.Interface_Statistics_Block],
         )
 
     def _make_block_systemd(self, block: 'Optional[Data_SystemdJournalExportBlock]' = None, *,
@@ -4662,9 +4667,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         data += bytes(-len(data) % 4)
 
         return Schema_SystemdJournalExportBlock(
-            length=len(data) + 12,
+            length=len(data) + GENERIC_BLOCK_MINIMUM,
             entry=data,
-            length2=len(data) + 12,
+            length2=len(data) + GENERIC_BLOCK_MINIMUM,
         )
 
     def _make_block_dsb(self, block: 'Optional[Data_DecryptionSecretsBlock]' = None, *,
@@ -4730,12 +4735,12 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         total_length += self._make_options_trailer(block, options_value)
 
         return self._make_padding(Schema_DecryptionSecretsBlock(
-            length=total_length + secrets_padded + 20,
+            length=total_length + secrets_padded + BLOCK_MINIMUM[Enum_BlockType.Decryption_Secrets_Block],
             secrets_type=secrets_type_val,
             secrets_length=secrets_length,
             secrets_data=secrets_data_val,
             options=options_value,
-            length2=total_length + secrets_padded + 20,
+            length2=total_length + secrets_padded + BLOCK_MINIMUM[Enum_BlockType.Decryption_Secrets_Block],
         ), block, 'padding_data')
 
     def _make_block_cb(self, block: 'Optional[Data_CustomBlock]' = None, *,
@@ -4782,11 +4787,14 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             cb_data += option.pack() if isinstance(option, Schema) else option
         cb_data += bytes(-len(cb_data) % 4)
 
+        # NOTE: both custom block types span the same fixed fields, and this
+        # method makes either, so the one entry stands for both.
+        minimum = BLOCK_MINIMUM[Enum_BlockType.Custom_Block_that_rewriters_can_copy_into_new_files]
         return Schema_CustomBlock(
-            length=len(cb_data) + 16,
+            length=len(cb_data) + minimum,
             pen=pen,
             data=cb_data,
-            length2=len(cb_data) + 16,
+            length2=len(cb_data) + minimum,
         )
 
     def _make_block_packet(self, block: 'Optional[Data_PacketBlock]' = None, *,
@@ -4853,7 +4861,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         total_length += self._make_options_trailer(block, options_value)
 
         return self._make_padding(Schema_PacketBlock(
-            length=total_length + 32 + packet_len,
+            length=total_length + BLOCK_MINIMUM[Enum_BlockType.Packet_Block] + packet_len,
             interface_id=interface_id,
             drop_count=drop_count,
             timestamp_high=timestamp_high,
@@ -4862,7 +4870,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             original_length=original_len,
             packet_data=packet_data,
             options=options_value,
-            length2=total_length + 32 + packet_len,
+            length2=total_length + BLOCK_MINIMUM[Enum_BlockType.Packet_Block] + packet_len,
         ), block, 'padding_data')
 
     def _make_pcapng_options(self, options: 'Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes] | bytes',
@@ -5269,7 +5277,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         )
 
     def _make_option_if_tsresol(self, type: 'Enum_OptionType', option: 'Optional[Data_IF_TSResolOption]' = None, *,
-                                resolution: 'int' = 1000000,
+                                resolution: 'int' = DEFAULT_RESOLUTION,
                                 **kwargs: 'Any') -> 'Schema_IF_TSResolOption':
         """Make PCAP-NG ``if_tsresol`` option.
 

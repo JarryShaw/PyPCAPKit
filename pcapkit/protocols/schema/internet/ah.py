@@ -15,6 +15,15 @@ __all__ = ['AH']
 if TYPE_CHECKING:
     from pcapkit.protocols.protocol import ProtocolBase
 
+#: Length of the fixed part of an IP Authentication Header (AH), before its
+#: Integrity Check Value, :rfc:`4302#section-2`. The one home of this value
+#: (:issue:`1739`), here so that the schema's ICV length and the protocol
+#: modules read the same one; it is fixed by the RFC, so it is never
+#: configurable.
+#:
+#: .. versionadded:: 1.5.0
+AH_HEADER_LEN = 12
+
 
 @schema_final
 class AH(Schema):
@@ -31,7 +40,7 @@ class AH(Schema):
     #: Sequence number field.
     seq: 'int' = UInt32Field()
     #: Integrity check value.
-    icv: 'bytes' = BytesField(length=lambda pkt: (pkt['len'] + 2) * 4 - 12)
+    icv: 'bytes' = BytesField(length=lambda pkt: (pkt['len'] + 2) * 4 - AH_HEADER_LEN)
     #: Payload.
     payload: 'bytes' = PayloadField()
 

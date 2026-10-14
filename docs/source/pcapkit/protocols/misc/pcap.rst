@@ -61,6 +61,17 @@ Header Schemas
 
 .. module:: pcapkit.protocols.schema.misc.pcap.header
 
+.. autodata:: pcapkit.protocols.schema.misc.pcap.header.GLOBAL_HEADER_LEN
+
+.. autodata:: pcapkit.protocols.schema.misc.pcap.header.MAGIC_NUMBER
+   :no-value:
+
+.. autodata:: pcapkit.protocols.schema.misc.pcap.header.RESOLUTION
+   :no-value:
+
+.. autodata:: pcapkit.protocols.schema.misc.pcap.header.RESOLUTION_PLACES
+   :no-value:
+
 .. autoclass:: pcapkit.protocols.schema.misc.pcap.header.Header
    :members:
    :show-inheritance:
@@ -126,6 +137,8 @@ Header Schemas
 --------------
 
 .. module:: pcapkit.protocols.schema.misc.pcap.frame
+
+.. autodata:: pcapkit.protocols.schema.misc.pcap.frame.RECORD_HEADER_LEN
 
 .. autoclass:: pcapkit.protocols.schema.misc.pcap.frame.Frame
    :members:

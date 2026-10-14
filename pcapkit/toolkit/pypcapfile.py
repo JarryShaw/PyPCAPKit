@@ -61,7 +61,12 @@ from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
+from pcapkit.protocols.internet import ipv6 as Module_IPv6
 from pcapkit.protocols.internet.ipv4 import IPv4 as Protocol_IPv4
+from pcapkit.protocols.schema.internet import ah as Schema_AH_Module
+from pcapkit.protocols.schema.internet import ipv4 as Schema_IPv4_Module
+from pcapkit.protocols.schema.misc.pcap.header import RESOLUTION
+from pcapkit.protocols.schema.transport import tcp as Schema_TCP_Module
 from pcapkit.protocols.transport.tcp import TCP as Protocol_TCP
 from pcapkit.utilities import config
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall, stacklevel
@@ -87,20 +92,11 @@ __all__ = [
 #: :meth:`pcapkit.protocols.link.ethernet.Ethernet._read_mac_addr`.
 py38 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 8)
 
-#: Minimum length of a TCP header, i.e. the fixed part with no options.
-TCP_MIN_HEADER_LEN = 20
-
 #: IPv4 **DF** (don't fragment) bit, within the three-bit flags field.
 IPV4_FLAG_DF = 0b010
 
 #: IPv4 **MF** (more fragments) bit, within the three-bit flags field.
 IPV4_FLAG_MF = 0b001
-
-#: Length of the fixed IPv4 header, i.e. with no options, :rfc:`791#section-3.1`.
-IPV4_HEADER_LEN = 20
-
-#: Length of the fixed IPv6 header, :rfc:`8200#section-3`.
-IPV6_HEADER_LEN = 40
 
 #: The captures :func:`_decline_ipv6_tcp` has warned about, oldest first. Each
 #: key :func:`_capture_of` gives maps to the anchor that keeps that key unique.
@@ -109,13 +105,9 @@ _ipv6_tcp_warned = collections.OrderedDict()  # type: OrderedDict[int, Any]
 # NOTE: the definitions from here to ``packet2timestamp``, and
 # ``_default_accepts``, ``_default_extension_header`` and
 # ``_walk_extension_headers`` below, are kept for :mod:`pcapkit.toolkit.scapy`:
-# it imports the rest, and ``_walk_extension_headers`` uses ``AH_HEADER_LEN``
-# and ``_default_extension_header``. This module's adapters use none of them
+# it imports the rest, and ``_walk_extension_headers`` uses
+# ``_default_extension_header``. This module's adapters use none of them
 # (#1708).
-
-#: Length of the fixed part of an IP Authentication Header (AH), before its
-#: Integrity Check Value, :rfc:`4302#section-2`.
-AH_HEADER_LEN = 12
 
 #: IP protocol numbers of the headers :func:`_walk_extension_headers` steps
 #: over inside IPv4: AH and the IPv6 Hop-by-Hop Options, Routing, Fragment,
@@ -156,7 +148,7 @@ def packet2timestamp(packet: 'Packet') -> 'float':
     .. _PyPCAPFile: https://github.com/kisom/pypcapfile
 
     """
-    divisor = 1_000_000_000 if packet.header[0].ns_resolution else 1_000_000
+    divisor = RESOLUTION[bool(packet.header[0].ns_resolution)]
     return (packet.timestamp * divisor + packet.timestamp_us) / divisor
 
 
@@ -355,8 +347,8 @@ def _network(packet: 'Packet') -> 'Optional[IP]':
     payload = getattr(link, 'payload', None)  # type: Any
     if type(payload).__name__ != 'IP':
         return None
-    if payload.hl * 4 > IPV4_HEADER_LEN and (
-            IPV4_HEADER_LEN + len(_maybe_unhex(bytes(payload.opt))) < payload.hl * 4):
+    if payload.hl * 4 > Schema_IPv4_Module.IPV4_HEADER_LEN and (
+            Schema_IPv4_Module.IPV4_HEADER_LEN + len(_maybe_unhex(bytes(payload.opt))) < payload.hl * 4):
         return None
     return payload
 
@@ -388,7 +380,8 @@ def _ipv6_carries_tcp(packet: 'Packet') -> 'bool':
         return False
 
     data = _maybe_unhex(bytes(payload))
-    return len(data) >= IPV6_HEADER_LEN and data[6] == Enum_TransType.TCP
+    return (len(data) >= Module_IPv6.IPV6_HEADER_LEN
+            and data[Module_IPv6.IPV6_NEXT_HEADER_OFFSET] == Enum_TransType.TCP)
 
 
 def _capture_of(packet: 'Packet') -> 'tuple[int, Any]':
@@ -486,7 +479,8 @@ def _transport(ipv4: 'IP') -> 'Optional[bytes]':
     segment = _maybe_unhex(bytes(segment))
     if ipv4.len:
         segment = segment[:max(ipv4.len - ipv4.hl * 4, 0)]
-    if len(segment) < TCP_MIN_HEADER_LEN or segment[12] >> 4 < 5:  # Data Offset, in words
+    if (len(segment) < Schema_TCP_Module.TCP_MIN_HEADER_LEN
+            or (segment[Schema_TCP_Module.TCP_DATA_OFFSET_OCTET] >> 4) * 4 < Schema_TCP_Module.TCP_MIN_HEADER_LEN):
         return None
     return segment
 
@@ -558,7 +552,8 @@ def _walk_extension_headers(protocol: 'int', data: 'bytes') -> 'Optional[tuple[i
         is cut short or rejected, or more than
         :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`
         follow in a row. An AH is ``(Payload Length + 2) * 4`` octets long
-        (:rfc:`4302#section-2.2`), and no shorter than :data:`AH_HEADER_LEN`;
+        (:rfc:`4302#section-2.2`), and no shorter than
+        :data:`~pcapkit.protocols.schema.internet.ah.AH_HEADER_LEN`;
         any other is read by :func:`_default_extension_header`.
 
     """
@@ -568,8 +563,8 @@ def _walk_extension_headers(protocol: 'int', data: 'bytes') -> 'Optional[tuple[i
             return None
         depth += 1
         if protocol == Enum_TransType.AH:
-            length = (data[1] + 2) * 4 if len(data) >= AH_HEADER_LEN else 0
-            if length < AH_HEADER_LEN or len(data) < length:
+            length = (data[1] + 2) * 4 if len(data) >= Schema_AH_Module.AH_HEADER_LEN else 0
+            if length < Schema_AH_Module.AH_HEADER_LEN or len(data) < length:
                 return None
             protocol, data = data[0], data[length:]
             continue
@@ -846,7 +841,7 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
     from pcapfile.protocols.transport.tcp import TCP  # isort:skip
 
     tcp = TCP(segment)
-    hdr_len = tcp.data_offset  # at least TCP_MIN_HEADER_LEN, see ``_transport``
+    hdr_len = tcp.data_offset  # at least ``TCP_MIN_HEADER_LEN``, see ``_transport``
     payload = segment[hdr_len:]
 
     return TCP_Packet(
@@ -920,7 +915,7 @@ def tcp_traceflow(packet: 'Packet', *, data_link: 'Enum_LinkType',
     from pcapfile.protocols.transport.tcp import TCP  # isort:skip
 
     tcp = TCP(segment)
-    hdr_len = tcp.data_offset  # at least TCP_MIN_HEADER_LEN, see ``_transport``
+    hdr_len = tcp.data_offset  # at least ``TCP_MIN_HEADER_LEN``, see ``_transport``
     return TF_TCP_Packet(  # type: ignore[type-var]
         protocol=data_link,                                 # data link type from savefile header
         index=count,                                        # frame number

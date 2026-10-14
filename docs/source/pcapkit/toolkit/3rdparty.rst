@@ -227,8 +227,6 @@ Auxiliary Functions
 Internal Definitions
 --------------------
 
-.. autodata:: pcapkit.toolkit.pypcapfile.TCP_MIN_HEADER_LEN
-
 .. autodata:: pcapkit.toolkit.pypcapfile.IPV4_FLAG_DF
 
 .. autodata:: pcapkit.toolkit.pypcapfile.IPV4_FLAG_MF

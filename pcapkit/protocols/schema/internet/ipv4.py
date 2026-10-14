@@ -44,6 +44,14 @@ if TYPE_CHECKING:
     from pcapkit.corekit.fields.field import FieldBase as Field
     from pcapkit.protocols.protocol import ProtocolBase
 
+#: Length of the fixed IPv4 header, i.e. with no options, :rfc:`791#section-3.1`.
+#: The one home of this value (:issue:`1739`), here so that the schema's option
+#: length and the protocol modules read the same one; it is fixed by the RFC, so
+#: it is never configurable.
+#:
+#: .. versionadded:: 1.5.0
+IPV4_HEADER_LEN = 20
+
 if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict
 
@@ -724,7 +732,7 @@ class IPv4(Schema):
     dst: 'IPv4Address' = IPv4AddressField()
     #: Options.
     options: 'list[Option]' = OptionField(
-        length=lambda pkt: pkt['vihl']['ihl'] * 4 - 20,
+        length=lambda pkt: pkt['vihl']['ihl'] * 4 - IPV4_HEADER_LEN,
         base_schema=Option,
         type_name='type',
         registry=Option.registry,

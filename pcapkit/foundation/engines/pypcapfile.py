@@ -20,6 +20,7 @@ from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.io import NamedStream
 from pcapkit.foundation.engines.engine import EngineBase
 from pcapkit.foundation.reassembly import ReassemblyManager
+from pcapkit.protocols.schema.misc.pcap.frame import RECORD_HEADER_LEN
 from pcapkit.utilities.exceptions import FormatError, stacklevel
 from pcapkit.utilities.warnings import AttributeWarning, ProtocolWarning, warn
 
@@ -363,8 +364,8 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
         number = 0
         while True:
             number += 1
-            record = file.read(16)
-            if len(record) < 16:
+            record = file.read(RECORD_HEADER_LEN)
+            if len(record) < RECORD_HEADER_LEN:
                 return
             timestamp, timestamp_us, capture_len, packet_len = struct.unpack(f'{order}IIII', record)
             data = file.read(capture_len)

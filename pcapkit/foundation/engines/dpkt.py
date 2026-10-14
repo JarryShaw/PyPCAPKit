@@ -18,6 +18,9 @@ from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
 from pcapkit.const.pcapng.option_type import OptionType as Enum_OptionType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.foundation.engines.engine import EngineBase
+from pcapkit.protocols.schema.misc.pcap.header import RESOLUTION
+from pcapkit.protocols.schema.misc.pcapng import (BYTE_ORDER_MAGIC, DEFAULT_RESOLUTION,
+                                                  GENERIC_BLOCK_MINIMUM)
 from pcapkit.utilities.compat import localcontext
 from pcapkit.utilities.exceptions import FormatError, stacklevel
 from pcapkit.utilities.logging import get_logger
@@ -44,6 +47,14 @@ if TYPE_CHECKING:
 #: logging.Logger: Module-level logger, a child of the package-wide
 #: :data:`pcapkit.utilities.logging.logger`.
 logger = get_logger(__name__)
+
+#: The Block Type of a Section Header Block as the octets read, the same in
+#: either byte order, spelled once rather than per block read.
+_SHB_TYPE_OCTETS = Enum_BlockType.Section_Header_Block.to_bytes(4, 'big')
+
+#: :data:`~pcapkit.protocols.schema.misc.pcapng.BYTE_ORDER_MAGIC` as a
+#: little-endian section writes it, spelled once rather than per block read.
+_LITTLE_BYTE_ORDER_OCTETS = BYTE_ORDER_MAGIC.to_bytes(4, 'little')
 
 
 class PCAPNGReader:
@@ -106,14 +117,14 @@ class PCAPNGReader:
             # the SHB block type is a palindrome, so it reads the same in
             # either byte order; any other block uses the section's order
             byteorder: 'Literal["big", "little"]'
-            if head[:4] == b'\x0a\x0d\x0d\x0a':
+            if head[:4] == _SHB_TYPE_OCTETS:
                 head += self._file.read(4)
-                byteorder = 'little' if head[8:] == b'\x4d\x3c\x2b\x1a' else 'big'
+                byteorder = 'little' if head[8:] == _LITTLE_BYTE_ORDER_OCTETS else 'big'
             else:
                 byteorder = self._ctx.section.byteorder
             block_type = int.from_bytes(head[:4], byteorder)
             length = int.from_bytes(head[4:8], byteorder)
-            if length < 12:
+            if length < GENERIC_BLOCK_MINIMUM:
                 raise FormatError(f'PCAP-NG: [Block {block_type}] invalid block length: {length}')
 
             buf = head + self._file.read(length - len(head))
@@ -172,7 +183,7 @@ class PCAPNGReader:
 
         tsresol = interface.options.get(Enum_OptionType.if_tsresol)
         tsoffset = interface.options.get(Enum_OptionType.if_tsoffset)
-        resolution = 1_000_000 if tsresol is None else tsresol.resolution
+        resolution = DEFAULT_RESOLUTION if tsresol is None else tsresol.resolution
         offset = 0 if tsoffset is None else tsoffset.offset
 
         # same arithmetic as :meth:`PCAPNG._read_timestamp
@@ -217,7 +228,7 @@ class PCAPNGReader:
 
         tsresol = cast('Optional[Data_IF_TSResolOption]',
                        interface.options.get(Enum_OptionType.if_tsresol))
-        resolution = 1_000_000 if tsresol is None else tsresol.resolution
+        resolution = DEFAULT_RESOLUTION if tsresol is None else tsresol.resolution
 
         self._linktype = interface.linktype
         return (Timestamp(0.0, decimal.Decimal(0), resolution, spb.original_len),
@@ -280,7 +291,7 @@ def _pcap_reader() -> 'Type[PCAPReader]':
 
             file, header = self._Reader__f, self._Reader__ph  # pylint: disable=no-member
             nanosecond = isinstance(self._divisor, decimal.Decimal)
-            resolution = 1_000_000_000 if nanosecond else 1_000_000
+            resolution = RESOLUTION[nanosecond]
             while True:
                 buf = file.read(header.__hdr_len__)
                 if not buf:

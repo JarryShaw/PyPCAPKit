@@ -15,6 +15,8 @@ from pcapkit.corekit.io import SeekableReader
 from pcapkit.foundation.engines.engine import EngineBase
 from pcapkit.protocols.misc.pcap.frame import Frame
 from pcapkit.protocols.misc.pcap.header import Header
+from pcapkit.protocols.schema.misc.pcap.frame import RECORD_HEADER_LEN
+from pcapkit.protocols.schema.misc.pcap.header import MAGIC_NUMBER as Schema_MAGIC_NUMBER
 from pcapkit.utilities.logging import get_logger
 
 __all__ = ['PCAP']
@@ -46,12 +48,10 @@ class PCAP(EngineBase[Frame]):
         #: Nanosecond flag.
         _nnsec: 'bool'
 
-    MAGIC_NUMBER = (
-        b'\xa1\xb2\x3c\x4d',
-        b'\xa1\xb2\xc3\xd4',
-        b'\x4d\x3c\xb2\xa1',
-        b'\xd4\xc3\xb2\xa1',
-    )
+    #: The PCAP magic numbers this engine claims, read from their one home,
+    #: :data:`pcapkit.protocols.schema.misc.pcap.header.MAGIC_NUMBER`
+    #: (:issue:`1739`).
+    MAGIC_NUMBER = tuple(Schema_MAGIC_NUMBER)
 
     ##########################################################################
     # Defaults.
@@ -234,10 +234,10 @@ class PCAP(EngineBase[Frame]):
             return
 
         position = ifile.tell()
-        head = ifile.read(16)
+        head = ifile.read(RECORD_HEADER_LEN)
         ifile.seek(position, io.SEEK_SET)
 
-        size = 16
-        if len(head) == 16:
+        size = RECORD_HEADER_LEN
+        if len(head) == RECORD_HEADER_LEN:
             size += int.from_bytes(head[8:12], self._gbhdr.byteorder)
         ifile._read_ahead_size = size

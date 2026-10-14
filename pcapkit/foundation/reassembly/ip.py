@@ -20,6 +20,7 @@ from pcapkit.foundation.reassembly.data.data import Completion
 from pcapkit.foundation.reassembly.data.ip import (_AT, Buffer, BufferID, Datagram, DatagramID,
                                                    Deferred, Packet)
 from pcapkit.foundation.reassembly.reassembly import ReassemblyBase
+from pcapkit.protocols.schema.internet.ipv6 import IP_MAX_LENGTH
 
 if TYPE_CHECKING:
     from typing import Type
@@ -28,11 +29,6 @@ if TYPE_CHECKING:
     from pcapkit.protocols.internet.ip import IP as IP_Protocol
 
 __all__ = ['IP']
-
-#: The most octets a 16-bit length field declares -- IPv4's Total Length, the
-#: header included, and IPv6's Payload Length, the fixed header excluded -- and
-#: so the length the data buffer is preallocated to.
-_MAX_LENGTH = 65535
 
 
 class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[_AT]):  # pylint: disable=abstract-method
@@ -160,7 +156,7 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
                 RCVBT=bytearray(8192),              # Fragment Received Bit Table
                 index=[],                           # index record
                 header=header,                      # header buffer
-                datagram=bytearray(_MAX_LENGTH),    # data buffer
+                datagram=bytearray(IP_MAX_LENGTH),  # data buffer
                 timestamp=TS,                       # first-arriving fragment's clock reading
                 conflict=[],                        # conflicting octet ranges
             )
@@ -203,8 +199,8 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         if TL == 0:
             length = len(info.payload)
             extent = FO + length
-            if self._header_overhead(IHL) + extent > _MAX_LENGTH:
-                size = max(extent, _MAX_LENGTH + 1, len(buf.datagram))
+            if self._header_overhead(IHL) + extent > IP_MAX_LENGTH:
+                size = max(extent, IP_MAX_LENGTH + 1, len(buf.datagram))
                 buf.datagram.extend(bytes(size - len(buf.datagram)))
                 buf.RCVBT.extend(bytes((size + 7) // 8 - len(buf.RCVBT)))
         else:
@@ -279,7 +275,8 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
             than it may be, and every 8-octet block up to it is marked
             received.
 
-        A datagram is no longer than ``_MAX_LENGTH`` with its header, as
+        A datagram is no longer than
+        :data:`~pcapkit.protocols.schema.internet.ipv6.IP_MAX_LENGTH` with its header, as
         :meth:`_header_overhead` counts it: IPv4's Total Length counts the
         whole header, and IPv6's Payload Length every header but the fixed one.
         A longer datagram cannot be declared, so it is never complete, and
@@ -292,10 +289,10 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
 
         """
         TDL = buf.TDL
-        if len(buf.datagram) > _MAX_LENGTH:
+        if len(buf.datagram) > IP_MAX_LENGTH:
             limit = len(buf.datagram)
         else:
-            limit = _MAX_LENGTH - self._header_overhead(len(buf.header))
+            limit = IP_MAX_LENGTH - self._header_overhead(len(buf.header))
         return 0 <= TDL <= limit and all(buf.RCVBT[:(TDL + 7) // 8])
 
     @staticmethod

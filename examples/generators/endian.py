@@ -77,10 +77,11 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 SAMPLE = ROOT / 'examples' / 'captures'
 
 #: PCAP file magic numbers, keyed by endianness and nanosecond-resolution flag.
-#: The same table as ``_MAGIC_NUM`` in
-#: :file:`pcapkit/protocols/misc/pcap/header.py`, which is the reader these
-#: fixtures are written for; it is repeated rather than imported so that a
-#: fixture stays generatable without :mod:`pcapkit` importing cleanly.
+#: The same values as
+#: :data:`pcapkit.protocols.schema.misc.pcap.header.MAGIC_NUMBER`, which the
+#: reader these fixtures are written for dispatches on; they are repeated
+#: rather than imported so that a fixture stays generatable without
+#: :mod:`pcapkit` importing cleanly.
 MAGIC_NUMBER = {
     ('big', False): b'\xa1\xb2\xc3\xd4',
     ('big', True): b'\xa1\xb2\x3c\x4d',

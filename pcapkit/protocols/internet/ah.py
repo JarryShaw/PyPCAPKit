@@ -31,6 +31,7 @@ from pcapkit.protocols.data.internet.ah import AH as Data_AH
 from pcapkit.protocols.internet.ipsec import IPsec
 from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
 from pcapkit.protocols.schema.internet.ah import AH as Schema_AH
+from pcapkit.protocols.schema.internet.ah import AH_HEADER_LEN
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
@@ -219,7 +220,7 @@ class AH(IPsec[Data_AH, Schema_AH], IPv6_Ext[Data_AH, Schema_AH],
         """
         next_value = self._make_index(next, next_default, namespace=next_namespace,
                                       reversed=next_reversed, pack=False)
-        length = (len(icv) + 12) // 4 - 2
+        length = (len(icv) + AH_HEADER_LEN) // 4 - 2
 
         return Schema_AH(
             next=next_value,  # type: ignore[arg-type]

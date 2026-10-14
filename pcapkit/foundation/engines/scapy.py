@@ -41,6 +41,9 @@ import struct
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.foundation.engines.engine import EngineBase
+from pcapkit.protocols.schema.misc.pcap.frame import RECORD_HEADER_LEN
+from pcapkit.protocols.schema.misc.pcap.header import RESOLUTION
+from pcapkit.protocols.schema.misc.pcapng import DEFAULT_RESOLUTION
 from pcapkit.utilities.exceptions import VersionError, stacklevel
 from pcapkit.utilities.logging import get_logger
 from pcapkit.utilities.warnings import AttributeWarning, warn
@@ -186,8 +189,8 @@ def _reader_type() -> 'Type[PcapReader]':
         # self)._read_packet``, which looks in the classes after ``PcapReader``
         # in the reader's MRO, so this one is a base listed after it.
         def _read_packet(self, size: 'int' = _CAPLEN_MAX) -> 'tuple[bytes, Any]':
-            header = self.f.read(16)
-            if len(header) < 16:
+            header = self.f.read(RECORD_HEADER_LEN)
+            if len(header) < RECORD_HEADER_LEN:
                 raise EOFError
             sec, usec, caplen, wirelen = struct.unpack(f'{self.endian}IIII', header)
             chunks = []  # type: list[bytes]
@@ -206,7 +209,7 @@ def _reader_type() -> 'Type[PcapReader]':
     class _PcapReader(_Closing, _Uncapped, PcapReader, _PcapRecords):
         def read_packet(self, *args: 'Any', **kwargs: 'Any') -> 'ScapyPacket':
             packet = super().read_packet(*args, **kwargs)
-            attach_resolution(packet, 1_000_000_000 if self.nano else 1_000_000)
+            attach_resolution(packet, RESOLUTION[bool(self.nano)])
             attach_linktype(packet, self.linktype)
             return packet
 
@@ -214,7 +217,7 @@ def _reader_type() -> 'Type[PcapReader]':
         # the metaclass makes this ``_PcapReader``'s alternative in turn
         alternative = _PcapReader
 
-        _resolution = 1_000_000
+        _resolution = DEFAULT_RESOLUTION
         # each set from the packet block last read, before ``read_packet`` reads it
         _linktype: 'int'
         _timed: 'bool'

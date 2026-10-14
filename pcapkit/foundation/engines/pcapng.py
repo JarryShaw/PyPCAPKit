@@ -18,6 +18,8 @@ from pcapkit.corekit.io import SeekableReader
 from pcapkit.dumpkit.pcap import PCAPIO
 from pcapkit.foundation.engines.engine import EngineBase
 from pcapkit.protocols.misc.pcapng import PCAPNG as P_PCAPNG
+from pcapkit.protocols.schema.misc.pcapng import (BLOCK_MINIMUM, BYTE_ORDER_MAGIC,
+                                                  GENERIC_BLOCK_MINIMUM)
 from pcapkit.utilities.exceptions import FormatError, stacklevel
 from pcapkit.utilities.logging import get_logger
 from pcapkit.utilities.warnings import DeprecatedFormatWarning, warn
@@ -104,30 +106,22 @@ class PCAPNG(EngineBase[P_PCAPNG]):
         #: across the whole file rather than per section.
         _block_count: 'collections.Counter[str]'
 
+    #: The PCAP-NG magic number this engine claims: the Block Type of a Section
+    #: Header Block, read from its one home,
+    #: :class:`~pcapkit.const.pcapng.block_type.BlockType` (:issue:`1739`). It
+    #: reads the same in either byte order.
     MAGIC_NUMBER = (
-        b'\x0a\x0d\x0d\x0a',
+        Enum_BlockType.Section_Header_Block.to_bytes(4, 'big'),
     )
 
-    #: A section header block's Byte-Order Magic, mapped to the byte order it
-    #: declares for its section.
-    BYTE_ORDER_MAGIC = {
-        b'\x1a\x2b\x3c\x4d': 'big',
-        b'\x4d\x3c\x2b\x1a': 'little',
+    #: A Section Header Block's Byte-Order Magic, as the octets read, mapped to
+    #: the byte order it declares for its section; built from the one home of
+    #: the value, :data:`pcapkit.protocols.schema.misc.pcapng.BYTE_ORDER_MAGIC`
+    #: (:issue:`1739`).
+    _BYTE_ORDER_OCTETS = {
+        BYTE_ORDER_MAGIC.to_bytes(4, 'big'): 'big',
+        BYTE_ORDER_MAGIC.to_bytes(4, 'little'): 'little',
     }  # type: dict[bytes, Literal['big', 'little']]
-
-    #: Block types mapped to the octets their fixed fields span, Block Type and
-    #: both copies of Block Total Length included; any other block spans 12.
-    BLOCK_MINIMUM = {
-        Enum_BlockType.Section_Header_Block: 28,
-        Enum_BlockType.Interface_Description_Block: 20,
-        Enum_BlockType.Packet_Block: 32,
-        Enum_BlockType.Simple_Packet_Block: 16,
-        Enum_BlockType.Interface_Statistics_Block: 24,
-        Enum_BlockType.Enhanced_Packet_Block: 32,
-        Enum_BlockType.Decryption_Secrets_Block: 20,
-        Enum_BlockType.Custom_Block_that_rewriters_can_copy_into_new_files: 16,
-        Enum_BlockType.Custom_Block_that_rewriters_should_not_copy_into_new_files: 16,
-    }  # type: dict[int, int]
 
     #: Block types that carry a captured packet, mapped to the tag used when
     #: reporting them. Parsing any of them resolves the interface the packet was
@@ -447,18 +441,18 @@ class PCAPNG(EngineBase[P_PCAPNG]):
 
         head = self._peek(12)
         if head[:4] == self.MAGIC_NUMBER[0]:
-            byteorder = self.BYTE_ORDER_MAGIC.get(head[8:12])
+            byteorder = self._BYTE_ORDER_OCTETS.get(head[8:12])
         else:
             byteorder = self._ctx.section.byteorder if self._ctx is not None else None
 
         if byteorder is not None and len(head) >= 8:
             block_type = int.from_bytes(head[:4], byteorder)
             length = int.from_bytes(head[4:8], byteorder)
-            if length >= self.BLOCK_MINIMUM.get(block_type, 12) and length % 4 == 0:
+            if length >= BLOCK_MINIMUM.get(block_type, GENERIC_BLOCK_MINIMUM) and length % 4 == 0:
                 size = length
                 if block_type == Enum_BlockType.Decryption_Secrets_Block:
                     secrets = int.from_bytes(self._peek(16)[12:16], byteorder)
-                    size = max(size, 20 + secrets + -secrets % 4)
+                    size = max(size, BLOCK_MINIMUM[block_type] + secrets + -secrets % 4)
         ifile._read_ahead_size = size
 
     def _check_packet_block_context(self) -> 'None':

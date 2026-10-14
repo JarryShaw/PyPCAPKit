@@ -95,6 +95,8 @@ Header Schemas
 
 .. module:: pcapkit.protocols.schema.internet.ipv4
 
+.. autodata:: pcapkit.protocols.schema.internet.ipv4.IPV4_HEADER_LEN
+
 .. autoclass:: pcapkit.protocols.schema.internet.ipv4.IPv4
    :members:
    :show-inheritance:

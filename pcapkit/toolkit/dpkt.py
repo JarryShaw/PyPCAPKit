@@ -23,6 +23,7 @@ from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.data import FrameRecord
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
 from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
+from pcapkit.protocols.schema.misc.pcap.header import RESOLUTION, RESOLUTION_PLACES
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
@@ -139,7 +140,7 @@ class Timestamp(RecordTimestamp, float):
     __slots__ = ('exact', 'resolution', 'orig_len')
 
     def __new__(cls, value: 'Any' = 0.0, exact: 'Optional[Decimal]' = None,
-                resolution: 'int' = 1_000_000, orig_len: 'Optional[int]' = None) -> 'Timestamp':
+                resolution: 'int' = RESOLUTION[False], orig_len: 'Optional[int]' = None) -> 'Timestamp':
         self = super().__new__(cls, value)
         self.exact = decimal.Decimal(float(self)) if exact is None else exact
         self.resolution = resolution
@@ -166,7 +167,7 @@ class DecimalTimestamp(RecordTimestamp, decimal.Decimal):
 
     __slots__ = ('exact', 'resolution', 'orig_len')
 
-    def __new__(cls, value: 'Any' = '0', resolution: 'int' = 1_000_000_000,
+    def __new__(cls, value: 'Any' = '0', resolution: 'int' = RESOLUTION[True],
                 orig_len: 'Optional[int]' = None) -> 'DecimalTimestamp':
         self = super().__new__(cls, value)
         self.exact = decimal.Decimal(self)
@@ -312,11 +313,12 @@ def packet2frame(packet: 'Packet', timestamp: 'float | Decimal', *,
     if isinstance(stamp, RecordTimestamp):
         epoch, resolution, orig_len = stamp.exact, stamp.resolution, stamp.orig_len
     elif isinstance(stamp, decimal.Decimal):
-        epoch, resolution, orig_len = stamp, 1_000_000_000, None
+        epoch, resolution, orig_len = stamp, RESOLUTION[True], None
     else:
-        epoch, resolution, orig_len = round(decimal.Decimal(stamp), 6), 1_000_000, None
+        epoch, resolution, orig_len = (round(decimal.Decimal(stamp), RESOLUTION_PLACES[False]),
+                                       RESOLUTION[False], None)
     ts_sec = int(epoch)
-    ts_usec = int((epoch - ts_sec) * (1_000_000_000 if resolution > 1_000_000 else 1_000_000))
+    ts_usec = int((epoch - ts_sec) * RESOLUTION[resolution > RESOLUTION[False]])
 
     # the mapping is exactly the one reported before #1507, plain value types
     # included, so that the dict-capable trace formats write the same bytes

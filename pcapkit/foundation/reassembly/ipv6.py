@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.foundation.reassembly.ip import IP
+from pcapkit.protocols.internet.ipv6 import IPV6_HEADER_LEN, IPV6_NEXT_HEADER_OFFSET
 from pcapkit.protocols.internet.ipv6 import IPv6 as IPv6_Protocol
 
 if TYPE_CHECKING:
@@ -21,14 +22,6 @@ if TYPE_CHECKING:
 
 __all__ = ['IPv6']
 
-#: Length of the fixed IPv6 header, i.e. the offset of the first extension
-#: header (:rfc:`8200#section-3`). A literal because it is a *byte offset* into
-#: the header rather than a protocol number, so no enumeration carries it.
-_IPV6_HDR_LEN = 40
-
-#: Offset of the Next Header field within the fixed IPv6 header. A literal for
-#: the same reason as :data:`_IPV6_HDR_LEN`.
-_IPV6_NEXT_HEADER = 6
 
 def _next_header_offset(header: 'bytes') -> 'int':
     """Locate the Next Header field of a datagram's last header.
@@ -47,8 +40,8 @@ def _next_header_offset(header: 'bytes') -> 'int':
         Offset, within ``header``, of the Next Header field to rewrite.
 
     """
-    offset = _IPV6_NEXT_HEADER
-    position = _IPV6_HDR_LEN
+    offset = IPV6_NEXT_HEADER_OFFSET
+    position = IPV6_HEADER_LEN
     proto = header[offset]
 
     # NOTE: ``header[position]`` is the Next Header field of the extension
@@ -152,7 +145,7 @@ class IPv6(IP):
         # a header too short to hold the fixed IPv6 header cannot be walked, and
         # a chain not ending in the Fragment header has nothing to rewrite --
         # which also makes this idempotent
-        if len(header) < _IPV6_HDR_LEN:
+        if len(header) < IPV6_HEADER_LEN:
             return header
         offset = _next_header_offset(header)
         if header[offset] != Enum_TransType.IPv6_Frag:
@@ -174,4 +167,4 @@ class IPv6(IP):
             How many of those octets the Payload Length counts.
 
         """
-        return max(length - _IPV6_HDR_LEN, 0)
+        return max(length - IPV6_HEADER_LEN, 0)
