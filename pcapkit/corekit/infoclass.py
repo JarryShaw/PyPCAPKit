@@ -17,6 +17,7 @@ import abc
 import collections.abc
 import contextlib
 import enum
+import inspect
 import itertools
 import sys
 import types
@@ -67,6 +68,33 @@ class FinalisedState(EnumLookup, enum.IntEnum):
     #: marked final by hand, never finalised, and so missing the generated
     #: ``__init__`` that makes the class usable at all.
     FINAL = enum.auto()
+
+
+#: :func:`inspect.get_annotations`, new in Python 3.10, or :data:`None` below it.
+_get_annotations = getattr(inspect, 'get_annotations', None)
+
+
+def _own_annotations(cls: 'type') -> 'dict[str, Any]':
+    """Return the annotations ``cls`` declares itself, never those of a base.
+
+    Below Python 3.10 (bpo-43901), ``cls.__annotations__`` of a class whose body
+    declares none is its nearest base's, so a field-less :class:`Info`
+    subclass read :class:`Info`'s own ``__finalised__``, ``__additional__`` and
+    ``__excluded__`` as its fields (:issue:`1692`). There, a class's own
+    annotations are in its ``__dict__``; from 3.10 on, they are read with
+    :func:`inspect.get_annotations`, as from 3.14 they are evaluated lazily and
+    are not in ``__dict__`` at all.
+
+    Args:
+        cls: Class to read.
+
+    Returns:
+        The annotations ``cls``'s own body declares, which may be empty.
+
+    """
+    if _get_annotations is None:
+        return cls.__dict__.get('__annotations__', {})
+    return _get_annotations(cls)
 
 
 def info_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
@@ -166,8 +194,10 @@ def info_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
                 break
 
             # NOTE: We iterate in reversed order to ensure that the type
-            # annotations of the superclasses are considered first.
-            for key in reversed(cls_.__annotations__):
+            # annotations of the superclasses are considered first. Each class
+            # contributes only the annotations it declares itself (see
+            # :func:`_own_annotations`), on every Python version.
+            for key in reversed(_own_annotations(cls_)):
                 # NOTE: We skip duplicated annotations to avoid duplicate
                 # argument in function definition.
                 if key in args_:
@@ -1161,7 +1191,7 @@ def _nested_types(cls: 'Type[Info]') -> 'dict[str, Type[Info]]':
         module = sys.modules.get(cls_.__module__)
         globalns = dict(vars(module)) if module is not None else {}
         localns = dict(vars(cls_))
-        for (key, ann) in cls_.__dict__.get('__annotations__', getattr(cls_, '__annotations__', {})).items():
+        for (key, ann) in _own_annotations(cls_).items():
             if key in seen:
                 continue
             seen.add(key)
