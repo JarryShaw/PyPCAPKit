@@ -50,7 +50,6 @@ import sys
 import textwrap
 from typing import TYPE_CHECKING
 
-from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
@@ -109,10 +108,9 @@ _ipv6_tcp_warned = collections.OrderedDict()  # type: OrderedDict[int, Any]
 
 # NOTE: the definitions from here to ``packet2timestamp``, and
 # ``_default_accepts``, ``_default_extension_header`` and
-# ``_walk_extension_headers`` below, are kept for :mod:`pcapkit.toolkit.dpkt`
-# and :mod:`pcapkit.toolkit.scapy`: they import the rest, and
-# ``_walk_extension_headers`` uses ``AH_HEADER_LEN`` and
-# ``_default_extension_header``. This module's adapters use none of them
+# ``_walk_extension_headers`` below, are kept for :mod:`pcapkit.toolkit.scapy`:
+# it imports the rest, and ``_walk_extension_headers`` uses ``AH_HEADER_LEN``
+# and ``_default_extension_header``. This module's adapters use none of them
 # (#1708).
 
 #: Length of the fixed part of an IP Authentication Header (AH), before its
@@ -128,29 +126,10 @@ IPV4_EXTENSION_HEADERS = frozenset((
     Enum_TransType.HIP,
 ))
 
-#: EtherTypes of the 802.1Q customer tag and the 802.1ad service tag.
-VLAN_TAGS = frozenset((
-    Enum_EtherType.Customer_VLAN_Tag_Type,
-    Enum_EtherType.IEEE_Std_802_1Q_Service_VLAN_tag_identifier,
-))
-
-#: Length of a VLAN tag (IEEE 802.1Q): two octets of tag control information,
-#: then the EtherType of what follows the tag.
-VLAN_TAG_LEN = 4
-
 #: IP protocol numbers of the IP-in-IP tunnels, each mapped to the IP version
 #: it carries: IPv4 (protocol 4, :rfc:`2003`) and IPv6 (protocol 41,
 #: :rfc:`2473` and :rfc:`4213`).
 IP_TUNNELS = {Enum_TransType.IPv4: 4, Enum_TransType.IPv6: 6}
-
-#: IPv6 extension headers that precede the upper-layer protocol: the ones
-#: :rfc:`8200#section-4.1` orders before it, less ESP, whose payload is
-#: encrypted, plus the Mobility, HIP and Shim6 headers.
-IPV6_EXTENSION_HEADERS = frozenset((
-    Enum_ExtensionHeader.HOPOPT, Enum_ExtensionHeader.IPv6_Opts, Enum_ExtensionHeader.IPv6_Route,
-    Enum_ExtensionHeader.IPv6_Frag, Enum_ExtensionHeader.AH, Enum_ExtensionHeader.Mobility_Header,
-    Enum_ExtensionHeader.HIP, Enum_ExtensionHeader.Shim6,
-))
 
 
 def packet2timestamp(packet: 'Packet') -> 'float':

@@ -10,8 +10,8 @@ PCAP and PCAP-NG alike (#1666). The branch now goes by the layer's class. And
 IPv6 now rejects a Version other than 6 (#1680), so such a header is kept raw:
 its frame hands over no input, and every frame after it is still read.
 
-dpkt and scapy still read those headers as IPv6 and hand their segments over,
-which the best-effort ruling on third-party engines allows (#1687).
+scapy still reads those headers as IPv6 and hands their segments over, which
+the best-effort ruling on third-party engines allows (#1687).
 
 Every capture is built here, so the module is in the unit tier.
 
@@ -38,7 +38,7 @@ RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 
 #: The third-party engines read here besides the default engine.
-ENGINES = ('dpkt', 'scapy')
+ENGINES = ('scapy',)
 
 #: The endpoints of every IPv6 header built here, then of every IPv4 one.
 IPV6 = (ipaddress.IPv6Address(wire.IPV6_A), ipaddress.IPv6Address(wire.IPV6_B))
@@ -195,7 +195,7 @@ class IPv6VersionFourTests(unittest.TestCase):
                 self.assertEqual(seen['IPv6'], {})
                 self.assertEqual(seen['datagrams']['IPv6'], [])
 
-    def test_dpkt_and_scapy_read_every_segment(self) -> None:
+    def test_scapy_reads_every_segment(self) -> None:
         frames = build()
         for container in ('pcap', 'pcapng'):
             for engine in ENGINES:

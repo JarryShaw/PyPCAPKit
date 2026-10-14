@@ -6,7 +6,7 @@ an IPv6 Fragment header, so a Fragment header followed by ESP or Destination
 Options raises :exc:`AttributeError` from ``dpkt/ip6.py``. The engine did not
 catch it, so the third-party exception ended the whole extraction.
 
-Every case writes its own one-frame capture to a temporary directory. Everything
+Every case writes its own capture to a temporary directory. Everything
 from :mod:`pcapkit` is imported inside each test, after
 :func:`~tests._support.reimport_once_per_class`, not at module load.
 
@@ -19,7 +19,7 @@ import tempfile
 import unittest
 import warnings
 
-from tests._support import reimport_once_per_class
+from tests._support import close_extractor, reimport_once_per_class
 
 HAS_DPKT = importlib.util.find_spec('dpkt') is not None
 
@@ -66,6 +66,32 @@ class TestDPKTParseError(unittest.TestCase):
                 self.assertEqual(bytes(ext.frame[0]), frame)
                 self.assertTrue(any(issubclass(item.category, DPKTWarning)
                                     and 'cannot parse' in str(item.message) for item in caught))
+
+    def test_unparsable_frame_is_written_out(self) -> None:
+        # The engine writes every frame through packet2dict, which read the
+        # header fields a frame kept raw does not have, so AttributeError ended
+        # the extraction there (#1662). It maps to no fields, then the next frame
+        # is read.
+        import pcapkit
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.toolkit.dpkt import packet2dict
+
+        frame = bytes(12) + b'\x86\xdd' + IPV6 + PAYLOADS[60]
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, 'frag-60.pcap')
+            _write_pcap(path, frame)
+            with open(path, 'ab') as file:
+                file.write(struct.pack('<IIII', 2, 0, len(frame), len(frame)) + frame)
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore')
+                ext = pcapkit.extract(fin=path, fout=os.path.join(tmp, 'out'), format='json',
+                                      engine='dpkt', store=True)
+            try:
+                self.assertEqual(ext.length, 2)
+                self.assertEqual(packet2dict(ext.frame[0], 1.0, data_link=LinkType.ETHERNET),
+                                 {'timestamp': 1.0, 'packet': frame, 'ETHERNET': {}})
+            finally:
+                close_extractor(ext)
 
 
 if __name__ == '__main__':

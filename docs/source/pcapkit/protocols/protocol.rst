@@ -118,8 +118,7 @@ starts at the first layer it dissects. One chain of extension headers is also bo
 its own, by :data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT`.
 The ``pyshark``, ``scapy`` and ``pypcapfile`` engines dissect with their own
 parsers, which do not apply the frame's layer bound (:issue:`1609`). The
-``dpkt`` toolkit counts the layers it walks as the default engine does, and
-stops at it.
+``dpkt`` toolkit reads what :mod:`dpkt` decodes, which applies neither bound.
 
 .. autodata:: pcapkit.protocols.protocol.FRAME_LAYER_LIMIT
 

@@ -101,6 +101,14 @@ their row says otherwise:
 |                                                                 | PCAP savefiles only, otherwise                                |
 |                                                                 | :exc:`~pcapkit.utilities.exceptions.FormatError`              |
 +-----------------------------------------------------------------+---------------------------------------------------------------+
+| :class:`~pcapkit.foundation.engines.dpkt.DPKT`                  | TCP in an IP-in-IP tunnel, or behind an AH or IPv6 extension  |
+|                                                                 | header carried in IPv4, is left out of TCP reassembly and     |
+|                                                                 | flow tracing, and IPv4 carried in IPv6, or IPv6 in IPv4, out  |
+|                                                                 | of IP reassembly, all without a warning; a frame `DPKT`_      |
+|                                                                 | cannot decode is kept raw, with a                             |
+|                                                                 | :class:`~pcapkit.utilities.warnings.DPKTWarning`, and is      |
+|                                                                 | neither reassembled nor traced                                |
++-----------------------------------------------------------------+---------------------------------------------------------------+
 | :class:`~pcapkit.foundation.engines.scapy.Scapy`                | reads IPv6 only as far as `Scapy`_ dissects it, without a     |
 |                                                                 | warning: behind a BSD loopback header only at the family      |
 |                                                                 | Scapy binds it to on the host it runs on, and no TCP or       |

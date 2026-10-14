@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""The DPKT engine reads raw-IP and BSD loopback frames as the default engine does.
+"""The DPKT engine reads raw-IP and BSD loopback frames by their version and address family.
 
 GitHub issues #1502 and #1574. :meth:`DPKT._get_protocol
 <pcapkit.foundation.engines.dpkt.DPKT._get_protocol>` knew Ethernet, IPv4 and
@@ -39,7 +39,7 @@ CAPTURES = (
 
 @unittest.skipUnless(HAS_DPKT, 'dpkt is not installed')
 class TestDPKTRawAndLoopback(unittest.TestCase):
-    """Pin the DPKT engine's raw-IP and loopback link types against the default engine's."""
+    """Pin the DPKT engine's raw-IP and loopback link types."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
@@ -78,14 +78,14 @@ class TestDPKTRawAndLoopback(unittest.TestCase):
                         self.assertEqual(network if loopback else frame.data,
                                          record[4:] if loopback else record)
 
-    def test_reassembly_inputs_match_the_default_engine(self) -> None:
-        for linktype, records, _ in CAPTURES:
+    def test_reassembly_inputs_are_the_captured_datagrams(self) -> None:
+        # each frame read as IPv4 is one whole datagram: IPV4's header, then its UDP header
+        for (linktype, records, _), frames in zip(CAPTURES, ((1,), (1, 2), (1,))):
             with self.subTest(linktype=linktype):
-                default = self._extract(linktype, records, 'default')
                 dpkt = self._extract(linktype, records, 'dpkt')
-                self.assertEqual(len(dpkt.reassembly.ipv4), len(default.reassembly.ipv4))
-                self.assertEqual([datagram.packet for datagram in dpkt.reassembly.ipv4],
-                                 [datagram.packet for datagram in default.reassembly.ipv4])
+                self.assertEqual([(datagram.index, bytes(datagram.header), bytes(datagram.payload))
+                                  for datagram in dpkt.reassembly.ipv4],
+                                 [((frame,), IPV4[:20], IPV4[20:]) for frame in frames])
 
     def test_get_protocol_by_link_type(self) -> None:
         import dpkt

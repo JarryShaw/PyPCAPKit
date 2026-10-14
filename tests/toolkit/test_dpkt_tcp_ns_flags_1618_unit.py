@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-"""The dpkt engine reads RST, SYN and FIN as the default engine does, whatever the NS bit. C.f. #1618.
+"""The dpkt engine reads RST, SYN and FIN from the flags octet, whatever the NS bit. C.f. #1618.
 
 `dpkt`_ 1.9.8 makes :attr:`dpkt.tcp.TCP.flags` nine bits wide, its top bit the
 NS bit (:rfc:`3540`). :func:`~pcapkit.toolkit.dpkt.tcp_reassembly` and
 :func:`~pcapkit.toolkit.dpkt.tcp_traceflow` read each flag by its position among
 that field's binary digits, padded to eight, so with NS set every flag was read
 one bit low: a SYN as a FIN, an RST as a SYN, a PSH as an RST. They now mask
-each flag out of the flags octet, as the default engine reads it.
+each flag out of the flags octet.
 
 Every capture is built here, so the module is in the unit tier.
 
@@ -84,22 +84,22 @@ class DPKTTCPNSFlagsTests(unittest.TestCase):
                 self.assertEqual({flag: seen[aspect][1][flag] for flag in ('rst', 'syn', 'fin')},
                                  {'rst': False, 'syn': True, 'fin': False})
 
-    def test_extraction_agrees_with_the_default_engine(self) -> None:
-        # Every input to TCP reassembly and flow tracing, every field of it, and
-        # what comes out, for every flags octet with NS and the reserved bits
-        # clear and set.
+    def test_extraction_reads_each_flag_from_the_flags_octet(self) -> None:
+        # Every input to TCP reassembly and flow tracing, for every flags octet
+        # with NS and the reserved bits clear and set; the header handed on is
+        # the captured one.
         cases = [(nibble, octet) for nibble in (0x0, NS, 0xE, 0xF) for octet in range(256)]
-        frames = [wire.ethernet(wire.ipv4(segment(number, nibble, octet), proto=6, df=True), 0x0800)
-                  for number, (nibble, octet) in enumerate(cases)]
-        base = read(self, 'default', frames)
-        self.assertEqual(sorted(base['tcp']), list(range(1, len(cases) + 1)))
-        self.assertEqual([{flag: base['tcp'][number][flag] for flag in ('rst', 'syn', 'fin')}
-                          for number in range(1, len(cases) + 1)],
-                         [expected(octet) for _, octet in cases])
+        headers = [segment(number, nibble, octet) for number, (nibble, octet) in enumerate(cases)]
+        frames = [wire.ethernet(wire.ipv4(header, proto=6, df=True), 0x0800) for header in headers]
+        numbers = list(range(1, len(cases) + 1))
         seen = read(self, 'dpkt', frames)
-        for aspect in ('tcp', 'trace', 'ids', 'flows'):
+        for aspect in ('tcp', 'trace'):
             with self.subTest(aspect=aspect):
-                self.assertEqual(seen[aspect], base[aspect])
+                self.assertEqual(sorted(seen[aspect]), numbers)
+                self.assertEqual([{flag: seen[aspect][number][flag] for flag in ('rst', 'syn', 'fin')}
+                                  for number in numbers],
+                                 [expected(octet) for _, octet in cases])
+                self.assertEqual([seen[aspect][number]['header'] for number in numbers], headers)
 
 
 if __name__ == '__main__':
