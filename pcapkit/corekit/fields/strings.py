@@ -110,8 +110,9 @@ class StringField(_TextField[str]):
             The default is ``'strict'``. Should decoding fail under it, the field
             retries with ``'replace'`` rather than raising, so an octet the charset
             cannot decode reads as U+FFFD -- the octets themselves are not lost,
-            see below. A codec that supports no error handler at all still raises:
-            ``idna`` reports ``Unsupported error handling: replace``, measured.
+            see below. A codec that raises under ``'replace'`` as well, such as
+            ``idna``, which supports ``'strict'`` alone, decodes as UTF-8 with
+            ``'replace'`` instead, and its octets are not lost either.
             Other possible values are ``'ignore'`` and ``'replace'`` as well as any
             other name registered with :func:`codecs.register_error` that can handle
             :exc:`UnicodeDecodeError`.
@@ -206,7 +207,15 @@ class StringField(_TextField[str]):
             try:
                 ret = value.decode(charset, self._errors)
             except UnicodeError:
-                ret = value.decode(charset, 'replace')
+                # NOTE: A codec may raise under ``'replace'`` too -- ``idna``
+                # supports ``'strict'`` alone, and ``punycode`` before Python 3.13
+                # decodes some non-ASCII octets strictly whatever the handler -- so
+                # the last resort is the fallback encoding, UTF-8, which cannot.
+                # The check below keeps the octets, as for any lossy decoding.
+                try:
+                    ret = value.decode(charset, 'replace')
+                except UnicodeError:
+                    ret = value.decode('utf-8', 'replace')
 
         # NOTE: Encoding may itself fail -- ``errors='strict'`` over text that
         # decoded under a lone-surrogate scheme, for one -- which is as much a
