@@ -527,7 +527,9 @@ class TestTheRewrite(unittest.TestCase):
         self.assertEqual(result.testsRun, stale.testsRun)
         self.assertTrue(result.wasSuccessful(),
                         '\n'.join(text for _, text in result.failures + result.errors))
-        self.assertEqual([note for note in notes(plan, 'manual') if 'ktlo_311' not in note], [])
+        # #1747: and `pypcap-parity`, which 3.11 leaving empties, for the owner to retire.
+        self.assertEqual([note for note in notes(plan, 'manual')
+                          if 'ktlo_311' not in note and note not in plan['retire']], [])
 
     def test_every_claim_and_rewriter_matches_once_on_main(self) -> None:
         """So a reworded sentence fails here, not as a silent skip in a weekly run."""

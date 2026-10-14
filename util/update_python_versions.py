@@ -62,7 +62,9 @@ run that changes nothing writes nothing. The prose the audit tests pin to the fi
 is regenerated with it (:data:`CLAIMS`, :data:`REWRITERS`), but nothing under
 :file:`.github/workflows/`: an App installation token needs the ``workflows``
 permission to push a change there, and the job's token has contents and pull
-requests only. Workflow comments name the tiers instead of restating them.
+requests only. Workflow comments name the tiers instead of restating them. Nor
+does it retire a job whose matrix the new tiers leave empty: the proposal names
+the job as a manual step, for the owner to retire or remove first (#1747).
 
 Three commands:
 
@@ -466,6 +468,40 @@ def required_contexts(workflows: 'dict[str, Any]', values: 'dict[str, str]') -> 
     legs = matrix_legs(workflows, values)[REQUIRED_JOB]
     return [REQUIRED_AGGREGATE] + [render_name(template, leg) for leg in legs
                                    if leg.get('ktlo') is not True and leg.get('experimental') is not True]
+
+
+def needed_by(workflow: 'dict[str, Any]', job_id: 'str') -> 'list[str]':
+    """The jobs of ``workflow`` whose ``needs:`` lists ``job_id``."""
+    found = []
+    for other, job in (workflow.get('jobs') or {}).items():
+        needs = job.get('needs') or []
+        if job_id in ([needs] if isinstance(needs, str) else needs):
+            found.append(other)
+    return found
+
+
+def emptied_jobs(workflows: 'dict[str, Any]', before: 'dict[str, str]', after: 'dict[str, str]',
+                 why: 'dict[str, str]') -> 'list[str]':
+    """A manual step for each job whose matrix the tiers ``after`` leave with no leg (#1747).
+
+    ``pypcap-parity`` holds supported versions below 3.12 only, so 3.11 moving to
+    KTLO empties it. The updater retires nothing: dropping a job is a workflow
+    edit, which ``pr``'s token cannot push, and the owner's call. So the tiers are
+    written as computed, and the job is named here, with each version ``why``
+    says leaves it and the jobs that need it, for the owner to retire first.
+    A matrix that was empty already is not one this update empties.
+
+    """
+    old, new = matrix_legs(workflows, before), matrix_legs(workflows, after)
+    found = []
+    for name, job_id in sorted(job for job, legs in old.items() if legs and not new.get(job)):
+        versions = dict.fromkeys(str(leg.get('python-version')) for leg in old[(name, job_id)])
+        reasons = ' and '.join(why.get(version, f'{version} leaves it') for version in versions)
+        needs = needed_by(workflows[name], job_id)
+        needed = f' (and its `needs:` in {", ".join(f"`{job}`" for job in needs)})' if needs else ''
+        found.append(f'{name}: `{job_id}` would have no leg left once {reasons}; retire or remove the '
+                     f'job{needed} before merging this update')
+    return found
 
 
 def setup_steps(job: 'dict[str, Any]') -> 'list[dict[str, Any]]':
@@ -1145,6 +1181,13 @@ def compute_plan(root: 'pathlib.Path', sources: 'dict[str, Any]') -> 'tuple[dict
                                         f'its own `{key}` output for `release_status`'))
 
     changes = tier_changes(before, after, reasons)
+    # #1747: in the plan's notes and its own key, which the body puts first.
+    # Not in the fingerprint: like the renames, it follows from the tiers and
+    # main's workflows, and the owner retiring the job on main must not make
+    # the same tiers a new proposal, which would recreate the branch.
+    retire = emptied_jobs(workflows, before_values, after_values,
+                          {change['version']: phrase(change) for change in changes})
+    notes.extend(Note('manual', text) for text in retire)
     plan = {
         'fingerprint': fingerprint(latest, versions),
         'title': title_of(changes, (before['latest'], latest)),
@@ -1156,6 +1199,7 @@ def compute_plan(root: 'pathlib.Path', sources: 'dict[str, Any]') -> 'tuple[dict
         'renamed': renamed,
         'added': added,
         'removed': removed,
+        'retire': retire,
         'notes': [note._asdict() for note in notes],
     }
     return plan, {path: texts[path] for path in changed}
@@ -1194,6 +1238,11 @@ def describe_plan(plan: 'dict[str, Any]', audit: 'tuple[str, list[str]]', run_ur
         if plan['latest'][0] != plan['latest'][1]:
             out.append(f'| `latest` | {plan["latest"][0]} | {plan["latest"][1]} | the newest bugfix branch |')
         out.append('')
+    if plan['retire']:
+        out.append('**Before merging, retire or remove these jobs by hand** -- the workflow retires nothing and '
+                   'never edits a workflow file, and these tiers leave their matrices empty (#1747):')
+        out += [f'- {text}' for text in plan['retire']]
+        out.append('')
     required = plan['required']
     if required['remove'] or required['add']:
         out.append('**Before merging, edit ruleset 23497679 (`main`)** -- the workflow never edits it:')
@@ -1208,8 +1257,9 @@ def describe_plan(plan: 'dict[str, Any]', audit: 'tuple[str, list[str]]', run_ur
         out.append('New check runs: ' + ', '.join(f'`{name}`' for name in plan['added']) + '.')
     if plan['removed']:
         out.append('Removed check runs: ' + ', '.join(f'`{name}`' for name in plan['removed']) + '.')
-    if plan['notes']:
-        out += ['', 'Not done here:'] + [f'- {note["text"]}' for note in plan['notes']]
+    rest = [note['text'] for note in plan['notes'] if note['text'] not in plan['retire']]
+    if rest:
+        out += ['', 'Not done here:'] + [f'- {text}' for text in rest]
     outcome, failures = audit
     names = ', '.join(f'`{module.rsplit(".", 1)[-1]}`' for module in AUDIT)
     if outcome == 'success':
