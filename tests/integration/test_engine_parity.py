@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
-"""End-to-end parity between the extraction engines.
+"""End-to-end runs of each extraction engine over the same captures.
 
 Translates :file:`examples/legacy_smoke/test_engine.py`, which ran the same
-capture through each engine and wrote four reports nobody compared, into
-assertions that the engines agree.
+capture through each engine and wrote four reports nobody checked, into
+assertions on what each engine reports, against constants.
 
 ``pyshark`` is left out on purpose -- not for want of :program:`tshark`, which
 the ``pypcap-parity`` job (the one whose selection collects this file) now
 installs, but because on Python 3.14 it fails inside its own
-``get_event_loop()`` before it reads a byte, so it cannot take part in a parity
-comparison that runs on every version;
+``get_event_loop()`` before it reads a byte, so it cannot take part in a check
+that runs on every version;
 :file:`tests/integration/test_engine_runtime.py` already pins that. The
 ``pipeline`` and ``server`` engines are commented out in the original script and
 are not covered here either.
@@ -23,7 +23,7 @@ from tests._support import sample_path
 from tests.integration._helpers import HAS_DPKT, HAS_RUNTIME, HAS_SCAPY, EndToEndTestCase
 
 #: Captures every engine is run over, with the frame count each must report.
-#: All three are small: the point is agreement, not throughput.
+#: All are small: the point is what each engine reports, not throughput.
 PARITY_CAPTURES = {
     'in.pcap': 6,
     'arp.pcap': 2,
@@ -31,7 +31,11 @@ PARITY_CAPTURES = {
     'http6.cap': 26,
 }
 
-#: Engines to compare, with the gate that decides whether each is available.
+#: The Ethernet header of each frame of ``arp.pcap``, as captured.
+ARP_ETHERNET_HEADERS = (bytes.fromhex('000c297d1db4000c2919dc610806'),
+                        bytes.fromhex('000c2919dc61000c297d1db40806'))
+
+#: Engines to run, with the gate that decides whether each is available.
 ENGINES = (
     ('default', HAS_RUNTIME),
     ('dpkt', HAS_DPKT),
@@ -46,18 +50,13 @@ class EngineParityTests(EndToEndTestCase):
     def available(self) -> 'list[str]':
         return [name for name, present in ENGINES if present]
 
-    def test_every_engine_reports_the_same_frame_count(self) -> None:
+    def test_every_engine_reports_the_frame_count(self) -> None:
         for capture, expected in PARITY_CAPTURES.items():
-            counts = {}
             for engine in self.available():
                 with self.subTest(capture=capture, engine=engine):
                     extractor = self.extract(fin=sample_path(capture), nofile=True,
                                              store=False, engine=engine)
-                    counts[engine] = extractor.length
                     self.assertEqual(extractor.length, expected)
-
-            with self.subTest(capture=capture):
-                self.assertEqual(set(counts.values()), {expected})
 
     def test_every_engine_writes_a_report(self) -> None:
         for engine in self.available():
@@ -88,48 +87,40 @@ class EngineParityTests(EndToEndTestCase):
                          [str(frame.protochain) for frame in by_name.frame])
 
     @unittest.skipUnless(HAS_DPKT, 'dpkt not installed')
-    def test_dpkt_engine_agrees_on_the_protocol_chain(self) -> None:
-        # The engines hand back their own packet objects, so the chains are
-        # spelled differently; the toolkit is what maps one onto the other.
+    def test_dpkt_engine_spells_the_protocol_chain_in_its_own_names(self) -> None:
+        # The engine hands back dpkt's own packet objects, and the toolkit spells
+        # their chain in dpkt's names.
         from pcapkit.toolkit.dpkt import packet2chain
 
-        native = self.extract(fin=sample_path('in.pcap'), nofile=True, store=True,
-                              engine='default')
         foreign = self.extract(fin=sample_path('in.pcap'), nofile=True, store=True,
                                engine='dpkt')
 
-        self.assertEqual(str(native.frame[0].protochain), 'Ethernet:IPv6:IPv6_ICMP')
         self.assertEqual(packet2chain(foreign.frame[0]), 'Ethernet:IP6:ICMP6')
-        self.assertEqual(str(native.frame[2].protochain), 'Ethernet:IPv4:TCP')
         self.assertEqual(packet2chain(foreign.frame[2]), 'Ethernet:IP:TCP')
 
     @unittest.skipUnless(HAS_SCAPY, 'scapy not installed')
-    def test_scapy_engine_returns_the_same_link_layer_bytes(self) -> None:
-        native = self.extract(fin=sample_path('arp.pcap'), nofile=True, store=True,
-                              engine='default')
+    def test_scapy_engine_returns_every_link_layer_octet(self) -> None:
         foreign = self.extract(fin=sample_path('arp.pcap'), nofile=True, store=True,
                                engine='scapy')
 
-        self.assertEqual(len(native.frame), len(foreign.frame))
-        for number, (mine, theirs) in enumerate(zip(native.frame, foreign.frame), start=1):
+        self.assertEqual(len(foreign.frame), len(ARP_ETHERNET_HEADERS))
+        for number, (frame, header) in enumerate(zip(foreign.frame, ARP_ETHERNET_HEADERS), start=1):
             with self.subTest(frame=number):
                 # Re-serialising scapy's frame reproduces the whole 60 octet frame,
-                # padded to the Ethernet minimum, and its first fourteen octets are
-                # the Ethernet header the default engine parsed into a layer of its
-                # own. That is what makes this a bytes-level parity check: both
-                # engines account for every captured octet, whatever they call the
-                # layers they split it into.
+                # padded to the Ethernet minimum, its first fourteen octets the
+                # Ethernet header as captured: the engine accounts for every
+                # captured octet, whatever it calls the layers it splits it into.
                 #
                 # #406: this comment used to say scapy "does not know this capture's
                 # link type and hands back one opaque ``Raw`` layer". That was the
                 # missing-layer-registry bug, not a property of the capture --
                 # arp.pcap is link type 1 and scapy now dissects it as
-                # ``Ethernet / ARP / Padding``. The assertions below are unchanged
-                # and still pass, because ``bytes()`` of a dissected frame is the
-                # same octet string as ``bytes()`` of an undissected one.
-                captured = bytes(theirs)
+                # ``Ethernet / ARP / Padding``. The assertions below still pass
+                # either way, because ``bytes()`` of a dissected frame is the same
+                # octet string as ``bytes()`` of an undissected one.
+                captured = bytes(frame)
                 self.assertEqual(len(captured), 60)
-                self.assertEqual(captured[:14], bytes(mine['Ethernet'].packet.header))
+                self.assertEqual(captured[:14], header)
 
 
 if __name__ == '__main__':

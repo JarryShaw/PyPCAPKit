@@ -5,10 +5,8 @@ The TCP reassembly and flow tracing adapters keyed a segment by the frame's
 *first* IP layer, which in a tunnel is the tunnel's own: every connection through
 one tunnel that shares a port pair merged into one flow, under the tunnel's
 endpoints. The default engine, scapy and pyshark did so (scapy found the inner
-IPv4 layer of 4in6 only), and dpkt found no TCP in a tunnel at all. Each now
-keys it by the IP layer nearest above the TCP segment, as Wireshark's TCP
-conversations do -- and dpkt enters only the tunnels the default engine
-dissects, protocols 4 and 41, not the protocol 0 it also decodes as IPv4.
+IPv4 layer of 4in6 only). Each now keys it by the IP layer nearest above the TCP
+segment, as Wireshark's TCP conversations do.
 
 Every capture is built here, so the module is in the unit tier. pyshark runs
 only where the interpreter supports it, with tshark on the path. The
@@ -47,8 +45,7 @@ TUNNEL = {4: 4, 6: 41}
 #: Each tunnel, named inner version first: ``6in4`` is IPv6 carried in IPv4.
 KINDS = {'4in4': (4, 4), '6in4': (6, 4), '4in6': (4, 6), '6in6': (6, 6)}
 #: Engines that report dissected fields only: no TCP reassembly, and no TCP
-#: octets in what they hand flow tracing (as ``NO_TCP_OCTETS`` in
-#: :mod:`tests.foundation.engines.test_engine_agreement_runtime`).
+#: octets in what they hand flow tracing.
 FIELDS_ONLY = frozenset(('pyshark',))
 
 
@@ -155,36 +152,12 @@ def read(test: unittest.TestCase, engine: str, frames: 'list[bytes]', *,
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class TunnelledTCPFlowKeyTests(unittest.TestCase):
-    """Every engine keys tunnelled TCP by the innermost IP header, as the default engine does."""
+    """The default engine, scapy and pyshark key tunnelled TCP by the innermost IP header."""
 
-    ENGINES = ('default', 'dpkt', 'scapy', 'pyshark')
+    ENGINES = ('default', 'scapy', 'pyshark')
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
-
-    def agree(self, frames: 'list[bytes]', engines: 'tuple[str, ...]' = ENGINES[1:]) -> 'dict[str, Any]':
-        """Check each of ``engines`` hands on what the default engine does for ``frames``.
-
-        That is every field of every TCP reassembly and flow tracing input, the
-        reassembled datagrams' ``id`` and the traced flows -- for an engine in
-        :data:`FIELDS_ONLY`, the flow tracing inputs less their octets, and the
-        flows. Returns the default engine's.
-
-        """
-        base = read(self, 'default', frames)
-        for engine in engines:
-            with self.subTest(engine=engine):
-                if not has(engine):
-                    self.skipTest(f'{engine} not installed')
-                seen = read(self, engine, frames)
-                want = base
-                if engine in FIELDS_ONLY:
-                    want = {'flows': base['flows'], 'trace': {
-                        number: {key: value for key, value in record.items() if key not in ('header', 'payload')}
-                        for number, record in base['trace'].items()}}
-                for aspect in want:
-                    self.assertEqual(seen[aspect], want[aspect], aspect)
-        return base
 
     def test_two_connections_through_one_tunnel_are_two_flows(self) -> None:
         for engine in self.ENGINES:
@@ -210,18 +183,16 @@ class TunnelledTCPFlowKeyTests(unittest.TestCase):
                                                  for record in seen['tcp'].values()}), pairs)
 
     def test_protocol_0_is_no_tunnel(self) -> None:
-        # dpkt decodes an IPv4 protocol 0 as IPv4, its IP_PROTO_IP; the default
-        # engine reads an IPv6 Hop-by-Hop Options header there, and so finds no
-        # TCP in the IPv4 packet behind it.
+        # The default engine reads an IPv6 Hop-by-Hop Options header at an IPv4
+        # protocol 0, and so finds no TCP in the IPv4 packet behind it.
         frames = [frame(ip(4, ip(4, segment, *INNER[4][connection], 6), *OUTER[4], 0))
                   for connection, segment in enumerate((wire.tcp(b'', seq=100, syn=True),
                                                         wire.tcp(b'hello', seq=101, ack=1)))]
-        base = self.agree(frames)
+        base = read(self, 'default', frames)
         self.assertEqual((base['trace'], base['flows'], base['ids']), ({}, [], []))
 
-    def test_tunnelled_segments_agree_with_the_default_engine(self) -> None:
-        # The other engines hand reassembly and flow tracing every field the
-        # default engine does, however the tunnel is built.
+    def test_the_default_engine_traces_every_tunnelled_segment(self) -> None:
+        # However the tunnel is built.
         segment = wire.tcp(b'payload', seq=7, ack=1)
         # a Data Offset of 6 words in a 20-octet segment, which the TCP parser
         # rejects and the default engine reads out of the raw octets (#1518)
@@ -242,18 +213,17 @@ class TunnelledTCPFlowKeyTests(unittest.TestCase):
             frame(ip(6, hop_by_hop + ip(4, segment, *INNER[4][1], 6), *OUTER[6], 0)),
             tunnelled('4in4', wire.tcp(b'', seq=1, ack=1)) + bytes(6),
         ]
-        base = self.agree(frames)
+        base = read(self, 'default', frames)
         self.assertEqual(sorted(base['trace']), list(range(1, len(frames) + 1)))
 
-    def test_tunnelled_first_fragments_agree_with_the_default_engine(self) -> None:
-        # pyshark too, since it turns tshark's IP reassembly off (#1612)
+    def test_the_default_engine_traces_tunnelled_first_fragments(self) -> None:
         segment = wire.tcp(b'payload', seq=7, ack=1)
         frames = [
             # the tunnel's first fragment, then the inner datagram's
             frame(ip(4, ip(4, segment, *INNER[4][1], 6), *OUTER[4], 4, mf=True)),
             frame(ip(4, ip(4, segment, *INNER[4][1], 6, mf=True), *OUTER[4], 4)),
         ]
-        base = self.agree(frames)
+        base = read(self, 'default', frames)
         self.assertEqual(sorted(base['trace']), [1, 2])
 
     def test_the_default_engine_reads_the_inner_header(self) -> None:

@@ -44,6 +44,8 @@ FLOWS = [((1, 2, 6, 7), (1, 7), (2, 6)), ((3, 4, 5), (3,), (4, 5))]
 UNIDIRECTIONAL = [((1, 7), (1, 7), ()), ((2, 6), (2, 6), ()), ((3,), (3,), ()), ((4, 5), (4, 5), ())]
 #: Frame numbers of each reassembled TCP datagram, as :mod:`dpkt` gives them.
 DATAGRAMS = [(2, 6), (3,), (4, 5)]
+#: The octets of each of those datagrams' payloads.
+DATAGRAM_LENGTHS = [208, 17, 17]
 
 
 def snapped_records(cut: 'int' = 4) -> 'tuple[bytes, list[tuple[int, int, int, bytes]]]':
@@ -91,7 +93,7 @@ def pcap_records(data: 'bytes') -> 'list[tuple[int, int, int, bytes]]':
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class SnappedCaptureTraceTests(unittest.TestCase):
-    """The default engine traces the snapped capture as the other engines do."""
+    """Every engine traces and reassembles every frame of the snapped capture."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
@@ -130,13 +132,13 @@ class SnappedCaptureTraceTests(unittest.TestCase):
                     self.assertEqual([flow[:3] for flow in flows], expected)
 
     @unittest.skipUnless(ENGINES, 'neither dpkt nor scapy installed')
-    def test_the_other_engines_agree(self) -> None:
+    def test_the_other_engines_trace_every_frame(self) -> None:
         for container in CONTAINERS:
-            for bidirectional in (True, False):
-                base = self._flows(container, trace_bidirectional=bidirectional)
+            for bidirectional, expected in ((True, FLOWS), (False, UNIDIRECTIONAL)):
                 for engine in ENGINES:
                     with self.subTest(container=container, bidirectional=bidirectional, engine=engine):
-                        self.assertEqual(self._flows(container, engine, trace_bidirectional=bidirectional), base)
+                        flows = self._flows(container, engine, trace_bidirectional=bidirectional)
+                        self.assertEqual([flow[:3] for flow in flows], expected)
 
     def _trace_files(self, container: 'str', engine: 'str' = 'default') -> 'dict[str, bytes]':
         fout = tempfile.mkdtemp(dir=self.tmp)
@@ -147,22 +149,23 @@ class SnappedCaptureTraceTests(unittest.TestCase):
                 files[flow.label] = file.read()
         return files
 
-    def test_each_traced_pcap_holds_the_captured_records(self) -> None:
+    def _assert_traced_records(self, engine: 'str') -> None:
         # Byte for byte: each flow's file holds its frames' records as captured,
         # snapped octets and original length alike (#1543).
         _, records = snapped_records()
         for container in CONTAINERS:
             with self.subTest(container=container):
-                files = self._trace_files(container)
+                files = self._trace_files(container, engine)
                 self.assertEqual(len(files), len(FLOWS))
                 for (index, _, _), data in zip(FLOWS, files.values()):
                     self.assertEqual(pcap_records(data), [records[number - 1] for number in index])
 
+    def test_each_traced_pcap_holds_the_captured_records(self) -> None:
+        self._assert_traced_records('default')
+
     @unittest.skipUnless('dpkt' in ENGINES, 'dpkt not installed')
-    def test_each_traced_pcap_matches_dpkt(self) -> None:
-        for container in CONTAINERS:
-            with self.subTest(container=container):
-                self.assertEqual(self._trace_files(container), self._trace_files(container, 'dpkt'))
+    def test_each_dpkt_traced_pcap_holds_the_captured_records(self) -> None:
+        self._assert_traced_records('dpkt')
 
     def _datagrams(self, container: 'str', engine: 'str' = 'default') -> 'list[tuple]':
         extractor = self._extract(container, engine, reassembly=True, reasm_store=True)
@@ -174,10 +177,11 @@ class SnappedCaptureTraceTests(unittest.TestCase):
                 self.assertEqual([index for index, _ in self._datagrams(container)], DATAGRAMS)
 
     @unittest.skipUnless('dpkt' in ENGINES, 'dpkt not installed')
-    def test_reassembly_matches_dpkt(self) -> None:
+    def test_dpkt_reassembly_takes_every_frame(self) -> None:
         for container in CONTAINERS:
             with self.subTest(container=container):
-                self.assertEqual(self._datagrams(container), self._datagrams(container, 'dpkt'))
+                self.assertEqual([(index, len(payload)) for index, payload in self._datagrams(container, 'dpkt')],
+                                 list(zip(DATAGRAMS, DATAGRAM_LENGTHS)))
 
 
 if __name__ == '__main__':

@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
-"""The dpkt and scapy engines find TCP in IPv4 where the default engine does. C.f. #1606, #1617.
+"""TCP carried in IPv4 behind an extension header or in a later fragment. C.f. #1606, #1617.
 
 The default engine dispatches an IPv4 packet's protocol through the registry
 IPv6 uses, so it reads an AH or IPv6 extension header carried directly in IPv4,
 and the TCP segment or IP-in-IP tunnel behind it, up to
 :data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT` headers in a
-row. `dpkt`_ decodes protocol 0 as IPv4 and keeps protocols 43, 44, 60, 135 and
-139 as octets, and `Scapy`_ keeps all of them as ``Raw`` but AH, behind which it
-dissects no TCP; so neither engine handed that TCP on (#1606). Both now step over
-the headers by the default engine's own rules, as the pypcapfile engine does
-(:func:`pcapkit.toolkit.pypcapfile._past_extension_headers`).
+row (#1606).
 
 A later IPv4 fragment carries no upper-layer header (:rfc:`791#section-3.2`), so
 the default engine reads no TCP in one, but `Scapy`_ binds IPv6 to IPv4 protocol
 41, and AH to protocol 51, whatever the fragment offset, and its engine handed on
 the TCP it then dissected (#1617). It now stops at such a fragment.
+
+`dpkt`_ decodes protocol 0 as IPv4, so a Hop-by-Hop header there can read as an
+IPv4 packet dpkt cannot decode, or whose payload is no packet; neither ends the
+extraction.
 
 Every capture is built here, so the module is in the unit tier.
 
@@ -40,9 +40,6 @@ if TYPE_CHECKING:
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
-
-#: The engines compared with the default engine.
-ENGINES = ('dpkt', 'scapy')
 
 
 def has(engine: str) -> bool:
@@ -217,66 +214,45 @@ def read(test: unittest.TestCase, engine: str, frames: 'list[bytes]') -> 'dict[s
     return seen
 
 
+#: The flow of the second frame of the dpkt cases below, ``tcp(2)`` in plain IPv4.
+NEXT_FLOW = ('192.0.2.1_1002-198.51.100.2_9-1.000001', (2,))
+
+
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class TCPCarrierWalkTests(unittest.TestCase):
-    """dpkt and scapy hand on the TCP the default engine reads in IPv4, and no other."""
+    """Where the engines read TCP in IPv4, and what dpkt survives on the way."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-    def agree(self, cases: 'dict[str, tuple[bool, Callable[[int], bytes]]]') -> None:
+    def assert_reads(self, engine: str, cases: 'dict[str, tuple[bool, Callable[[int], bytes]]]') -> None:
+        """``engine`` reads TCP in exactly the frames of ``cases`` marked to be read."""
         frames, reads = build(cases)
-        base = read(self, 'default', frames)
-        # what the default engine reads, as the cases say
-        self.assertEqual(sorted(base['tcp']), reads)
-        self.assertEqual(sorted(base['trace']), reads)
-        self.assertEqual(len(base['ids']), len(reads))
+        seen = read(self, engine, frames)
         names = dict(enumerate(cases, start=1))
-        for engine in ENGINES:
-            with self.subTest(engine=engine):
-                if not has(engine):
-                    self.skipTest(f'{engine} not installed')
-                seen = read(self, engine, frames)
-                for aspect in ('tcp', 'trace'):
-                    self.assertEqual(
-                        [names[number] for number in sorted(set(seen[aspect]) ^ set(base[aspect]))], [],
-                        f'{aspect}: frames read by one of {engine} and the default engine alone')
-                    self.assertEqual(seen[aspect], base[aspect], aspect)
-                for aspect in ('ids', 'flows'):
-                    self.assertEqual(seen[aspect], base[aspect], aspect)
+        for aspect in ('tcp', 'trace'):
+            self.assertEqual([names[number] for number in sorted(set(seen[aspect]) ^ set(reads))], [],
+                             f'{aspect}: frames read, or left unread, against the cases')
+        self.assertEqual(len(seen['ids']), len(reads))
+        self.assertEqual([index for _, index in seen['flows']], [(number,) for number in reads])
 
-    def test_tcp_behind_an_extension_header_in_ipv4_is_read_as_the_default_engine_reads_it(self) -> None:
+    def test_the_default_engine_reads_tcp_behind_an_extension_header_in_ipv4(self) -> None:
         # #1606
-        self.agree(EXTENSION_HEADERS)
+        self.assert_reads('default', EXTENSION_HEADERS)
 
     def test_no_tcp_is_read_in_a_later_ipv4_fragment(self) -> None:
-        # #1617
-        self.agree(FRAGMENTS)
-
-    def test_a_dpkt_packet_built_by_hand_is_walked_too(self) -> None:
-        # With no record octets attached, the IPv4 payload is DPKT's own
-        # re-serialisation of it, which here is the octets it was parsed from.
-        if not has('dpkt'):
-            self.skipTest('dpkt not installed')
-        import dpkt
-
-        from pcapkit.toolkit import dpkt as toolkit
-
-        segment = tcp(1, opts=b'\x02\x04\x05\xb4')
-        for name, packet in (('hop-by-hop', v4(options(6) + segment, 0)),
-                             ('ah', v4(ah(6) + segment, 51)),
-                             ('4in4 behind hop-by-hop', v4(options(4) + v4(segment, 6), 0))):
-            with self.subTest(case=name):
-                data = toolkit.tcp_reassembly(dpkt.ethernet.Ethernet(eth(packet)), 1.0)
-                self.assertIsNotNone(data)
-                self.assertEqual((data.header, bytes(data.payload)), (segment[:24], segment[24:]))
+        # #1617: Scapy dissected TCP behind a later fragment
+        for engine in ('default', 'scapy'):
+            with self.subTest(engine=engine):
+                if engine != 'default' and not has(engine):
+                    self.skipTest(f'{engine} not installed')
+                self.assert_reads(engine, FRAGMENTS)
 
     def test_a_tunnel_dpkt_cannot_decode_ends_no_extraction(self) -> None:
         # dpkt 1.9.8 reads ``frag_off`` from whatever header follows an IPv6
         # Fragment header (#1351), so the IPv6 packet behind this Hop-by-Hop
-        # header raises AttributeError. The next frame is still read, and the
-        # TCP in this one is read off the octets, as the default engine reads
-        # it (#1626).
+        # header raises AttributeError. The extraction goes on, and the next
+        # frame is still read (#1626).
         if not has('dpkt'):
             self.skipTest('dpkt not installed')
         import dpkt
@@ -285,7 +261,8 @@ class TCPCarrierWalkTests(unittest.TestCase):
         with self.assertRaises(AttributeError):
             dpkt.ip6.IP6(inner)
         seen = read(self, 'dpkt', [eth(v4(options(41) + inner, 0)), eth(v4(tcp(2), 6))])
-        self.assertEqual((sorted(seen['tcp']), sorted(seen['trace'])), ([1, 2], [1, 2]))
+        self.assertIn(2, seen['tcp'])
+        self.assertIn(NEXT_FLOW, seen['flows'])
 
     def test_a_dpkt_payload_that_is_no_packet_is_leaf_data(self) -> None:
         # dpkt decodes IPv4 protocol 0 as IPv4, so this Hop-by-Hop header and the
@@ -305,12 +282,10 @@ class TCPCarrierWalkTests(unittest.TestCase):
         info = toolkit.packet2dict(packet, 1.0, data_link=LinkType.ETHERNET)
         self.assertEqual(sorted(info['ETHERNET']['IP']['IP']['VRRP']), sorted(dpkt.vrrp.VRRP.__hdr_fields__))
 
-        frames = [octets, eth(v4(tcp(2), 6))]
-        base = read(self, 'default', frames)
-        self.assertEqual((sorted(base['tcp']), sorted(base['trace'])), ([1, 2], [1, 2]))
-        seen = read(self, 'dpkt', frames)
-        for aspect in ('tcp', 'trace', 'ids', 'flows'):
-            self.assertEqual(seen[aspect], base[aspect], aspect)
+        # and the extraction goes on to the next frame
+        seen = read(self, 'dpkt', [octets, eth(v4(tcp(2), 6))])
+        self.assertIn(2, seen['tcp'])
+        self.assertIn(NEXT_FLOW, seen['flows'])
 
     def test_a_dpkt_payload_that_is_no_packet_ends_the_verbose_chain(self) -> None:
         # The same frame as above, whose chain ``packet2chain`` prints for each

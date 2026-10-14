@@ -5,9 +5,11 @@ Both engines expose each frame's captured octets, its timestamp, its original
 length and its link type, so their flow tracing adapters carry a PCAP frame
 record beside the frame mapping they always reported, and
 :class:`~pcapkit.foundation.extraction.Extractor` no longer swaps the format for
-JSON. The checks are the strongest available: every traced PCAP file is
-byte-compared with the default engine's for the same input, and every JSON trace
-with the one main wrote before.
+JSON. Every traced PCAP file is checked against the capture it was traced from:
+it holds its flow's records as captured, octets, original length and timestamp
+alike, the timestamp in the trace's resolution. The records are read from the
+capture by hand, so no engine's reading is the reference. Every JSON trace is
+checked against the one main wrote before.
 
 The inputs no sample has are synthesised from :file:`tcp.pcap`: nanosecond PCAP
 and PCAP-NG (``if_tsresol=9``) captures, each with a timestamp that has
@@ -52,6 +54,21 @@ MAGIC = {False: bytes.fromhex('d4c3b2a1'), True: bytes.fromhex('4d3cb2a1')}
 #: none at all, which leaves a nanosecond count with a microsecond count's digits.
 EXTRA_NS = {'unaligned': 789, 'aligned': 0}
 
+#: The flow labels of ``tcp.pcap`` made nanoseconds plus each of :data:`EXTRA_NS`:
+#: the first frame's timestamp as a :obj:`float`, ``1500000000.000774789`` being
+#: ``1500000000.0007749``.
+NS_LABELS = {
+    'unaligned': ['10.20.30.130_22-10.20.30.131_53406-1500000000.0007749',
+                  'fe80..a6.87f9.2793.16ee_51774-fe80..1ccd.7c77.bac7.46b7_22-1500000000.0024338'],
+    'aligned': ['10.20.30.130_22-10.20.30.131_53406-1500000000.000774',
+                'fe80..a6.87f9.2793.16ee_51774-fe80..1ccd.7c77.bac7.46b7_22-1500000000.002433'],
+}
+
+#: The frames of each flow dpkt traces in ``tcp.pcap`` as ``LINKTYPE_IPV4``, and in
+#: ``http6.cap`` as ``LINKTYPE_IPV6``, each with its Ethernet headers stripped.
+RAW_TCP_FLOWS = [(1, 2, 6, 7)]
+RAW_HTTP6_FLOWS = [tuple(range(1, 16)), tuple(range(16, 27))]
+
 #: SHA-256 of each JSON flow trace of ``tcp.pcap``, as main wrote it at 6af87f608.
 JSON_TRACE_SHA256 = {
     'dpkt': {
@@ -81,6 +98,42 @@ def _records(source: 'str | bytes') -> 'tuple[bytes, list[list]]':
         records.append([ts_sec, ts_usec, orig_len, rest[16:16 + incl_len]])
         rest = rest[16 + incl_len:]
     return header, records
+
+
+def _captured(source: 'str') -> 'list[list]':
+    """The ``[ts_sec, ts_nsec, orig_len, octets]`` of every frame of a little-endian
+    PCAP, or of the Enhanced Packet Blocks of a little-endian PCAP-NG, read by hand."""
+    with open(source, 'rb') as file:
+        data = file.read()
+    if data[:4] in MAGIC.values():
+        scale = 1 if data[:4] == MAGIC[True] else 1000
+        return [[ts_sec, fraction * scale, orig_len, octets]
+                for ts_sec, fraction, orig_len, octets in _records(data)[1]]
+    assert data[8:12] == bytes.fromhex('4d3c2b1a'), f'{source}: not a little-endian PCAP or PCAP-NG'
+    records, resolutions, offset = [], [], 0  # type: list[list], list[int], int
+    while offset < len(data):
+        block_type, length = struct.unpack_from('<II', data, offset)
+        body = data[offset + 8:offset + length - 4]
+        offset += length
+        if block_type == 1:  # Interface Description Block: its ``if_tsresol``, 6 if absent
+            resolution, position = 6, 8
+            while position + 4 <= len(body):
+                code, size = struct.unpack_from('<HH', body, position)
+                if code == 0:
+                    break
+                if code == 9:
+                    resolution = body[position + 4]
+                position += 4 + size + (-size % 4)
+            assert resolution < 0x80, f'{source}: a power-of-two if_tsresol'
+            resolutions.append(resolution)
+        elif block_type == 6:  # Enhanced Packet Block
+            interface, high, low, incl_len, orig_len = struct.unpack_from('<IIIII', body)
+            ticks, resolution = (high << 32) | low, resolutions[interface]
+            nanoseconds = (ticks * 10 ** (9 - resolution) if resolution <= 9
+                           else ticks // 10 ** (resolution - 9))
+            records.append([nanoseconds // 10 ** 9, nanoseconds % 10 ** 9, orig_len,
+                            body[20:20 + incl_len]])
+    return records
 
 
 def _write(path: 'str', header: 'bytes', records: 'list[list]') -> 'str':
@@ -114,7 +167,7 @@ def _write_pcapng(path: 'str', records: 'list[list]', *, tsresol: 'int') -> 'str
 
 @unittest.skipUnless(HAS_RUNTIME and ENGINES, 'runtime dependencies, dpkt or scapy not installed')
 class EnginePCAPTraceTests(unittest.TestCase):
-    """A traced flow is the same PCAP file whichever engine read the capture."""
+    """Each engine writes a traced flow as a PCAP file of the flow's captured records."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
@@ -149,18 +202,28 @@ class EnginePCAPTraceTests(unittest.TestCase):
                 flows.append((flow.label, tuple(flow.index), file.read()))
         return flows
 
-    def _assert_same_files(self, fin: 'str', *, nanosecond: 'bool',
-                           caught: 'list | None' = None) -> None:
+    def _assert_holds_the_records(self, fin: 'str', flows: 'list[tuple[str, tuple, bytes]]', *,
+                                  nanosecond: 'bool' = False) -> None:
+        """Each of ``flows`` is a PCAP file of its frames' records as ``fin`` holds them."""
+        captured = _captured(fin)
+        self.assertTrue(flows)
+        for label, index, data in flows:
+            self.assertEqual(data[:4], MAGIC[nanosecond], label)
+            self.assertEqual(_records(data)[1],
+                             [[ts_sec, ts_nsec if nanosecond else ts_nsec // 1000, orig_len, octets]
+                              for ts_sec, ts_nsec, orig_len, octets in
+                              (captured[number - 1] for number in index)], label)
+
+    def _assert_every_engine_holds_the_records(self, fin: 'str', *, nanosecond: 'bool',
+                                               labels: 'list[str] | None' = None) -> None:
+        """Every engine's flows of ``fin`` hold their records, and are labelled ``labels`` if given."""
         skip_if_stand_in(self, fin)
-        base = self._flows('default', fin, nanosecond=nanosecond)
-        self.assertTrue(base)
         for engine in ENGINES:
             with self.subTest(engine=engine):
-                flows = self._flows(engine, fin, nanosecond=nanosecond, caught=caught)
-                self.assertEqual([flow[:2] for flow in flows], [flow[:2] for flow in base])
-                for (label, _, mine), (_, _, theirs) in zip(flows, base):
-                    self.assertEqual(mine[:4], MAGIC[nanosecond], label)
-                    self.assertEqual(mine, theirs, label)
+                flows = self._flows(engine, fin, nanosecond=nanosecond)
+                self._assert_holds_the_records(fin, flows, nanosecond=nanosecond)
+                if labels is not None:
+                    self.assertEqual([label for label, _, _ in flows], labels)
 
     def _nanosecond_records(self, extra: 'int') -> 'list[list]':
         """``tcp.pcap``'s records, each microsecond fraction made nanoseconds plus ``extra``."""
@@ -168,16 +231,16 @@ class EnginePCAPTraceTests(unittest.TestCase):
         return [[ts_sec, ts_usec * 1000 + extra, orig_len, octets]
                 for ts_sec, ts_usec, orig_len, octets in records]
 
-    def test_traced_pcap_matches_the_default_engine_byte_for_byte(self) -> None:
+    def test_each_traced_pcap_holds_the_captured_records(self) -> None:
         for capture in CAPTURES:
             for nanosecond in (False, True):
                 with self.subTest(capture=capture, nanosecond=nanosecond):
-                    self._assert_same_files(sample_path(capture), nanosecond=nanosecond)
+                    self._assert_every_engine_holds_the_records(sample_path(capture), nanosecond=nanosecond)
 
     def test_a_stand_in_capture_skips_rather_than_fails(self) -> None:
         # When the Wireshark download fails the generator writes a stand-in under the
         # upstream name, built from DHCP, so it has no TCP flow to trace (#1478). The
-        # comparison needs one, so on a stand-in it skips rather than fails.
+        # check needs one, so on a stand-in it skips rather than fails.
         spec = importlib.util.spec_from_file_location('_pcapng_generator_stand_in', PCAPNG_GENERATOR)
         assert spec is not None and spec.loader is not None
         generator = importlib.util.module_from_spec(spec)
@@ -190,35 +253,37 @@ class EnginePCAPTraceTests(unittest.TestCase):
         with open(fin, 'wb') as file:
             file.write(generator.build_many_interfaces())
         with self.assertRaises(unittest.SkipTest):
-            self._assert_same_files(fin, nanosecond=False)
+            self._assert_every_engine_holds_the_records(fin, nanosecond=False)
 
     def test_a_nanosecond_pcap_keeps_its_resolution(self) -> None:
-        # The record fraction stays in the capture's own resolution, as the default
-        # engine's does. The labels agree too: the flow tracer is handed a float,
-        # not the Decimal dpkt reads a nanosecond PCAP's timestamp as (#1501).
+        # The record fraction stays in the capture's own resolution. The flow
+        # tracer is handed a float, not the Decimal dpkt reads a nanosecond PCAP's
+        # timestamp as (#1501), so the labels carry the float's digits.
         header, _ = _records(sample_path('tcp.pcap'))
         for case, extra in EXTRA_NS.items():
             fin = _write(os.path.join(self.tmp, f'{case}.pcap'), MAGIC[True] + header[4:],
                          self._nanosecond_records(extra))
             for nanosecond in (False, True):
                 with self.subTest(case=case, nanosecond=nanosecond):
-                    self._assert_same_files(fin, nanosecond=nanosecond)
+                    self._assert_every_engine_holds_the_records(fin, nanosecond=nanosecond,
+                                                                labels=NS_LABELS[case])
 
     @unittest.skipUnless(HAS_DPKT, 'dpkt not installed')
-    def test_a_raw_ip_link_type_traces_as_the_default_engine(self) -> None:
+    def test_a_raw_ip_link_type_is_traced(self) -> None:
         # With the Ethernet header stripped, dpkt reads each frame as a bare IP or
         # IP6, which names no ``ip`` or ``ip6`` layer, so it traced nothing (#1548).
-        # Every frame is kept, IPv6 ones under LINKTYPE_IPV4 included.
-        for capture, linktype in (('tcp.pcap', 228), ('http6.cap', 229)):
+        # The capture keeps every frame, its IPv6 ones under LINKTYPE_IPV4
+        # included, and those are not traced.
+        for capture, linktype, flows in (('tcp.pcap', 228, RAW_TCP_FLOWS), ('http6.cap', 229, RAW_HTTP6_FLOWS)):
             header, records = _records(sample_path(capture))
             fin = _write(os.path.join(self.tmp, f'raw-{linktype}.pcap'),
                          header[:20] + struct.pack('<I', linktype),
                          [[ts_sec, ts_usec, orig_len - 14, octets[14:]]
                           for ts_sec, ts_usec, orig_len, octets in records])
             with self.subTest(capture=capture, linktype=linktype):
-                base = self._flows('default', fin)
-                self.assertTrue(base)
-                self.assertEqual(self._flows('dpkt', fin), base)
+                traced = self._flows('dpkt', fin)
+                self.assertEqual([index for _, index, _ in traced], flows)
+                self._assert_holds_the_records(fin, traced)
 
     def test_a_nanosecond_pcapng_keeps_its_resolution(self) -> None:
         # ``if_tsresol=9``: an unaligned timestamp must keep its sub-microsecond
@@ -229,11 +294,10 @@ class EnginePCAPTraceTests(unittest.TestCase):
                                 self._nanosecond_records(extra), tsresol=9)
             for nanosecond in (False, True):
                 with self.subTest(case=case, nanosecond=nanosecond):
-                    self._assert_same_files(fin, nanosecond=nanosecond)
+                    self._assert_every_engine_holds_the_records(fin, nanosecond=nanosecond)
 
     def test_a_cross_resolution_trace_rescales_the_fraction(self) -> None:
-        # Not only the same bytes as the default engine: the right ones. The first
-        # frame of tcp.pcap is at 1500000000.000774; the synthetic nanosecond
+        # The first frame of tcp.pcap is at 1500000000.000774; the synthetic nanosecond
         # captures put it at 1500000000.000774789. A trace in the other resolution
         # than its capture's scales the fraction, truncating nanoseconds (#1529).
         header, _ = _records(sample_path('tcp.pcap'))
@@ -255,8 +319,8 @@ class EnginePCAPTraceTests(unittest.TestCase):
 
     def test_a_snapped_frame_keeps_its_original_length(self) -> None:
         # Both engines' readers report a record's original length, PCAP and
-        # PCAP-NG alike, so a frame the snapshot length cut short is written as
-        # the default engine writes it.
+        # PCAP-NG alike, so a frame the snapshot length cut short is written with
+        # the original length it was captured with.
         header, records = _records(sample_path('tcp.pcap'))
         longest = max(range(len(records)), key=lambda index: len(records[index][3]))
         records[longest][3] = records[longest][3][:-4]
@@ -268,7 +332,7 @@ class EnginePCAPTraceTests(unittest.TestCase):
         }
         for container, fin in captures.items():
             with self.subTest(container=container):
-                self._assert_same_files(fin, nanosecond=False)
+                self._assert_every_engine_holds_the_records(fin, nanosecond=False)
 
     def test_no_engine_warns_about_original_lengths(self) -> None:
         # The frame record is complete, so there is nothing to warn about -- not on
@@ -361,11 +425,11 @@ class EnginePCAPTraceTests(unittest.TestCase):
                     hdr = header(buf)
                     yield hdr.tv_sec + (hdr.tv_usec / divisor), file.read(hdr.caplen)
 
-        base = self._flows('default', sample_path('tcp.pcap'))
         caught = []  # type: list
         with mock.patch.object(dpkt.pcap, 'Reader', Renamed):
             flows = self._flows('dpkt', sample_path('tcp.pcap'), caught=caught)
-        self.assertEqual(flows, base)
+        # tcp.pcap captured every frame whole, so the original length lost is the one kept
+        self._assert_holds_the_records(sample_path('tcp.pcap'), flows)
         messages = [str(w.message) for w in caught if issubclass(w.category, DPKTWarning)
                     and 'original length' in str(w.message)]
         self.assertEqual(len(messages), 1, messages)
