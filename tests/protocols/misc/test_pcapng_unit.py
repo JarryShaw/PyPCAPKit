@@ -12,6 +12,7 @@ import os
 import struct
 import subprocess  # nosec: B404
 import sys
+import sysconfig
 import tempfile
 import textwrap
 import time
@@ -4744,6 +4745,14 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
         failing, and a cap that the parent cannot lift is the only way to tell
         "parsed" from "did not run out of memory yet".
 
+        The cap is 512 MiB over the address space the subprocess has already
+        mapped, not 512 MiB in all: on a 64-bit build mimalloc reserves address
+        space 1 GiB at a time, the first as the interpreter starts, so under it
+        an absolute cap is spent before the parse begins (#1731). A
+        free-threaded build always uses mimalloc; any other build that has it
+        runs the subprocess a second time under ``PYTHONMALLOC=mimalloc``, so a
+        leg with the GIL measures that too.
+
         """
         if importlib.util.find_spec('resource') is None:  # pragma: no cover
             self.skipTest('the resource module is unavailable on this platform')
@@ -4751,7 +4760,15 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
         source = textwrap.dedent('''
             import io, json, resource, struct, sys, warnings
             sys.path.insert(0, sys.argv[1])
-            resource.setrlimit(resource.RLIMIT_AS, (512 * 1024 ** 2,) * 2)
+
+            # /proc/self/statm opens with the address space mapped, in pages;
+            # without procfs the cap is absolute
+            try:
+                with open('/proc/self/statm', encoding='ascii') as statm:
+                    mapped = int(statm.read().split()[0]) * resource.getpagesize()
+            except OSError:
+                mapped = 0
+            resource.setrlimit(resource.RLIMIT_AS, (mapped + 512 * 1024 ** 2,) * 2)
 
             import pcapkit
             from pcapkit.foundation.extraction import Extractor
@@ -4778,34 +4795,48 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
                               'frames': len(extractor.frame)}))
         ''')
 
-        with tempfile.TemporaryDirectory() as tempdir:
-            script = os.path.join(tempdir, 'capped.py')
-            with open(script, 'w', encoding='utf-8') as handle:
-                handle.write(source)
-            status = os.path.join(tempdir, 'status')
-            output = os.path.join(tempdir, 'stdout')
+        # a build option rather than a version: 3.13 and later can be built
+        # --without-mimalloc, and then reject PYTHONMALLOC=mimalloc at start-up
+        allocators = [None]
+        if sysconfig.get_config_var('WITH_MIMALLOC'):
+            allocators.append('mimalloc')
 
-            with open(output, 'w', encoding='utf-8') as stdout:
-                completed = subprocess.run(  # nosec: B603
-                    (sys.executable, script, str(ROOT)),
-                    stdout=stdout, stderr=subprocess.DEVNULL, check=False, timeout=300,
-                )
-            # the exit code read back from a file rather than taken from a
-            # pipeline, where a wrapper's own status can be reported instead
-            with open(status, 'w', encoding='utf-8') as handle:
-                handle.write(str(completed.returncode))
-            with open(status, encoding='utf-8') as handle:
-                returncode = int(handle.read())
-            with open(output, encoding='utf-8') as handle:
-                payload = handle.read()
+        for allocator in allocators:
+            env = dict(os.environ)
+            if allocator is not None:
+                env['PYTHONMALLOC'] = allocator
+            with self.subTest(allocator=allocator or 'default'), tempfile.TemporaryDirectory() as tempdir:
+                script = os.path.join(tempdir, 'capped.py')
+                with open(script, 'w', encoding='utf-8') as handle:
+                    handle.write(source)
+                status = os.path.join(tempdir, 'status')
+                output = os.path.join(tempdir, 'stdout')
+                errors = os.path.join(tempdir, 'stderr')
 
-        self.assertEqual(returncode, 0, payload)
-        result = json.loads(payload)
-        # the subprocess measured a tree under this repository, not an installed
-        # copy of pcapkit somewhere else
-        self.assertTrue(result['file'].startswith(str(ROOT)), result['file'])
-        self.assertEqual(result['input'], 8048)
-        self.assertEqual(result['frames'], 200)
+                with open(output, 'w', encoding='utf-8') as stdout, \
+                        open(errors, 'w', encoding='utf-8') as stderr:
+                    completed = subprocess.run(  # nosec: B603
+                        (sys.executable, script, str(ROOT)),
+                        stdout=stdout, stderr=stderr, env=env, check=False, timeout=300,
+                    )
+                # the exit code read back from a file rather than taken from a
+                # pipeline, where a wrapper's own status can be reported instead
+                with open(status, 'w', encoding='utf-8') as handle:
+                    handle.write(str(completed.returncode))
+                with open(status, encoding='utf-8') as handle:
+                    returncode = int(handle.read())
+                with open(output, encoding='utf-8') as handle:
+                    payload = handle.read()
+                with open(errors, encoding='utf-8', errors='replace') as handle:
+                    diagnostic = handle.read()[-2000:]
+
+                self.assertEqual(returncode, 0, payload + diagnostic)
+                result = json.loads(payload)
+                # the subprocess measured a tree under this repository, not an
+                # installed copy of pcapkit somewhere else
+                self.assertTrue(result['file'].startswith(str(ROOT)), result['file'])
+                self.assertEqual(result['input'], 8048)
+                self.assertEqual(result['frames'], 200)
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
