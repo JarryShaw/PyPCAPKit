@@ -29,7 +29,7 @@ ALL_PY = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'pcapkit'
 #: an API decision.
 DELIBERATE_NON_EXPORTS = {
     'pcapkit.utilities': ('logger', 'get_logger', 'configure', 'reset', 'ensure_output',
-                          'warn', 'stacklevel', 'detect', 'beholder', 'prepare', 'seekset'),
+                          'warn', 'stacklevel', 'detect'),
 }
 
 

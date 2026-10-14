@@ -107,7 +107,7 @@ This class is reached two different ways:
 2. **A recognised header whose own parser raises.** ``HOPOPT``,
    ``IPv6-Route``, ``IPv6-Opts``, ``MH``, ``HIP``, ``IPv6-Frag`` and ``AH`` all
    have dedicated classes. When one of *those* raises,
-   :func:`~pcapkit.utilities.decorators.beholder`
+   :func:`~pcapkit.corekit.decorators.beholder`
    (:meth:`Protocol._import_next_layer <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>`)
    would substitute plain :class:`~pcapkit.protocols.misc.raw.Raw`, which loses
    ``next`` and crashes the walk as in path 1.
@@ -381,7 +381,7 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
                   stands in for, e.g. ``0`` for ``HOPOPT`` or ``140`` for
                   ``Shim6``.
                 * ``error`` -- the parsing error, when this instance was
-                  reached as a :func:`~pcapkit.utilities.decorators.beholder`
+                  reached as a :func:`~pcapkit.corekit.decorators.beholder`
                   fallback rather than by direct dispatch.
 
         Returns:
@@ -578,7 +578,7 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
             reading ``IPv4:IPv6-Ext:...`` instead of the ``IPv4:Shim6`` that a
             plain, non-continuing ``Raw`` gives. Rejecting here sends
             construction back through
-            :func:`~pcapkit.utilities.decorators.beholder` at the *caller's*
+            :func:`~pcapkit.corekit.decorators.beholder` at the *caller's*
             layer, which substitutes that same ``Raw``: the version-agnostic
             behaviour, with no IPv4-specific code.
 

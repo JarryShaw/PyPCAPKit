@@ -3,7 +3,7 @@
 
 GitHub issue #1610: each layer dissects the next one from inside its own parse,
 so deep nesting of any protocol ran into Python's recursion limit, and
-:func:`~pcapkit.utilities.decorators.beholder` caught the ``RecursionError`` and
+:func:`~pcapkit.corekit.decorators.beholder` caught the ``RecursionError`` and
 left the rest raw, silently. From a script on Python 3.14, TCP was lost behind
 108 IPv4 headers in IPv4, or behind 200 stacked 802.1Q tags. #1604 bounded one
 chain of extension headers, but its count restarts at every tunnel.

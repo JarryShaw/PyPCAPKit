@@ -654,7 +654,7 @@ class StructError(BaseError, struct.error):
 class StreamEOFError(BaseError, EOFError):
     """Underlying stream exhausted; no data left to read.
 
-    Raised by :func:`~pcapkit.utilities.decorators.prepare` when the *length*
+    Raised by :func:`~pcapkit.corekit.decorators.prepare` when the *length*
     of a schema's read was derived by measuring what is actually left in the
     stream -- rather than declared by the caller -- and that measurement came
     back zero. This is the frame reader's "no more packets" signal, so it
@@ -666,7 +666,7 @@ class StreamEOFError(BaseError, EOFError):
     nothing to read -- is a different situation and does not raise this.
 
     Note:
-        :func:`~pcapkit.utilities.decorators.prepare` always raises this with
+        :func:`~pcapkit.corekit.decorators.prepare` always raises this with
         ``quiet=True``: reaching end of stream is the frame reader's ordinary
         way of finding out there is nothing left to parse, not a fault to
         log -- the same convention

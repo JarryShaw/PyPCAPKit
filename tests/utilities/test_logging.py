@@ -224,7 +224,7 @@ class LoggerHierarchyTests(unittest.TestCase):
             'pcapkit.foundation.engines.pcapng': 'pcapkit.foundation.engines.pcapng',
             'pcapkit.utilities.exceptions': 'pcapkit.utilities.exceptions',
             'pcapkit.utilities.warnings': 'pcapkit.utilities.warnings',
-            'pcapkit.utilities.decorators': 'pcapkit.utilities.decorators',
+            'pcapkit.corekit.decorators': 'pcapkit.corekit.decorators',
             'pcapkit.dumpkit.common': 'pcapkit.dumpkit.common',
         }
         for module_name, expected in cases.items():

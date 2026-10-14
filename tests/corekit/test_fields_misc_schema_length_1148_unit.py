@@ -12,7 +12,7 @@ parses correctly.
 The nested schema is now told the true remainder of the buffer. A remainder of
 zero is passed as a declared length, so a truncated item is still reported as
 malformed data rather than as the quiet end-of-stream signal that
-:func:`~pcapkit.utilities.decorators.prepare` raises for a derived zero.
+:func:`~pcapkit.corekit.decorators.prepare` raises for a derived zero.
 """
 
 import unittest

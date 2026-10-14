@@ -434,8 +434,8 @@ def bootstrap_core_modules(test: 'Optional[unittest.TestCase]' = None) -> dict[s
                              'pcapkit/utilities/exceptions.py', test)
     warnings = load_module('pcapkit.utilities.warnings', 'pcapkit/utilities/warnings.py', test)
     multidict = load_module('pcapkit.corekit.multidict', 'pcapkit/corekit/multidict.py', test)
-    decorators = load_module('pcapkit.utilities.decorators',
-                             'pcapkit/utilities/decorators.py', test)
+    decorators = load_module('pcapkit.corekit.decorators',
+                             'pcapkit/corekit/decorators.py', test)
     protochain = load_module('pcapkit.corekit.protochain',
                              'pcapkit/corekit/protochain.py', test)
     return {

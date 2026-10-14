@@ -48,6 +48,6 @@ class IPv6_Ext(Protocol):
     #: Header-specific content after the two fixed octets, as consumed.
     data: 'bytes'
     #: Original parsing error, if this instance was reached as a
-    #: :func:`~pcapkit.utilities.decorators.beholder` fallback rather than by
+    #: :func:`~pcapkit.corekit.decorators.beholder` fallback rather than by
     #: direct dispatch.
     error: 'Optional[Exception]'

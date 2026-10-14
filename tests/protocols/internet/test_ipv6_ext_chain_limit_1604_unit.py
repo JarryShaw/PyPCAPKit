@@ -3,7 +3,7 @@
 
 GitHub issue #1604: inside IPv4, each IPv6 extension header dissects the next
 one itself, so a long chain ran into Python's recursion limit, and
-:func:`~pcapkit.utilities.decorators.beholder` caught the ``RecursionError``
+:func:`~pcapkit.corekit.decorators.beholder` caught the ``RecursionError``
 and left the rest raw, silently. Where that happened depended on the
 interpreter and the stack -- after 79 headers on Python 3.11, and between 85
 and 90 on 3.14, from a script at the default limit -- and IPv6, which walks its

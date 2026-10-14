@@ -308,7 +308,7 @@ class NGAPUnitTests(unittest.TestCase):
 
         This is the behaviour the optional dependency buys its optionality with:
         the payload reaches :class:`~pcapkit.protocols.misc.raw.Raw` through
-        :func:`~pcapkit.utilities.decorators.beholder` rather than aborting the
+        :func:`~pcapkit.corekit.decorators.beholder` rather than aborting the
         frame, and keeps the PPID's name while doing so.
 
         """

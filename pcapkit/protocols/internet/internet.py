@@ -18,11 +18,11 @@ from typing import TYPE_CHECKING, Generic, cast
 
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.decorators import beholder
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase, _rebuilding
 from pcapkit.protocols.schema.schema import keep_short_read, replay_short_read
-from pcapkit.utilities.decorators import beholder
 from pcapkit.utilities.exceptions import stacklevel
 from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 

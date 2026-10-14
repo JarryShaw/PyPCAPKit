@@ -31,6 +31,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.decorators import beholder
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
 from pcapkit.corekit.protochain import ProtoChain
@@ -40,7 +41,6 @@ from pcapkit.protocols.internet.ip import IP
 from pcapkit.protocols.protocol import FRAME_LAYER_LIMIT, _frame_depth
 from pcapkit.protocols.schema.internet.ipv6 import IPv6 as Schema_IPv6
 from pcapkit.protocols.schema.internet.ipv6 import jumbo_payload_length, jumbogram_error
-from pcapkit.utilities.decorators import beholder
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
@@ -72,7 +72,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
     #: When that dedicated parser raises, :meth:`_import_next_layer`
     #: substitutes :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
     #: instead of letting the generic
-    #: :func:`~pcapkit.utilities.decorators.beholder` fall back to plain
+    #: :func:`~pcapkit.corekit.decorators.beholder` fall back to plain
     #: :class:`~pcapkit.protocols.misc.raw.Raw`, which has no ``next`` field
     #: and so cannot continue the walk in :meth:`_decode_next_layer`.
     #:
@@ -606,7 +606,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             # :class:`~pcapkit.protocols.misc.raw.Raw`, which does not (see
             # :attr:`__generic_ext_codes__`). Reading ``info.next`` on that
             # would raise ``AttributeError`` and let a further-out
-            # :func:`~pcapkit.utilities.decorators.beholder` degrade the
+            # :func:`~pcapkit.corekit.decorators.beholder` degrade the
             # *whole* packet.
             #
             # Such a layer is not recorded as an extension header: it consumed
@@ -725,7 +725,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             raises, this substitutes
             :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` for it
             rather than letting the exception reach the
-            :func:`~pcapkit.utilities.decorators.beholder` decorating this
+            :func:`~pcapkit.corekit.decorators.beholder` decorating this
             method, which would substitute plain
             :class:`~pcapkit.protocols.misc.raw.Raw` -- and ``Raw`` has no
             ``next`` field, so it could not continue

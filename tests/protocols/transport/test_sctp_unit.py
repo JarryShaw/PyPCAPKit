@@ -898,7 +898,7 @@ class SCTPUnitTests(unittest.TestCase):
 
         ``b'ngap-pdu'`` is not an aligned PER ``NGAP-PDU``, which is the point:
         the failure has to reach :class:`Raw` through
-        :func:`~pcapkit.utilities.decorators.beholder` rather than escape, and
+        :func:`~pcapkit.corekit.decorators.beholder` rather than escape, and
         the payload has to keep the PPID's name while doing so. For PPID 60 that
         path is also what a capture parsed *without* ``pycrate`` installed takes
         on every NGAP packet.

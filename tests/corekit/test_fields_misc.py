@@ -135,7 +135,7 @@ class SchemaFieldDefaultTests(unittest.TestCase):
     typed ``default: bytes`` constructor argument and unpacks it eagerly, via
     ``schema.unpack(default)`` -- a single positional argument. That call
     shape reached
-    :func:`~pcapkit.utilities.decorators.prepare`, which read ``length`` and
+    :func:`~pcapkit.corekit.decorators.prepare`, which read ``length`` and
     ``packet`` out of ``args[2]``/``args[3]`` unconditionally, so any call
     shorter than three positional arguments raised ``IndexError`` instead of
     falling back to the documented ``None`` default -- making

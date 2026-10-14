@@ -74,11 +74,11 @@ the guesses:
 
 * It is not the parse path's ``except Exception`` handlers absorbing the
   ``SIGALRM``-raised :exc:`TimeoutError`. Those handlers exist -- in
-  :mod:`pcapkit.utilities.decorators` and
+  :mod:`pcapkit.corekit.decorators` and
   :meth:`ProtocolBase._decode_next_layer
   <pcapkit.protocols.protocol.ProtocolBase._decode_next_layer>` -- and
   :exc:`TimeoutError` is indeed an :exc:`Exception`, but neither is *entered*
-  during the spin: :func:`~pcapkit.utilities.decorators.prepare` raises end of
+  during the spin: :func:`~pcapkit.corekit.decorators.prepare` raises end of
   stream before any next-layer decode is reached, and a logger tap over the
   retries recorded nothing from either module.
 * The memory is not those handlers logging. It is the retry loop emitting tens of

@@ -2,7 +2,7 @@
 """``Raw`` accepts an empty byte string on the parsing path too.
 
 GitHub issue #1285: ``Raw(b"")`` left the length for
-:func:`~pcapkit.utilities.decorators.prepare` to derive, and a derived zero
+:func:`~pcapkit.corekit.decorators.prepare` to derive, and a derived zero
 is the end-of-stream signal, so it raised
 :exc:`~pcapkit.utilities.exceptions.StreamEOFError` while ``Raw(packet=b"")``
 worked.

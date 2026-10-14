@@ -149,7 +149,7 @@ class QuietExceptionTests(unittest.TestCase):
     def test_prepare_raises_stream_eof_error_quietly(self) -> None:
         """End of stream is control flow, so ``prepare`` raises it silently.
 
-        :func:`~pcapkit.utilities.decorators.prepare` passes ``quiet=True``
+        :func:`~pcapkit.corekit.decorators.prepare` passes ``quiet=True``
         when a *measured* -- as opposed to caller-declared -- read length comes
         back zero, because that is how the frame reader learns a capture is
         exhausted rather than a fault worth a log record. It is the same
