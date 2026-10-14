@@ -34,7 +34,7 @@ from tests.foundation import _roundtrip as wire
 from tests.toolkit import test_pypcapfile_unit as pypcapfile_unit
 
 if TYPE_CHECKING:
-    from typing import Any, ClassVar, Iterator, Optional
+    from typing import Any, Iterator, Optional
 
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None
                   for name in ('tbtrim', 'aenum', 'chardet', 'dictdumper'))
@@ -110,7 +110,7 @@ CAPTURES = {
     'sweep-pcapng-ns': ('pcapng', True, SWEEP_NS),
 }
 
-#: Readings by engine and what :func:`read` builds and reads, kept across the classes.
+#: Readings by engine and what :func:`read` builds and reads, kept across the tests.
 _READINGS = {}  # type: dict[tuple[Any, ...], dict[str, Any]]
 
 
@@ -174,75 +174,51 @@ def read(test: unittest.TestCase, engine: str, container: str, nanosecond: bool,
     return seen
 
 
-class _Agreement(unittest.TestCase):
-    """An engine's capture timestamps are the default engine's, at ``ts_sec=1``."""
-
-    #: Engine under test.
-    ENGINE = None  # type: ClassVar[Optional[str]]
-    #: Inputs the engine hands over, of ``ipv4``, ``ipv6``, ``tcp`` and ``trace``.
-    KINDS = ('ipv4', 'ipv6', 'tcp', 'trace')
-    #: Containers the engine reads.
-    CONTAINERS = ('pcap', 'pcapng')
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+@unittest.skipUnless(HAS_DPKT, 'dpkt not installed')
+class DPKTTimestampTests(unittest.TestCase):
+    """dpkt hands over the double nearest each exact timestamp, on PCAP and PCAP-NG alike."""
 
     def setUp(self) -> None:
-        if self.ENGINE is None:
-            self.skipTest('base class')
         reimport_once_per_class(self)
 
-    def captures(self, sweep: bool) -> 'list[str]':
-        return [name for name, (container, _, _) in CAPTURES.items()
-                if container in self.CONTAINERS and name.startswith('sweep-') == sweep]
+    def check(self, container: str, nanosecond: bool, fractions: 'tuple[int, ...]', seconds: int = 1,
+              digits: 'Optional[int]' = None) -> 'list[float]':
+        """Assert every input, and every trace file name, carries the exact timestamp of its frame.
 
-    def check(self, *capture: 'Any') -> 'dict[str, Any]':
-        """Assert the engine's inputs and trace file names over ``capture`` are the default engine's.
-
-        ``capture`` is what :func:`read` takes after the engine.
+        The arguments are what :func:`read` takes after the engine.
 
         """
-        base, mine = read(self, 'default', *capture), read(self, self.ENGINE, *capture)
-        for kind in self.KINDS:
-            self.assertTrue(base[kind], f'default hands over no {kind} input')
-            self.assertEqual(mine[kind], base[kind], kind)
-        self.assertEqual(mine['names'], base['names'])
-        return base
+        want = sorted(exact(seconds, fraction, nanosecond) for fraction in fractions)
+        seen = read(self, 'dpkt', container, nanosecond, fractions, seconds, digits)
+        for kind in ('ipv4', 'ipv6', 'tcp', 'trace'):
+            self.assertEqual(sorted(seen[kind].values()), want, kind)
+        self.assertEqual(sorted(name.rsplit('-', 1)[1] for name in seen['names']),
+                         sorted(f'{stamp}.json' for stamp in want))
+        return want
 
-    def test_ts_sec_1_hands_over_the_default_engines_timestamp(self) -> None:
-        for name in self.captures(sweep=False):
-            with self.subTest(capture=name):
-                base = self.check(*CAPTURES[name])
-                # the default engine hands over the double nearest 1.003691
-                self.assertEqual(set(base['trace'].values()), {1.003691})
-                self.assertTrue(all(label.endswith('-1.003691.json') for label in base['names']), base['names'])
+    def test_ts_sec_1_hands_over_the_exact_timestamp(self) -> None:
+        for name, capture in CAPTURES.items():
+            if not name.startswith('sweep-'):
+                with self.subTest(capture=name):
+                    self.assertEqual(self.check(*capture), [1.003691])
 
-    def test_sweep_hands_over_the_default_engines_timestamp(self) -> None:
+    def test_sweep_hands_over_the_exact_timestamp(self) -> None:
         # the sweeps hold many a fraction ``ts_sec + frac / divisor`` misses
         self.assertGreater(double_rounded(SWEEP_US, False), 50)
         self.assertGreater(double_rounded(SWEEP_NS, True), 50)
-        for name in self.captures(sweep=True):
-            with self.subTest(capture=name):
-                base = self.check(*CAPTURES[name])
-                _, nanosecond, fractions = CAPTURES[name]
-                self.assertEqual(sorted(base['trace'].values()),
-                                 sorted(exact(1, fraction, nanosecond) for fraction in fractions))
+        for name, capture in CAPTURES.items():
+            if name.startswith('sweep-'):
+                with self.subTest(capture=name):
+                    self.check(*capture)
 
-    def test_low_decimal_precision_hands_over_the_default_engines_timestamp(self) -> None:
+    def test_low_decimal_precision_hands_over_the_exact_timestamp(self) -> None:
         before = decimal.getcontext().prec
         for seconds, fraction in LOW_PRECISION_STAMPS:
             for digits in LOW_PRECISIONS:
                 with self.subTest(ts_sec=seconds, prec=digits):
-                    base = self.check('pcap', False, (fraction,), seconds, digits)
-                    self.assertEqual(set(base['trace'].values()), {exact(seconds, fraction, False)})
-                    label = f'-{exact(seconds, fraction, False)}.json'
-                    self.assertTrue(all(name.endswith(label) for name in base['names']), base['names'])
+                    self.check('pcap', False, (fraction,), seconds, digits)
         self.assertEqual(decimal.getcontext().prec, before)
-
-
-@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
-@unittest.skipUnless(HAS_DPKT, 'dpkt not installed')
-class DPKTTimestampAgreementTests(_Agreement):
-    """dpkt hands over the default engine's timestamp, on PCAP and PCAP-NG alike."""
-
-    ENGINE = 'dpkt'
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')

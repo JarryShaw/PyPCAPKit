@@ -37,11 +37,12 @@ A chain of IPv6 extension headers is dissected to at most
 a row, whether it follows IPv6 or another layer such as IPv4. What follows is
 kept as :class:`~pcapkit.protocols.misc.raw.Raw`, with one
 :exc:`~pcapkit.utilities.warnings.ProtocolWarning` (:issue:`1604`). The
-``dpkt`` toolkit stops at the same depth. The ``pyshark`` engine leaves the walk
-to its own parser, which does not stop there, so it may still find the upper
-layer past it (:issue:`1609`). So does the ``scapy`` engine behind IPv6, where
-Scapy dissects each extension header itself; behind IPv4, its toolkit steps over
-them in the octets to find TCP, and stops at the same depth. The ``pypcapfile``
-toolkit walks no extension header chain, so it finds no upper layer behind one.
+``pyshark`` engine leaves the walk to its own parser, which does not stop there,
+so it may still find the upper layer past it (:issue:`1609`). So may the
+``dpkt`` toolkit, which reads the chain as :mod:`dpkt` decodes it. So does the
+``scapy`` engine behind IPv6, where Scapy dissects each extension header itself;
+behind IPv4, its toolkit steps over them in the octets to find TCP, and stops at
+the same depth. The ``pypcapfile`` toolkit walks no extension header chain, so
+it finds no upper layer behind one.
 
 .. autodata:: pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT

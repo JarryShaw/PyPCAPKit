@@ -131,27 +131,26 @@ class TestDPKTPCAPNGInterfaces(unittest.TestCase):
                          [(lt, ts) for lt, _, ts in EXPECTED])
         self.assertEqual([data for _, _, data in seen], [ETHERNET, IPV4, ETHERNET, IPV4])
 
-    def _assert_engines_agree(self, count: int) -> None:
+    def _assert_frames(self, count: int) -> None:
         from pcapkit.toolkit.dpkt import TIMESTAMP_ATTR
 
-        default = self._extract('default')
         dpkt = self._extract('dpkt')
 
         self.assertEqual(dpkt.length, count)
         self.assertEqual([getattr(frame, TIMESTAMP_ATTR) for frame in dpkt.frame],
-                         [float(frame.info.timestamp_epoch) for frame in default.frame])
+                         [ts for _, _, ts in EXPECTED[:count]])
         self.assertEqual([type(frame).__name__ for frame in dpkt.frame],
                          [name for _, name, _ in EXPECTED[:count]])
 
-    def test_dpkt_engine_matches_default_engine_across_interfaces(self) -> None:
+    def test_dpkt_engine_reads_each_interface(self) -> None:
         # section 1 only: one byte order, two interfaces
         with open(self.path, 'r+b') as file:
             file.truncate(len(_capture()) - len(_shb('>') + _idb('>', 228, tsresol=0x8A, tsoffset=100)
                                                   + _epb('>', 0, IPV4)))
-        self._assert_engines_agree(3)
+        self._assert_frames(3)
 
-    def test_dpkt_engine_matches_default_engine_across_sections(self) -> None:
-        self._assert_engines_agree(len(EXPECTED))
+    def test_dpkt_engine_reads_each_section(self) -> None:
+        self._assert_frames(len(EXPECTED))
 
     def test_unknown_interface_id_is_a_format_error(self) -> None:
         from pcapkit.foundation.engines.dpkt import PCAPNGReader
@@ -167,7 +166,7 @@ class TestDPKTPCAPNGInterfaces(unittest.TestCase):
 
 @unittest.skipUnless(HAS_DPKT, 'dpkt is not installed')
 class TestDPKTSimplePacketBlock(unittest.TestCase):
-    """The DPKT engine reads a Simple Packet Block, as the default engine does."""
+    """The DPKT engine reads a Simple Packet Block."""
 
     #: Ethernet, then raw IPv4 on nanoseconds; an SPB names no interface, so it
     #: is on the first, whose snaplen cuts it short. Big-endian, so the block's
@@ -210,21 +209,19 @@ class TestDPKTSimplePacketBlock(unittest.TestCase):
         self.assertEqual((float(stamp), stamp.exact, stamp.orig_len),
                          (0.0, decimal.Decimal(0), len(ETHERNET) + 40))
 
-    def test_dpkt_engine_matches_default_engine(self) -> None:
+    def test_dpkt_engine_reads_every_block(self) -> None:
         import pcapkit
         from pcapkit.toolkit.dpkt import packet2bytes, packet2timestamp
 
         self._write(self.CAPTURE)
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            default = pcapkit.extract(fin=self.path, engine='default', nofile=True, store=True)
             dpkt = pcapkit.extract(fin=self.path, engine='dpkt', nofile=True, store=True)
 
-        self.assertEqual(dpkt.length, default.length)
+        # the SPB, between the two EPBs, is dated at the epoch
         self.assertEqual([(float(packet2timestamp(frame)), packet2bytes(frame))
                           for frame in dpkt.frame],
-                         [(float(frame.info.timestamp_epoch), bytes(frame.info.packet))
-                          for frame in default.frame])
+                         [(TICKS / 10**9, IPV4), (0.0, ETHERNET), (TICKS / 10**6, ETHERNET)])
 
     def test_packet_data_stops_at_the_original_length(self) -> None:
         from pcapkit.foundation.engines.dpkt import PCAPNGReader
@@ -236,27 +233,28 @@ class TestDPKTSimplePacketBlock(unittest.TestCase):
             ((stamp, data),) = list(PCAPNGReader(file))
         self.assertEqual((data, stamp.orig_len), (ETHERNET, len(ETHERNET)))
 
-    def test_a_raw_ipv4_interface_is_traced_as_by_the_default_engine(self) -> None:
+    def test_a_raw_ipv4_interface_is_traced(self) -> None:
         # #1520 and #1548 at once: on a LINKTYPE_IPV4 interface, an SPB is read
         # as a bare IP packet, which the flow tracer has to find too
         import pcapkit
 
         self._write(_shb('<') + _idb('<', 228) + _spb('<', IPV4_TCP) + _epb('<', 0, IPV4_TCP))
-        flows = {}
-        for engine in ('default', 'dpkt'):
-            with warnings.catch_warnings():
-                warnings.simplefilter('ignore')
-                extractor = pcapkit.extract(fin=self.path, engine=engine, nofile=True, tcp=True,
-                                            trace=True, trace_format='pcap',
-                                            trace_fout=os.path.join(self._tmp.name, engine))
-            self.addCleanup(close_extractor, extractor)
-            flows[engine] = []
-            for flow in extractor.trace.tcp:
-                with open(flow.fpout, 'rb') as file:
-                    flows[engine].append((flow.label, tuple(flow.index), file.read()))
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            extractor = pcapkit.extract(fin=self.path, engine='dpkt', nofile=True, tcp=True,
+                                        trace=True, trace_format='pcap', trace_byteorder='little',
+                                        trace_fout=os.path.join(self._tmp.name, 'dpkt'))
+        self.addCleanup(close_extractor, extractor)
+        flows = []
+        for flow in extractor.trace.tcp:
+            with open(flow.fpout, 'rb') as file:
+                flows.append((flow.label, tuple(flow.index), file.read()))
 
-        self.assertEqual([index for _, index, _ in flows['dpkt']], [(1, 2)])
-        self.assertEqual(flows['dpkt'], flows['default'])
+        # the SPB dated at the epoch, then the EPB, each record the whole packet
+        traced = (struct.pack('<IHHiIII', 0xA1B2C3D4, 2, 4, 0, 0, 262144, 228)
+                  + struct.pack('<IIII', 0, 0, len(IPV4_TCP), len(IPV4_TCP)) + IPV4_TCP
+                  + struct.pack('<IIII', TICKS // 10**6, TICKS % 10**6, len(IPV4_TCP), len(IPV4_TCP)) + IPV4_TCP)
+        self.assertEqual(flows, [('10.0.0.1_1234-10.0.0.2_80-0.0', (1, 2), traced)])
 
     def test_a_section_without_an_interface_is_a_format_error(self) -> None:
         from pcapkit.foundation.engines.dpkt import PCAPNGReader

@@ -76,27 +76,42 @@ class FakeIPv6:
         return b'I' * 40 + b'H' * 8 + b'F' * 8 + b'PAYLOAD'
 
 
-def _ipv6_frame(payload: bytes, nxt: int, *, src: str, dst: str, flow: int = 0):
-    """Build an Ethernet frame carrying IPv6, as the DPKT engine hands it over: its record octets attached."""
-    import dpkt
+class TCP:
+    __hdr_fields__ = ('sport', 'dport', 'seq', 'ack', 'flags')
+    __hdr_len__ = 4
+    #: Data Offset, in 32-bit words. ``off * 4`` has to agree with the header
+    #: portion of :meth:`pack`, the way it does on a real :class:`dpkt.tcp.TCP`.
+    off = 1
+    sport = 2345
+    dport = 443
+    seq = 20
+    ack = 15
+    flags = 0b00010011
+    data = b'ip6'
 
-    from pcapkit.toolkit import dpkt as toolkit
-
-    octets = (b'\xbb' * 6 + b'\xaa' * 6 + b'\x86\xdd'
-              + struct.pack('>IHBB16s16s', 0x60000000 | flow, len(payload), nxt, 64,
-                            ip_address(src).packed, ip_address(dst).packed) + payload)
-    packet = dpkt.ethernet.Ethernet(octets)
-    toolkit.attach_buffer(packet, octets)
-    return packet
+    def pack(self) -> bytes:
+        return b'HEADip6'
 
 
-def _fake_fragment_frame():
-    """A later IPv6 fragment, behind a Hop-by-Hop header, with the fields :class:`FakeFragment` pins."""
-    frag = FakeFragment()
-    payload = (bytes([44, 0, 1, 4, 0, 0, 0, 0])                            # Hop-by-Hop, one PadN
-               + struct.pack('>BBHI', frag.nxt, 0, frag.frag_off << 3 | frag.m_flag, frag.id)
-               + b'PAYLOAD')
-    return _ipv6_frame(payload, 0, src='2001:db8::1', dst='2001:db8::2', flow=FakeIPv6.flow)
+class FakeTCPIPv6:
+    __hdr_fields__ = ('src', 'dst')
+    src = ip_address('2001:db8::10').packed
+    dst = ip_address('2001:db8::20').packed
+
+    def __init__(self) -> None:
+        self.data = TCP()
+
+
+class FakeDPKTPacket:
+    __hdr_fields__ = ('link',)
+    link = 1
+
+    def __init__(self) -> None:
+        self.ip6 = FakeTCPIPv6()
+        self.data = self.ip6
+
+    def pack(self) -> bytes:
+        return b'packet'
 
 
 @unittest.skipUnless(HAS_RUNTIME and HAS_DPKT, 'runtime dependencies not installed')
@@ -218,7 +233,8 @@ class DPKTToolkitTests(unittest.TestCase):
             results = {
                 'ipv4': toolkit.ipv4_reassembly(self._make_ipv4_tcp_packet(fragmented=True),
                                                 stamp, count=1),
-                'ipv6': toolkit.ipv6_reassembly(_fake_fragment_frame(), stamp, count=1),
+                'ipv6': toolkit.ipv6_reassembly(types.SimpleNamespace(ip6=FakeIPv6(FakeFragment())),
+                                                stamp, count=1),
                 'tcp': toolkit.tcp_reassembly(packet, stamp, count=1),
                 'trace': toolkit.tcp_traceflow(packet, stamp, data_link=LinkType.ETHERNET, count=1),
             }
@@ -278,13 +294,11 @@ class DPKTToolkitTests(unittest.TestCase):
                          (99, True, bytes(20)))
         self.assertIsNone(toolkit.ipv4_reassembly(ipv6, 1.0, count=1))
 
-    def test_tcp_helpers_cover_tcp_over_ipv6(self) -> None:
+    def test_tcp_helpers_cover_ipv6_and_data_payload_fallback(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.toolkit import dpkt as toolkit
 
-        # SYN and FIN set, with ACK
-        segment = struct.pack('>HHIIBBHHH', 2345, 443, 20, 15, 5 << 4, 0b00010011, 1024, 0, 0) + b'ip6'
-        packet = _ipv6_frame(segment, 6, src='2001:db8::10', dst='2001:db8::20')
+        packet = FakeDPKTPacket()
         tcp = toolkit.tcp_reassembly(packet, 60.5, count=12)
         self.assertIsNotNone(tcp)
         assert tcp is not None
@@ -302,9 +316,9 @@ class DPKTToolkitTests(unittest.TestCase):
         self.assertEqual(flow.dst, ip_address('2001:db8::20'))
         self.assertTrue(flow.syn)
         self.assertTrue(flow.fin)
-        self.assertEqual(flow.frame['ETHERNET']['IP6']['TCP']['sport'], 2345)
+        self.assertEqual(flow.frame['ETHERNET']['FakeTCPIPv6']['TCP']['sport'], 2345)
 
-    def test_ipv6_header_length_and_reassembly_of_a_fragment(self) -> None:
+    def test_ipv6_header_length_and_reassembly_with_fragment_fake(self) -> None:
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.toolkit import dpkt as toolkit
 
@@ -312,8 +326,7 @@ class DPKTToolkitTests(unittest.TestCase):
         ipv6 = FakeIPv6(frag)
         self.assertEqual(toolkit.ipv6_hdr_len(ipv6), 48)
 
-        # the same fields on the wire, as the engine hands them over
-        packet = _fake_fragment_frame()
+        packet = types.SimpleNamespace(ip6=ipv6)
         reassembled = toolkit.ipv6_reassembly(packet, 0.0, count=5)
         self.assertIsNotNone(reassembled)
         assert reassembled is not None
@@ -337,8 +350,6 @@ class DPKTToolkitTests(unittest.TestCase):
         self.assertIsNone(toolkit.ipv6_reassembly(types.SimpleNamespace(), 0.0, count=1))
         self.assertIsNone(toolkit.ipv6_reassembly(types.SimpleNamespace(ip6=FakeIPv6()), 0.0,
                                                   count=1))
-        self.assertIsNone(toolkit.ipv6_reassembly(_ipv6_frame(b'PAYLOAD', 253, src='2001:db8::1',
-                                                              dst='2001:db8::2'), 0.0, count=1))
 
 
 # ---------------------------------------------------------------------------
@@ -845,52 +856,79 @@ class DPKTIPv6ReassemblyTests(unittest.TestCase):
         self.assertEqual(bytes(datagrams[0].payload), body)
 
 
+def _tcp_payloads(path: str) -> 'dict[int, tuple[int, bytes]]':
+    """Each TCP segment straight over Ethernet and IP in a little-endian PCAP, read by hand.
+
+    Returns:
+        The segment's sequence number and payload, by frame number.
+
+    """
+    with open(path, 'rb') as file:
+        data = file.read()
+    segments = {}  # type: dict[int, tuple[int, bytes]]
+    offset, number = 24, 0
+    while offset + 16 <= len(data):
+        incl_len = struct.unpack_from('<IIII', data, offset)[2]
+        record = data[offset + 16:offset + 16 + incl_len]
+        offset, number = offset + 16 + incl_len, number + 1
+        if record[12:14] == b'\x08\x00' and record[23] == 6:
+            ihl = (record[14] & 0x0F) * 4
+            segment = record[14 + ihl:14 + int.from_bytes(record[16:18], 'big')]
+        elif record[12:14] == b'\x86\xdd' and record[20] == 6:
+            segment = record[54:54 + int.from_bytes(record[18:20], 'big')]
+        else:
+            continue
+        segments[number] = (int.from_bytes(segment[4:8], 'big'), segment[(segment[12] >> 4) * 4:])
+    return segments
+
+
+def _assemble(segments: 'list[tuple[int, bytes]]') -> bytes:
+    """The octets ``(seq, data)`` segments carry from the lowest sequence number on, the first copy winning."""
+    start = min(seq for seq, _ in segments)
+    octets = {}  # type: dict[int, int]
+    for seq, data in segments:
+        for index, octet in enumerate(data):
+            octets.setdefault(seq - start + index, octet)
+    return bytes(octets[index] for index in range(len(octets)))
+
+
 @unittest.skipUnless(HAS_RUNTIME and HAS_DPKT, 'runtime dependencies not installed')
-class DPKTEngineParityTests(unittest.TestCase):
-    """The ``dpkt`` engine must agree with the default engine octet for octet.
+class DPKTEngineReassemblyTests(unittest.TestCase):
+    """The ``dpkt`` engine reassembles the captured octets, octet for octet.
 
     This is the check that would have caught the Data Offset defect: the split
     was wrong in a way that left the datagram *lengths* untouched, because the
     reassembly buffer is indexed by sequence number, so only a byte-level
-    comparison against a known-good engine shows it.
+    comparison against the capture's own octets shows it.
 
     """
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-    def _reassemble(self, path: str, engine: str):
+    def test_tcp_reassembly_is_the_captured_payload(self) -> None:
         import pcapkit
 
-        extractor = pcapkit.extract(fin=path, nofile=True, store=False, engine=engine,
-                                    tcp=True, reassembly=True, reasm_strict=True)
-        try:
-            return [
-                (
-                    datagram.completed,
-                    datagram.payload if isinstance(datagram.payload, bytes)
-                    else b''.join(datagram.payload),
-                )
-                for datagram in extractor.reassembly.tcp
-            ]
-        finally:
-            close_extractor(extractor)
-
-    def test_tcp_reassembly_matches_the_default_engine(self) -> None:
         try:
             path = sample_path('test.pcap')
         except FileNotFoundError as exc:
             self.skipTest(str(exc))
 
-        default = self._reassemble(path, 'default')
-        dpkt_out = self._reassemble(path, 'dpkt')
+        extractor = pcapkit.extract(fin=path, nofile=True, store=False, engine='dpkt',
+                                    tcp=True, reassembly=True, reasm_strict=True)
+        try:
+            datagrams = list(extractor.reassembly.tcp)
+        finally:
+            close_extractor(extractor)
 
-        self.assertGreater(len(default), 0, 'sample capture reassembled nothing')
-        self.assertEqual(len(dpkt_out), len(default))
-        for index, (expected, actual) in enumerate(zip(default, dpkt_out)):
-            with self.subTest(datagram=index):
-                self.assertEqual(actual[0], expected[0])
-                self.assertEqual(actual[1], expected[1])
+        segments = _tcp_payloads(path)
+        self.assertGreater(len(datagrams), 0, 'sample capture reassembled nothing')
+        for datagram in datagrams:
+            with self.subTest(frames=datagram.index):
+                payload = (datagram.payload if isinstance(datagram.payload, bytes)
+                           else b''.join(datagram.payload))
+                self.assertTrue(datagram.completed)
+                self.assertEqual(payload, _assemble([segments[number] for number in datagram.index]))
 
 
 @unittest.skipUnless(HAS_RUNTIME and HAS_DPKT, 'runtime dependencies not installed')
@@ -941,24 +979,24 @@ class DPKTTimestampTests(unittest.TestCase):
         with self.assertRaises(UnsupportedCall):
             packet2timestamp(bare)
 
-    def test_following_a_stream_agrees_with_the_default_engine(self) -> None:
+    def test_following_a_stream_reads_every_stream(self) -> None:
         """And the real timestamp changes nothing, which is worth pinning.
 
         TCP reassembly has no timeout by default, so the value never reaches a
         decision -- the fix removes a workaround rather than altering a result.
+        ``in.pcap`` holds two TCP conversations, of two frames and one, each
+        segment alone, so none has a payload to reassemble.
 
         """
         import tempfile
 
         from pcapkit.interface.misc import follow_tcp_stream
 
-        def follow(engine: str):
-            with tempfile.TemporaryDirectory() as tempdir:
-                streams = follow_tcp_stream(fin=sample_path('in.pcap'), engine=engine,
-                                            fout=tempdir, format='json')
-                return [(len(stream.packets), stream.conversations) for stream in streams]
-
-        self.assertEqual(follow('dpkt'), follow('default'))
+        with tempfile.TemporaryDirectory() as tempdir:
+            streams = follow_tcp_stream(fin=sample_path('in.pcap'), engine='dpkt',
+                                        fout=tempdir, format='json')
+            self.assertEqual([(len(stream.packets), stream.conversations) for stream in streams],
+                             [(2, ()), (1, ())])
 
 
 if __name__ == '__main__':

@@ -54,8 +54,8 @@ class FollowTCPStreamTests(unittest.TestCase):
     (``AttributeError: 'dict' object has no attribute 'packet'``) and returned an
     empty, misleading result on Scapy frames.
 
-    Both third-party engines that dissect this capture -- DPKT and Scapy -- must
-    therefore agree with the default engine on every stream. Engines that do
+    Both third-party engines that dissect this capture must therefore find every
+    stream: DPKT the two it holds, and Scapy the default engine's. Engines that do
     no dissection at all (PyPCAP) or have no reassembly adapter (PyShark) are
     redirected to the default engine instead, and are asserted separately below.
 
@@ -114,28 +114,25 @@ class FollowTCPStreamTests(unittest.TestCase):
         self.assertEqual(sorted(len(stream.packets) for stream in streams), [1, 1, 1])
 
     @unittest.skipUnless(HAS_DPKT, 'dpkt not installed')
-    def test_dpkt_engine_matches_the_default_engine(self) -> None:
-        # DPKT dissects in.pcap's Ethernet/IP/TCP in full, so it must agree with the
-        # native engine on both the stream count and the reassembled bytes. This is
-        # the regression guard for #399: before the fix the DPKT frame reached the
+    def test_dpkt_engine_follows_every_stream(self) -> None:
+        # DPKT dissects in.pcap's Ethernet/IP/TCP in full, so it finds both streams,
+        # of two frames and one, with no payload to reassemble. This is the
+        # regression guard for #399: before the fix the DPKT frame reached the
         # pcapkit adapter and raised AttributeError, and the counted-vs-uncounted
         # call convention is what makes the reassembled numbering line up.
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            native = self._follow()
             foreign = self._follow(engine='dpkt')
 
         self.assertEqual(len(foreign), IN_PCAP_TCP_STREAMS)
-        self.assertEqual([len(stream.packets) for stream in foreign],
-                         [len(stream.packets) for stream in native])
-        self.assertEqual([stream.conversations for stream in foreign],
-                         [stream.conversations for stream in native])
+        self.assertEqual([(len(stream.packets), stream.conversations) for stream in foreign],
+                         [(2, ()), (1, ())])
 
     @unittest.skipUnless(HAS_SCAPY, 'scapy not installed')
     def test_scapy_engine_matches_the_default_engine(self) -> None:
         # Scapy dissects in.pcap in full -- its two ICMPv6-over-IPv6 frames, its
-        # three IPv4/TCP frames and its one UDP frame -- so, exactly like DPKT above,
-        # it must agree with the native engine rather than differ from it.
+        # three IPv4/TCP frames and its one UDP frame -- so it must agree with the
+        # native engine rather than differ from it.
         # This is the regression guard for #406: the engine imported only
         # ``scapy.sendrecv``, so Scapy's ``conf.l2types`` registry was empty,
         # ``PcapReader`` could not map link type 1, and all six frames arrived as
