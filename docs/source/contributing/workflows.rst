@@ -757,6 +757,63 @@ and 8% of the unit tier's time in a serial 3.14 run (86 of 1,031 s), and 10-11% 
 3.14, 3.15 and 3.14t legs of run 38581834697, so the rest should take GraalPy 88-113
 minutes (estimate).
 
+GraalPy's leg still loses its runner 18-30 minutes into its tests, with ``The runner
+has received a shutdown signal`` (`#1740 <https://github.com/JarryShaw/PyPCAPKit/issues/1740>`__),
+so each experimental leg samples its runner while the tests run. ``Start the resource
+monitor`` writes ``free -m``, ``df -h`` of ``/`` and the workspace's volume,
+``/proc/loadavg`` and the five processes with the most RSS every 30 seconds, each
+line led by ``[monitor]``, to ``$RUNNER_TEMP/resource-monitor.log``; ``Run unit
+tests`` copies the file into its own log with ``tail -F``; ``Stop the resource
+monitor`` ends the sampler, ``if: always()``. The file is uploaded as
+``resource-monitor-<version>`` (14 days, ``if: always()``, ``continue-on-error``)
+only where the runner survives the tests. `always()
+<https://docs.github.com/en/actions/reference/workflows-and-actions/expressions#always>`__
+runs a step "even when canceled", and docs.github.com says nothing of a runner's
+shutdown, after which the runner evaluates no later step's condition (actions/runner
+``src/Runner.Worker/StepsRunner.cs:205-208``, at ``796cc18ff``). Job 116057255255
+skipped every step after its tests, ``Post Run actions/checkout@v7`` too, whose
+`post-if
+<https://docs.github.com/en/actions/reference/workflows-and-actions/metadata-syntax#runspost-if>`__
+"defaults to ``always()``". On a lost runner, then, the ``[monitor]`` lines in the
+tests' log are the record. The monitor's three steps, start, stop and upload, are each
+``continue-on-error`` with no cap of their own, so the caps above and the check names
+are as they were.
+
+A lost runner fails the job, and so its check, whatever ``continue-on-error`` says,
+so ``Run unit tests`` holds the tests to what leaves the runner alive, and a breach
+fails the step, which ``Containment summary`` and ``Experimental summary`` report as
+warnings:
+
+* GraalPy alone gets ``GRAAL_PYTHON_VM_ARGS=--vm.Xmx2g``, a 2 GiB heap for every
+  GraalPy process, xdist workers included, and ``-n 3``, a CPU of the runner's 4 left
+  to the JIT and the runner; 3.14t keeps ``-n auto``.
+* ``timeout --signal=INT --kill-after=3m 110m`` ends pytest under the step's 120-minute
+  cap, so it still writes the junit XML, and exits 124; ``prlimit --fsize=2147483648``
+  caps any file at 2 GiB.
+* Where the scope starts ``true`` under a throwaway unit, ``pcapkit-probe-<pid>.scope``,
+  with every flag the tests get (``sudo -n --preserve-env``, ``MemoryMax=12G``,
+  ``MemorySwapMax=0``, ``CPUWeight=20``, ``--uid``, ``--gid``), the tests run in the
+  transient scope ``pcapkit-tests.scope`` as the runner's own user; otherwise they run
+  the same pytest command line uncapped, under a ``No memory cap`` warning. sudo
+  resets ``PATH`` and drops ``LD_*``, where setup-python puts its ``lib/``, so ``env``
+  sets them, and the heap, again. The sampler started a step earlier, outside the scope, so an OOM kill there
+  leaves it running; each sample adds the kernel's ``oom_kill`` count and the scope's
+  ``memory.current`` and ``memory.events``.
+
+The step writes ``$RUNNER_TEMP/tests-status``: the exit status, the scope and the
+probe's error, the seconds the tests took, the OOM kills while they ran
+(``/proc/vmstat``) and the ``MemoryError`` lines in their output. From it and the
+monitor's last sample, ``Containment summary`` warns ``No memory cap``, ``tests lost a
+process to the OOM killer``, ``tests timed out at 110 minutes`` or ``tests raised
+MemoryError``, each a warning of its own. A timeout is exit 124, or 137 with no OOM kill
+after 110 minutes: ``--kill-after``'s SIGKILL to a teardown SIGINT did not end, where an
+OOM kill of pytest exits 137 too. ``Experimental summary``, the job's last step and the
+KTLO summary's script, still warns of every failed step, ``tests`` included. The 2 GiB,
+``-n 3`` and 12G are estimates for a 16 GB, 4-CPU runner until a run shows them. At 3
+workers rather than 4, GraalPy's tests should take about 117-151 minutes (an inference
+from the 88-113 above, not measured), so its leg may end on the 110-minute timeout as a
+warning: that is expected, blocks nothing, and leaves the caps as they are.
+
 Python Versions
 ---------------
 

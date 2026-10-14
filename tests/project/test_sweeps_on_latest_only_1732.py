@@ -109,15 +109,23 @@ def run_step(leg: 'dict[str, Any]', where: 'tuple[str, str]' = JOB) -> 'list[str
         stub = pathlib.Path(temp, 'python')
         stub.write_text(STUB, encoding='utf-8')
         stub.chmod(0o755)
+        # #1740: experimental's tests step probes `sudo -n systemd-run`, which fails here, as it
+        # would where no scope can start, so the tests run uncapped: no scope on this machine.
+        sudo = pathlib.Path(temp, 'sudo')
+        sudo.write_text('#!/bin/sh\nexit 1\n', encoding='utf-8')
+        sudo.chmod(0o755)
+        # A directory for the files that step writes, named RUNNER_TEMP in what is returned.
+        runner_temp = pathlib.Path(temp, '_temp')
+        runner_temp.mkdir()
         record = pathlib.Path(temp, 'args')
-        env = dict(os.environ, **step_env(leg, where), ARGS_FILE=str(record), RUNNER_TEMP=RUNNER_TEMP,
+        env = dict(os.environ, **step_env(leg, where), ARGS_FILE=str(record), RUNNER_TEMP=str(runner_temp),
                    REAL_PYTHON=sys.executable, PATH=temp + os.pathsep + os.environ.get('PATH', ''))
         # From the root, as the runner runs it: ``integration`` imports tests/_tiers.py.
         result = subprocess.run(['bash', '-e', '-c', step(where)['run']], env=env, cwd=ROOT,  # nosec B603 B607
                                 capture_output=True, text=True, check=False, timeout=60)
         if result.returncode:
             raise AssertionError(f'the step failed on {leg}: {result.stderr}')
-        return record.read_text(encoding='utf-8').splitlines()
+        return [arg.replace(str(runner_temp), RUNNER_TEMP) for arg in record.read_text(encoding='utf-8').splitlines()]
 
 
 def pytest_args(argv: 'list[str]') -> 'list[str]':
@@ -160,10 +168,14 @@ class TestTheStepSelectsByLeg(unittest.TestCase):
         for version, (leg, argv) in self.runs.items():
             if version == self.latest:
                 continue
+            want = list(expected)
+            if is_experimental(leg):
+                # #1740: the experimental step's own worker count, 3 on GraalPy and `auto` on the rest.
+                want[want.index('-n') + 1] = step_env(leg, EXPERIMENTAL)['WORKERS']
             with self.subTest(python=version):
                 self.assertNotIn('coverage', argv)
                 self.assertEqual(argv[:2], ['-m', 'pytest'])
-                self.assertEqual(pytest_args(argv), expected)
+                self.assertEqual(pytest_args(argv), want)
 
 
 class TestTheGlobIsTheSweeps(unittest.TestCase):
