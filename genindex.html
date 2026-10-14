@@ -285,7 +285,6 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/misc/pcap.html">PCAP File Headers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/misc/byteorder.html">Byte Order - Shared Byte-Order Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/misc/raw.html">Raw Packet Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/misc/null.html">No-Payload Packet</a></li>
 </ul>
@@ -300,9 +299,11 @@
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/corekit/fields/ipaddress.html">IP Address Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/corekit/fields/collections.html">Container Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/corekit/fields/misc.html">Miscellaneous Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pcapkit/corekit/fields/byteorder.html">Byte-Order Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/context.html">Parsing Context</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/decorators.html">Decorator Functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/enum.html">Enumeration Base</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/infoclass.html">Info Class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/io.html">I/O Objects</a></li>
@@ -326,7 +327,6 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="pcapkit/utilities/index.html">Module Utilities</a><input aria-label="Toggle navigation of Module Utilities" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/decorators.html">Decorator Functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/logging.html">Logging System</a></li>
@@ -434,6 +434,7 @@
 <li class="toctree-l2"><a class="reference internal" href="contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="contributing/conventions/documentation.html">Writing the Documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="contributing/conventions/test-coverage.html">Testing a Change</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing/conventions/utilities-or-corekit.html">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="contributing/releasing.html">Release Process</a></li>
@@ -7358,7 +7359,7 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.beeyond_media">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
-        <li><a href="pcapkit/utilities/decorators.html#pcapkit.utilities.decorators.beholder">beholder() (in module pcapkit.utilities.decorators)</a>
+        <li><a href="pcapkit/corekit/decorators.html#pcapkit.corekit.decorators.beholder">beholder() (in module pcapkit.corekit.decorators)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.bencher">bencher (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
@@ -8592,7 +8593,7 @@
           <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.SectionHeaderBlock.byteorder">(pcapkit.protocols.schema.misc.pcapng.SectionHeaderBlock attribute)</a>
 </li>
         </ul></li>
-        <li><a href="pcapkit/protocols/misc/byteorder.html#pcapkit.protocols.schema.misc.byteorder.byteorder_callback">byteorder_callback() (in module pcapkit.protocols.schema.misc.byteorder)</a>
+        <li><a href="pcapkit/corekit/fields/byteorder.html#pcapkit.corekit.fields.byteorder.byteorder_callback">byteorder_callback() (in module pcapkit.corekit.fields.byteorder)</a>
 </li>
         <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.ByteorderTest">ByteorderTest (class in pcapkit.protocols.schema.misc.pcapng)</a>
 </li>
@@ -30317,9 +30318,13 @@
 </li>
           <li><a href="pcapkit/corekit/context.html#module-pcapkit.corekit.context">pcapkit.corekit.context</a>
 </li>
+          <li><a href="pcapkit/corekit/decorators.html#module-pcapkit.corekit.decorators">pcapkit.corekit.decorators</a>
+</li>
           <li><a href="pcapkit/corekit/enum.html#module-pcapkit.corekit.enum">pcapkit.corekit.enum</a>
 </li>
           <li><a href="pcapkit/corekit/fields/index.html#module-pcapkit.corekit.fields">pcapkit.corekit.fields</a>
+</li>
+          <li><a href="pcapkit/corekit/fields/byteorder.html#module-pcapkit.corekit.fields.byteorder">pcapkit.corekit.fields.byteorder</a>
 </li>
           <li><a href="pcapkit/corekit/fields/collections.html#module-pcapkit.corekit.fields.collections">pcapkit.corekit.fields.collections</a>
 </li>
@@ -30651,8 +30656,6 @@
 </li>
           <li><a href="pcapkit/protocols/misc/index.html#module-pcapkit.protocols.schema.misc">pcapkit.protocols.schema.misc</a>
 </li>
-          <li><a href="pcapkit/protocols/misc/byteorder.html#module-pcapkit.protocols.schema.misc.byteorder">pcapkit.protocols.schema.misc.byteorder</a>
-</li>
           <li><a href="pcapkit/protocols/misc/null.html#module-pcapkit.protocols.schema.misc.null">pcapkit.protocols.schema.misc.null</a>
 </li>
           <li><a href="pcapkit/protocols/misc/pcap.html#module-pcapkit.protocols.schema.misc.pcap">pcapkit.protocols.schema.misc.pcap</a>
@@ -30708,8 +30711,6 @@
           <li><a href="pcapkit/utilities/chardet.html#module-pcapkit.utilities.chardet">pcapkit.utilities.chardet</a>
 </li>
           <li><a href="pcapkit/utilities/index.html#module-pcapkit.utilities.compat">pcapkit.utilities.compat</a>
-</li>
-          <li><a href="pcapkit/utilities/decorators.html#module-pcapkit.utilities.decorators">pcapkit.utilities.decorators</a>
 </li>
           <li><a href="pcapkit/utilities/exceptions.html#module-pcapkit.utilities.exceptions">pcapkit.utilities.exceptions</a>
 </li>
@@ -37030,7 +37031,7 @@
 </li>
         <li><a href="pcapkit/const/pcapng.html#pcapkit.const.pcapng.block_type.BlockType.Packet_Block">Packet_Block (pcapkit.const.pcapng.block_type.BlockType attribute)</a>
 </li>
-        <li><a href="pcapkit/protocols/misc/byteorder.html#pcapkit.protocols.schema.misc.byteorder.packet_byteorder">packet_byteorder() (in module pcapkit.protocols.schema.misc.byteorder)</a>
+        <li><a href="pcapkit/corekit/fields/byteorder.html#pcapkit.corekit.fields.byteorder.packet_byteorder">packet_byteorder() (in module pcapkit.corekit.fields.byteorder)</a>
 </li>
         <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.EnhancedPacketBlock.packet_data">packet_data (pcapkit.protocols.schema.misc.pcapng.EnhancedPacketBlock attribute)</a>
 
@@ -39111,6 +39112,19 @@
         <li><a href="pcapkit/corekit/context.html#pcapkit.corekit.context.pcapkit.corekit.context._CT">pcapkit.corekit.context._CT (in module pcapkit.corekit.context)</a>
 </li>
         <li>
+    pcapkit.corekit.decorators
+
+        <ul>
+          <li><a href="pcapkit/corekit/decorators.html#module-pcapkit.corekit.decorators">module</a>
+</li>
+        </ul></li>
+        <li><a href="pcapkit/corekit/decorators.html#pcapkit.corekit.decorators.pcapkit.corekit.decorators.R_beholder">pcapkit.corekit.decorators.R_beholder (in module pcapkit.corekit.decorators)</a>
+</li>
+        <li><a href="pcapkit/corekit/decorators.html#pcapkit.corekit.decorators.pcapkit.corekit.decorators.R_prepare">pcapkit.corekit.decorators.R_prepare (in module pcapkit.corekit.decorators)</a>
+</li>
+        <li><a href="pcapkit/corekit/decorators.html#pcapkit.corekit.decorators.pcapkit.corekit.decorators.R_seekset">pcapkit.corekit.decorators.R_seekset (in module pcapkit.corekit.decorators)</a>
+</li>
+        <li>
     pcapkit.corekit.enum
 
         <ul>
@@ -39122,6 +39136,13 @@
 
         <ul>
           <li><a href="pcapkit/corekit/fields/index.html#module-pcapkit.corekit.fields">module</a>
+</li>
+        </ul></li>
+        <li>
+    pcapkit.corekit.fields.byteorder
+
+        <ul>
+          <li><a href="pcapkit/corekit/fields/byteorder.html#module-pcapkit.corekit.fields.byteorder">module</a>
 </li>
         </ul></li>
         <li>
@@ -40350,13 +40371,6 @@
 </li>
         </ul></li>
         <li>
-    pcapkit.protocols.schema.misc.byteorder
-
-        <ul>
-          <li><a href="pcapkit/protocols/misc/byteorder.html#module-pcapkit.protocols.schema.misc.byteorder">module</a>
-</li>
-        </ul></li>
-        <li>
     pcapkit.protocols.schema.misc.null
 
         <ul>
@@ -40560,19 +40574,6 @@
           <li><a href="pcapkit/utilities/index.html#module-pcapkit.utilities.compat">module</a>
 </li>
         </ul></li>
-        <li>
-    pcapkit.utilities.decorators
-
-        <ul>
-          <li><a href="pcapkit/utilities/decorators.html#module-pcapkit.utilities.decorators">module</a>
-</li>
-        </ul></li>
-        <li><a href="pcapkit/utilities/decorators.html#pcapkit.utilities.decorators.pcapkit.utilities.decorators.R_beholder">pcapkit.utilities.decorators.R_beholder (in module pcapkit.utilities.decorators)</a>
-</li>
-        <li><a href="pcapkit/utilities/decorators.html#pcapkit.utilities.decorators.pcapkit.utilities.decorators.R_prepare">pcapkit.utilities.decorators.R_prepare (in module pcapkit.utilities.decorators)</a>
-</li>
-        <li><a href="pcapkit/utilities/decorators.html#pcapkit.utilities.decorators.pcapkit.utilities.decorators.R_seekset">pcapkit.utilities.decorators.R_seekset (in module pcapkit.utilities.decorators)</a>
-</li>
         <li>
     pcapkit.utilities.exceptions
 
@@ -43167,7 +43168,7 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.prelude">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
-        <li><a href="pcapkit/utilities/decorators.html#pcapkit.utilities.decorators.prepare">prepare() (in module pcapkit.utilities.decorators)</a>
+        <li><a href="pcapkit/corekit/decorators.html#pcapkit.corekit.decorators.prepare">prepare() (in module pcapkit.corekit.decorators)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.presence_5298">presence_5298 (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
@@ -45654,8 +45655,6 @@
           <li><a href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.scapy.Scapy.read_frame">(pcapkit.foundation.engines.scapy.Scapy method)</a>
 </li>
         </ul></li>
-        <li><a href="pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pypcapfile.READ_LINKTYPES">READ_LINKTYPES (in module pcapkit.toolkit.pypcapfile)</a>
-</li>
         <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.readable">readable() (pcapkit.corekit.io.SeekableReader method)</a>
 </li>
         <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.readinto">readinto() (pcapkit.corekit.io.SeekableReader method)</a>
@@ -48270,10 +48269,10 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.reserved_7026">reserved_7026 (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.reserved_7031">reserved_7031 (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.reserved_7040">reserved_7040 (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.reserved_7073">reserved_7073 (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
@@ -49072,7 +49071,7 @@
 </li>
           <li><a href="pcapkit/toolkit/3rdparty.html#index-7">RFC 2460 Section 4.4</a>
 </li>
-          <li><a href="pcapkit/toolkit/3rdparty.html#index-0">RFC 2460 Section 4.5</a>, <a href="pcapkit/toolkit/3rdparty.html#index-1">[1]</a>, <a href="pcapkit/toolkit/3rdparty.html#index-3">[2]</a>, <a href="pcapkit/toolkit/builtin.html#index-0">[3]</a>, <a href="pcapkit/toolkit/builtin.html#index-2">[4]</a>
+          <li><a href="pcapkit/toolkit/3rdparty.html#index-0">RFC 2460 Section 4.5</a>, <a href="pcapkit/toolkit/3rdparty.html#index-2">[1]</a>, <a href="pcapkit/toolkit/3rdparty.html#index-3">[2]</a>, <a href="pcapkit/toolkit/builtin.html#index-0">[3]</a>, <a href="pcapkit/toolkit/builtin.html#index-2">[4]</a>
 </li>
           <li><a href="pcapkit/toolkit/3rdparty.html#index-6">RFC 2460 Section 4.6</a>
 </li>
@@ -49090,7 +49089,7 @@
 </li>
           <li><a href="changelog/1.5.0.html#index-11">RFC 2661</a>, <a href="changelog/1.5.0.html#index-24">[1]</a>, <a href="changelog/1.5.0.html#index-58">[2]</a>, <a href="changelog/1.5.0.html#index-9">[3]</a>, <a href="contributing/pep.html#index-25">[4]</a>, <a href="pcapkit/foundation/registry.html#index-1">[5]</a>, <a href="pcapkit/protocols/link/l2tp.html#index-0">[6]</a>, <a href="pcapkit/protocols/link/l2tp.html#index-3">[7]</a>, <a href="pcapkit/protocols/link/l2tp.html#index-4">[8]</a>, <a href="pcapkit/protocols/link/l2tpv2.html#index-0">[9]</a>, <a href="pcapkit/protocols/link/l2tpv2.html#index-2">[10]</a>, <a href="pcapkit/protocols/link/l2tpv2.html#index-5">[11]</a>, <a href="pcapkit/protocols/link/l2tpv2.html#index-6">[12]</a>, <a href="pcapkit/protocols/link/l2tpv2.html#index-7">[13]</a>, <a href="pcapkit/protocols/link/l2tpv2.html#index-8">[14]</a>
 </li>
-          <li><a href="pcapkit/const/ipv6.html#index-16">RFC 2675</a>, <a href="pcapkit/protocols/internet/hopopt.html#index-15">[1]</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-4">[2]</a>, <a href="pcapkit/protocols/internet/ipv6_opts.html#index-15">[3]</a>, <a href="pcapkit/toolkit/3rdparty.html#index-2">[4]</a>
+          <li><a href="pcapkit/const/ipv6.html#index-16">RFC 2675</a>, <a href="pcapkit/protocols/internet/hopopt.html#index-15">[1]</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-4">[2]</a>, <a href="pcapkit/protocols/internet/ipv6_opts.html#index-15">[3]</a>
 </li>
           <li><a href="pcapkit/protocols/internet/ipv6.html#index-1">RFC 2675 Section 3</a>, <a href="pcapkit/protocols/internet/ipv6.html#index-2">[1]</a>
 </li>
@@ -50008,7 +50007,7 @@
 </li>
           <li><a href="changelog/1.5.0.html#index-5">RFC 791</a>, <a href="contributing/pep.html#index-28">[1]</a>, <a href="contributing/pep.html#index-33">[2]</a>, <a href="contributing/pep.html#index-53">[3]</a>, <a href="pcapkit/const/ipv4.html#index-0">[4]</a>, <a href="pcapkit/const/ipv4.html#index-1">[5]</a>, <a href="pcapkit/const/ipv4.html#index-3">[6]</a>, <a href="pcapkit/const/ipv4.html#index-4">[7]</a>, <a href="pcapkit/const/ipv4.html#index-6">[8]</a>, <a href="pcapkit/const/ipv4.html#index-7">[9]</a>, <a href="pcapkit/const/ipv4.html#index-9">[10]</a>, <a href="pcapkit/foundation/reassembly/index.html#index-0">[11]</a>, <a href="pcapkit/foundation/reassembly/ip/index.html#index-0">[12]</a>, <a href="pcapkit/foundation/reassembly/ip/index.html#index-2">[13]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-0">[14]</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-6">[15]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv4.html#index-0">[16]</a>, <a href="pcapkit/foundation/reassembly/ip/ipv6.html#index-4">[17]</a>, <a href="pcapkit/foundation/reassembly/reassembly.html#index-0">[18]</a>, <a href="pcapkit/foundation/reassembly/tcp.html#index-4">[19]</a>, <a href="pcapkit/protocols/internet/ip.html#index-0">[20]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-0">[21]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-1">[22]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-10">[23]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-12">[24]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-2">[25]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-23">[26]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-3">[27]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-6">[28]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-7">[29]</a>, <a href="pcapkit/protocols/internet/ipv4.html#index-9">[30]</a>
 </li>
-          <li><a href="pcapkit/foundation/reassembly/ip/index.html#index-3">RFC 791 Section 3.2</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-1">[1]</a>
+          <li><a href="pcapkit/foundation/reassembly/ip/index.html#index-3">RFC 791 Section 3.2</a>, <a href="pcapkit/foundation/reassembly/ip/ip.html#index-1">[1]</a>, <a href="pcapkit/toolkit/3rdparty.html#index-1">[2]</a>
 </li>
           <li><a href="pcapkit/const/reg.html#index-35">RFC 792</a>
 </li>
@@ -52581,7 +52580,7 @@
 </li>
         <li><a href="pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.SeekError">SeekError</a>
 </li>
-        <li><a href="pcapkit/utilities/decorators.html#pcapkit.utilities.decorators.seekset">seekset() (in module pcapkit.utilities.decorators)</a>
+        <li><a href="pcapkit/corekit/decorators.html#pcapkit.corekit.decorators.seekset">seekset() (in module pcapkit.corekit.decorators)</a>
 </li>
         <li><a href="pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.SeekWarning">SeekWarning</a>
 </li>

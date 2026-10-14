@@ -59,9 +59,10 @@ Terminology
           header, because :rfc:`8200#section-4.5` says it is not present in the
           reassembled packet. :attr:`IPv6.hdr_len <pcapkit.protocols.data.internet.ipv6.IPv6.hdr_len>`
           does count it -- it is a header length, and the Fragment header is one
-          of the extension headers it has walked -- so the adapters subtract it
-          back off. All four adapters (``pcap``, ``pcapng``, ``dpkt`` and
-          ``scapy``) agree on the three fields.
+          of the extension headers it has walked -- so the ``pcap`` and
+          ``pcapng`` adapters subtract it back off. The ``dpkt`` and ``scapy``
+          adapters leave it out of the three fields too, but as best effort,
+          not as a contract (:issue:`1687`).
 
        .. note::
 

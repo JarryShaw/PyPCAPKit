@@ -7,9 +7,9 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/utilities/index.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.utilities contains several useful functions and classes which are foundations of pcapkit, including decorator function seekset() and beholder(), and several user-refined exceptions and warn..." />
-<meta name="description" content="pcapkit.utilities contains several useful functions and classes which are foundations of pcapkit, including decorator function seekset() and beholder(), and several user-refined exceptions and warn..." />
-<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Decorator Functions" href="decorators.html"><link rel="prev" title="Common Utilities" href="../dumpkit/common.html">
+<meta property="og:description" content="pcapkit.utilities holds the cross-cutting services pcapkit is built with: user-refined exceptions and warnings, logging, a compatibility layer, and wrappers around third-party libraries. It imports..." />
+<meta name="description" content="pcapkit.utilities holds the cross-cutting services pcapkit is built with: user-refined exceptions and warnings, logging, a compatibility layer, and wrappers around third-party libraries. It imports..." />
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="User Defined Exceptions" href="exceptions.html"><link rel="prev" title="Common Utilities" href="../dumpkit/common.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
         <title>Module Utilities - PyPCAPKit</title>
@@ -293,7 +293,6 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/misc/pcap.html">PCAP File Headers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../protocols/misc/byteorder.html">Byte Order - Shared Byte-Order Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/misc/raw.html">Raw Packet Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/misc/null.html">No-Payload Packet</a></li>
 </ul>
@@ -308,9 +307,11 @@
 <li class="toctree-l4"><a class="reference internal" href="../corekit/fields/ipaddress.html">IP Address Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/fields/collections.html">Container Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/fields/misc.html">Miscellaneous Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../corekit/fields/byteorder.html">Byte-Order Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/context.html">Parsing Context</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../corekit/decorators.html">Decorator Functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/enum.html">Enumeration Base</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/infoclass.html">Info Class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/io.html">I/O Objects</a></li>
@@ -334,7 +335,6 @@
 </ul>
 </li>
 <li class="toctree-l2 current has-children current-page"><a class="current reference internal" href="#">Module Utilities</a><input aria-label="Toggle navigation of Module Utilities" checked="" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="decorators.html">Decorator Functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="logging.html">Logging System</a></li>
@@ -442,6 +442,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/conventions/utilities-or-corekit.html">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing/releasing.html">Release Process</a></li>
@@ -491,17 +492,12 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.utilities">
 <span id="module-utilities"></span><h1>Module Utilities<a class="headerlink" href="#module-pcapkit.utilities" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.utilities" title="pcapkit.utilities"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities</span></code></a> contains several useful functions
-and classes which are foundations of <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, including
-decorator function <a class="reference internal" href="decorators.html#pcapkit.utilities.decorators.seekset" title="pcapkit.utilities.decorators.seekset"><code class="xref py py-func docutils literal notranslate"><span class="pre">seekset()</span></code></a>
-and <a class="reference internal" href="decorators.html#pcapkit.utilities.decorators.beholder" title="pcapkit.utilities.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a>, and
-several user-refined exceptions and warnings.</p>
+<p><a class="reference internal" href="#module-pcapkit.utilities" title="pcapkit.utilities"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities</span></code></a> holds the cross-cutting services <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> is
+built with: user-refined exceptions and warnings, logging, a compatibility
+layer, and wrappers around third-party libraries. It imports nothing from
+<a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> outside itself; see <a class="reference internal" href="../../contributing/conventions/utilities-or-corekit.html#utilities-or-corekit"><span class="std std-ref">Choosing Between utilities and corekit</span></a>.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="decorators.html">Decorator Functions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="decorators.html#type-variables">Type Variables</a></li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="exceptions.html">User Defined Exceptions</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="exceptions.html#loud-and-quiet-errors">Loud and Quiet Errors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="exceptions.html#typeerror-category"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code> Category</a></li>
@@ -576,22 +572,31 @@ following objects and functions:</p>
 <tr class="row-odd"><td><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict[KT,</span> <span class="pre">VT]</span></code></a></p></td>
 <td><p>Python 3.9</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.StrEnum" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">enum.StrEnum</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference external" href="https://docs.python.org/3/library/urllib.parse.html#urllib.parse.unquote" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">urllib.parse.unquote()</span></code></a> on <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a></p></td>
+<td><p>Python 3.9</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.StrEnum" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">enum.StrEnum</span></code></a></p></td>
 <td><p>Python 3.11</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.final" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">typing.final()</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.final" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">typing.final()</span></code></a></p></td>
 <td><p>Python 3.11</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference external" href="https://docs.python.org/3/library/decimal.html#decimal.localcontext" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">decimal.localcontext(ctx=None,</span> <span class="pre">**kwargs)</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference external" href="https://docs.python.org/3/library/decimal.html#decimal.localcontext" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">decimal.localcontext(ctx=None,</span> <span class="pre">**kwargs)</span></code></a></p></td>
 <td><p>Python 3.11</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.show_flag_values" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">enum.show_flag_values()</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.show_flag_values" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">enum.show_flag_values()</span></code></a></p></td>
 <td><p>Python 3.11</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeAlias" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.TypeAlias</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeAlias" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.TypeAlias</span></code></a></p></td>
 <td><p>Python 3.10</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference external" href="https://docs.python.org/3/library/threading.html#threading.__excepthook__" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">threading.__excepthook__</span></code></a>, as <code class="docutils literal notranslate"><span class="pre">default_threading_excepthook</span></code></p></td>
+<tr class="row-even"><td><p><a class="reference external" href="https://docs.python.org/3/library/threading.html#threading.__excepthook__" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">threading.__excepthook__</span></code></a>, as <code class="docutils literal notranslate"><span class="pre">default_threading_excepthook</span></code></p></td>
+<td><p>Python 3.10</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.get_annotations" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">inspect.get_annotations()</span></code></a>, of a class</p></td>
+<td><p>Python 3.10</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://docs.python.org/3/library/types.html#types.UnionType" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">types.UnionType</span></code></a>, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> below it</p></td>
 <td><p>Python 3.10</p></td>
 </tr>
 </tbody>
@@ -605,12 +610,12 @@ following objects and functions:</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="decorators.html">
+          <a class="next-page" href="exceptions.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Decorator Functions</div>
+                <div class="title">User Defined Exceptions</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>

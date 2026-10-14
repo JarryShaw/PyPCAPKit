@@ -286,7 +286,6 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/pcap.html">PCAP File Headers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/byteorder.html">Byte Order - Shared Byte-Order Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/raw.html">Raw Packet Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/null.html">No-Payload Packet</a></li>
 </ul>
@@ -301,9 +300,11 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/ipaddress.html">IP Address Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/collections.html">Container Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/misc.html">Miscellaneous Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/corekit/fields/byteorder.html">Byte-Order Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/context.html">Parsing Context</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/decorators.html">Decorator Functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/enum.html">Enumeration Base</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/infoclass.html">Info Class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/io.html">I/O Objects</a></li>
@@ -327,7 +328,6 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/utilities/index.html">Module Utilities</a><input aria-label="Toggle navigation of Module Utilities" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/decorators.html">Decorator Functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/logging.html">Logging System</a></li>
@@ -435,6 +435,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/conventions/utilities-or-corekit.html">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../contributing/releasing.html">Release Process</a></li>
@@ -669,9 +670,8 @@
 <span class="w">        </span><span class="sd">"""Decode a Simple Packet Block, against the section's first interface.</span>
 
 <span class="sd">        `DPKT`_ has no type for this block, so it is parsed by</span>
-<span class="sd">        :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`, as for the default</span>
-<span class="sd">        engine: the packet data is ``min(original_len, snaplen)`` octets, with</span>
-<span class="sd">        the snaplen of interface 0.</span>
+<span class="sd">        :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`: the packet data is</span>
+<span class="sd">        ``min(original_len, snaplen)`` octets, with the snaplen of interface 0.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            buf: Whole block, as read from the file.</span>
@@ -679,8 +679,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Timestamp and packet data, as :meth:`_read_packet` returns them. A</span>
 <span class="sd">            Simple Packet Block carries no timestamp, so the packet is dated at</span>
-<span class="sd">            the UNIX epoch, as the default engine dates it; the original length</span>
-<span class="sd">            is the block's own.</span>
+<span class="sd">            the UNIX epoch; the original length is the block's own.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            FormatError: If the section describes no interface. A Simple Packet</span>
@@ -774,8 +773,8 @@
                 <span class="k">if</span> <span class="n">nanosecond</span><span class="p">:</span>
                     <span class="k">yield</span> <span class="n">DecimalTimestamp</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">hdr</span><span class="o">.</span><span class="n">len</span><span class="p">),</span> <span class="n">buf</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="c1"># at the default engine's precision, not the caller's, which</span>
-                    <span class="c1"># may be too low to hold it (:issue:`1668`)</span>
+                    <span class="c1"># at a precision of 64 digits, not the caller's, which may</span>
+                    <span class="c1"># be too low to hold it (:issue:`1668`)</span>
                     <span class="k">with</span> <span class="n">localcontext</span><span class="p">(</span><span class="n">prec</span><span class="o">=</span><span class="mi">64</span><span class="p">):</span>
                         <span class="n">exact</span> <span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">hdr</span><span class="o">.</span><span class="n">tv_sec</span><span class="p">)</span> <span class="o">+</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">hdr</span><span class="o">.</span><span class="n">tv_usec</span><span class="p">)</span> <span class="o">/</span> <span class="n">resolution</span>
                     <span class="k">yield</span> <span class="n">Timestamp</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">exact</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">hdr</span><span class="o">.</span><span class="n">len</span><span class="p">),</span> <span class="n">buf</span>
@@ -786,17 +785,16 @@
 <span class="nd">@functools</span><span class="o">.</span><span class="n">lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">_loopback_protocol</span><span class="p">(</span><span class="n">base</span><span class="p">:</span> <span class="s1">'Type[DPKTPacket]'</span><span class="p">,</span> <span class="n">ip</span><span class="p">:</span> <span class="s1">'Type[DPKTPacket]'</span><span class="p">,</span> <span class="n">ip6</span><span class="p">:</span> <span class="s1">'Type[DPKTPacket]'</span><span class="p">,</span>
                        <span class="n">linktype</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[DPKTPacket]'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""A :class:`dpkt.loopback.Loopback` that reads as the default engine's.</span>
+<span class="w">    </span><span class="sd">"""A :class:`dpkt.loopback.Loopback` that reads the address family by link type.</span>
 
 <span class="sd">    It reads the address family in the byte order</span>
 <span class="sd">    :func:`~pcapkit.protocols.link.loopback.family_byteorder` gives for</span>
 <span class="sd">    ``linktype`` -- network byte order for ``LINKTYPE_LOOP``, inferred for</span>
-<span class="sd">    ``LINKTYPE_NULL`` -- and dispatches on the same families as</span>
-<span class="sd">    :class:`~pcapkit.protocols.link.loopback.Loopback`. Unlike `DPKT`_'s own, it</span>
-<span class="sd">    names an IPv4 or IPv6 payload ``ip`` or ``ip6``, as</span>
-<span class="sd">    :class:`dpkt.ethernet.Ethernet` does and as :mod:`pcapkit.toolkit.dpkt`</span>
-<span class="sd">    looks for it, and keeps a payload of any other family as raw octets rather</span>
-<span class="sd">    than parsing it as Ethernet (:issue:`1574`).</span>
+<span class="sd">    ``LINKTYPE_NULL`` -- and dispatches on families 2 (IPv4) and 24, 28 and 30</span>
+<span class="sd">    (IPv6). Unlike `DPKT`_'s own, it names an IPv4 or IPv6 payload ``ip`` or</span>
+<span class="sd">    ``ip6``, as :class:`dpkt.ethernet.Ethernet` does and as</span>
+<span class="sd">    :mod:`pcapkit.toolkit.dpkt` looks for it, and keeps a payload of any other</span>
+<span class="sd">    family as raw octets rather than parsing it as Ethernet (:issue:`1574`).</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        base: :class:`dpkt.loopback.Loopback` itself.</span>
@@ -844,9 +842,9 @@
 <span class="sd">    :class:`dpkt.pcapng.Reader`, so each packet takes the link type and the</span>
 <span class="sd">    timestamp resolution and offset of the interface it was captured on.</span>
 
-<span class="sd">    It reads every packet block the default engine reads -- the Enhanced, the</span>
-<span class="sd">    Simple and the (obsolete) Packet Block -- and skips every other block</span>
-<span class="sd">    without a warning. `DPKT`_'s own reader skips the Simple Packet Block too.</span>
+<span class="sd">    It reads the Enhanced, the Simple and the (obsolete) Packet Block, and</span>
+<span class="sd">    skips every other block without a warning. `DPKT`_'s own reader skips the</span>
+<span class="sd">    Simple Packet Block too.</span>
 
 <span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
 
@@ -967,9 +965,9 @@
 <span class="sd">            for more operational information.</span>
 
 <span class="sd">        """</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.dpkt</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">attach_buffer</span><span class="p">,</span> <span class="n">attach_linktype</span><span class="p">,</span> <span class="n">attach_timestamp</span><span class="p">,</span>
-                                          <span class="n">ipv4_reassembly</span><span class="p">,</span> <span class="n">ipv6_reassembly</span><span class="p">,</span> <span class="n">packet2dict</span><span class="p">,</span>
-                                          <span class="n">tcp_reassembly</span><span class="p">,</span> <span class="n">tcp_traceflow</span><span class="p">)</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.dpkt</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">attach_buffer</span><span class="p">,</span> <span class="n">attach_timestamp</span><span class="p">,</span> <span class="n">ipv4_reassembly</span><span class="p">,</span>
+                                          <span class="n">ipv6_reassembly</span><span class="p">,</span> <span class="n">packet2dict</span><span class="p">,</span> <span class="n">tcp_reassembly</span><span class="p">,</span>
+                                          <span class="n">tcp_traceflow</span><span class="p">)</span>
         <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>
 
         <span class="n">reader</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span>
@@ -988,9 +986,8 @@
             <span class="c1"># ``frag_off`` from whatever header follows an IPv6 Fragment header,</span>
             <span class="c1"># so a Fragment header followed by ESP or Destination Options raises</span>
             <span class="c1"># :exc:`AttributeError` (:issue:`1351`). The frame is kept as a raw</span>
-            <span class="c1"># packet, so one undecodable frame does not end the extraction and</span>
-            <span class="c1"># the frame numbering still matches the other engines, which fall</span>
-            <span class="c1"># back to a raw payload in the same way.</span>
+            <span class="c1"># packet, so one undecodable frame neither ends the extraction nor</span>
+            <span class="c1"># shifts the numbering of the frames after it.</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">: dpkt cannot parse the frame '</span>
                  <span class="sa">f</span><span class="s1">'(</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s1">); kept as raw data'</span><span class="p">,</span>
                  <span class="n">DPKTWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
@@ -1005,9 +1002,6 @@
         <span class="c1"># it again recomputes zeroed checksums and lengths into it, so keep those</span>
         <span class="c1"># too for the adapters to slice the wire octets out of.</span>
         <span class="n">attach_buffer</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">pkt</span><span class="p">)</span>
-        <span class="c1"># And a frame kept as raw data does not say what link layer its octets</span>
-        <span class="c1"># start with, which the adapters read them by (#1626).</span>
-        <span class="n">attach_linktype</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">linktype</span><span class="p">)</span>
 
         <span class="c1"># verbose output</span>
         <span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span> <span class="o">+=</span> <span class="mi">1</span>

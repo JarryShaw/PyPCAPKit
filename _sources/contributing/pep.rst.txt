@@ -492,9 +492,9 @@ each has a matching :mod:`pcapkit.toolkit` module
 ``all`` includes -- ``all`` carries core addons only, and ``PyPCAP`` also has
 the installability problem below), docs
 under :doc:`/pcapkit/foundation/engines/index`, and tests under
-``tests/foundation/engines/`` and ``tests/toolkit/``. Both were verified
-end-to-end against the sample captures: each agrees with the ``default`` engine
-on frame count, per-record capture length, timestamp and Ethernet header.
+``tests/foundation/engines/`` and ``tests/toolkit/``. Like every third-party
+engine, both are best effort: they need not match the ``default`` engine, and
+protocol rules belong in the ``default`` engine only (:issue:`1687`).
 
 Neither library, though, is usable straight from PyPI on a current Python, and
 both of the following are worth knowing before reaching for them:
@@ -563,13 +563,15 @@ both of the following are worth knowing before reaching for them:
   sends the loader to ``find_library("pcap")``. No compiler and no
   :file:`pcap.h` are needed; a ``libpcap.so.1`` is.
 
-Both engines support less than the ``default`` engine does, deliberately and
-noisily: `pypcap`_ performs no protocol dissection, so it disables reassembly
-*and* flow tracing; `pypcapfile`_ has no IPv6 decoder, so it disables IPv6
-reassembly while keeping IPv4 and TCP. Each gap is announced through an
+Both engines support less than the ``default`` engine does, deliberately:
+`pypcap`_ performs no protocol dissection, so it disables reassembly *and* flow
+tracing; `pypcapfile`_ has no IPv6 decoder, so it disables IPv6 reassembly while
+keeping IPv4 and TCP. Each gap is announced through an
 :class:`~pcapkit.utilities.warnings.AttributeWarning` or an outright exception
-rather than by silently returning nothing --
-:doc:`/pcapkit/foundation/engines/index` tabulates them.
+rather than by silently returning nothing, save that `pypcapfile`_ leaves TCP
+behind a VLAN tag, in a tunnel or behind an extension header (an IPv6 one, or AH
+in IPv4) out without one -- :doc:`/pcapkit/foundation/engines/index` tabulates
+them.
 
 Adding a further engine does not mean adding handler methods to
 :class:`~pcapkit.foundation.extraction.Extractor`, as the thread describes. A new engine subclasses

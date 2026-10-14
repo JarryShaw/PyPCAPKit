@@ -3,16 +3,16 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta property="og:title" content="Byte Order - Shared Byte-Order Helpers" />
+<meta property="og:title" content="Byte-Order Helpers" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/misc/byteorder.html" />
+<meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/corekit/fields/byteorder.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.schema.misc.byteorder contains the field callback that reads a capture file’s byte order out of the packet data. It is shared by the PCAP frame header ( frame) and the PCAP-NG blo..." />
-<meta name="description" content="pcapkit.protocols.schema.misc.byteorder contains the field callback that reads a capture file’s byte order out of the packet data. It is shared by the PCAP frame header ( frame) and the PCAP-NG blo..." />
-<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="Raw Packet Data" href="raw.html"><link rel="prev" title="PCAP-NG File Format" href="pcapng.html">
+<meta property="og:description" content="pcapkit.corekit.fields.byteorder contains the field callback that reads a capture file’s byte order out of the packet data. It is shared by the PCAP frame header ( frame) and the PCAP-NG blocks ( p..." />
+<meta name="description" content="pcapkit.corekit.fields.byteorder contains the field callback that reads a capture file’s byte order out of the packet data. It is shared by the PCAP frame header ( frame) and the PCAP-NG blocks ( p..." />
+<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="Parsing Context" href="../context.html"><link rel="prev" title="Miscellaneous Fields" href="misc.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>Byte Order - Shared Byte-Order Helpers - PyPCAPKit</title>
+        <title>Byte-Order Helpers - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -239,87 +239,88 @@
 <li class="toctree-l3"><a class="reference internal" href="../../foundation/registry.html">Registry Management</a></li>
 </ul>
 </li>
-<li class="toctree-l2 current has-children"><a class="reference internal" href="../index.html">Protocol Family</a><input aria-label="Toggle navigation of Protocol Family" checked="" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="../protocol.html">Root Protocol</a></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../link/index.html">Link Layer</a><input aria-label="Toggle navigation of Link Layer" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../link/link.html">Base Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../link/ethernet.html">Ethernet Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../link/loopback.html">BSD Loopback Encapsulation</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../link/s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../protocols/index.html">Protocol Family</a><input aria-label="Toggle navigation of Protocol Family" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../protocols/protocol.html">Root Protocol</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/link/index.html">Link Layer</a><input aria-label="Toggle navigation of Link Layer" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/link/link.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/link/ethernet.html">Ethernet Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/link/l2tpv2.html">L2TPv2 - Layer Two Tunnelling Protocol version 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/link/loopback.html">BSD Loopback Encapsulation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/link/vlan.html">VLAN - 802.1Q/802.1ad VLAN Tag Types</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/link/c_tag.html">C_Tag - 802.1Q Customer VLAN Tag Type</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/link/s_tag.html">S_Tag - 802.1ad Service VLAN Tag Type</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../internet/index.html">Internet Layer</a><input aria-label="Toggle navigation of Internet Layer" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../internet/internet.html">Base Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../internet/ip.html">IP - Internet Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../internet/ipv6_option.html">IPv6 Options - Shared Option Helpers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../internet/ah.html">AH - Authentication Header</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../internet/esp.html">ESP - Encapsulating Security Payload</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../internet/hip.html">HIP - Host Identity Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../internet/mh.html">MH - Mobility Header</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/internet/index.html">Internet Layer</a><input aria-label="Toggle navigation of Internet Layer" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/internet.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ip.html">IP - Internet Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipv6_option.html">IPv6 Options - Shared Option Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ah.html">AH - Authentication Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/hip.html">HIP - Host Identity Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/mh.html">MH - Mobility Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../transport/index.html">Transport Layer</a><input aria-label="Toggle navigation of Transport Layer" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../transport/transport.html">Base Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../transport/sctp.html">SCTP - Stream Control Transmission Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../transport/tcp.html">TCP - Transmission Control Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../transport/udp.html">UDP - User Datagram Protocol</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/transport/index.html">Transport Layer</a><input aria-label="Toggle navigation of Transport Layer" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/transport/transport.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/transport/sctp.html">SCTP - Stream Control Transmission Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/transport/tcp.html">TCP - Transmission Control Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/transport/udp.html">UDP - User Datagram Protocol</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../application/index.html">Application Layer</a><input aria-label="Toggle navigation of Application Layer" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../application/application.html">Base Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../application/http.html">HTTP - Hypertext Transfer Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../application/ftp.html">FTP - File Transfer Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../application/ngap.html">NGAP - NG Application Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../application/ospf.html">OSPF - Open Shortest Path First</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/application/index.html">Application Layer</a><input aria-label="Toggle navigation of Application Layer" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/application/application.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/application/http.html">HTTP - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/application/ngap.html">NGAP - NG Application Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/application/ospf.html">OSPF - Open Shortest Path First</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/application/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
 </ul>
 </li>
-<li class="toctree-l3 current has-children"><a class="reference internal" href="index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" checked="" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="pcap.html">PCAP File Headers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pcapng.html">PCAP-NG File Format</a></li>
-<li class="toctree-l4 current current-page"><a class="current reference internal" href="#">Byte Order - Shared Byte-Order Helpers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="raw.html">Raw Packet Data</a></li>
-<li class="toctree-l4"><a class="reference internal" href="null.html">No-Payload Packet</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/pcap.html">PCAP File Headers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/raw.html">Raw Packet Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/null.html">No-Payload Packet</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../../corekit/fields/index.html">Protocol Fields</a><input aria-label="Toggle navigation of Protocol Fields" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../corekit/fields/field.html">Base Fields</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../corekit/fields/numbers.html">Numerical Fields</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../corekit/fields/strings.html">Text Fields</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../corekit/fields/ipaddress.html">IP Address Fields</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../corekit/fields/collections.html">Container Fields</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../corekit/fields/misc.html">Miscellaneous Fields</a></li>
+<li class="toctree-l2 current has-children"><a class="reference internal" href="../index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" checked="" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l3 current has-children"><a class="reference internal" href="index.html">Protocol Fields</a><input aria-label="Toggle navigation of Protocol Fields" checked="" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="field.html">Base Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="numbers.html">Numerical Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="strings.html">Text Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipaddress.html">IP Address Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="collections.html">Container Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="misc.html">Miscellaneous Fields</a></li>
+<li class="toctree-l4 current current-page"><a class="current reference internal" href="#">Byte-Order Helpers</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../../corekit/context.html">Parsing Context</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../corekit/enum.html">Enumeration Base</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../corekit/infoclass.html">Info Class</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../corekit/io.html">I/O Objects</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../corekit/module.html">Module Descriptor</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../corekit/multidict.html">Multi-Mapping Dictionary</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../corekit/packet.html">Deferred Packet</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../corekit/protochain.html">Protocol Chain</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../corekit/sentinels.html">Sentinel Objects</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../corekit/version.html">Version Info</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../context.html">Parsing Context</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../decorators.html">Decorator Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../enum.html">Enumeration Base</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../infoclass.html">Info Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../io.html">I/O Objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../module.html">Module Descriptor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../multidict.html">Multi-Mapping Dictionary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../packet.html">Deferred Packet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../sentinels.html">Sentinel Objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../version.html">Version Info</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../toolkit/index.html">Compatibility Tools</a><input aria-label="Toggle navigation of Compatibility Tools" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -334,7 +335,6 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../utilities/index.html">Module Utilities</a><input aria-label="Toggle navigation of Module Utilities" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../utilities/decorators.html">Decorator Functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/logging.html">Logging System</a></li>
@@ -442,6 +442,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/utilities-or-corekit.html">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../contributing/releasing.html">Release Process</a></li>
@@ -467,12 +468,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/main/docs/source/pcapkit/protocols/misc/byteorder.rst?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/main/docs/source/pcapkit/corekit/fields/byteorder.rst?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/main/docs/source/pcapkit/protocols/misc/byteorder.rst" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/main/docs/source/pcapkit/corekit/fields/byteorder.rst" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -489,22 +490,22 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="module-pcapkit.protocols.schema.misc.byteorder">
-<span id="byte-order-shared-byte-order-helpers"></span><h1>Byte Order - Shared Byte-Order Helpers<a class="headerlink" href="#module-pcapkit.protocols.schema.misc.byteorder" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.protocols.schema.misc.byteorder" title="pcapkit.protocols.schema.misc.byteorder"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.misc.byteorder</span></code></a> contains the field callback that
-reads a capture file’s byte order out of the packet data. It is shared by the
-PCAP frame header (<a class="reference internal" href="pcap.html#module-pcapkit.protocols.schema.misc.pcap.frame" title="pcapkit.protocols.schema.misc.pcap.frame"><code class="xref py py-mod docutils literal notranslate"><span class="pre">frame</span></code></a>) and the
-PCAP-NG blocks (<a class="reference internal" href="pcapng.html#module-pcapkit.protocols.schema.misc.pcapng" title="pcapkit.protocols.schema.misc.pcapng"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapng</span></code></a>).</p>
+          <section id="module-pcapkit.corekit.fields.byteorder">
+<span id="byte-order-helpers"></span><h1>Byte-Order Helpers<a class="headerlink" href="#module-pcapkit.corekit.fields.byteorder" title="Link to this heading">¶</a></h1>
+<p><a class="reference internal" href="#module-pcapkit.corekit.fields.byteorder" title="pcapkit.corekit.fields.byteorder"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.byteorder</span></code></a> contains the field callback that reads
+a capture file’s byte order out of the packet data. It is shared by the PCAP
+frame header (<a class="reference internal" href="../../protocols/misc/pcap.html#module-pcapkit.protocols.schema.misc.pcap.frame" title="pcapkit.protocols.schema.misc.pcap.frame"><code class="xref py py-mod docutils literal notranslate"><span class="pre">frame</span></code></a>) and the PCAP-NG
+blocks (<a class="reference internal" href="../../protocols/misc/pcapng.html#module-pcapkit.protocols.schema.misc.pcapng" title="pcapkit.protocols.schema.misc.pcapng"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapng</span></code></a>).</p>
 <section id="auxiliary-functions">
 <h2>Auxiliary Functions<a class="headerlink" href="#auxiliary-functions" title="Link to this heading">¶</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.byteorder.byteorder_callback">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.misc.byteorder.</span></span><span class="sig-name descname"><span class="pre">byteorder_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/misc/byteorder.html#byteorder_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.misc.byteorder.byteorder_callback" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.byteorder.byteorder_callback">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.byteorder.</span></span><span class="sig-name descname"><span class="pre">byteorder_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/byteorder.html#byteorder_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.byteorder.byteorder_callback" title="Link to this definition">¶</a></dt>
 <dd><p>Update byte order of a PCAP or PCAP-NG file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>field</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.NumberField" title="pcapkit.corekit.fields.numbers.NumberField"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumberField</span></code></a></span>) – Field instance.</p></li>
+<li><p><strong>field</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="numbers.html#pcapkit.corekit.fields.numbers.NumberField" title="pcapkit.corekit.fields.numbers.NumberField"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumberField</span></code></a></span>) – Field instance.</p></li>
 <li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Packet data.</p></li>
 </ul>
 </dd>
@@ -512,12 +513,12 @@ PCAP-NG blocks (<a class="reference internal" href="pcapng.html#module-pcapkit.p
 <div class="admonition-notes admonition">
 <p class="admonition-title">Notes</p>
 <p><code class="docutils literal notranslate"><span class="pre">byteorder</span></code> is the key a caller has to seed, and
-<a class="reference internal" href="#pcapkit.protocols.schema.misc.byteorder.packet_byteorder" title="pcapkit.protocols.schema.misc.byteorder.packet_byteorder"><code class="xref py py-func docutils literal notranslate"><span class="pre">packet_byteorder()</span></code></a> is what reads it.
+<a class="reference internal" href="#pcapkit.corekit.fields.byteorder.packet_byteorder" title="pcapkit.corekit.fields.byteorder.packet_byteorder"><code class="xref py py-func docutils literal notranslate"><span class="pre">packet_byteorder()</span></code></a> is what reads it.
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">Frame.pack</span></code> and
-<a class="reference internal" href="pcap.html#pcapkit.protocols.misc.pcap.frame.Frame.unpack" title="pcapkit.protocols.misc.pcap.frame.Frame.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Frame.unpack</span></code></a>
+<a class="reference internal" href="../../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame.unpack" title="pcapkit.protocols.misc.pcap.frame.Frame.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Frame.unpack</span></code></a>
 both write it from the global header’s magic number. A PCAP-NG Section
 Header Block writes it from its own Byte-Order Magic (see
-<a class="reference internal" href="pcapng.html#pcapkit.protocols.schema.misc.pcapng.shb_byteorder_callback" title="pcapkit.protocols.schema.misc.pcapng.shb_byteorder_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">shb_byteorder_callback()</span></code></a>),
+<a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.shb_byteorder_callback" title="pcapkit.protocols.schema.misc.pcapng.shb_byteorder_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">shb_byteorder_callback()</span></code></a>),
 and the blocks, options and records of that section read it, nested or
 not. The fallback to <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.byteorder" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.byteorder</span></code></a> is for a schema packed or
 unpacked on its own, with no header to ask. That also means a
@@ -531,11 +532,11 @@ fixtures that take the other side of the branch.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.byteorder.packet_byteorder">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.misc.byteorder.</span></span><span class="sig-name descname"><span class="pre">packet_byteorder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/misc/byteorder.html#packet_byteorder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.misc.byteorder.packet_byteorder" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.byteorder.packet_byteorder">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.byteorder.</span></span><span class="sig-name descname"><span class="pre">packet_byteorder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/byteorder.html#packet_byteorder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.byteorder.packet_byteorder" title="Link to this definition">¶</a></dt>
 <dd><p>Byte order declared for the file or section that <code class="docutils literal notranslate"><span class="pre">packet</span></code> belongs to.</p>
 <p>A nested schema is handed its parent’s packet data under a <code class="docutils literal notranslate"><span class="pre">__packet__</span></code>
-key (see <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField.pack" title="pcapkit.corekit.fields.misc.SchemaField.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SchemaField.pack</span></code></a>), so the byte order may
+key (see <a class="reference internal" href="misc.html#pcapkit.corekit.fields.misc.SchemaField.pack" title="pcapkit.corekit.fields.misc.SchemaField.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SchemaField.pack</span></code></a>), so the byte order may
 live one level up.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -559,23 +560,23 @@ byte order when the packet data declares none.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="raw.html">
+          <a class="next-page" href="../context.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Raw Packet Data</div>
+                <div class="title">Parsing Context</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="pcapng.html">
+          <a class="prev-page" href="misc.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">PCAP-NG File Format</div>
+                <div class="title">Miscellaneous Fields</div>
                 
               </div>
             </a>
@@ -609,7 +610,7 @@ byte order when the packet data declares none.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Byte Order - Shared Byte-Order Helpers</a><ul>
+<li><a class="reference internal" href="#">Byte-Order Helpers</a><ul>
 <li><a class="reference internal" href="#auxiliary-functions">Auxiliary Functions</a></li>
 </ul>
 </li>

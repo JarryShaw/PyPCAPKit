@@ -2,6 +2,11 @@
 3rd-Party Support
 =================
 
+The adapters below are best effort (:issue:`1687`): they need not match the
+:doc:`builtin` adapters one to one, since protocol rules belong in the default
+engine only, so the same capture can reassemble or trace differently from one
+engine to the next. :doc:`../foundation/engines/index` tabulates the gaps.
+
 Scapy Tools
 ===========
 
@@ -184,25 +189,15 @@ cannot be used for it.
    :data:`None` -- which would be indistinguishable from "this frame carries no
    IPv6 fragment".
 
-   Nor does it decode a VLAN tag or a tunnel. The adapters read an IPv4 packet
-   behind 802.1Q and 802.1ad tags as `PyPCAPFile`_ reads an untagged one, and
-   TCP tunnelled in IP (e.g. 4in4, 4in6) from its innermost IPv4 packet, keyed by
-   that packet's addresses as the default engine keys it, while TCP over IPv6,
-   tunnelled (e.g. 6in4, 6in6) or not, is left out of
+   TCP over IPv6 is therefore left out of
    :func:`~pcapkit.toolkit.pypcapfile.tcp_reassembly` and
    :func:`~pcapkit.toolkit.pypcapfile.tcp_traceflow`, with an
-   :class:`~pcapkit.utilities.warnings.AttributeWarning` once per capture.
-
-   Nor does it decode a link layer but Ethernet. The adapters read the IP packet
-   of a BSD loopback (``NULL``, ``LOOP``) or raw-IP (``RAW``, ``IPV4``,
-   ``IPV6``) frame themselves, as the default engine dissects it (see
-   :data:`~pcapkit.toolkit.pypcapfile.READ_LINKTYPES`, :issue:`1667`). Every
-   other link type is left unread, as the default engine leaves it, and the
-   engine warns of it with an :class:`~pcapkit.utilities.warnings.AttributeWarning`.
-   Nor do the adapters read deeper than the default engine dissects: each VLAN
-   tag, IP header, AH and IPv6 extension header is one of the
-   :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT` layers of a frame, and
-   nothing past the last of them is read (:issue:`1609`).
+   :class:`~pcapkit.utilities.warnings.AttributeWarning` once per capture when
+   the IPv6 packet is straight over Ethernet. `PyPCAPFile`_ decodes no link
+   layer but Ethernet, and no VLAN tag or tunnel, so a frame of any other link
+   type is left undecoded, with the engine's own warning, and TCP behind a VLAN
+   tag, in a tunnel or behind an extension header (an IPv6 one, or AH in IPv4)
+   is left out without one.
 
 .. autofunction:: pcapkit.toolkit.pypcapfile.ipv4_reassembly
 
@@ -225,9 +220,6 @@ Auxiliary Functions
 
 Internal Definitions
 --------------------
-
-.. autodata:: pcapkit.toolkit.pypcapfile.READ_LINKTYPES
-   :no-value:
 
 .. autodata:: pcapkit.toolkit.pypcapfile.TCP_MIN_HEADER_LEN
 

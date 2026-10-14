@@ -293,7 +293,6 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../protocols/misc/index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/pcap.html">PCAP File Headers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/byteorder.html">Byte Order - Shared Byte-Order Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/raw.html">Raw Packet Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/misc/null.html">No-Payload Packet</a></li>
 </ul>
@@ -308,9 +307,11 @@
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/fields/ipaddress.html">IP Address Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/fields/collections.html">Container Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/fields/misc.html">Miscellaneous Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/fields/byteorder.html">Byte-Order Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/context.html">Parsing Context</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../corekit/decorators.html">Decorator Functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/enum.html">Enumeration Base</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/infoclass.html">Info Class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/io.html">I/O Objects</a></li>
@@ -334,7 +335,6 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../utilities/index.html">Module Utilities</a><input aria-label="Toggle navigation of Module Utilities" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../utilities/decorators.html">Decorator Functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/logging.html">Logging System</a></li>
@@ -442,6 +442,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/utilities-or-corekit.html">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../contributing/releasing.html">Release Process</a></li>
@@ -627,8 +628,7 @@ the interface it names, in its own section (<a class="extlink-issue reference ex
 <p><code class="docutils literal notranslate"><span class="pre">dpkt.pcapng.Reader</span></code> also skips Simple Packet Blocks, which <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a> has no
 type for; <a class="reference internal" href="#pcapkit.foundation.engines.dpkt.PCAPNGReader" title="pcapkit.foundation.engines.dpkt.PCAPNGReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNGReader</span></code></a> reads them
 through <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s own <a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG" title="pcapkit.protocols.misc.pcapng.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a>
-and, since the block carries no timestamp, dates them 0, as the default
-engine does (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1520">#1520</a>).</p>
+and, since the block carries no timestamp, dates them 0 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1520">#1520</a>).</p>
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.dpkt.DPKT">
@@ -638,9 +638,9 @@ engine does (<a class="extlink-issue reference external" href="https://github.co
 <p>A PCAP-NG file is read by <a class="reference internal" href="#pcapkit.foundation.engines.dpkt.PCAPNGReader" title="pcapkit.foundation.engines.dpkt.PCAPNGReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNGReader</span></code></a> rather than by
 <code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.pcapng.Reader</span></code>, so each packet takes the link type and the
 timestamp resolution and offset of the interface it was captured on.</p>
-<p>It reads every packet block the default engine reads – the Enhanced, the
-Simple and the (obsolete) Packet Block – and skips every other block
-without a warning. <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a>’s own reader skips the Simple Packet Block too.</p>
+<p>It reads the Enhanced, the Simple and the (obsolete) Packet Block, and
+skips every other block without a warning. <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a>’s own reader skips the
+Simple Packet Block too.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>extractor</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a></span>) – <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> instance.</p>
@@ -899,8 +899,8 @@ is provided, as the PyShark engine does not parse with
 <span class="sig-name descname"><span class="pre">read_frame</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pyshark.html#PyShark.read_frame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pyshark.PyShark.read_frame" title="Link to this definition">¶</a></dt>
 <dd><p>Read frames with PyShark engine.</p>
 <p>A tshark record that is not a packet, such as a PCAP-NG systemd Journal
-Export Block, is skipped. Frames are numbered by count, as the default
-engine numbers them, not by tshark’s frame number.</p>
+Export Block, is skipped. Frames are numbered by count, not by tshark’s
+frame number.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></span></p>
@@ -1658,9 +1658,7 @@ support, as is used by <a class="reference internal" href="../extraction.html#pc
 TCP and UDP and nothing else. IPv6 reassembly is therefore unavailable and is
 disabled – with an <a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a> –
 when requested; IPv4 and TCP reassembly and TCP flow tracing remain
-available. The IP packet of a BSD loopback or raw-IP frame, which it does
-not decode, is read by <a class="reference internal" href="../../toolkit/3rdparty.html#module-pcapkit.toolkit.pypcapfile" title="pcapkit.toolkit.pypcapfile"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pypcapfile</span></code></a> instead
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1667">#1667</a>). PCAP-NG is rejected with a
+available. PCAP-NG is rejected with a
 <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FormatError</span></code></a>. <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> 0.12.0 drops
 every record of a big-endian savefile, every record from a zero-length one
 on, and a truncated final record, so the engine reads the records itself,
@@ -1679,18 +1677,15 @@ no PCAP-NG support. Consequently this engine</p>
 <li><p>reads PCAP savefiles only, raising
 <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FormatError</span></code></a> on PCAP-NG,</p></li>
 <li><p>reads the savefile’s records itself, into <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a>’s own packet
-objects, as <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> 0.12.0 drops records the <code class="docutils literal notranslate"><span class="pre">default</span></code> engine
-reads – see <a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._read_records" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._read_records"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_records()</span></code></a>,</p></li>
+objects, as <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> 0.12.0 drops some of them – see
+<a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._read_records" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._read_records"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_records()</span></code></a>,</p></li>
 <li><p>disables IPv6 reassembly, warning as it does so, while leaving IPv4 and
-TCP reassembly and TCP flow tracing in place,</p></li>
+TCP reassembly and TCP flow tracing in place, and</p></li>
 <li><p>leaves TCP over IPv6 out of TCP reassembly and flow tracing, with one
-<a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a> per capture – see
-<a class="reference internal" href="../../toolkit/3rdparty.html#module-pcapkit.toolkit.pypcapfile" title="pcapkit.toolkit.pypcapfile"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pypcapfile</span></code></a> – and</p></li>
-<li><p>leaves the frames of a link type <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> has no decoder for
-undecoded, from which <a class="reference internal" href="../../toolkit/3rdparty.html#module-pcapkit.toolkit.pypcapfile" title="pcapkit.toolkit.pypcapfile"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pypcapfile</span></code></a> reads the IP
-packet of the BSD loopback and raw-IP ones itself, as the <code class="docutils literal notranslate"><span class="pre">default</span></code>
-engine dissects it (see
-<a class="reference internal" href="../../toolkit/3rdparty.html#pcapkit.toolkit.pypcapfile.READ_LINKTYPES" title="pcapkit.toolkit.pypcapfile.READ_LINKTYPES"><code class="xref py py-data docutils literal notranslate"><span class="pre">READ_LINKTYPES</span></code></a>).</p></li>
+<a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a> per capture when the
+IPv6 packet is straight over Ethernet, and TCP behind a VLAN tag, in a
+tunnel or behind an extension header (an IPv6 one, or AH in IPv4) out
+without one – see <a class="reference internal" href="../../toolkit/3rdparty.html#module-pcapkit.toolkit.pypcapfile" title="pcapkit.toolkit.pypcapfile"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pypcapfile</span></code></a>.</p></li>
 </ul>
 <p>The engine stops decoding at the network layer rather than descending into
 the transport layer. <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> decoders <em>replace</em> the payload bytes of
@@ -1791,10 +1786,8 @@ is provided as the PyPCAPFile engine does not
 support such operations.</p></li>
 <li><p>if IPv6 reassembly is enabled, as <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> has no IPv6
 decoder.</p></li>
-<li><p>if the savefile’s link layer type is left unread: neither
-<code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> has a decoder for it nor
-<a class="reference internal" href="../../toolkit/3rdparty.html#module-pcapkit.toolkit.pypcapfile" title="pcapkit.toolkit.pypcapfile"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pypcapfile</span></code></a> reads it (see
-<a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._get_decoder" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._get_decoder"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_get_decoder()</span></code></a>).</p></li>
+<li><p>if <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> has no decoder for the savefile’s link layer
+type, in which case frames are left undecoded.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
@@ -1867,13 +1860,9 @@ for more operational information.</p>
 <dd class="field-odd"><p>The decoder class, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> when <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> has none.</p>
 </dd>
 <dt class="field-even">Warns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>AttributeWarning</strong> – If no decoder is available and the link layer type
-is none of the <a class="reference internal" href="../../toolkit/3rdparty.html#pcapkit.toolkit.pypcapfile.READ_LINKTYPES" title="pcapkit.toolkit.pypcapfile.READ_LINKTYPES"><code class="xref py py-data docutils literal notranslate"><span class="pre">READ_LINKTYPES</span></code></a>,
-as frames will then be left hexlified – see <a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile.run" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> – and
-no reassembly or flow tracing is possible. The frames of those
-link types are left undecoded too, but reassembly and flow
-tracing read the IP packet in them, as the <code class="docutils literal notranslate"><span class="pre">default</span></code> engine
-does, so nothing is lost there to warn of.</p>
+<dd class="field-even"><p><strong>AttributeWarning</strong> – If no decoder is available, as frames will then be
+left hexlified – see <a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile.run" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> – and no reassembly or flow
+tracing is possible.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1881,9 +1870,9 @@ does, so nothing is lost there to warn of.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._read_records">
 <span class="sig-prename descclassname"><span class="pre">PyPCAPFile.</span></span><span class="sig-name descname"><span class="pre">_read_records</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pypcapfile.html#PyPCAPFile._read_records"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._read_records" title="Link to this definition">¶</a></dt>
-<dd><p>Read the savefile’s records, as the <code class="docutils literal notranslate"><span class="pre">default</span></code> engine reads them.</p>
+<dd><p>Read the savefile’s records, every one of them.</p>
 <p><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapfile.savefile._read_a_packet()</span></code> (pypcapfile 0.12.0) drops
-records the <code class="docutils literal notranslate"><span class="pre">default</span></code> engine reads, in two ways:</p>
+records in two ways:</p>
 <ul class="simple">
 <li><p>It picks the byte order of each record header by testing
 <code class="docutils literal notranslate"><span class="pre">hdrp[0].byteorder</span> <span class="pre">==</span> <span class="pre">'big'</span></code> – <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> against <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>,
@@ -1899,9 +1888,8 @@ loaded, into the <code class="xref py py-class docutils literal notranslate"><sp
 builds with <code class="docutils literal notranslate"><span class="pre">layers=0</span></code> – the frame hexlified, pointing at the
 savefile’s own header – so <a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._decode" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._decode"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_decode()</span></code></a> and
 <a class="reference internal" href="../../toolkit/3rdparty.html#module-pcapkit.toolkit.pypcapfile" title="pcapkit.toolkit.pypcapfile"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pypcapfile</span></code></a> see what <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> hands them.
-It stops where <a class="reference internal" href="../../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame" title="pcapkit.protocols.misc.pcap.frame.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code></a> stops,
-at a tail too short for a record header, and keeps a record whose capture
-length runs past the data as that does: the capture length as declared,
+It stops at a tail too short for a record header, and keeps a record
+whose capture length runs past the data: the capture length as declared,
 the octets present as the frame.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

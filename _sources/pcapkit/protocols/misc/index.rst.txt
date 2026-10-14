@@ -16,6 +16,5 @@ indication of empty payload, the PCAP header classes, and the PCAP-NG
 
    pcap
    pcapng
-   byteorder
    raw
    null

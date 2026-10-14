@@ -52,7 +52,7 @@ Editing ``__version__`` by hand without also moving :file:`CITATION.cff`'s
 (``:494-514``) asserts the two agree, and ``create-release.yml``'s
 ``unit-tests`` job (``:467-481``) calls ``unit-tests.yml`` with
 ``gate-only: true``, which runs the **full** suite rather than the tiered
-subset an ordinary push runs (its ``gate`` job, ``unit-tests.yml:1679-1749``).
+subset an ordinary push runs (its ``gate`` job, ``unit-tests.yml:1721-1791``).
 That gate runs whenever a release will -- a moved ``__version__`` is exactly
 what makes ``version_check``'s evidence read "not yet published" -- and every
 publishing job requires it to have succeeded (``:500,685,850,1085``), so a
@@ -62,7 +62,7 @@ Either run the script, or move both fields by hand in the same commit.
 This is the **only** edit a person makes to get a release started -- the tag,
 the Release, and every upload are the workflow's job from here. Two other
 checks run unconditionally on the same path, though neither is a step in *this*
-process: the ``changelog`` job (``unit-tests.yml:1527-1546``) fails outright if
+process: the ``changelog`` job (``unit-tests.yml:1569-1588``) fails outright if
 ``CHANGELOG.md`` has drifted from its source entry under
 :file:`docs/source/changelog/`, and the release-body step warns, without
 failing, if that entry's heading still reads "unreleased"
@@ -115,6 +115,15 @@ when some target's evidence is not yet ``'true'``
 (`#1052 <https://github.com/JarryShaw/PyPCAPKit/issues/1052>`__), so the
 common Vendor Update run that bumped nothing costs a minute, not a full-suite
 run.
+
+A run that may release waits for the one ahead of it on the same ref and never
+cancels it (``create-release.yml:30-32``), since two Vendor Update runs
+completing close together raise two runs on the same tip. A group holds one
+pending run, which a newer one cancels, so a run whose Vendor Update did not
+conclude ``success`` is keyed on its own ``github.run_id`` instead
+(`#1705 <https://github.com/JarryShaw/PyPCAPKit/issues/1705>`__). It releases
+nothing, so it neither waits behind a release nor displaces a run waiting
+there; only a newer run that may release, reading ``main``'s newer tip, can.
 
 One Commit per Release
 ----------------------

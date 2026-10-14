@@ -70,7 +70,8 @@ class hierarchy of :mod:`pcapkit.foundation.engines`:
        click PyPCAPFile "/pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile"
 
 Not every engine can do everything :class:`~pcapkit.foundation.extraction.Extractor`
-offers, and the ones that cannot say so rather than quietly doing less:
+offers, and the ones that cannot say so rather than quietly doing less, unless
+their row says otherwise:
 
 +-----------------------------------------------------------------+---------------------------------------------------------------+
 | Engine                                                          | Gap, and how it is surfaced                                   |
@@ -92,12 +93,26 @@ offers, and the ones that cannot say so rather than quietly doing less:
 | :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile`      | no IPv6 decoder, hence no IPv6 reassembly -- disabled with an |
 |                                                                 | :class:`~pcapkit.utilities.warnings.AttributeWarning`, and    |
 |                                                                 | :func:`~pcapkit.toolkit.pypcapfile.ipv6_reassembly` raises;   |
-|                                                                 | TCP over IPv6, tunnelled in IP (e.g. 6in4) or not, is left    |
-|                                                                 | out of TCP reassembly and flow tracing, with an               |
+|                                                                 | TCP over IPv6 straight over Ethernet is left out of TCP       |
+|                                                                 | reassembly and flow tracing, with an                          |
 |                                                                 | :class:`~pcapkit.utilities.warnings.AttributeWarning` once    |
-|                                                                 | per capture; IPv4 behind 802.1Q/802.1ad VLAN tags is read as  |
-|                                                                 | it is untagged; PCAP savefiles only, otherwise                |
+|                                                                 | per capture, and TCP behind a VLAN tag, in a tunnel or behind |
+|                                                                 | an extension header (an IPv6 one, or AH in IPv4) without one; |
+|                                                                 | PCAP savefiles only, otherwise                                |
 |                                                                 | :exc:`~pcapkit.utilities.exceptions.FormatError`              |
++-----------------------------------------------------------------+---------------------------------------------------------------+
+| :class:`~pcapkit.foundation.engines.dpkt.DPKT`                  | TCP in an IP-in-IP tunnel, or behind an AH or IPv6 extension  |
+|                                                                 | header carried in IPv4, is left out of TCP reassembly and     |
+|                                                                 | flow tracing, and IPv4 carried in IPv6, or IPv6 in IPv4, out  |
+|                                                                 | of IP reassembly, all without a warning; a frame `DPKT`_      |
+|                                                                 | cannot decode is kept raw, with a                             |
+|                                                                 | :class:`~pcapkit.utilities.warnings.DPKTWarning`, and is      |
+|                                                                 | neither reassembled nor traced                                |
++-----------------------------------------------------------------+---------------------------------------------------------------+
+| :class:`~pcapkit.foundation.engines.scapy.Scapy`                | reads IPv6 only as far as `Scapy`_ dissects it, without a     |
+|                                                                 | warning: behind a BSD loopback header only at the family      |
+|                                                                 | Scapy binds it to on the host it runs on, and no TCP or       |
+|                                                                 | Fragment header behind an AH, Mobility, HIP or Shim6 header   |
 +-----------------------------------------------------------------+---------------------------------------------------------------+
 | :class:`~pcapkit.foundation.engines.dpkt.DPKT`,                 | no PCAP output, since each frame reaches the writer as a      |
 | :class:`~pcapkit.foundation.engines.scapy.Scapy`,               | plain :obj:`dict` -- ``json`` is written instead, with a      |

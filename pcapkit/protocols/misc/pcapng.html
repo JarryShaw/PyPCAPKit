@@ -9,7 +9,7 @@
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="pcapkit.protocols.misc.pcapng contains PCAPNG only, which implements extractor for PCAP-NG file format*. Auxiliary Data: TLSKeyLabel is defined in pcapkit.const.pcapng.tls_key_label, generated like..." />
 <meta name="description" content="pcapkit.protocols.misc.pcapng contains PCAPNG only, which implements extractor for PCAP-NG file format*. Auxiliary Data: TLSKeyLabel is defined in pcapkit.const.pcapng.tls_key_label, generated like..." />
-<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="Byte Order - Shared Byte-Order Helpers" href="byteorder.html"><link rel="prev" title="PCAP File Headers" href="pcap.html">
+<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="Raw Packet Data" href="raw.html"><link rel="prev" title="PCAP File Headers" href="pcap.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
         <title>PCAP-NG File Format - PyPCAPKit</title>
@@ -293,7 +293,6 @@
 <li class="toctree-l3 current has-children"><a class="reference internal" href="index.html">Auxiliary Protocols</a><input aria-label="Toggle navigation of Auxiliary Protocols" checked="" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="pcap.html">PCAP File Headers</a></li>
 <li class="toctree-l4 current current-page"><a class="current reference internal" href="#">PCAP-NG File Format</a></li>
-<li class="toctree-l4"><a class="reference internal" href="byteorder.html">Byte Order - Shared Byte-Order Helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="raw.html">Raw Packet Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="null.html">No-Payload Packet</a></li>
 </ul>
@@ -308,9 +307,11 @@
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/fields/ipaddress.html">IP Address Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/fields/collections.html">Container Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../corekit/fields/misc.html">Miscellaneous Fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../corekit/fields/byteorder.html">Byte-Order Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/context.html">Parsing Context</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../corekit/decorators.html">Decorator Functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/enum.html">Enumeration Base</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/infoclass.html">Info Class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../corekit/io.html">I/O Objects</a></li>
@@ -334,7 +335,6 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../utilities/index.html">Module Utilities</a><input aria-label="Toggle navigation of Module Utilities" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../utilities/decorators.html">Decorator Functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/logging.html">Logging System</a></li>
@@ -442,6 +442,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/process.html">Running the Repository</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/documentation.html">Writing the Documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/test-coverage.html">Testing a Change</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing/conventions/utilities-or-corekit.html">Choosing Between <code class="docutils literal notranslate"><span class="pre">utilities</span></code> and <code class="docutils literal notranslate"><span class="pre">corekit</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../contributing/releasing.html">Release Process</a></li>
@@ -6757,9 +6758,9 @@ link-layer-dependent errors).</p>
 <section id="auxiliary-functions">
 <h2>Auxiliary Functions<a class="headerlink" href="#auxiliary-functions" title="Link to this heading">¶</a></h2>
 <p>The byte order of every block but the Section Header Block is read by
-<a class="reference internal" href="byteorder.html#pcapkit.protocols.schema.misc.byteorder.byteorder_callback" title="pcapkit.protocols.schema.misc.byteorder.byteorder_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">byteorder_callback()</span></code></a>, which is
+<a class="reference internal" href="../../corekit/fields/byteorder.html#pcapkit.corekit.fields.byteorder.byteorder_callback" title="pcapkit.corekit.fields.byteorder.byteorder_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">byteorder_callback()</span></code></a>, which is
 shared with the PCAP frame header and documented in
-<a class="reference internal" href="byteorder.html#module-pcapkit.protocols.schema.misc.byteorder" title="pcapkit.protocols.schema.misc.byteorder"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.misc.byteorder</span></code></a>.</p>
+<a class="reference internal" href="../../corekit/fields/byteorder.html#module-pcapkit.corekit.fields.byteorder" title="pcapkit.corekit.fields.byteorder"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.byteorder</span></code></a>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.shb_byteorder_callback">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.misc.pcapng.</span></span><span class="sig-name descname"><span class="pre">shb_byteorder_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/misc/pcapng.html#shb_byteorder_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.shb_byteorder_callback" title="Link to this definition">¶</a></dt>
@@ -6770,7 +6771,7 @@ the first SHB of a file has no section context by construction, and a later
 one would otherwise inherit the <em>previous</em> section’s byte order. The magic
 is therefore also written back as <code class="docutils literal notranslate"><span class="pre">packet['byteorder']</span></code>, which is what the
 SHB’s own options – read by
-<a class="reference internal" href="byteorder.html#pcapkit.protocols.schema.misc.byteorder.byteorder_callback" title="pcapkit.protocols.schema.misc.byteorder.byteorder_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">byteorder_callback()</span></code></a>, after this field –
+<a class="reference internal" href="../../corekit/fields/byteorder.html#pcapkit.corekit.fields.byteorder.byteorder_callback" title="pcapkit.corekit.fields.byteorder.byteorder_callback"><code class="xref py py-func docutils literal notranslate"><span class="pre">byteorder_callback()</span></code></a>, after this field –
 resolve their byte order from.</p>
 <p>A Section Header Block of 12 octets has no room for the magic, and its
 place holds the trailing Block Total Length instead. That length is 12 in
@@ -8289,12 +8290,12 @@ Set on parsing only, and written back verbatim on rebuild.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="byteorder.html">
+          <a class="next-page" href="raw.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Byte Order - Shared Byte-Order Helpers</div>
+                <div class="title">Raw Packet Data</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
