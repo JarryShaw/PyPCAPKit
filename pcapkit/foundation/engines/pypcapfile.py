@@ -400,7 +400,7 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
 
         """
         # A zero-length record holds nothing to decode, which is not a decoding
-        # failure: the ``default`` engine reads one without a warning too.
+        # failure.
         if self._declf is None or not packet.packet:
             return packet
 

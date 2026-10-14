@@ -83,9 +83,9 @@ class RecordTimestamp:
     :class:`DecimalTimestamp` instead, which *is* the value `DPKT`_ yields --
     so a stored frame's timestamp is exactly what it was before -- and also
     carries those three. Reassembly and flow tracing are handed a plain
-    :obj:`float` of it, as by every other engine (:issue:`1501`): of its exact
-    value, since `DPKT`_'s own for a microsecond PCAP rounds twice
-    (:issue:`1668`; see :func:`_capture_time`).
+    :obj:`float` of it (:issue:`1501`): of its exact value, since `DPKT`_'s
+    own for a microsecond PCAP rounds twice (:issue:`1668`; see
+    :func:`_capture_time`).
 
     A copy, a deep copy and a pickle at any protocol all rebuild a timestamp
     from what its :meth:`~object.__reduce__` returns, so all keep the three.
@@ -225,9 +225,9 @@ def _capture_time(timestamp: 'float | Decimal') -> 'float':
         timestamp: Capture timestamp of the packet.
 
     Returns:
-        The :obj:`float` nearest the exact timestamp, as the default engine hands
-        over. `DPKT`_ reads a microsecond PCAP's as ``tv_sec + tv_usec / 1e6``,
-        which rounds twice, so can be an ulp off at a small ``tv_sec``:
+        The :obj:`float` nearest the exact timestamp. `DPKT`_ reads a
+        microsecond PCAP's as ``tv_sec + tv_usec / 1e6``, which rounds twice,
+        so can be an ulp off at a small ``tv_sec``:
         ``1.0036909999999999`` for ``1.003691`` (:issue:`1668`). A
         :class:`RecordTimestamp` is therefore read by its exact value. Any other
         timestamp -- one passed by hand, or yielded by a ``dpkt`` whose reader
@@ -296,9 +296,9 @@ def packet2frame(packet: 'Packet', timestamp: 'float | Decimal', *,
 
     Note:
         The fraction in ``frame_info.ts_usec`` is in the capture's own resolution,
-        as the default engine's is, and both it and ``orig_len`` come from the
-        reader: :class:`~pcapkit.foundation.engines.dpkt.DPKT` reads PCAP and
-        PCAP-NG alike into a :class:`RecordTimestamp`. A timestamp that is not one
+        and both it and ``orig_len`` come from the reader:
+        :class:`~pcapkit.foundation.engines.dpkt.DPKT` reads PCAP and PCAP-NG
+        alike into a :class:`RecordTimestamp`. A timestamp that is not one
         -- a packet built by hand, or read by a ``dpkt`` whose reader the engine
         could not extend -- is read as `DPKT`_ yields it: a
         :class:`~decimal.Decimal` counts nanoseconds and a :obj:`float`
@@ -565,7 +565,7 @@ def ipv4_reassembly(packet: 'Packet', timestamp: 'float', *,
             does. A caller holding only a frame can read it back with
             :func:`packet2timestamp`, which is where
             :class:`~pcapkit.foundation.engines.dpkt.DPKT` leaves it. Handed on
-            as a :obj:`float`, as every engine's adapters do, though `DPKT`_ reads
+            as a :obj:`float`, though `DPKT`_ reads
             a nanosecond PCAP's as a :class:`~decimal.Decimal` (:issue:`1501`),
             and as the one nearest the exact value it carries, if any, where
             `DPKT`_'s own may be an ulp off (:issue:`1668`; see
@@ -706,9 +706,7 @@ def ipv6_reassembly(packet: 'Packet', timestamp: 'float', *,
                 # (:rfc:`8200#section-4.5`), not the IPv6 header's Flow Label. The
                 # label is optional and routinely zero, so keying on it collapses
                 # every datagram between one address pair into a single buffer and
-                # interleaves their fragments; it would also disagree with
-                # ``bufid[2]`` in every other engine, which feeds
-                # :attr:`pcapkit.foundation.reassembly.data.ip.DatagramID.id`.
+                # interleaves their fragments.
                 ipv6_frag.id,                                    # identification
                 Enum_TransType.get(ipv6_frag.nxt),               # next header field in IPv6 Fragment Header
             ),
@@ -742,11 +740,10 @@ def _tcp_flags(tcp: 'TCP') -> 'tuple[bool, bool, bool]':
 
     Note:
         Each flag is masked out of :attr:`dpkt.tcp.TCP.flags` by its ``TH_*``
-        value, so it is read from the flags octet alone, as the default engine
-        reads it. `DPKT`_ 1.9.8 makes that field nine bits wide, its top bit
-        the NS bit (:rfc:`3540`): read by its position among the field's binary
-        digits, every flag was one bit low with NS set, a SYN reading as a FIN
-        (:issue:`1618`).
+        value, so it is read from the flags octet alone. `DPKT`_ 1.9.8 makes
+        that field nine bits wide, its top bit the NS bit (:rfc:`3540`): read by
+        its position among the field's binary digits, every flag was one bit low
+        with NS set, a SYN reading as a FIN (:issue:`1618`).
 
     .. _DPKT: https://dpkt.readthedocs.io
 
