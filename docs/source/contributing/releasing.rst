@@ -35,8 +35,10 @@ a crawl whose changes are all to comments or docstrings is committed as
 "Updated vendor documentation without a version bump" instead, so it reaches
 ``main`` without starting a release
 (`#1674 <https://github.com/JarryShaw/PyPCAPKit/issues/1674>`__). A crawl that
-finds nothing commits nothing. The bump commit is what starts the automated
-path described below.
+finds nothing commits nothing. The bump commit carries every module the crawl
+wrote under ``pcapkit/const/``, new and deleted ones included
+(`#1685 <https://github.com/JarryShaw/PyPCAPKit/issues/1685>`__), and is what
+starts the automated path described below.
 
 The same script is also the manual entry point: run
 ``python util/bump_version.py`` and commit the result to ``main`` for a
