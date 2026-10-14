@@ -20,21 +20,62 @@ capture. :mod:`pcapkit` is imported inside each test, after
 
 """
 
+import contextlib
 import datetime
 import importlib.util
 import ipaddress
 import json
+import logging
 import os
 import plistlib
 import struct
 import tempfile
 import unittest
 import warnings
+from typing import TYPE_CHECKING
 
 from tests._support import reimport_once_per_class
 
+if TYPE_CHECKING:
+    from typing import Iterator
+
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
+
+
+class _Recorder(logging.Handler):
+    """A handler that keeps the records instead of formatting them."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.records = []  # type: list[logging.LogRecord]
+
+    def emit(self, record: 'logging.LogRecord') -> None:
+        self.records.append(record)
+
+
+@contextlib.contextmanager
+def assert_no_logs(test: 'unittest.TestCase', name: 'str', level: 'int') -> 'Iterator[None]':
+    """:meth:`unittest.TestCase.assertNoLogs`, which is 3.10+, on every supported Python.
+
+    Takes ``name`` over as that method does -- its own handler only, ``level`` as
+    the threshold, no propagation -- and fails if the block logged anything.
+
+    """
+    logger = logging.getLogger(name)
+    recorder = _Recorder()
+    handlers, threshold, propagate = logger.handlers[:], logger.level, logger.propagate
+    logger.handlers = [recorder]
+    logger.setLevel(level)
+    logger.propagate = False
+    try:
+        yield
+    finally:
+        logger.handlers = handlers
+        logger.setLevel(threshold)
+        logger.propagate = propagate
+    test.assertEqual([(record.levelname, record.getMessage()) for record in recorder.records], [],
+                     f'unexpected logs on {name!r}')
 
 
 def pcap_file(major: 'int', minor: 'int') -> 'bytes':
@@ -98,7 +139,7 @@ class TestDumperRoundTrip(unittest.TestCase):
             'nl': NULL,
             'tz': datetime.timezone(datetime.timedelta(hours=8)),
         }
-        with self.assertNoLogs('pcapkit', level='WARNING'):
+        with assert_no_logs(self, 'pcapkit', logging.WARNING):
             got = json.loads(self.dump('JSON', value))['x']
         self.assertEqual(got, {'net4': '10.0.0.0/8', 'net6': '::/0', 'nv': '<NO_VALUE>',
                                'nl': '<NULL>', 'tz': 28800.0})

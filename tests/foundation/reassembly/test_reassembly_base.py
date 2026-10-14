@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import sys
 import unittest
+from typing import Tuple
 from unittest import mock
 
 from tests._support import reimport_once_per_class
@@ -36,7 +37,7 @@ class ReassemblyBaseTests(unittest.TestCase):
         class DummyProtocol:
             pass
 
-        class DummyReassembly(ReassemblyBase[DummyPacket, DummyDatagram, tuple[str], DummyBuffer]):
+        class DummyReassembly(ReassemblyBase[DummyPacket, DummyDatagram, Tuple[str], DummyBuffer]):
             __protocol_name__ = 'Dummy'
             __protocol_type__ = DummyProtocol
 
@@ -99,7 +100,7 @@ class ReassemblyBaseTests(unittest.TestCase):
         class DummyBuffer(Info):
             entries: list[int]
 
-        class BaseFallback(ReassemblyBase[DummyPacket, DummyDatagram, tuple[str], DummyBuffer]):
+        class BaseFallback(ReassemblyBase[DummyPacket, DummyDatagram, Tuple[str], DummyBuffer]):
             def reassembly(self, info: DummyPacket) -> None:
                 super().reassembly(info)
 
@@ -146,7 +147,7 @@ class ReassemblyBaseTests(unittest.TestCase):
             entries: list[int]
 
         with mock.patch('pcapkit.foundation.extraction.Extractor.register_reassembly') as register:
-            class Explicit(Reassembly[DummyPacket, DummyDatagram, tuple[str], DummyBuffer],
+            class Explicit(Reassembly[DummyPacket, DummyDatagram, Tuple[str], DummyBuffer],
                            protocol='ExampleProto'):
                 def reassembly(self, info: DummyPacket) -> None:
                     super().reassembly(info)
@@ -158,7 +159,7 @@ class ReassemblyBaseTests(unittest.TestCase):
         self.assertEqual(Explicit.__callback_fn__, [])
 
         with mock.patch('pcapkit.foundation.extraction.Extractor.register_reassembly') as register:
-            class Default(Reassembly[DummyPacket, DummyDatagram, tuple[str], DummyBuffer]):
+            class Default(Reassembly[DummyPacket, DummyDatagram, Tuple[str], DummyBuffer]):
                 __protocol_name__ = 'DefaultProto'
 
                 def reassembly(self, info: DummyPacket) -> None:
@@ -209,7 +210,7 @@ class ReassemblyBaseTests(unittest.TestCase):
 
         with mock.patch('pcapkit.foundation.extraction.Extractor.register_reassembly') as register:
             with self.assertRaises(UnsupportedCall) as caught:
-                class Typo(Reassembly[DummyPacket, DummyDatagram, tuple[str], DummyBuffer],
+                class Typo(Reassembly[DummyPacket, DummyDatagram, Tuple[str], DummyBuffer],
                            reassembly='wrong-keyword-for-reassembly'):
                     def reassembly(self, info: DummyPacket) -> None:
                         super().reassembly(info)
@@ -227,7 +228,7 @@ class ReassemblyBaseTests(unittest.TestCase):
         expected = UnsupportedCall if sys.version_info >= (3, 11) else TypeError
         with mock.patch('pcapkit.foundation.extraction.Extractor.register_reassembly') as register:
             with self.assertRaises(expected):
-                class Collides(Reassembly[DummyPacket, DummyDatagram, tuple[str], DummyBuffer],
+                class Collides(Reassembly[DummyPacket, DummyDatagram, Tuple[str], DummyBuffer],
                                name='collides-with-ABCMeta-on-3.10'):
                     def reassembly(self, info: DummyPacket) -> None:
                         super().reassembly(info)
