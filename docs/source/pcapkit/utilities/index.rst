@@ -48,6 +48,8 @@ following objects and functions:
      - Python 3.9
    * - :class:`dict[KT, VT] <dict>`
      - Python 3.9
+   * - :func:`urllib.parse.unquote` on :obj:`bytes`
+     - Python 3.9
    * - :class:`enum.StrEnum`
      - Python 3.11
    * - :func:`typing.final`

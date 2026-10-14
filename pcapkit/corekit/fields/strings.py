@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 from pcapkit.corekit.fields.field import NO_VALUE, Field
 from pcapkit.utilities.chardet import detect
-from pcapkit.utilities.compat import Dict
+from pcapkit.utilities.compat import Dict, unquote
 from pcapkit.utilities.exceptions import FieldValueError
 
 __all__ = [
@@ -138,7 +138,7 @@ class StringField(_TextField[str]):
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
                  default: 'str | NoValueType' = NO_VALUE, encoding: 'Optional[str]' = None,
                  errors: 'Literal["strict", "ignore", "replace"]' = 'strict',
-                 unquote: 'bool' = False,
+                 unquote: 'bool' = False,  # pylint: disable=redefined-outer-name
                  callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
         super().__init__(length, default, callback)
 
@@ -198,9 +198,9 @@ class StringField(_TextField[str]):
         """
         if self._unquote:
             try:
-                ret = urllib_parse.unquote(value, encoding=self._encoding or 'utf-8', errors=self._errors)
+                ret = unquote(value, encoding=self._encoding or 'utf-8', errors=self._errors)
             except UnicodeError:
-                ret = urllib_parse.unquote(value.replace(b'%', rb'\x'), encoding='utf-8', errors='replace')
+                ret = unquote(value.replace(b'%', rb'\x'), encoding='utf-8', errors='replace')
         else:
             charset = self._encoding or detect(value)
             try:
