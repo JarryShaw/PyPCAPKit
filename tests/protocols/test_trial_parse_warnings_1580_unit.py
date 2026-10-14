@@ -382,16 +382,33 @@ class TestTrialParseWarnings(unittest.TestCase):
                          [('past the outermost frame', __file__)])
 
     def test_hold_is_local_to_its_context(self) -> None:
-        """A warning reported in another context is not held by this one's block."""
+        """A warning reported in another context is not held by this one's block.
+
+        Each other context records for itself: under
+        :data:`sys.flags.context_aware_warnings`, on by default in a
+        free-threaded build, :func:`warnings.catch_warnings` records in a context
+        variable, which an empty context does not have (#1731).
+
+        """
         from pcapkit.utilities.warnings import SchemaWarning, hold_warnings, warn
+
+        def record_in_an_empty_context() -> 'list[str]':
+            with warnings.catch_warnings(record=True) as inner:
+                warnings.simplefilter('always')
+                warn('an empty context', SchemaWarning)
+            return self._schema(inner)
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
+            # copied before the block is entered: the recording, not the block
+            copied = contextvars.copy_context()
             with hold_warnings() as held:
-                contextvars.Context().run(warn, 'another context', SchemaWarning)
-                self.assertEqual(self._schema(caught), ['another context'])
+                copied.run(warn, 'a copied context', SchemaWarning)
+                self.assertEqual(self._schema(caught), ['a copied context'])
+                self.assertEqual(contextvars.Context().run(record_in_an_empty_context),
+                                 ['an empty context'])
                 held.discard = True
-        self.assertEqual(self._schema(caught), ['another context'])
+        self.assertEqual(self._schema(caught), ['a copied context'])
 
     def test_hold_left_out_of_order(self) -> None:
         """A generator's block left out of order neither ends another block nor outlives itself."""
