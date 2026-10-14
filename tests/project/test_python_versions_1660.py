@@ -268,6 +268,10 @@ TEMPLATES_AT_MAIN = {
     ('cron-conda.yml', 'conda-dist'):
         'Conda deployment (update) on ${{ matrix.os }} with Python ${{ matrix.python-version }}',
 }
+#: Each unit-tests.yml job MAIN ran KTLO legs in, and the job those legs run in
+#: since #1738, which nothing gating waits on.
+KTLO_TWINS = {('unit-tests.yml', 'test'): 'test-ktlo', ('unit-tests.yml', 'integration'): 'integration-ktlo',
+              ('unit-tests.yml', 'pypcap-parity'): 'pypcap-parity-ktlo'}
 #: Ruleset 23497679's required contexts at MAIN.
 REQUIRED_AT_MAIN = {'Required checks passed'} | {f'Compat Python {v}' for v in SUPPORTED_AT_MAIN}
 #: The tiers MAIN's matrices encode, as this change first wrote them into the file.
@@ -565,6 +569,13 @@ class TestNothingMovedButLatest(unittest.TestCase):
                     leg.pop('coverage', None)
                     if leg['python-version'] == TIERS_AT_MAIN['latest']:
                         leg['coverage'] = True
+            if (name, job_id) in KTLO_TWINS:
+                # #1738: the KTLO legs, in MAIN's order, are the twin job's.
+                twin = KTLO_TWINS[(name, job_id)]
+                with self.subTest(workflow=name, job=twin):
+                    self.assertEqual(legs(matrix(name, twin, self.values)),
+                                     [leg for leg in expected if leg.get('ktlo') is True])
+                expected = [leg for leg in expected if leg.get('ktlo') is not True]
             with self.subTest(workflow=name, job=job_id):
                 self.assertEqual(legs(matrix(name, job_id, self.values)), expected)
 
@@ -586,12 +597,22 @@ class TestNothingMovedButLatest(unittest.TestCase):
         """Rulesets match check names literally, so each template and leg name stays.
 
         ``test``'s template is :data:`MAIN`'s again since its experimental legs
-        left it for a job of their own (#1732).
+        left it for a job of their own (#1732). Since #1738 each job of
+        :data:`KTLO_TWINS` names its legs with a template of its own, the KTLO
+        job's ending `` (KTLO)``, so what stays is each leg's rendered name.
 
         """
         for (name, job_id), template in TEMPLATES_AT_MAIN.items():
             with self.subTest(workflow=name, job=job_id):
-                self.assertEqual(workflow(name)['jobs'][job_id]['name'], template)
+                if (name, job_id) not in KTLO_TWINS:
+                    self.assertEqual(workflow(name)['jobs'][job_id]['name'], template)
+                    continue
+                spec = MAIN_MATRICES[(name, job_id)]
+                before = sorted(render(template, leg) for leg in legs(spec))
+                after = sorted(render(workflow(name)['jobs'][job]['name'], leg)
+                               for job in (job_id, KTLO_TWINS[(name, job_id)])
+                               for leg in legs(matrix(name, job, self.values)))
+                self.assertEqual(after, before)
         compat = TEMPLATES_AT_MAIN[('python-compatibility.yml', 'compatibility')]
         compat_legs = legs(matrix('python-compatibility.yml', 'compatibility', self.values))
         blocking = {render(compat, leg) for leg in compat_legs

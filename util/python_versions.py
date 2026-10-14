@@ -13,17 +13,22 @@ actions/runner-images' READMEs at 2c421200c.
 
 ``latest``
     The newest supported CPython, for the single-interpreter jobs.
-``test``, ``integration``, ``compatibility``
+``compatibility``
     Both tiers. A KTLO leg carries ``ktlo: true``, and ``os`` where
-    ``ubuntu-latest`` cannot provide it; ``test`` marks the ``latest`` leg
-    ``coverage: true``.
+    ``ubuntu-latest`` cannot provide it.
+``test``, ``integration``
+    The supported tier alone; ``test`` marks the ``latest`` leg ``coverage: true``.
+``test-ktlo``, ``integration-ktlo``, ``pypcap-parity-ktlo``
+    Each KTLO version as a leg carrying ``ktlo: true``, and ``os`` as above, for
+    unit-tests.yml's jobs of the same names, which nothing gating waits on (#1738).
+    No other unit-tests.yml output holds a KTLO version.
 ``experimental``
     Each experimental version as a leg carrying ``experimental: true``, for
     experimental.yml's ``experimental`` job, a workflow of its own so that nothing
     waits on it (#1732).
     No other output holds an experimental version.
 ``pypcap-parity``
-    The versions below 3.12 that run on ``ubuntu-latest``.
+    The supported versions below 3.12.
 ``pypi``
     CPython, then PyPy, both tiers, on ``ubuntu-latest``.
 ``conda``
@@ -187,15 +192,41 @@ def on_latest(data: 'dict[str, Any]', impl: 'str', name: 'str', job: 'str') -> '
     return found
 
 
-def tiered(data: 'dict[str, Any]', impl: 'str' = 'cpython') -> 'dict[str, Any]':
-    """The supported tier as the axis, each KTLO version added by ``include``."""
+def ktlo_legs(data: 'dict[str, Any]', impl: 'str' = 'cpython') -> 'list[dict[str, Any]]':
+    """Each KTLO version of ``impl`` as a leg, with the image it needs as ``os``."""
     include = []
     for version in tier(data, impl, 'ktlo'):
         leg = {'python-version': version, 'ktlo': True}  # type: dict[str, Any]
         if runner(data, impl, version) is not None:
             leg['os'] = runner(data, impl, version)
         include.append(leg)
-    return {'python-version': tier(data, impl, 'supported'), 'include': include}
+    return include
+
+
+def tiered(data: 'dict[str, Any]', impl: 'str' = 'cpython') -> 'dict[str, Any]':
+    """python-compatibility.yml's ``compatibility``: the supported tier as the axis, each KTLO version added by ``include``."""
+    return {'python-version': tier(data, impl, 'supported'), 'include': ktlo_legs(data, impl)}
+
+
+def supported_matrix(data: 'dict[str, Any]') -> 'dict[str, Any]':
+    """unit-tests.yml's ``integration``: the supported tier alone, its KTLO legs ``integration-ktlo``'s (#1738)."""
+    return {'python-version': tier(data, 'cpython', 'supported'), 'include': []}
+
+
+def legs_matrix(found: 'list[dict[str, Any]]') -> 'dict[str, Any]':
+    """``found`` in the shape of every other matrix here: a ``python-version`` axis that ``include`` marks."""
+    return {'python-version': [leg['python-version'] for leg in found], 'include': found}
+
+
+def ktlo_matrix(data: 'dict[str, Any]') -> 'dict[str, Any]':
+    """unit-tests.yml's ``test-ktlo`` and ``integration-ktlo``: the KTLO legs alone, out of the gating jobs (#1738).
+
+    ``Required checks passed`` reads one ``needs.<job>.result`` per job, and
+    ``unittest-ordering`` needs ``test``, so a KTLO leg that fails as a job -- a
+    lost runner, or the job cap -- failed both from inside ``test``.
+
+    """
+    return legs_matrix(ktlo_legs(data))
 
 
 def experimental_legs(data: 'dict[str, Any]') -> 'list[dict[str, Any]]':
@@ -211,8 +242,8 @@ def experimental_legs(data: 'dict[str, Any]') -> 'list[dict[str, Any]]':
 
 
 def test_matrix(data: 'dict[str, Any]') -> 'dict[str, Any]':
-    """unit-tests.yml's ``test``: both tiers, and the one coverage leg on ``latest``."""
-    matrix = tiered(data)
+    """unit-tests.yml's ``test``: the supported tier, and the one coverage leg on ``latest``."""
+    matrix = supported_matrix(data)
     matrix['include'].insert(0, {'python-version': data['latest'], 'coverage': True})
     return matrix
 
@@ -227,20 +258,23 @@ def experimental_matrix(data: 'dict[str, Any]') -> 'dict[str, Any]':
     ``include`` marks, which keys each leg by its version.
 
     """
-    found = experimental_legs(data)
-    return {'python-version': [leg['python-version'] for leg in found], 'include': found}
+    return legs_matrix(experimental_legs(data))
 
 
 def parity_matrix(data: 'dict[str, Any]') -> 'dict[str, Any]':
-    """unit-tests.yml's ``pypcap-parity``: every version below :data:`PARITY_BELOW` it can run.
+    """unit-tests.yml's ``pypcap-parity``: every supported version below :data:`PARITY_BELOW`.
 
-    The axis lists both tiers and ``include`` marks the KTLO ones, as the job did.
+    Its KTLO ones are ``pypcap-parity-ktlo``'s (#1738).
 
     """
     supported = [v for v in on_latest(data, 'cpython', 'supported', 'pypcap-parity') if key(v) < PARITY_BELOW]
+    return {'python-version': supported, 'include': []}
+
+
+def parity_ktlo_matrix(data: 'dict[str, Any]') -> 'dict[str, Any]':
+    """unit-tests.yml's ``pypcap-parity-ktlo``: each KTLO version below :data:`PARITY_BELOW` it can run (#1738)."""
     ktlo = [v for v in on_latest(data, 'cpython', 'ktlo', 'pypcap-parity') if key(v) < PARITY_BELOW]
-    return {'python-version': sorted(ktlo + supported, key=key),
-            'include': [{'python-version': version, 'ktlo': True} for version in ktlo]}
+    return legs_matrix([{'python-version': version, 'ktlo': True} for version in ktlo])
 
 
 def pypi_matrix(data: 'dict[str, Any]') -> 'dict[str, Any]':
@@ -261,10 +295,13 @@ def wheel_tag(version: 'str') -> 'str':
 OUTPUTS = {
     'latest': lambda data: data['latest'],
     'test': test_matrix,
+    'test-ktlo': ktlo_matrix,
     'experimental': experimental_matrix,
-    'integration': tiered,
+    'integration': supported_matrix,
+    'integration-ktlo': ktlo_matrix,
     'compatibility': tiered,
     'pypcap-parity': parity_matrix,
+    'pypcap-parity-ktlo': parity_ktlo_matrix,
     'pypi': pypi_matrix,
     'conda': lambda data: tier(data, 'cpython', 'supported'),
     'engine-supported': lambda data: '\n'.join(on_latest(data, 'cpython', 'supported', 'engine-tests')),

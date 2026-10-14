@@ -333,15 +333,22 @@ class TestTheExperimentalLegsAreAWorkflowOfTheirOwn(unittest.TestCase):
                 self.assertLess(sum(steps.values()), cap)
 
     def test_a_failure_never_turns_the_run_red(self) -> None:
-        """Job-level ``continue-on-error`` there alone: a ``test`` leg's failure must still fail its gate."""
+        """Job-level ``continue-on-error`` there and on the KTLO jobs alone: a ``test`` leg's failure must still fail its gate.
+
+        unit-tests.yml's KTLO jobs carry it too since #1738, which nothing gating
+        ``needs:`` (``tests/project/test_ktlo_jobs_gate_nothing_1738.py``).
+
+        """
         spec = self.own['jobs']['experimental']
         self.assertIs(spec.get('continue-on-error'), True)
         self.assertEqual(spec['env'], {'ANNOTATION_LEVEL': 'warning'})
         self.assertEqual(spec['steps'][-1]['name'], 'Experimental summary')
+        expected = {'experimental.yml': ['experimental'],
+                    'unit-tests.yml': ['test-ktlo', 'integration-ktlo', 'pypcap-parity-ktlo']}
         for name in ('unit-tests.yml', 'experimental.yml'):
             with self.subTest(workflow=name):
                 self.assertEqual([job_id for job_id, entry in workflow(name)['jobs'].items()
-                                  if 'continue-on-error' in entry], ['experimental'] if name == 'experimental.yml' else [])
+                                  if 'continue-on-error' in entry], expected[name])
 
     def test_it_installs_what_test_installs(self) -> None:
         """So tests/_dependency_gates.py, which reads unit-tests.yml alone, loses no gate by its leaving."""

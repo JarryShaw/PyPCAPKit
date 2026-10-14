@@ -113,18 +113,19 @@ MATRICES = (
 #: The jobs a single ``needs.<job>.result`` aggregates, so KTLO must stay step-level.
 AGGREGATED = (('unit-tests.yml', 'test'), ('unit-tests.yml', 'integration'),
               ('unit-tests.yml', 'pypcap-parity'), ('create-release.yml', 'pypi'))
-#: Where each KTLO leg must be, as (workflow, job, KTLO versions).
+#: Where each KTLO leg must be, as (workflow, job, KTLO versions). unit-tests.yml's
+#: are jobs of their own since #1738, which nothing gating waits on.
 KTLO_LEGS = (
-    ('unit-tests.yml', 'test', KTLO),
-    ('unit-tests.yml', 'integration', KTLO),
-    ('unit-tests.yml', 'pypcap-parity', tuple(v for v in PARITY if v in KTLO)),
+    ('unit-tests.yml', 'test-ktlo', KTLO),
+    ('unit-tests.yml', 'integration-ktlo', KTLO),
+    ('unit-tests.yml', 'pypcap-parity-ktlo', tuple(v for v in PARITY if v in KTLO)),
     ('python-compatibility.yml', 'compatibility', KTLO),
     ('create-release.yml', 'pypi', KTLO_ON_LATEST + tier('pypy', 'ktlo')),
 )
 #: The jobs 3.7 joins (#1633), each as (workflow, job, install-or-verify step).
 LEGACY_37 = (
-    ('unit-tests.yml', 'test', 'Install package and test dependencies'),
-    ('unit-tests.yml', 'integration', 'Install package, test and generator dependencies'),
+    ('unit-tests.yml', 'test-ktlo', 'Install package and test dependencies'),
+    ('unit-tests.yml', 'integration-ktlo', 'Install package, test and generator dependencies'),
     ('python-compatibility.yml', 'compatibility', 'Verify package'),
 )
 
@@ -176,7 +177,7 @@ PROSE_SCAN = (
 )
 PROSE_FILES = ('pyproject.toml', 'README.md', 'SECURITY.md', 'CONTRIBUTING.md', 'Makefile')
 #: Spelled-out counts, as the workflows page writes them.
-WORDS = {'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
+WORDS = {'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
          'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
          'eleven': 11, 'twelve': 12, 'thirteen': 13, 'fourteen': 14, 'fifteen': 15}
 
@@ -599,8 +600,8 @@ class TestPython37IsKTLO(unittest.TestCase):
             with self.subTest(workflow=name, job=job_id):
                 found = [leg for leg in legs(name, job_id) if leg['python-version'] == '3.7']
                 self.assertEqual(found, [{'python-version': '3.7', 'ktlo': True, 'os': 'ubuntu-22.04'}])
-                self.assertTrue(spec['name'].endswith("${{ matrix.ktlo && ' (KTLO)' || '' }}"))
-        joined = {(name, job_id) for name, job_id, _ in MATRICES
+                self.assertTrue(spec['name'].endswith((' (KTLO)', "${{ matrix.ktlo && ' (KTLO)' || '' }}")))
+        joined = {(name, job_id) for name, job_id, _ in MATRICES + KTLO_LEGS
                   if '3.7' in [leg['python-version'] for leg in legs(name, job_id)]}
         engines = [versions for _, versions in engine_inputs()]
         if '3.7' in ' '.join(engines).split():
@@ -774,8 +775,11 @@ class TestTheProseFollowsTheTiers(unittest.TestCase):
         engines = {version for _, versions in engine_inputs() for version in versions.split()}
         claims = {
             r'``test`` \((\w+) Python legs': len(legs('unit-tests.yml', 'test')),
+            r'``test-ktlo`` \((\w+)\)': len(legs('unit-tests.yml', 'test-ktlo')),
             r'``integration`` \((\w+)\)': len(legs('unit-tests.yml', 'integration')),
+            r'``integration-ktlo`` \((\w+)\)': len(legs('unit-tests.yml', 'integration-ktlo')),
             r'``pypcap-parity`` \((\w+)\)': len(legs('unit-tests.yml', 'pypcap-parity')),
+            r'``pypcap-parity-ktlo`` \((\w+)\)': len(legs('unit-tests.yml', 'pypcap-parity-ktlo')),
             r'each looping over (\w+) Python versions': len(engines),
         }
         for pattern, count in claims.items():

@@ -59,8 +59,14 @@ if TYPE_CHECKING:
 KTLO_JOBS = tuple((name, job_id) for name, job_id, _ in KTLO_LEGS)
 #: The jobs whose steps write annotations of their own on a KTLO leg, so set the level.
 LEVELLED = (('unit-tests.yml', 'test'), ('unit-tests.yml', 'integration'),
-            ('unit-tests.yml', 'pypcap-parity'), ('python-compatibility.yml', 'compatibility'),
-            EXPERIMENTAL_JOB)
+            ('unit-tests.yml', 'pypcap-parity'), ('unit-tests.yml', 'test-ktlo'),
+            ('unit-tests.yml', 'integration-ktlo'), ('unit-tests.yml', 'pypcap-parity-ktlo'),
+            ('python-compatibility.yml', 'compatibility'), EXPERIMENTAL_JOB)
+#: unit-tests.yml's KTLO-only jobs (#1738), which nothing gating needs. Their job-level
+#: ``continue-on-error: true`` is a backstop for the failures no step contains, on top
+#: of the step-level guards, which are what keep a leg's check run green.
+BACKSTOPPED = (('unit-tests.yml', 'test-ktlo'), ('unit-tests.yml', 'integration-ktlo'),
+               ('unit-tests.yml', 'pypcap-parity-ktlo'))
 #: Steps that stop every leg alike, KTLO or not, by job. #1634's: a leg that cannot
 #: show its tree is the tag's must not go on to publish, as
 #: ``test_release_tags_the_run_sha_1634.TestPublishersCheckTheirTags`` pins.
@@ -78,6 +84,8 @@ UNREACHABLE_ERRORS = {
 MASKED_ON_EVERY_LEG = {
     ('unit-tests.yml', 'test'): ('Upload test timings',),
     ('unit-tests.yml', 'integration'): ('Upload test timings',),
+    ('unit-tests.yml', 'test-ktlo'): ('Upload test timings',),
+    ('unit-tests.yml', 'integration-ktlo'): ('Upload test timings',),
     ('create-release.yml', 'pypi'): ('Publish package to TestPyPI',),
 }
 #: ``engine-tests``'s KTLO steps: the KTLO cells, and the setup step of their
@@ -276,10 +284,18 @@ class TestNoKTLOFailureTurnsAJobRed(unittest.TestCase):
     """(a) Whatever step fails on a KTLO leg, the job concludes ``success``."""
 
     def test_no_job_with_a_ktlo_leg_masks_it_at_job_level(self) -> None:
-        """Job-level, the run passes but the leg's check run concludes ``failure``."""
+        """Job-level, the run passes but the leg's check run concludes ``failure``.
+
+        So it is never the mechanism: only :data:`BACKSTOPPED` carries it, as a
+        backstop on top of the step-level guards the tests below pin (#1738).
+
+        """
         for name, job_id in KTLO_JOBS + (('unit-tests.yml', 'engine-tests'),):
             with self.subTest(workflow=name, job=job_id):
-                self.assertNotIn('continue-on-error', job(name, job_id))
+                if (name, job_id) in BACKSTOPPED:
+                    self.assertIs(job(name, job_id).get('continue-on-error'), True)
+                else:
+                    self.assertNotIn('continue-on-error', job(name, job_id))
 
     def test_no_step_can_fail_a_ktlo_leg(self) -> None:
         for name, job_id in KTLO_JOBS:
