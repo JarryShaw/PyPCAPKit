@@ -40,12 +40,14 @@ What is read, and the rules for reading it:
   for the newest :data:`JUNIT_RUNS` successful push runs. Each testcase's own
   ``time`` is used; a suite's ``tests=`` count includes subtests and is not.
 
-A default run makes about 625 API calls (estimate, for the week to 2026-10-09: ~60
-listing pages, 300 + 240 job reads, 15 for artifacts, up to 10 workflow reads),
-inside ``GITHUB_TOKEN``'s 1,000 per hour; ``--max-calls`` stops it before it can
-take more. ``--concurrency-hours`` adds the
-runner-pool measurement, which costs one call per run of every workflow in that
-window and is therefore off unless asked for.
+A default run makes about 690 API calls (estimate, for the week to 2026-10-09: 63
+listing pages, one per workflow per day and one more per further 100 runs, from
+that week's run counts, with Experimental Tests taken as Unit Tests' 10 since it
+runs on the same events; at most 300 + 300 job reads; 15 for artifacts; up to 12
+workflow reads), inside ``GITHUB_TOKEN``'s 1,000 per hour; ``--max-calls`` stops
+it before it can take more. ``--concurrency-hours`` adds the runner-pool
+measurement, which costs one call per run of every workflow in that window and is
+therefore off unless asked for.
 
 Standard library only, so the workflow runs it on a bare interpreter. The token is
 ``GH_TOKEN`` (or ``GITHUB_TOKEN``); locally, ``GH_TOKEN=$(gh auth token)`` works.
@@ -88,9 +90,19 @@ API = 'https://api.github.com'
 UNIT_TESTS = 'unit-tests.yml'
 #: The other workflows on a pull request's path, read for job durations only.
 OTHER_WORKFLOWS = ('python-compatibility.yml', 'lint.yml', 'codeql-analysis.yml',
-                   'deploy-pages.yml')
+                   'deploy-pages.yml', 'experimental.yml')
 #: GitHub's own ``timeout-minutes`` when a job sets none.
 DEFAULT_TIMEOUT = 360
+#: Workflows of which no required context names a check, so every job is
+#: non-blocking (#1732).
+NON_BLOCKING_WORKFLOWS = ('experimental.yml',)
+#: The suffix every KTLO leg's job name carries (#1633); such a leg's steps cannot
+#: fail it (#1672).
+KTLO_SUFFIX = ' (KTLO)'
+#: The suffix an experimental leg's job name carried in ``unit-tests.yml`` before
+#: #1732 moved it out; such a leg's steps could not fail it either, and its runs
+#: stay in the window until they age out.
+EXPERIMENTAL_SUFFIX = ' (experimental)'
 
 #: The aggregate job the ruleset requires; its completion is "mergeable".
 REQUIRED_JOB = 'Required checks passed'
@@ -321,9 +333,9 @@ def parse_workflow(text: 'str') -> 'list[dict[str, Any]]':
 def _parse_steps(section: 'str') -> 'list[dict[str, Any]]':
     """The named steps of one job section, with any step-level cap.
 
-    A cap written as an expression differs by leg -- ``test``'s on its experimental
-    legs (#1660) -- and the job's spec does not say which leg a name ran, so it
-    reads as none, as an uncapped step's does.
+    A cap written as an expression differs by leg, and the job's spec does not say
+    which leg a name ran, so it reads as none, as an uncapped step's does. No
+    workflow writes one since #1732 moved the experimental legs out of ``test``.
 
     """
     found = []  # type: list[dict[str, Any]]
@@ -932,32 +944,52 @@ def _fmt(value: 'Optional[float]', digits: 'int' = 1) -> 'str':
     return '-' if value is None else f'{value:.{digits}f}'
 
 
+def non_blocking(workflow: 'str', job: 'str') -> 'bool':
+    """Whether ``job``'s cap findings (H1, H2, H4) are warnings rather than HARD.
+
+    Every job of :data:`NON_BLOCKING_WORKFLOWS` is non-blocking, and so is a KTLO leg
+    or an experimental leg from before the split, wherever it ran (#1732).
+
+    """
+    return (workflow in NON_BLOCKING_WORKFLOWS
+            or job.endswith(KTLO_SUFFIX) or job.endswith(EXPERIMENTAL_SUFFIX))
+
+
 def evaluate(report: 'dict[str, Any]', baseline: 'Optional[dict[str, Any]]') -> 'list[dict[str, str]]':
-    """Every HARD (``H*``) and WARN (``W*``) threshold that fires on ``report``."""
+    """Every HARD (``H*``) and WARN (``W*``) threshold that fires on ``report``.
+
+    A cap finding on a :func:`non_blocking` job keeps its ``H`` id but is a warning.
+
+    """
     found = []  # type: list[dict[str, str]]
 
-    def fire(code: 'str', message: 'str') -> 'None':
-        found.append({'id': code, 'level': 'hard' if code[0] == 'H' else 'warn', 'message': message})
+    def fire(code: 'str', message: 'str', soft: 'bool' = False) -> 'None':
+        if soft:
+            message += ' Non-blocking, so a warning (#1732).'
+        found.append({'id': code, 'level': 'hard' if code[0] == 'H' and not soft else 'warn',
+                      'message': message})
 
     for row in report['jobs']:
         label = f'`{row["name"]}` ({row["workflow"]})'
+        soft = non_blocking(row['workflow'], row['name'])
         if row['n'] >= MIN_SAMPLES and row['p90'] >= HARD_CAP_SHARE * row['cap']:
             fire('H1', f'{label} p90 is {_fmt(row["p90"])} min, at or above '
-                       f'{HARD_CAP_SHARE:.0%} of its {row["cap"]}-minute cap.')
+                       f'{HARD_CAP_SHARE:.0%} of its {row["cap"]}-minute cap.', soft)
         if row.get('days_to_cap') is not None and row['days_to_cap'] <= HARD_PROJECTION_DAYS:
             fire('H4', f'{label} reaches its {row["cap"]}-minute cap in '
                        f'{_fmt(row["days_to_cap"])} days on a linear fit '
-                       f'(+{_fmt(row["slope_per_day"], 2)} min/day).')
+                       f'(+{_fmt(row["slope_per_day"], 2)} min/day).', soft)
     for row in report['steps']:
         if not row.get('cap'):
             continue
         label = f'`{row["job"]}` step `{row["name"]}`'
+        soft = non_blocking(row['workflow'], row['job'])
         if row['n'] >= MIN_SAMPLES and row['p90'] >= HARD_CAP_SHARE * row['cap']:
             fire('H2', f'{label} p90 is {_fmt(row["p90"])} min, at or above '
-                       f'{HARD_CAP_SHARE:.0%} of its {row["cap"]}-minute step cap.')
+                       f'{HARD_CAP_SHARE:.0%} of its {row["cap"]}-minute step cap.', soft)
         if row.get('days_to_cap') is not None and row['days_to_cap'] <= HARD_PROJECTION_DAYS:
             fire('H4', f'{label} reaches its {row["cap"]}-minute step cap in '
-                       f'{_fmt(row["days_to_cap"])} days on a linear fit.')
+                       f'{_fmt(row["days_to_cap"])} days on a linear fit.', soft)
 
     pr = report['runs'].get('pull_request', {})
     mergeable = pr.get('mergeable', {})

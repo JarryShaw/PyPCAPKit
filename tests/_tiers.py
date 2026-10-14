@@ -46,6 +46,8 @@ So this module answers, cheaply and without needing the fixtures themselves:
   which of their test methods) skip a generated capture rather than reading it
   for real, and the complete pytest selection the fixture-dependent tier needs
   in order to still exercise them.
+* :func:`is_roundtrip_sweep` -- is this unit-tier module one of the round-trip
+  sweeps, which only the ``latest`` leg of the ``test`` job runs (#1732)?
 
 :file:`tests/conftest.py` drives the first four at collection time, and
 :func:`tests._support.sample_path` consults :func:`check_unit_tier_read` on
@@ -118,6 +120,7 @@ Nothing in this file is collected by :program:`pytest`: ``python_files`` in
 from __future__ import annotations
 
 import ast
+import fnmatch
 import functools
 import pathlib
 import subprocess
@@ -130,6 +133,7 @@ __all__ = [
     'GeneratedFixtureInUnitTierError', 'TierGuardWarning', 'SampleCall',
     'ROOT', 'TESTS_ROOT', 'SAMPLE_ROOT', 'REGENERATE_SAMPLES_CMD', 'UNIT_TIER_SELECTION',
     'FIXTURE_TIER_SUFFIXES', 'FIXTURE_TIER_DIRS', 'FIXTURE_TIER_SELECTOR',
+    'ROUNDTRIP_SWEEP_GLOB', 'ROUNDTRIP_RUNTIME_GLOB', 'is_roundtrip_sweep',
     'is_unit_tier', 'committed_captures', 'committed_capture_names',
     'guard_unavailable_reason', 'handled_lines', 'sample_path_calls',
     'audit_module', 'check_unit_tier_read', 'explain',
@@ -172,6 +176,17 @@ FIXTURE_TIER_SELECTOR = (
     'python -c "from tests._tiers import fixture_tier_paths; '
     'print(\' \'.join(fixture_tier_paths()))"'
 )
+#: The round-trip sweeps (#1732), as the ``--ignore-glob`` that the ``test`` job
+#: of :file:`.github/workflows/unit-tests.yml` adds to :data:`UNIT_TIER_SELECTION`
+#: on every leg but ``latest``: a module whose path under :data:`ROOT` holds
+#: ``roundtrip``. A selection within the unit tier, not a tier of its own: the
+#: modules stay unit-tier, and ``latest`` runs them, under coverage.
+ROUNDTRIP_SWEEP_GLOB = '*roundtrip*'
+#: The round-trip sweeps of the fixture tier (#1732): the ``*_runtime.py`` modules
+#: whose name holds ``roundtrip``, which the ``integration`` job runs on ``latest``
+#: alone. Every other leg drops them from :func:`fixture_tier_paths`'s selection and
+#: passes this as an ``--ignore-glob``, since pytest ignores no path it was handed.
+ROUNDTRIP_RUNTIME_GLOB = '*roundtrip*_runtime.py'
 #: Suffixes that make a tracked file worth suggesting as a replacement capture.
 #: Committedness itself is whatever git says -- this filter only keeps the
 #: suggestion in :func:`explain` from offering :file:`out.txt` as a capture.
@@ -263,6 +278,27 @@ def is_unit_tier(path: 'pathlib.Path | str') -> 'bool':
     if relative.name.endswith(FIXTURE_TIER_SUFFIXES):
         return False
     return FIXTURE_TIER_DIRS.isdisjoint(relative.parts[:-1])
+
+
+def is_roundtrip_sweep(path: 'pathlib.Path | str') -> 'bool':
+    """Whether ``path`` names a unit-tier round-trip sweep (#1732).
+
+    The executable statement of :data:`ROUNDTRIP_SWEEP_GLOB`, matched the way
+    pytest matches an ``--ignore-glob`` run from :data:`ROOT`: the glob made
+    absolute, against the absolute path, with ``*`` spanning ``/``.
+
+    Args:
+        path: Path to a module, absolute or relative to :data:`ROOT`.
+
+    Returns:
+        :data:`True` for a unit-tier module the glob matches.
+
+    """
+    candidate = pathlib.Path(path)
+    if not candidate.is_absolute():
+        candidate = ROOT / candidate
+    return is_unit_tier(candidate) and fnmatch.fnmatch(str(candidate.resolve()),
+                                                       str(ROOT / ROUNDTRIP_SWEEP_GLOB))
 
 
 def _git(*args: 'str') -> 'Optional[str]':

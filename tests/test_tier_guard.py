@@ -188,18 +188,47 @@ class WorkflowAgreementTests(unittest.TestCase):
         The point of failure this catches: somebody adds a fourth
         fixture-dependent naming convention to the workflow and the guard goes
         on classifying those modules as unit-tier, flagging their perfectly
-        legal capture reads.
+        legal capture reads. The globs that are not a tier's are
+        :data:`~tests._tiers.ROUNDTRIP_SWEEP_GLOB` and
+        :data:`~tests._tiers.ROUNDTRIP_RUNTIME_GLOB`, which only the legs other
+        than ``latest`` add (#1732), each a constant of its own.
 
         """
         if not WORKFLOW.is_file():
             self.skipTest(f'{WORKFLOW} is not present, e.g. in a source distribution')
 
         text = WORKFLOW.read_text(encoding='utf-8')
-        globs = set(re.findall(r"--ignore-glob='\*([^']+)'", text))
+        globs = set(re.findall(r"--ignore-glob='([^']+)'", text))
         directories = set(re.findall(r'--ignore=tests/(\S+)', text))
 
-        self.assertEqual(globs, set(_tiers.FIXTURE_TIER_SUFFIXES))
+        self.assertEqual(globs, {f'*{suffix}' for suffix in _tiers.FIXTURE_TIER_SUFFIXES}
+                         | {_tiers.ROUNDTRIP_SWEEP_GLOB, _tiers.ROUNDTRIP_RUNTIME_GLOB})
         self.assertEqual(directories, set(_tiers.FIXTURE_TIER_DIRS))
+
+    def test_a_roundtrip_sweep_stays_in_the_unit_tier(self) -> None:
+        """#1732: the sweeps are a selection within the unit tier, not a tier.
+
+        So the tier guard keeps auditing them, and ``latest`` runs them; a module
+        outside the unit tier is no sweep even when its name says round trip.
+
+        """
+        cases = {
+            'tests/protocols/test_option_roundtrip_unit.py': True,
+            'tests/protocols/misc/test_pcapng_roundtrip2_unit.py': True,
+            'tests/protocols/test_to_dict_payload_roundtrip_1447_unit.py': True,
+            'tests/protocols/test_capture_roundtrip_runtime.py': False,
+            'tests/integration/test_roundtrip_end_to_end.py': False,
+            'tests/foundation/registry/test_registry_symmetry_unit.py': False,
+            'tests/corekit/test_multidict.py': False,
+            'examples/roundtrip/test_example.py': False,
+        }
+        for relative, expected in cases.items():
+            with self.subTest(module=relative):
+                self.assertIs(_tiers.is_roundtrip_sweep(relative), expected)
+                if expected:
+                    self.assertTrue(_tiers.is_unit_tier(relative))
+        self.assertIs(_tiers.is_roundtrip_sweep(_tiers.ROOT / 'tests/protocols/test_option_roundtrip_unit.py'),
+                      True)
 
     def test_integration_job_selects_positively_by_asking_tiers_for_it(self) -> None:
         """The ``integration`` job's selection runs the other direction, so it

@@ -29,6 +29,7 @@ are checked, offline, since this tier has no network and no token:
 
 from __future__ import annotations
 
+import argparse
 import contextlib
 import datetime
 import importlib.util
@@ -241,8 +242,15 @@ class TestWorkflowText(unittest.TestCase):
             ordering, 'Run tests/protocols and the root-level modules under plain unittest'), 20)
         caps = {spec['id']: spec['timeout'] for spec in specs}
         self.assertEqual((caps['test'], caps['integration'], caps['engine-tests']), (45, 45, 30))
-        # #1660: its experimental legs' caps are expressions, so no leg's is known.
+        # #1732: the experimental legs are experimental.yml's, with caps of their own.
         self.assertIsNone(ci_timing.step_cap(test, ci_timing.TESTS_STEP))
+        self.assertNotIn('experimental', [spec['id'] for spec in specs])
+        own = ci_timing.parse_workflow((WORKFLOWS / 'experimental.yml').read_text(encoding='utf-8'))
+        for name in ('Python graalpy-25.4 (experimental)', 'Python 3.14t (experimental)'):
+            with self.subTest(job=name):
+                experimental = ci_timing.match_job(own, name)
+                self.assertEqual((experimental['id'], experimental['timeout'],
+                                  ci_timing.step_cap(experimental, ci_timing.TESTS_STEP)), ('experimental', 140, 120))
 
     def test_a_cap_by_leg_reads_as_none(self) -> 'None':
         """An expression is no one cap; a literal beside it still reads."""
@@ -694,6 +702,96 @@ class TestThresholds(unittest.TestCase):
         self.assertEqual(codes, {f'H{i}' for i in range(1, 5)} | {f'W{i}' for i in range(1, 10)})
         documented = set(re.findall(r'\* - ``([HW]\d)``', DOC.read_text(encoding='utf-8')))
         self.assertEqual(documented, codes)
+
+
+class TestNonBlockingLegs(unittest.TestCase):
+    """#1732: a cap finding on a leg nothing waits on is a warning, not HARD."""
+
+    #: (workflow, job name, its cap in the real workflow file).
+    EXPERIMENTAL = ('experimental.yml', 'Python graalpy-25.4 (experimental)', 140)
+    KTLO = ('unit-tests.yml', 'Python 3.10 (KTLO)', 45)
+    #: Experimental legs from before the split, run under ``test``'s 45-minute cap and
+    #: still in the 7-day window for a week after it merges.
+    LEGACY = (('unit-tests.yml', 'Python graalpy-25.4 (experimental)', 45),
+              ('unit-tests.yml', 'Python 3.14t (experimental)', 45))
+    BLOCKING = ('unit-tests.yml', 'Python 3.14', 45)
+
+    def levels(self, change: 'Callable[[dict], None]') -> 'list[tuple[str, str]]':
+        report, baseline = quiet()
+        change(report)
+        return [(item['id'], item['level']) for item in ci_timing.evaluate(report, baseline)]
+
+    def test_each_cap_rule_only_warns_on_a_non_blocking_leg(self) -> 'None':
+        for workflow, name, cap in (self.EXPERIMENTAL, self.KTLO, *self.LEGACY):
+            def leg(row: 'dict') -> 'None':
+                row.update(workflow=workflow, name=name, cap=cap)
+
+            def step(row: 'dict') -> 'None':
+                row.update(workflow=workflow, job=name, name=ci_timing.TESTS_STEP, cap=cap)
+
+            cases = {
+                'H1': lambda r: (leg(r['jobs'][0]), r['jobs'][0].update(p90=cap / 2)),
+                'H2': lambda r: (step(r['steps'][0]), r['steps'][0].update(p90=cap / 2)),
+                'H4 (job)': lambda r: (leg(r['jobs'][0]), r['jobs'][0].update(days_to_cap=14.0)),
+                'H4 (step)': lambda r: (step(r['steps'][0]), r['steps'][0].update(days_to_cap=14.0)),
+            }
+            for code, change in cases.items():
+                with self.subTest(job=name, rule=code):
+                    self.assertEqual(self.levels(change), [(code.split()[0], 'warn')])
+
+    def test_a_blocking_leg_stays_hard(self) -> 'None':
+        workflow, name, cap = self.BLOCKING
+        self.assertFalse(ci_timing.non_blocking(workflow, name))
+        self.assertEqual(self.levels(lambda r: r['jobs'][0].update(p90=cap / 2)), [('H1', 'hard')])
+        self.assertEqual(self.levels(lambda r: r['steps'][0].update(p90=10.0)), [('H2', 'hard')])
+        # The same name in experimental.yml would not be, and either suffix counts only
+        # at the end.
+        self.assertTrue(ci_timing.non_blocking('experimental.yml', name))
+        self.assertFalse(ci_timing.non_blocking(workflow, 'Python 3.10 (KTLO) extra'))
+        self.assertFalse(ci_timing.non_blocking(workflow, 'Python 3.14t (experimental) extra'))
+
+    def run_report(self, workflow: 'str', name: 'str', took: 'float') -> 'tuple[int, str]':
+        """``_report`` on five runs of one job taking ``took`` minutes, against the real file."""
+        start = datetime.datetime(2026, 10, 9, 10, tzinfo=datetime.timezone.utc)
+        runs = []
+        for number in range(ci_timing.MIN_SAMPLES):
+            begun = start + datetime.timedelta(hours=3 * number)
+            stamp_of = lambda moment: moment.strftime('%Y-%m-%dT%H:%M:%SZ')  # noqa: E731
+            runs.append({'id': number, 'event': 'push', 'conclusion': 'success', 'head_sha': 'a',
+                         'created_at': stamp_of(begun), 'jobs': [{
+                             'name': name, 'conclusion': 'success', 'runner_name': 'GitHub Actions 1',
+                             'run_attempt': 1, 'created_at': stamp_of(begun), 'started_at': stamp_of(begun),
+                             'completed_at': stamp_of(begun + datetime.timedelta(minutes=took)),
+                             'steps': []}]})
+        data = {'repo': REPO, 'since': '2026-10-03T00:00:00Z', 'until': '2026-10-10T00:00:00Z',
+                'days': 7, 'junit': [], 'workflows': {workflow: {'runs': runs, 'specs': {
+                    'newest': ('a', (WORKFLOWS / workflow).read_text(encoding='utf-8'))}}}}
+        args = argparse.Namespace(baseline=None, out=None, summary=None)
+        stdout = io.StringIO()
+        with contextlib.redirect_stdout(stdout):
+            status = ci_timing._report(args, ci_timing.Client('', transport=mock.Mock()), data)
+        return status, stdout.getvalue()
+
+    def test_the_run_stays_green_on_a_non_blocking_leg_past_its_share(self) -> 'None':
+        for workflow, name, cap in (self.EXPERIMENTAL, self.KTLO, *self.LEGACY):
+            with self.subTest(job=name):
+                status, stdout = self.run_report(workflow, name, cap / 2 + 1)
+                self.assertEqual(status, 0)
+                self.assertIn('::warning title=CI timing H1::', stdout)
+                self.assertNotIn('::error', stdout)
+                self.assertIn(f'**WARN H1:** `{name}` ({workflow})', stdout)
+                self.assertIn(f'its {cap}-minute cap', stdout)
+
+    def test_the_run_fails_on_a_blocking_leg_past_its_share(self) -> 'None':
+        workflow, name, cap = self.BLOCKING
+        status, stdout = self.run_report(workflow, name, cap / 2 + 1)
+        self.assertEqual(status, ci_timing.EXIT_HARD)
+        self.assertIn('::error title=CI timing H1::', stdout)
+
+    def test_the_rule_is_documented(self) -> 'None':
+        page = ' '.join(DOC.read_text(encoding='utf-8').split())
+        self.assertIn('``H1``, ``H2`` and ``H4`` on a non-blocking job are warnings', page)
+        self.assertIn('a job whose name ends in ``(experimental)``', page)
 
 
 def step_blocks(text: 'str', name: 'str') -> 'list[str]':

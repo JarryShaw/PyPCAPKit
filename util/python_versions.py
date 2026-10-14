@@ -16,8 +16,12 @@ actions/runner-images' READMEs at 2c421200c.
 ``test``, ``integration``, ``compatibility``
     Both tiers. A KTLO leg carries ``ktlo: true``, and ``os`` where
     ``ubuntu-latest`` cannot provide it; ``test`` marks the ``latest`` leg
-    ``coverage: true``, and adds each experimental version as a leg carrying
-    ``experimental: true``. No other output holds an experimental version.
+    ``coverage: true``.
+``experimental``
+    Each experimental version as a leg carrying ``experimental: true``, for
+    experimental.yml's ``experimental`` job, a workflow of its own so that nothing
+    waits on it (#1732).
+    No other output holds an experimental version.
 ``pypcap-parity``
     The versions below 3.12 that run on ``ubuntu-latest``.
 ``pypi``
@@ -207,11 +211,24 @@ def experimental_legs(data: 'dict[str, Any]') -> 'list[dict[str, Any]]':
 
 
 def test_matrix(data: 'dict[str, Any]') -> 'dict[str, Any]':
-    """unit-tests.yml's ``test``: both tiers, the one coverage leg on ``latest``, and the experimental legs."""
+    """unit-tests.yml's ``test``: both tiers, and the one coverage leg on ``latest``."""
     matrix = tiered(data)
     matrix['include'].insert(0, {'python-version': data['latest'], 'coverage': True})
-    matrix['include'].extend(experimental_legs(data))
     return matrix
+
+
+def experimental_matrix(data: 'dict[str, Any]') -> 'dict[str, Any]':
+    """experimental.yml's ``experimental``: the experimental legs alone, out of ``test`` (#1732).
+
+    ``Required checks passed`` and ``unittest-ordering`` wait on every leg of
+    ``test``, and every ``workflow_run`` consumer of "Unit Tests" on its run, so a
+    leg in that workflow that runs for two hours holds up every pull request.
+    The shape of every other matrix here, a ``python-version`` axis that
+    ``include`` marks, which keys each leg by its version.
+
+    """
+    found = experimental_legs(data)
+    return {'python-version': [leg['python-version'] for leg in found], 'include': found}
 
 
 def parity_matrix(data: 'dict[str, Any]') -> 'dict[str, Any]':
@@ -244,6 +261,7 @@ def wheel_tag(version: 'str') -> 'str':
 OUTPUTS = {
     'latest': lambda data: data['latest'],
     'test': test_matrix,
+    'experimental': experimental_matrix,
     'integration': tiered,
     'compatibility': tiered,
     'pypcap-parity': parity_matrix,

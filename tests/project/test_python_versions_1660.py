@@ -284,9 +284,8 @@ TIERS_AT_MAIN = {
 }
 
 
-#: ``test``'s name since #1660, which names an experimental leg too.
-TEST_TEMPLATE = ("Python ${{ matrix.python-version }}${{ matrix.experimental && ' (experimental)' || '' }}"
-                 "${{ matrix.ktlo && ' (KTLO)' || '' }}")
+#: The experimental legs' job name (#1732), which ``test``'s was on those legs from #1660.
+EXPERIMENTAL_TEMPLATE = 'Python ${{ matrix.python-version }} (experimental)'
 
 
 def render(template: 'str', leg: 'dict[str, Any]') -> 'str':
@@ -586,18 +585,13 @@ class TestNothingMovedButLatest(unittest.TestCase):
     def test_no_job_name_changes_but_the_gates(self) -> None:
         """Rulesets match check names literally, so each template and leg name stays.
 
-        ``test``'s template gained the experimental tier's suffix (#1660), which
-        names every one of :data:`MAIN`'s legs as before.
+        ``test``'s template is :data:`MAIN`'s again since its experimental legs
+        left it for a job of their own (#1732).
 
         """
         for (name, job_id), template in TEMPLATES_AT_MAIN.items():
             with self.subTest(workflow=name, job=job_id):
-                if (name, job_id) == ('unit-tests.yml', 'test'):
-                    self.assertEqual(workflow(name)['jobs'][job_id]['name'], TEST_TEMPLATE)
-                    self.assertEqual([render(TEST_TEMPLATE, leg) for leg in legs(matrix(name, job_id, self.values))],
-                                     [render(template, leg) for leg in legs(matrix(name, job_id, self.values))])
-                else:
-                    self.assertEqual(workflow(name)['jobs'][job_id]['name'], template)
+                self.assertEqual(workflow(name)['jobs'][job_id]['name'], template)
         compat = TEMPLATES_AT_MAIN[('python-compatibility.yml', 'compatibility')]
         compat_legs = legs(matrix('python-compatibility.yml', 'compatibility', self.values))
         blocking = {render(compat, leg) for leg in compat_legs
@@ -976,7 +970,10 @@ def experimental(data: 'dict[str, Any]') -> 'list[str]':
 
 
 class TestTheExperimentalTier(unittest.TestCase):
-    """#1660, the owner's option 1: GraalPy and free-threaded CPython run non-blocking ``test`` legs, nothing else.
+    """#1660, the owner's option 1: GraalPy and free-threaded CPython run non-blocking legs, nothing else.
+
+    #1732, the owner's option 2: those legs are the ``experimental`` job of
+    experimental.yml, a workflow of its own, so nothing in unit-tests.yml waits on them.
 
     :mod:`tests.project.test_ktlo_legs_stay_green_1672` runs those legs' steps to
     show they cannot fail the job; this reads the file, the matrices and the names.
@@ -1026,14 +1023,17 @@ class TestTheExperimentalTier(unittest.TestCase):
             with self.subTest(case=label), self.assertRaises(ValueError):
                 script().load(write_tiers(self.tmp, dict(TIERS_WITH_EXPERIMENTAL, versions=data)))
 
-    def test_only_test_gains_a_leg_and_no_other_output_moves(self) -> None:
-        """No ``integration``, ``Compat``, parity, engine, wheel or conda leg, and no release count."""
+    def test_only_the_experimental_output_gains_a_leg(self) -> None:
+        """No ``test``, ``integration``, ``Compat``, parity, engine, wheel or conda leg, and no release count."""
         base, values = self.outputs(TIERS_AT_MAIN), self.outputs(TIERS_WITH_EXPERIMENTAL)
-        self.assertEqual({name: value for name, value in values.items() if name != 'test'},
-                         {name: value for name, value in base.items() if name != 'test'})
-        self.assertEqual(legs(json.loads(values['test'])), legs(json.loads(base['test'])) + EXPERIMENTAL_LEGS)
+        self.assertEqual({name: value for name, value in values.items() if name != 'experimental'},
+                         {name: value for name, value in base.items() if name != 'experimental'})
+        self.assertEqual(json.loads(base['experimental']), {'python-version': [], 'include': []})
+        self.assertEqual(json.loads(values['experimental']),
+                         {'python-version': ['3.14t', 'graalpy-25.4'], 'include': EXPERIMENTAL_LEGS})
+        self.assertEqual(legs(json.loads(values['experimental'])), EXPERIMENTAL_LEGS)
 
-    def test_on_main_no_job_but_test_runs_an_experimental_version(self) -> None:
+    def test_on_main_no_job_but_experimental_runs_an_experimental_version(self) -> None:
         """Every matrix and setup-python input any workflow reads from the script, as the file stands."""
         found = experimental(script().load())
         self.assertTrue(found)
@@ -1046,7 +1046,7 @@ class TestTheExperimentalTier(unittest.TestCase):
                     continue
                 read.append((name, job_id))
                 expected = [{'python-version': version, 'experimental': True} for version in found] \
-                    if (name, job_id) == ('unit-tests.yml', 'test') else []
+                    if (name, job_id) == ('experimental.yml', 'experimental') else []
                 with self.subTest(workflow=name, job=job_id):
                     self.assertEqual([leg for leg in legs(matrix(name, job_id)) if leg['python-version'] in found],
                                      expected)
@@ -1057,10 +1057,12 @@ class TestTheExperimentalTier(unittest.TestCase):
                 self.assertFalse(set(re.findall(r'[\w.-]+', values[output])) & set(found))
 
     def test_each_leg_is_named_experimental_and_never_required(self) -> None:
+        """#1732: the names ``test`` gave these legs, so no check name changes."""
         found = experimental(script().load())
-        template = workflow('unit-tests.yml')['jobs']['test']['name']
-        self.assertEqual(template, TEST_TEMPLATE)
-        names = [render(template, leg) for leg in legs(matrix('unit-tests.yml', 'test'))]
+        self.assertEqual(workflow('experimental.yml')['jobs']['experimental']['name'], EXPERIMENTAL_TEMPLATE)
+        names = [render(workflow(name)['jobs'][job_id]['name'], leg)
+                 for name, job_id in (('unit-tests.yml', 'test'), ('experimental.yml', 'experimental'))
+                 for leg in legs(matrix(name, job_id))]
         self.assertEqual(len(names), len(set(names)), names)
         self.assertEqual([name for name in names if name.endswith(' (experimental)')],
                          [f'Python {version} (experimental)' for version in found])
