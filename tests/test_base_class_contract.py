@@ -246,7 +246,9 @@ class BaseClassAliasTests(unittest.TestCase):
         may exist, it just may not be the base.
 
         """
-        pending = tuple(rel.removesuffix('.py').replace('/', '.')
+        # Not ``str.removesuffix``: that is Python 3.9+, and the 3.8 leg runs
+        # this line as soon as the dict gains an entry. C.f. #1699.
+        pending = tuple((rel[:-len('.py')] if rel.endswith('.py') else rel).replace('/', '.')
                         for rel in PENDING_ALIAS_PATHS)
 
         offenders = []
