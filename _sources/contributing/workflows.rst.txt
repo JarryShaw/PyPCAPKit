@@ -3,7 +3,7 @@ GitHub Actions Workflows
 
 .. important::
 
-   The twelve workflows under :file:`.github/workflows/` trigger each other, and
+   The thirteen workflows under :file:`.github/workflows/` trigger each other, and
    the chain that results is not visible from any single file -- reading one
    ``on:`` block never shows what a *different* workflow's completion goes on
    to start. This page is the repository-wide graph. The release *pipeline*
@@ -37,6 +37,13 @@ At a Glance
      - --
      - --
      - ``workflow_call`` (reusable)
+   * - Experimental Tests
+     - :file:`experimental.yml`
+     - ``main``
+     - ``main``
+     - --
+     - --
+     - --
    * - Python Compatibility
      - :file:`python-compatibility.yml`
      - ``main``
@@ -140,6 +147,7 @@ than starting a new one.
 
        CQ["CodeQL<br/>codeql-analysis.yml"]
        UT["Unit Tests<br/>unit-tests.yml"]
+       EX["Experimental Tests<br/>experimental.yml"]
        PC["Python Compatibility<br/>python-compatibility.yml"]
        LT["Lint<br/>lint.yml"]
        VU["Vendor Update<br/>cron-vendor.yml"]
@@ -157,6 +165,9 @@ than starting a new one.
 
        PUSH --> UT
        PR --> UT
+
+       PUSH --> EX
+       PR --> EX
 
        PUSH --> PC
        PR --> PC
@@ -285,8 +296,8 @@ repository target the same reusable workflow, with the same input:
 not one: ``gate`` (the full suite, on ``latest``), ``changelog``
 (checks ``CHANGELOG.md`` against its source entry) and ``python-versions``,
 which reads ``gate``'s version (see `Python Versions`_ below). It skips the other
-**eight** -- the five matrix jobs, ``test`` (eleven Python legs: five
-supported, four KTLO, two experimental), ``integration`` (nine),
+**eight** -- the five matrix jobs, ``test`` (nine Python legs: five
+supported, four KTLO), ``integration`` (nine),
 ``engine-tests`` (one job for each of five engines, each looping over six
 Python versions), ``pypcap-parity`` (two) and ``unittest-ordering``
 (eleven matrix cells), each of which has already run once for this commit
@@ -298,7 +309,7 @@ and ``project-tests``, and ``required-checks`` (see `Required Status
 Checks`_ below), gated out by their own ``if:`` rather than by having
 already run. ``changelog`` carries no
 ``if:`` at all and runs on every path regardless -- deliberately, per its own
-comment (``unit-tests.yml:1557-1563``): ``create-release.yml`` feeds
+comment (``unit-tests.yml:1553-1559``): ``create-release.yml`` feeds
 ``CHANGELOG.md`` to the GitHub Release body, so the release path is exactly
 where a drifted file must not go unchecked. Confirmed on run `36210743295
 <https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295>`__ (a
@@ -444,27 +455,31 @@ CI Timing Review (`#1538 <https://github.com/JarryShaw/PyPCAPKit/issues/1538>`__
 **CI Timing** (:file:`ci-timing.yml`) runs :file:`util/ci_timing.py` every Monday,
 or on dispatch with a ``days`` window and an optional ``concurrency_hours`` runner-pool
 measurement. Through the API it lists every completed run in the window of Unit Tests,
-Python Compatibility, Lint, CodeQL and GitHub Pages, a day per query because a
-filtered listing stops at 1,000 runs (Pages completed 1,154 in the week to
-2026-10-09). It then reads the jobs of an evenly spaced sample -- 150 push and 150
-pull-request runs of Unit Tests, 60 runs of each other workflow -- and the summary
-says how many runs each sample holds and which span they cover. That is about 625
-calls (estimate) of ``GITHUB_TOKEN``'s 1,000 an hour, on a read-only token
+Python Compatibility, Lint, CodeQL, GitHub Pages and Experimental Tests (#1732, so
+its two-hour legs stay measured), a day per query because a filtered listing stops
+at 1,000 runs (Pages completed 1,154 in the week to 2026-10-09). It then reads the
+jobs of an evenly spaced sample -- 150 push and 150 pull-request runs of Unit Tests,
+60 runs of each other workflow -- and the summary says how many runs each sample
+holds and which span they cover. That is about 690 calls (estimate: 63 listing
+pages, one per workflow per day and one more per further 100 runs, by the week to
+2026-10-09's run counts with Experimental Tests taken as Unit Tests' 10, since it
+runs on the same events; at most 300 + 300 job reads; 15 for the JUnit artifacts;
+up to 12 workflow-file reads) of ``GITHUB_TOKEN``'s 1,000 an hour, on a read-only token
 (``actions: read``, ``contents: read``). A job is measured by its own outcome: one
 cancelled at 95% of its cap or later timed out and counts, even in a run that reads
 ``cancelled`` for that reason; one cancelled earlier was superseded and does not. A
-step cap written as an expression, as three of ``test``'s are (#1660), differs by
-leg and reads as none.
+step cap written as an expression differs by leg and reads as none.
 The report goes to the job summary and to the ``ci-timing-report`` artifact (90
 days), and the newest earlier report is the next run's baseline. It is not a
 ``workflow_run`` on Unit Tests, which would add a job per run to a runner pool
 measured saturated at 20 concurrent jobs.
 
-Per-test timings come from the ``test`` and ``integration`` legs, which run pytest
-with ``--durations=30 --durations-min=1.0`` and ``--junitxml`` and upload the file as
-``junit-unit-<version>`` or ``junit-integration-<version>`` (14 days). Each upload
-step is ``continue-on-error``, so an artifact-service outage cannot fail a leg that
-``Required checks passed`` needs. pytest writes one ``<testcase>`` per test however
+Per-test timings come from the ``test`` and ``integration`` legs, and from
+:file:`experimental.yml`'s, which run pytest with ``--durations=30
+--durations-min=1.0`` and ``--junitxml`` and upload the file as
+``junit-unit-<version>``, ``junit-integration-<version>`` or
+``junit-experimental-<version>`` (14 days). Each upload step is ``continue-on-error``,
+so an artifact-service outage cannot fail a leg. pytest writes one ``<testcase>`` per test however
 many subtests it runs -- about 0.6 MB per unit leg (estimate) -- but the suite's
 ``tests=`` count includes subtests, so the review reads each testcase's ``time``. The
 ordering, ``gate``, ``engine-tests`` and ``pypcap-parity`` legs write no file, and nor
@@ -536,6 +551,17 @@ while the pool stays saturated, and the first runs with JUnit will show whether
 ``W7``'s 10-second test line needs raising. What to do when one fires is on
 :doc:`conventions/process`.
 
+``H1``, ``H2`` and ``H4`` on a non-blocking job are warnings, not HARD, so they do
+not fail the run (#1732): on every job of :file:`experimental.yml`, which no
+required context names, on every KTLO leg, a job whose name ends in ``(KTLO)``
+(#1633), and on a job whose name ends in ``(experimental)`` in any workflow. That
+last covers the experimental legs that ran in :file:`unit-tests.yml` under
+``test``'s 45-minute cap before the split, whose runs stay in the 7-day window for a
+week after it. The finding keeps its ``H`` id and says it is non-blocking. A
+KTLO leg of ``test``, ``integration`` or ``pypcap-parity`` past its job's
+``timeout-minutes`` is still cancelled, which ``Required checks passed`` refuses,
+so that warning is worth acting on before the cap.
+
 Work Kept Off the Pull-Request Queue (`#1538 <https://github.com/JarryShaw/PyPCAPKit/issues/1538>`__)
 -----------------------------------------------------------------------------------------------------
 
@@ -576,7 +602,7 @@ grepping every workflow file for its name:
      - Where
    * - ``Required checks passed``
      - job ``required-checks``
-     - ``unit-tests.yml:1884``
+     - ``unit-tests.yml:1881``
    * - ``Compat Python 3.11``
      - job ``compatibility``, matrix leg ``3.11``
      - ``python-compatibility.yml:60``, ``.github/python-versions.toml:20``
@@ -598,21 +624,21 @@ which added ``Compat Python 3.15`` and removed ``Compat Python 3.10``. Moving a 
 between the tiers below means editing the ruleset in the same change.
 
 ``Required checks passed`` is defined by exactly one job
-(``unit-tests.yml:1884``). ``Compat Python`` is defined by one, the
+(``unit-tests.yml:1881``). ``Compat Python`` is defined by one, the
 ``compatibility`` job in ``python-compatibility.yml`` (``:60``), whose matrix
 (``:74``) comes from :file:`.github/python-versions.toml`: the five required legs
 are its supported tier (``python-versions.toml:20-24``), and its four KTLO legs
 (``python-versions.toml:16-19``) have names ending in ``(KTLO)``, so no required
 context matches one. A comment at
-``unit-tests.yml:1794`` mentions the string without defining it.
+``unit-tests.yml:1790`` mentions the string without defining it.
 
 ``Required checks passed`` is an aggregate, not a single check run. The ruleset
 requires it and the five ``Compat Python 3.11``-``3.15`` legs, nothing else, as
-``unit-tests.yml``'s own comment (``unit-tests.yml:1793-1803``) records. It
+``unit-tests.yml``'s own comment (``unit-tests.yml:1789-1799``) records. It
 ``needs:`` the gating jobs of ``unit-tests.yml`` -- ``test``, ``integration``,
 ``engine-tests`` and ``pypcap-parity``, plus ``changes`` and ``project-tests``
 for the docs-only path -- and checks each result explicitly
-(``unit-tests.yml:1883-1937``). Rulesets match check names literally, with no
+(``unit-tests.yml:1880-1934``). Rulesets match check names literally, with no
 wildcard, so requiring the matrix cells one by one would mean editing the
 ruleset whenever a matrix changes; the aggregate keeps the required list fixed.
 It accepts the four legs as ``skipped`` only on a docs-only pull request, where
@@ -621,7 +647,7 @@ instead. The ``Compat`` legs stay required separately because they come from
 ``python-compatibility.yml``, and a job cannot ``needs:`` a job in another
 workflow file. This job runs on Unit Tests' own ``push``/``pull_request``
 triggers; the ``gate-only: true`` reusable calls documented above skip it via
-``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:1886``),
+``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:1883``),
 so it is never produced -- and never expected -- on those paths.
 
 Python versions come in two tiers (#1633), and an experimental one (#1660,
@@ -634,7 +660,7 @@ pull request red (#1672). Each KTLO leg shares its job with supported legs, in
 every such job works the same way:
 
 * Every step that can fail on a KTLO leg has an ``id`` and
-  ``continue-on-error: ${{ matrix.ktlo == true }}`` (``unit-tests.yml:116-126``),
+  ``continue-on-error: ${{ matrix.ktlo == true }}`` (``unit-tests.yml:115-125``),
   unless it is masked on every leg, as the timings uploads are. Its ``outcome`` is
   then ``failure`` but its ``conclusion`` ``success``, so the job, its check run
   and ``required-checks`` read ``success``. A step that needs an earlier one's work
@@ -669,24 +695,54 @@ was measured on that job.
 
 The **experimental** tier is free-threaded CPython and GraalPy, spelt as
 setup-python reads them (``3.14t``, ``graalpy-25.4``). Each runs one leg of
-``test``, named ``Python <version> (experimental)``, and nothing else: no
-``integration``, ``Compat``, wheel or conda leg, so never a required context. The
-legs never block, by the KTLO mechanics above: ``test``'s guard is
-``${{ matrix.ktlo == true || matrix.experimental == true }}``, their annotations
-are warnings, and ``Experimental summary``, the step before ``KTLO summary``,
-reports each failed step. A leg past the job's 45-minute ``timeout-minutes`` would
-be cancelled, which no step-level guard contains and ``Required checks passed``
-refuses, and neither build's runtime here is measured. So on these legs alone,
-setup-python, the install and the tests have caps of their own, of 5, 10 and 25
-minutes: a step at its cap fails rather than cancels, and the guard holds
-(actions/runner ``src/Runner.Worker/StepsRunner.cs:322-353``). The runner's
-``has timed out`` error stays, changing no conclusion, as ``Process completed with
-exit code N.`` does. Everything but the install and the tests took under 20
-seconds on every uncovered leg of runs 38569321543-38569522442. Every other leg's
-caps are 360, the documented maximum, so its job's 45 minutes bind first, as with
-none. Promoting one whose leg stays green is a hand edit,
-which :file:`util/python_versions.py` refuses until the build has a wheel, a conda
-build and a ``Compat`` leg.
+``experimental`` (two), the one matrix job of :file:`.github/workflows/experimental.yml`
+("Experimental Tests"), named ``Python <version> (experimental)``, and nothing
+else: no ``integration``, ``Compat``, wheel or conda leg, so never a required
+context. They were legs of ``test`` until `#1732
+<https://github.com/JarryShaw/PyPCAPKit/issues/1732>`__, which moved them to a
+workflow of their own, by the owner's ruling that nothing waits on them. **That
+workflow reports separately and holds up nothing**: a job cannot ``needs:`` one in
+another workflow, nothing calls it, and no ``workflow_run`` names it, so the Unit
+Tests run completes without it, and with it ``Required checks passed``,
+``unittest-ordering`` and the four workflows that wait on Unit Tests completing
+(``coverage-comment.yml``, ``deploy-pages.yml``, ``cron-vendor.yml`` and
+``cron-conda.yml``). It runs on Unit Tests' ``push`` and ``pull_request`` events,
+skips a docs-only pull request by the same ``changes`` script, and cancels a
+pull request's superseded run. The legs never
+block, by the KTLO mechanics above: every step that can fail has
+``continue-on-error: true``, their annotations are warnings, and ``Experimental
+summary``, the job's last step, reports each failed step. A failure no step
+contains, such as a lost runner, fails the job, and the job's own
+``continue-on-error: true`` keeps it from failing the run: it "prevents a workflow
+run from failing when a job fails" (`Workflow syntax
+<https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idcontinue-on-error>`__),
+though the leg's check run still reads ``failure``. A job past its
+``timeout-minutes`` is cancelled, and that page does not say whether the job-level
+guard covers a cancellation. So setup-python, the install and the tests have caps
+of their own, of 5, 10 and 120 minutes, under the job's 140: a step at its cap
+fails rather than cancels, and the guard holds (actions/runner
+``src/Runner.Worker/StepsRunner.cs:322-353``). The runner's ``has timed out`` error
+stays, changing no conclusion, as ``Process completed with exit code N.`` does.
+Everything but the install and the tests took under 20 seconds on every uncovered
+leg of runs 38569321543-38569522442. ``test``'s caps are main's: 45 minutes for the
+job, and none on a step. Promoting one whose leg stays green is a hand edit, which
+:file:`util/python_versions.py` refuses until the build has a wheel, a conda build
+and a ``Compat`` leg.
+
+The tests' 120 minutes are sized for GraalPy, the slower of the two legs that share
+them: its leg reached 26% of the unit tier in 25 minutes (job 115915976024), where
+3.14t's ran the whole tier in 5.8 (run 38581834697). By the owner's ruling the
+round-trip sweeps run on ``latest`` alone: every leg but ``latest`` adds
+``--ignore-glob='*roundtrip*'``, which leaves out each unit-tier module whose path
+holds ``roundtrip`` (``ROUNDTRIP_SWEEP_GLOB`` in :file:`tests/_tiers.py`), and
+``latest``, the coverage leg, runs them as before. The subset covers
+``integration`` too: off ``latest`` its legs leave out the three
+``*roundtrip*_runtime.py`` modules (``ROUNDTRIP_RUNTIME_GLOB``), dropping them from
+``fixture_tier_paths()``'s selection and adding the glob as an ``--ignore-glob``,
+since pytest applies no ignore to a path it was handed. On 2026-10-14 they were 41 modules
+and 8% of the unit tier's time in a serial 3.14 run (86 of 1,031 s), and 10-11% on the
+3.14, 3.15 and 3.14t legs of run 38581834697, so the rest should take GraalPy 88-113
+minutes (estimate).
 
 Python Versions
 ---------------

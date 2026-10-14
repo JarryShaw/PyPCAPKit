@@ -331,6 +331,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/logging.html">Logging System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
 </ul>
 </li>
@@ -515,6 +516,12 @@
 <span class="sd">   :class:`~pcapfile.protocols.transport.tcp.TCP` class rather than a</span>
 <span class="sd">   reimplementation.</span>
 
+<span class="sd">.. versionremoved:: 1.5.0</span>
+
+<span class="sd">   ``pcapkit.toolkit.pypcapfile.IPV6_TCP_WARNED_LIMIT``, now</span>
+<span class="sd">   :data:`pcapkit.utilities.config.IPV6_TCP_WARNED_LIMIT`, set with</span>
+<span class="sd">   :envvar:`PCAPKIT_IPV6_TCP_WARNED_LIMIT` (:issue:`1726`).</span>
+
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">binascii</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
@@ -531,9 +538,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">IP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TCP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">EXTENSION_HEADER_LIMIT</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv4</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4</span> <span class="k">as</span> <span class="n">Protocol_IPv4</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">Protocol_TCP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">warn</span>
 
@@ -571,12 +578,6 @@
 
 <span class="c1">#: Length of the fixed IPv6 header, :rfc:`8200#section-3`.</span>
 <span class="n">IPV6_HEADER_LEN</span> <span class="o">=</span> <span class="mi">40</span>
-
-<span class="c1">#: How many captures :func:`_decline_ipv6_tcp` remembers having warned about.</span>
-<span class="c1">#: Each one pins a packet of its own in memory (see :func:`_capture_of`), so the</span>
-<span class="c1">#: memory is bounded and the oldest is forgotten first. Up to this many captures</span>
-<span class="c1">#: read at the same time warn exactly once each.</span>
-<span class="n">IPV6_TCP_WARNED_LIMIT</span> <span class="o">=</span> <span class="mi">32</span>
 
 <span class="c1">#: The captures :func:`_decline_ipv6_tcp` has warned about, oldest first. Each</span>
 <span class="c1">#: key :func:`_capture_of` gives maps to the anchor that keeps that key unique.</span>
@@ -691,9 +692,10 @@
 <span class="sd">            field.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Lowercase, colon-separated hex MAC address, e.g. ``'01:00:5e:01:03:03'``</span>
-<span class="sd">        -- the same form :meth:`~pcapkit.protocols.link.ethernet.Ethernet._read_mac_addr`</span>
-<span class="sd">        uses for the default engine.</span>
+<span class="sd">        The MAC address as text. A raw 6-octet ``value`` is formatted as</span>
+<span class="sd">        lowercase hex, two digits per octet, colon-separated, e.g.</span>
+<span class="sd">        ``'01:00:5e:01:03:03'``; any other is decoded as ASCII and returned</span>
+<span class="sd">        as is.</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        The released `PyPCAPFile`_ (0.12.0) already stores ``src``/``dst`` pre-formatted</span>
@@ -913,7 +915,7 @@
 <span class="sd">            capture to reach :func:`tcp_reassembly` or :func:`tcp_traceflow`.</span>
 <span class="sd">            Later frames of the same capture are left out without another</span>
 <span class="sd">            warning, and every other capture warns once of its own, however</span>
-<span class="sd">            their frames interleave. Only the :data:`IPV6_TCP_WARNED_LIMIT`</span>
+<span class="sd">            their frames interleave. Only the :data:`~pcapkit.utilities.config.IPV6_TCP_WARNED_LIMIT`</span>
 <span class="sd">            captures warned about most recently are remembered, so with more</span>
 <span class="sd">            than that read at once a forgotten one warns again: the warning can</span>
 <span class="sd">            repeat, but is never omitted.</span>
@@ -926,7 +928,7 @@
         <span class="k">return</span>
 
     <span class="n">_ipv6_tcp_warned</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">anchor</span>
-    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">_ipv6_tcp_warned</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">IPV6_TCP_WARNED_LIMIT</span><span class="p">:</span>
+    <span class="k">while</span> <span class="n">config</span><span class="o">.</span><span class="n">IPV6_TCP_WARNED_LIMIT</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">_ipv6_tcp_warned</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">config</span><span class="o">.</span><span class="n">IPV6_TCP_WARNED_LIMIT</span><span class="p">:</span>
         <span class="n">_ipv6_tcp_warned</span><span class="o">.</span><span class="n">popitem</span><span class="p">(</span><span class="n">last</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Frame </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2">: TCP over IPv6 is left out of TCP reassembly and flow tracing, as "</span>
          <span class="s2">"'pypcapfile' has no IPv6 decoder; later such frames of this capture are left out "</span>
@@ -1037,7 +1039,7 @@
 <span class="sd">        on, and how many headers were stepped over -- ``protocol``, ``data`` and</span>
 <span class="sd">        ``0`` if ``protocol`` is none of them -- or :data:`None` if one of them</span>
 <span class="sd">        is cut short or rejected, or more than</span>
-<span class="sd">        :data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT`</span>
+<span class="sd">        :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`</span>
 <span class="sd">        follow in a row. An AH is ``(Payload Length + 2) * 4`` octets long</span>
 <span class="sd">        (:rfc:`4302#section-2.2`), and no shorter than :data:`AH_HEADER_LEN`;</span>
 <span class="sd">        any other is read by :func:`_default_extension_header`.</span>
@@ -1045,7 +1047,7 @@
 <span class="sd">    """</span>
     <span class="n">depth</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">while</span> <span class="n">protocol</span> <span class="ow">in</span> <span class="n">IPV4_EXTENSION_HEADERS</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">depth</span> <span class="o">==</span> <span class="n">EXTENSION_HEADER_LIMIT</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">depth</span> <span class="o">==</span> <span class="n">config</span><span class="o">.</span><span class="n">EXTENSION_HEADER_LIMIT</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="n">depth</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="n">protocol</span> <span class="o">==</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">AH</span><span class="p">:</span>

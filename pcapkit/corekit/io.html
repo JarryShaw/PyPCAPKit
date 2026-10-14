@@ -338,6 +338,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/logging.html">Logging System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/chardet.html">Character Set Detection</a></li>
 </ul>
 </li>
@@ -498,6 +499,11 @@
 <a class="reference internal" href="#pcapkit.corekit.io.PeekableStream" title="pcapkit.corekit.io.PeekableStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">PeekableStream</span></code></a>, which adds <code class="docutils literal notranslate"><span class="pre">peek</span></code> to a seekable
 stream, and <a class="reference internal" href="#pcapkit.corekit.io.NamedStream" title="pcapkit.corekit.io.NamedStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">NamedStream</span></code></a>, which gives a stream a
 <code class="docutils literal notranslate"><span class="pre">name</span></code>.</p>
+<div class="versionremoved">
+<p><span class="versionmodified removed">Removed in version 1.5.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.corekit.io._READ_CHUNK</span></code>, now
+<a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.READ_CHUNK" title="pcapkit.utilities.config.READ_CHUNK"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.utilities.config.READ_CHUNK</span></code></a>, set with
+<span class="target" id="index-0"></span><a class="reference internal" href="../utilities/config.html#envvar-PCAPKIT_READ_CHUNK"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_READ_CHUNK</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1726">#1726</a>).</p>
+</div>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.io.SeekableReader">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.io.</span></span><span class="sig-name descname"><span class="pre">SeekableReader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">131072</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">stream_closing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#SeekableReader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.SeekableReader" title="Link to this definition">¶</a></dt>

@@ -338,6 +338,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/logging.html">Logging System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/chardet.html">Character Set Detection</a></li>
 </ul>
 </li>
@@ -1521,6 +1522,11 @@ protocol tree, since <a class="reference external" href="https://pypi.org/projec
 The reassembly and flow tracing adapters return the data their
 <a class="reference internal" href="../foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> counterpart consumes, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> if the frame
 cannot be used for it.</p>
+<div class="versionremoved">
+<p><span class="versionmodified removed">Removed in version 1.5.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.toolkit.pypcapfile.IPV6_TCP_WARNED_LIMIT</span></code>, now
+<a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.IPV6_TCP_WARNED_LIMIT" title="pcapkit.utilities.config.IPV6_TCP_WARNED_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.utilities.config.IPV6_TCP_WARNED_LIMIT</span></code></a>, set with
+<span class="target" id="index-9"></span><a class="reference internal" href="../utilities/config.html#envvar-PCAPKIT_IPV6_TCP_WARNED_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_IPV6_TCP_WARNED_LIMIT</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1726">#1726</a>).</p>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> has no IPv6 decoder, so <a class="reference internal" href="#pcapkit.toolkit.pypcapfile.ipv6_reassembly" title="pcapkit.toolkit.pypcapfile.ipv6_reassembly"><code class="xref py py-func docutils literal notranslate"><span class="pre">ipv6_reassembly()</span></code></a>

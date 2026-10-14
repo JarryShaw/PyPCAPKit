@@ -331,6 +331,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/logging.html">Logging System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
 </ul>
 </li>
@@ -486,6 +487,12 @@
 <span class="sd">an abstract base class for all protocol family, with pre-defined</span>
 <span class="sd">utility arguments and methods of specified protocols.</span>
 
+<span class="sd">.. versionremoved:: 1.5.0</span>
+
+<span class="sd">   ``pcapkit.protocols.protocol.FRAME_LAYER_LIMIT``, now</span>
+<span class="sd">   :data:`pcapkit.utilities.config.FRAME_LAYER_LIMIT`, set with</span>
+<span class="sd">   :envvar:`PCAPKIT_FRAME_LAYER_LIMIT` (:issue:`1726`).</span>
+
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">abc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ast</span>
@@ -523,6 +530,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">Data_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span> <span class="k">as</span> <span class="n">Schema_Raw</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.chardet</span><span class="w"> </span><span class="kn">import</span> <span class="n">detect</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">cached_property</span><span class="p">,</span> <span class="n">get_annotations</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">ProtocolNotFound</span><span class="p">,</span>
@@ -872,34 +880,14 @@
          <span class="n">UnknownFieldWarning</span><span class="p">)</span>
 
 
-<span class="c1">#: Most layers dissected in one frame (:issue:`1610`). A layer is one entry of</span>
-<span class="c1">#: the frame's protocol chain, counted from the first layer the frame record</span>
-<span class="c1">#: carries, usually its link layer; a protocol constructed from its own octets</span>
-<span class="c1">#: is not counted itself, so the count starts at the first layer it dissects.</span>
-<span class="c1">#: IPv6 extension headers are layers like any other, whether</span>
-<span class="c1">#: :class:`~pcapkit.protocols.internet.ipv6.IPv6` walks them or each dissects</span>
-<span class="c1">#: the next. What follows the last layer is kept as</span>
-<span class="c1">#: :class:`~pcapkit.protocols.misc.raw.Raw`, with one</span>
-<span class="c1">#: :exc:`~pcapkit.utilities.warnings.ProtocolWarning`, unless it would have been</span>
-<span class="c1">#: left raw anyway or there is nothing left.</span>
-<span class="c1">#:</span>
-<span class="c1">#: Each layer dissects the next from inside its own parse, so without the bound</span>
-<span class="c1">#: a deep enough frame, such as IP in IP or stacked 802.1Q tags, stops wherever</span>
-<span class="c1">#: Python's recursion limit falls, which depends on the interpreter and on how</span>
-<span class="c1">#: deep the caller's own stack is. A tunnel does not restart the count, and nor</span>
-<span class="c1">#: does the end of a chain of extension headers, which</span>
-<span class="c1">#: :data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT` bounds on</span>
-<span class="c1">#: its own.</span>
-<span class="n">FRAME_LAYER_LIMIT</span> <span class="o">=</span> <span class="mi">64</span>
-
 <span class="c1">#: contextvars.ContextVar[int]: How many layers of the frame being dissected</span>
 <span class="c1">#: come before the next one :meth:`ProtocolBase._parse_next_layer` parses, c.f.</span>
-<span class="c1">#: :data:`FRAME_LAYER_LIMIT`.</span>
+<span class="c1">#: :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.</span>
 <span class="n">_frame_depth</span> <span class="o">=</span> <span class="n">contextvars</span><span class="o">.</span><span class="n">ContextVar</span><span class="p">(</span><span class="s1">'_frame_depth'</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
 <span class="c1">#: contextvars.ContextVar[bool]: Whether a payload is being rebuilt by</span>
 <span class="c1">#: :meth:`ProtocolBase._make_payload`, so that the layer it is rebuilt for</span>
-<span class="c1">#: parses the same octets again, c.f. :data:`FRAME_LAYER_LIMIT`.</span>
+<span class="c1">#: parses the same octets again, c.f. :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.</span>
 <span class="n">_rebuilding</span> <span class="o">=</span> <span class="n">contextvars</span><span class="o">.</span><span class="n">ContextVar</span><span class="p">(</span><span class="s1">'_rebuilding'</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
 
@@ -1055,7 +1043,7 @@
     <span class="c1">#: ``object.__new__(SomeProtocol)``) sees, so reading it is always safe.</span>
     <span class="n">_exctx</span><span class="p">:</span> <span class="s1">'Optional[ContextRegistry]'</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="c1">#: Whether this layer is past :data:`FRAME_LAYER_LIMIT`, and so was kept as</span>
+    <span class="c1">#: Whether this layer is past :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`, and so was kept as</span>
     <span class="c1">#: :class:`~pcapkit.protocols.misc.raw.Raw` by :meth:`_parse_next_layer`</span>
     <span class="c1">#: without being parsed. Such a layer carries an ``error`` as one that</span>
     <span class="c1">#: failed to parse does, so this is what tells the two apart: what follows</span>
@@ -2546,7 +2534,7 @@
 <span class="sd">        The payload is built one layer further into the frame than this</span>
 <span class="sd">        protocol, as :meth:`_parse_next_layer` counts it, since each layer built</span>
 <span class="sd">        parses its own octets again. So rebuilding a frame stops at</span>
-<span class="sd">        :data:`FRAME_LAYER_LIMIT` where parsing it did, rather than that many</span>
+<span class="sd">        :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` where parsing it did, rather than that many</span>
 <span class="sd">        layers below each layer of it (:issue:`1610`). Nor does the payload's</span>
 <span class="sd">        parse warn of the limit: this protocol's own parse goes over the same</span>
 <span class="sd">        octets, so the rebuilt frame warns of it once, as the parsed one did.</span>
@@ -2825,7 +2813,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Instance of ``klass``, or of :class:`~pcapkit.protocols.misc.raw.Raw`</span>
 <span class="sd">            when fewer octets were captured than its header needs, or when it is</span>
-<span class="sd">            past :data:`FRAME_LAYER_LIMIT`.</span>
+<span class="sd">            past :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            :meth:`Schema.unpack &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;`</span>
@@ -2854,24 +2842,25 @@
 <span class="sd">            still warns. A layer captured at least as long as its hint cannot be</span>
 <span class="sd">            replaced, and is parsed holding nothing, even inside one that holds.</span>
 
-<span class="sd">            A layer past :data:`FRAME_LAYER_LIMIT` in its frame is not parsed:</span>
+<span class="sd">            A layer past :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` in its frame is not parsed:</span>
 <span class="sd">            it and the rest of the frame are kept as</span>
 <span class="sd">            :class:`~pcapkit.protocols.misc.raw.Raw`, marked</span>
 <span class="sd">            :attr:`_past_layer_limit`, with one</span>
 <span class="sd">            :exc:`~pcapkit.utilities.warnings.ProtocolWarning` (:issue:`1610`).</span>
 
 <span class="sd">        Warns:</span>
-<span class="sd">            ProtocolWarning: If the next layer is past :data:`FRAME_LAYER_LIMIT`.</span>
+<span class="sd">            ProtocolWarning: If the next layer is past :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.</span>
 
 <span class="sd">        """</span>
         <span class="n">depth</span> <span class="o">=</span> <span class="n">_frame_depth</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span>
-        <span class="k">if</span> <span class="n">depth</span> <span class="o">&gt;</span> <span class="n">FRAME_LAYER_LIMIT</span><span class="p">:</span>
+        <span class="n">limit</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">FRAME_LAYER_LIMIT</span>
+        <span class="k">if</span> <span class="n">limit</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">depth</span> <span class="o">&gt;</span> <span class="n">limit</span><span class="p">:</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.null</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
 
             <span class="c1"># NOTE: Nothing is lost if the next layer is raw already, or empty.</span>
             <span class="k">if</span> <span class="n">klass</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Raw</span> <span class="ow">and</span> <span class="n">klass</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NoPayload</span><span class="p">:</span>
-                <span class="n">message</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s1">'the frame reached the limit of </span><span class="si">{</span><span class="n">FRAME_LAYER_LIMIT</span><span class="si">}</span><span class="s1"> layers; the rest of it, '</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s1">'the frame reached the limit of </span><span class="si">{</span><span class="n">limit</span><span class="si">}</span><span class="s1"> layers; the rest of it, '</span>
                            <span class="sa">f</span><span class="s1">'from </span><span class="si">{</span><span class="n">klass</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> on, is left undissected'</span><span class="p">)</span>
                 <span class="c1"># NOTE: Inside a payload being rebuilt, the layer it is rebuilt</span>
                 <span class="c1"># for warns of the same octets once its own parse gets here.</span>

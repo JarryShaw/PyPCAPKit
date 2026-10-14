@@ -7,6 +7,12 @@ Common Utilities
 :mod:`pcapkit.dumpkit`, chiefly customised hooks for :class:`dictdumper.Dumper`
 classes.
 
+.. versionremoved:: 1.5.0
+
+   ``pcapkit.dumpkit.common.FALLBACK_LIMIT``, now
+   :data:`pcapkit.utilities.config.FALLBACK_LIMIT`, set with
+   :envvar:`PCAPKIT_FALLBACK_LIMIT` (:issue:`1726`).
+
 .. autofunction:: pcapkit.dumpkit.common.make_dumper
 
 .. autoclass:: pcapkit.dumpkit.common.Dumper

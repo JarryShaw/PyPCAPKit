@@ -9,7 +9,7 @@
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="pcapkit.utilities.chardet wraps chardet with a bounded cache, for turning the bytes of a text field into a str. It is shared by StringField.post_process and ProtocolBase.decode, which is why it liv..." />
 <meta name="description" content="pcapkit.utilities.chardet wraps chardet with a bounded cache, for turning the bytes of a text field into a str. It is shared by StringField.post_process and ProtocolBase.decode, which is why it liv..." />
-<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Constant Enumerations" href="../const/index.html"><link rel="prev" title="Logging System" href="logging.html">
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Constant Enumerations" href="../const/index.html"><link rel="prev" title="Configuration" href="config.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
         <title>Character Set Detection - PyPCAPKit</title>
@@ -338,6 +338,7 @@
 <li class="toctree-l3"><a class="reference internal" href="exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="logging.html">Logging System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="config.html">Configuration</a></li>
 <li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Character Set Detection</a></li>
 </ul>
 </li>
@@ -513,7 +514,7 @@ by construction the one <a class="reference external" href="https://chardet.read
 it was keyed on: <a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.lru_cache" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">functools.lru_cache()</span></code></a> caches an argument’s <em>hash</em>
 but still keeps the argument, since a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> needs the key to settle
 equality on a hash collision. Measured, feeding 20 distinct 1 MB values
-retains 19.1 MB. <a class="reference internal" href="#pcapkit.utilities.chardet.DETECT_CACHE_SIZE" title="pcapkit.utilities.chardet.DETECT_CACHE_SIZE"><code class="xref py py-data docutils literal notranslate"><span class="pre">DETECT_CACHE_SIZE</span></code></a> therefore caps the entries
+retains 19.1 MB. <a class="reference internal" href="config.html#pcapkit.utilities.config.DETECT_CACHE_SIZE" title="pcapkit.utilities.config.DETECT_CACHE_SIZE"><code class="xref py py-data docutils literal notranslate"><span class="pre">DETECT_CACHE_SIZE</span></code></a> therefore caps the entries
 rather than the footprint, which matters because
 <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol.decode" title="pcapkit.protocols.protocol.Protocol.decode"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.decode</span></code></a> is public and a caller
 may hand it a whole payload. Use <a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.lru_cache.cache_clear" title="(in Python v3.15)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">detect.cache_clear</span></code></a> to release it in a long-running
@@ -542,13 +543,12 @@ name one.</p>
 </dl>
 </dd></dl>
 
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.utilities.chardet.DETECT_CACHE_SIZE">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.chardet.</span></span><span class="sig-name descname"><span class="pre">DETECT_CACHE_SIZE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1024</span></span><a class="headerlink" href="#pcapkit.utilities.chardet.DETECT_CACHE_SIZE" title="Link to this definition">¶</a></dt>
-<dd><p>How many distinct bytestrings <a class="reference internal" href="#pcapkit.utilities.chardet.detect" title="pcapkit.utilities.chardet.detect"><code class="xref py py-func docutils literal notranslate"><span class="pre">detect()</span></code></a> will remember. Bounded so that a
-capture full of never-repeating text cannot retain all of it.</p>
-</dd></dl>
-
+<p>The cache holds <a class="reference internal" href="config.html#pcapkit.utilities.config.DETECT_CACHE_SIZE" title="pcapkit.utilities.config.DETECT_CACHE_SIZE"><code class="xref py py-data docutils literal notranslate"><span class="pre">DETECT_CACHE_SIZE</span></code></a> entries.</p>
+<div class="versionremoved">
+<p><span class="versionmodified removed">Removed in version 1.5.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.utilities.chardet.DETECT_CACHE_SIZE</span></code>, now
+<a class="reference internal" href="config.html#pcapkit.utilities.config.DETECT_CACHE_SIZE" title="pcapkit.utilities.config.DETECT_CACHE_SIZE"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.utilities.config.DETECT_CACHE_SIZE</span></code></a>, set with
+<span class="target" id="index-0"></span><a class="reference internal" href="config.html#envvar-PCAPKIT_DETECT_CACHE_SIZE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DETECT_CACHE_SIZE</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1726">#1726</a>).</p>
+</div>
 </section>
 
         </article>
@@ -565,14 +565,14 @@ capture full of never-repeating text cannot retain all of it.</p>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="logging.html">
+          <a class="prev-page" href="config.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Logging System</div>
+                <div class="title">Configuration</div>
                 
               </div>
             </a>

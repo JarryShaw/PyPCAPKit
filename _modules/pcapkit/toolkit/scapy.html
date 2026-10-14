@@ -331,6 +331,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/logging.html">Logging System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
 </ul>
 </li>
@@ -880,7 +881,7 @@
 <span class="sd">        An IPv4 layer whose protocol names an AH or IPv6 extension header</span>
 <span class="sd">        (:data:`~pcapkit.toolkit.pypcapfile.IPV4_EXTENSION_HEADERS`) has those</span>
 <span class="sd">        headers stepped over in its octets, up to</span>
-<span class="sd">        :data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT` of</span>
+<span class="sd">        :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` of</span>
 <span class="sd">        them in a row (see</span>
 <span class="sd">        :func:`~pcapkit.toolkit.pypcapfile._walk_extension_headers`), and what</span>
 <span class="sd">        follows them is dissected from the octets: a tunnel, walked on as</span>
@@ -1231,8 +1232,7 @@
             <span class="c1"># put the moment of parsing into every flow label -- so the same</span>
             <span class="c1"># capture traced twice would produce different label strings and</span>
             <span class="c1"># different output filenames. Scapy carries the record's</span>
-            <span class="c1"># own timestamp on ``Packet.time``, which is what every other</span>
-            <span class="c1"># engine's adapter reports.</span>
+            <span class="c1"># own timestamp on ``Packet.time``, so that is what is reported.</span>
             <span class="n">timestamp</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">time</span><span class="p">),</span>                        <span class="c1"># capture timestamp</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>                                         <span class="c1"># TCP sequence number</span>
             <span class="n">ack</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">ack</span><span class="p">,</span>                                         <span class="c1"># TCP acknowledgement number</span>

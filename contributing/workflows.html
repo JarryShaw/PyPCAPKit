@@ -338,6 +338,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/logging.html">Logging System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
 </ul>
 </li>
@@ -494,7 +495,7 @@
 <h1>GitHub Actions Workflows<a class="headerlink" href="#github-actions-workflows" title="Link to this heading">¶</a></h1>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>The twelve workflows under <code class="file docutils literal notranslate"><span class="pre">.github/workflows/</span></code> trigger each other, and
+<p>The thirteen workflows under <code class="file docutils literal notranslate"><span class="pre">.github/workflows/</span></code> trigger each other, and
 the chain that results is not visible from any single file – reading one
 <code class="docutils literal notranslate"><span class="pre">on:</span></code> block never shows what a <em>different</em> workflow’s completion goes on
 to start. This page is the repository-wide graph. The release <em>pipeline</em>
@@ -532,7 +533,15 @@ itself, job by job from a version bump to a published package, is on
 <td><p>–</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">workflow_call</span></code> (reusable)</p></td>
 </tr>
-<tr class="row-even"><td><p>Python Compatibility</p></td>
+<tr class="row-even"><td><p>Experimental Tests</p></td>
+<td><p><code class="file docutils literal notranslate"><span class="pre">experimental.yml</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">main</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">main</span></code></p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
+</tr>
+<tr class="row-odd"><td><p>Python Compatibility</p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">main</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">main</span></code></p></td>
@@ -540,7 +549,7 @@ itself, job by job from a version bump to a published package, is on
 <td><p>–</p></td>
 <td><p>–</p></td>
 </tr>
-<tr class="row-odd"><td><p>Lint</p></td>
+<tr class="row-even"><td><p>Lint</p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">lint.yml</span></code></p></td>
 <td><p>–</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">main</span></code></p></td>
@@ -548,7 +557,7 @@ itself, job by job from a version bump to a published package, is on
 <td><p>–</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">workflow_dispatch</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p>Vendor Update</p></td>
+<tr class="row-odd"><td><p>Vendor Update</p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">cron-vendor.yml</span></code></p></td>
 <td><p>–</p></td>
 <td><p>–</p></td>
@@ -556,7 +565,7 @@ itself, job by job from a version bump to a published package, is on
 <td><p><strong>Unit Tests</strong></p></td>
 <td><p>–</p></td>
 </tr>
-<tr class="row-odd"><td><p>Conda Update</p></td>
+<tr class="row-even"><td><p>Conda Update</p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">cron-conda.yml</span></code></p></td>
 <td><p>–</p></td>
 <td><p>–</p></td>
@@ -564,7 +573,7 @@ itself, job by job from a version bump to a published package, is on
 <td><p><strong>Unit Tests</strong></p></td>
 <td><p>–</p></td>
 </tr>
-<tr class="row-even"><td><p>GitHub Pages</p></td>
+<tr class="row-odd"><td><p>GitHub Pages</p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">deploy-pages.yml</span></code></p></td>
 <td><p>–</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">main</span></code></p></td>
@@ -572,7 +581,7 @@ itself, job by job from a version bump to a published package, is on
 <td><p><strong>Unit Tests</strong></p></td>
 <td><p>–</p></td>
 </tr>
-<tr class="row-odd"><td><p>Create Release</p></td>
+<tr class="row-even"><td><p>Create Release</p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">create-release.yml</span></code></p></td>
 <td><p>tags <code class="docutils literal notranslate"><span class="pre">v*</span></code></p></td>
 <td><p>–</p></td>
@@ -580,7 +589,7 @@ itself, job by job from a version bump to a published package, is on
 <td><p><strong>Vendor Update</strong></p></td>
 <td><p>–</p></td>
 </tr>
-<tr class="row-even"><td><p>Project Status</p></td>
+<tr class="row-odd"><td><p>Project Status</p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">project-status.yml</span></code></p></td>
 <td><p>–</p></td>
 <td><p>–</p></td>
@@ -588,7 +597,7 @@ itself, job by job from a version bump to a published package, is on
 <td><p>–</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">issues</span></code>, <code class="docutils literal notranslate"><span class="pre">pull_request_target</span></code>, <code class="docutils literal notranslate"><span class="pre">workflow_dispatch</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p>Coverage Comment</p></td>
+<tr class="row-even"><td><p>Coverage Comment</p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">coverage-comment.yml</span></code></p></td>
 <td><p>–</p></td>
 <td><p>–</p></td>
@@ -596,7 +605,7 @@ itself, job by job from a version bump to a published package, is on
 <td><p><strong>Unit Tests</strong></p></td>
 <td><p>–</p></td>
 </tr>
-<tr class="row-even"><td><p>CI Timing</p></td>
+<tr class="row-odd"><td><p>CI Timing</p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">ci-timing.yml</span></code></p></td>
 <td><p>–</p></td>
 <td><p>–</p></td>
@@ -604,7 +613,7 @@ itself, job by job from a version bump to a published package, is on
 <td><p>–</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">workflow_dispatch</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p>Python Versions</p></td>
+<tr class="row-even"><td><p>Python Versions</p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">cron-python-versions.yml</span></code></p></td>
 <td><p>–</p></td>
 <td><p>–</p></td>
@@ -645,6 +654,7 @@ than starting a new one.</p>
 
     CQ[&quot;CodeQL&lt;br/&gt;codeql-analysis.yml&quot;]
     UT[&quot;Unit Tests&lt;br/&gt;unit-tests.yml&quot;]
+    EX[&quot;Experimental Tests&lt;br/&gt;experimental.yml&quot;]
     PC[&quot;Python Compatibility&lt;br/&gt;python-compatibility.yml&quot;]
     LT[&quot;Lint&lt;br/&gt;lint.yml&quot;]
     VU[&quot;Vendor Update&lt;br/&gt;cron-vendor.yml&quot;]
@@ -662,6 +672,9 @@ than starting a new one.</p>
 
     PUSH --&gt; UT
     PR --&gt; UT
+
+    PUSH --&gt; EX
+    PR --&gt; EX
 
     PUSH --&gt; PC
     PR --&gt; PC
@@ -785,8 +798,8 @@ repository target the same reusable workflow, with the same input:</p>
 not one: <code class="docutils literal notranslate"><span class="pre">gate</span></code> (the full suite, on <code class="docutils literal notranslate"><span class="pre">latest</span></code>), <code class="docutils literal notranslate"><span class="pre">changelog</span></code>
 (checks <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> against its source entry) and <code class="docutils literal notranslate"><span class="pre">python-versions</span></code>,
 which reads <code class="docutils literal notranslate"><span class="pre">gate</span></code>’s version (see <a class="reference internal" href="#python-versions">Python Versions</a> below). It skips the other
-<strong>eight</strong> – the five matrix jobs, <code class="docutils literal notranslate"><span class="pre">test</span></code> (eleven Python legs: five
-supported, four KTLO, two experimental), <code class="docutils literal notranslate"><span class="pre">integration</span></code> (nine),
+<strong>eight</strong> – the five matrix jobs, <code class="docutils literal notranslate"><span class="pre">test</span></code> (nine Python legs: five
+supported, four KTLO), <code class="docutils literal notranslate"><span class="pre">integration</span></code> (nine),
 <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> (one job for each of five engines, each looping over six
 Python versions), <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> (two) and <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>
 (eleven matrix cells), each of which has already run once for this commit
@@ -798,7 +811,7 @@ and <code class="docutils literal notranslate"><span class="pre">project-tests</
 Checks</a> below), gated out by their own <code class="docutils literal notranslate"><span class="pre">if:</span></code> rather than by having
 already run. <code class="docutils literal notranslate"><span class="pre">changelog</span></code> carries no
 <code class="docutils literal notranslate"><span class="pre">if:</span></code> at all and runs on every path regardless – deliberately, per its own
-comment (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1557-1563</span></code>): <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code> feeds
+comment (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1553-1559</span></code>): <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code> feeds
 <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> to the GitHub Release body, so the release path is exactly
 where a drifted file must not go unchecked. Confirmed on run <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295">36210743295</a> (a
 schedule-triggered GitHub Pages run): both <code class="docutils literal notranslate"><span class="pre">Changelog</span> <span class="pre">drift</span></code> and <code class="docutils literal notranslate"><span class="pre">Gate</span>
@@ -928,26 +941,30 @@ failed. Neither workflow’s coverage step is a required check.</p>
 <p><strong>CI Timing</strong> (<code class="file docutils literal notranslate"><span class="pre">ci-timing.yml</span></code>) runs <code class="file docutils literal notranslate"><span class="pre">util/ci_timing.py</span></code> every Monday,
 or on dispatch with a <code class="docutils literal notranslate"><span class="pre">days</span></code> window and an optional <code class="docutils literal notranslate"><span class="pre">concurrency_hours</span></code> runner-pool
 measurement. Through the API it lists every completed run in the window of Unit Tests,
-Python Compatibility, Lint, CodeQL and GitHub Pages, a day per query because a
-filtered listing stops at 1,000 runs (Pages completed 1,154 in the week to
-2026-10-09). It then reads the jobs of an evenly spaced sample – 150 push and 150
-pull-request runs of Unit Tests, 60 runs of each other workflow – and the summary
-says how many runs each sample holds and which span they cover. That is about 625
-calls (estimate) of <code class="docutils literal notranslate"><span class="pre">GITHUB_TOKEN</span></code>’s 1,000 an hour, on a read-only token
+Python Compatibility, Lint, CodeQL, GitHub Pages and Experimental Tests (#1732, so
+its two-hour legs stay measured), a day per query because a filtered listing stops
+at 1,000 runs (Pages completed 1,154 in the week to 2026-10-09). It then reads the
+jobs of an evenly spaced sample – 150 push and 150 pull-request runs of Unit Tests,
+60 runs of each other workflow – and the summary says how many runs each sample
+holds and which span they cover. That is about 690 calls (estimate: 63 listing
+pages, one per workflow per day and one more per further 100 runs, by the week to
+2026-10-09’s run counts with Experimental Tests taken as Unit Tests’ 10, since it
+runs on the same events; at most 300 + 300 job reads; 15 for the JUnit artifacts;
+up to 12 workflow-file reads) of <code class="docutils literal notranslate"><span class="pre">GITHUB_TOKEN</span></code>’s 1,000 an hour, on a read-only token
 (<code class="docutils literal notranslate"><span class="pre">actions:</span> <span class="pre">read</span></code>, <code class="docutils literal notranslate"><span class="pre">contents:</span> <span class="pre">read</span></code>). A job is measured by its own outcome: one
 cancelled at 95% of its cap or later timed out and counts, even in a run that reads
 <code class="docutils literal notranslate"><span class="pre">cancelled</span></code> for that reason; one cancelled earlier was superseded and does not. A
-step cap written as an expression, as three of <code class="docutils literal notranslate"><span class="pre">test</span></code>’s are (#1660), differs by
-leg and reads as none.
+step cap written as an expression differs by leg and reads as none.
 The report goes to the job summary and to the <code class="docutils literal notranslate"><span class="pre">ci-timing-report</span></code> artifact (90
 days), and the newest earlier report is the next run’s baseline. It is not a
 <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> on Unit Tests, which would add a job per run to a runner pool
 measured saturated at 20 concurrent jobs.</p>
-<p>Per-test timings come from the <code class="docutils literal notranslate"><span class="pre">test</span></code> and <code class="docutils literal notranslate"><span class="pre">integration</span></code> legs, which run pytest
-with <code class="docutils literal notranslate"><span class="pre">--durations=30</span> <span class="pre">--durations-min=1.0</span></code> and <code class="docutils literal notranslate"><span class="pre">--junitxml</span></code> and upload the file as
-<code class="docutils literal notranslate"><span class="pre">junit-unit-&lt;version&gt;</span></code> or <code class="docutils literal notranslate"><span class="pre">junit-integration-&lt;version&gt;</span></code> (14 days). Each upload
-step is <code class="docutils literal notranslate"><span class="pre">continue-on-error</span></code>, so an artifact-service outage cannot fail a leg that
-<code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code> needs. pytest writes one <code class="docutils literal notranslate"><span class="pre">&lt;testcase&gt;</span></code> per test however
+<p>Per-test timings come from the <code class="docutils literal notranslate"><span class="pre">test</span></code> and <code class="docutils literal notranslate"><span class="pre">integration</span></code> legs, and from
+<code class="file docutils literal notranslate"><span class="pre">experimental.yml</span></code>’s, which run pytest with <code class="docutils literal notranslate"><span class="pre">--durations=30</span>
+<span class="pre">--durations-min=1.0</span></code> and <code class="docutils literal notranslate"><span class="pre">--junitxml</span></code> and upload the file as
+<code class="docutils literal notranslate"><span class="pre">junit-unit-&lt;version&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">junit-integration-&lt;version&gt;</span></code> or
+<code class="docutils literal notranslate"><span class="pre">junit-experimental-&lt;version&gt;</span></code> (14 days). Each upload step is <code class="docutils literal notranslate"><span class="pre">continue-on-error</span></code>,
+so an artifact-service outage cannot fail a leg. pytest writes one <code class="docutils literal notranslate"><span class="pre">&lt;testcase&gt;</span></code> per test however
 many subtests it runs – about 0.6 MB per unit leg (estimate) – but the suite’s
 <code class="docutils literal notranslate"><span class="pre">tests=</span></code> count includes subtests, so the review reads each testcase’s <code class="docutils literal notranslate"><span class="pre">time</span></code>. The
 ordering, <code class="docutils literal notranslate"><span class="pre">gate</span></code>, <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> and <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> legs write no file, and nor
@@ -1038,6 +1055,16 @@ initial value, to tune once weekly reports exist. <code class="docutils literal 
 while the pool stays saturated, and the first runs with JUnit will show whether
 <code class="docutils literal notranslate"><span class="pre">W7</span></code>’s 10-second test line needs raising. What to do when one fires is on
 <a class="reference internal" href="conventions/process.html"><span class="doc">Running the Repository</span></a>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">H1</span></code>, <code class="docutils literal notranslate"><span class="pre">H2</span></code> and <code class="docutils literal notranslate"><span class="pre">H4</span></code> on a non-blocking job are warnings, not HARD, so they do
+not fail the run (#1732): on every job of <code class="file docutils literal notranslate"><span class="pre">experimental.yml</span></code>, which no
+required context names, on every KTLO leg, a job whose name ends in <code class="docutils literal notranslate"><span class="pre">(KTLO)</span></code>
+(#1633), and on a job whose name ends in <code class="docutils literal notranslate"><span class="pre">(experimental)</span></code> in any workflow. That
+last covers the experimental legs that ran in <code class="file docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> under
+<code class="docutils literal notranslate"><span class="pre">test</span></code>’s 45-minute cap before the split, whose runs stay in the 7-day window for a
+week after it. The finding keeps its <code class="docutils literal notranslate"><span class="pre">H</span></code> id and says it is non-blocking. A
+KTLO leg of <code class="docutils literal notranslate"><span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">integration</span></code> or <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> past its job’s
+<code class="docutils literal notranslate"><span class="pre">timeout-minutes</span></code> is still cancelled, which <code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code> refuses,
+so that warning is worth acting on before the cap.</p>
 </section>
 <section id="work-kept-off-the-pull-request-queue-1538">
 <h2>Work Kept Off the Pull-Request Queue (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1538">#1538</a>)<a class="headerlink" href="#work-kept-off-the-pull-request-queue-1538" title="Link to this heading">¶</a></h2>
@@ -1078,7 +1105,7 @@ grepping every workflow file for its name:</p>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code></p></td>
 <td><p>job <code class="docutils literal notranslate"><span class="pre">required-checks</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1884</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1881</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.11</span></code></p></td>
 <td><p>job <code class="docutils literal notranslate"><span class="pre">compatibility</span></code>, matrix leg <code class="docutils literal notranslate"><span class="pre">3.11</span></code></p></td>
@@ -1107,20 +1134,20 @@ grepping every workflow file for its name:</p>
 which added <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.15</span></code> and removed <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.10</span></code>. Moving a version
 between the tiers below means editing the ruleset in the same change.</p>
 <p><code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code> is defined by exactly one job
-(<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1884</span></code>). <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span></code> is defined by one, the
+(<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1881</span></code>). <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span></code> is defined by one, the
 <code class="docutils literal notranslate"><span class="pre">compatibility</span></code> job in <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code> (<code class="docutils literal notranslate"><span class="pre">:60</span></code>), whose matrix
 (<code class="docutils literal notranslate"><span class="pre">:74</span></code>) comes from <code class="file docutils literal notranslate"><span class="pre">.github/python-versions.toml</span></code>: the five required legs
 are its supported tier (<code class="docutils literal notranslate"><span class="pre">python-versions.toml:20-24</span></code>), and its four KTLO legs
 (<code class="docutils literal notranslate"><span class="pre">python-versions.toml:16-19</span></code>) have names ending in <code class="docutils literal notranslate"><span class="pre">(KTLO)</span></code>, so no required
 context matches one. A comment at
-<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1794</span></code> mentions the string without defining it.</p>
+<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1790</span></code> mentions the string without defining it.</p>
 <p><code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code> is an aggregate, not a single check run. The ruleset
 requires it and the five <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.11</span></code>-<code class="docutils literal notranslate"><span class="pre">3.15</span></code> legs, nothing else, as
-<code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s own comment (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1793-1803</span></code>) records. It
+<code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s own comment (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1789-1799</span></code>) records. It
 <code class="docutils literal notranslate"><span class="pre">needs:</span></code> the gating jobs of <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> – <code class="docutils literal notranslate"><span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">integration</span></code>,
 <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> and <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code>, plus <code class="docutils literal notranslate"><span class="pre">changes</span></code> and <code class="docutils literal notranslate"><span class="pre">project-tests</span></code>
 for the docs-only path – and checks each result explicitly
-(<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1883-1937</span></code>). Rulesets match check names literally, with no
+(<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1880-1934</span></code>). Rulesets match check names literally, with no
 wildcard, so requiring the matrix cells one by one would mean editing the
 ruleset whenever a matrix changes; the aggregate keeps the required list fixed.
 It accepts the four legs as <code class="docutils literal notranslate"><span class="pre">skipped</span></code> only on a docs-only pull request, where
@@ -1129,7 +1156,7 @@ instead. The <code class="docutils literal notranslate"><span class="pre">Compat
 <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>, and a job cannot <code class="docutils literal notranslate"><span class="pre">needs:</span></code> a job in another
 workflow file. This job runs on Unit Tests’ own <code class="docutils literal notranslate"><span class="pre">push</span></code>/<code class="docutils literal notranslate"><span class="pre">pull_request</span></code>
 triggers; the <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code> reusable calls documented above skip it via
-<code class="docutils literal notranslate"><span class="pre">if:</span> <span class="pre">${{</span> <span class="pre">always()</span> <span class="pre">&amp;&amp;</span> <span class="pre">inputs.gate-only</span> <span class="pre">!=</span> <span class="pre">true</span> <span class="pre">}}</span></code> (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1886</span></code>),
+<code class="docutils literal notranslate"><span class="pre">if:</span> <span class="pre">${{</span> <span class="pre">always()</span> <span class="pre">&amp;&amp;</span> <span class="pre">inputs.gate-only</span> <span class="pre">!=</span> <span class="pre">true</span> <span class="pre">}}</span></code> (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1883</span></code>),
 so it is never produced – and never expected – on those paths.</p>
 <p>Python versions come in two tiers (#1633), and an experimental one (#1660,
 below), declared in <code class="file docutils literal notranslate"><span class="pre">.github/python-versions.toml</span></code> (see <a class="reference internal" href="#python-versions">Python Versions</a>).
@@ -1141,7 +1168,7 @@ pull request red (#1672). Each KTLO leg shares its job with supported legs, in
 every such job works the same way:</p>
 <ul class="simple">
 <li><p>Every step that can fail on a KTLO leg has an <code class="docutils literal notranslate"><span class="pre">id</span></code> and
-<code class="docutils literal notranslate"><span class="pre">continue-on-error:</span> <span class="pre">${{</span> <span class="pre">matrix.ktlo</span> <span class="pre">==</span> <span class="pre">true</span> <span class="pre">}}</span></code> (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:116-126</span></code>),
+<code class="docutils literal notranslate"><span class="pre">continue-on-error:</span> <span class="pre">${{</span> <span class="pre">matrix.ktlo</span> <span class="pre">==</span> <span class="pre">true</span> <span class="pre">}}</span></code> (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:115-125</span></code>),
 unless it is masked on every leg, as the timings uploads are. Its <code class="docutils literal notranslate"><span class="pre">outcome</span></code> is
 then <code class="docutils literal notranslate"><span class="pre">failure</span></code> but its <code class="docutils literal notranslate"><span class="pre">conclusion</span></code> <code class="docutils literal notranslate"><span class="pre">success</span></code>, so the job, its check run
 and <code class="docutils literal notranslate"><span class="pre">required-checks</span></code> read <code class="docutils literal notranslate"><span class="pre">success</span></code>. A step that needs an earlier one’s work
@@ -1174,24 +1201,51 @@ are they in <code class="docutils literal notranslate"><span class="pre">pypcap-
 was measured on that job.</p>
 <p>The <strong>experimental</strong> tier is free-threaded CPython and GraalPy, spelt as
 setup-python reads them (<code class="docutils literal notranslate"><span class="pre">3.14t</span></code>, <code class="docutils literal notranslate"><span class="pre">graalpy-25.4</span></code>). Each runs one leg of
-<code class="docutils literal notranslate"><span class="pre">test</span></code>, named <code class="docutils literal notranslate"><span class="pre">Python</span> <span class="pre">&lt;version&gt;</span> <span class="pre">(experimental)</span></code>, and nothing else: no
-<code class="docutils literal notranslate"><span class="pre">integration</span></code>, <code class="docutils literal notranslate"><span class="pre">Compat</span></code>, wheel or conda leg, so never a required context. The
-legs never block, by the KTLO mechanics above: <code class="docutils literal notranslate"><span class="pre">test</span></code>’s guard is
-<code class="docutils literal notranslate"><span class="pre">${{</span> <span class="pre">matrix.ktlo</span> <span class="pre">==</span> <span class="pre">true</span> <span class="pre">||</span> <span class="pre">matrix.experimental</span> <span class="pre">==</span> <span class="pre">true</span> <span class="pre">}}</span></code>, their annotations
-are warnings, and <code class="docutils literal notranslate"><span class="pre">Experimental</span> <span class="pre">summary</span></code>, the step before <code class="docutils literal notranslate"><span class="pre">KTLO</span> <span class="pre">summary</span></code>,
-reports each failed step. A leg past the job’s 45-minute <code class="docutils literal notranslate"><span class="pre">timeout-minutes</span></code> would
-be cancelled, which no step-level guard contains and <code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code>
-refuses, and neither build’s runtime here is measured. So on these legs alone,
-setup-python, the install and the tests have caps of their own, of 5, 10 and 25
-minutes: a step at its cap fails rather than cancels, and the guard holds
-(actions/runner <code class="docutils literal notranslate"><span class="pre">src/Runner.Worker/StepsRunner.cs:322-353</span></code>). The runner’s
-<code class="docutils literal notranslate"><span class="pre">has</span> <span class="pre">timed</span> <span class="pre">out</span></code> error stays, changing no conclusion, as <code class="docutils literal notranslate"><span class="pre">Process</span> <span class="pre">completed</span> <span class="pre">with</span>
-<span class="pre">exit</span> <span class="pre">code</span> <span class="pre">N.</span></code> does. Everything but the install and the tests took under 20
-seconds on every uncovered leg of runs 38569321543-38569522442. Every other leg’s
-caps are 360, the documented maximum, so its job’s 45 minutes bind first, as with
-none. Promoting one whose leg stays green is a hand edit,
-which <code class="file docutils literal notranslate"><span class="pre">util/python_versions.py</span></code> refuses until the build has a wheel, a conda
-build and a <code class="docutils literal notranslate"><span class="pre">Compat</span></code> leg.</p>
+<code class="docutils literal notranslate"><span class="pre">experimental</span></code> (two), the one matrix job of <code class="file docutils literal notranslate"><span class="pre">.github/workflows/experimental.yml</span></code>
+(“Experimental Tests”), named <code class="docutils literal notranslate"><span class="pre">Python</span> <span class="pre">&lt;version&gt;</span> <span class="pre">(experimental)</span></code>, and nothing
+else: no <code class="docutils literal notranslate"><span class="pre">integration</span></code>, <code class="docutils literal notranslate"><span class="pre">Compat</span></code>, wheel or conda leg, so never a required
+context. They were legs of <code class="docutils literal notranslate"><span class="pre">test</span></code> until <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1732">#1732</a>, which moved them to a
+workflow of their own, by the owner’s ruling that nothing waits on them. <strong>That
+workflow reports separately and holds up nothing</strong>: a job cannot <code class="docutils literal notranslate"><span class="pre">needs:</span></code> one in
+another workflow, nothing calls it, and no <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> names it, so the Unit
+Tests run completes without it, and with it <code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code>,
+<code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code> and the four workflows that wait on Unit Tests completing
+(<code class="docutils literal notranslate"><span class="pre">coverage-comment.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">deploy-pages.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">cron-vendor.yml</span></code> and
+<code class="docutils literal notranslate"><span class="pre">cron-conda.yml</span></code>). It runs on Unit Tests’ <code class="docutils literal notranslate"><span class="pre">push</span></code> and <code class="docutils literal notranslate"><span class="pre">pull_request</span></code> events,
+skips a docs-only pull request by the same <code class="docutils literal notranslate"><span class="pre">changes</span></code> script, and cancels a
+pull request’s superseded run. The legs never
+block, by the KTLO mechanics above: every step that can fail has
+<code class="docutils literal notranslate"><span class="pre">continue-on-error:</span> <span class="pre">true</span></code>, their annotations are warnings, and <code class="docutils literal notranslate"><span class="pre">Experimental</span>
+<span class="pre">summary</span></code>, the job’s last step, reports each failed step. A failure no step
+contains, such as a lost runner, fails the job, and the job’s own
+<code class="docutils literal notranslate"><span class="pre">continue-on-error:</span> <span class="pre">true</span></code> keeps it from failing the run: it “prevents a workflow
+run from failing when a job fails” (<a class="reference external" href="https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idcontinue-on-error">Workflow syntax</a>),
+though the leg’s check run still reads <code class="docutils literal notranslate"><span class="pre">failure</span></code>. A job past its
+<code class="docutils literal notranslate"><span class="pre">timeout-minutes</span></code> is cancelled, and that page does not say whether the job-level
+guard covers a cancellation. So setup-python, the install and the tests have caps
+of their own, of 5, 10 and 120 minutes, under the job’s 140: a step at its cap
+fails rather than cancels, and the guard holds (actions/runner
+<code class="docutils literal notranslate"><span class="pre">src/Runner.Worker/StepsRunner.cs:322-353</span></code>). The runner’s <code class="docutils literal notranslate"><span class="pre">has</span> <span class="pre">timed</span> <span class="pre">out</span></code> error
+stays, changing no conclusion, as <code class="docutils literal notranslate"><span class="pre">Process</span> <span class="pre">completed</span> <span class="pre">with</span> <span class="pre">exit</span> <span class="pre">code</span> <span class="pre">N.</span></code> does.
+Everything but the install and the tests took under 20 seconds on every uncovered
+leg of runs 38569321543-38569522442. <code class="docutils literal notranslate"><span class="pre">test</span></code>’s caps are main’s: 45 minutes for the
+job, and none on a step. Promoting one whose leg stays green is a hand edit, which
+<code class="file docutils literal notranslate"><span class="pre">util/python_versions.py</span></code> refuses until the build has a wheel, a conda build
+and a <code class="docutils literal notranslate"><span class="pre">Compat</span></code> leg.</p>
+<p>The tests’ 120 minutes are sized for GraalPy, the slower of the two legs that share
+them: its leg reached 26% of the unit tier in 25 minutes (job 115915976024), where
+3.14t’s ran the whole tier in 5.8 (run 38581834697). By the owner’s ruling the
+round-trip sweeps run on <code class="docutils literal notranslate"><span class="pre">latest</span></code> alone: every leg but <code class="docutils literal notranslate"><span class="pre">latest</span></code> adds
+<code class="docutils literal notranslate"><span class="pre">--ignore-glob='*roundtrip*'</span></code>, which leaves out each unit-tier module whose path
+holds <code class="docutils literal notranslate"><span class="pre">roundtrip</span></code> (<code class="docutils literal notranslate"><span class="pre">ROUNDTRIP_SWEEP_GLOB</span></code> in <code class="file docutils literal notranslate"><span class="pre">tests/_tiers.py</span></code>), and
+<code class="docutils literal notranslate"><span class="pre">latest</span></code>, the coverage leg, runs them as before. The subset covers
+<code class="docutils literal notranslate"><span class="pre">integration</span></code> too: off <code class="docutils literal notranslate"><span class="pre">latest</span></code> its legs leave out the three
+<code class="docutils literal notranslate"><span class="pre">*roundtrip*_runtime.py</span></code> modules (<code class="docutils literal notranslate"><span class="pre">ROUNDTRIP_RUNTIME_GLOB</span></code>), dropping them from
+<code class="docutils literal notranslate"><span class="pre">fixture_tier_paths()</span></code>’s selection and adding the glob as an <code class="docutils literal notranslate"><span class="pre">--ignore-glob</span></code>,
+since pytest applies no ignore to a path it was handed. On 2026-10-14 they were 41 modules
+and 8% of the unit tier’s time in a serial 3.14 run (86 of 1,031 s), and 10-11% on the
+3.14, 3.15 and 3.14t legs of run 38581834697, so the rest should take GraalPy 88-113
+minutes (estimate).</p>
 </section>
 <section id="python-versions">
 <h2>Python Versions<a class="headerlink" href="#python-versions" title="Link to this heading">¶</a></h2>

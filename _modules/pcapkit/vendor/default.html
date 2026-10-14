@@ -331,6 +331,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/logging.html">Logging System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
 </ul>
 </li>
@@ -483,6 +484,17 @@
 <span class="sd">:mod:`pcapkit.vendor.default` contains :class:`~pcapkit.vendor.default.Vendor`</span>
 <span class="sd">only, which is the base meta class for all vendor crawlers.</span>
 
+<span class="sd">.. versionremoved:: 1.5.0</span>
+
+<span class="sd">   Moved to :mod:`pcapkit.utilities.config` (:issue:`1726`):</span>
+
+<span class="sd">   * ``pcapkit.vendor.default.MAX_RETRY``, now</span>
+<span class="sd">     :data:`pcapkit.utilities.config.VENDOR_RETRY`, set with</span>
+<span class="sd">     :envvar:`PCAPKIT_VENDOR_RETRY`;</span>
+<span class="sd">   * ``pcapkit.vendor.default.CI_MODE``, now</span>
+<span class="sd">     :data:`pcapkit.utilities.config.CI_MODE`, set with</span>
+<span class="sd">     :envvar:`PCAPKIT_CI_MODE`.</span>
+
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">abc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
@@ -502,8 +514,8 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">VendorNotImplemented</span><span class="p">,</span> <span class="n">VendorPathNotFound</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">BOOLEAN_STATES</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">VendorRequestWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -511,9 +523,6 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Vendor'</span><span class="p">]</span>
-
-<span class="n">MAX_RETRY</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'PCAPKIT_VENDOR_RETRY'</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span> <span class="ow">or</span> <span class="mi">1</span>
-<span class="n">CI_MODE</span> <span class="o">=</span> <span class="n">BOOLEAN_STATES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'PCAPKIT_CI_MODE'</span><span class="p">,</span> <span class="s1">'false'</span><span class="p">)</span><span class="o">.</span><span class="n">casefold</span><span class="p">(),</span> <span class="kc">False</span><span class="p">)</span>
 
 <span class="c1">#: Distribution name of this package, i.e. the name its metadata is registered</span>
 <span class="c1">#: under, which is not the import name (:mod:`pcapkit`).</span>
@@ -571,9 +580,11 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">get_proxies</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, str]'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Get proxy for blocked sites.</span>
 
-<span class="sd">    The function will read :envvar:`PCAPKIT_HTTP_PROXY`</span>
-<span class="sd">    and :envvar:`PCAPKIT_HTTPS_PROXY`, if any, for the</span>
-<span class="sd">    proxy settings of |requests|_.</span>
+<span class="sd">    The function will read :envvar:`PCAPKIT_HTTP_PROXY` and</span>
+<span class="sd">    :envvar:`PCAPKIT_HTTPS_PROXY`, if any, on every call, through</span>
+<span class="sd">    :func:`~pcapkit.utilities.config.http_proxy` and</span>
+<span class="sd">    :func:`~pcapkit.utilities.config.https_proxy`, for the proxy settings of</span>
+<span class="sd">    |requests|_.</span>
 
 <span class="sd">    .. |requests| replace:: ``requests``</span>
 <span class="sd">    .. _requests: https://requests.readthedocs.io</span>
@@ -582,8 +593,8 @@
 <span class="sd">        Proxy settings for |requests|_.</span>
 
 <span class="sd">    """</span>
-    <span class="n">HTTP_PROXY</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">'PCAPKIT_HTTP_PROXY'</span><span class="p">)</span>
-    <span class="n">HTTPS_PROXY</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">'PCAPKIT_HTTPS_PROXY'</span><span class="p">)</span>
+    <span class="n">HTTP_PROXY</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">http_proxy</span><span class="p">()</span>
+    <span class="n">HTTPS_PROXY</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">https_proxy</span><span class="p">()</span>
     <span class="n">PROXIES</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, str]</span>
     <span class="k">if</span> <span class="n">HTTP_PROXY</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">PROXIES</span><span class="p">[</span><span class="s1">'http'</span><span class="p">]</span> <span class="o">=</span> <span class="n">HTTP_PROXY</span>
@@ -1107,19 +1118,19 @@
 
         <span class="c1"># NOTE: both branches below send this. Wikimedia rejects ``requests``'</span>
         <span class="c1"># default agent with HTTP 403, so a crawler without it fetches 126 bytes</span>
-        <span class="c1"># of robot-policy text and retries MAX_RETRY times against a refusal</span>
+        <span class="c1"># of robot-policy text and retries config.VENDOR_RETRY times against a refusal</span>
         <span class="c1"># that no amount of retrying will lift; see #518.</span>
         <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'User-Agent'</span><span class="p">:</span> <span class="n">get_user_agent</span><span class="p">()}</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">counter</span> <span class="o">=</span> <span class="mi">1</span>
             <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">counter</span> <span class="o">&gt;</span> <span class="n">MAX_RETRY</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">counter</span> <span class="o">&gt;</span> <span class="n">config</span><span class="o">.</span><span class="n">VENDOR_RETRY</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">RequestException</span>
 
                 <span class="n">page</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">LINK</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>  <span class="c1"># nosec: B113</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">page</span><span class="o">.</span><span class="n">ok</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">page</span><span class="o">.</span><span class="n">text</span><span class="p">:</span>
-                    <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Connection failed; retry for </span><span class="si">{</span><span class="n">counter</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">MAX_RETRY</span><span class="si">}</span><span class="s1">...'</span><span class="p">,</span>
+                    <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Connection failed; retry for </span><span class="si">{</span><span class="n">counter</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">VENDOR_RETRY</span><span class="si">}</span><span class="s1">...'</span><span class="p">,</span>
                          <span class="n">VendorRequestWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
                     <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -1136,19 +1147,19 @@
 
                 <span class="n">counter</span> <span class="o">=</span> <span class="mi">1</span>
                 <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">counter</span> <span class="o">&gt;</span> <span class="n">MAX_RETRY</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">counter</span> <span class="o">&gt;</span> <span class="n">config</span><span class="o">.</span><span class="n">VENDOR_RETRY</span><span class="p">:</span>
                         <span class="k">raise</span>
 
                     <span class="n">page</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">LINK</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">proxies</span><span class="o">=</span><span class="n">proxies</span><span class="p">)</span>  <span class="c1"># nosec: B113</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">page</span><span class="o">.</span><span class="n">ok</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">page</span><span class="o">.</span><span class="n">text</span><span class="p">:</span>
-                        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Connection failed; retry with proxy for </span><span class="si">{</span><span class="n">counter</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">MAX_RETRY</span><span class="si">}</span><span class="s1">...'</span><span class="p">,</span>
+                        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Connection failed; retry with proxy for </span><span class="si">{</span><span class="n">counter</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">VENDOR_RETRY</span><span class="si">}</span><span class="s1">...'</span><span class="p">,</span>
                              <span class="n">VendorRequestWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
                         <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
                         <span class="k">continue</span>
                     <span class="k">break</span>
             <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">RequestException</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">CI_MODE</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">CI_MODE</span><span class="p">:</span>
                     <span class="n">warn</span><span class="p">(</span><span class="s1">'Connection failed; exit on CI mode...'</span><span class="p">,</span>
                          <span class="n">VendorRequestWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
                     <span class="k">raise</span>
@@ -1157,7 +1168,7 @@
                     <span class="c1"># NOTE: manual intervention needs an operator, and a process</span>
                     <span class="c1"># with no terminal has none -- nobody to read the instructions</span>
                     <span class="c1"># below, nobody to save the page, so the wait it ends in could</span>
-                    <span class="c1"># only ever time out the whole run. Fail exactly as CI_MODE</span>
+                    <span class="c1"># only ever time out the whole run. Fail exactly as config.CI_MODE</span>
                     <span class="c1"># does rather than prompting into the void; see #522.</span>
                     <span class="n">warn</span><span class="p">(</span><span class="s1">'Connection failed; exit as stdin is not interactive...'</span><span class="p">,</span>
                          <span class="n">VendorRequestWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>

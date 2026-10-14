@@ -331,6 +331,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/logging.html">Logging System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
 </ul>
 </li>
@@ -486,6 +487,12 @@
 <span class="sd">:class:`~pcapkit.protocols.internet.ipsec.IPsec`, :class:`~pcapkit.protocols.internet.ipv4.IPv4`,</span>
 <span class="sd">:class:`~pcapkit.protocols.internet.ipv6.IPv6`, :class:`~pcapkit.protocols.internet.ipx.IPX`, and etc.</span>
 
+<span class="sd">.. versionremoved:: 1.5.0</span>
+
+<span class="sd">   ``pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT``, now</span>
+<span class="sd">   :data:`pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`, set with</span>
+<span class="sd">   :envvar:`PCAPKIT_EXTENSION_HEADER_LIMIT` (:issue:`1726`).</span>
+
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">contextvars</span>
@@ -499,6 +506,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.protochain</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoChain</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">,</span> <span class="n">_rebuilding</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">keep_short_read</span><span class="p">,</span> <span class="n">replay_short_read</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">stacklevel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span>
 
@@ -511,32 +519,10 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Internet'</span><span class="p">]</span>
 
-<span class="c1">#: Most IPv6 extension headers dissected in one chain, i.e. one after another</span>
-<span class="c1">#: with no other layer between them (:issue:`1604`). The walk stops there, and</span>
-<span class="c1">#: what follows the last of them is kept as</span>
-<span class="c1">#: :class:`~pcapkit.protocols.misc.raw.Raw`, with one</span>
-<span class="c1">#: :exc:`~pcapkit.utilities.warnings.ProtocolWarning`. That holds whether the</span>
-<span class="c1">#: chain follows IPv6, which walks it in a loop</span>
-<span class="c1">#: (:meth:`IPv6._decode_next_layer</span>
-<span class="c1">#: &lt;pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer&gt;`), or another</span>
-<span class="c1">#: layer such as IPv4, where each header dissects the next one itself</span>
-<span class="c1">#: (:meth:`Internet._import_next_layer`). The toolkit adapters that walk a</span>
-<span class="c1">#: chain themselves stop at the same depth.</span>
-<span class="c1">#:</span>
-<span class="c1">#: :rfc:`8200#section-4.1` allows each extension header at most once, and the</span>
-<span class="c1">#: Destination Options header at most twice, so no compliant chain gets close.</span>
-<span class="c1">#: Without the bound, a chain dissected header by header stops wherever</span>
-<span class="c1">#: Python's recursion limit falls, which depends on the interpreter.</span>
-<span class="c1">#:</span>
-<span class="c1">#: Rebuilding a frame with :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data`</span>
-<span class="c1">#: stops where parsing it did, and warns once too (:issue:`1619`), c.f.</span>
-<span class="c1">#: :meth:`Internet._make_payload`.</span>
-<span class="n">EXTENSION_HEADER_LIMIT</span> <span class="o">=</span> <span class="mi">32</span>
-
 <span class="c1">#: contextvars.ContextVar[int]: Where the payload :meth:`Internet._make_payload`</span>
 <span class="c1">#: rebuilds sits in a chain of IPv6 extension headers, should it be one: one past</span>
 <span class="c1">#: the layer it is the payload of, as :meth:`Internet._next_exthdr_depth` places</span>
-<span class="c1">#: it while parsing, c.f. :data:`EXTENSION_HEADER_LIMIT`.</span>
+<span class="c1">#: it while parsing, c.f. :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`.</span>
 <span class="n">_exthdr_rebuilt</span> <span class="o">=</span> <span class="n">contextvars</span><span class="o">.</span><span class="n">ContextVar</span><span class="p">(</span><span class="s1">'_exthdr_rebuilt'</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
 
@@ -632,7 +618,7 @@
     <span class="c1">#: int: How many IPv6 extension headers in a row the next layer follows:</span>
     <span class="c1">#: this layer's place in such a chain, or how many headers</span>
     <span class="c1">#: :class:`~pcapkit.protocols.internet.ipv6.IPv6` walked, else ``0``, c.f.</span>
-    <span class="c1">#: :data:`EXTENSION_HEADER_LIMIT` and :meth:`_next_exthdr_depth`.</span>
+    <span class="c1">#: :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` and :meth:`_next_exthdr_depth`.</span>
     <span class="n">_exthdr_depth</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="c1">##########################################################################</span>
@@ -720,7 +706,7 @@
 <span class="sd">            _exthdr_depth (int): Where this layer is in a chain of IPv6</span>
 <span class="sd">                extension headers, counting from ``1``, or ``0`` if it is not</span>
 <span class="sd">                in one. Handed over by :meth:`_import_next_layer` while</span>
-<span class="sd">                parsing, c.f. :data:`EXTENSION_HEADER_LIMIT`; a layer</span>
+<span class="sd">                parsing, c.f. :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`; a layer</span>
 <span class="sd">                constructed instead, as :meth:`from_data` rebuilds one, takes it</span>
 <span class="sd">                from :meth:`_rebuilt_exthdr_depth` (:issue:`1619`).</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
@@ -783,7 +769,7 @@
 <span class="sd">            One more than :attr:`_exthdr_depth` if ``proto`` names an IPv6</span>
 <span class="sd">            extension header, or ``0`` if it names none, so that another layer</span>
 <span class="sd">            between two headers starts a new chain. Past</span>
-<span class="sd">            :data:`EXTENSION_HEADER_LIMIT`, the next layer is left raw.</span>
+<span class="sd">            :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`, the next layer is left raw.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">extension</span><span class="p">:</span>
@@ -829,7 +815,7 @@
 <span class="sd">        &lt;pcapkit.protocols.protocol.ProtocolBase._make_payload&gt;`, but the payload</span>
 <span class="sd">        is built at its place in its chain of IPv6 extension headers, one past</span>
 <span class="sd">        this layer's, since it parses its own octets again. So rebuilding a frame</span>
-<span class="sd">        stops at :data:`EXTENSION_HEADER_LIMIT` where parsing it did, rather</span>
+<span class="sd">        stops at :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` where parsing it did, rather</span>
 <span class="sd">        than that many headers past each header of the chain, and warns of the</span>
 <span class="sd">        limit once, as :meth:`_next_layer_class` describes (:issue:`1619`).</span>
 
@@ -870,14 +856,14 @@
 <span class="sd">            :class:`~pcapkit.protocols.misc.null.NoPayload` if there is</span>
 <span class="sd">            nothing to parse; :class:`~pcapkit.protocols.misc.raw.Raw` if the</span>
 <span class="sd">            parse stops at this layer, or the next layer is an IPv6 extension</span>
-<span class="sd">            header past :data:`EXTENSION_HEADER_LIMIT` in a row; otherwise the</span>
+<span class="sd">            header past :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` in a row; otherwise the</span>
 <span class="sd">            class registered for ``proto``. With it, the keywords only that next</span>
 <span class="sd">            layer is constructed with: the warning given, as ``error``, or the</span>
 <span class="sd">            next layer's place in its chain, as ``_exthdr_depth``.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            ProtocolWarning: If the next layer is past</span>
-<span class="sd">                :data:`EXTENSION_HEADER_LIMIT` (:issue:`1604`), unless this</span>
+<span class="sd">                :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` (:issue:`1604`), unless this</span>
 <span class="sd">                layer is inside a payload being rebuilt (:issue:`1619`).</span>
 
 <span class="sd">        """</span>
@@ -889,15 +875,16 @@
             <span class="k">return</span> <span class="n">Raw</span><span class="p">,</span> <span class="p">{}</span>
 
         <span class="n">depth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_exthdr_depth</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">extension</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">depth</span> <span class="o">&gt;</span> <span class="n">EXTENSION_HEADER_LIMIT</span><span class="p">:</span>
+        <span class="n">limit</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">EXTENSION_HEADER_LIMIT</span>
+        <span class="k">if</span> <span class="n">limit</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">depth</span> <span class="o">&gt;</span> <span class="n">limit</span><span class="p">:</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
 
             <span class="n">message</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: a chain of IPv6 extension headers reached the limit of '</span>
-                       <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">EXTENSION_HEADER_LIMIT</span><span class="si">}</span><span class="s1"> headers; the rest of the packet, from Next '</span>
+                       <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">limit</span><span class="si">}</span><span class="s1"> headers; the rest of the packet, from Next '</span>
                        <span class="sa">f</span><span class="s1">'Header </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s2">"int"</span><span class="p">,</span><span class="w"> </span><span class="n">proto</span><span class="p">))</span><span class="si">}</span><span class="s1">, is left undissected'</span><span class="p">)</span>
             <span class="c1"># NOTE: Inside a payload being rebuilt, the layer it is rebuilt for</span>
             <span class="c1"># warns of the same octets once its own parse gets here, as for</span>
-            <span class="c1"># :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT`.</span>
+            <span class="c1"># :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">_rebuilding</span><span class="o">.</span><span class="n">get</span><span class="p">():</span>
                 <span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
             <span class="k">return</span> <span class="n">Raw</span><span class="p">,</span> <span class="p">{</span><span class="s1">'error'</span><span class="p">:</span> <span class="n">message</span><span class="p">}</span>
@@ -981,7 +968,7 @@
 <span class="sd">            Instance of next layer.</span>
 
 <span class="sd">        Notes:</span>
-<span class="sd">            An IPv6 extension header past :data:`EXTENSION_HEADER_LIMIT` in a</span>
+<span class="sd">            An IPv6 extension header past :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` in a</span>
 <span class="sd">            row is not dissected: it and the rest of the packet are kept as</span>
 <span class="sd">            :class:`~pcapkit.protocols.misc.raw.Raw`, with one</span>
 <span class="sd">            :exc:`~pcapkit.utilities.warnings.ProtocolWarning` (:issue:`1604`).</span>

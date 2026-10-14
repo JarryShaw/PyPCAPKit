@@ -6,6 +6,17 @@ Base Crawler
 :mod:`pcapkit.vendor.default` contains :class:`~pcapkit.vendor.default.Vendor`
 only, which is the base meta class for all vendor crawlers.
 
+.. versionremoved:: 1.5.0
+
+   Moved to :mod:`pcapkit.utilities.config` (:issue:`1726`):
+
+   * ``pcapkit.vendor.default.MAX_RETRY``, now
+     :data:`pcapkit.utilities.config.VENDOR_RETRY`, set with
+     :envvar:`PCAPKIT_VENDOR_RETRY`;
+   * ``pcapkit.vendor.default.CI_MODE``, now
+     :data:`pcapkit.utilities.config.CI_MODE`, set with
+     :envvar:`PCAPKIT_CI_MODE`.
+
 .. autoclass:: pcapkit.vendor.default.Vendor
    :no-members:
    :show-inheritance:

@@ -338,6 +338,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/logging.html">Logging System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/chardet.html">Character Set Detection</a></li>
 </ul>
 </li>
@@ -658,7 +659,7 @@ is included when <a class="reference internal" href="../../corekit/infoclass.htm
 </dl>
 <div class="admonition-notes admonition">
 <p class="admonition-title">Notes</p>
-<p>An IPv6 extension header past <a class="reference internal" href="#pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT" title="pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a> in a
+<p>An IPv6 extension header past <a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.EXTENSION_HEADER_LIMIT" title="pcapkit.utilities.config.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a> in a
 row is not dissected: it and the rest of the packet are kept as
 <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, with one
 <a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.ProtocolWarning" title="pcapkit.utilities.warnings.ProtocolWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolWarning</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1604">#1604</a>).
@@ -687,14 +688,14 @@ is handed to the next layer, c.f. <a class="reference internal" href="#pcapkit.p
 <dd class="field-odd"><p><a class="reference internal" href="../misc/null.html#pcapkit.protocols.misc.null.NoPayload" title="pcapkit.protocols.misc.null.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a> if there is
 nothing to parse; <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> if the
 parse stops at this layer, or the next layer is an IPv6 extension
-header past <a class="reference internal" href="#pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT" title="pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a> in a row; otherwise the
+header past <a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.EXTENSION_HEADER_LIMIT" title="pcapkit.utilities.config.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a> in a row; otherwise the
 class registered for <code class="docutils literal notranslate"><span class="pre">proto</span></code>. With it, the keywords only that next
 layer is constructed with: the warning given, as <code class="docutils literal notranslate"><span class="pre">error</span></code>, or the
 next layer’s place in its chain, as <code class="docutils literal notranslate"><span class="pre">_exthdr_depth</span></code>.</p>
 </dd>
 <dt class="field-even">Warns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>ProtocolWarning</strong> – If the next layer is past
-<a class="reference internal" href="#pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT" title="pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1604">#1604</a>), unless this
+<a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.EXTENSION_HEADER_LIMIT" title="pcapkit.utilities.config.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1604">#1604</a>), unless this
 layer is inside a payload being rebuilt (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1619">#1619</a>).</p>
 </dd>
 </dl>
@@ -720,7 +721,7 @@ counts the chain itself, c.f. <a class="reference internal" href="ipv6.html#pcap
 <dd class="field-odd"><p>One more than <a class="reference internal" href="#pcapkit.protocols.internet.internet.Internet._exthdr_depth" title="pcapkit.protocols.internet.internet.Internet._exthdr_depth"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_exthdr_depth</span></code></a> if <code class="docutils literal notranslate"><span class="pre">proto</span></code> names an IPv6
 extension header, or <code class="docutils literal notranslate"><span class="pre">0</span></code> if it names none, so that another layer
 between two headers starts a new chain. Past
-<a class="reference internal" href="#pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT" title="pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a>, the next layer is left raw.</p>
+<a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.EXTENSION_HEADER_LIMIT" title="pcapkit.utilities.config.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a>, the next layer is left raw.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -732,7 +733,7 @@ between two headers starts a new chain. Past
 <p>As <code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase._make_payload</span></code>, but the payload
 is built at its place in its chain of IPv6 extension headers, one past
 this layer’s, since it parses its own octets again. So rebuilding a frame
-stops at <a class="reference internal" href="#pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT" title="pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a> where parsing it did, rather
+stops at <a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.EXTENSION_HEADER_LIMIT" title="pcapkit.utilities.config.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a> where parsing it did, rather
 than that many headers past each header of the chain, and warns of the
 limit once, as <a class="reference internal" href="#pcapkit.protocols.internet.internet.Internet._next_layer_class" title="pcapkit.protocols.internet.internet.Internet._next_layer_class"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_next_layer_class()</span></code></a> describes (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1619">#1619</a>).</p>
 <dl class="field-list simple">
@@ -802,7 +803,7 @@ c.f. <a class="reference internal" href="#pcapkit.protocols.internet.internet.In
 <dd><p>How many IPv6 extension headers in a row the next layer follows:
 this layer’s place in such a chain, or how many headers
 <a class="reference internal" href="ipv6.html#pcapkit.protocols.internet.ipv6.IPv6" title="pcapkit.protocols.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a> walked, else <code class="docutils literal notranslate"><span class="pre">0</span></code>, c.f.
-<a class="reference internal" href="#pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT" title="pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a> and <a class="reference internal" href="#pcapkit.protocols.internet.internet.Internet._next_exthdr_depth" title="pcapkit.protocols.internet.internet.Internet._next_exthdr_depth"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_next_exthdr_depth()</span></code></a>.</p>
+<a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.EXTENSION_HEADER_LIMIT" title="pcapkit.utilities.config.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a> and <a class="reference internal" href="#pcapkit.protocols.internet.internet.Internet._next_exthdr_depth" title="pcapkit.protocols.internet.internet.Internet._next_exthdr_depth"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_next_exthdr_depth()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
@@ -815,7 +816,7 @@ this layer’s place in such a chain, or how many headers
 <section id="extension-header-chains">
 <h2>Extension Header Chains<a class="headerlink" href="#extension-header-chains" title="Link to this heading">¶</a></h2>
 <p>A chain of IPv6 extension headers is dissected to at most
-<a class="reference internal" href="#pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT" title="pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a> headers in
+<a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.EXTENSION_HEADER_LIMIT" title="pcapkit.utilities.config.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a> headers in
 a row, whether it follows IPv6 or another layer such as IPv4. What follows is
 kept as <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, with one
 <a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.ProtocolWarning" title="pcapkit.utilities.warnings.ProtocolWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolWarning</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1604">#1604</a>). The
@@ -824,31 +825,14 @@ so it may still find the upper layer past it (<a class="extlink-issue reference 
 <code class="docutils literal notranslate"><span class="pre">dpkt</span></code> toolkit, which reads the chain as <code class="xref py py-mod docutils literal notranslate"><span class="pre">dpkt</span></code> decodes it. So does the
 <code class="docutils literal notranslate"><span class="pre">scapy</span></code> engine behind IPv6, where Scapy dissects each extension header itself;
 behind IPv4, its toolkit steps over them in the octets to find TCP, up to
-<a class="reference internal" href="#pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT" title="pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a> of them in a
-row. The <code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code> toolkit walks no extension header chain, so
-it finds no upper layer behind one.</p>
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.internet.</span></span><span class="sig-name descname"><span class="pre">EXTENSION_HEADER_LIMIT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32</span></span><a class="headerlink" href="#pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT" title="Link to this definition">¶</a></dt>
-<dd><p>Most IPv6 extension headers dissected in one chain, i.e. one after another
-with no other layer between them (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1604">#1604</a>). The walk stops there, and
-what follows the last of them is kept as
-<a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, with one
-<a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.ProtocolWarning" title="pcapkit.utilities.warnings.ProtocolWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolWarning</span></code></a>. That holds whether the
-chain follows IPv6, which walks it in a loop
-(<a class="reference internal" href="ipv6.html#pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer" title="pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6._decode_next_layer</span></code></a>), or another
-layer such as IPv4, where each header dissects the next one itself
-(<a class="reference internal" href="#pcapkit.protocols.internet.internet.Internet._import_next_layer" title="pcapkit.protocols.internet.internet.Internet._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Internet._import_next_layer()</span></code></a>). The toolkit adapters that walk a
-chain themselves stop at the same depth.</p>
-<p><span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.1"><strong>RFC 8200 Section 4.1</strong></a> allows each extension header at most once, and the
-Destination Options header at most twice, so no compliant chain gets close.
-Without the bound, a chain dissected header by header stops wherever
-Python’s recursion limit falls, which depends on the interpreter.</p>
-<p>Rebuilding a frame with <code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code>
-stops where parsing it did, and warns once too (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1619">#1619</a>), c.f.
-<a class="reference internal" href="#pcapkit.protocols.internet.internet.Internet._make_payload" title="pcapkit.protocols.internet.internet.Internet._make_payload"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Internet._make_payload()</span></code></a>.</p>
-</dd></dl>
-
+<a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.EXTENSION_HEADER_LIMIT" title="pcapkit.utilities.config.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a> of them in a row. The
+<code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code> toolkit walks no extension header chain, so it finds no upper
+layer behind one.</p>
+<div class="versionremoved">
+<p><span class="versionmodified removed">Removed in version 1.5.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT</span></code>, now
+<a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.EXTENSION_HEADER_LIMIT" title="pcapkit.utilities.config.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.utilities.config.EXTENSION_HEADER_LIMIT</span></code></a>, set with
+<span class="target" id="index-0"></span><a class="reference internal" href="../../utilities/config.html#envvar-PCAPKIT_EXTENSION_HEADER_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_EXTENSION_HEADER_LIMIT</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1726">#1726</a>).</p>
+</div>
 </section>
 </section>
 

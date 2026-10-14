@@ -331,6 +331,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/logging.html">Logging System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
 </ul>
 </li>
@@ -536,17 +537,47 @@
                   <span class="s1">'true'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">'false'</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
                   <span class="s1">'on'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">'off'</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
 
+<span class="c1">#: list[tuple[str, str]]: Each flag below whose value is not one of</span>
+<span class="c1">#: :data:`BOOLEAN_STATES`, as ``(variable, value)``, in the order read.</span>
+<span class="c1">#:</span>
+<span class="c1">#: This module loads before :mod:`pcapkit.utilities.warnings`, which needs</span>
+<span class="c1">#: :data:`VERBOSE`, so it cannot warn of a bad value itself. It records the</span>
+<span class="c1">#: value here instead, and :mod:`pcapkit.utilities.warnings` reports each with a</span>
+<span class="c1">#: :exc:`~pcapkit.utilities.warnings.ConfigWarning` once it has loaded</span>
+<span class="c1">#: (:issue:`1726`).</span>
+<span class="n">_BAD_FLAGS</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[tuple[str, str]]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_read_flag</span><span class="p">(</span><span class="n">variable</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Read the boolean environment variable ``variable``, off by default.</span>
+
+<span class="sd">    The value is read with surrounding whitespace stripped and</span>
+<span class="sd">    case-insensitively, as :func:`pcapkit.utilities.config._read_flag` reads</span>
+<span class="sd">    one. A value that is not then one of :data:`BOOLEAN_STATES` is taken as off</span>
+<span class="sd">    and recorded in :data:`_BAD_FLAGS`.</span>
+
+<span class="sd">    """</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">variable</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">text</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">BOOLEAN_STATES</span><span class="p">[</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">casefold</span><span class="p">()]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">_BAD_FLAGS</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">variable</span><span class="p">,</span> <span class="n">text</span><span class="p">))</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+
 <span class="c1">#: bool: Development mode flag.</span>
-<span class="n">DEVMODE</span> <span class="o">=</span> <span class="n">BOOLEAN_STATES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'PCAPKIT_DEVMODE'</span><span class="p">,</span> <span class="s1">'false'</span><span class="p">)</span><span class="o">.</span><span class="n">casefold</span><span class="p">(),</span> <span class="kc">False</span><span class="p">)</span>
+<span class="n">DEVMODE</span> <span class="o">=</span> <span class="n">_read_flag</span><span class="p">(</span><span class="s1">'PCAPKIT_DEVMODE'</span><span class="p">)</span>
 <span class="c1">#: bool: Verbose output flag.</span>
-<span class="n">VERBOSE</span> <span class="o">=</span> <span class="n">BOOLEAN_STATES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'PCAPKIT_VERBOSE'</span><span class="p">,</span> <span class="s1">'false'</span><span class="p">)</span><span class="o">.</span><span class="n">casefold</span><span class="p">(),</span> <span class="kc">False</span><span class="p">)</span>
+<span class="n">VERBOSE</span> <span class="o">=</span> <span class="n">_read_flag</span><span class="p">(</span><span class="s1">'PCAPKIT_VERBOSE'</span><span class="p">)</span>
 
 <span class="c1">###############################################################################</span>
 <span class="c1"># Sphinx Mode</span>
 <span class="c1">###############################################################################</span>
 
 <span class="c1">#: bool: This is a workaround for :data:`typing.TYPE_CHECKING` in Sphinx.</span>
-<span class="n">SPHINX_TYPE_CHECKING</span> <span class="o">=</span> <span class="n">BOOLEAN_STATES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'PCAPKIT_SPHINX'</span><span class="p">,</span> <span class="s1">'false'</span><span class="p">)</span><span class="o">.</span><span class="n">casefold</span><span class="p">(),</span> <span class="kc">False</span><span class="p">)</span>
+<span class="n">SPHINX_TYPE_CHECKING</span> <span class="o">=</span> <span class="n">_read_flag</span><span class="p">(</span><span class="s1">'PCAPKIT_SPHINX'</span><span class="p">)</span>
 
 <span class="c1">###############################################################################</span>
 <span class="c1"># Logger Setup</span>

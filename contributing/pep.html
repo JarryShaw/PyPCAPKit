@@ -338,6 +338,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/logging.html">Logging System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
 </ul>
 </li>
@@ -883,9 +884,9 @@ IPv6 extension headers – used to exhaust the recursion limit and leave the res
 of the frame raw, silently, at a depth that varied with the interpreter and the
 caller’s stack (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1604">#1604</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1610">#1610</a>).</p>
 <p>Recursion stays, with a counted bound:
-<a class="reference internal" href="../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.FRAME_LAYER_LIMIT" title="pcapkit.protocols.protocol.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a> caps a frame at 64 layers,
-and <a class="reference internal" href="../pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT" title="pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a> caps one
-chain of extension headers at 32. Past either, the rest stays
+<a class="reference internal" href="../pcapkit/utilities/config.html#pcapkit.utilities.config.FRAME_LAYER_LIMIT" title="pcapkit.utilities.config.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a> caps a frame at 64 layers by
+default, and <a class="reference internal" href="../pcapkit/utilities/config.html#pcapkit.utilities.config.EXTENSION_HEADER_LIMIT" title="pcapkit.utilities.config.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a> caps one
+chain of extension headers at 32 by default. Past either, the rest stays
 <a class="reference internal" href="../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, with one
 <a class="reference internal" href="../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.ProtocolWarning" title="pcapkit.utilities.warnings.ProtocolWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolWarning</span></code></a>. Raising
 <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.setrecursionlimit" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">sys.setrecursionlimit()</span></code></a> instead was rejected: it is process-wide, and the

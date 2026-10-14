@@ -338,6 +338,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/logging.html">Logging System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/chardet.html">Character Set Detection</a></li>
 </ul>
 </li>
@@ -492,6 +493,20 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.corekit.fields.field">
 <span id="base-fields"></span><h1>Base Fields<a class="headerlink" href="#module-pcapkit.corekit.fields.field" title="Link to this heading">¶</a></h1>
+<div class="versionremoved">
+<p><span class="versionmodified removed">Removed in version 1.5.0: </span>Moved to <a class="reference internal" href="../../utilities/config.html#module-pcapkit.utilities.config" title="pcapkit.utilities.config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.config</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1726">#1726</a>):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.field._MAX_ZERO_PAD_LENGTH</span></code>, now
+<a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH" title="pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH</span></code></a>, set with
+<span class="target" id="index-0"></span><a class="reference internal" href="../../utilities/config.html#envvar-PCAPKIT_MAX_ZERO_PAD_LENGTH"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_MAX_ZERO_PAD_LENGTH</span></code></a>;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.field._MAX_ZERO_PAD_SHORTFALL</span></code>, now
+<a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL" title="pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL</span></code></a>, set with
+<span class="target" id="index-1"></span><a class="reference internal" href="../../utilities/config.html#envvar-PCAPKIT_MAX_ZERO_PAD_SHORTFALL"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_MAX_ZERO_PAD_SHORTFALL</span></code></a>;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.field._ZERO_PAD_BUDGET_RATIO</span></code>, now
+<a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO" title="pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO</span></code></a>, set with
+<span class="target" id="index-2"></span><a class="reference internal" href="../../utilities/config.html#envvar-PCAPKIT_ZERO_PAD_BUDGET_RATIO"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_ZERO_PAD_BUDGET_RATIO</span></code></a>.</p></li>
+</ul>
+</div>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.fields.field.Field">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.field.</span></span><span class="sig-name descname"><span class="pre">Field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;pcapkit.corekit.sentinels.NoValueType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;function</span> <span class="pre">Field.&lt;lambda&gt;&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/field.html#Field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.field.Field" title="Link to this definition">¶</a></dt>
@@ -783,11 +798,11 @@ mapping dictionary.</p>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">buffer</span></code> holds fewer octets than <a class="reference internal" href="#pcapkit.corekit.fields.field.FieldBase.length" title="pcapkit.corekit.fields.field.FieldBase.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a>
     declares, and either <code class="docutils literal notranslate"><span class="pre">length</span></code> is past
-    <code class="xref py py-data docutils literal notranslate"><span class="pre">_MAX_ZERO_PAD_LENGTH</span></code>, or the shortfall is past
-    <code class="xref py py-data docutils literal notranslate"><span class="pre">_MAX_ZERO_PAD_SHORTFALL</span></code> and takes this parse’s total of
-    such shortfalls past what <code class="xref py py-data docutils literal notranslate"><span class="pre">_ZERO_PAD_BUDGET_RATIO</span></code> allows
+    <a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH" title="pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH"><code class="xref py py-data docutils literal notranslate"><span class="pre">MAX_ZERO_PAD_LENGTH</span></code></a>, or the shortfall is past
+    <a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL" title="pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL"><code class="xref py py-data docutils literal notranslate"><span class="pre">MAX_ZERO_PAD_SHORTFALL</span></code></a> and takes this parse’s total of
+    such shortfalls past what <a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO" title="pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO"><code class="xref py py-data docutils literal notranslate"><span class="pre">ZERO_PAD_BUDGET_RATIO</span></code></a> allows
     for the octets it has actually been given. A shortfall within
-    <code class="xref py py-data docutils literal notranslate"><span class="pre">_MAX_ZERO_PAD_SHORTFALL</span></code> is always padded and never
+    <a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL" title="pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL"><code class="xref py py-data docutils literal notranslate"><span class="pre">MAX_ZERO_PAD_SHORTFALL</span></code></a> is always padded and never
     raises.</p>
 </dd>
 </dl>

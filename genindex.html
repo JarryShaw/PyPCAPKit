@@ -330,6 +330,7 @@
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/logging.html">Logging System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/chardet.html">Character Set Detection</a></li>
 </ul>
 </li>
@@ -10025,6 +10026,8 @@
           <li><a href="pcapkit/protocols/transport/sctp.html#pcapkit.protocols.schema.transport.sctp.SCTP.chunks">(pcapkit.protocols.schema.transport.sctp.SCTP attribute)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/utilities/config.html#pcapkit.utilities.config.CI_MODE">CI_MODE (in module pcapkit.utilities.config)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.cichild_lm">cichild_lm (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -11196,6 +11199,8 @@
         <li><a href="pcapkit/utilities/logging.html#pcapkit.utilities.logging.configure">configure() (in module pcapkit.utilities.logging)</a>
 </li>
         <li><a href="pcapkit/const/ngap.html#pcapkit.const.ngap.protocol_ie.ProtocolIE.ConfiguredTACIndication">ConfiguredTACIndication (pcapkit.const.ngap.protocol_ie.ProtocolIE attribute)</a>
+</li>
+        <li><a href="pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.ConfigWarning">ConfigWarning</a>
 </li>
         <li><a href="pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.data.ip.Buffer.conflict">conflict (pcapkit.foundation.reassembly.data.ip.Buffer attribute)</a>
 
@@ -13503,7 +13508,7 @@
 </li>
         <li><a href="pcapkit/utilities/chardet.html#pcapkit.utilities.chardet.detect">detect() (in module pcapkit.utilities.chardet)</a>
 </li>
-        <li><a href="pcapkit/utilities/chardet.html#pcapkit.utilities.chardet.DETECT_CACHE_SIZE">DETECT_CACHE_SIZE (in module pcapkit.utilities.chardet)</a>
+        <li><a href="pcapkit/utilities/config.html#pcapkit.utilities.config.DETECT_CACHE_SIZE">DETECT_CACHE_SIZE (in module pcapkit.utilities.config)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.devbasic">devbasic (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
@@ -16259,8 +16264,6 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.entextnetwk">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.entextxid">entextxid (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -16275,6 +16278,8 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.entp">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.TLSKeyLog.entries">entries (pcapkit.protocols.data.misc.pcapng.TLSKeyLog attribute)</a>
 
         <ul>
@@ -16351,17 +16356,37 @@
         <ul>
           <li><a href="pcapkit/foundation/engines/3rdparty.html#index-0">PATH</a>, <a href="pcapkit/foundation/engines/3rdparty.html#index-1">[1]</a>, <a href="pcapkit/foundation/engines/3rdparty.html#index-2">[2]</a>, <a href="pcapkit/foundation/engines/3rdparty.html#index-3">[3]</a>, <a href="pcapkit/foundation/engines/3rdparty.html#index-4">[4]</a>, <a href="pcapkit/foundation/engines/3rdparty.html#index-5">[5]</a>, <a href="pcapkit/foundation/engines/index.html#index-0">[6]</a>
 </li>
-          <li><a href="pcapkit/vendor/default.html#index-0">PCAPKIT_CI_MODE</a>, <a href="pcapkit/vendor/default.html#index-1">[1]</a>, <a href="pcapkit/vendor/default.html#index-2">[2]</a>
+          <li><a href="pcapkit/index.html#index-1">PCAPKIT_CI_MODE</a>, <a href="pcapkit/index.html#index-9">[1]</a>, <a href="pcapkit/utilities/config.html#envvar-PCAPKIT_CI_MODE">[2]</a>, <a href="pcapkit/utilities/config.html#index-24">[3]</a>, <a href="pcapkit/vendor/default.html#index-1">[4]</a>, <a href="pcapkit/vendor/default.html#index-2">[5]</a>, <a href="pcapkit/vendor/default.html#index-3">[6]</a>, <a href="pcapkit/vendor/default.html#index-4">[7]</a>
 </li>
-          <li><a href="contributing/pep.html#index-27">PCAPKIT_DEVMODE</a>, <a href="pcapkit/index.html#envvar-PCAPKIT_DEVMODE">[1]</a>, <a href="pcapkit/utilities/logging.html#index-0">[2]</a>, <a href="pcapkit/utilities/logging.html#index-1">[3]</a>, <a href="pcapkit/utilities/logging.html#index-2">[4]</a>, <a href="pcapkit/utilities/logging.html#index-3">[5]</a>, <a href="pcapkit/utilities/logging.html#index-6">[6]</a>, <a href="pcapkit/utilities/logging.html#index-7">[7]</a>, <a href="pcapkit/utilities/warnings.html#index-1">[8]</a>
+          <li><a href="pcapkit/utilities/chardet.html#index-0">PCAPKIT_DETECT_CACHE_SIZE</a>, <a href="pcapkit/utilities/config.html#envvar-PCAPKIT_DETECT_CACHE_SIZE">[1]</a>, <a href="pcapkit/utilities/config.html#index-18">[2]</a>, <a href="pcapkit/utilities/config.html#index-8">[3]</a>
 </li>
-          <li><a href="pcapkit/index.html#envvar-PCAPKIT_HTTP_PROXY">PCAPKIT_HTTP_PROXY</a>, <a href="pcapkit/vendor/default.html#index-3">[1]</a>
+          <li><a href="contributing/pep.html#index-27">PCAPKIT_DEVMODE</a>, <a href="pcapkit/index.html#envvar-PCAPKIT_DEVMODE">[1]</a>, <a href="pcapkit/index.html#index-6">[2]</a>, <a href="pcapkit/utilities/config.html#index-0">[3]</a>, <a href="pcapkit/utilities/logging.html#index-0">[4]</a>, <a href="pcapkit/utilities/logging.html#index-1">[5]</a>, <a href="pcapkit/utilities/logging.html#index-2">[6]</a>, <a href="pcapkit/utilities/logging.html#index-3">[7]</a>, <a href="pcapkit/utilities/logging.html#index-6">[8]</a>, <a href="pcapkit/utilities/logging.html#index-7">[9]</a>, <a href="pcapkit/utilities/warnings.html#index-1">[10]</a>
 </li>
-          <li><a href="pcapkit/index.html#envvar-PCAPKIT_HTTPS_PROXY">PCAPKIT_HTTPS_PROXY</a>, <a href="pcapkit/vendor/default.html#index-4">[1]</a>
+          <li><a href="pcapkit/protocols/internet/internet.html#index-0">PCAPKIT_EXTENSION_HEADER_LIMIT</a>, <a href="pcapkit/utilities/config.html#envvar-PCAPKIT_EXTENSION_HEADER_LIMIT">[1]</a>, <a href="pcapkit/utilities/config.html#index-14">[2]</a>, <a href="pcapkit/utilities/config.html#index-4">[3]</a>
 </li>
-          <li><a href="pcapkit/index.html#envvar-PCAPKIT_SPHINX">PCAPKIT_SPHINX</a>, <a href="pcapkit/utilities/logging.html#index-5">[1]</a>
+          <li><a href="pcapkit/dumpkit/common.html#index-0">PCAPKIT_FALLBACK_LIMIT</a>, <a href="pcapkit/utilities/config.html#envvar-PCAPKIT_FALLBACK_LIMIT">[1]</a>, <a href="pcapkit/utilities/config.html#index-17">[2]</a>, <a href="pcapkit/utilities/config.html#index-7">[3]</a>
 </li>
-          <li><a href="pcapkit/index.html#envvar-PCAPKIT_VERBOSE">PCAPKIT_VERBOSE</a>, <a href="pcapkit/utilities/logging.html#index-4">[1]</a>, <a href="pcapkit/utilities/warnings.html#index-2">[2]</a>
+          <li><a href="pcapkit/protocols/protocol.html#index-0">PCAPKIT_FRAME_LAYER_LIMIT</a>, <a href="pcapkit/utilities/config.html#envvar-PCAPKIT_FRAME_LAYER_LIMIT">[1]</a>, <a href="pcapkit/utilities/config.html#index-13">[2]</a>, <a href="pcapkit/utilities/config.html#index-3">[3]</a>, <a href="pcapkit/utilities/config.html#index-5">[4]</a>
+</li>
+          <li><a href="pcapkit/index.html#index-2">PCAPKIT_HTTP_PROXY</a>, <a href="pcapkit/index.html#index-4">[1]</a>, <a href="pcapkit/utilities/config.html#envvar-PCAPKIT_HTTP_PROXY">[2]</a>, <a href="pcapkit/utilities/config.html#index-25">[3]</a>, <a href="pcapkit/utilities/config.html#index-26">[4]</a>, <a href="pcapkit/vendor/default.html#index-5">[5]</a>
+</li>
+          <li><a href="pcapkit/index.html#index-3">PCAPKIT_HTTPS_PROXY</a>, <a href="pcapkit/index.html#index-5">[1]</a>, <a href="pcapkit/utilities/config.html#envvar-PCAPKIT_HTTPS_PROXY">[2]</a>, <a href="pcapkit/utilities/config.html#index-27">[3]</a>, <a href="pcapkit/utilities/config.html#index-28">[4]</a>, <a href="pcapkit/vendor/default.html#index-6">[5]</a>
+</li>
+          <li><a href="pcapkit/toolkit/3rdparty.html#index-9">PCAPKIT_IPV6_TCP_WARNED_LIMIT</a>, <a href="pcapkit/utilities/config.html#envvar-PCAPKIT_IPV6_TCP_WARNED_LIMIT">[1]</a>, <a href="pcapkit/utilities/config.html#index-16">[2]</a>, <a href="pcapkit/utilities/config.html#index-6">[3]</a>
+</li>
+          <li><a href="pcapkit/corekit/fields/field.html#index-0">PCAPKIT_MAX_ZERO_PAD_LENGTH</a>, <a href="pcapkit/utilities/config.html#envvar-PCAPKIT_MAX_ZERO_PAD_LENGTH">[1]</a>, <a href="pcapkit/utilities/config.html#index-10">[2]</a>, <a href="pcapkit/utilities/config.html#index-20">[3]</a>
+</li>
+          <li><a href="pcapkit/corekit/fields/field.html#index-1">PCAPKIT_MAX_ZERO_PAD_SHORTFALL</a>, <a href="pcapkit/utilities/config.html#envvar-PCAPKIT_MAX_ZERO_PAD_SHORTFALL">[1]</a>, <a href="pcapkit/utilities/config.html#index-11">[2]</a>, <a href="pcapkit/utilities/config.html#index-21">[3]</a>
+</li>
+          <li><a href="pcapkit/corekit/io.html#index-0">PCAPKIT_READ_CHUNK</a>, <a href="pcapkit/utilities/config.html#envvar-PCAPKIT_READ_CHUNK">[1]</a>, <a href="pcapkit/utilities/config.html#index-19">[2]</a>, <a href="pcapkit/utilities/config.html#index-9">[3]</a>
+</li>
+          <li><a href="pcapkit/index.html#envvar-PCAPKIT_SPHINX">PCAPKIT_SPHINX</a>, <a href="pcapkit/index.html#index-8">[1]</a>, <a href="pcapkit/utilities/config.html#index-2">[2]</a>, <a href="pcapkit/utilities/logging.html#index-5">[3]</a>
+</li>
+          <li><a href="pcapkit/index.html#index-0">PCAPKIT_VENDOR_RETRY</a>, <a href="pcapkit/index.html#index-10">[1]</a>, <a href="pcapkit/index.html#index-11">[2]</a>, <a href="pcapkit/utilities/config.html#envvar-PCAPKIT_VENDOR_RETRY">[3]</a>, <a href="pcapkit/utilities/config.html#index-23">[4]</a>, <a href="pcapkit/vendor/default.html#index-0">[5]</a>
+</li>
+          <li><a href="pcapkit/index.html#envvar-PCAPKIT_VERBOSE">PCAPKIT_VERBOSE</a>, <a href="pcapkit/index.html#index-7">[1]</a>, <a href="pcapkit/utilities/config.html#index-1">[2]</a>, <a href="pcapkit/utilities/logging.html#index-4">[3]</a>, <a href="pcapkit/utilities/warnings.html#index-2">[4]</a>
+</li>
+          <li><a href="pcapkit/corekit/fields/field.html#index-2">PCAPKIT_ZERO_PAD_BUDGET_RATIO</a>, <a href="pcapkit/utilities/config.html#envvar-PCAPKIT_ZERO_PAD_BUDGET_RATIO">[1]</a>, <a href="pcapkit/utilities/config.html#index-12">[2]</a>, <a href="pcapkit/utilities/config.html#index-22">[3]</a>
 </li>
           <li><a href="pcapkit/utilities/warnings.html#index-0">PYTHONWARNINGS</a>, <a href="pcapkit/utilities/warnings.html#index-3">[1]</a>
 </li>
@@ -17236,7 +17261,7 @@
 </li>
         <li><a href="pcapkit/const/ngap.html#pcapkit.const.ngap.protocol_ie.ProtocolIE.ExtendedUEIdentityIndexValue">ExtendedUEIdentityIndexValue (pcapkit.const.ngap.protocol_ie.ProtocolIE attribute)</a>
 </li>
-        <li><a href="pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT">EXTENSION_HEADER_LIMIT (in module pcapkit.protocols.internet.internet)</a>
+        <li><a href="pcapkit/utilities/config.html#pcapkit.utilities.config.EXTENSION_HEADER_LIMIT">EXTENSION_HEADER_LIMIT (in module pcapkit.utilities.config)</a>
 </li>
         <li><a href="pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6.extension_headers">extension_headers (pcapkit.protocols.internet.ipv6.IPv6 property)</a>
 </li>
@@ -17412,6 +17437,8 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.fairview">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/utilities/config.html#pcapkit.utilities.config.FALLBACK_LIMIT">FALLBACK_LIMIT (in module pcapkit.utilities.config)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.famdc">famdc (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -19050,7 +19077,7 @@
         </ul></li>
         <li><a href="pcapkit/protocols/misc/pcap.html#pcapkit.protocols.data.misc.pcap.frame.Frame.frame_info">frame_info (pcapkit.protocols.data.misc.pcap.frame.Frame attribute)</a>
 </li>
-        <li><a href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.FRAME_LAYER_LIMIT">FRAME_LAYER_LIMIT (in module pcapkit.protocols.protocol)</a>
+        <li><a href="pcapkit/utilities/config.html#pcapkit.utilities.config.FRAME_LAYER_LIMIT">FRAME_LAYER_LIMIT (in module pcapkit.utilities.config)</a>
 </li>
         <li><a href="pcapkit/const/arp.html#pcapkit.const.arp.hardware.Hardware.Frame_Relay">Frame_Relay (pcapkit.const.arp.hardware.Hardware attribute)</a>
 </li>
@@ -21736,6 +21763,8 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.http_mgmt">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/utilities/config.html#pcapkit.utilities.config.http_proxy">http_proxy() (in module pcapkit.utilities.config)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.http_rpc_epmap">http_rpc_epmap (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -21758,6 +21787,8 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.https_443">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/utilities/config.html#pcapkit.utilities.config.https_proxy">https_proxy() (in module pcapkit.utilities.config)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.https_wmap">https_wmap (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -24639,6 +24670,8 @@
         <li><a href="pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.schema.internet.ipv6_route.ipv6_route_data_selector">ipv6_route_data_selector() (in module pcapkit.protocols.schema.internet.ipv6_route)</a>
 </li>
         <li><a href="pcapkit/const/ipv6.html#pcapkit.const.ipv6.seed_id.SeedID.IPV6_SOURCE_ADDRESS">IPV6_SOURCE_ADDRESS (pcapkit.const.ipv6.seed_id.SeedID attribute)</a>
+</li>
+        <li><a href="pcapkit/utilities/config.html#pcapkit.utilities.config.IPV6_TCP_WARNED_LIMIT">IPV6_TCP_WARNED_LIMIT (in module pcapkit.utilities.config)</a>
 </li>
         <li><a href="pcapkit/corekit/fields/ipaddress.html#pcapkit.corekit.fields.ipaddress.IPv6AddressField">IPv6AddressField (class in pcapkit.corekit.fields.ipaddress)</a>
 </li>
@@ -28678,6 +28711,10 @@
           <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.LoadInformationOption.max_sessions">(pcapkit.protocols.schema.internet.mh.LoadInformationOption attribute)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/utilities/config.html#pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH">MAX_ZERO_PAD_LENGTH (in module pcapkit.utilities.config)</a>
+</li>
+        <li><a href="pcapkit/utilities/config.html#pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL">MAX_ZERO_PAD_SHORTFALL (in module pcapkit.utilities.config)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.maxim_asics">maxim_asics (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -30711,6 +30748,8 @@
           <li><a href="pcapkit/utilities/chardet.html#module-pcapkit.utilities.chardet">pcapkit.utilities.chardet</a>
 </li>
           <li><a href="pcapkit/utilities/index.html#module-pcapkit.utilities.compat">pcapkit.utilities.compat</a>
+</li>
+          <li><a href="pcapkit/utilities/config.html#module-pcapkit.utilities.config">pcapkit.utilities.config</a>
 </li>
           <li><a href="pcapkit/utilities/exceptions.html#module-pcapkit.utilities.exceptions">pcapkit.utilities.exceptions</a>
 </li>
@@ -40575,6 +40614,13 @@
 </li>
         </ul></li>
         <li>
+    pcapkit.utilities.config
+
+        <ul>
+          <li><a href="pcapkit/utilities/config.html#module-pcapkit.utilities.config">module</a>
+</li>
+        </ul></li>
+        <li>
     pcapkit.utilities.exceptions
 
         <ul>
@@ -40660,8 +40706,6 @@
           <li><a href="pcapkit/vendor/esp.html#module-pcapkit.vendor.esp.integrity">module</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     pcapkit.vendor.ftp
 
@@ -40676,6 +40720,8 @@
           <li><a href="pcapkit/vendor/ftp.html#module-pcapkit.vendor.ftp.command">module</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     pcapkit.vendor.ftp.return_code
 
@@ -41614,17 +41660,37 @@
           <li><a href="pcapkit/vendor/vlan.html#module-pcapkit.vendor.vlan.priority_level">module</a>
 </li>
         </ul></li>
-        <li><a href="pcapkit/vendor/default.html#index-0">PCAPKIT_CI_MODE</a>, <a href="pcapkit/vendor/default.html#index-1">[1]</a>, <a href="pcapkit/vendor/default.html#index-2">[2]</a>
+        <li><a href="pcapkit/index.html#index-1">PCAPKIT_CI_MODE</a>, <a href="pcapkit/index.html#index-9">[1]</a>, <a href="pcapkit/utilities/config.html#index-24">[2]</a>, <a href="pcapkit/vendor/default.html#index-1">[3]</a>, <a href="pcapkit/vendor/default.html#index-2">[4]</a>, <a href="pcapkit/vendor/default.html#index-3">[5]</a>, <a href="pcapkit/vendor/default.html#index-4">[6]</a>
 </li>
-        <li><a href="contributing/pep.html#index-27">PCAPKIT_DEVMODE</a>, <a href="pcapkit/utilities/logging.html#index-0">[1]</a>, <a href="pcapkit/utilities/logging.html#index-1">[2]</a>, <a href="pcapkit/utilities/logging.html#index-2">[3]</a>, <a href="pcapkit/utilities/logging.html#index-3">[4]</a>, <a href="pcapkit/utilities/logging.html#index-6">[5]</a>, <a href="pcapkit/utilities/logging.html#index-7">[6]</a>, <a href="pcapkit/utilities/warnings.html#index-1">[7]</a>
+        <li><a href="pcapkit/utilities/chardet.html#index-0">PCAPKIT_DETECT_CACHE_SIZE</a>, <a href="pcapkit/utilities/config.html#index-18">[1]</a>, <a href="pcapkit/utilities/config.html#index-8">[2]</a>
 </li>
-        <li><a href="pcapkit/vendor/default.html#index-3">PCAPKIT_HTTP_PROXY</a>
+        <li><a href="contributing/pep.html#index-27">PCAPKIT_DEVMODE</a>, <a href="pcapkit/index.html#index-6">[1]</a>, <a href="pcapkit/utilities/config.html#index-0">[2]</a>, <a href="pcapkit/utilities/logging.html#index-0">[3]</a>, <a href="pcapkit/utilities/logging.html#index-1">[4]</a>, <a href="pcapkit/utilities/logging.html#index-2">[5]</a>, <a href="pcapkit/utilities/logging.html#index-3">[6]</a>, <a href="pcapkit/utilities/logging.html#index-6">[7]</a>, <a href="pcapkit/utilities/logging.html#index-7">[8]</a>, <a href="pcapkit/utilities/warnings.html#index-1">[9]</a>
 </li>
-        <li><a href="pcapkit/vendor/default.html#index-4">PCAPKIT_HTTPS_PROXY</a>
+        <li><a href="pcapkit/protocols/internet/internet.html#index-0">PCAPKIT_EXTENSION_HEADER_LIMIT</a>, <a href="pcapkit/utilities/config.html#index-14">[1]</a>, <a href="pcapkit/utilities/config.html#index-4">[2]</a>
 </li>
-        <li><a href="pcapkit/utilities/logging.html#index-5">PCAPKIT_SPHINX</a>
+        <li><a href="pcapkit/dumpkit/common.html#index-0">PCAPKIT_FALLBACK_LIMIT</a>, <a href="pcapkit/utilities/config.html#index-17">[1]</a>, <a href="pcapkit/utilities/config.html#index-7">[2]</a>
 </li>
-        <li><a href="pcapkit/utilities/logging.html#index-4">PCAPKIT_VERBOSE</a>, <a href="pcapkit/utilities/warnings.html#index-2">[1]</a>
+        <li><a href="pcapkit/protocols/protocol.html#index-0">PCAPKIT_FRAME_LAYER_LIMIT</a>, <a href="pcapkit/utilities/config.html#index-13">[1]</a>, <a href="pcapkit/utilities/config.html#index-3">[2]</a>, <a href="pcapkit/utilities/config.html#index-5">[3]</a>
+</li>
+        <li><a href="pcapkit/index.html#index-2">PCAPKIT_HTTP_PROXY</a>, <a href="pcapkit/index.html#index-4">[1]</a>, <a href="pcapkit/utilities/config.html#index-25">[2]</a>, <a href="pcapkit/utilities/config.html#index-26">[3]</a>, <a href="pcapkit/vendor/default.html#index-5">[4]</a>
+</li>
+        <li><a href="pcapkit/index.html#index-3">PCAPKIT_HTTPS_PROXY</a>, <a href="pcapkit/index.html#index-5">[1]</a>, <a href="pcapkit/utilities/config.html#index-27">[2]</a>, <a href="pcapkit/utilities/config.html#index-28">[3]</a>, <a href="pcapkit/vendor/default.html#index-6">[4]</a>
+</li>
+        <li><a href="pcapkit/toolkit/3rdparty.html#index-9">PCAPKIT_IPV6_TCP_WARNED_LIMIT</a>, <a href="pcapkit/utilities/config.html#index-16">[1]</a>, <a href="pcapkit/utilities/config.html#index-6">[2]</a>
+</li>
+        <li><a href="pcapkit/corekit/fields/field.html#index-0">PCAPKIT_MAX_ZERO_PAD_LENGTH</a>, <a href="pcapkit/utilities/config.html#index-10">[1]</a>, <a href="pcapkit/utilities/config.html#index-20">[2]</a>
+</li>
+        <li><a href="pcapkit/corekit/fields/field.html#index-1">PCAPKIT_MAX_ZERO_PAD_SHORTFALL</a>, <a href="pcapkit/utilities/config.html#index-11">[1]</a>, <a href="pcapkit/utilities/config.html#index-21">[2]</a>
+</li>
+        <li><a href="pcapkit/corekit/io.html#index-0">PCAPKIT_READ_CHUNK</a>, <a href="pcapkit/utilities/config.html#index-19">[1]</a>, <a href="pcapkit/utilities/config.html#index-9">[2]</a>
+</li>
+        <li><a href="pcapkit/index.html#index-8">PCAPKIT_SPHINX</a>, <a href="pcapkit/utilities/config.html#index-2">[1]</a>, <a href="pcapkit/utilities/logging.html#index-5">[2]</a>
+</li>
+        <li><a href="pcapkit/index.html#index-0">PCAPKIT_VENDOR_RETRY</a>, <a href="pcapkit/index.html#index-10">[1]</a>, <a href="pcapkit/index.html#index-11">[2]</a>, <a href="pcapkit/utilities/config.html#index-23">[3]</a>, <a href="pcapkit/vendor/default.html#index-0">[4]</a>
+</li>
+        <li><a href="pcapkit/index.html#index-7">PCAPKIT_VERBOSE</a>, <a href="pcapkit/utilities/config.html#index-1">[1]</a>, <a href="pcapkit/utilities/logging.html#index-4">[2]</a>, <a href="pcapkit/utilities/warnings.html#index-2">[3]</a>
+</li>
+        <li><a href="pcapkit/corekit/fields/field.html#index-2">PCAPKIT_ZERO_PAD_BUDGET_RATIO</a>, <a href="pcapkit/utilities/config.html#index-12">[1]</a>, <a href="pcapkit/utilities/config.html#index-22">[2]</a>
 </li>
         <li><a href="pcapkit/foundation/engines/builtin.html#pcapkit.foundation.engines.pcapng.PCAPNG">PCAPNG (class in pcapkit.foundation.engines.pcapng)</a>
 
@@ -45635,6 +45701,8 @@
         </ul></li>
         <li><a href="pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.read1">read1() (pcapkit.corekit.io.SeekableReader method)</a>
 </li>
+        <li><a href="pcapkit/utilities/config.html#pcapkit.utilities.config.READ_CHUNK">READ_CHUNK (in module pcapkit.utilities.config)</a>
+</li>
         <li><a href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT.read_frame">read_frame() (pcapkit.foundation.engines.dpkt.DPKT method)</a>
 
         <ul>
@@ -48269,10 +48337,10 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.reserved_7026">reserved_7026 (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
-        <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.reserved_7031">reserved_7031 (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
-</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.reserved_7031">reserved_7031 (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.reserved_7040">reserved_7040 (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.reserved_7073">reserved_7073 (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
@@ -50069,7 +50137,7 @@
 </li>
           <li><a href="pcapkit/vendor/ipv6.html#index-0">RFC 8200 Section 4</a>
 </li>
-          <li><a href="pcapkit/protocols/internet/internet.html#index-0">RFC 8200 Section 4.1</a>
+          <li><a href="pcapkit/utilities/config.html#index-15">RFC 8200 Section 4.1</a>
 </li>
           <li><a href="pcapkit/protocols/internet/hopopt.html#index-19">RFC 8200 Section 4.2</a>, <a href="pcapkit/protocols/internet/hopopt.html#index-21">[1]</a>, <a href="pcapkit/protocols/internet/hopopt.html#index-3">[2]</a>, <a href="pcapkit/protocols/internet/ipv6_option.html#index-0">[3]</a>, <a href="pcapkit/protocols/internet/ipv6_option.html#index-1">[4]</a>, <a href="pcapkit/protocols/internet/ipv6_opts.html#index-19">[5]</a>, <a href="pcapkit/protocols/internet/ipv6_opts.html#index-21">[6]</a>, <a href="pcapkit/protocols/internet/ipv6_opts.html#index-3">[7]</a>
 </li>
@@ -61038,6 +61106,8 @@
           <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.VendorSpecificOption.vendor">(pcapkit.protocols.schema.internet.mh.VendorSpecificOption attribute)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/utilities/config.html#pcapkit.utilities.config.VENDOR_RETRY">VENDOR_RETRY (in module pcapkit.utilities.config)</a>
+</li>
         <li><a href="pcapkit/const/mh.html#pcapkit.const.mh.option.Option.Vendor_Specific_Mobility_Option">Vendor_Specific_Mobility_Option (pcapkit.const.mh.option.Option attribute)</a>
 </li>
         <li><a href="pcapkit/const/mh.html#pcapkit.const.mh.upn_reason.UpdateNotificationReason.VENDOR_SPECIFIC_REASON">VENDOR_SPECIFIC_REASON (pcapkit.const.mh.upn_reason.UpdateNotificationReason attribute)</a>
@@ -63599,6 +63669,8 @@
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/sctp.html#pcapkit.const.sctp.parameter.Parameter.Zero_Checksum_Acceptable">Zero_Checksum_Acceptable (pcapkit.const.sctp.parameter.Parameter attribute)</a>
+</li>
+        <li><a href="pcapkit/utilities/config.html#pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO">ZERO_PAD_BUDGET_RATIO (in module pcapkit.utilities.config)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.zicom">zicom (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 

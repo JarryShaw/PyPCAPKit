@@ -338,6 +338,7 @@
 <li class="toctree-l3"><a class="reference internal" href="exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3 current current-page"><a class="current reference internal" href="#">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="logging.html">Logging System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="chardet.html">Character Set Detection</a></li>
 </ul>
 </li>
@@ -809,6 +810,19 @@ the application’s business, and is done through the standard
 <span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.warnings.</span></span><span class="sig-name descname"><span class="pre">ExtractionWarning</span></span><a class="reference internal" href="../../_modules/pcapkit/utilities/warnings.html#ExtractionWarning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.warnings.ExtractionWarning" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.utilities.warnings.BaseWarning" title="pcapkit.utilities.warnings.BaseWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseWarning</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#RuntimeWarning" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeWarning</span></code></a></p>
 <p>Extraction warning.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="pcapkit.utilities.warnings.ConfigWarning">
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.warnings.</span></span><span class="sig-name descname"><span class="pre">ConfigWarning</span></span><a class="reference internal" href="../../_modules/pcapkit/utilities/warnings.html#ConfigWarning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.warnings.ConfigWarning" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.utilities.warnings.BaseWarning" title="pcapkit.utilities.warnings.BaseWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseWarning</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#RuntimeWarning" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeWarning</span></code></a></p>
+<p>Configuration warning.</p>
+<p>Reported by <a class="reference internal" href="config.html#module-pcapkit.utilities.config" title="pcapkit.utilities.config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.config</span></code></a> for an environment variable that
+is invalid, and so falls back to its default, or that lifts a limit past its
+default.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.5.0.</span></p>
+</div>
 </dd></dl>
 
 </section>

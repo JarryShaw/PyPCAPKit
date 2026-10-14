@@ -331,6 +331,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/logging.html">Logging System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
 </ul>
 </li>
@@ -534,11 +535,12 @@
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">contextvars</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">stacklevel</span> <span class="k">as</span> <span class="n">stacklevel_calculator</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">VERBOSE</span><span class="p">,</span> <span class="n">get_logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">_BAD_FLAGS</span><span class="p">,</span> <span class="n">BOOLEAN_STATES</span><span class="p">,</span> <span class="n">VERBOSE</span><span class="p">,</span> <span class="n">get_logger</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">types</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameType</span><span class="p">,</span> <span class="n">TracebackType</span>
@@ -561,7 +563,7 @@
     <span class="s1">'FileWarning'</span><span class="p">,</span> <span class="s1">'LayerWarning'</span><span class="p">,</span> <span class="s1">'ProtocolWarning'</span><span class="p">,</span> <span class="s1">'AttributeWarning'</span><span class="p">,</span>
     <span class="s1">'DevModeWarning'</span><span class="p">,</span> <span class="s1">'VendorRequestWarning'</span><span class="p">,</span> <span class="s1">'VendorRuntimeWarning'</span><span class="p">,</span>
     <span class="s1">'UnknownFieldWarning'</span><span class="p">,</span> <span class="s1">'RegistryWarning'</span><span class="p">,</span> <span class="s1">'SchemaWarning'</span><span class="p">,</span> <span class="s1">'InfoWarning'</span><span class="p">,</span>
-    <span class="s1">'SeekWarning'</span><span class="p">,</span> <span class="s1">'ExtractionWarning'</span><span class="p">,</span>
+    <span class="s1">'SeekWarning'</span><span class="p">,</span> <span class="s1">'ExtractionWarning'</span><span class="p">,</span> <span class="s1">'ConfigWarning'</span><span class="p">,</span>
     <span class="c1"># ResourceWarning</span>
     <span class="s1">'DPKTWarning'</span><span class="p">,</span> <span class="s1">'ScapyWarning'</span><span class="p">,</span> <span class="s1">'PySharkWarning'</span><span class="p">,</span> <span class="s1">'EmojiWarning'</span><span class="p">,</span>
     <span class="s1">'VendorWarning'</span><span class="p">,</span>
@@ -940,6 +942,21 @@
 
 
 
+<div class="viewcode-block" id="ConfigWarning">
+<a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.ConfigWarning">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ConfigWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Configuration warning.</span>
+
+<span class="sd">    Reported by :mod:`pcapkit.utilities.config` for an environment variable that</span>
+<span class="sd">    is invalid, and so falls back to its default, or that lifts a limit past its</span>
+<span class="sd">    default.</span>
+
+<span class="sd">    .. versionadded:: 1.5.0</span>
+
+<span class="sd">    """</span></div>
+
+
+
 <span class="c1">##############################################################################</span>
 <span class="c1"># ResourceWarning session.</span>
 <span class="c1">##############################################################################</span>
@@ -990,6 +1007,62 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">DeprecatedFormatWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Warning on deprecated formats."""</span></div>
 
+
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># Deferred Reports</span>
+<span class="c1">###############################################################################</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_importer_stacklevel</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Stack level, relative to the caller, of the innermost frame outside :mod:`pcapkit`.</span>
+
+<span class="sd">    For a :exc:`ConfigWarning` given while :mod:`pcapkit` is imported, which</span>
+<span class="sd">    then names the module that imported it (:issue:`1726`).</span>
+<span class="sd">    :func:`~pcapkit.utilities.exceptions.stacklevel` counts every frame, but</span>
+<span class="sd">    :func:`warnings.warn` does not count those of :mod:`importlib`'s bootstrap,</span>
+<span class="sd">    which an import puts between the importing module and :mod:`pcapkit`. Its</span>
+<span class="sd">    level then runs past the outermost frame, and the warning is attributed to</span>
+<span class="sd">    ``&lt;sys&gt;:0``. This counts frames as :func:`warnings.warn` does, and</span>
+<span class="sd">    :mod:`logging` does from Python 3.11; on earlier versions the log record is</span>
+<span class="sd">    attributed to a frame inside the import.</span>
+
+<span class="sd">    """</span>
+    <span class="n">pcapkit</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s1">pcapkit</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s1">'</span>
+    <span class="n">boundary</span> <span class="o">=</span> <span class="n">outermost</span> <span class="o">=</span> <span class="n">level</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">currentframe</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_back</span> <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>  <span class="c1"># the caller, level 1</span>
+        <span class="k">while</span> <span class="n">frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_filename</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="s1">'importlib'</span> <span class="ow">in</span> <span class="n">filename</span> <span class="ow">and</span> <span class="s1">'_bootstrap'</span> <span class="ow">in</span> <span class="n">filename</span><span class="p">):</span>
+                <span class="n">level</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">outermost</span> <span class="o">=</span> <span class="n">level</span>
+                <span class="k">if</span> <span class="n">pcapkit</span> <span class="ow">in</span> <span class="n">filename</span><span class="p">:</span>
+                    <span class="n">boundary</span> <span class="o">=</span> <span class="n">level</span>
+            <span class="n">frame</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_back</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">frame</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">boundary</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">outermost</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_report_bad_flags</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Report the bad flags :mod:`pcapkit.utilities.logging` recorded.</span>
+
+<span class="sd">    Each entry of :data:`pcapkit.utilities.logging._BAD_FLAGS` is reported with</span>
+<span class="sd">    a :exc:`ConfigWarning` and then dropped, so it is reported once. An entry is</span>
+<span class="sd">    dropped only after its warning returns, so under :option:`-W error &lt;-W&gt;` the</span>
+<span class="sd">    next import raises again rather than passing silently.</span>
+
+<span class="sd">    """</span>
+    <span class="k">while</span> <span class="n">_BAD_FLAGS</span><span class="p">:</span>
+        <span class="n">variable</span><span class="p">,</span> <span class="n">text</span> <span class="o">=</span> <span class="n">_BAD_FLAGS</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">text</span><span class="si">!r}</span><span class="s1"> is not one of </span><span class="si">{</span><span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">BOOLEAN_STATES</span><span class="p">)</span><span class="si">}</span><span class="s1">; '</span>
+             <span class="s1">'using the default, False'</span><span class="p">,</span> <span class="n">ConfigWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">_importer_stacklevel</span><span class="p">())</span>
+        <span class="k">del</span> <span class="n">_BAD_FLAGS</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+
+<span class="n">_report_bad_flags</span><span class="p">()</span>
 </pre></div>
         </article>
       </div>

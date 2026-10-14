@@ -331,6 +331,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/logging.html">Logging System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
 </ul>
 </li>
@@ -475,7 +476,28 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.corekit.fields.field</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">"""base field class"""</span>
+<span class="sd">"""Base Fields</span>
+<span class="sd">================</span>
+
+<span class="sd">.. module:: pcapkit.corekit.fields.field</span>
+
+<span class="sd">:mod:`pcapkit.corekit.fields.field` contains the base field classes.</span>
+
+<span class="sd">.. versionremoved:: 1.5.0</span>
+
+<span class="sd">   Moved to :mod:`pcapkit.utilities.config` (:issue:`1726`):</span>
+
+<span class="sd">   * ``pcapkit.corekit.fields.field._MAX_ZERO_PAD_LENGTH``, now</span>
+<span class="sd">     :data:`pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH`, set with</span>
+<span class="sd">     :envvar:`PCAPKIT_MAX_ZERO_PAD_LENGTH`;</span>
+<span class="sd">   * ``pcapkit.corekit.fields.field._MAX_ZERO_PAD_SHORTFALL``, now</span>
+<span class="sd">     :data:`pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL`, set with</span>
+<span class="sd">     :envvar:`PCAPKIT_MAX_ZERO_PAD_SHORTFALL`;</span>
+<span class="sd">   * ``pcapkit.corekit.fields.field._ZERO_PAD_BUDGET_RATIO``, now</span>
+<span class="sd">     :data:`pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO`, set with</span>
+<span class="sd">     :envvar:`PCAPKIT_ZERO_PAD_BUDGET_RATIO`.</span>
+
+<span class="sd">"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">abc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
@@ -485,6 +507,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NO_VALUE</span><span class="p">,</span> <span class="n">NoValueType</span>  <span class="c1"># pylint: disable=unused-import</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldValueError</span><span class="p">,</span> <span class="n">NoDefaultValue</span><span class="p">,</span> <span class="n">ProtocolError</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'NO_VALUE'</span><span class="p">,</span> <span class="s1">'Field'</span><span class="p">]</span>
@@ -498,99 +521,9 @@
 
 <span class="n">_T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_T'</span><span class="p">)</span>
 
-<span class="c1">#: int: Ceiling on the zero-padding :meth:`FieldBase.unpack` will still perform</span>
-<span class="c1">#: for a field whose declared length outruns its buffer.</span>
-<span class="c1">#:</span>
-<span class="c1">#: This is libpcap's own ``MAXIMUM_SNAPLEN`` -- the point past which libpcap</span>
-<span class="c1">#: itself treats a capture's declared snapshot length as corrupt or</span>
-<span class="c1">#: byte-order-swapped rather than real -- and it is the same figure this</span>
-<span class="c1">#: package's own PCAP writer defaults ``snaplen`` to</span>
-<span class="c1">#: (:meth:`pcapkit.protocols.misc.pcap.header.Header.make`). No single field</span>
-<span class="c1">#: within one captured packet is legitimately larger than the largest packet</span>
-<span class="c1">#: libpcap itself is willing to believe, so nothing this library parses</span>
-<span class="c1">#: should ever declare a length past it.</span>
-<span class="c1">#:</span>
-<span class="c1">#: The bound is deliberately *not* "any declared length beyond what the</span>
-<span class="c1">#: buffer holds": :meth:`ListField.unpack &lt;pcapkit.corekit.fields.collections.</span>
-<span class="c1">#: ListField.unpack&gt;` and :meth:`OptionField.unpack &lt;pcapkit.corekit.fields.</span>
-<span class="c1">#: collections.OptionField.unpack&gt;` depend on reading a short, sometimes</span>
-<span class="c1">#: empty, tail past a truncated area and having it decode as zero -- that is</span>
-<span class="c1">#: how an over-long ``ihl``, or a capture cut short by the snapshot length,</span>
-<span class="c1">#: reads as end-of-option-list or ``Pad1`` instead of wedging or raising (see</span>
-<span class="c1">#: :issue:`431`). Every such read is of a fixed-width, few-octet field, always</span>
-<span class="c1">#: far under this ceiling, so it is untouched; only a length past it -- which</span>
-<span class="c1">#: no fixed-width field ever legitimately is -- gets refused.</span>
-<span class="c1">#:</span>
-<span class="c1">#: A ceiling on one field says nothing about how many fields a parse may pad,</span>
-<span class="c1">#: which is what :data:`_MAX_ZERO_PAD_SHORTFALL` and</span>
-<span class="c1">#: :data:`_ZERO_PAD_BUDGET_RATIO` below are for. See :issue:`573`.</span>
-<span class="n">_MAX_ZERO_PAD_LENGTH</span> <span class="o">=</span> <span class="mh">0x40_000</span>
-
-<span class="c1">#: int: Shortfall :meth:`FieldBase.unpack` will always zero-pad for, whatever</span>
-<span class="c1">#: else a parse has already padded.</span>
-<span class="c1">#:</span>
-<span class="c1">#: :data:`_MAX_ZERO_PAD_LENGTH` bounds each field on its own, and a packet holds</span>
-<span class="c1">#: many fields, so it leaves the *sum* unbounded: a declared length just under the</span>
-<span class="c1">#: ceiling is honoured however often it is declared. Measured on this tree, 200</span>
-<span class="c1">#: minimal PCAP-NG Decryption Secrets Blocks -- 4,800 wire octets, each block</span>
-<span class="c1">#: declaring ``secrets_length`` of 262,142 against two supplied octets through</span>
-<span class="c1">#: ``UnknownSecrets.data`` (``pcapkit/protocols/schema/misc/pcapng.py``) --</span>
-<span class="c1">#: retained 50.0 MiB, an amplification of 10,922x per block. Every individual</span>
-<span class="c1">#: field was under the ceiling, so nothing refused any of them (:issue:`573`).</span>
-<span class="c1">#:</span>
-<span class="c1">#: The sum therefore wants a budget, and this is the figure that makes one</span>
-<span class="c1">#: *safe*. A budget on its own is not: a capture cut short by its snapshot length</span>
-<span class="c1">#: pads legitimately and must keep parsing (:issue:`431`, and the reasoning that</span>
-<span class="c1">#: declined :issue:`554`), and it pads far more than it reads, so any running</span>
-<span class="c1">#: budget tight enough to matter starts refusing real captures. Worse, it refuses</span>
-<span class="c1">#: them *sometimes* -- measured on this tree with a running budget alone, the</span>
-<span class="c1">#: same legitimate 54-octet frame parsed to one result on 37 of 40 calls and to</span>
-<span class="c1">#: another on calls 26, 33 and 39, because whether it fit depended on what had</span>
-<span class="c1">#: been parsed before it. A guard whose answer moves with history is not a guard.</span>
-<span class="c1">#:</span>
-<span class="c1">#: 65,536 is what removes that. It is the whole span of a 16-bit wire length</span>
-<span class="c1">#: field -- which is how an IP header, an IPv6 payload, a TCP or IPv4 option and</span>
-<span class="c1">#: a PCAP-NG option all declare their size -- so no shortfall that one of those</span>
-<span class="c1">#: can produce is subject to the budget at all, and every one of them is padded</span>
-<span class="c1">#: unconditionally. Measured: the largest legitimate single</span>
-<span class="c1">#: shortfall found anywhere was 65,495 octets, from a snapshot-truncated</span>
-<span class="c1">#: offload-sized frame (100 frames at ``incl_len`` 54 declaring an IPv4 total</span>
-<span class="c1">#: length of 65,535, padding 6,549,500 octets from 7,024 read), and 64,750 from a</span>
-<span class="c1">#: truncated PCAP-NG option. Both sit under this figure, and so does anything</span>
-<span class="c1">#: else a 16-bit field can ask for.</span>
-<span class="c1">#:</span>
-<span class="c1">#: What is left above it is the band a *32-bit* wire length reaches --</span>
-<span class="c1">#: PCAP-NG's own block and secrets lengths, which is where :issue:`573`'s</span>
-<span class="c1">#: amplification lives -- and legitimately that is a once-per-file event, since</span>
-<span class="c1">#: only the last block of a truncated capture is cut short. So the band gets the</span>
-<span class="c1">#: running budget below, whose one-off term already covers any single such event</span>
-<span class="c1">#: outright.</span>
-<span class="n">_MAX_ZERO_PAD_SHORTFALL</span> <span class="o">=</span> <span class="mh">0x10_000</span>
-
-<span class="c1">#: int: Zero padding *past* :data:`_MAX_ZERO_PAD_SHORTFALL` that</span>
-<span class="c1">#: :meth:`FieldBase.unpack` will synthesise in total for every octet a parse has</span>
-<span class="c1">#: actually been given, over and above the one-off</span>
-<span class="c1">#: :data:`_MAX_ZERO_PAD_LENGTH` allowance.</span>
-<span class="c1">#:</span>
-<span class="c1">#: A shortfall in this band -- past 65,536 octets and so past anything a 16-bit</span>
-<span class="c1">#: wire length can declare, but within :data:`_MAX_ZERO_PAD_LENGTH` -- is a</span>
-<span class="c1">#: PCAP-NG block or secrets length, a 32-bit figure. One of those, on its own, is</span>
-<span class="c1">#: legitimate: it is what the final block of a capture truncated at EOF looks</span>
-<span class="c1">#: like, and the ``_MAX_ZERO_PAD_LENGTH`` term of the allowance covers it whole,</span>
-<span class="c1">#: from a cold start, because such a shortfall cannot exceed that ceiling and</span>
-<span class="c1">#: still be padded at all.</span>
-<span class="c1">#:</span>
-<span class="c1">#: *Repeating* one is not legitimate, and that is what 16 is chosen to catch.</span>
-<span class="c1">#: Truncation cuts the end of a file, so a capture has one short block, not two</span>
-<span class="c1">#: hundred; :issue:`573`'s shape has two hundred because they are declared</span>
-<span class="c1">#: rather than cut. 16 octets of further allowance per octet genuinely read</span>
-<span class="c1">#: leaves any real file an allowance orders of magnitude past the one event it</span>
-<span class="c1">#: can want, while bounding the sum for a file whose blocks all lie.</span>
-<span class="n">_ZERO_PAD_BUDGET_RATIO</span> <span class="o">=</span> <span class="mh">0x10</span>
-
 <span class="c1">#: ContextVar[Optional[list[int]]]: Running ``[octets supplied, octets</span>
 <span class="c1">#: synthesised]`` ledger for :meth:`FieldBase.unpack`, against which</span>
-<span class="c1">#: :data:`_ZERO_PAD_BUDGET_RATIO` is enforced.</span>
+<span class="c1">#: :data:`~pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO` is enforced.</span>
 <span class="c1">#:</span>
 <span class="c1">#: A :class:`~contextvars.ContextVar` rather than a plain module global so that</span>
 <span class="c1">#: a thread parsing one capture cannot spend the budget of a thread parsing</span>
@@ -616,8 +549,8 @@
 <span class="c1">#: calls :func:`_zero_pad_budget` -- so the bound as shipped is over everything a</span>
 <span class="c1">#: context has ever parsed, not over one ``Extractor`` run. It is still a bound,</span>
 <span class="c1">#: and still proportionate: total padding past</span>
-<span class="c1">#: :data:`_MAX_ZERO_PAD_SHORTFALL` stays within</span>
-<span class="c1">#: ``_MAX_ZERO_PAD_LENGTH + _ZERO_PAD_BUDGET_RATIO`` times the octets that</span>
+<span class="c1">#: :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL` stays within</span>
+<span class="c1">#: ``MAX_ZERO_PAD_LENGTH + ZERO_PAD_BUDGET_RATIO`` times the octets that</span>
 <span class="c1">#: context has genuinely been given, so a long-running service that has read a</span>
 <span class="c1">#: great deal has earned proportionately more, rather than banking an unlimited</span>
 <span class="c1">#: allowance. Scoping it per file would make the bound tighter and is a one-line</span>
@@ -625,7 +558,7 @@
 <span class="c1">#: layer has something to call.</span>
 <span class="c1">#:</span>
 <span class="c1">#: Cumulative state is what makes an answer depend on history, so note what is</span>
-<span class="c1">#: *not* weighed against it: a shortfall within :data:`_MAX_ZERO_PAD_SHORTFALL`</span>
+<span class="c1">#: *not* weighed against it: a shortfall within :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL`</span>
 <span class="c1">#: neither consults this ledger nor is charged to it, which is what keeps every</span>
 <span class="c1">#: legitimate short read answering the same however much preceded it. Only the</span>
 <span class="c1">#: 32-bit band above reads and writes ``[1]``.</span>
@@ -963,11 +896,11 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            FieldValueError: If ``buffer`` holds fewer octets than :attr:`length`</span>
 <span class="sd">                declares, and either ``length`` is past</span>
-<span class="sd">                :data:`_MAX_ZERO_PAD_LENGTH`, or the shortfall is past</span>
-<span class="sd">                :data:`_MAX_ZERO_PAD_SHORTFALL` and takes this parse's total of</span>
-<span class="sd">                such shortfalls past what :data:`_ZERO_PAD_BUDGET_RATIO` allows</span>
+<span class="sd">                :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH`, or the shortfall is past</span>
+<span class="sd">                :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL` and takes this parse's total of</span>
+<span class="sd">                such shortfalls past what :data:`~pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO` allows</span>
 <span class="sd">                for the octets it has actually been given. A shortfall within</span>
-<span class="sd">                :data:`_MAX_ZERO_PAD_SHORTFALL` is always padded and never</span>
+<span class="sd">                :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL` is always padded and never</span>
 <span class="sd">                raises.</span>
 
 <span class="sd">        """</span>
@@ -984,20 +917,21 @@
         <span class="c1"># field from a value it just read off the wire (e.g. ``DecryptionSecretsBlock``'s</span>
         <span class="c1"># ``secrets_data: BytesField(length=lambda pkt: pkt['__length__'])``) --</span>
         <span class="c1"># and is thus attacker-controlled: a corrupt or hostile capture can</span>
-        <span class="c1"># declare an arbitrarily large one. Past :data:`_MAX_ZERO_PAD_LENGTH`, a</span>
+        <span class="c1"># declare an arbitrarily large one. Past :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH`, a</span>
         <span class="c1"># length short of what ``buffer`` holds is provably bogus: the padding</span>
         <span class="c1"># cannot recover data that was never in the buffer, only zero-fill for</span>
         <span class="c1"># it, and no field this large is legitimate to begin with. Honouring it</span>
         <span class="c1"># would allocate and zero-fill up to ``length`` octets on nothing but</span>
         <span class="c1"># the packet's own say-so. C.f. #554.</span>
-        <span class="k">if</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="n">_MAX_ZERO_PAD_LENGTH</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
+        <span class="n">ceiling</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">MAX_ZERO_PAD_LENGTH</span>
+        <span class="k">if</span> <span class="n">ceiling</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="n">ceiling</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">'Field </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> declares a length of </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1"> octet(s), '</span>
                 <span class="sa">f</span><span class="s1">'but only </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span><span class="si">}</span><span class="s1"> octet(s) are available.'</span>
             <span class="p">)</span>
 
         <span class="c1"># NOTE: The ceiling above bounds one field; this bounds their sum. A</span>
-        <span class="c1"># declared length just under :data:`_MAX_ZERO_PAD_LENGTH` passes it every</span>
+        <span class="c1"># declared length just under :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH` passes it every</span>
         <span class="c1"># time it is declared, so 200 of them amplify 4,800 wire octets into</span>
         <span class="c1"># 50.0 MiB of retained zeros with the ceiling doing exactly what it was</span>
         <span class="c1"># written to do. C.f. #573.</span>
@@ -1037,7 +971,7 @@
             <span class="n">_zero_pad_ledger</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ledger</span><span class="p">)</span>
         <span class="n">ledger</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">supplied</span>
 
-        <span class="c1"># A shortfall no larger than :data:`_MAX_ZERO_PAD_SHORTFALL` is padded</span>
+        <span class="c1"># A shortfall no larger than :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL` is padded</span>
         <span class="c1"># without consulting the budget, and is not charged to it either. That is</span>
         <span class="c1"># the load-bearing half of this fix rather than a concession in it: it is</span>
         <span class="c1"># what keeps the answer a function of *this* read rather than of</span>
@@ -1052,13 +986,16 @@
         <span class="c1"># band; charging that to the same ledger would exhaust it within a few</span>
         <span class="c1"># frames and refuse the next large shortfall -- reintroducing exactly the</span>
         <span class="c1"># history-dependence the band exists to remove.</span>
-        <span class="k">if</span> <span class="n">padding</span> <span class="o">&gt;</span> <span class="n">_MAX_ZERO_PAD_SHORTFALL</span><span class="p">:</span>
-            <span class="n">allowance</span> <span class="o">=</span> <span class="n">_MAX_ZERO_PAD_LENGTH</span> <span class="o">+</span> <span class="n">_ZERO_PAD_BUDGET_RATIO</span> <span class="o">*</span> <span class="n">ledger</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">ledger</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">padding</span> <span class="o">&gt;</span> <span class="n">allowance</span><span class="p">:</span>
+        <span class="n">shortfall</span><span class="p">,</span> <span class="n">ratio</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">MAX_ZERO_PAD_SHORTFALL</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">ZERO_PAD_BUDGET_RATIO</span>
+        <span class="k">if</span> <span class="n">shortfall</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">padding</span> <span class="o">&gt;</span> <span class="n">shortfall</span><span class="p">:</span>
+            <span class="c1"># NOTE: ``-1`` for either term of the allowance lifts the budget.</span>
+            <span class="n">unbounded</span> <span class="o">=</span> <span class="n">ceiling</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">or</span> <span class="n">ratio</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">allowance</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">unbounded</span> <span class="k">else</span> <span class="n">ceiling</span> <span class="o">+</span> <span class="n">ratio</span> <span class="o">*</span> <span class="n">ledger</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">unbounded</span> <span class="ow">and</span> <span class="n">ledger</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">padding</span> <span class="o">&gt;</span> <span class="n">allowance</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">'Field </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> would zero-pad </span><span class="si">{</span><span class="n">padding</span><span class="si">}</span><span class="s1"> octet(s), '</span>
                     <span class="sa">f</span><span class="s1">'taking this parse to </span><span class="si">{</span><span class="n">ledger</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">padding</span><span class="si">}</span><span class="s1"> octet(s) of '</span>
-                    <span class="sa">f</span><span class="s1">'padding past </span><span class="si">{</span><span class="n">_MAX_ZERO_PAD_SHORTFALL</span><span class="si">}</span><span class="s1"> octet(s) against '</span>
+                    <span class="sa">f</span><span class="s1">'padding past </span><span class="si">{</span><span class="n">shortfall</span><span class="si">}</span><span class="s1"> octet(s) against '</span>
                     <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">ledger</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> octet(s) actually read, past the </span><span class="si">{</span><span class="n">allowance</span><span class="si">}</span><span class="s1"> '</span>
                     <span class="sa">f</span><span class="s1">'octet(s) allowed.'</span>
                 <span class="p">)</span>

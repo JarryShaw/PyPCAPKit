@@ -15,6 +15,7 @@ layer, and wrappers around third-party libraries. It imports nothing from
    exceptions
    warnings
    logging
+   config
    chardet
 
 Version Compatibility

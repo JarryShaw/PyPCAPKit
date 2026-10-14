@@ -338,6 +338,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../utilities/exceptions.html">User Defined Exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/warnings.html">User Defined Warnings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/logging.html">Logging System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/chardet.html">Character Set Detection</a></li>
 </ul>
 </li>
@@ -1106,7 +1107,7 @@ instead, by <code class="xref py py-meth docutils literal notranslate"><span cla
 <p>The payload is built one layer further into the frame than this
 protocol, as <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._parse_next_layer" title="pcapkit.protocols.protocol.Protocol._parse_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_parse_next_layer()</span></code></a> counts it, since each layer built
 parses its own octets again. So rebuilding a frame stops at
-<a class="reference internal" href="#pcapkit.protocols.protocol.FRAME_LAYER_LIMIT" title="pcapkit.protocols.protocol.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a> where parsing it did, rather than that many
+<a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.FRAME_LAYER_LIMIT" title="pcapkit.utilities.config.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a> where parsing it did, rather than that many
 layers below each layer of it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1610">#1610</a>). Nor does the payload’s
 parse warn of the limit: this protocol’s own parse goes over the same
 octets, so the rebuilt frame warns of it once, as the parsed one did.</p>
@@ -1279,7 +1280,7 @@ be included when <a class="reference internal" href="../corekit/infoclass.html#p
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Instance of <code class="docutils literal notranslate"><span class="pre">klass</span></code>, or of <a class="reference internal" href="misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>
 when fewer octets were captured than its header needs, or when it is
-past <a class="reference internal" href="#pcapkit.protocols.protocol.FRAME_LAYER_LIMIT" title="pcapkit.protocols.protocol.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a>.</p>
+past <a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.FRAME_LAYER_LIMIT" title="pcapkit.utilities.config.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a>.</p>
 </dd>
 </dl>
 <div class="admonition note">
@@ -1307,7 +1308,7 @@ parse ends when it is kept, still inside the guard that catches them
 under an <code class="docutils literal notranslate"><span class="pre">error</span></code> filter. A layer kept with its header cut short
 still warns. A layer captured at least as long as its hint cannot be
 replaced, and is parsed holding nothing, even inside one that holds.</p>
-<p>A layer past <a class="reference internal" href="#pcapkit.protocols.protocol.FRAME_LAYER_LIMIT" title="pcapkit.protocols.protocol.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a> in its frame is not parsed:
+<p>A layer past <a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.FRAME_LAYER_LIMIT" title="pcapkit.utilities.config.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a> in its frame is not parsed:
 it and the rest of the frame are kept as
 <a class="reference internal" href="misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, marked
 <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._past_layer_limit" title="pcapkit.protocols.protocol.Protocol._past_layer_limit"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_past_layer_limit</span></code></a>, with one
@@ -1315,7 +1316,7 @@ it and the rest of the frame are kept as
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>ProtocolWarning</strong> – If the next layer is past <a class="reference internal" href="#pcapkit.protocols.protocol.FRAME_LAYER_LIMIT" title="pcapkit.protocols.protocol.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a>.</p>
+<dd class="field-odd"><p><strong>ProtocolWarning</strong> – If the next layer is past <a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.FRAME_LAYER_LIMIT" title="pcapkit.utilities.config.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1402,7 +1403,7 @@ none.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._past_layer_limit">
 <span class="sig-name descname"><span class="pre">_past_layer_limit</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._past_layer_limit" title="Link to this definition">¶</a></dt>
-<dd><p>Whether this layer is past <a class="reference internal" href="#pcapkit.protocols.protocol.FRAME_LAYER_LIMIT" title="pcapkit.protocols.protocol.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a>, and so was kept as
+<dd><p>Whether this layer is past <a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.FRAME_LAYER_LIMIT" title="pcapkit.utilities.config.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a>, and so was kept as
 <a class="reference internal" href="misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> by <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._parse_next_layer" title="pcapkit.protocols.protocol.Protocol._parse_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_parse_next_layer()</span></code></a>
 without being parsed. Such a layer carries an <code class="docutils literal notranslate"><span class="pre">error</span></code> as one that
 failed to parse does, so this is what tells the two apart: what follows
@@ -1686,7 +1687,7 @@ to handle the <code class="docutils literal notranslate"><span class="pre">name<
 <section id="layers-per-frame">
 <h2>Layers per Frame<a class="headerlink" href="#layers-per-frame" title="Link to this heading">¶</a></h2>
 <p>A frame is dissected to at most
-<a class="reference internal" href="#pcapkit.protocols.protocol.FRAME_LAYER_LIMIT" title="pcapkit.protocols.protocol.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a> layers of its protocol
+<a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.FRAME_LAYER_LIMIT" title="pcapkit.utilities.config.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a> layers of its protocol
 chain, counted from the first layer the frame record carries, through tunnels,
 VLAN tags and IPv6 extension headers alike. What follows is kept as
 <a class="reference internal" href="misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, with one
@@ -1696,32 +1697,15 @@ default engine’s TCP reassembly and flow tracing do not read a TCP segment
 there back out, as they do one the TCP parser rejected (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1518">#1518</a>). A
 protocol constructed from its own octets is not counted itself, so the count
 starts at the first layer it dissects. One chain of extension headers is also bounded on
-its own, by <a class="reference internal" href="internet/internet.html#pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT" title="pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a>.
+its own, by <a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.EXTENSION_HEADER_LIMIT" title="pcapkit.utilities.config.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a>.
 The <code class="docutils literal notranslate"><span class="pre">pyshark</span></code>, <code class="docutils literal notranslate"><span class="pre">scapy</span></code> and <code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code> engines dissect with their own
 parsers, which do not apply the frame’s layer bound (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1609">#1609</a>). The
 <code class="docutils literal notranslate"><span class="pre">dpkt</span></code> toolkit reads what <code class="xref py py-mod docutils literal notranslate"><span class="pre">dpkt</span></code> decodes, which applies neither bound.</p>
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.protocol.FRAME_LAYER_LIMIT">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.protocol.</span></span><span class="sig-name descname"><span class="pre">FRAME_LAYER_LIMIT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">64</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.FRAME_LAYER_LIMIT" title="Link to this definition">¶</a></dt>
-<dd><p>Most layers dissected in one frame (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1610">#1610</a>). A layer is one entry of
-the frame’s protocol chain, counted from the first layer the frame record
-carries, usually its link layer; a protocol constructed from its own octets
-is not counted itself, so the count starts at the first layer it dissects.
-IPv6 extension headers are layers like any other, whether
-<a class="reference internal" href="internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6" title="pcapkit.protocols.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a> walks them or each dissects
-the next. What follows the last layer is kept as
-<a class="reference internal" href="misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, with one
-<a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.ProtocolWarning" title="pcapkit.utilities.warnings.ProtocolWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolWarning</span></code></a>, unless it would have been
-left raw anyway or there is nothing left.</p>
-<p>Each layer dissects the next from inside its own parse, so without the bound
-a deep enough frame, such as IP in IP or stacked 802.1Q tags, stops wherever
-Python’s recursion limit falls, which depends on the interpreter and on how
-deep the caller’s own stack is. A tunnel does not restart the count, and nor
-does the end of a chain of extension headers, which
-<a class="reference internal" href="internet/internet.html#pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT" title="pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a> bounds on
-its own.</p>
-</dd></dl>
-
+<div class="versionremoved">
+<p><span class="versionmodified removed">Removed in version 1.5.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol.FRAME_LAYER_LIMIT</span></code>, now
+<a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.FRAME_LAYER_LIMIT" title="pcapkit.utilities.config.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.utilities.config.FRAME_LAYER_LIMIT</span></code></a>, set with
+<span class="target" id="index-0"></span><a class="reference internal" href="../utilities/config.html#envvar-PCAPKIT_FRAME_LAYER_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_FRAME_LAYER_LIMIT</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1726">#1726</a>).</p>
+</div>
 </section>
 <section id="data-models">
 <h2>Data Models<a class="headerlink" href="#data-models" title="Link to this heading">¶</a></h2>
