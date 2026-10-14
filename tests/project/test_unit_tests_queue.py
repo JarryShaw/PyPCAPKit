@@ -585,7 +585,7 @@ CITATIONS: 'dict[str, list[tuple[str, Optional[str]]]]' = {
     'docs/source/contributing/workflows.rst': [
         ('# Deliberately *not* gated on ``gate-only``', '# this is neither expensive'),
         ('name: Required checks passed', None),
-        ('five for `Compat Python 3.11`', None),
+        ('and a `Compat Python` one per supported version', None),
         ("# Ruleset 23497679's required_status_checks", '# them.'),
         ('  required-checks:', 'echo "All required jobs reported an accepted result."'),
         ('if: ${{ always() && inputs.gate-only != true }}', None),
@@ -654,8 +654,6 @@ BARE_ELSEWHERE: 'dict[str, dict[str, str]]' = {
     'docs/source/contributing/workflows.rst': {
         '60': '.github/workflows/python-compatibility.yml',
         '74': '.github/workflows/python-compatibility.yml',
-        '20-24': '.github/python-versions.toml',
-        '16-19': '.github/python-versions.toml',
     },
 }
 

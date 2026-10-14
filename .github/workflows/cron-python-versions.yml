@@ -1,0 +1,177 @@
+name: Python Versions
+
+# #1660: keeps .github/python-versions.toml current. `detect` recomputes the
+# tiers from python.org's release cycle, PyPy's releases, setup-python's builds
+# and the hosted runner images (util/update_python_versions.py, whose docstring
+# gives the rules), rewrites the file and the prose the audit tests pin to it,
+# and runs that audit. When something changed, `pr` pushes the change to
+# `bot/python-versions` and opens that branch's pull request, or updates the
+# open one, for the owner to merge. Nothing here pushes `main` or edits ruleset
+# 23497679: the pull request body lists the required contexts to change by hand.
+#
+# Only these two triggers. A push to `bot/python-versions` starts the pull
+# request's own checks, which is why `pr` spends the release App's token rather
+# than GITHUB_TOKEN, whose pushes start nothing; nothing it starts runs this
+# workflow again.
+on:
+  schedule:
+    - cron: '41 5 * * 1' # Mondays at 05:41 UTC
+  workflow_dispatch:
+
+# Nothing by default; each job asks for what it needs.
+permissions: {}
+
+# One run at a time, so two runs cannot race for the branch. A queued run is
+# kept, not cancelled: it recomputes from the sources and skips what the branch
+# already proposes.
+concurrency:
+  group: python-versions
+  cancel-in-progress: false
+
+jobs:
+  # No secret and a read-only token. The computation reads the network and
+  # writes only this checkout, and the audit is the repository's own tests.
+  detect:
+    name: Recompute the Python version tiers
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      changed: ${{ steps.update.outputs.changed }}
+      publish: ${{ steps.update.outputs.publish }}
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # `latest` for this job, like every single-interpreter job (#1661).
+      - name: Read the Python versions
+        id: python-versions
+        run: python3 util/python_versions.py --github-output
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ steps.python-versions.outputs.latest }}
+
+      # PyYAML, from the `test` extra, for the workflow readers and the audit;
+      # neither imports pcapkit.
+      - name: Install PyYAML
+        run: python -m pip install PyYAML
+
+      # Fetches the four sources, rewrites the files, and writes the proposal to
+      # $RUNNER_TEMP/proposal. `publish` is false when nothing changed, or when
+      # `bot/python-versions` has an open pull request and a commit it holds
+      # ahead of main proposes these tiers, hand edits or merges of main on top
+      # or not (an anonymous, commits-only fetch), so an unmerged proposal is not
+      # pushed, nor its approval asked for, every week. When that branch holds
+      # commits it did not make and proposes other tiers, this fails as
+      # `publish` would refuse, before any approval. A branch with no open pull
+      # request was merged or closed, and is proposed afresh. The token reads
+      # that pull request's state.
+      - name: Recompute the tiers
+        id: update
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python util/update_python_versions.py update --write --out "$RUNNER_TEMP/proposal"
+          --proposal-branch bot/python-versions --github-output
+
+      # The three modules that pin the workflows and the prose to the file, on
+      # the rewritten tree. A failure here does not stop the proposal: a tier
+      # move can need hand edits the script names, and the body lists what failed.
+      - name: Run the audit tests
+        id: audit
+        continue-on-error: true
+        shell: bash
+        run: >-
+          python -m unittest -v tests.project.test_python_versions_1660
+          tests.project.test_python_matrix_tiers_1633 tests.project.test_ktlo_legs_stay_green_1672
+          2>&1 | tee "$RUNNER_TEMP/audit.log"
+
+      - name: Write the pull request body
+        if: ${{ steps.update.outputs.changed == 'true' }}
+        env:
+          AUDIT_OUTCOME: ${{ steps.audit.outcome }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: >-
+          python util/update_python_versions.py body "$RUNNER_TEMP/proposal"
+          --audit-outcome "$AUDIT_OUTCOME" --audit-log "$RUNNER_TEMP/audit.log" --run-url "$RUN_URL"
+
+      # Kept for as long as an environment approval can wait. The proposal holds
+      # files/.github/..., which upload-artifact leaves out unless told otherwise.
+      - name: Upload the proposal
+        if: ${{ steps.update.outputs.publish == 'true' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: python-versions-proposal
+          path: ${{ runner.temp }}/proposal
+          include-hidden-files: true
+          retention-days: 30
+
+      - name: Say why no pull request opens
+        if: ${{ steps.update.outputs.publish == 'true' && vars.RELEASE_APP_CLIENT_ID == '' }}
+        run: >-
+          echo "::warning title=No pull request without the release App::vars.RELEASE_APP_CLIENT_ID is unset,
+          so the pr job skips. Set up the App as docs/source/contributing/releasing.rst describes."
+
+      # With nothing changed the tree is main's, so a failing audit is main's own
+      # failure: the run says so rather than passing green over it.
+      - name: Fail on a failing audit of an unchanged tree
+        if: ${{ steps.update.outputs.changed != 'true' && steps.audit.outcome == 'failure' }}
+        run: |
+          echo "::error title=The audit fails on main::the tiers need no change, but the audit fails; see above."
+          exit 1
+
+  # The release App's private key is a secret of the `github-release`
+  # environment, which needs the owner's approval, so he is asked only on a run
+  # that has something to propose. The token is contents and pull requests
+  # write and nothing else: no `workflows`, so it cannot push a workflow file,
+  # and `update` writes none. `publish` force-pushes `bot/python-versions` alone,
+  # and while its pull request is open refuses it if it holds commits it did not
+  # make; with none open it recreates the branch from main.
+  pr:
+    name: Open or update the pull request
+    needs: detect
+    if: >-
+      ${{ needs.detect.outputs.publish == 'true' && vars.RELEASE_APP_CLIENT_ID != '' &&
+      github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: github-release
+    # GITHUB_TOKEN only downloads `detect`'s artifact; the App's token does the rest.
+    permissions:
+      actions: read
+
+    steps:
+      - name: Mint the release App's token
+        id: app
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      # The commit `detect` read, with full history for the branch's merge base.
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          token: ${{ steps.app.outputs.token }}
+
+      - name: Download the proposal
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --name python-versions-proposal
+          --dir "$RUNNER_TEMP/proposal"
+
+      - name: Push the proposal and open or update its pull request
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          APP_SLUG: ${{ steps.app.outputs.app-slug }}
+          APP_BOT_ID: ${{ vars.RELEASE_APP_BOT_ID }}
+        run: python3 util/update_python_versions.py publish "$RUNNER_TEMP/proposal"

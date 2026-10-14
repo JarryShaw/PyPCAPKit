@@ -36,6 +36,9 @@ Asserted here, over :file:`.github/workflows/create-release.yml`:
   build number that would free is already tagged;
 * ``github``, ``pypi`` and ``conda`` refuse to publish under a tag that names any
   other commit, which is likewise run, not just read;
+* once the version is tagged, ``version_check``'s PyPI and Anaconda counts are
+  of the tiers at the tag's commit, not this run's (#1660), run against a
+  scratch repository, so a tier added since cannot fail the check above;
 * every step handed ``PCAPKIT_RUN_SHA`` is handed ``github.sha``, and no
   expression names ``workflow_run.head_sha`` -- the scratch-repository tests
   inject their own values, so these are what tie them to the job;
@@ -53,11 +56,13 @@ where PyYAML is installed, the split ``test_release_gates.py`` uses.
 
 from __future__ import annotations
 
+import json
 import os
 import pathlib
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 from typing import TYPE_CHECKING
@@ -394,13 +399,21 @@ class TestTheReleaseAppToken(WorkflowMixin, unittest.TestCase):
 
     def test_the_private_key_is_read_only_in_github_behind_its_environment(self) -> None:
         """An environment secret: "If the environment requires approval, a job cannot
-        access environment secrets until one of the required reviewers approves it"."""
+        access environment secrets until one of the required reviewers approves it".
+
+        #1660's Python Versions ``pr`` job is the one other reader, behind the same
+        environment, minting the token it opens its pull request with.
+        """
+        readers_by_workflow = {WORKFLOW.name: ['github'], 'cron-python-versions.yml': ['pr']}
         for path in sorted(WORKFLOW.parent.glob('*.yml')):
             text = strip_comments(path.read_text(encoding='utf-8'))
-            readers = sorted(job for job, block in job_blocks(text, path).items() if SECRET.search(block))
+            blocks = job_blocks(text, path)
+            readers = sorted(job for job, block in blocks.items() if SECRET.search(block))
             with self.subTest(workflow=path.name):
-                self.assertEqual(readers, ['github'] if path == WORKFLOW else [])
+                self.assertEqual(readers, readers_by_workflow.get(path.name, []))
                 self.assertNotRegex(text, r'(?i)toJSON\(\s*secrets\s*\)', 'every secret, this one included')
+                for job in readers:
+                    self.assertEqual(declared_environment(blocks[job]), 'github-release')
         uses = [label(step) for step in self.steps['github'] if SECRET.search(repr(step))]
         self.assertEqual(uses, [MINT_STEP])
         self.assertEqual(declared_environment(job_blocks(WORKFLOW.read_text(encoding='utf-8'))['github']),
@@ -991,6 +1004,160 @@ class TestTheTagCheckScript(ScratchRepository):
             self.push(self.run_sha, f'refs/tags/{tag}')
         result = self.check(self.run_sha)
         self.assertEqual(result.returncode, 0, result.stdout)
+
+
+RELEASED_STEP = 'Read the released Python versions'
+#: The tier file as #1677 added it, before the first weekly proposal, and its reader.
+FIRST_TIERS = ROOT / 'tests' / 'project' / 'python_versions_fixtures' / 'python-versions.toml'
+READER = ROOT / 'util' / 'python_versions.py'
+#: A ``curl`` answering 200 with ``$REPLY`` as the body it writes to ``-o``.
+FAKE_CURL = '#!/bin/sh\nwhile [ $# -gt 0 ]; do [ "$1" = -o ] && cp "$REPLY" "$2"; shift; done\nprintf 200\n'
+
+
+@unittest.skipIf(sys.version_info < (3, 11), 'util/python_versions.py reads the tier file with tomllib, from 3.11')
+class TestTheCountsAreOfTheReleasedTiers(ScratchRepository):
+    """``version_check`` counts the wheels and conda builds a tagged version was released with (#1660).
+
+    ``pre`` is tagged before the tier file existed, ``added`` adds it as #1677
+    did, and ``grown`` merges the first weekly proposal, pypy3.12; the run is on
+    ``grown``. Counting ``grown``'s tiers for a version tagged earlier read the
+    finished release as incomplete, ran the gate and ``pypi``, and failed the
+    tag check above on every run.
+
+    """
+
+    VERSION = '1.5.0b12'
+
+    def setUp(self) -> None:
+        super().setUp()
+        # #1644: no automatic maintenance to race the scratch directory's removal.
+        self.env.update({'GIT_CONFIG_COUNT': '3', 'GIT_CONFIG_KEY_0': 'maintenance.auto', 'GIT_CONFIG_VALUE_0': 'false',
+                         'GIT_CONFIG_KEY_1': 'gc.auto', 'GIT_CONFIG_VALUE_1': '0',
+                         'GIT_CONFIG_KEY_2': 'gc.autoDetach', 'GIT_CONFIG_VALUE_2': 'false'})
+        self.bin = self.tmp / 'bin'
+        self.bin.mkdir()
+        for name, text in (('python3', f'#!/bin/sh\nexec "{sys.executable}" "$@"\n'), ('curl', FAKE_CURL)):
+            (self.bin / name).write_text(text, encoding='utf-8')
+            (self.bin / name).chmod(0o755)
+        self.env['PATH'] = f'{self.bin}{os.pathsep}{self.env["PATH"]}'
+        self.output = self.tmp / 'github-output'
+        self.env['GITHUB_OUTPUT'] = str(self.output)
+
+        self.pre = self.commit(self.VERSION, '0', 'before the tier file')
+        tiers = self.seed / '.github' / 'python-versions.toml'
+        tiers.parent.mkdir()
+        (self.seed / 'util').mkdir()
+        shutil.copyfile(FIRST_TIERS, tiers)
+        shutil.copyfile(READER, self.seed / 'util' / 'python_versions.py')
+        self.added = self.commit(self.VERSION, '0', 'the tier file')
+        self.values = {self.added: self.read(tiers)}
+        line = '"pypy3.11" = { tier = "supported" }\n'
+        grown = tiers.read_text(encoding='utf-8').replace(line, line + '"pypy3.12" = { tier = "supported" }\n')
+        tiers.write_text(grown, encoding='utf-8')
+        self.grown = self.commit(self.VERSION, '0', 'pypy3.12 joins the supported tier')
+        self.values[self.grown] = self.read(tiers)
+        self.push(self.grown, 'refs/heads/main')
+
+    @staticmethod
+    def read(tiers: 'pathlib.Path') -> 'dict[str, str]':
+        """``pypi-wheels`` and ``conda-builds`` as "Read the Python versions" writes them for ``tiers``."""
+        names = ('pypi-wheels', 'conda-builds')
+        printed = subprocess.run([sys.executable, str(READER), '--file', str(tiers), *names], capture_output=True,
+                                 text=True, check=True, timeout=scale_timeout(60)).stdout
+        return dict(zip(names, printed.splitlines()))
+
+    def released(self, exists: 'bool') -> 'tuple[subprocess.CompletedProcess[str], dict[str, str]]':
+        """The step, handed what this run's "Read the Python versions" and ``check_tag`` output."""
+        self.output.write_text('', encoding='utf-8')
+        run = self.values[self.grown]
+        result = self.run_steps('version_check', (RELEASED_STEP,), {
+            'PCAPKIT_TAG': f'v{self.VERSION}', 'PCAPKIT_TAG_EXISTS': str(exists).lower(),
+            'PCAPKIT_PYPI_WHEELS': run['pypi-wheels'], 'PCAPKIT_CONDA_BUILDS': run['conda-builds']})
+        self.assertEqual(result.returncode, 0, result.stdout)
+        return result, dict(line.split('=', 1) for line in self.output.read_text(encoding='utf-8').splitlines())
+
+    def complete(self, step: 'str', wheels: 'str', builds: 'str', reply: 'dict[str, Any]') -> 'str':
+        """The completeness check ``step`` for a release ``reply`` describes, given what the step above wrote."""
+        script = self.step('version_check', step)['run']
+        for path in ('/tmp/pypi_release.json', '/tmp/anaconda_release.json'):
+            script = script.replace(path, str(self.tmp / 'release.json'))
+        (self.tmp / 'reply.json').write_text(json.dumps(reply), encoding='utf-8')
+        (self.tmp / 'check.sh').write_text(script, encoding='utf-8')
+        self.output.write_text('', encoding='utf-8')
+        env = dict(self.env, REPLY=str(self.tmp / 'reply.json'), PCAPKIT_VERSION=self.VERSION,
+                   PCAPKIT_PYPI_WHEELS=wheels, PCAPKIT_CONDA_BUILDS=builds)
+        result = subprocess.run([BASH, '-e', str(self.tmp / 'check.sh')], cwd=self.tmp, env=env, capture_output=True,
+                                text=True, check=False, timeout=scale_timeout(60))
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        written = dict(line.split('=', 1) for line in self.output.read_text(encoding='utf-8').splitlines())
+        return next(iter(written.values()))
+
+    def test_the_checks_count_what_this_step_read(self) -> None:
+        ids = [step.get('id') for step in self.steps['version_check']]
+        self.assertLess(ids.index('check_tag'), ids.index('released'))
+        self.assertLess(ids.index('released'), min(ids.index('check_pypi'), ids.index('check_conda')))
+        self.assertEqual(self.step('version_check', RELEASED_STEP)['env'], {
+            'PCAPKIT_TAG': 'v${{ steps.get_version.outputs.PCAPKIT_VERSION }}',
+            'PCAPKIT_TAG_EXISTS': '${{ steps.check_tag.outputs.exists }}',
+            'PCAPKIT_PYPI_WHEELS': '${{ steps.python-versions.outputs.pypi-wheels }}',
+            'PCAPKIT_CONDA_BUILDS': '${{ steps.python-versions.outputs.conda-builds }}',
+        })
+        for step, name, output in (('Check PyPI publish completeness', 'PCAPKIT_PYPI_WHEELS', 'pypi-wheels'),
+                                   ('Check Anaconda publish completeness', 'PCAPKIT_CONDA_BUILDS', 'conda-builds')):
+            with self.subTest(step=step):
+                self.assertEqual(self.step('version_check', step)['env'][name],
+                                 f'${{{{ steps.released.outputs.{output} }}}}')
+        # git log and every tag: the whole history.
+        self.assertEqual(self.step('version_check', 'Checkout code')['with']['fetch-depth'], '0')
+
+    def test_before_the_tag_this_runs_tiers_count(self) -> None:
+        self.checkout(self.grown)
+        _, written = self.released(exists=False)
+        self.assertEqual(written, self.values[self.grown])
+        self.assertIn('pp312', written['pypi-wheels'].split())
+
+    def test_a_tag_on_this_runs_commit_counts_this_runs_tiers(self) -> None:
+        self.push(self.grown, f'refs/tags/v{self.VERSION}')
+        self.checkout(self.grown)
+        self.assertEqual(self.released(exists=True)[1], self.values[self.grown])
+
+    def test_a_tag_on_an_earlier_commit_counts_its_tiers(self) -> None:
+        self.push(self.added, f'refs/tags/v{self.VERSION}')
+        self.checkout(self.grown)
+        _, written = self.released(exists=True)
+        self.assertEqual(written, self.values[self.added])
+        self.assertNotIn('pp312', written['pypi-wheels'].split())
+
+    def test_a_tag_pushed_after_the_checkout_is_fetched(self) -> None:
+        self.checkout(self.grown)
+        self.push(self.added, f'refs/tags/v{self.VERSION}')
+        self.assertEqual(self.released(exists=True)[1], self.values[self.added])
+
+    def test_a_tag_older_than_the_tier_file_counts_the_tiers_it_was_added_with(self) -> None:
+        """As ``v1.5.0b12`` (``2025da5e5``) is: tagged before #1677 (``727c0fc60``) added the file."""
+        self.push(self.pre, f'refs/tags/v{self.VERSION}')
+        self.checkout(self.grown)
+        result, written = self.released(exists=True)
+        self.assertEqual(written, self.values[self.added])
+        self.assertIn(f'::notice title=Released before the tier file::v{self.VERSION} predates '
+                      f'.github/python-versions.toml; counting the tiers {self.added} added it with.', result.stdout)
+
+    def test_a_finished_release_reads_complete_after_the_tiers_grow(self) -> None:
+        """The two checks, fed the step's answer and, as before it, this run's tiers."""
+        self.push(self.added, f'refs/tags/v{self.VERSION}')
+        self.checkout(self.grown)
+        _, written = self.released(exists=True)
+        released, run = self.values[self.added], self.values[self.grown]
+        files = [f'pypcapkit-{self.VERSION}-{tag}-none-any.whl' for tag in released['pypi-wheels'].split()]
+        pypi = {'urls': [{'filename': name} for name in files + [f'pypcapkit-{self.VERSION}.tar.gz']]}
+        conda = {'distributions': [{'attrs': {'subdir': platform, 'build': f'{build}_0'}}
+                                   for platform in ('linux-64', 'osx-64')
+                                   for build in released['conda-builds'].split()]}
+        step = 'Check PyPI publish completeness'
+        self.assertEqual(self.complete(step, written['pypi-wheels'], '', pypi), 'true')
+        self.assertEqual(self.complete(step, run['pypi-wheels'], '', pypi), 'false')
+        step = 'Check Anaconda publish completeness'
+        self.assertEqual(self.complete(step, '', written['conda-builds'], conda), 'true')
 
 
 @unittest.skipIf(not BASH, 'needs bash on PATH')

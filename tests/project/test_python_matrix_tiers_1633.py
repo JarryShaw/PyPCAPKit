@@ -321,13 +321,16 @@ class TestNoKTLOLegCanFailTheRelease(unittest.TestCase):
         """``PCAPKIT_PYPI_COMPLETE`` for a release holding ``files``, ``curl`` stubbed.
 
         The supported wheel tags reach the step as ``PCAPKIT_PYPI_WHEELS``, read
-        from the tier file as the workflow reads it (#1660).
+        from the tier file as the workflow reads it (#1660): this run's, which
+        the ``released`` step passes on while the version is untagged.
 
         """
         steps = job('create-release.yml', 'version_check')['steps']
         step = next(step for step in steps if step.get('name') == 'Check PyPI publish completeness')
         script = step['run']
-        wheels = resolve('create-release.yml', 'version_check', step['env']['PCAPKIT_PYPI_WHEELS'])
+        self.assertEqual(step['env']['PCAPKIT_PYPI_WHEELS'], '${{ steps.released.outputs.pypi-wheels }}')
+        released = next(step for step in steps if step.get('id') == 'released')
+        wheels = resolve('create-release.yml', 'version_check', released['env']['PCAPKIT_PYPI_WHEELS'])
         reply = self.tmp / 'reply.json'
         reply.write_text(json.dumps({'urls': [{'filename': name} for name in files]}), encoding='utf-8')
         bin_dir = self.tmp / 'bin'

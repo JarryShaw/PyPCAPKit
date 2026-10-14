@@ -1,6 +1,6 @@
 name: Coverage Comment
 
-# Posts the coverage the `test` job's Python 3.15 leg measured in
+# Posts the coverage the `test` job's `latest` leg measured in
 # unit-tests.yml as a pull-request comment. It runs no tests. The comment cannot
 # be posted from unit-tests.yml itself: that file is also a reusable workflow,
 # and a called workflow can only narrow the token its caller passes, never widen
@@ -81,8 +81,13 @@ jobs:
           if tests not in ('success', 'failure', 'cancelled', 'skipped'):
               sys.exit(f'invalid test outcome in artifact: {tests!r}')
           total = number(data['total'])
+          # The leg's version, from the artifact; one written before #1660 has none.
+          python = data.get('python')
+          if python is not None and not (isinstance(python, str) and re.fullmatch(r'3\.\d+', python)):
+              sys.exit(f'invalid Python version in artifact: {python!r}')
+          leg = f'Python {python}' if python else 'the coverage leg'
           status = '' if tests == 'success' else f' -- **tests {tests}**, so this is partial'
-          print(f"**Coverage: {total:.2f}%**{status} (unit tier, Python 3.15, "
+          print(f"**Coverage: {total:.2f}%**{status} (unit tier, {leg}, "
                 f"`{os.environ['HEAD_SHA'][:9]}`, Unit Tests run {os.environ['RUN_CONCLUSION']})")
           print()
           print('| Package | Statements | Missed | Branches | Partial | Cover |')

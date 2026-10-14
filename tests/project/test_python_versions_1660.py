@@ -27,7 +27,11 @@ step outputs. Four things are pinned here:
   script are facts about the engines, not pins, and are not read.)
 * **The prose follows the file.** The classifiers, README, SECURITY.md, the
   docs' version lists, the bug-report template, and the comments and docs
-  naming the coverage leg's version or the release checks' counts.
+  naming the coverage leg's version or the release checks' counts. None of
+  them is a workflow: the weekly job that regenerates them
+  (:file:`util/update_python_versions.py`) cannot push one, so workflow
+  comments name the tiers instead, as
+  :mod:`tests.project.test_python_versions_update_1660` pins.
 
 The script reads the file with :mod:`tomllib`, in the standard library from 3.11,
 so every test that reads it skips on the KTLO interpreters, 3.8-3.10 -- the
@@ -133,6 +137,10 @@ def workflow_at_main(name: 'str') -> 'dict[str, Any]':
 
 def workflows(load: 'Callable[[str], dict[str, Any]]' = workflow) -> 'Iterator[tuple[str, dict[str, Any]]]':
     for path in sorted(WORKFLOWS.glob('*.yml')):
+        if load is workflow_at_main and subprocess.run(
+                ['git', 'cat-file', '-e', f'{MAIN}:.github/workflows/{path.name}'], cwd=ROOT,
+                capture_output=True, check=False).returncode:
+            continue  # added since MAIN, as cron-python-versions.yml was (#1660)
         yield path.name, load(path.name)
 
 
@@ -672,7 +680,8 @@ def pins(load: 'Callable[[str], dict[str, Any]]' = workflow) -> 'dict[tuple[str,
 SINGLE = (('unit-tests.yml', 'gate'), ('unit-tests.yml', 'unittest-ordering'), ('unit-tests.yml', 'changelog'),
           ('unit-tests.yml', 'project-tests'), ('create-release.yml', 'version_check'),
           ('cron-conda.yml', 'conda-update'), ('cron-vendor.yml', 'vendor-update'),
-          ('deploy-pages.yml', 'deploy-pages'), ('ci-timing.yml', 'report'), ('lint.yml', 'lint'))
+          ('deploy-pages.yml', 'deploy-pages'), ('ci-timing.yml', 'report'), ('lint.yml', 'lint'),
+          ('cron-python-versions.yml', 'detect'))
 
 
 class TestEveryVersionComesFromTheFile(unittest.TestCase):
@@ -775,10 +784,17 @@ class TestTheAnacondaCheckCountsTheFile(unittest.TestCase):
             self.skipTest('bash and python3 are needed to run the workflow shell')
 
     def complete(self, distributions: 'list[tuple[str, str]]') -> 'str':
-        """``PCAPKIT_CONDA_COMPLETE`` for a release holding these (platform, build) pairs."""
-        step = next(step for step in workflow('create-release.yml')['jobs']['version_check']['steps']
-                    if step.get('name') == 'Check Anaconda publish completeness')
-        builds = resolve('create-release.yml', 'version_check', step['env']['PCAPKIT_CONDA_BUILDS'])
+        """``PCAPKIT_CONDA_COMPLETE`` for a release holding these (platform, build) pairs.
+
+        The builds are this run's, which the ``released`` step passes on while the
+        version is untagged; ``test_release_tags_the_run_sha_1634`` runs it tagged.
+
+        """
+        steps = workflow('create-release.yml')['jobs']['version_check']['steps']
+        step = next(step for step in steps if step.get('name') == 'Check Anaconda publish completeness')
+        self.assertEqual(step['env']['PCAPKIT_CONDA_BUILDS'], '${{ steps.released.outputs.conda-builds }}')
+        released = next(step for step in steps if step.get('id') == 'released')
+        builds = resolve('create-release.yml', 'version_check', released['env']['PCAPKIT_CONDA_BUILDS'])
         with tempfile.TemporaryDirectory(prefix='pcapkit-1660-') as tmp:
             scratch = pathlib.Path(tmp)
             reply = scratch / 'reply.json'
@@ -849,24 +865,24 @@ class TestTheProseFollowsTheFile(unittest.TestCase):
         ('pyproject.toml', r'\*\*(3\.\d+) through (3\.\d+)\*\* are supported', 'supported'),
         ('pyproject.toml', r'\*\*(3\.\d+) through (3\.\d+)\*\* are KTLO', 'ktlo'),
         ('pyproject.toml', r'the KTLO tier \((3\.\d+)-(3\.\d+)\)', 'ktlo'),
-        ('.github/workflows/lint.yml', r'Python Compatibility sweep (3\.\d+)-(3\.\d+),', 'supported'),
-        ('.github/workflows/lint.yml', r'the non-blocking KTLO legs (3\.\d+)-(3\.\d+)', 'ktlo'),
     )
 
     def test_each_tier_range_names_the_files_tier(self) -> None:
+        """Its first and last version, and so every one between: "3.8 to 3.10" says 3.9 is in it."""
         for path, pattern, name in self.RANGES:
             versions = self.supported if name == 'supported' else self.ktlo
             with self.subTest(path=path, claim=pattern):
                 self.assertEqual(re.findall(pattern, prose(ROOT / path)), [(versions[0], versions[-1])])
+        for name, versions in (('supported', self.supported), ('ktlo', self.ktlo)):
+            minors = [int(version.split('.')[1]) for version in versions]
+            with self.subTest(tier=name):
+                self.assertEqual(minors, list(range(minors[0], minors[0] + len(minors))),
+                                 f'a range cannot state the {name} tier {versions}; reword the claims by hand')
 
     def test_the_required_contexts_table_is_the_supported_tier(self) -> None:
         """The docs' copy of ruleset 23497679, which a tier change edits with it."""
         page = prose(ROOT / 'docs' / 'source' / 'contributing' / 'workflows.rst')
         self.assertEqual(re.findall(r'\* - ``Compat Python (3\.\d+)``', page), self.supported)
-        comment = prose(WORKFLOWS / 'unit-tests.yml')
-        self.assertEqual(re.findall(r'and (\w+) for `Compat Python (3\.\d+)`-`(3\.\d+)`', comment),
-                         [(['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven'][len(self.supported)],
-                           self.supported[0], self.supported[-1])])
 
     def test_the_workflows_page_cites_each_version_on_its_line(self) -> None:
         """The required contexts' rows, and the two tiers' spans under them, cite the file by line."""
@@ -878,7 +894,7 @@ class TestTheProseFollowsTheFile(unittest.TestCase):
             with self.subTest(version=version):
                 self.assertTrue(lines[int(line) - 1].startswith(f'"{version}" = '), lines[int(line) - 1])
         for label, versions in (('supported tier', self.supported), ('KTLO legs', self.ktlo)):
-            spans = re.findall(rf'its (?:\w+ )?{label} \(``:(\d+)-(\d+)``\)', page)
+            spans = re.findall(rf'its (?:\w+ )?{label} \(``python-versions\.toml:(\d+)-(\d+)``\)', page)
             with self.subTest(tier=label):
                 self.assertEqual(len(spans), 1, spans)
                 first, last = map(int, spans[0])
@@ -895,13 +911,10 @@ class TestTheProseFollowsTheFile(unittest.TestCase):
 
     #: (file, a claim naming the coverage leg's or the sdist leg's version) -- ``latest``.
     LATEST = (
-        ('.github/workflows/coverage-comment.yml', r'\(unit tier, Python (\d+\.\d+), '),
-        ('.github/workflows/coverage-comment.yml', r"the `test` job's Python (\d+\.\d+) leg"),
         ('.github/coverage.toml', r'\(`test`, Python (\d+\.\d+)\)'),
         ('docs/source/contributing/workflows.rst',
          r'the ``Python (\d+\.\d+)`` leg of ``test`` \(matrix key ``coverage: true``\)'),
         ('docs/source/contributing/conventions/test-coverage.rst', r"the ``test`` job's Python (\d+\.\d+) cell"),
-        ('.github/workflows/create-release.yml', r'keeps only on the (\d+\.\d+) leg'),
         ('docs/source/contributing/releasing.rst', r'the sdist kept only on the (\d+\.\d+) leg'),
     )
 
@@ -912,14 +925,8 @@ class TestTheProseFollowsTheFile(unittest.TestCase):
 
     def test_the_release_checks_counts_follow_the_matrices(self) -> None:
         """version_check's own counts come from the file; the prose stating them must too."""
-        release = prose(WORKFLOWS / 'create-release.yml')
         page = prose(ROOT / 'docs' / 'source' / 'contributing' / 'releasing.rst')
         claims = (
-            (release, r'against the (\d+) expected', [str(self.wheels + 1)] * 2),
-            (release, r'expected -- the (\d+) supported legs', [str(self.wheels)]),
-            (release, r'the (\d+)-leg ``conda`` matrix \(2 OS x (\d+) Python versions\)',
-             [(str(2 * self.conda), str(self.conda))]),
-            (release, r'only (\d+) of (\d+) legs', [(str(2 * self.conda - 1), str(2 * self.conda))]),
             (page, r'against the (\d+) expected -- the (\d+) supported legs',
              [(str(self.wheels + 1), str(self.wheels))]),
             (page, r'against the (\d+) expected \(2 OS x (\d+) Python versions\)',
