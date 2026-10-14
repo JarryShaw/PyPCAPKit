@@ -10,6 +10,12 @@ which is a base class for internet layer protocols, eg. :class:`~pcapkit.protoco
 :class:`~pcapkit.protocols.internet.ipsec.IPsec`, :class:`~pcapkit.protocols.internet.ipv4.IPv4`,
 :class:`~pcapkit.protocols.internet.ipv6.IPv6`, :class:`~pcapkit.protocols.internet.ipx.IPX`, and etc.
 
+.. versionremoved:: 1.5.0
+
+   ``pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT``, now
+   :data:`pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`, set with
+   :envvar:`PCAPKIT_EXTENSION_HEADER_LIMIT` (:issue:`1726`).
+
 """
 import collections
 import contextvars
@@ -23,6 +29,7 @@ from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase, _rebuilding
 from pcapkit.protocols.schema.schema import keep_short_read, replay_short_read
+from pcapkit.utilities import config
 from pcapkit.utilities.exceptions import stacklevel
 from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
@@ -35,32 +42,10 @@ if TYPE_CHECKING:
 
 __all__ = ['Internet']
 
-#: Most IPv6 extension headers dissected in one chain, i.e. one after another
-#: with no other layer between them (:issue:`1604`). The walk stops there, and
-#: what follows the last of them is kept as
-#: :class:`~pcapkit.protocols.misc.raw.Raw`, with one
-#: :exc:`~pcapkit.utilities.warnings.ProtocolWarning`. That holds whether the
-#: chain follows IPv6, which walks it in a loop
-#: (:meth:`IPv6._decode_next_layer
-#: <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>`), or another
-#: layer such as IPv4, where each header dissects the next one itself
-#: (:meth:`Internet._import_next_layer`). The toolkit adapters that walk a
-#: chain themselves stop at the same depth.
-#:
-#: :rfc:`8200#section-4.1` allows each extension header at most once, and the
-#: Destination Options header at most twice, so no compliant chain gets close.
-#: Without the bound, a chain dissected header by header stops wherever
-#: Python's recursion limit falls, which depends on the interpreter.
-#:
-#: Rebuilding a frame with :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data`
-#: stops where parsing it did, and warns once too (:issue:`1619`), c.f.
-#: :meth:`Internet._make_payload`.
-EXTENSION_HEADER_LIMIT = 32
-
 #: contextvars.ContextVar[int]: Where the payload :meth:`Internet._make_payload`
 #: rebuilds sits in a chain of IPv6 extension headers, should it be one: one past
 #: the layer it is the payload of, as :meth:`Internet._next_exthdr_depth` places
-#: it while parsing, c.f. :data:`EXTENSION_HEADER_LIMIT`.
+#: it while parsing, c.f. :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`.
 _exthdr_rebuilt = contextvars.ContextVar('_exthdr_rebuilt', default=0)
 
 
@@ -154,7 +139,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
     #: int: How many IPv6 extension headers in a row the next layer follows:
     #: this layer's place in such a chain, or how many headers
     #: :class:`~pcapkit.protocols.internet.ipv6.IPv6` walked, else ``0``, c.f.
-    #: :data:`EXTENSION_HEADER_LIMIT` and :meth:`_next_exthdr_depth`.
+    #: :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` and :meth:`_next_exthdr_depth`.
     _exthdr_depth = 0
 
     ##########################################################################
@@ -239,7 +224,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             _exthdr_depth (int): Where this layer is in a chain of IPv6
                 extension headers, counting from ``1``, or ``0`` if it is not
                 in one. Handed over by :meth:`_import_next_layer` while
-                parsing, c.f. :data:`EXTENSION_HEADER_LIMIT`; a layer
+                parsing, c.f. :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`; a layer
                 constructed instead, as :meth:`from_data` rebuilds one, takes it
                 from :meth:`_rebuilt_exthdr_depth` (:issue:`1619`).
             **kwargs: Arbitrary keyword arguments.
@@ -300,7 +285,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             One more than :attr:`_exthdr_depth` if ``proto`` names an IPv6
             extension header, or ``0`` if it names none, so that another layer
             between two headers starts a new chain. Past
-            :data:`EXTENSION_HEADER_LIMIT`, the next layer is left raw.
+            :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`, the next layer is left raw.
 
         """
         if extension:
@@ -340,7 +325,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
         <pcapkit.protocols.protocol.ProtocolBase._make_payload>`, but the payload
         is built at its place in its chain of IPv6 extension headers, one past
         this layer's, since it parses its own octets again. So rebuilding a frame
-        stops at :data:`EXTENSION_HEADER_LIMIT` where parsing it did, rather
+        stops at :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` where parsing it did, rather
         than that many headers past each header of the chain, and warns of the
         limit once, as :meth:`_next_layer_class` describes (:issue:`1619`).
 
@@ -378,14 +363,14 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             :class:`~pcapkit.protocols.misc.null.NoPayload` if there is
             nothing to parse; :class:`~pcapkit.protocols.misc.raw.Raw` if the
             parse stops at this layer, or the next layer is an IPv6 extension
-            header past :data:`EXTENSION_HEADER_LIMIT` in a row; otherwise the
+            header past :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` in a row; otherwise the
             class registered for ``proto``. With it, the keywords only that next
             layer is constructed with: the warning given, as ``error``, or the
             next layer's place in its chain, as ``_exthdr_depth``.
 
         Warns:
             ProtocolWarning: If the next layer is past
-                :data:`EXTENSION_HEADER_LIMIT` (:issue:`1604`), unless this
+                :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` (:issue:`1604`), unless this
                 layer is inside a payload being rebuilt (:issue:`1619`).
 
         """
@@ -397,15 +382,16 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             return Raw, {}
 
         depth = self._next_exthdr_depth(proto, extension)
-        if depth > EXTENSION_HEADER_LIMIT:
+        limit = config.EXTENSION_HEADER_LIMIT
+        if limit != -1 and depth > limit:
             from pcapkit.protocols.misc.raw import Raw  # isort: skip # pylint: disable=import-outside-toplevel
 
             message = (f'{self.alias}: a chain of IPv6 extension headers reached the limit of '
-                       f'{EXTENSION_HEADER_LIMIT} headers; the rest of the packet, from Next '
+                       f'{limit} headers; the rest of the packet, from Next '
                        f'Header {int(cast("int", proto))}, is left undissected')
             # NOTE: Inside a payload being rebuilt, the layer it is rebuilt for
             # warns of the same octets once its own parse gets here, as for
-            # :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT`.
+            # :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.
             if not _rebuilding.get():
                 warn(message, ProtocolWarning, stacklevel=stacklevel())
             return Raw, {'error': message}
@@ -483,7 +469,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             Instance of next layer.
 
         Notes:
-            An IPv6 extension header past :data:`EXTENSION_HEADER_LIMIT` in a
+            An IPv6 extension header past :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` in a
             row is not dissected: it and the rest of the packet are kept as
             :class:`~pcapkit.protocols.misc.raw.Raw`, with one
             :exc:`~pcapkit.utilities.warnings.ProtocolWarning` (:issue:`1604`).

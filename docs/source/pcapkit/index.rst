@@ -139,14 +139,6 @@ Environment Variables
 
       :data:`pcapkit.utilities.logging.VERBOSE`
 
-.. envvar:: PCAPKIT_HTTP_PROXY
-
-   HTTP proxy address for :mod:`pcapkit.vendor` crawlers.
-
-.. envvar:: PCAPKIT_HTTPS_PROXY
-
-   HTTPS proxy address for :mod:`pcapkit.vendor` crawlers.
-
 .. envvar:: PCAPKIT_SPHINX
 
    If set to ``1``, :mod:`pcapkit` will run with Sphinx additional
@@ -155,3 +147,20 @@ Environment Variables
    .. seealso::
 
       :data:`pcapkit.utilities.logging.SPHINX_TYPE_CHECKING`
+
+The tunable limits, and the :mod:`pcapkit.vendor` crawlers'
+:envvar:`PCAPKIT_VENDOR_RETRY`, :envvar:`PCAPKIT_CI_MODE`,
+:envvar:`PCAPKIT_HTTP_PROXY` and :envvar:`PCAPKIT_HTTPS_PROXY`, are read by
+:mod:`pcapkit.utilities.config`, which lists each with its default, its
+accepted range and its risks.
+
+.. versionchanged:: 1.5.0
+
+   :envvar:`PCAPKIT_HTTP_PROXY` and :envvar:`PCAPKIT_HTTPS_PROXY` are documented
+   with :mod:`pcapkit.utilities.config` rather than here, and are still read on
+   every request. The tunable limits are new as variables (:issue:`1726`). A
+   bad value of :envvar:`PCAPKIT_DEVMODE`, :envvar:`PCAPKIT_VERBOSE`,
+   :envvar:`PCAPKIT_SPHINX`, :envvar:`PCAPKIT_CI_MODE` or
+   :envvar:`PCAPKIT_VENDOR_RETRY` now warns with
+   :exc:`~pcapkit.utilities.warnings.ConfigWarning` instead of being taken
+   silently, or, for :envvar:`PCAPKIT_VENDOR_RETRY`, crashing the import.

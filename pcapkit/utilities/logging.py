@@ -60,17 +60,47 @@ BOOLEAN_STATES = {'1': True, '0': False,
                   'true': True, 'false': False,
                   'on': True, 'off': False}
 
+#: list[tuple[str, str]]: Each flag below whose value is not one of
+#: :data:`BOOLEAN_STATES`, as ``(variable, value)``, in the order read.
+#:
+#: This module loads before :mod:`pcapkit.utilities.warnings`, which needs
+#: :data:`VERBOSE`, so it cannot warn of a bad value itself. It records the
+#: value here instead, and :mod:`pcapkit.utilities.warnings` reports each with a
+#: :exc:`~pcapkit.utilities.warnings.ConfigWarning` once it has loaded
+#: (:issue:`1726`).
+_BAD_FLAGS = []  # type: list[tuple[str, str]]
+
+
+def _read_flag(variable: 'str') -> 'bool':
+    """Read the boolean environment variable ``variable``, off by default.
+
+    The value is read with surrounding whitespace stripped and
+    case-insensitively, as :func:`pcapkit.utilities.config._read_flag` reads
+    one. A value that is not then one of :data:`BOOLEAN_STATES` is taken as off
+    and recorded in :data:`_BAD_FLAGS`.
+
+    """
+    text = os.environ.get(variable)
+    if text is None:
+        return False
+    try:
+        return BOOLEAN_STATES[text.strip().casefold()]
+    except KeyError:
+        _BAD_FLAGS.append((variable, text))
+        return False
+
+
 #: bool: Development mode flag.
-DEVMODE = BOOLEAN_STATES.get(os.environ.get('PCAPKIT_DEVMODE', 'false').casefold(), False)
+DEVMODE = _read_flag('PCAPKIT_DEVMODE')
 #: bool: Verbose output flag.
-VERBOSE = BOOLEAN_STATES.get(os.environ.get('PCAPKIT_VERBOSE', 'false').casefold(), False)
+VERBOSE = _read_flag('PCAPKIT_VERBOSE')
 
 ###############################################################################
 # Sphinx Mode
 ###############################################################################
 
 #: bool: This is a workaround for :data:`typing.TYPE_CHECKING` in Sphinx.
-SPHINX_TYPE_CHECKING = BOOLEAN_STATES.get(os.environ.get('PCAPKIT_SPHINX', 'false').casefold(), False)
+SPHINX_TYPE_CHECKING = _read_flag('PCAPKIT_SPHINX')
 
 ###############################################################################
 # Logger Setup

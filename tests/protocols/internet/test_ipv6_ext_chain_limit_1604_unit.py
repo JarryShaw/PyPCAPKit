@@ -9,7 +9,7 @@ interpreter and the stack -- after 79 headers on Python 3.11, and between 85
 and 90 on 3.14, from a script at the default limit -- and IPv6, which walks its
 chain in a loop, went on to any depth.
 
-Now both stop at :data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT`
+Now both stop at :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`
 headers in a row: what follows is kept as
 :class:`~pcapkit.protocols.misc.raw.Raw`, with one
 :exc:`~pcapkit.utilities.warnings.ProtocolWarning`, however long the chain and
@@ -123,9 +123,9 @@ class ExtensionHeaderChainLimitTests(unittest.TestCase):
         return (str(parsed.protochain), layer.info.protocol, len(layer.data), tuple(messages))
 
     def test_the_limit_is_32(self) -> None:
-        from pcapkit.protocols.internet.internet import EXTENSION_HEADER_LIMIT
+        from pcapkit.utilities import config
 
-        self.assertEqual(EXTENSION_HEADER_LIMIT, 32)
+        self.assertEqual(config.EXTENSION_HEADER_LIMIT, 32)
 
     def test_a_chain_of_32_is_dissected_to_the_tcp(self) -> None:
         for carrier in ETHERTYPE:

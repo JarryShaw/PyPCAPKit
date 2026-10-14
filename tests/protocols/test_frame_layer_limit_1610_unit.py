@@ -9,7 +9,7 @@ left the rest raw, silently. From a script on Python 3.14, TCP was lost behind
 chain of extension headers, but its count restarts at every tunnel.
 
 Now every frame stops at
-:data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT` layers, counted along its
+:data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` layers, counted along its
 protocol chain from the first layer its record carries, through tunnels, tags
 and extension headers alike: what follows is kept as
 :class:`~pcapkit.protocols.misc.raw.Raw`, with one
@@ -182,9 +182,9 @@ class FrameLayerLimitTests(unittest.TestCase):
         self.assertEqual(int(layer.info.protocol), named[layers[63]])  # type: ignore[attr-defined]
 
     def test_the_limit_is_64(self) -> None:
-        from pcapkit.protocols.protocol import FRAME_LAYER_LIMIT
+        from pcapkit.utilities import config
 
-        self.assertEqual(FRAME_LAYER_LIMIT, 64)
+        self.assertEqual(config.FRAME_LAYER_LIMIT, 64)
 
     def test_a_frame_of_64_layers_is_dissected_to_the_tcp(self) -> None:
         # Guard: below the old recursion cut-off, so this held before #1610 too.

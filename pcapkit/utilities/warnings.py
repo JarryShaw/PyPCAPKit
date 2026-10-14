@@ -58,11 +58,12 @@ them if it is discarded (:issue:`1580`).
 """
 import contextvars
 import inspect
+import os
 import warnings
 from typing import TYPE_CHECKING
 
 from pcapkit.utilities.exceptions import stacklevel as stacklevel_calculator
-from pcapkit.utilities.logging import VERBOSE, get_logger
+from pcapkit.utilities.logging import _BAD_FLAGS, BOOLEAN_STATES, VERBOSE, get_logger
 
 if TYPE_CHECKING:
     from types import FrameType, TracebackType
@@ -85,7 +86,7 @@ __all__ = [
     'FileWarning', 'LayerWarning', 'ProtocolWarning', 'AttributeWarning',
     'DevModeWarning', 'VendorRequestWarning', 'VendorRuntimeWarning',
     'UnknownFieldWarning', 'RegistryWarning', 'SchemaWarning', 'InfoWarning',
-    'SeekWarning', 'ExtractionWarning',
+    'SeekWarning', 'ExtractionWarning', 'ConfigWarning',
     # ResourceWarning
     'DPKTWarning', 'ScapyWarning', 'PySharkWarning', 'EmojiWarning',
     'VendorWarning',
@@ -407,6 +408,18 @@ class ExtractionWarning(BaseWarning, RuntimeWarning):
     """Extraction warning."""
 
 
+class ConfigWarning(BaseWarning, RuntimeWarning):
+    """Configuration warning.
+
+    Reported by :mod:`pcapkit.utilities.config` for an environment variable that
+    is invalid, and so falls back to its default, or that lifts a limit past its
+    default.
+
+    .. versionadded:: 1.5.0
+
+    """
+
+
 ##############################################################################
 # ResourceWarning session.
 ##############################################################################
@@ -439,3 +452,59 @@ class VendorWarning(BaseWarning, ResourceWarning):
 
 class DeprecatedFormatWarning(BaseWarning, DeprecationWarning):
     """Warning on deprecated formats."""
+
+
+###############################################################################
+# Deferred Reports
+###############################################################################
+
+
+def _importer_stacklevel() -> 'int':
+    """Stack level, relative to the caller, of the innermost frame outside :mod:`pcapkit`.
+
+    For a :exc:`ConfigWarning` given while :mod:`pcapkit` is imported, which
+    then names the module that imported it (:issue:`1726`).
+    :func:`~pcapkit.utilities.exceptions.stacklevel` counts every frame, but
+    :func:`warnings.warn` does not count those of :mod:`importlib`'s bootstrap,
+    which an import puts between the importing module and :mod:`pcapkit`. Its
+    level then runs past the outermost frame, and the warning is attributed to
+    ``<sys>:0``. This counts frames as :func:`warnings.warn` does, and
+    :mod:`logging` does from Python 3.11; on earlier versions the log record is
+    attributed to a frame inside the import.
+
+    """
+    pcapkit = f'{os.path.sep}pcapkit{os.path.sep}'
+    boundary = outermost = level = 0
+    frame = inspect.currentframe()
+    try:
+        frame = frame.f_back if frame is not None else None  # the caller, level 1
+        while frame is not None:
+            filename = frame.f_code.co_filename
+            if not ('importlib' in filename and '_bootstrap' in filename):
+                level += 1
+                outermost = level
+                if pcapkit in filename:
+                    boundary = level
+            frame = frame.f_back
+    finally:
+        del frame
+    return max(1, min(boundary + 1, outermost))
+
+
+def _report_bad_flags() -> 'None':
+    """Report the bad flags :mod:`pcapkit.utilities.logging` recorded.
+
+    Each entry of :data:`pcapkit.utilities.logging._BAD_FLAGS` is reported with
+    a :exc:`ConfigWarning` and then dropped, so it is reported once. An entry is
+    dropped only after its warning returns, so under :option:`-W error <-W>` the
+    next import raises again rather than passing silently.
+
+    """
+    while _BAD_FLAGS:
+        variable, text = _BAD_FLAGS[0]
+        warn(f'{variable}={text!r} is not one of {", ".join(BOOLEAN_STATES)}; '
+             'using the default, False', ConfigWarning, stacklevel=_importer_stacklevel())
+        del _BAD_FLAGS[0]
+
+
+_report_bad_flags()

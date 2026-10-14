@@ -1,5 +1,26 @@
 # -*- coding: utf-8 -*-
-"""base field class"""
+"""Base Fields
+================
+
+.. module:: pcapkit.corekit.fields.field
+
+:mod:`pcapkit.corekit.fields.field` contains the base field classes.
+
+.. versionremoved:: 1.5.0
+
+   Moved to :mod:`pcapkit.utilities.config` (:issue:`1726`):
+
+   * ``pcapkit.corekit.fields.field._MAX_ZERO_PAD_LENGTH``, now
+     :data:`pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH`, set with
+     :envvar:`PCAPKIT_MAX_ZERO_PAD_LENGTH`;
+   * ``pcapkit.corekit.fields.field._MAX_ZERO_PAD_SHORTFALL``, now
+     :data:`pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL`, set with
+     :envvar:`PCAPKIT_MAX_ZERO_PAD_SHORTFALL`;
+   * ``pcapkit.corekit.fields.field._ZERO_PAD_BUDGET_RATIO``, now
+     :data:`pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO`, set with
+     :envvar:`PCAPKIT_ZERO_PAD_BUDGET_RATIO`.
+
+"""
 
 import abc
 import contextlib
@@ -9,6 +30,7 @@ import struct
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from pcapkit.corekit.sentinels import NO_VALUE, NoValueType  # pylint: disable=unused-import
+from pcapkit.utilities import config
 from pcapkit.utilities.exceptions import FieldValueError, NoDefaultValue, ProtocolError
 
 __all__ = ['NO_VALUE', 'Field']
@@ -22,99 +44,9 @@ if TYPE_CHECKING:
 
 _T = TypeVar('_T')
 
-#: int: Ceiling on the zero-padding :meth:`FieldBase.unpack` will still perform
-#: for a field whose declared length outruns its buffer.
-#:
-#: This is libpcap's own ``MAXIMUM_SNAPLEN`` -- the point past which libpcap
-#: itself treats a capture's declared snapshot length as corrupt or
-#: byte-order-swapped rather than real -- and it is the same figure this
-#: package's own PCAP writer defaults ``snaplen`` to
-#: (:meth:`pcapkit.protocols.misc.pcap.header.Header.make`). No single field
-#: within one captured packet is legitimately larger than the largest packet
-#: libpcap itself is willing to believe, so nothing this library parses
-#: should ever declare a length past it.
-#:
-#: The bound is deliberately *not* "any declared length beyond what the
-#: buffer holds": :meth:`ListField.unpack <pcapkit.corekit.fields.collections.
-#: ListField.unpack>` and :meth:`OptionField.unpack <pcapkit.corekit.fields.
-#: collections.OptionField.unpack>` depend on reading a short, sometimes
-#: empty, tail past a truncated area and having it decode as zero -- that is
-#: how an over-long ``ihl``, or a capture cut short by the snapshot length,
-#: reads as end-of-option-list or ``Pad1`` instead of wedging or raising (see
-#: :issue:`431`). Every such read is of a fixed-width, few-octet field, always
-#: far under this ceiling, so it is untouched; only a length past it -- which
-#: no fixed-width field ever legitimately is -- gets refused.
-#:
-#: A ceiling on one field says nothing about how many fields a parse may pad,
-#: which is what :data:`_MAX_ZERO_PAD_SHORTFALL` and
-#: :data:`_ZERO_PAD_BUDGET_RATIO` below are for. See :issue:`573`.
-_MAX_ZERO_PAD_LENGTH = 0x40_000
-
-#: int: Shortfall :meth:`FieldBase.unpack` will always zero-pad for, whatever
-#: else a parse has already padded.
-#:
-#: :data:`_MAX_ZERO_PAD_LENGTH` bounds each field on its own, and a packet holds
-#: many fields, so it leaves the *sum* unbounded: a declared length just under the
-#: ceiling is honoured however often it is declared. Measured on this tree, 200
-#: minimal PCAP-NG Decryption Secrets Blocks -- 4,800 wire octets, each block
-#: declaring ``secrets_length`` of 262,142 against two supplied octets through
-#: ``UnknownSecrets.data`` (``pcapkit/protocols/schema/misc/pcapng.py``) --
-#: retained 50.0 MiB, an amplification of 10,922x per block. Every individual
-#: field was under the ceiling, so nothing refused any of them (:issue:`573`).
-#:
-#: The sum therefore wants a budget, and this is the figure that makes one
-#: *safe*. A budget on its own is not: a capture cut short by its snapshot length
-#: pads legitimately and must keep parsing (:issue:`431`, and the reasoning that
-#: declined :issue:`554`), and it pads far more than it reads, so any running
-#: budget tight enough to matter starts refusing real captures. Worse, it refuses
-#: them *sometimes* -- measured on this tree with a running budget alone, the
-#: same legitimate 54-octet frame parsed to one result on 37 of 40 calls and to
-#: another on calls 26, 33 and 39, because whether it fit depended on what had
-#: been parsed before it. A guard whose answer moves with history is not a guard.
-#:
-#: 65,536 is what removes that. It is the whole span of a 16-bit wire length
-#: field -- which is how an IP header, an IPv6 payload, a TCP or IPv4 option and
-#: a PCAP-NG option all declare their size -- so no shortfall that one of those
-#: can produce is subject to the budget at all, and every one of them is padded
-#: unconditionally. Measured: the largest legitimate single
-#: shortfall found anywhere was 65,495 octets, from a snapshot-truncated
-#: offload-sized frame (100 frames at ``incl_len`` 54 declaring an IPv4 total
-#: length of 65,535, padding 6,549,500 octets from 7,024 read), and 64,750 from a
-#: truncated PCAP-NG option. Both sit under this figure, and so does anything
-#: else a 16-bit field can ask for.
-#:
-#: What is left above it is the band a *32-bit* wire length reaches --
-#: PCAP-NG's own block and secrets lengths, which is where :issue:`573`'s
-#: amplification lives -- and legitimately that is a once-per-file event, since
-#: only the last block of a truncated capture is cut short. So the band gets the
-#: running budget below, whose one-off term already covers any single such event
-#: outright.
-_MAX_ZERO_PAD_SHORTFALL = 0x10_000
-
-#: int: Zero padding *past* :data:`_MAX_ZERO_PAD_SHORTFALL` that
-#: :meth:`FieldBase.unpack` will synthesise in total for every octet a parse has
-#: actually been given, over and above the one-off
-#: :data:`_MAX_ZERO_PAD_LENGTH` allowance.
-#:
-#: A shortfall in this band -- past 65,536 octets and so past anything a 16-bit
-#: wire length can declare, but within :data:`_MAX_ZERO_PAD_LENGTH` -- is a
-#: PCAP-NG block or secrets length, a 32-bit figure. One of those, on its own, is
-#: legitimate: it is what the final block of a capture truncated at EOF looks
-#: like, and the ``_MAX_ZERO_PAD_LENGTH`` term of the allowance covers it whole,
-#: from a cold start, because such a shortfall cannot exceed that ceiling and
-#: still be padded at all.
-#:
-#: *Repeating* one is not legitimate, and that is what 16 is chosen to catch.
-#: Truncation cuts the end of a file, so a capture has one short block, not two
-#: hundred; :issue:`573`'s shape has two hundred because they are declared
-#: rather than cut. 16 octets of further allowance per octet genuinely read
-#: leaves any real file an allowance orders of magnitude past the one event it
-#: can want, while bounding the sum for a file whose blocks all lie.
-_ZERO_PAD_BUDGET_RATIO = 0x10
-
 #: ContextVar[Optional[list[int]]]: Running ``[octets supplied, octets
 #: synthesised]`` ledger for :meth:`FieldBase.unpack`, against which
-#: :data:`_ZERO_PAD_BUDGET_RATIO` is enforced.
+#: :data:`~pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO` is enforced.
 #:
 #: A :class:`~contextvars.ContextVar` rather than a plain module global so that
 #: a thread parsing one capture cannot spend the budget of a thread parsing
@@ -140,8 +72,8 @@ _ZERO_PAD_BUDGET_RATIO = 0x10
 #: calls :func:`_zero_pad_budget` -- so the bound as shipped is over everything a
 #: context has ever parsed, not over one ``Extractor`` run. It is still a bound,
 #: and still proportionate: total padding past
-#: :data:`_MAX_ZERO_PAD_SHORTFALL` stays within
-#: ``_MAX_ZERO_PAD_LENGTH + _ZERO_PAD_BUDGET_RATIO`` times the octets that
+#: :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL` stays within
+#: ``MAX_ZERO_PAD_LENGTH + ZERO_PAD_BUDGET_RATIO`` times the octets that
 #: context has genuinely been given, so a long-running service that has read a
 #: great deal has earned proportionately more, rather than banking an unlimited
 #: allowance. Scoping it per file would make the bound tighter and is a one-line
@@ -149,7 +81,7 @@ _ZERO_PAD_BUDGET_RATIO = 0x10
 #: layer has something to call.
 #:
 #: Cumulative state is what makes an answer depend on history, so note what is
-#: *not* weighed against it: a shortfall within :data:`_MAX_ZERO_PAD_SHORTFALL`
+#: *not* weighed against it: a shortfall within :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL`
 #: neither consults this ledger nor is charged to it, which is what keeps every
 #: legitimate short read answering the same however much preceded it. Only the
 #: 32-bit band above reads and writes ``[1]``.
@@ -462,11 +394,11 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
         Raises:
             FieldValueError: If ``buffer`` holds fewer octets than :attr:`length`
                 declares, and either ``length`` is past
-                :data:`_MAX_ZERO_PAD_LENGTH`, or the shortfall is past
-                :data:`_MAX_ZERO_PAD_SHORTFALL` and takes this parse's total of
-                such shortfalls past what :data:`_ZERO_PAD_BUDGET_RATIO` allows
+                :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH`, or the shortfall is past
+                :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL` and takes this parse's total of
+                such shortfalls past what :data:`~pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO` allows
                 for the octets it has actually been given. A shortfall within
-                :data:`_MAX_ZERO_PAD_SHORTFALL` is always padded and never
+                :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL` is always padded and never
                 raises.
 
         """
@@ -483,20 +415,21 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
         # field from a value it just read off the wire (e.g. ``DecryptionSecretsBlock``'s
         # ``secrets_data: BytesField(length=lambda pkt: pkt['__length__'])``) --
         # and is thus attacker-controlled: a corrupt or hostile capture can
-        # declare an arbitrarily large one. Past :data:`_MAX_ZERO_PAD_LENGTH`, a
+        # declare an arbitrarily large one. Past :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH`, a
         # length short of what ``buffer`` holds is provably bogus: the padding
         # cannot recover data that was never in the buffer, only zero-fill for
         # it, and no field this large is legitimate to begin with. Honouring it
         # would allocate and zero-fill up to ``length`` octets on nothing but
         # the packet's own say-so. C.f. #554.
-        if length > _MAX_ZERO_PAD_LENGTH and len(buffer) < length:
+        ceiling = config.MAX_ZERO_PAD_LENGTH
+        if ceiling != -1 and length > ceiling and len(buffer) < length:
             raise FieldValueError(
                 f'Field {self.name} declares a length of {length} octet(s), '
                 f'but only {len(buffer)} octet(s) are available.'
             )
 
         # NOTE: The ceiling above bounds one field; this bounds their sum. A
-        # declared length just under :data:`_MAX_ZERO_PAD_LENGTH` passes it every
+        # declared length just under :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH` passes it every
         # time it is declared, so 200 of them amplify 4,800 wire octets into
         # 50.0 MiB of retained zeros with the ceiling doing exactly what it was
         # written to do. C.f. #573.
@@ -536,7 +469,7 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
             _zero_pad_ledger.set(ledger)
         ledger[0] += supplied
 
-        # A shortfall no larger than :data:`_MAX_ZERO_PAD_SHORTFALL` is padded
+        # A shortfall no larger than :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL` is padded
         # without consulting the budget, and is not charged to it either. That is
         # the load-bearing half of this fix rather than a concession in it: it is
         # what keeps the answer a function of *this* read rather than of
@@ -551,13 +484,16 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
         # band; charging that to the same ledger would exhaust it within a few
         # frames and refuse the next large shortfall -- reintroducing exactly the
         # history-dependence the band exists to remove.
-        if padding > _MAX_ZERO_PAD_SHORTFALL:
-            allowance = _MAX_ZERO_PAD_LENGTH + _ZERO_PAD_BUDGET_RATIO * ledger[0]
-            if ledger[1] + padding > allowance:
+        shortfall, ratio = config.MAX_ZERO_PAD_SHORTFALL, config.ZERO_PAD_BUDGET_RATIO
+        if shortfall != -1 and padding > shortfall:
+            # NOTE: ``-1`` for either term of the allowance lifts the budget.
+            unbounded = ceiling == -1 or ratio == -1
+            allowance = 0 if unbounded else ceiling + ratio * ledger[0]
+            if not unbounded and ledger[1] + padding > allowance:
                 raise FieldValueError(
                     f'Field {self.name} would zero-pad {padding} octet(s), '
                     f'taking this parse to {ledger[1] + padding} octet(s) of '
-                    f'padding past {_MAX_ZERO_PAD_SHORTFALL} octet(s) against '
+                    f'padding past {shortfall} octet(s) against '
                     f'{ledger[0]} octet(s) actually read, past the {allowance} '
                     f'octet(s) allowed.'
                 )

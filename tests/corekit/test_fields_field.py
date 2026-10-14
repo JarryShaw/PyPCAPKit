@@ -28,7 +28,7 @@ class FieldBaseUnpackBoundsTests(unittest.TestCase):
     ``Pad1`` instead of wedging or raising (#431). Rejecting every shortfall
     regardless of size would turn every one of those into a hard failure.
 
-    So the guard only fires past :data:`~pcapkit.corekit.fields.field._MAX_ZERO_PAD_LENGTH`
+    So the guard only fires past :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH`
     -- libpcap's own ``MAXIMUM_SNAPLEN`` and this package's own default
     ``snaplen`` -- which every fixed-width field ``ListField``/``OptionField``
     read past EOF is nowhere near, and which no legitimate single field is
@@ -50,7 +50,9 @@ class FieldBaseUnpackBoundsTests(unittest.TestCase):
 
         self.BytesField = BytesField
         self.FieldValueError = FieldValueError
-        self.ceiling = field_module._MAX_ZERO_PAD_LENGTH
+        from pcapkit.utilities import config
+
+        self.ceiling = config.MAX_ZERO_PAD_LENGTH
 
     def test_exact_length_buffer_unpacks_unchanged(self) -> None:
         field = self.BytesField(length=4)
@@ -70,7 +72,7 @@ class FieldBaseUnpackBoundsTests(unittest.TestCase):
         were never read -- rather than raise, or every capture cut short
         by its snapshot length would start failing to parse instead of
         reporting the tail as padding. This field is nowhere near
-        :data:`~pcapkit.corekit.fields.field._MAX_ZERO_PAD_LENGTH`, so the
+        :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH`, so the
         shortfall must still be padded exactly as before #554.
 
         The zeros land on the *tail*, which is where the unread octets were:
@@ -189,7 +191,7 @@ class FieldBaseCumulativePaddingBudgetTests(unittest.TestCase):
 
     #554's ceiling is per-field, and #573 is what that leaves behind: a packet
     holds many fields, so a declared length sitting just *under*
-    :data:`~pcapkit.corekit.fields.field._MAX_ZERO_PAD_LENGTH` is honoured
+    :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH` is honoured
     however many times it is declared, and the sum has no bound at all. Measured
     on the tree that carried only the per-field ceiling, 200 minimal PCAP-NG
     Decryption Secrets Blocks -- 4,800 wire octets, each declaring
@@ -200,8 +202,8 @@ class FieldBaseCumulativePaddingBudgetTests(unittest.TestCase):
     :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>` now
     keeps a running ledger of octets supplied against octets synthesised, and
     refuses a shortfall *past*
-    :data:`~pcapkit.corekit.fields.field._MAX_ZERO_PAD_SHORTFALL` once the total
-    of those passes ``_MAX_ZERO_PAD_LENGTH + _ZERO_PAD_BUDGET_RATIO * supplied``.
+    :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL` once the total
+    of those passes ``MAX_ZERO_PAD_LENGTH + ZERO_PAD_BUDGET_RATIO * supplied``.
 
     Two things these tests have to hold at once, and the second is the harder.
 
@@ -215,7 +217,7 @@ class FieldBaseCumulativePaddingBudgetTests(unittest.TestCase):
     on 37 of 40 identical calls and to a different one on calls 26, 33 and 39,
     purely because of what had been parsed before it.
 
-    :data:`~pcapkit.corekit.fields.field._MAX_ZERO_PAD_SHORTFALL` is what removes
+    :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL` is what removes
     that: a shortfall within the span of a 16-bit wire length is padded
     unconditionally and charged to nothing, so no shortfall a snapshot-truncated
     capture, a truncated option area or an over-long ``ihl`` can produce is ever
@@ -234,7 +236,10 @@ class FieldBaseCumulativePaddingBudgetTests(unittest.TestCase):
         self.field_module = field_module
         self.BytesField = BytesField
         self.FieldValueError = FieldValueError
-        self.ceiling = field_module._MAX_ZERO_PAD_LENGTH
+        from pcapkit.utilities import config
+
+        self.config = config
+        self.ceiling = config.MAX_ZERO_PAD_LENGTH
 
         # The ledger is cumulative per context, and this class's tests share one
         # import of the module, so an earlier test has already earned allowance
@@ -281,7 +286,7 @@ class FieldBaseCumulativePaddingBudgetTests(unittest.TestCase):
         """The #573 scenario: 200 fields, every one of them within the ceiling.
 
         Each declares two octets short of
-        :data:`~pcapkit.corekit.fields.field._MAX_ZERO_PAD_LENGTH` against two
+        :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH` against two
         supplied octets, so #554's per-field guard is *correct* to let each one
         through -- and before #573 all 200 went through, retaining 50.0 MiB from
         4,800 octets of input. At least one has to be refused now, or the sum is
@@ -432,11 +437,11 @@ class FieldBaseCumulativePaddingBudgetTests(unittest.TestCase):
         covers whole. A test that only read the constants back from the module
         would still pass if either figure were changed to something unjustified.
         """
-        self.assertEqual(self.field_module._MAX_ZERO_PAD_SHORTFALL, 65536)
+        self.assertEqual(self.config.MAX_ZERO_PAD_SHORTFALL, 65536)
         self.assertEqual(2 ** 16, 65536)
         self.assertGreater(65536, 65495)  # the worst legitimate shortfall measured
 
-        self.assertEqual(self.field_module._ZERO_PAD_BUDGET_RATIO, 16)
+        self.assertEqual(self.config.ZERO_PAD_BUDGET_RATIO, 16)
 
         # and the bands have to be the right way round, or the 32-bit band would
         # swallow the 16-bit one.
@@ -548,6 +553,38 @@ class FieldBaseCumulativePaddingBudgetTests(unittest.TestCase):
                 self.assertEqual(self.BytesField(length=size).unpack(buffer, {}), buffer)
             self.assertEqual(ledger[1], 0)
             self.assertEqual(ledger[0], 500 * size)
+
+    def all_padded(self, *reads: 'tuple[int, int]') -> bool:
+        """Whether every ``(declared, supplied)`` read is padded, in one fresh budget."""
+        with self.field_module._zero_pad_budget():
+            for declared, supplied in reads:
+                try:
+                    self.BytesField(length=declared).unpack(bytes(supplied), {})
+                except self.FieldValueError:
+                    return False
+        return True
+
+    def test_the_budget_is_refused_one_octet_past_the_allowance(self) -> None:
+        """Padding up to the allowance is taken, and one octet past it is refused.
+
+        Two reads of 10 octets each earn ``262,144 + 16 * 20 = 262,464`` octets.
+        The first pads 70,000 of them, so the second may pad 192,464 and no more.
+        """
+        first = (70_010, 10)
+        for padding, padded in ((192_463, True), (192_464, True), (192_465, False)):
+            with self.subTest(padding=padding):
+                self.assertIs(self.all_padded(first, (padding + 10, 10)), padded)
+
+    def test_a_shortfall_past_65536_is_charged_and_65536_is_not(self) -> None:
+        """The band edge: a 65,536-octet shortfall is free, and 65,537 is charged.
+
+        The first read pads 262,143 octets from none read, one short of the
+        allowance, so a second read that is charged at all is refused.
+        """
+        first = (262_143, 0)
+        for padding, padded in ((65_535, True), (65_536, True), (65_537, False)):
+            with self.subTest(padding=padding):
+                self.assertIs(self.all_padded(first, (padding, 0)), padded)
 
 
 class FieldBaseShortReadPaddingSideTests(unittest.TestCase):

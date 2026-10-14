@@ -107,7 +107,9 @@ class TestFallbackBounded(unittest.TestCase):
         with self.assertRaisesRegex(UnsupportedCall, 'more than 10000 objects'):
             self.dump('JSON', {'node': chain(14)})
 
-        with mock.patch.object(common, 'FALLBACK_LIMIT', 7):
+        from pcapkit.utilities import config
+
+        with mock.patch.object(config, 'FALLBACK_LIMIT', 7):
             # seven objects: within the limit
             record = json.loads(self.dump('JSON', {'node': chain(2)}))['x']
             self.assertEqual(record['node']['right']['left'], {'leaf': 0})

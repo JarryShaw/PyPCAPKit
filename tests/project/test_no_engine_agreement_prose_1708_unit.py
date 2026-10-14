@@ -93,18 +93,6 @@ EXEMPT = {
     ('pcapkit/protocols/schema/internet/ipv6.py', 'as the default engine walks'),
 }
 
-#: ``(path, phrase)`` of each agreement claim in a file the open change for
-#: issue #1726 owns, with the reason it is left to that change. Not checked
-#: for staleness: the entry excuses that phrase alone, and goes once the claim
-#: does.
-PENDING = {
-    ('pcapkit/protocols/internet/internet.py', 'stop at the same depth'):
-        'protocols/internet/internet.py is owned by the change for #1726',
-    ('pcapkit/toolkit/scapy.py', 'every other engine'):
-        'toolkit/scapy.py is owned by the change for #1726',
-}
-
-
 #: Whitespace, with the ``#`` or ``#:`` that opens a continued comment line,
 #: read as one space; and reST markup -- a role prefix such as ``:obj:``, a
 #: backtick run with the ``~`` it may carry, a hyperlink's trailing ``_`` --
@@ -175,7 +163,7 @@ class EngineAgreementProseTests(unittest.TestCase):
         for path in scanned():
             relative = path.relative_to(ROOT).as_posix()
             for lineno, name, phrase in claims(path.read_text(encoding='utf-8')):
-                if (relative, phrase) not in EXEMPT.union(PENDING):
+                if (relative, phrase) not in EXEMPT:
                     found.append(f'{relative}:{lineno}: [{name}] {phrase!r}')
         self.assertEqual(
             found, [],

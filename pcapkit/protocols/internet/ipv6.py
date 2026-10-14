@@ -36,11 +36,11 @@ from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.data.internet.ipv6 import IPv6 as Data_IPv6
-from pcapkit.protocols.internet.internet import EXTENSION_HEADER_LIMIT
 from pcapkit.protocols.internet.ip import IP
-from pcapkit.protocols.protocol import FRAME_LAYER_LIMIT, _frame_depth
+from pcapkit.protocols.protocol import _frame_depth
 from pcapkit.protocols.schema.internet.ipv6 import IPv6 as Schema_IPv6
 from pcapkit.protocols.schema.internet.ipv6 import jumbo_payload_length, jumbogram_error
+from pcapkit.utilities import config
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
@@ -564,18 +564,18 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
                 break
 
             # NOTE: At most :data:`EXTENSION_HEADER_LIMIT
-            # <pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT>`
+            # <pcapkit.utilities.config.EXTENSION_HEADER_LIMIT>`
             # headers are walked, as at most that many are dissected after any
             # other layer. This header and the rest are then the upper layer,
             # which :meth:`_import_next_layer` keeps raw, with one warning
             # (:issue:`1604`).
-            if len(_protos) >= EXTENSION_HEADER_LIMIT:
+            if config.EXTENSION_HEADER_LIMIT != -1 and len(_protos) >= config.EXTENSION_HEADER_LIMIT:
                 break
 
             # NOTE: Likewise past :data:`FRAME_LAYER_LIMIT
-            # <pcapkit.protocols.protocol.FRAME_LAYER_LIMIT>` layers of the
+            # <pcapkit.utilities.config.FRAME_LAYER_LIMIT>` layers of the
             # frame (:issue:`1610`), since each header walked is one of them.
-            if depth + len(_protos) >= FRAME_LAYER_LIMIT:
+            if config.FRAME_LAYER_LIMIT != -1 and depth + len(_protos) >= config.FRAME_LAYER_LIMIT:
                 break
 
             # # directly break when No Next Header occurs
@@ -743,7 +743,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             the full distinction.
 
             The upper layer past a walk cut at :data:`EXTENSION_HEADER_LIMIT
-            <pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT>` is the
+            <pcapkit.utilities.config.EXTENSION_HEADER_LIMIT>` is the
             next extension header, and is kept raw with one
             :exc:`~pcapkit.utilities.warnings.ProtocolWarning`, as in
             :meth:`Internet._import_next_layer

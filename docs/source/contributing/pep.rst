@@ -428,9 +428,9 @@ of the frame raw, silently, at a depth that varied with the interpreter and the
 caller's stack (:issue:`1604`, :issue:`1610`).
 
 Recursion stays, with a counted bound:
-:data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT` caps a frame at 64 layers,
-and :data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT` caps one
-chain of extension headers at 32. Past either, the rest stays
+:data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` caps a frame at 64 layers by
+default, and :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` caps one
+chain of extension headers at 32 by default. Past either, the rest stays
 :class:`~pcapkit.protocols.misc.raw.Raw`, with one
 :exc:`~pcapkit.utilities.warnings.ProtocolWarning`. Raising
 :func:`sys.setrecursionlimit` instead was rejected: it is process-wide, and the

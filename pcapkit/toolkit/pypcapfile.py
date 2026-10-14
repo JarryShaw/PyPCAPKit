@@ -39,6 +39,12 @@ cannot be used for it.
    :class:`~pcapfile.protocols.transport.tcp.TCP` class rather than a
    reimplementation.
 
+.. versionremoved:: 1.5.0
+
+   ``pcapkit.toolkit.pypcapfile.IPV6_TCP_WARNED_LIMIT``, now
+   :data:`pcapkit.utilities.config.IPV6_TCP_WARNED_LIMIT`, set with
+   :envvar:`PCAPKIT_IPV6_TCP_WARNED_LIMIT` (:issue:`1726`).
+
 """
 import binascii
 import collections
@@ -55,9 +61,9 @@ from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
-from pcapkit.protocols.internet.internet import EXTENSION_HEADER_LIMIT
 from pcapkit.protocols.internet.ipv4 import IPv4 as Protocol_IPv4
 from pcapkit.protocols.transport.tcp import TCP as Protocol_TCP
+from pcapkit.utilities import config
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall, stacklevel
 from pcapkit.utilities.warnings import AttributeWarning, warn
 
@@ -95,12 +101,6 @@ IPV4_HEADER_LEN = 20
 
 #: Length of the fixed IPv6 header, :rfc:`8200#section-3`.
 IPV6_HEADER_LEN = 40
-
-#: How many captures :func:`_decline_ipv6_tcp` remembers having warned about.
-#: Each one pins a packet of its own in memory (see :func:`_capture_of`), so the
-#: memory is bounded and the oldest is forgotten first. Up to this many captures
-#: read at the same time warn exactly once each.
-IPV6_TCP_WARNED_LIMIT = 32
 
 #: The captures :func:`_decline_ipv6_tcp` has warned about, oldest first. Each
 #: key :func:`_capture_of` gives maps to the anchor that keeps that key unique.
@@ -212,9 +212,10 @@ def _parse_mac_address(value: 'Any') -> 'str':
             field.
 
     Returns:
-        Lowercase, colon-separated hex MAC address, e.g. ``'01:00:5e:01:03:03'``
-        -- the same form :meth:`~pcapkit.protocols.link.ethernet.Ethernet._read_mac_addr`
-        uses for the default engine.
+        The MAC address as text. A raw 6-octet ``value`` is formatted as
+        lowercase hex, two digits per octet, colon-separated, e.g.
+        ``'01:00:5e:01:03:03'``; any other is decoded as ASCII and returned
+        as is.
 
     Note:
         The released `PyPCAPFile`_ (0.12.0) already stores ``src``/``dst`` pre-formatted
@@ -431,7 +432,7 @@ def _decline_ipv6_tcp(packet: 'Packet', count: 'int') -> 'None':
             capture to reach :func:`tcp_reassembly` or :func:`tcp_traceflow`.
             Later frames of the same capture are left out without another
             warning, and every other capture warns once of its own, however
-            their frames interleave. Only the :data:`IPV6_TCP_WARNED_LIMIT`
+            their frames interleave. Only the :data:`~pcapkit.utilities.config.IPV6_TCP_WARNED_LIMIT`
             captures warned about most recently are remembered, so with more
             than that read at once a forgotten one warns again: the warning can
             repeat, but is never omitted.
@@ -444,7 +445,7 @@ def _decline_ipv6_tcp(packet: 'Packet', count: 'int') -> 'None':
         return
 
     _ipv6_tcp_warned[key] = anchor
-    while len(_ipv6_tcp_warned) > IPV6_TCP_WARNED_LIMIT:
+    while config.IPV6_TCP_WARNED_LIMIT != -1 and len(_ipv6_tcp_warned) > config.IPV6_TCP_WARNED_LIMIT:
         _ipv6_tcp_warned.popitem(last=False)
     warn(f"Frame {count}: TCP over IPv6 is left out of TCP reassembly and flow tracing, as "
          "'pypcapfile' has no IPv6 decoder; later such frames of this capture are left out "
@@ -555,7 +556,7 @@ def _walk_extension_headers(protocol: 'int', data: 'bytes') -> 'Optional[tuple[i
         on, and how many headers were stepped over -- ``protocol``, ``data`` and
         ``0`` if ``protocol`` is none of them -- or :data:`None` if one of them
         is cut short or rejected, or more than
-        :data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT`
+        :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`
         follow in a row. An AH is ``(Payload Length + 2) * 4`` octets long
         (:rfc:`4302#section-2.2`), and no shorter than :data:`AH_HEADER_LEN`;
         any other is read by :func:`_default_extension_header`.
@@ -563,7 +564,7 @@ def _walk_extension_headers(protocol: 'int', data: 'bytes') -> 'Optional[tuple[i
     """
     depth = 0
     while protocol in IPV4_EXTENSION_HEADERS:
-        if depth == EXTENSION_HEADER_LIMIT:
+        if depth == config.EXTENSION_HEADER_LIMIT:
             return None
         depth += 1
         if protocol == Enum_TransType.AH:
