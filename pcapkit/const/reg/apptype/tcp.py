@@ -63,6 +63,8 @@ class TCP(AppType):
            synchronisation
        * - ``adobe-shadow``
          - [TCP] Adobe Shadow Server
+       * - ``ae-control``
+         - [TCP] Acoustics Engineering network device control
        * - ``aerohive-proxy``
          - [TCP] Aerohive Proxy Configuration Service
        * - ``affinity-docs0``
