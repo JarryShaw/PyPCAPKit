@@ -592,7 +592,7 @@ git<span class="w"> </span>apply<span class="w"> </span>/tmp/fix.diff
 python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/&lt;path&gt;/test_&lt;name&gt;_unit.py<span class="w"> </span>-q<span class="w">    </span><span class="c1"># must pass</span>
 </pre></div>
 </div>
-<p>CI measures one leg, the <code class="docutils literal notranslate"><span class="pre">test</span></code> job’s Python 3.14 cell in
+<p>CI measures one leg, the <code class="docutils literal notranslate"><span class="pre">test</span></code> job’s Python 3.15 cell in
 <code class="file docutils literal notranslate"><span class="pre">.github/workflows/unit-tests.yml</span></code>, with branch coverage over <a class="reference internal" href="../../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>
 configured by <code class="file docutils literal notranslate"><span class="pre">.github/coverage.toml</span></code>; <code class="file docutils literal notranslate"><span class="pre">.github/workflows/coverage-comment.yml</span></code>
 posts the totals on the pull request. Locally, measure with <code class="docutils literal notranslate"><span class="pre">coverage</span> <span class="pre">run</span></code> rather than

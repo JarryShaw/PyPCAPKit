@@ -614,7 +614,9 @@
 <span class="sd">    :class:`DecimalTimestamp` instead, which *is* the value `DPKT`_ yields --</span>
 <span class="sd">    so a stored frame's timestamp is exactly what it was before -- and also</span>
 <span class="sd">    carries those three. Reassembly and flow tracing are handed a plain</span>
-<span class="sd">    :obj:`float` of it, as by every other engine (:issue:`1501`).</span>
+<span class="sd">    :obj:`float` of it, as by every other engine (:issue:`1501`): of its exact</span>
+<span class="sd">    value, since `DPKT`_'s own for a microsecond PCAP rounds twice</span>
+<span class="sd">    (:issue:`1668`; see :func:`_capture_time`).</span>
 
 <span class="sd">    A copy, a deep copy and a pickle at any protocol all rebuild a timestamp</span>
 <span class="sd">    from what its :meth:`~object.__reduce__` returns, so all keep the three.</span>
@@ -745,6 +747,29 @@
             <span class="s2">"'Extractor(engine=dpkt)' has one attached"</span>
         <span class="p">)</span>
     <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'float'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_capture_time</span><span class="p">(</span><span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float | Decimal'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'float'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The capture timestamp reassembly and flow tracing are handed.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        timestamp: Capture timestamp of the packet.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The :obj:`float` nearest the exact timestamp, as the default engine hands</span>
+<span class="sd">        over. `DPKT`_ reads a microsecond PCAP's as ``tv_sec + tv_usec / 1e6``,</span>
+<span class="sd">        which rounds twice, so can be an ulp off at a small ``tv_sec``:</span>
+<span class="sd">        ``1.0036909999999999`` for ``1.003691`` (:issue:`1668`). A</span>
+<span class="sd">        :class:`RecordTimestamp` is therefore read by its exact value. Any other</span>
+<span class="sd">        timestamp -- one passed by hand, or yielded by a ``dpkt`` whose reader</span>
+<span class="sd">        the engine could not extend -- carries none, and is handed on as it is.</span>
+
+<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">RecordTimestamp</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">timestamp</span><span class="o">.</span><span class="n">exact</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">attach_buffer</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
@@ -1639,7 +1664,10 @@
 <span class="sd">            :func:`packet2timestamp`, which is where</span>
 <span class="sd">            :class:`~pcapkit.foundation.engines.dpkt.DPKT` leaves it. Handed on</span>
 <span class="sd">            as a :obj:`float`, as every engine's adapters do, though `DPKT`_ reads</span>
-<span class="sd">            a nanosecond PCAP's as a :class:`~decimal.Decimal` (:issue:`1501`).</span>
+<span class="sd">            a nanosecond PCAP's as a :class:`~decimal.Decimal` (:issue:`1501`),</span>
+<span class="sd">            and as the one nearest the exact value it carries, if any, where</span>
+<span class="sd">            `DPKT`_'s own may be an ulp off (:issue:`1668`; see</span>
+<span class="sd">            :func:`_capture_time`).</span>
 <span class="sd">        count: Packet index. If not provided, default to ``-1``.</span>
 
 <span class="sd">    Returns:</span>
@@ -1696,7 +1724,7 @@
         <span class="n">tl</span><span class="o">=</span><span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">octets</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">],</span> <span class="s1">'big'</span><span class="p">),</span>                  <span class="c1"># total length, header includes</span>
         <span class="n">header</span><span class="o">=</span><span class="n">octets</span><span class="p">[:</span><span class="n">ihl</span><span class="p">],</span>                                    <span class="c1"># raw bytes type header</span>
         <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">octets</span><span class="p">[</span><span class="n">ihl</span><span class="p">:]),</span>                        <span class="c1"># raw bytearray type payload</span>
-        <span class="n">timestamp</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span>                             <span class="c1"># capture timestamp</span>
+        <span class="n">timestamp</span><span class="o">=</span><span class="n">_capture_time</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span>                     <span class="c1"># capture timestamp</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">data</span></div>
 
@@ -1780,7 +1808,7 @@
         <span class="n">tl</span><span class="o">=</span><span class="n">fragment</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span>                              <span class="c1"># total length, header includes</span>
         <span class="n">header</span><span class="o">=</span><span class="n">octets</span><span class="p">[:</span><span class="n">fragment</span><span class="p">],</span>                                <span class="c1"># raw bytes type header before IPv6-Frag</span>
         <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span>                              <span class="c1"># raw bytearray type payload after IPv6-Frag</span>
-        <span class="n">timestamp</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span>                              <span class="c1"># capture timestamp</span>
+        <span class="n">timestamp</span><span class="o">=</span><span class="n">_capture_time</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span>                      <span class="c1"># capture timestamp</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">data</span></div>
 
@@ -1843,7 +1871,7 @@
             <span class="n">first</span><span class="o">=</span><span class="n">segment</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>                                  <span class="c1"># first sequence number of payload</span>
             <span class="n">last</span><span class="o">=</span><span class="n">segment</span><span class="o">.</span><span class="n">seq</span> <span class="o">+</span> <span class="n">raw_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>                     <span class="c1"># last sequence number of payload</span>
             <span class="nb">len</span><span class="o">=</span><span class="n">raw_len</span><span class="p">,</span>                                        <span class="c1"># payload length, header excludes</span>
-            <span class="n">timestamp</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span>                         <span class="c1"># capture timestamp</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="n">_capture_time</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span>                 <span class="c1"># capture timestamp</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span>
     <span class="k">return</span> <span class="kc">None</span></div>
@@ -1900,7 +1928,7 @@
             <span class="n">dst</span><span class="o">=</span><span class="n">segment</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span>                                            <span class="c1"># destination IP</span>
             <span class="n">srcport</span><span class="o">=</span><span class="n">segment</span><span class="o">.</span><span class="n">srcport</span><span class="p">,</span>                                    <span class="c1"># TCP source port</span>
             <span class="n">dstport</span><span class="o">=</span><span class="n">segment</span><span class="o">.</span><span class="n">dstport</span><span class="p">,</span>                                    <span class="c1"># TCP destination port</span>
-            <span class="n">timestamp</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span>                                 <span class="c1"># timestamp</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="n">_capture_time</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span>                         <span class="c1"># timestamp</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">segment</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>                                            <span class="c1"># TCP sequence number</span>
             <span class="n">ack</span><span class="o">=</span><span class="n">segment</span><span class="o">.</span><span class="n">ack</span><span class="p">,</span>                                            <span class="c1"># TCP acknowledgement number</span>
             <span class="n">header</span><span class="o">=</span><span class="n">segment</span><span class="o">.</span><span class="n">header</span><span class="p">,</span>                                      <span class="c1"># raw bytes type header</span>

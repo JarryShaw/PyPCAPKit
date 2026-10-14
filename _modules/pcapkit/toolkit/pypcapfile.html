@@ -712,7 +712,8 @@
 <span class="sd">        packet: PyPCAPFile packet.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Timestamp of the packet, in seconds since the epoch.</span>
+<span class="sd">        Timestamp of the packet, in seconds since the epoch: the :obj:`float`</span>
+<span class="sd">        nearest the exact value, as the default engine hands over.</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        `PyPCAPFile`_ keeps the two halves of the per-packet timestamp apart, and</span>
@@ -720,11 +721,16 @@
 <span class="sd">        savefile carries the nanosecond magic number -- which is recorded on the</span>
 <span class="sd">        savefile header as ``ns_resolution``.</span>
 
+<span class="sd">        The two are joined in one integer division, which rounds once.</span>
+<span class="sd">        ``timestamp + timestamp_us / divisor`` rounds twice, so can be an ulp</span>
+<span class="sd">        off at a small ``timestamp``: ``1.0036909999999999`` for ``1.003691``</span>
+<span class="sd">        (:issue:`1668`).</span>
+
 <span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
 
 <span class="sd">    """</span>
     <span class="n">divisor</span> <span class="o">=</span> <span class="mi">1_000_000_000</span> <span class="k">if</span> <span class="n">packet</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ns_resolution</span> <span class="k">else</span> <span class="mi">1_000_000</span>
-    <span class="k">return</span> <span class="n">packet</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">+</span> <span class="n">packet</span><span class="o">.</span><span class="n">timestamp_us</span> <span class="o">/</span> <span class="n">divisor</span></div>
+    <span class="k">return</span> <span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">*</span> <span class="n">divisor</span> <span class="o">+</span> <span class="n">packet</span><span class="o">.</span><span class="n">timestamp_us</span><span class="p">)</span> <span class="o">/</span> <span class="n">divisor</span></div>
 
 
 

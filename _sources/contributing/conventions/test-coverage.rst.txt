@@ -100,7 +100,7 @@ the fix back, and say in the pull request that you did:
    git apply /tmp/fix.diff
    python -m pytest tests/<path>/test_<name>_unit.py -q    # must pass
 
-CI measures one leg, the ``test`` job's Python 3.14 cell in
+CI measures one leg, the ``test`` job's Python 3.15 cell in
 :file:`.github/workflows/unit-tests.yml`, with branch coverage over :mod:`pcapkit`
 configured by :file:`.github/coverage.toml`; :file:`.github/workflows/coverage-comment.yml`
 posts the totals on the pull request. Locally, measure with ``coverage run`` rather than

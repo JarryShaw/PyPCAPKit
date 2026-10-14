@@ -788,7 +788,10 @@ does. A caller holding only a frame can read it back with
 <code class="xref py py-func docutils literal notranslate"><span class="pre">packet2timestamp()</span></code>, which is where
 <a class="reference internal" href="../foundation/engines/3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT" title="pcapkit.foundation.engines.dpkt.DPKT"><code class="xref py py-class docutils literal notranslate"><span class="pre">DPKT</span></code></a> leaves it. Handed on
 as a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a>, as every engine’s adapters do, though <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a> reads
-a nanosecond PCAP’s as a <a class="reference external" href="https://docs.python.org/3/library/decimal.html#decimal.Decimal" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Decimal</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1501">#1501</a>).</p></li>
+a nanosecond PCAP’s as a <a class="reference external" href="https://docs.python.org/3/library/decimal.html#decimal.Decimal" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Decimal</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1501">#1501</a>),
+and as the one nearest the exact value it carries, if any, where
+<a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a>’s own may be an ulp off (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1668">#1668</a>; see
+<code class="xref py py-func docutils literal notranslate"><span class="pre">_capture_time()</span></code>).</p></li>
 <li><p><strong>count</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Packet index. If not provided, default to <code class="docutils literal notranslate"><span class="pre">-1</span></code>.</p></li>
 </ul>
 </dd>
@@ -1087,12 +1090,15 @@ dissects it.</p></li>
 <ul class="simple">
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be used for TCP flow tracing. A packet can be reassembled
 if it contains TCP layer with a whole fixed header (see
-<code class="xref py py-func docutils literal notranslate"><span class="pre">_has_fixed_header()</span></code>), keyed by the IP layer that carries it – in an
-IP-in-IP tunnel, the innermost (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_carrier()</span></code>). Where
+<code class="xref py py-func docutils literal notranslate"><span class="pre">_has_fixed_header()</span></code>), keyed by the addresses of the IP header that
+carries it (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_header_addresses()</span></code>) – in an IP-in-IP tunnel, the
+innermost (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_carrier()</span></code>). Where
 <code class="docutils literal notranslate"><span class="pre">captured</span></code> has the frame, it is instead the TCP the default engine
 reads in the frame’s octets, by the frame’s link type in the capture
 file, and none where the default engine reads none: behind a link
-type, EtherType or tunnel it does not dissect (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_segment()</span></code>).</p></li>
+type, EtherType or tunnel it does not dissect, or past
+<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.FRAME_LAYER_LIMIT" title="pcapkit.protocols.protocol.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a> layers of the
+frame (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_segment()</span></code>).</p></li>
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be reassembled, then the <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> mapping of data for TCP
 flow tracing (<a class="reference internal" href="../foundation/traceflow/tcp.html#term-trace.tcp.packet"><span class="xref std std-term">trace.tcp.packet</span></a>) will be returned; otherwise, returns <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p></li>
 </ul>
@@ -1717,11 +1723,12 @@ warning.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcap_packet</span></code></span>) – PyPCAPFile packet.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span></p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a>
+nearest the exact value, as the default engine hands over.</p>
 </dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Timestamp of the packet, in seconds since the epoch.</p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span></p>
 </dd>
 </dl>
 <div class="admonition note">
@@ -1730,6 +1737,10 @@ warning.</p>
 the sub-second half is nanoseconds rather than microseconds when the
 savefile carries the nanosecond magic number – which is recorded on the
 savefile header as <code class="docutils literal notranslate"><span class="pre">ns_resolution</span></code>.</p>
+<p>The two are joined in one integer division, which rounds once.
+<code class="docutils literal notranslate"><span class="pre">timestamp</span> <span class="pre">+</span> <span class="pre">timestamp_us</span> <span class="pre">/</span> <span class="pre">divisor</span></code> rounds twice, so can be an ulp
+off at a small <code class="docutils literal notranslate"><span class="pre">timestamp</span></code>: <code class="docutils literal notranslate"><span class="pre">1.0036909999999999</span></code> for <code class="docutils literal notranslate"><span class="pre">1.003691</span></code>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1668">#1668</a>).</p>
 </div>
 </dd></dl>
 

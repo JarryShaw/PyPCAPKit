@@ -500,9 +500,10 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.loopback</span><span class="w"> </span><span class="kn">import</span> <span class="n">family_byteorder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">FRAME_LAYER_LIMIT</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.pypcapfile</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">IP_TUNNELS</span><span class="p">,</span> <span class="n">IPV4_EXTENSION_HEADERS</span><span class="p">,</span> <span class="n">IPV4_HEADER_LEN</span><span class="p">,</span>
                                         <span class="n">TCP_MIN_HEADER_LEN</span><span class="p">,</span> <span class="n">VLAN_TAG_LEN</span><span class="p">,</span> <span class="n">VLAN_TAGS</span><span class="p">,</span>
-                                        <span class="n">_default_accepts</span><span class="p">,</span> <span class="n">_upper_layer</span><span class="p">)</span>
+                                        <span class="n">_default_accepts</span><span class="p">,</span> <span class="n">_walk_upper_layer</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">MissingKeyError</span><span class="p">,</span> <span class="n">ProtocolError</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -822,13 +823,15 @@
 <span class="n">OCTETS_PROTOCOLS</span> <span class="o">=</span> <span class="n">IPV4_EXTENSION_HEADERS</span> <span class="o">|</span> <span class="p">{</span><span class="n">Enum_TransType</span><span class="o">.</span><span class="n">Shim6</span><span class="p">}</span>
 
 <span class="c1">#: tshark display filter matching every frame :func:`tcp_traceflow` asks the</span>
-<span class="c1">#: captured octets of: one tshark dissects TCP in (see :func:`_traces`), or one</span>
-<span class="c1">#: with an IPv4 header whose protocol is one of the :data:`OCTETS_PROTOCOLS`.</span>
-<span class="c1">#: It matches every ``tcp`` layer and ``ip.proto`` field of a frame, so it</span>
-<span class="c1">#: matches all of those frames and maybe others. The members are joined with</span>
-<span class="c1">#: ``||`` rather than written as a set, as tshark 4.6.9 refuses a set whose</span>
-<span class="c1">#: members are separated by spaces only.</span>
-<span class="n">OCTETS_FILTER</span> <span class="o">=</span> <span class="s1">' || '</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">'tcp'</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="sa">f</span><span class="s1">'ip.proto == </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span> <span class="k">for</span> <span class="n">protocol</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">OCTETS_PROTOCOLS</span><span class="p">))])</span>
+<span class="c1">#: captured octets of: one tshark dissects TCP in (see :func:`_traces`), one</span>
+<span class="c1">#: with an IPv4 header whose protocol is one of the :data:`OCTETS_PROTOCOLS`, or</span>
+<span class="c1">#: one whose dissection stops in a stack of 802.1Q tags (see</span>
+<span class="c1">#: :func:`_stops_in_vlan_tags`). It matches every ``tcp`` and ``vlan`` layer and</span>
+<span class="c1">#: ``ip.proto`` field of a frame, so it matches all of those frames and maybe</span>
+<span class="c1">#: others. The members are joined with ``||`` rather than written as a set, as</span>
+<span class="c1">#: tshark 4.6.9 refuses a set whose members are separated by spaces only.</span>
+<span class="n">OCTETS_FILTER</span> <span class="o">=</span> <span class="s1">' || '</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">'tcp'</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="sa">f</span><span class="s1">'ip.proto == </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span> <span class="k">for</span> <span class="n">protocol</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">OCTETS_PROTOCOLS</span><span class="p">)),</span>
+                             <span class="s1">'vlan'</span><span class="p">])</span>
 
 <span class="c1">#: Length of an Ethernet header: two MAC addresses and the EtherType.</span>
 <span class="n">ETHERNET_HEADER_LEN</span> <span class="o">=</span> <span class="mi">14</span>
@@ -1076,6 +1079,36 @@
     <span class="k">return</span> <span class="s1">'urgent_pointer'</span> <span class="ow">in</span> <span class="n">tcp</span><span class="o">.</span><span class="n">field_names</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_header_addresses</span><span class="p">(</span><span class="n">ip</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[tuple[IPv4Address | IPv6Address, IPv4Address | IPv6Address]]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Read the addresses of an IP header from tshark's dissection of it.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ip: PyShark ``ip`` or ``ipv6`` layer.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The header's Source and Destination Address fields, as the default</span>
+<span class="sd">        engine keys a segment by them; or :data:`None` if tshark reports no</span>
+<span class="sd">        source or no destination address.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Behind an LSRR or SSRR option whose route is not yet used up</span>
+<span class="sd">        (:rfc:`791#section-3.1`), tshark reports the route's last address as</span>
+<span class="sd">        ``ip.dst``, at its place in the option, and the header's as</span>
+<span class="sd">        ``ip.cur_rt``, which it reports nowhere else. Where the option's route</span>
+<span class="sd">        data is no whole number of addresses, it reports no ``ip.dst`` at all</span>
+<span class="sd">        ("Suboption would go past end of option"); the default engine's IPv4</span>
+<span class="sd">        parser rejects such an option, so reads no TCP behind it. Both measured</span>
+<span class="sd">        with tshark 4.6.9 over every length and pointer of an LSRR and SSRR</span>
+<span class="sd">        option an IPv4 header holds (:issue:`1671`).</span>
+
+<span class="sd">    """</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">src</span><span class="p">,</span> <span class="n">dst</span> <span class="o">=</span> <span class="n">ip</span><span class="o">.</span><span class="n">src</span><span class="p">,</span> <span class="n">ip</span><span class="o">.</span><span class="n">dst</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>  <span class="c1"># what PyShark raises for a field tshark does not report</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">src</span><span class="p">)),</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="s1">'cur_rt'</span><span class="p">,</span> <span class="n">dst</span><span class="p">)))</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_from_layers</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[_Segment]'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Read the TCP segment of a PyShark packet from tshark's dissection of it.</span>
 
@@ -1084,9 +1117,9 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        The packet's first TCP layer, if it has a whole fixed header (see</span>
-<span class="sd">        :func:`_has_fixed_header`), keyed by the IP layer that carries it -- in</span>
-<span class="sd">        an IP-in-IP tunnel, the innermost (see :func:`_carrier`); else</span>
-<span class="sd">        :data:`None`.</span>
+<span class="sd">        :func:`_has_fixed_header`), keyed by the addresses of the IP header</span>
+<span class="sd">        that carries it (see :func:`_header_addresses`) -- in an IP-in-IP</span>
+<span class="sd">        tunnel, the innermost (see :func:`_carrier`); else :data:`None`.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        ProtocolError: If a TCP flag field is not a boolean tshark spelling.</span>
@@ -1095,9 +1128,12 @@
     <span class="n">ip</span><span class="p">,</span> <span class="n">tcp</span> <span class="o">=</span> <span class="n">_carrier</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">ip</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">tcp</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">_has_fixed_header</span><span class="p">(</span><span class="n">tcp</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">addresses</span> <span class="o">=</span> <span class="n">_header_addresses</span><span class="p">(</span><span class="n">ip</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">addresses</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
     <span class="k">return</span> <span class="n">_Segment</span><span class="p">(</span>
-        <span class="n">src</span><span class="o">=</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">src</span><span class="p">),</span>
-        <span class="n">dst</span><span class="o">=</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">dst</span><span class="p">),</span>
+        <span class="n">src</span><span class="o">=</span><span class="n">addresses</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">dst</span><span class="o">=</span><span class="n">addresses</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
         <span class="n">srcport</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">srcport</span><span class="p">),</span>
         <span class="n">dstport</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">dstport</span><span class="p">),</span>
         <span class="n">seq</span><span class="o">=</span><span class="n">_absolute</span><span class="p">(</span><span class="n">tcp</span><span class="p">,</span> <span class="s1">'seq'</span><span class="p">),</span>
@@ -1115,11 +1151,35 @@
 <span class="sd">        packet: PyShark packet.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Whether :func:`_from_layers` finds a segment in it, its flags unread.</span>
+<span class="sd">        Whether its first TCP layer has a whole fixed header (see</span>
+<span class="sd">        :func:`_has_fixed_header`) and an IP layer carries it (see</span>
+<span class="sd">        :func:`_carrier`).</span>
 
 <span class="sd">    """</span>
     <span class="n">ip</span><span class="p">,</span> <span class="n">tcp</span> <span class="o">=</span> <span class="n">_carrier</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">tcp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_has_fixed_header</span><span class="p">(</span><span class="n">tcp</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_stops_in_vlan_tags</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whether tshark's dissection of a PyShark packet stops in a stack of 802.1Q tags.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: PyShark packet.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Whether it has a ``vlan`` layer and no ``ip`` or ``ipv6`` layer.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        tshark dissects at most 20 802.1Q tags of a frame, 802.1ad tags between</span>
+<span class="sd">        them or not, and nothing past the 21st ("Too many nested VLAN tags",</span>
+<span class="sd">        measured with tshark 4.6.9). The default engine dissects every one of</span>
+<span class="sd">        the :data:`~pcapkit.toolkit.pypcapfile.VLAN_TAGS` and the IP packet</span>
+<span class="sd">        behind them, up to :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT`</span>
+<span class="sd">        layers of the frame (:issue:`1609`).</span>
+
+<span class="sd">    """</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="p">{</span><span class="n">layer</span><span class="o">.</span><span class="n">layer_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">packet</span><span class="o">.</span><span class="n">layers</span><span class="p">}</span>
+    <span class="k">return</span> <span class="s1">'vlan'</span> <span class="ow">in</span> <span class="n">names</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">names</span> <span class="o">&amp;</span> <span class="p">{</span><span class="s1">'ip'</span><span class="p">,</span> <span class="s1">'ipv6'</span><span class="p">}</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_extension_header_carrier</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
@@ -1205,7 +1265,7 @@
         <span class="k">raise</span> <span class="n">MissingKeyError</span><span class="p">(</span><span class="s1">'frame.encap_type=</span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="n">encap_type</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_network_start</span><span class="p">(</span><span class="n">linktype</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">octets</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[tuple[int, int]]'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_network_start</span><span class="p">(</span><span class="n">linktype</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">octets</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[tuple[int, int, int]]'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Find the outermost IP layer the default engine dissects in a frame, from its octets.</span>
 
 <span class="sd">    Args:</span>
@@ -1214,9 +1274,12 @@
 <span class="sd">        octets: The frame's captured octets.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        The layer's IP version and where its header starts in ``octets``, or</span>
-<span class="sd">        :data:`None` if the default engine dissects no IP layer right after</span>
-<span class="sd">        the link layer.</span>
+<span class="sd">        The layer's IP version, where its header starts in ``octets``, and its</span>
+<span class="sd">        place in the frame, as the default engine counts layers towards</span>
+<span class="sd">        :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT`: ``1`` where the</span>
+<span class="sd">        frame is the IP packet, else ``2``, and one more for each VLAN tag,</span>
+<span class="sd">        which is a layer of its own (:issue:`1609`). :data:`None` if the</span>
+<span class="sd">        default engine dissects no IP layer right after the link layer.</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        The default engine dissects a frame by its link type</span>
@@ -1244,26 +1307,26 @@
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">octets</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">start</span> <span class="o">+</span> <span class="n">VLAN_TAG_LEN</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">None</span>
             <span class="n">ethertype</span><span class="p">,</span> <span class="n">start</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">octets</span><span class="p">[</span><span class="n">start</span> <span class="o">+</span> <span class="mi">2</span><span class="p">:</span><span class="n">start</span> <span class="o">+</span> <span class="mi">4</span><span class="p">],</span> <span class="s1">'big'</span><span class="p">),</span> <span class="n">start</span> <span class="o">+</span> <span class="n">VLAN_TAG_LEN</span>
-        <span class="n">version</span> <span class="o">=</span> <span class="n">ETHERTYPE_IP_VERSIONS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ethertype</span><span class="p">)</span>
+        <span class="n">version</span><span class="p">,</span> <span class="n">depth</span> <span class="o">=</span> <span class="n">ETHERTYPE_IP_VERSIONS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ethertype</span><span class="p">),</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">start</span> <span class="o">-</span> <span class="n">ETHERNET_HEADER_LEN</span><span class="p">)</span> <span class="o">//</span> <span class="n">VLAN_TAG_LEN</span>
     <span class="k">elif</span> <span class="n">linktype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">NULL</span><span class="p">,</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">LOOP</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">octets</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">LOOPBACK_HEADER_LEN</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
-        <span class="n">family</span><span class="p">,</span> <span class="n">start</span> <span class="o">=</span> <span class="n">octets</span><span class="p">[:</span><span class="n">LOOPBACK_HEADER_LEN</span><span class="p">],</span> <span class="n">LOOPBACK_HEADER_LEN</span>
+        <span class="n">family</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">depth</span> <span class="o">=</span> <span class="n">octets</span><span class="p">[:</span><span class="n">LOOPBACK_HEADER_LEN</span><span class="p">],</span> <span class="n">LOOPBACK_HEADER_LEN</span><span class="p">,</span> <span class="mi">2</span>
         <span class="n">version</span> <span class="o">=</span> <span class="n">LOOPBACK_IP_VERSIONS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">family</span><span class="p">,</span> <span class="n">family_byteorder</span><span class="p">(</span><span class="n">family</span><span class="p">,</span> <span class="n">linktype</span><span class="p">)))</span>
     <span class="k">elif</span> <span class="n">linktype</span> <span class="o">==</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">RAW</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">octets</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
-        <span class="n">version</span><span class="p">,</span> <span class="n">start</span> <span class="o">=</span> <span class="n">octets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="n">version</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">depth</span> <span class="o">=</span> <span class="n">octets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>
     <span class="k">elif</span> <span class="n">linktype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV4</span><span class="p">,</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV6</span><span class="p">):</span>
-        <span class="n">version</span><span class="p">,</span> <span class="n">start</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span> <span class="k">if</span> <span class="n">linktype</span> <span class="o">==</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV4</span> <span class="k">else</span> <span class="mi">6</span><span class="p">),</span> <span class="mi">0</span>
+        <span class="n">version</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">depth</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span> <span class="k">if</span> <span class="n">linktype</span> <span class="o">==</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV4</span> <span class="k">else</span> <span class="mi">6</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">version</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">version</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">return</span> <span class="n">version</span><span class="p">,</span> <span class="n">start</span>
+    <span class="k">return</span> <span class="n">version</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">depth</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">captured</span><span class="p">:</span> <span class="s1">'Captured'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[tuple[int, bytes]]'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">captured</span><span class="p">:</span> <span class="s1">'Captured'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[tuple[int, bytes, int]]'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Find the outermost IP packet the default engine dissects in a PyShark packet's frame.</span>
 
 <span class="sd">    Args:</span>
@@ -1271,16 +1334,19 @@
 <span class="sd">        captured: The frame, as the default engine reads it from the capture file.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        The packet's IP version and its octets on, to the end of the frame, as</span>
-<span class="sd">        :func:`_network_start` finds it by the frame's link type, if tshark</span>
-<span class="sd">        dissected it too: the packet's first ``ip`` or ``ipv6`` layer is of that</span>
-<span class="sd">        version, and tshark reports its version field there, the layer's source</span>
-<span class="sd">        address in the header's Source Address field, and its destination</span>
-<span class="sd">        address in the octets where tshark reports that field (see below).</span>
-<span class="sd">        Else :data:`None`: the default engine dissects no IP packet right after</span>
-<span class="sd">        the link layer, or tshark dissected none there, e.g. as it reads an</span>
-<span class="sd">        IPv6 packet over link type ``IPV4`` (228) as IPv6, or dissected that</span>
-<span class="sd">        layer out of other octets, e.g. another frame's.</span>
+<span class="sd">        The packet's IP version, its octets on, to the end of the frame, and</span>
+<span class="sd">        its place in the frame, as :func:`_network_start` finds it by the</span>
+<span class="sd">        frame's link type, if tshark dissected it too: the packet's first</span>
+<span class="sd">        ``ip`` or ``ipv6`` layer is of that version, and tshark reports its</span>
+<span class="sd">        version field there, the layer's source address in the header's Source</span>
+<span class="sd">        Address field, and its destination address in the octets where tshark</span>
+<span class="sd">        reports that field (see below). Or if tshark dissected no IP layer, as</span>
+<span class="sd">        its dissection stopped in the VLAN tags before it (see</span>
+<span class="sd">        :func:`_stops_in_vlan_tags`). Else :data:`None`: the default engine</span>
+<span class="sd">        dissects no IP packet right after the link layer, or tshark dissected</span>
+<span class="sd">        none there, e.g. as it reads an IPv6 packet over link type ``IPV4``</span>
+<span class="sd">        (228) as IPv6, or dissected that layer out of other octets, e.g.</span>
+<span class="sd">        another frame's.</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        The destination address is matched where tshark reports it, not in</span>
@@ -1295,10 +1361,12 @@
     <span class="n">found</span> <span class="o">=</span> <span class="n">_network_start</span><span class="p">(</span><span class="n">linktype</span><span class="p">,</span> <span class="n">octets</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">found</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
-    <span class="n">version</span><span class="p">,</span> <span class="n">start</span> <span class="o">=</span> <span class="n">found</span>
+    <span class="n">version</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">depth</span> <span class="o">=</span> <span class="n">found</span>
 
     <span class="n">name</span> <span class="o">=</span> <span class="s1">'ip'</span> <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">4</span> <span class="k">else</span> <span class="s1">'ipv6'</span>
     <span class="n">ip</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">layer</span> <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">packet</span><span class="o">.</span><span class="n">layers</span> <span class="k">if</span> <span class="n">layer</span><span class="o">.</span><span class="n">layer_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'ip'</span><span class="p">,</span> <span class="s1">'ipv6'</span><span class="p">)),</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ip</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_stops_in_vlan_tags</span><span class="p">(</span><span class="n">packet</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">version</span><span class="p">,</span> <span class="n">octets</span><span class="p">[</span><span class="n">start</span><span class="p">:],</span> <span class="n">depth</span>
     <span class="k">if</span> <span class="n">ip</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">ip</span><span class="o">.</span><span class="n">layer_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="n">name</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">try</span><span class="p">:</span>
@@ -1312,15 +1380,17 @@
             <span class="ow">or</span> <span class="n">octets</span><span class="p">[</span><span class="n">where</span><span class="p">:</span><span class="n">where</span> <span class="o">+</span> <span class="n">size</span><span class="p">]</span> <span class="o">!=</span> <span class="n">source</span>
             <span class="ow">or</span> <span class="n">target</span> <span class="o">&lt;</span> <span class="n">start</span> <span class="ow">or</span> <span class="n">octets</span><span class="p">[</span><span class="n">target</span><span class="p">:</span><span class="n">target</span> <span class="o">+</span> <span class="n">size</span><span class="p">]</span> <span class="o">!=</span> <span class="n">destination</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">return</span> <span class="n">version</span><span class="p">,</span> <span class="n">octets</span><span class="p">[</span><span class="n">start</span><span class="p">:]</span>
+    <span class="k">return</span> <span class="n">version</span><span class="p">,</span> <span class="n">octets</span><span class="p">[</span><span class="n">start</span><span class="p">:],</span> <span class="n">depth</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_from_octets</span><span class="p">(</span><span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[_Segment]'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_from_octets</span><span class="p">(</span><span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">depth</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[_Segment]'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Read the TCP segment the default engine reads in an IP packet, from its octets.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        version: IP version of the header ``data`` starts with, ``4`` or ``6``.</span>
 <span class="sd">        data: Raw octets from the IP header on, to the end of the frame.</span>
+<span class="sd">        depth: The IP header's place in its frame, its first layer being ``1``</span>
+<span class="sd">            (see :func:`_network_start`).</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        The segment, keyed by the IP layer that carries it -- in an IP-in-IP</span>
@@ -1333,11 +1403,14 @@
 <span class="sd">        IPv4 parser accepts (see</span>
 <span class="sd">        :func:`~pcapkit.toolkit.pypcapfile._default_accepts`), and each IP</span>
 <span class="sd">        packet is followed past its headers by</span>
-<span class="sd">        :func:`~pcapkit.toolkit.pypcapfile._upper_layer`: an AH or IPv6</span>
+<span class="sd">        :func:`~pcapkit.toolkit.pypcapfile._walk_upper_layer`: an AH or IPv6</span>
 <span class="sd">        extension header in IPv4 by the default engine's own parser, and the</span>
 <span class="sd">        extension headers of IPv6, up to</span>
 <span class="sd">        :data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT` of</span>
-<span class="sd">        them in a row; none in a later fragment. A TCP header must be at least</span>
+<span class="sd">        them in a row; none in a later fragment. No layer is read past</span>
+<span class="sd">        :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT` layers of the</span>
+<span class="sd">        frame, each IP header, AH and IPv6 extension header one of them</span>
+<span class="sd">        (:issue:`1609`). A TCP header must be at least</span>
 <span class="sd">        :data:`~pcapkit.toolkit.pypcapfile.TCP_MIN_HEADER_LEN` octets long, as</span>
 <span class="sd">        its Data Offset gives it, with that many captured.</span>
 
@@ -1355,18 +1428,20 @@
 
 <span class="sd">    """</span>
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">depth</span> <span class="o">&gt;</span> <span class="n">FRAME_LAYER_LIMIT</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">4</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">IPV4_HEADER_LEN</span><span class="p">:</span>
             <span class="n">ihl</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0x0F</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span>
             <span class="k">if</span> <span class="n">IPV4_HEADER_LEN</span> <span class="o">&lt;</span> <span class="n">ihl</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_default_accepts</span><span class="p">(</span><span class="s1">'IPv4'</span><span class="p">,</span> <span class="n">data</span><span class="p">[:</span><span class="n">ihl</span><span class="p">]):</span>
                 <span class="k">return</span> <span class="kc">None</span>
-        <span class="n">upper</span> <span class="o">=</span> <span class="n">_upper_layer</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="n">upper</span> <span class="o">=</span> <span class="n">_walk_upper_layer</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">depth</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">upper</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">upper</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">IP_TUNNELS</span><span class="p">:</span>
             <span class="k">break</span>
-        <span class="n">version</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">IP_TUNNELS</span><span class="p">[</span><span class="n">upper</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">upper</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">version</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">depth</span> <span class="o">=</span> <span class="n">IP_TUNNELS</span><span class="p">[</span><span class="n">upper</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">upper</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">upper</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
 
-    <span class="n">protocol</span><span class="p">,</span> <span class="n">segment</span> <span class="o">=</span> <span class="n">upper</span>
+    <span class="n">protocol</span><span class="p">,</span> <span class="n">segment</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">upper</span>
     <span class="k">if</span> <span class="n">protocol</span> <span class="o">!=</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">TCP</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">TCP_MIN_HEADER_LEN</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="n">header</span> <span class="o">=</span> <span class="p">(</span><span class="n">segment</span><span class="p">[</span><span class="mi">12</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span>  <span class="c1"># the Data Offset, in octets</span>
@@ -1401,9 +1476,10 @@
 <span class="sd">            :func:`tcp_traceflow`).</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        If tshark's dissection has a segment (see :func:`_traces`), or an IPv4</span>
+<span class="sd">        If tshark's dissection has a segment (see :func:`_traces`), an IPv4</span>
 <span class="sd">        layer whose protocol names an AH or IPv6 extension header (see</span>
-<span class="sd">        :func:`_extension_header_carrier`), the segment read from the octets of</span>
+<span class="sd">        :func:`_extension_header_carrier`), or stops in a stack of 802.1Q tags</span>
+<span class="sd">        (see :func:`_stops_in_vlan_tags`), the segment read from the octets of</span>
 <span class="sd">        the frame's outermost IP packet on (see :func:`_network` and</span>
 <span class="sd">        :func:`_from_octets`), or :data:`None` where the default engine</span>
 <span class="sd">        dissects no IP packet after the frame's link layer or tshark dissects</span>
@@ -1428,12 +1504,16 @@
 <span class="sd">        accepts it, and none behind Shim6 (140), whose parser refuses IPv4</span>
 <span class="sd">        (:issue:`1625`). Reading the frame from its link layer on, as the</span>
 <span class="sd">        default engine does, stops where it stops: at a link type, EtherType or</span>
-<span class="sd">        tunnel it does not dissect, or past</span>
+<span class="sd">        tunnel it does not dissect, past</span>
 <span class="sd">        :data:`~pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT`</span>
-<span class="sd">        extension headers in a row of an IPv6 packet.</span>
+<span class="sd">        extension headers in a row of an IPv6 packet, or past</span>
+<span class="sd">        :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT` layers of the</span>
+<span class="sd">        frame, which tshark reads on past; and it reads on past the 20 802.1Q</span>
+<span class="sd">        tags of a frame tshark stops at (:issue:`1609`).</span>
 
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">captured</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">_traces</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span> <span class="ow">or</span> <span class="n">_extension_header_carrier</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">captured</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">_traces</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span> <span class="ow">or</span> <span class="n">_extension_header_carrier</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                                 <span class="ow">or</span> <span class="n">_stops_in_vlan_tags</span><span class="p">(</span><span class="n">packet</span><span class="p">)):</span>
         <span class="n">frame</span> <span class="o">=</span> <span class="n">captured</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">network</span> <span class="o">=</span> <span class="n">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">frame</span><span class="p">)</span>
@@ -1467,12 +1547,15 @@
 
 <span class="sd">        * If the ``packet`` can be used for TCP flow tracing. A packet can be reassembled</span>
 <span class="sd">          if it contains TCP layer with a whole fixed header (see</span>
-<span class="sd">          :func:`_has_fixed_header`), keyed by the IP layer that carries it -- in an</span>
-<span class="sd">          IP-in-IP tunnel, the innermost (see :func:`_carrier`). Where</span>
+<span class="sd">          :func:`_has_fixed_header`), keyed by the addresses of the IP header that</span>
+<span class="sd">          carries it (see :func:`_header_addresses`) -- in an IP-in-IP tunnel, the</span>
+<span class="sd">          innermost (see :func:`_carrier`). Where</span>
 <span class="sd">          ``captured`` has the frame, it is instead the TCP the default engine</span>
 <span class="sd">          reads in the frame's octets, by the frame's link type in the capture</span>
 <span class="sd">          file, and none where the default engine reads none: behind a link</span>
-<span class="sd">          type, EtherType or tunnel it does not dissect (see :func:`_segment`).</span>
+<span class="sd">          type, EtherType or tunnel it does not dissect, or past</span>
+<span class="sd">          :data:`~pcapkit.protocols.protocol.FRAME_LAYER_LIMIT` layers of the</span>
+<span class="sd">          frame (see :func:`_segment`).</span>
 <span class="sd">        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP</span>
 <span class="sd">          flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.</span>
 
