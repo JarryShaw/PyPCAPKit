@@ -235,7 +235,8 @@ def packet2timestamp(packet: 'Packet') -> 'float':
         packet: PyPCAPFile packet.
 
     Returns:
-        Timestamp of the packet, in seconds since the epoch.
+        Timestamp of the packet, in seconds since the epoch: the :obj:`float`
+        nearest the exact value, as the default engine hands over.
 
     Note:
         `PyPCAPFile`_ keeps the two halves of the per-packet timestamp apart, and
@@ -243,11 +244,16 @@ def packet2timestamp(packet: 'Packet') -> 'float':
         savefile carries the nanosecond magic number -- which is recorded on the
         savefile header as ``ns_resolution``.
 
+        The two are joined in one integer division, which rounds once.
+        ``timestamp + timestamp_us / divisor`` rounds twice, so can be an ulp
+        off at a small ``timestamp``: ``1.0036909999999999`` for ``1.003691``
+        (:issue:`1668`).
+
     .. _PyPCAPFile: https://github.com/kisom/pypcapfile
 
     """
     divisor = 1_000_000_000 if packet.header[0].ns_resolution else 1_000_000
-    return packet.timestamp + packet.timestamp_us / divisor
+    return (packet.timestamp * divisor + packet.timestamp_us) / divisor
 
 
 def _parse_ipv4_address(value: 'Any') -> 'IPv4Address':

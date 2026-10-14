@@ -139,7 +139,9 @@ class RecordTimestamp:
     :class:`DecimalTimestamp` instead, which *is* the value `DPKT`_ yields --
     so a stored frame's timestamp is exactly what it was before -- and also
     carries those three. Reassembly and flow tracing are handed a plain
-    :obj:`float` of it, as by every other engine (:issue:`1501`).
+    :obj:`float` of it, as by every other engine (:issue:`1501`): of its exact
+    value, since `DPKT`_'s own for a microsecond PCAP rounds twice
+    (:issue:`1668`; see :func:`_capture_time`).
 
     A copy, a deep copy and a pickle at any protocol all rebuild a timestamp
     from what its :meth:`~object.__reduce__` returns, so all keep the three.
@@ -270,6 +272,29 @@ def packet2timestamp(packet: 'Packet') -> 'float':
             "'Extractor(engine=dpkt)' has one attached"
         )
     return cast('float', timestamp)
+
+
+def _capture_time(timestamp: 'float | Decimal') -> 'float':
+    """The capture timestamp reassembly and flow tracing are handed.
+
+    Args:
+        timestamp: Capture timestamp of the packet.
+
+    Returns:
+        The :obj:`float` nearest the exact timestamp, as the default engine hands
+        over. `DPKT`_ reads a microsecond PCAP's as ``tv_sec + tv_usec / 1e6``,
+        which rounds twice, so can be an ulp off at a small ``tv_sec``:
+        ``1.0036909999999999`` for ``1.003691`` (:issue:`1668`). A
+        :class:`RecordTimestamp` is therefore read by its exact value. Any other
+        timestamp -- one passed by hand, or yielded by a ``dpkt`` whose reader
+        the engine could not extend -- carries none, and is handed on as it is.
+
+    .. _DPKT: https://dpkt.readthedocs.io
+
+    """
+    if isinstance(timestamp, RecordTimestamp):
+        return float(timestamp.exact)
+    return float(timestamp)
 
 
 def attach_buffer(packet: 'Packet', buffer: 'bytes') -> 'None':
@@ -1153,7 +1178,10 @@ def ipv4_reassembly(packet: 'Packet', timestamp: 'float', *,
             :func:`packet2timestamp`, which is where
             :class:`~pcapkit.foundation.engines.dpkt.DPKT` leaves it. Handed on
             as a :obj:`float`, as every engine's adapters do, though `DPKT`_ reads
-            a nanosecond PCAP's as a :class:`~decimal.Decimal` (:issue:`1501`).
+            a nanosecond PCAP's as a :class:`~decimal.Decimal` (:issue:`1501`),
+            and as the one nearest the exact value it carries, if any, where
+            `DPKT`_'s own may be an ulp off (:issue:`1668`; see
+            :func:`_capture_time`).
         count: Packet index. If not provided, default to ``-1``.
 
     Returns:
@@ -1210,7 +1238,7 @@ def ipv4_reassembly(packet: 'Packet', timestamp: 'float', *,
         tl=int.from_bytes(octets[2:4], 'big'),                  # total length, header includes
         header=octets[:ihl],                                    # raw bytes type header
         payload=bytearray(octets[ihl:]),                        # raw bytearray type payload
-        timestamp=float(timestamp),                             # capture timestamp
+        timestamp=_capture_time(timestamp),                     # capture timestamp
     )
     return data
 
@@ -1291,7 +1319,7 @@ def ipv6_reassembly(packet: 'Packet', timestamp: 'float', *,
         tl=fragment + len(payload),                              # total length, header includes
         header=octets[:fragment],                                # raw bytes type header before IPv6-Frag
         payload=bytearray(payload),                              # raw bytearray type payload after IPv6-Frag
-        timestamp=float(timestamp),                              # capture timestamp
+        timestamp=_capture_time(timestamp),                      # capture timestamp
     )
     return data
 
@@ -1351,7 +1379,7 @@ def tcp_reassembly(packet: 'Packet', timestamp: 'float', *,
             first=segment.seq,                                  # first sequence number of payload
             last=segment.seq + raw_len - 1,                     # last sequence number of payload
             len=raw_len,                                        # payload length, header excludes
-            timestamp=float(timestamp),                         # capture timestamp
+            timestamp=_capture_time(timestamp),                 # capture timestamp
         )
         return data
     return None
@@ -1405,7 +1433,7 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
             dst=segment.dst,                                            # destination IP
             srcport=segment.srcport,                                    # TCP source port
             dstport=segment.dstport,                                    # TCP destination port
-            timestamp=float(timestamp),                                 # timestamp
+            timestamp=_capture_time(timestamp),                         # timestamp
             seq=segment.seq,                                            # TCP sequence number
             ack=segment.ack,                                            # TCP acknowledgement number
             header=segment.header,                                      # raw bytes type header

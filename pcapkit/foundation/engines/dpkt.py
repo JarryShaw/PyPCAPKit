@@ -293,7 +293,10 @@ def _pcap_reader() -> 'Type[PCAPReader]':
                 if nanosecond:
                     yield DecimalTimestamp(value, resolution, hdr.len), buf
                 else:
-                    exact = decimal.Decimal(hdr.tv_sec) + decimal.Decimal(hdr.tv_usec) / resolution
+                    # at the default engine's precision, not the caller's, which
+                    # may be too low to hold it (:issue:`1668`)
+                    with localcontext(prec=64):
+                        exact = decimal.Decimal(hdr.tv_sec) + decimal.Decimal(hdr.tv_usec) / resolution
                     yield Timestamp(value, exact, resolution, hdr.len), buf
 
     return _Reader
