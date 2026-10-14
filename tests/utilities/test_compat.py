@@ -5,8 +5,9 @@ Every name that module exports has two implementations: the one the running
 interpreter provides, and a fallback for the oldest interpreter the package
 supports. Only one of the two can run on any given interpreter, so the only way
 to test the other is to lie to the module about which interpreter it is on --
-:meth:`CompatTests.load_compat_as_python35` executes the file a second time with
-:data:`sys.version_info` faked to ``(3, 5)``.
+:meth:`CompatTests.load_compat_as` executes the file a second time with
+:data:`sys.version_info` faked to ``(3, 5)``. ``default_threading_excepthook``
+has a third, for 3.8 and 3.9 only, which a fake ``(3, 9)`` reaches instead.
 
 That lie is not free, and containing its cost is most of what this module is
 about. A fake version is process-global for as long as it is installed, so *any*
@@ -28,7 +29,7 @@ Hence the two guards here, neither of which is about the shims themselves:
 
 #. :data:`WARM_BEFORE_FAKING` is imported *before* the fake goes in, so the
    memoised value is the true one, and
-   :meth:`CompatTests.load_compat_as_python35` **asserts** that nothing at all
+   :meth:`CompatTests.load_compat_as` **asserts** that nothing at all
    was first-imported under the fake -- the ordering is checked rather than
    assumed.
 #. :meth:`CompatTests.assert_aenum_is_not_poisoned` runs as a cleanup on every
@@ -53,11 +54,14 @@ from __future__ import annotations
 import decimal
 import enum
 import importlib
+import subprocess
 import sys
+import textwrap
 import unittest
 from unittest import mock
 
 from tests._support import load_module, purge_modules, reimport_once_per_class
+from tests._tiers import ROOT
 
 # NOTE: :mod:`aenum` is deliberately *not* imported at module scope, however
 # convenient that would be for the assertions below. A module-level import would
@@ -96,7 +100,7 @@ from tests._support import load_module, purge_modules, reimport_once_per_class
 #:
 #: The rest are here because the faked branches import them too. Whether each one
 #: memoises anything version-dependent is deliberately *not* the question: the
-#: invariant :meth:`CompatTests.load_compat_as_python35` asserts is that nothing
+#: invariant :meth:`CompatTests.load_compat_as` asserts is that nothing
 #: whatever is first-imported under the fake, which needs no judgement about
 #: which third-party caches are dangerous. A future interpreter or :mod:`aenum`
 #: release that pulls in one more module fails that assertion here, at the line
@@ -106,8 +110,10 @@ from tests._support import load_module, purge_modules, reimport_once_per_class
 #: running the test until it stopped complaining, and that distinction is the
 #: point of having it. Every import statement on a branch reachable at ``(3, 5)``:
 #: :mod:`collections.abc` (line 34), :mod:`pathlib` (63), :mod:`threading` (67),
-#: :mod:`typing` (4, 68, 126), :mod:`aenum` (143), :mod:`typing_extensions` (148,
-#: 202), :mod:`contextlib` (153), :mod:`decimal` (154), :mod:`enum` (179).
+#: :mod:`typing` (4, 68, 126), :mod:`aenum` (154), :mod:`typing_extensions` (172,
+#: 226), :mod:`contextlib` (177), :mod:`decimal` (178), :mod:`enum` (203). A fake
+#: ``(3, 9)`` reaches three more: :mod:`builtins` (31), :mod:`functools` (123) and
+#: :mod:`_thread` (251).
 #:
 #: Four of those never actually surface, and *why* is the point. Three --
 #: :mod:`collections.abc`, :mod:`contextlib` and :mod:`pathlib` -- are imported at
@@ -118,9 +124,11 @@ from tests._support import load_module, purge_modules, reimport_once_per_class
 #: why the four are on the list despite costing a :data:`sys.modules` lookup each
 #: and nothing else. Measured: with only the five that do surface warmed and
 #: :mod:`pathlib` forced cold, the window leaks ``['pathlib', 'pathlib._os']``;
-#: with the full list it is empty even with five of the nine forced cold.
-WARM_BEFORE_FAKING = ('aenum', 'collections.abc', 'contextlib', 'decimal', 'enum',
-                      'pathlib', 'threading', 'typing', 'typing_extensions')
+#: with the full list, then nine names, it is empty even with five of them forced
+#: cold.
+WARM_BEFORE_FAKING = ('_thread', 'aenum', 'builtins', 'collections.abc', 'contextlib',
+                      'decimal', 'enum', 'functools', 'pathlib', 'threading', 'typing',
+                      'typing_extensions')
 
 #: Prefix of the names the loaders themselves write, which are excluded from the
 #: "nothing was imported under the fake" check. :func:`tests._support.load_module`
@@ -179,7 +187,7 @@ class CompatTests(unittest.TestCase):
         # ended -- including when it ended by raising. It is a sweep of a handful
         # of module attributes, so paying it on the tests that fake nothing costs
         # nothing and covers the case where a future test in this file learns to
-        # fake a version without going through ``load_compat_as_python35``.
+        # fake a version without going through ``load_compat_as``.
         self.addCleanup(self.assert_aenum_is_not_poisoned)
 
         self.compat = load_module('pcapkit.utilities.compat', 'pcapkit/utilities/compat.py')
@@ -212,15 +220,15 @@ class CompatTests(unittest.TestCase):
             f'and raises AttributeError. Nothing undoes this: restoring sys.version_info '
             f'does not un-memoise a value. See issue #687 and WARM_BEFORE_FAKING.')
 
-    def load_compat_as_python35(self, module_name: str) -> 'object':
-        """Execute :file:`pcapkit/utilities/compat.py` as if on Python 3.5.
+    def load_compat_as(self, module_name: str, version: 'tuple[int, int]') -> 'object':
+        """Execute :file:`pcapkit/utilities/compat.py` as if on an older Python.
 
         Two things have to hold for that to be safe, and the second is the whole
         of issue #687.
 
-        The interpreter has to *look* like 3.5 while the module body runs, which
-        is what the :func:`~unittest.mock.patch.object` here does. And nothing may
-        be imported for the first time while it looks that way, because an
+        The interpreter has to *look* like ``version`` while the module body runs,
+        which is what the :func:`~unittest.mock.patch.object` here does. And nothing
+        may be imported for the first time while it looks that way, because an
         import-time cache of the faked value is not something restoring
         :data:`sys.version_info` can undo -- the value is already memoised inside
         a module this suite does not own.
@@ -236,19 +244,21 @@ class CompatTests(unittest.TestCase):
 
         Args:
             module_name: Dotted name to execute the file under. Must not be the
-                name the real module holds, or the 3.5-flavoured module would be
-                bound over it.
+                name the real module holds, or the faked module would be bound
+                over it.
+            version: The :data:`sys.version_info` to fake. ``(3, 5)`` takes
+                every fallback at once.
 
         Returns:
-            The executed module, with every ``< 3.6`` fallback in place of the
-            implementation this interpreter would otherwise have supplied.
+            The executed module, with each fallback ``version`` reaches in place
+            of the implementation this interpreter would otherwise have supplied.
 
         """
         for name in WARM_BEFORE_FAKING:
             importlib.import_module(name)
 
         before = frozenset(sys.modules)
-        with mock.patch.object(sys, 'version_info', (3, 5)):
+        with mock.patch.object(sys, 'version_info', version):
             compat = load_module(module_name, 'pcapkit/utilities/compat.py')
 
         leaked = sorted(
@@ -258,7 +268,7 @@ class CompatTests(unittest.TestCase):
         self.assertEqual(
             leaked, [],
             f'{leaked} were imported for the first time while sys.version_info was '
-            f'faked to (3, 5), so whatever any of them memoised about the interpreter '
+            f'faked to {version!r}, so whatever any of them memoised about the interpreter '
             f'at import time is now wrong for the rest of the process -- and restoring '
             f'sys.version_info does not undo it. Add them to WARM_BEFORE_FAKING so '
             f'they are imported under the real version first. See issue #687.')
@@ -294,6 +304,40 @@ class CompatTests(unittest.TestCase):
 
         self.assertEqual(self.compat.show_flag_values(DemoFlag.READ | DemoFlag.EXEC), [1, 4])
 
+    def test_default_threading_excepthook_is_the_hook_the_interpreter_started_with(self) -> None:
+        """GitHub issue #1691: the real default, even once a host hook replaced it.
+
+        :data:`threading.excepthook` is only the default until something replaces
+        it, so a fresh interpreter reads it first, then installs a hook of its own,
+        and only then runs :file:`pcapkit/utilities/compat.py` -- by path, so no
+        other part of :mod:`pcapkit` is imported. On 3.8 and 3.9 this is what pins
+        ``_thread._excepthook`` over whatever the hook holds at import.
+
+        """
+        code = textwrap.dedent('''
+            import importlib.util
+            import sys
+            import threading
+
+            STARTUP = threading.excepthook if sys.version_info >= (3, 8) else None
+
+            def host_hook(args):
+                pass
+            threading.excepthook = host_hook
+
+            spec = importlib.util.spec_from_file_location('compat_probe', sys.argv[1])
+            compat = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(compat)
+            print('IS_STARTUP:', compat.default_threading_excepthook is STARTUP)
+            print('IS_HOST:', compat.default_threading_excepthook is host_hook)
+        ''')
+        proc = subprocess.run(
+            [sys.executable, '-c', code, str(ROOT / 'pcapkit' / 'utilities' / 'compat.py')],
+            capture_output=True, text=True, timeout=60)
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertIn('IS_STARTUP: True', proc.stdout)
+        self.assertIn('IS_HOST: False', proc.stdout)
+
     def test_faking_the_version_leaves_aenum_reading_the_real_one(self) -> None:
         """The regression test for issue #687.
 
@@ -321,7 +365,7 @@ class CompatTests(unittest.TestCase):
 
         """
         purge_modules(['pcapkit.utilities.compat_py35_probe'])
-        self.load_compat_as_python35('pcapkit.utilities.compat_py35_probe')
+        self.load_compat_as('pcapkit.utilities.compat_py35_probe', (3, 5))
 
         # Not vacuous: the branch just executed did ``from aenum import StrEnum``,
         # so aenum is in sys.modules by now whether or not the warm-up put it
@@ -343,9 +387,10 @@ class CompatTests(unittest.TestCase):
 
     def test_python35_fallback_implementations(self) -> None:
         purge_modules(['pcapkit.utilities.compat_py35'])
-        compat = self.load_compat_as_python35('pcapkit.utilities.compat_py35')
+        compat = self.load_compat_as('pcapkit.utilities.compat_py35', (3, 5))
 
         self.assertTrue(issubclass(compat.ModuleNotFoundError, ImportError))
+        self.assertIsNone(compat.default_threading_excepthook)
 
         class CollectionLike:
             def __len__(self): return 0
@@ -417,6 +462,21 @@ class CompatTests(unittest.TestCase):
         self.assertEqual(list(compat._iter_bits_lsb(0)), [])
         with self.assertRaises(ValueError):
             compat.show_flag_values(-1)
+
+    def test_python39_default_threading_excepthook_is_the_310_one(self) -> None:
+        """The 3.8 and 3.9 branch lands on the object 3.10 and later name.
+
+        ``_thread._excepthook`` still exists from 3.10 on, so faking ``(3, 9)``
+        runs that branch on those interpreters too, where it must agree with
+        :data:`threading.__excepthook__` -- the identity the branch rests on. On
+        3.8 and 3.9 both loads take the same branch.
+
+        """
+        purge_modules(['pcapkit.utilities.compat_py39'])
+        compat = self.load_compat_as('pcapkit.utilities.compat_py39', (3, 9))
+
+        self.assertIs(compat.default_threading_excepthook,
+                      self.compat.default_threading_excepthook)
 
 
 if __name__ == '__main__':

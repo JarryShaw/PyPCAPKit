@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     # functions
-    'final', 'localcontext', 'show_flag_values',
+    'final', 'localcontext', 'show_flag_values', 'default_threading_excepthook',
 
     # exceptions
     'ModuleNotFoundError',
@@ -226,3 +226,28 @@ if sys.version_info < (3, 10):
     from typing_extensions import TypeAlias
 else:
     from typing import TypeAlias  # novermin
+
+# The interpreter's own default :data:`threading.excepthook`, as it stood before
+# anything replaced it, which :data:`threading.__excepthook__` names only from
+# 3.10 (issue #1691). The object itself is older: CPython 3.8 and 3.9 start
+# :data:`threading.excepthook` as ``_thread._excepthook``, the same function 3.10
+# and later bind as ``__excepthook__`` (checked with ``is`` on 3.8.20, 3.9.25,
+# 3.10.21 and 3.14.8). Importing it from :mod:`_thread`, rather than reading
+# whatever :data:`threading.excepthook` holds when this module loads, keeps it the
+# real default on 3.8 and 3.9 even when a host application, or an earlier loaded
+# copy of :mod:`pcapkit.utilities.exceptions`, has already replaced the hook --
+# as it is on 3.10 and later. 3.6 and 3.7 have no thread exception hook at all,
+# so the name is :data:`None` there rather than a failed import; nothing on those
+# interpreters calls it.
+#
+# The stdlib name is not reused as it stands, unlike every other name here: a
+# bare ``__excepthook__`` imported into a module reads as
+# :data:`sys.__excepthook__`, which takes three arguments rather than one, and
+# :mod:`pcapkit.utilities.exceptions` uses both. ``default_`` is the word that
+# module's docstrings already use for this object.
+if sys.version_info < (3, 8):
+    default_threading_excepthook = None
+elif sys.version_info < (3, 10):
+    from _thread import _excepthook as default_threading_excepthook
+else:
+    from threading import __excepthook__ as default_threading_excepthook  # novermin
