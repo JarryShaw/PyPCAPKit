@@ -1151,7 +1151,7 @@ class Extractor(Generic[_P]):
             pcapkit.utilities.warnings.FormatWarning: Warns under following circumstances:
 
                 * If using PCAP output for TCP flow tracing while the extraction engine is
-                  DPKT, Scapy, PyShark or PyPCAPFile.
+                  PyShark or PyPCAPFile.
                 * If using PCAP output while the extraction engine is a third-party
                   one, i.e. DPKT, Scapy, PyShark, PyPCAP, pcap-ct or PyPCAPFile.
                 * If output file format is not supported.
