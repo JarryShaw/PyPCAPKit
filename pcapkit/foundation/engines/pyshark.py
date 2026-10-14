@@ -58,8 +58,8 @@ def _is_packet(packet: 'PySharkPacket') -> 'bool':
 
     :program:`tshark` numbers every record it reads, not only packets: a PCAP-NG
     systemd Journal Export Block, Custom Block or Sysdig Event Block is a frame
-    to it, measured with :program:`tshark` 4.6.9. The default engine counts
-    Enhanced, Simple and obsolete Packet Blocks only.
+    to it, measured with :program:`tshark` 4.6.9. This engine counts packet
+    records only.
 
     The marker is ``frame.encap_type`` on the record's :func:`_frame_layer`.
     Wireshark adds it for ``REC_TYPE_PACKET`` records only:
@@ -273,8 +273,8 @@ class PyShark(EngineBase['PySharkPacket']):
         """Read frames with PyShark engine.
 
         A tshark record that is not a packet, such as a PCAP-NG systemd Journal
-        Export Block, is skipped. Frames are numbered by count, as the default
-        engine numbers them, not by tshark's frame number.
+        Export Block, is skipped. Frames are numbered by count, not by tshark's
+        frame number.
 
         Returns:
             Parsed frame instance.

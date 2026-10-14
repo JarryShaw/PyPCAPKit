@@ -353,13 +353,7 @@ def _parse_epoch(value: 'Any') -> 'float':
         value: The field as PyShark reports it, decimal text.
 
     Returns:
-        The timestamp, as the same :obj:`float` the default engine reports.
-
-    Note:
-        The default engine computes the epoch as a :class:`~decimal.Decimal`
-        and hands the tracer ``float()`` of it (:mod:`pcapkit.toolkit.pcap`).
-        This takes the same route, so both are the double nearest the same
-        decimal value: identical, not merely close.
+        The timestamp, as the :obj:`float` nearest the decimal value.
 
     Raises:
         ProtocolError: If ``value`` is not decimal text.
@@ -468,8 +462,7 @@ def _carrier(packet: 'Packet') -> 'tuple[Any, Any]':
     Note:
         The nearest is the innermost IP layer of an IP-in-IP tunnel
         (:rfc:`2003`, :rfc:`2473`, :rfc:`4213`), whose addresses are the TCP
-        endpoints', as for the default engine
-        (:func:`pcapkit.toolkit.pcap.tcp_segment`). ``packet.ip`` is the first
+        endpoints'. ``packet.ip`` is the first
         ``ip`` layer instead, which is the tunnel's (:issue:`1581`).
 
     """
@@ -493,10 +486,10 @@ def _has_fixed_header(tcp: 'Any') -> 'bool':
         Whether the layer carries ``tcp.urgent_pointer``.
 
     Note:
-        The default engine traces a segment only if its 20-octet fixed header
-        (:rfc:`9293#section-3.1`) was captured and its Data Offset is at least
-        5 (:func:`pcapkit.toolkit.pcap.tcp_segment`). tshark omits fields in
-        both other cases, measured with tshark 4.6.9 (:issue:`1611`):
+        A segment is traced only if its 20-octet fixed header
+        (:rfc:`9293#section-3.1`) was captured and its Data Offset is at
+        least 5. tshark omits fields in both other cases, measured with
+        tshark 4.6.9 (:issue:`1611`):
 
         * a Data Offset below 5 stops the dissection at ``tcp.hdr_len``, so
           ``tcp.ack`` and the ``tcp.flags`` fields are absent;
@@ -614,8 +607,8 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
 
         # A Simple Packet Block carries no timestamp, so tshark reports no
         # ``frame.time_epoch`` for it; the PDML ``geninfo`` timestamp PyShark
-        # keeps as ``sniff_timestamp`` is then ``'0.000000000'``, which is what
-        # the default engine reports (measured on ``test.pcapng`` frame 4).
+        # keeps as ``sniff_timestamp`` is then ``'0.000000000'``, the UNIX epoch
+        # (measured on ``test.pcapng`` frame 4).
         epoch = getattr(frame, 'time_epoch', None)
         if epoch is None:
             epoch = packet.sniff_timestamp

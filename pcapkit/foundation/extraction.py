@@ -964,9 +964,8 @@ class Extractor(Generic[_P]):
         :class:`~pcapkit.foundation.engines.dpkt.DPKT`,
         :class:`~pcapkit.foundation.engines.scapy.Scapy` and
         :class:`~pcapkit.foundation.engines.pyshark.PyShark` -- which call it at
-        setup, so their output opens with the same header record as the
-        built-in engines' and :attr:`format` is set even for a capture with no
-        frames.
+        setup, so their output opens with the header record dumped above and
+        :attr:`format` is set even for a capture with no frames.
 
         Raises:
             FormatError: If the input is neither a PCAP nor a PCAP-NG file.

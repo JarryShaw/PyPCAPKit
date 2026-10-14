@@ -182,18 +182,17 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         #
         # A Total Length of 0 declares nothing. It is what TCP segmentation
         # offload leaves in a capture taken on the sending host, and the
-        # datagram then runs to the end of the captured frame -- which is the
-        # payload every adapter hands over (:issue:`1547`). Wireshark ("presumed
-        # TSO") substitutes that length for the field before it reassembles
-        # anything, and so does this, whatever **MF** and the offset say: an
-        # unfragmented one is then whole rather than ``-IHL`` octets long
-        # (:issue:`1555`). Linux's BIG TCP zeroes the field precisely because
-        # the datagram, header included, outgrows the 65535 octets it can
-        # declare -- and such a datagram never completes in a buffer of that
-        # length (:meth:`_is_complete`). So the buffer grows past it, to hold
-        # the datagram rather than clip it, ``RCVBT`` in step with it; it grows
-        # by an octet even when the data alone would fit, since its growing is
-        # what lifts the bound.
+        # datagram then runs to the end of the captured frame (:issue:`1547`).
+        # Wireshark ("presumed TSO") substitutes that length for the field
+        # before it reassembles anything, and so does this, whatever **MF** and
+        # the offset say: an unfragmented one is then whole rather than ``-IHL``
+        # octets long (:issue:`1555`). Linux's BIG TCP zeroes the field
+        # precisely because the datagram, header included, outgrows the 65535
+        # octets it can declare -- and such a datagram never completes in a
+        # buffer of that length (:meth:`_is_complete`). So the buffer grows past
+        # it, to hold the datagram rather than clip it, ``RCVBT`` in step with
+        # it; it grows by an octet even when the data alone would fit, since its
+        # growing is what lifts the bound.
         #
         # With nothing declared, a snaplen cut cannot be seen in the length. A
         # non-final fragment's cut still shows, as a partial last block, which

@@ -189,9 +189,8 @@ class PCAPNGReader:
         """Decode a Simple Packet Block, against the section's first interface.
 
         `DPKT`_ has no type for this block, so it is parsed by
-        :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`, as for the default
-        engine: the packet data is ``min(original_len, snaplen)`` octets, with
-        the snaplen of interface 0.
+        :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`: the packet data is
+        ``min(original_len, snaplen)`` octets, with the snaplen of interface 0.
 
         Args:
             buf: Whole block, as read from the file.
@@ -199,8 +198,7 @@ class PCAPNGReader:
         Returns:
             Timestamp and packet data, as :meth:`_read_packet` returns them. A
             Simple Packet Block carries no timestamp, so the packet is dated at
-            the UNIX epoch, as the default engine dates it; the original length
-            is the block's own.
+            the UNIX epoch; the original length is the block's own.
 
         Raises:
             FormatError: If the section describes no interface. A Simple Packet
@@ -293,8 +291,8 @@ def _pcap_reader() -> 'Type[PCAPReader]':
                 if nanosecond:
                     yield DecimalTimestamp(value, resolution, hdr.len), buf
                 else:
-                    # at the default engine's precision, not the caller's, which
-                    # may be too low to hold it (:issue:`1668`)
+                    # at a precision of 64 digits, not the caller's, which may
+                    # be too low to hold it (:issue:`1668`)
                     with localcontext(prec=64):
                         exact = decimal.Decimal(hdr.tv_sec) + decimal.Decimal(hdr.tv_usec) / resolution
                     yield Timestamp(value, exact, resolution, hdr.len), buf
@@ -305,17 +303,16 @@ def _pcap_reader() -> 'Type[PCAPReader]':
 @functools.lru_cache(maxsize=None)
 def _loopback_protocol(base: 'Type[DPKTPacket]', ip: 'Type[DPKTPacket]', ip6: 'Type[DPKTPacket]',
                        linktype: 'int') -> 'Type[DPKTPacket]':
-    """A :class:`dpkt.loopback.Loopback` that reads as the default engine's.
+    """A :class:`dpkt.loopback.Loopback` that reads the address family by link type.
 
     It reads the address family in the byte order
     :func:`~pcapkit.protocols.link.loopback.family_byteorder` gives for
     ``linktype`` -- network byte order for ``LINKTYPE_LOOP``, inferred for
-    ``LINKTYPE_NULL`` -- and dispatches on the same families as
-    :class:`~pcapkit.protocols.link.loopback.Loopback`. Unlike `DPKT`_'s own, it
-    names an IPv4 or IPv6 payload ``ip`` or ``ip6``, as
-    :class:`dpkt.ethernet.Ethernet` does and as :mod:`pcapkit.toolkit.dpkt`
-    looks for it, and keeps a payload of any other family as raw octets rather
-    than parsing it as Ethernet (:issue:`1574`).
+    ``LINKTYPE_NULL`` -- and dispatches on families 2 (IPv4) and 24, 28 and 30
+    (IPv6). Unlike `DPKT`_'s own, it names an IPv4 or IPv6 payload ``ip`` or
+    ``ip6``, as :class:`dpkt.ethernet.Ethernet` does and as
+    :mod:`pcapkit.toolkit.dpkt` looks for it, and keeps a payload of any other
+    family as raw octets rather than parsing it as Ethernet (:issue:`1574`).
 
     Args:
         base: :class:`dpkt.loopback.Loopback` itself.
@@ -361,9 +358,9 @@ class DPKT(EngineBase['DPKTPacket']):
     :class:`dpkt.pcapng.Reader`, so each packet takes the link type and the
     timestamp resolution and offset of the interface it was captured on.
 
-    It reads every packet block the default engine reads -- the Enhanced, the
-    Simple and the (obsolete) Packet Block -- and skips every other block
-    without a warning. `DPKT`_'s own reader skips the Simple Packet Block too.
+    It reads the Enhanced, the Simple and the (obsolete) Packet Block, and
+    skips every other block without a warning. `DPKT`_'s own reader skips the
+    Simple Packet Block too.
 
     .. _DPKT: https://dpkt.readthedocs.io
 
@@ -500,9 +497,8 @@ class DPKT(EngineBase['DPKTPacket']):
             # ``frag_off`` from whatever header follows an IPv6 Fragment header,
             # so a Fragment header followed by ESP or Destination Options raises
             # :exc:`AttributeError` (:issue:`1351`). The frame is kept as a raw
-            # packet, so one undecodable frame does not end the extraction and
-            # the frame numbering still matches the other engines, which fall
-            # back to a raw payload in the same way.
+            # packet, so one undecodable frame neither ends the extraction nor
+            # shifts the numbering of the frames after it.
             warn(f'Frame {ext._frnum + 1}: dpkt cannot parse the frame '
                  f'({type(exc).__name__}: {exc}); kept as raw data',
                  DPKTWarning, stacklevel=stacklevel())
