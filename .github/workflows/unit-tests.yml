@@ -64,8 +64,11 @@ jobs:
     outputs:
       latest: ${{ steps.read.outputs.latest }}
       test: ${{ steps.read.outputs.test }}
+      test-ktlo: ${{ steps.read.outputs.test-ktlo }}
       integration: ${{ steps.read.outputs.integration }}
+      integration-ktlo: ${{ steps.read.outputs.integration-ktlo }}
       pypcap-parity: ${{ steps.read.outputs.pypcap-parity }}
+      pypcap-parity-ktlo: ${{ steps.read.outputs.pypcap-parity-ktlo }}
       engine-supported: ${{ steps.read.outputs.engine-supported }}
       engine-ktlo: ${{ steps.read.outputs.engine-ktlo }}
 
@@ -89,21 +92,22 @@ jobs:
     # this workflow used to) therefore ran the whole matrix in every caller
     # and skipped the gate everywhere. An input is the only reliable way for a
     # reusable workflow to know how it was invoked.
-    name: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}
+    name: Python ${{ matrix.python-version }}
     if: ${{ inputs.gate-only != true && needs.changes.outputs.code != 'false' }}
     needs: [changes, python-versions]
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
     timeout-minutes: 45
     # #1672: the level of every annotation a failing step writes -- a warning on
-    # a KTLO leg, which must not show red, an error on a supported one.
+    # a KTLO leg, which must not show red, an error on a supported one. The
+    # steps are shared with `test-ktlo`, whose legs carry `ktlo: true`.
     env:
       ANNOTATION_LEVEL: ${{ matrix.ktlo && 'warning' || 'error' }}
     strategy:
       fail-fast: false
-      # #1660: .github/python-versions.toml's CPython tiers, through the
-      # `python-versions` job. The supported tier is the `python-version` axis
-      # and blocks through `required-checks` (#1633); `include` marks one leg
-      # `coverage: true` and adds each KTLO leg with `ktlo: true`.
+      # #1660: .github/python-versions.toml's supported CPython tier, through
+      # the `python-versions` job, as the `python-version` axis; it blocks
+      # through `required-checks` (#1633). `include` marks one leg
+      # `coverage: true`. The KTLO legs are `test-ktlo`'s (#1738).
       #
       # Exactly one leg runs under coverage, so measuring it adds no leg to
       # the queue. It is `latest`, the newest supported version, like every
@@ -112,32 +116,12 @@ jobs:
       # coverage cost 1.8x on 3.15 locally (2.0x on 3.14): a step of about
       # 15-19 minutes under the job's 45.
       #
-      # The KTLO tier (#1633): end-of-life versions that still build and
-      # test but never block. `required-checks` reads this job's one
-      # `needs.test.result`, so a KTLO leg cannot fail the job: each step
-      # that can fail on one carries `continue-on-error: ${{ matrix.ktlo
-      # == true }}` instead -- the step-level form, whose effect on the job
-      # is documented, as for engine-tests' KTLO cell. The leg concludes
-      # success, and the job's last step, `KTLO summary`, reports each
-      # failed step as a warning (#1672). A version `ubuntu-latest` cannot
-      # provide carries its `runner` from the file as `os`: 3.8 and 3.9 need
-      # ubuntu-24.04, as setup-python has no Ubuntu 26.04 build of either
-      # and `ubuntu-latest` moves to 26.04 from 2026-10-19.
-      #
-      # 3.7 needs ubuntu-22.04, the newest image setup-python builds it for
-      # (3.7.17). It cannot install today -- the `test` extra's `pytest>=8`
-      # needs 3.8, and the sources use syntax 3.7 cannot parse -- so the leg
-      # stops at its install step, with one annotation naming pip's reason
-      # (see that step). ubuntu-22.04 is deprecated: brownouts from
-      # 2027-03-23, retirement on 2027-04-17 (actions/runner-images#14254).
-      # A brownout fails the leg before any step runs, which no step-level
-      # `continue-on-error` can contain, so this leg must go before then.
-      #
       # The experimental tier (#1660) runs in experimental.yml, a workflow of
       # its own, so that nothing here waits on it (#1732).
       matrix: ${{ fromJSON(needs.python-versions.outputs.test) }}
 
-    steps:
+    # `&test-steps`: `test-ktlo` runs these same steps, by YAML alias.
+    steps: &test-steps
       - uses: actions/checkout@v7
         id: checkout
         continue-on-error: ${{ matrix.ktlo == true }}
@@ -419,8 +403,47 @@ jobs:
             echo "- ${LEG}: step \`${id}\` failed; non-blocking, so this job still succeeds." >> "$GITHUB_STEP_SUMMARY"
           done <<< "$failed"
 
+  # The KTLO tier (#1633): end-of-life versions that still build and test but
+  # never block. #1738, the owner's option A: their legs are this job's, not
+  # `test`'s, and neither `required-checks` nor `unittest-ordering` `needs:`
+  # it, so a failure no step can contain -- a lost runner, the job cap --
+  # fails nothing that gates. The steps are `test`'s, by YAML alias
+  # (docs.github.com, Reusing workflow configurations, "YAML anchors and
+  # aliases"), and each that can fail on a KTLO leg carries
+  # `continue-on-error: ${{ matrix.ktlo == true }}`, so the leg concludes
+  # success, its annotations are warnings, and `KTLO summary`, the last step,
+  # reports each failed step as a warning (#1672). The job-level
+  # `continue-on-error` is the backstop for the rest: it "Prevents a workflow
+  # run from failing when a job fails" (docs.github.com, Workflow syntax,
+  # `jobs.<job_id>.continue-on-error`), as on experimental.yml's job, so the
+  # Unit Tests run its `workflow_run` consumers read stays green.
+  #
+  # A version `ubuntu-latest` cannot provide carries its `runner` from the
+  # file as `os`: 3.8 and 3.9 need ubuntu-24.04, as setup-python has no Ubuntu
+  # 26.04 build of either and `ubuntu-latest` moves to 26.04 from 2026-10-19.
+  # 3.7 needs ubuntu-22.04, the newest image setup-python builds it for
+  # (3.7.17). It cannot install today -- the `test` extra's `pytest>=8` needs
+  # 3.8, and the sources use syntax 3.7 cannot parse -- so the leg stops at
+  # its install step, with one annotation naming pip's reason (see that step).
+  # ubuntu-22.04 is deprecated: brownouts from 2027-03-23, retirement on
+  # 2027-04-17 (actions/runner-images#14254); a brownout fails the leg before
+  # any step runs, which only the job-level guard contains.
+  test-ktlo:
+    name: Python ${{ matrix.python-version }} (KTLO)
+    if: ${{ inputs.gate-only != true && needs.changes.outputs.code != 'false' }}
+    needs: [changes, python-versions]
+    runs-on: ${{ matrix.os || 'ubuntu-latest' }}
+    timeout-minutes: 45
+    continue-on-error: true
+    env:
+      ANNOTATION_LEVEL: ${{ matrix.ktlo && 'warning' || 'error' }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.python-versions.outputs.test-ktlo) }}
+    steps: *test-steps
+
   integration:
-    name: Integration Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}
+    name: Integration Python ${{ matrix.python-version }}
     if: ${{ inputs.gate-only != true && needs.changes.outputs.code != 'false' }}
     needs: [changes, python-versions]
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
@@ -430,11 +453,12 @@ jobs:
       ANNOTATION_LEVEL: ${{ matrix.ktlo && 'warning' || 'error' }}
     strategy:
       fail-fast: false
-      # The two tiers of the `test` job above, for the same reasons, without
-      # its coverage leg.
+      # The supported tier of the `test` job above, without its coverage leg;
+      # the KTLO legs are `integration-ktlo`'s (#1738).
       matrix: ${{ fromJSON(needs.python-versions.outputs.integration) }}
 
-    steps:
+    # `&integration-steps`: `integration-ktlo` runs these same steps.
+    steps: &integration-steps
       - uses: actions/checkout@v7
         id: checkout
         continue-on-error: ${{ matrix.ktlo == true }}
@@ -609,6 +633,21 @@ jobs:
             echo "::warning title=${id} failed on ${LEG//,/%2C}::KTLO legs never block (#1633), so this job still succeeds (#1672); see the ${id} step's log."
             echo "- ${LEG}: step \`${id}\` failed; non-blocking, so this job still succeeds." >> "$GITHUB_STEP_SUMMARY"
           done <<< "$failed"
+
+  # `integration`'s KTLO legs, apart for the reasons on `test-ktlo` (#1738).
+  integration-ktlo:
+    name: Integration Python ${{ matrix.python-version }} (KTLO)
+    if: ${{ inputs.gate-only != true && needs.changes.outputs.code != 'false' }}
+    needs: [changes, python-versions]
+    runs-on: ${{ matrix.os || 'ubuntu-latest' }}
+    timeout-minutes: 45
+    continue-on-error: true
+    env:
+      ANNOTATION_LEVEL: ${{ matrix.ktlo && 'warning' || 'error' }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.python-versions.outputs.integration-ktlo) }}
+    steps: *integration-steps
 
   # Per-engine coverage for the third-party capture engines (#845): every
   # (Python version, engine) pair is checked, and a failure -- or a correctly
@@ -1102,7 +1141,7 @@ jobs:
   # step-level `continue-on-error`, for the reason given on the `test` job's
   # matrix.
   pypcap-parity:
-    name: PyPCAP/PyPCAPFile parity Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}
+    name: PyPCAP/PyPCAPFile parity Python ${{ matrix.python-version }}
     if: ${{ inputs.gate-only != true && needs.changes.outputs.code != 'false' }}
     needs: [changes, python-versions]
     runs-on: ubuntu-latest
@@ -1121,7 +1160,8 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJSON(needs.python-versions.outputs.pypcap-parity) }}
 
-    steps:
+    # `&pypcap-parity-steps`: `pypcap-parity-ktlo` runs these same steps.
+    steps: &pypcap-parity-steps
       - uses: actions/checkout@v7
         id: checkout
         continue-on-error: ${{ matrix.ktlo == true }}
@@ -1332,6 +1372,25 @@ jobs:
             echo "::warning title=${id} failed on ${LEG//,/%2C}::KTLO legs never block (#1633), so this job still succeeds (#1672); see the ${id} step's log."
             echo "- ${LEG}: step \`${id}\` failed; non-blocking, so this job still succeeds." >> "$GITHUB_STEP_SUMMARY"
           done <<< "$failed"
+
+  # `pypcap-parity`'s KTLO legs, apart for the reasons on `test-ktlo` (#1738).
+  # Same apt set and cache key; `pypcap-parity`'s supported leg saves it.
+  pypcap-parity-ktlo:
+    name: PyPCAP/PyPCAPFile parity Python ${{ matrix.python-version }} (KTLO)
+    if: ${{ inputs.gate-only != true && needs.changes.outputs.code != 'false' }}
+    needs: [changes, python-versions]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    continue-on-error: true
+    env:
+      APT_PACKAGES: build-essential libpcap-dev tshark
+      APT_SET: pypcap-parity
+      APT_CACHE_SAVE: 'false'
+      ANNOTATION_LEVEL: ${{ matrix.ktlo && 'warning' || 'error' }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.python-versions.outputs.pypcap-parity-ktlo) }}
+    steps: *pypcap-parity-steps
 
   # GitHub issue #981: two test modules
   # (tests/protocols/application/test_http_unit.py and
@@ -1550,9 +1609,9 @@ jobs:
   # to the GitHub Release body: a drifted copy is not merely wrong in the tree, it
   # is published.
   #
-  # Deliberately *not* gated on ``gate-only``, unlike the four jobs above
-  # (`test`, `integration`, `engine-tests`, `pypcap-parity`), and that is the
-  # point of putting it here at all. ``create-release.yml`` calls this
+  # Deliberately *not* gated on ``gate-only``, unlike the matrix jobs above
+  # (`test`, `integration`, `engine-tests`, `pypcap-parity` and the KTLO ones),
+  # and that is the point of putting it here at all. ``create-release.yml`` calls this
   # workflow as its release gate, so an ungated job runs on the release path and
   # the release body cannot be built from a file that has drifted. The matrix is
   # skipped per caller because it is expensive and already ran for the commit;
@@ -1850,19 +1909,16 @@ jobs:
   # here: the cell script exits 0 for a cell that declined exactly as
   # expected, so they contribute to that job's `success` like any other cell.
   #
-  # Nor is the KTLO tier (#1633): engine-tests' 3.10 cell, and the 3.7-3.10
-  # legs of `test` and `integration` and the 3.10 leg of `pypcap-parity`.
-  # Each is non-blocking through step-level `continue-on-error`, whose effect
-  # on the job's result *is* documented (a step's `conclusion` is its result
-  # after `continue-on-error` is applied), so the job, and this gate, read
-  # `success` while the failed step stays visible. Not a job-level
-  # `continue-on-error`: GitHub does not document whether `needs.<job>.result`
-  # sees such a job's failure as `failure` or `success`, so a KTLO-only
-  # regression could block every merge. The one failure no step can contain is
-  # a leg that never gets a runner: the 3.7 legs' deprecated ubuntu-22.04 image
-  # has brownouts from 2027-03-23 -- see the `test` job's matrix. The
-  # experimental legs (#1660) are in experimental.yml, which nothing here
-  # needs or waits on (#1732).
+  # Nor is the KTLO tier (#1633). engine-tests' KTLO cell is non-blocking
+  # through step-level `continue-on-error`, whose effect on the job's result
+  # *is* documented (a step's `conclusion` is its result after
+  # `continue-on-error` is applied), so the job, and this gate, read `success`
+  # while the failed step stays visible. The KTLO legs of `test`,
+  # `integration` and `pypcap-parity` are `test-ktlo`, `integration-ktlo`
+  # and `pypcap-parity-ktlo` (#1738), which this job does not need, so not
+  # even a failure no step can contain -- a lost runner, the job cap -- can
+  # fail it. The experimental legs (#1660) are in experimental.yml, which
+  # nothing here needs or waits on (#1732).
   #
   # The docs-only path. On a pull request whose diff touches nothing but
   # `docs/**` and `*.md` files outside the code directories (the `changes`

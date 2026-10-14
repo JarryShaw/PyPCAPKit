@@ -787,7 +787,7 @@ def _toml_array(text: 'str', name: 'str') -> 'Optional[tuple[Requirement, ...]]'
     """The ``name = [ ... ]`` array of double-quoted strings in ``text``.
 
     A targeted scan rather than :mod:`tomllib`, which is 3.11+ while the oldest
-    ``test`` leg to run the suite is 3.8 (a KTLO leg, #1633) -- and a guard that skips on
+    leg to run the suite is 3.8 (``test-ktlo``'s, #1633, #1738) -- and a guard that skips on
     some legs is the shape of invisibility this whole module exists to remove.
     Comments are stripped first, quote-aware, because the arrays here are
     heavily annotated; the brackets inside ``"requests[socks]"`` are what makes
@@ -1423,6 +1423,10 @@ def pytest_jobs(workflow: 'Optional[pathlib.Path]' = None) -> 'tuple[Job, ...]':
     text = (workflow or WORKFLOW).read_text(encoding='utf-8')
     jobs = []  # type: list[Job]
     for name, section in job_sections(text).items():
+        # A KTLO job (#1738) writes its steps as a YAML alias of its gating
+        # twin's -- `steps: *test-steps` -- so its slice holds no pytest line and
+        # is skipped here: it installs and selects what the twin does, so it
+        # reaches no gate the twin does not.
         if 'python -m pytest' not in section:
             continue
 

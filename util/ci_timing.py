@@ -301,10 +301,13 @@ def parse_workflow(text: 'str') -> 'list[dict[str, Any]]':
 
     Read off the text by indentation, the way the tests under :file:`tests/project`
     read these files, because PyYAML is not in the standard library. Every workflow
-    here keeps job keys at four spaces, which is all this relies on.
+    here keeps job keys at four spaces, which is all this relies on. A job whose
+    ``steps:`` is a YAML alias, as unit-tests.yml's KTLO jobs are (#1738), gets the
+    steps of the job that anchors them, which comes first, as YAML needs.
 
     """
     jobs = []  # type: list[dict[str, Any]]
+    anchors = {}  # type: dict[str, list[dict[str, Any]]]
     body = re.split(r'(?m)^jobs:\s*$', text, maxsplit=1)
     if len(body) != 2:
         return jobs
@@ -316,6 +319,12 @@ def parse_workflow(text: 'str') -> 'list[dict[str, Any]]':
         needed = [] if needs is None else [
             item.strip() for item in _scalar(needs.group(1)).strip('[]').split(',') if item.strip()]
         template = _scalar(name.group(1)) if name else job_id
+        steps = _parse_steps(section)
+        node = re.search(r'(?m)^    steps:[ \t]*([&*])([\w-]+)[ \t]*$', section)
+        if node and node.group(1) == '&':
+            anchors[node.group(2)] = steps
+        elif node:
+            steps = anchors.get(node.group(2), [])
         jobs.append({
             'id': job_id,
             'name': template,
@@ -325,7 +334,7 @@ def parse_workflow(text: 'str') -> 'list[dict[str, Any]]':
             'unnamed': name is None,
             'timeout': int(timeout.group(1)) if timeout else DEFAULT_TIMEOUT,
             'needs': needed,
-            'steps': _parse_steps(section),
+            'steps': steps,
         })
     return jobs
 
@@ -341,7 +350,7 @@ def _parse_steps(section: 'str') -> 'list[dict[str, Any]]':
     found = []  # type: list[dict[str, Any]]
     lines = section.splitlines()
     try:
-        start = next(i for i, line in enumerate(lines) if re.match(r'^    steps:\s*$', line))
+        start = next(i for i, line in enumerate(lines) if re.match(r'^    steps:(?:[ \t]*&[\w-]+)?\s*$', line))
     except StopIteration:
         return found
     items = [i for i in range(start + 1, len(lines)) if re.match(r'^ {4,}- ', lines[i])]
@@ -367,13 +376,21 @@ def _parse_steps(section: 'str') -> 'list[dict[str, Any]]':
 
 
 def match_job(specs: 'list[dict[str, Any]]', name: 'str') -> 'Optional[dict[str, Any]]':
-    """The spec a job name in the API came from; a literal name wins over a template."""
+    """The spec a job name in the API came from; a literal name wins over a template.
+
+    Of the templates that match, the one with the most literal text wins:
+    ``Python ${{ matrix.python-version }}`` matches ``Python 3.10 (KTLO)`` too,
+    which is ``Python ${{ matrix.python-version }} (KTLO)``'s, ``test-ktlo``'s
+    and not ``test``'s (#1738).
+
+    """
     for spec in specs:
         if spec['literal'] and spec['name'] == name:
             return spec
+    matched = [spec for spec in specs if spec['pattern'].fullmatch(name)]
+    if matched:
+        return max(matched, key=lambda spec: len(re.sub(r'\$\{\{.*?\}\}', '', spec['name'])))
     for spec in specs:
-        if spec['pattern'].fullmatch(name):
-            return spec
         if spec['unnamed'] and re.fullmatch(rf'{re.escape(spec["id"])} \(.*\)', name):
             return spec
     return None

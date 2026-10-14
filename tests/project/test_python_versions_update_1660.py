@@ -619,7 +619,7 @@ class TestTheExperimentalEntriesAreHandKept(unittest.TestCase):
         plan, texts = updater().compute_plan(root, as_of_the_file(snapshot()))
         self.assertEqual((plan['changes'], texts, plan['notes']), ([], {}, []))
         page = ' '.join((root / 'docs/source/contributing/workflows.rst').read_text(encoding='utf-8').split())
-        self.assertIn('``test`` (nine Python legs: five supported, four KTLO)', page)
+        self.assertIn('``test`` (five Python legs), ``test-ktlo`` (four)', page)
         self.assertIn('``experimental`` (two)', page)
 
     def test_a_tier_move_keeps_them_byte_for_byte_after_the_computed_versions(self) -> None:

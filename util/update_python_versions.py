@@ -436,6 +436,25 @@ def leg_names(workflows: 'dict[str, Any]', values: 'dict[str, str]') -> 'dict[tu
     return found
 
 
+#: The suffix of a job holding only the KTLO legs of the job named without it (#1738).
+KTLO_JOB_SUFFIX = '-ktlo'
+
+
+def with_ktlo_twins(names: 'dict[tuple[str, str], dict[tuple, str]]') -> 'dict[tuple[str, str], dict[tuple, str]]':
+    """:func:`leg_names` with each KTLO job's legs under its gating twin's, as one job.
+
+    A version moving to KTLO moves from ``test`` to ``test-ktlo`` (#1738); keyed
+    together, its check run reads as renamed, as when both tiers shared a job.
+
+    """
+    found = {}  # type: dict[tuple[str, str], dict[tuple, str]]
+    for (name, job_id), legs in names.items():
+        if job_id.endswith(KTLO_JOB_SUFFIX):
+            job_id = job_id[:-len(KTLO_JOB_SUFFIX)]
+        found.setdefault((name, job_id), {}).update(legs)
+    return found
+
+
 def required_contexts(workflows: 'dict[str, Any]', values: 'dict[str, str]') -> 'list[str]':
     """Ruleset 23497679's required contexts for ``values``: the aggregate, and :data:`REQUIRED_JOB`'s blocking legs.
 
@@ -901,12 +920,15 @@ CLAIMS = {
               lambda f: counted(len(f['ktlo']), lines_of(f, 'ktlo'))),
         Claim(r'and the (\w+) ``Compat Python (3\.\d+)``-``(3\.\d+)`` legs',
               lambda f: counted(len(f['required']) - 1, span(f['supported']))),
-        Claim(r'``test`` \((\w+) Python legs: (\w+) supported, (\w+) KTLO\)',
-              lambda f: (Word(f['legs']['test']), Word(len(f['supported'])), Word(len(f['ktlo'])))),
+        # #1738: each gating job's legs, then its KTLO twin's.
+        Claim(r'``test`` \((\w+) Python legs\)', lambda f: (Word(f['legs']['test']),)),
+        Claim(r'``test-ktlo`` \((\w+)\)', lambda f: (Word(f['legs']['test-ktlo']),)),
         Claim(r'``experimental`` \((\w+)\)', lambda f: (Word(f['legs']['experimental']),)),
         Claim(r'``integration`` \((\w+)\)', lambda f: (Word(f['legs']['integration']),)),
+        Claim(r'``integration-ktlo`` \((\w+)\)', lambda f: (Word(f['legs']['integration-ktlo']),)),
         Claim(r'each looping over (\w+) Python versions', lambda f: (Word(f['engines']),)),
         Claim(r'``pypcap-parity`` \((\w+)\)', lambda f: (Word(f['legs']['pypcap-parity']),)),
+        Claim(r'``pypcap-parity-ktlo`` \((\w+)\)', lambda f: (Word(f['legs']['pypcap-parity-ktlo']),)),
         Claim(r'the ``Python (3\.\d+)`` leg of ``test`` \(matrix key ``coverage: true``\)',
               lambda f: (f['latest'],)),
     ),
@@ -1105,7 +1127,8 @@ def compute_plan(root: 'pathlib.Path', sources: 'dict[str, Any]') -> 'tuple[dict
         texts[path] = text
     changed = [path for path in TARGETS if texts[path] != (root / path).read_bytes().decode('utf-8')]
 
-    names_before, names_after = leg_names(workflows, before_values), leg_names(workflows, after_values)
+    names_before = with_ktlo_twins(leg_names(workflows, before_values))
+    names_after = with_ktlo_twins(leg_names(workflows, after_values))
     renamed, added, removed = [], [], []
     for job in sorted(set(names_before) | set(names_after)):
         old, new = names_before.get(job, {}), names_after.get(job, {})

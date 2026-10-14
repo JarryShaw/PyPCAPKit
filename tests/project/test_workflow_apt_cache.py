@@ -314,14 +314,22 @@ class TestOneSaverPerKey(unittest.TestCase):
     """Two jobs saving one key race, and the loser logs ``Unable to reserve cache``."""
 
     def test_only_one_parity_cell_saves(self) -> None:
-        """APT_CACHE_SAVE selects exactly one of the parity matrix's Python versions."""
+        """APT_CACHE_SAVE selects exactly one of the parity matrices' Python versions.
+
+        Since #1738 the KTLO legs are ``pypcap-parity-ktlo``'s, under the same
+        ``APT_SET`` and so the same key, and that job never saves.
+
+        """
         value = job_env('pypcap-parity', 'APT_CACHE_SAVE')
         match = re.fullmatch(r"\$\{\{ matrix\.python-version == '([\d.]+)' \}\}", value)
         self.assertIsNotNone(match, value)
-        # The parity matrix's legs, from .github/python-versions.toml (#1660).
+        # The parity matrices' legs, from .github/python-versions.toml (#1660).
         versions = [leg['python-version'] for leg in legs(matrix('unit-tests.yml', 'pypcap-parity'))]
         self.assertIn(match.group(1), versions)  # type: ignore[union-attr]
-        self.assertGreater(len(versions), 1)
+        self.assertEqual(job_env('pypcap-parity-ktlo', 'APT_CACHE_SAVE'), "'false'")
+        self.assertEqual(job_env('pypcap-parity-ktlo', 'APT_SET'), job_env('pypcap-parity', 'APT_SET'))
+        ktlo = [leg['python-version'] for leg in legs(matrix('unit-tests.yml', 'pypcap-parity-ktlo'))]
+        self.assertGreater(len(versions + ktlo), 1)
 
     def test_each_engine_job_saves_its_own_key(self) -> None:
         """engine-tests has one job per APT_SET, so each saves."""
