@@ -13,7 +13,7 @@ several user-refined exceptions and warnings.
 .. toctree::
    :maxdepth: 2
 
-   functools
+   decorators
    exceptions
    warnings
    logging

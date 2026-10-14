@@ -34,6 +34,11 @@ captured. The trial's warnings are held back by
 on both channels, since they describe a layer the result does not have, and a kept
 layer's are reported as above when the trial ends (:issue:`1580`).
 
+.. autofunction:: pcapkit.utilities.warnings.warn
+
+.. autoclass:: pcapkit.utilities.warnings.hold_warnings
+   :members: discard, holding
+
 Silencing pcapkit Warnings
 --------------------------
 
