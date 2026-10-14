@@ -284,9 +284,16 @@ TIERS_AT_MAIN = {
 }
 
 
+#: ``test``'s name since #1660, which names an experimental leg too.
+TEST_TEMPLATE = ("Python ${{ matrix.python-version }}${{ matrix.experimental && ' (experimental)' || '' }}"
+                 "${{ matrix.ktlo && ' (KTLO)' || '' }}")
+
+
 def render(template: 'str', leg: 'dict[str, Any]') -> 'str':
-    """A matrix job's name for one leg, for the two expression shapes these names use."""
+    """A matrix job's name for one leg, for the three expression shapes these names use."""
     name = template.replace("${{ matrix.ktlo && ' (KTLO)' || '' }}", ' (KTLO)' if leg.get('ktlo') is True else '')
+    name = name.replace("${{ matrix.experimental && ' (experimental)' || '' }}",
+                        ' (experimental)' if leg.get('experimental') is True else '')
     name = re.sub(r'\$\{\{ matrix\.([\w-]+) \}\}', lambda match: str(leg[match.group(1)]), name)
     assert '${{' not in name, name
     return name
@@ -577,10 +584,20 @@ class TestNothingMovedButLatest(unittest.TestCase):
                                  'Run the KTLO cells (non-blocking)': ENGINES_AT_MAIN[0]})
 
     def test_no_job_name_changes_but_the_gates(self) -> None:
-        """Rulesets match check names literally, so each template and leg name stays."""
+        """Rulesets match check names literally, so each template and leg name stays.
+
+        ``test``'s template gained the experimental tier's suffix (#1660), which
+        names every one of :data:`MAIN`'s legs as before.
+
+        """
         for (name, job_id), template in TEMPLATES_AT_MAIN.items():
             with self.subTest(workflow=name, job=job_id):
-                self.assertEqual(workflow(name)['jobs'][job_id]['name'], template)
+                if (name, job_id) == ('unit-tests.yml', 'test'):
+                    self.assertEqual(workflow(name)['jobs'][job_id]['name'], TEST_TEMPLATE)
+                    self.assertEqual([render(TEST_TEMPLATE, leg) for leg in legs(matrix(name, job_id, self.values))],
+                                     [render(template, leg) for leg in legs(matrix(name, job_id, self.values))])
+                else:
+                    self.assertEqual(workflow(name)['jobs'][job_id]['name'], template)
         compat = TEMPLATES_AT_MAIN[('python-compatibility.yml', 'compatibility')]
         compat_legs = legs(matrix('python-compatibility.yml', 'compatibility', self.values))
         blocking = {render(compat, leg) for leg in compat_legs
@@ -935,6 +952,129 @@ class TestTheProseFollowsTheFile(unittest.TestCase):
         for text, pattern, expected in claims:
             with self.subTest(claim=pattern):
                 self.assertEqual(re.findall(pattern, text), expected)
+
+
+#: The two builds as setup-python spells them, at actions/setup-python 3892123fb: a
+#: free-threaded CPython as ``3.14t`` (src/find-python.ts:240,
+#: ``/^(\d+\.\d+(\.\d+)?)(t)$/``), and GraalPy as ``graalpy-<version>``
+#: (src/find-graalpy.ts:115-125; README.md:55, ``graalpy-24.0``), the version being
+#: a GraalPy release line, matched as a semver range against oracle/graalpython's
+#: release tags (src/install-graalpy.ts:213-248).
+SETUP_PYTHON = {'cpython': re.compile(r'3\.\d+t'), 'graalpy': re.compile(r'graalpy-\d+\.\d+')}
+#: :data:`TIERS_AT_MAIN` with one experimental build of each, listed last as the file lists them.
+EXPERIMENTAL_LEGS = [{'python-version': '3.14t', 'experimental': True},
+                     {'python-version': 'graalpy-25.4', 'experimental': True}]
+TIERS_WITH_EXPERIMENTAL = dict(TIERS_AT_MAIN, versions=dict(
+    TIERS_AT_MAIN['versions'],
+    cpython=dict(TIERS_AT_MAIN['versions']['cpython'], **{'3.14t': {'tier': 'experimental'}}),
+    graalpy={'graalpy-25.4': {'tier': 'experimental'}}))
+
+
+def experimental(data: 'dict[str, Any]') -> 'list[str]':
+    """Every experimental version in ``data``, CPython's then GraalPy's."""
+    return [version for impl in ('cpython', 'pypy', 'graalpy') for version in script().tier(data, impl, 'experimental')]
+
+
+class TestTheExperimentalTier(unittest.TestCase):
+    """#1660, the owner's option 1: GraalPy and free-threaded CPython run non-blocking ``test`` legs, nothing else.
+
+    :mod:`tests.project.test_ktlo_legs_stay_green_1672` runs those legs' steps to
+    show they cannot fail the job; this reads the file, the matrices and the names.
+
+    """
+
+    def setUp(self) -> None:
+        tmp = tempfile.TemporaryDirectory(prefix='pcapkit-1660-')  # pylint: disable=consider-using-with
+        self.addCleanup(tmp.cleanup)
+        self.tmp = pathlib.Path(tmp.name)
+
+    def outputs(self, data: 'dict[str, Any]') -> 'dict[str, str]':
+        return script().outputs(script().load(write_tiers(self.tmp, data)))
+
+    def test_the_file_lists_free_threaded_cpython_and_graalpy(self) -> None:
+        """Each spelt as setup-python's ``python-version`` reads it, and nothing else experimental."""
+        data = script().load()
+        for impl, spelling in SETUP_PYTHON.items():
+            found = script().tier(data, impl, 'experimental')
+            with self.subTest(implementation=impl):
+                self.assertTrue(found, f'no experimental {impl}')
+                for version in found:
+                    self.assertRegex(version, rf'^{spelling.pattern}$')
+        self.assertEqual(script().tier(data, 'pypy', 'experimental'), [])
+
+    def test_load_holds_the_tier_to_those_builds(self) -> None:
+        """Either way round: no other build is experimental, and neither build is anything else."""
+        self.assertEqual(script().load(write_tiers(self.tmp, TIERS_WITH_EXPERIMENTAL))['versions'],
+                         TIERS_WITH_EXPERIMENTAL['versions'])
+        versions = TIERS_WITH_EXPERIMENTAL['versions']
+        cpython = {key: value for key, value in versions['cpython'].items() if key != '3.14t'}
+        cases = {
+            'a free-threaded build in a blocking tier': dict(versions, cpython=dict(cpython, **{
+                '3.14t': {'tier': 'supported'}})),
+            'GraalPy in a blocking tier': dict(versions, graalpy={'graalpy-25.4': {'tier': 'ktlo'}}),
+            'a plain CPython experimental': dict(versions, cpython=dict(cpython, **{
+                '3.16': {'tier': 'experimental'}})),
+            'PyPy experimental': dict(versions, pypy=dict(versions['pypy'], **{
+                'pypy3.12': {'tier': 'experimental'}})),
+            'experimental before the rest': dict(versions, cpython=dict({'3.14t': {'tier': 'experimental'}},
+                                                                        **cpython)),
+            "setup-python's other GraalPy spelling": dict(versions, graalpy={'graalpy25.4': {'tier': 'experimental'}}),
+            'GraalPy lists nothing': dict(versions, graalpy={}),
+            'an implementation the script cannot spell': dict(versions, jython={'2.7': {'tier': 'experimental'}}),
+        }
+        for label, data in cases.items():
+            with self.subTest(case=label), self.assertRaises(ValueError):
+                script().load(write_tiers(self.tmp, dict(TIERS_WITH_EXPERIMENTAL, versions=data)))
+
+    def test_only_test_gains_a_leg_and_no_other_output_moves(self) -> None:
+        """No ``integration``, ``Compat``, parity, engine, wheel or conda leg, and no release count."""
+        base, values = self.outputs(TIERS_AT_MAIN), self.outputs(TIERS_WITH_EXPERIMENTAL)
+        self.assertEqual({name: value for name, value in values.items() if name != 'test'},
+                         {name: value for name, value in base.items() if name != 'test'})
+        self.assertEqual(legs(json.loads(values['test'])), legs(json.loads(base['test'])) + EXPERIMENTAL_LEGS)
+
+    def test_on_main_no_job_but_test_runs_an_experimental_version(self) -> None:
+        """Every matrix and setup-python input any workflow reads from the script, as the file stands."""
+        found = experimental(script().load())
+        self.assertTrue(found)
+        read = []
+        for name, spec in workflows():
+            for job_id, job in spec.get('jobs', {}).items():
+                raw = job.get('strategy', {}).get('matrix')
+                texts = [raw] if isinstance(raw, str) else list((raw or {}).values()) if isinstance(raw, dict) else []
+                if not any(isinstance(text, str) and READ.fullmatch(text.strip()) for text in texts):
+                    continue
+                read.append((name, job_id))
+                expected = [{'python-version': version, 'experimental': True} for version in found] \
+                    if (name, job_id) == ('unit-tests.yml', 'test') else []
+                with self.subTest(workflow=name, job=job_id):
+                    self.assertEqual([leg for leg in legs(matrix(name, job_id)) if leg['python-version'] in found],
+                                     expected)
+        self.assertGreaterEqual(len(read), 7, 'the scan is blind')
+        values = live_outputs()
+        for output in ('conda', 'engine-supported', 'engine-ktlo', 'pypi-wheels', 'conda-builds', 'pypi'):
+            with self.subTest(output=output):
+                self.assertFalse(set(re.findall(r'[\w.-]+', values[output])) & set(found))
+
+    def test_each_leg_is_named_experimental_and_never_required(self) -> None:
+        found = experimental(script().load())
+        template = workflow('unit-tests.yml')['jobs']['test']['name']
+        self.assertEqual(template, TEST_TEMPLATE)
+        names = [render(template, leg) for leg in legs(matrix('unit-tests.yml', 'test'))]
+        self.assertEqual(len(names), len(set(names)), names)
+        self.assertEqual([name for name in names if name.endswith(' (experimental)')],
+                         [f'Python {version} (experimental)' for version in found])
+        supported = script().tier(script().load(), 'cpython', 'supported')
+        required = {'Required checks passed'} | {f'Compat Python {version}' for version in supported}
+        self.assertFalse(required & set(names))
+        compat = [leg['python-version'] for leg in legs(matrix('python-compatibility.yml', 'compatibility'))]
+        self.assertFalse(set(compat) & set(found))
+
+    def test_the_workflows_page_names_each_experimental_version(self) -> None:
+        page = prose(ROOT / 'docs' / 'source' / 'contributing' / 'workflows.rst')
+        listed = re.findall(r'spelt as setup-python reads them \(((?:``[^`]+``(?:, )?)+)\)', page)
+        self.assertEqual(len(listed), 1, listed)
+        self.assertEqual(re.findall(r'``([^`]+)``', listed[0]), experimental(script().load()))
 
 
 if __name__ == '__main__':

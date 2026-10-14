@@ -89,15 +89,16 @@ jobs:
     # this workflow used to) therefore ran the whole matrix in every caller
     # and skipped the gate everywhere. An input is the only reliable way for a
     # reusable workflow to know how it was invoked.
-    name: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}
+    name: Python ${{ matrix.python-version }}${{ matrix.experimental && ' (experimental)' || '' }}${{ matrix.ktlo && ' (KTLO)' || '' }}
     if: ${{ inputs.gate-only != true && needs.changes.outputs.code != 'false' }}
     needs: [changes, python-versions]
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
     timeout-minutes: 45
     # #1672: the level of every annotation a failing step writes -- a warning on
-    # a KTLO leg, which must not show red, an error on a supported one.
+    # a KTLO or experimental leg, which must not show red, an error on a
+    # supported one.
     env:
-      ANNOTATION_LEVEL: ${{ matrix.ktlo && 'warning' || 'error' }}
+      ANNOTATION_LEVEL: ${{ (matrix.ktlo || matrix.experimental) && 'warning' || 'error' }}
     strategy:
       fail-fast: false
       # #1660: .github/python-versions.toml's CPython tiers, through the
@@ -132,16 +133,34 @@ jobs:
       # 2027-03-23, retirement on 2027-04-17 (actions/runner-images#14254).
       # A brownout fails the leg before any step runs, which no step-level
       # `continue-on-error` can contain, so this leg must go before then.
+      #
+      # The experimental tier (#1660): free-threaded CPython and GraalPy, one
+      # leg each with `experimental: true`, here and in no other job. They
+      # never block, by the KTLO mechanics: the same step-level guard, and
+      # `Experimental summary` reports each failed step as a warning. Nor can
+      # they be a required context, as no `Compat` leg is experimental.
+      #
+      # Neither build's runtime here is measured, and a leg past this job's
+      # `timeout-minutes` is cancelled, which no step-level guard contains and
+      # `required-checks` refuses. So on these legs alone, setup-python, the
+      # install and the tests carry caps of their own, 5, 10 and 25 minutes: a
+      # step past its cap fails rather than cancels, and `continue-on-error`
+      # then applies as to any failure (actions/runner
+      # src/Runner.Worker/StepsRunner.cs:322-353, at 5f0b3ddcc). That leaves 5
+      # minutes for the rest, which took at most 0.32, setup-python included,
+      # on every uncovered leg of runs 38569321543-38569522442. Every other
+      # leg's caps are 360, the documented maximum, so the job's 45 binds first.
       matrix: ${{ fromJSON(needs.python-versions.outputs.test) }}
 
     steps:
       - uses: actions/checkout@v7
         id: checkout
-        continue-on-error: ${{ matrix.ktlo == true }}
+        continue-on-error: ${{ matrix.ktlo == true || matrix.experimental == true }}
 
       - uses: actions/setup-python@v7
         id: python
-        continue-on-error: ${{ matrix.ktlo == true }}
+        continue-on-error: ${{ matrix.ktlo == true || matrix.experimental == true }}
+        timeout-minutes: ${{ matrix.experimental && 5 || 360 }}
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
@@ -183,14 +202,15 @@ jobs:
       # than failing against a missing package. The install needs its own
       # interpreter: if setup-python failed, the image's `python` would be
       # tested under this leg's name. On a supported leg either fails the job;
-      # on a KTLO leg the annotation is a warning (#1672).
+      # on a KTLO or experimental leg the annotation is a warning (#1672).
       - name: Install package and test dependencies
         id: install
         if: ${{ steps.python.outcome == 'success' }}
-        continue-on-error: ${{ matrix.ktlo == true }}
+        continue-on-error: ${{ matrix.ktlo == true || matrix.experimental == true }}
+        timeout-minutes: ${{ matrix.experimental && 10 || 360 }}
         shell: bash
         env:
-          LEG: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}
+          LEG: Python ${{ matrix.python-version }}${{ matrix.experimental && ' (experimental, non-blocking)' || '' }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}
         run: |
           python -m pip install -U pip setuptools wheel
           if ! python -m pip install -e '.[test,DPKT,crypto,NGAP]' 2>&1 | tee "$RUNNER_TEMP/pip-install.log"; then
@@ -212,7 +232,7 @@ jobs:
       - name: Report available parallelism
         id: parallelism
         if: ${{ steps.install.outcome == 'success' }}
-        continue-on-error: ${{ matrix.ktlo == true }}
+        continue-on-error: ${{ matrix.ktlo == true || matrix.experimental == true }}
         run: |
           nproc
           python -c "import os; print('cpu_count', os.cpu_count())"
@@ -220,7 +240,8 @@ jobs:
       - name: Run unit tests
         id: tests
         if: ${{ steps.install.outcome == 'success' }}
-        continue-on-error: ${{ matrix.ktlo == true }}
+        continue-on-error: ${{ matrix.ktlo == true || matrix.experimental == true }}
+        timeout-minutes: ${{ matrix.experimental && 25 || 360 }}
         # `--dist load` is pinned explicitly rather than left to default: a
         # future change to xdist's own default, or someone "optimising" to
         # `loadfile`/`loadscope`, cannot silently change how this suite is
@@ -372,6 +393,27 @@ jobs:
           name: junit-unit-${{ matrix.python-version }}
           path: ${{ runner.temp }}/junit.xml
           retention-days: 14
+
+      # #1660: an experimental leg's report, as `KTLO summary` below is a KTLO
+      # leg's, and for the same reasons. Its own step, so that one stays a
+      # single script shared by every KTLO job; it is skipped on a KTLO leg.
+      - name: Experimental summary
+        if: ${{ !cancelled() && matrix.experimental == true }}
+        continue-on-error: ${{ matrix.experimental == true }}
+        shell: bash
+        env:
+          LEG: Python ${{ matrix.python-version }} (experimental, non-blocking)
+          STEPS: ${{ toJSON(steps) }}
+        run: |
+          failed=$(jq -r 'to_entries[] | select(.value.outcome == "failure") | .key' <<< "$STEPS")
+          if [ -z "$failed" ]; then
+            echo "$LEG: no step failed."
+            exit 0
+          fi
+          while IFS= read -r id; do
+            echo "::warning title=${id} failed on ${LEG//,/%2C}::Experimental legs never block (#1660), so this job still succeeds; see the ${id} step's log."
+            echo "- ${LEG}: step \`${id}\` failed; non-blocking, so this job still succeeds." >> "$GITHUB_STEP_SUMMARY"
+          done <<< "$failed"
 
       # #1672: the KTLO leg's report, and the last step of every KTLO matrix
       # job, in one script. Each step above that can fail on a KTLO leg has an
@@ -1822,7 +1864,8 @@ jobs:
   # sees such a job's failure as `failure` or `success`, so a KTLO-only
   # regression could block every merge. The one failure no step can contain is
   # a leg that never gets a runner: the 3.7 legs' deprecated ubuntu-22.04 image
-  # has brownouts from 2027-03-23 -- see the `test` job's matrix.
+  # has brownouts from 2027-03-23 -- see the `test` job's matrix. `test`'s
+  # experimental legs (#1660) are non-blocking the same way.
   #
   # The docs-only path. On a pull request whose diff touches nothing but
   # `docs/**` and `*.md` files outside the code directories (the `changes`

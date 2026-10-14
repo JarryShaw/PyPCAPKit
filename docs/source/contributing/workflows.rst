@@ -285,10 +285,10 @@ repository target the same reusable workflow, with the same input:
 not one: ``gate`` (the full suite, on ``latest``), ``changelog``
 (checks ``CHANGELOG.md`` against its source entry) and ``python-versions``,
 which reads ``gate``'s version (see `Python Versions`_ below). It skips the other
-**eight** -- the five matrix jobs, ``test`` (nine Python legs: five
-supported, four KTLO), ``integration`` (nine), ``engine-tests`` (one job
-for each of five engines, each looping over six Python versions),
-``pypcap-parity`` (two) and ``unittest-ordering``
+**eight** -- the five matrix jobs, ``test`` (eleven Python legs: five
+supported, four KTLO, two experimental), ``integration`` (nine),
+``engine-tests`` (one job for each of five engines, each looping over six
+Python versions), ``pypcap-parity`` (two) and ``unittest-ordering``
 (eleven matrix cells), each of which has already run once for this commit
 from Unit Tests' own ``push`` trigger (and, all but ``unittest-ordering``,
 which runs on ``main`` pushes only, from its ``pull_request`` trigger), so
@@ -298,7 +298,7 @@ and ``project-tests``, and ``required-checks`` (see `Required Status
 Checks`_ below), gated out by their own ``if:`` rather than by having
 already run. ``changelog`` carries no
 ``if:`` at all and runs on every path regardless -- deliberately, per its own
-comment (``unit-tests.yml:1515-1521``): ``create-release.yml`` feeds
+comment (``unit-tests.yml:1557-1563``): ``create-release.yml`` feeds
 ``CHANGELOG.md`` to the GitHub Release body, so the release path is exactly
 where a drifted file must not go unchecked. Confirmed on run `36210743295
 <https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295>`__ (a
@@ -444,7 +444,9 @@ says how many runs each sample holds and which span they cover. That is about 62
 calls (estimate) of ``GITHUB_TOKEN``'s 1,000 an hour, on a read-only token
 (``actions: read``, ``contents: read``). A job is measured by its own outcome: one
 cancelled at 95% of its cap or later timed out and counts, even in a run that reads
-``cancelled`` for that reason; one cancelled earlier was superseded and does not.
+``cancelled`` for that reason; one cancelled earlier was superseded and does not. A
+step cap written as an expression, as three of ``test``'s are (#1660), differs by
+leg and reads as none.
 The report goes to the job summary and to the ``ci-timing-report`` artifact (90
 days), and the newest earlier report is the next run's baseline. It is not a
 ``workflow_run`` on Unit Tests, which would add a job per run to a runner pool
@@ -566,7 +568,7 @@ grepping every workflow file for its name:
      - Where
    * - ``Required checks passed``
      - job ``required-checks``
-     - ``unit-tests.yml:1841``
+     - ``unit-tests.yml:1884``
    * - ``Compat Python 3.11``
      - job ``compatibility``, matrix leg ``3.11``
      - ``python-compatibility.yml:60``, ``.github/python-versions.toml:20``
@@ -588,21 +590,21 @@ which added ``Compat Python 3.15`` and removed ``Compat Python 3.10``. Moving a 
 between the tiers below means editing the ruleset in the same change.
 
 ``Required checks passed`` is defined by exactly one job
-(``unit-tests.yml:1841``). ``Compat Python`` is defined by one, the
+(``unit-tests.yml:1884``). ``Compat Python`` is defined by one, the
 ``compatibility`` job in ``python-compatibility.yml`` (``:60``), whose matrix
 (``:74``) comes from :file:`.github/python-versions.toml`: the five required legs
 are its supported tier (``python-versions.toml:20-24``), and its four KTLO legs
 (``python-versions.toml:16-19``) have names ending in ``(KTLO)``, so no required
 context matches one. A comment at
-``unit-tests.yml:1752`` mentions the string without defining it.
+``unit-tests.yml:1794`` mentions the string without defining it.
 
 ``Required checks passed`` is an aggregate, not a single check run. The ruleset
 requires it and the five ``Compat Python 3.11``-``3.15`` legs, nothing else, as
-``unit-tests.yml``'s own comment (``unit-tests.yml:1751-1761``) records. It
+``unit-tests.yml``'s own comment (``unit-tests.yml:1793-1803``) records. It
 ``needs:`` the gating jobs of ``unit-tests.yml`` -- ``test``, ``integration``,
 ``engine-tests`` and ``pypcap-parity``, plus ``changes`` and ``project-tests``
 for the docs-only path -- and checks each result explicitly
-(``unit-tests.yml:1840-1894``). Rulesets match check names literally, with no
+(``unit-tests.yml:1883-1937``). Rulesets match check names literally, with no
 wildcard, so requiring the matrix cells one by one would mean editing the
 ruleset whenever a matrix changes; the aggregate keeps the required list fixed.
 It accepts the four legs as ``skipped`` only on a docs-only pull request, where
@@ -611,12 +613,12 @@ instead. The ``Compat`` legs stay required separately because they come from
 ``python-compatibility.yml``, and a job cannot ``needs:`` a job in another
 workflow file. This job runs on Unit Tests' own ``push``/``pull_request``
 triggers; the ``gate-only: true`` reusable calls documented above skip it via
-``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:1843``),
+``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:1886``),
 so it is never produced -- and never expected -- on those paths.
 
-Python versions come in two tiers (#1633), declared in
-:file:`.github/python-versions.toml` (see `Python Versions`_). The **supported**
-tier, 3.11-3.15, blocks: a failed leg fails ``Required checks passed`` or its own
+Python versions come in two tiers (#1633), and an experimental one (#1660,
+below), declared in :file:`.github/python-versions.toml` (see `Python Versions`_).
+The **supported** tier, 3.11-3.15, blocks: a failed leg fails ``Required checks passed`` or its own
 required ``Compat`` context. The **KTLO** tier -- end-of-life 3.7-3.10, still built and
 tested -- never blocks, is never a required context, and never shows a commit or a
 pull request red (#1672). Each KTLO leg shares its job with supported legs, in
@@ -624,7 +626,7 @@ pull request red (#1672). Each KTLO leg shares its job with supported legs, in
 every such job works the same way:
 
 * Every step that can fail on a KTLO leg has an ``id`` and
-  ``continue-on-error: ${{ matrix.ktlo == true }}`` (``unit-tests.yml:115-125``),
+  ``continue-on-error: ${{ matrix.ktlo == true }}`` (``unit-tests.yml:116-126``),
   unless it is masked on every leg, as the timings uploads are. Its ``outcome`` is
   then ``failure`` but its ``conclusion`` ``success``, so the job, its check run
   and ``required-checks`` read ``success``. A step that needs an earlier one's work
@@ -657,14 +659,35 @@ in no matrix: setup-python builds it only for retired Ubuntu images. Nor are
 are they in ``pypcap-parity``, which also runs on ``ubuntu-latest``; none of them
 was measured on that job.
 
+The **experimental** tier is free-threaded CPython and GraalPy, spelt as
+setup-python reads them (``3.14t``, ``graalpy-25.4``). Each runs one leg of
+``test``, named ``Python <version> (experimental)``, and nothing else: no
+``integration``, ``Compat``, wheel or conda leg, so never a required context. The
+legs never block, by the KTLO mechanics above: ``test``'s guard is
+``${{ matrix.ktlo == true || matrix.experimental == true }}``, their annotations
+are warnings, and ``Experimental summary``, the step before ``KTLO summary``,
+reports each failed step. A leg past the job's 45-minute ``timeout-minutes`` would
+be cancelled, which no step-level guard contains and ``Required checks passed``
+refuses, and neither build's runtime here is measured. So on these legs alone,
+setup-python, the install and the tests have caps of their own, of 5, 10 and 25
+minutes: a step at its cap fails rather than cancels, and the guard holds
+(actions/runner ``src/Runner.Worker/StepsRunner.cs:322-353``). The runner's
+``has timed out`` error stays, changing no conclusion, as ``Process completed with
+exit code N.`` does. Everything but the install and the tests took under 20
+seconds on every uncovered leg of runs 38569321543-38569522442. Every other leg's
+caps are 360, the documented maximum, so its job's 45 minutes bind first, as with
+none. Promoting one whose leg stays green is a hand edit,
+which :file:`util/python_versions.py` refuses until the build has a wheel, a conda
+build and a ``Compat`` leg.
+
 Python Versions
 ---------------
 
 Since `#1660 <https://github.com/JarryShaw/PyPCAPKit/issues/1660>`__,
 :file:`.github/python-versions.toml` declares every Python version CI runs: one
-line per version, with its tier -- ``supported``, ``ktlo``, or ``pre-release``,
-which none is today -- and, where ``ubuntu-latest`` cannot provide it, the
-``runner`` it needs. ``latest`` names the newest supported CPython, which every
+line per version, with its tier -- ``supported``, ``ktlo``, ``experimental``, or
+``pre-release``, which none is today -- and, where ``ubuntu-latest`` cannot
+provide it, the ``runner`` it needs. ``latest`` names the newest supported CPython, which every
 job on one interpreter runs. :file:`util/python_versions.py` reads the file with
 the runner's own ``python3`` -- its ``tomllib`` needs 3.11, and every image that
 runs it has 3.12 or newer -- and writes each matrix as JSON: a ``python-versions``
@@ -704,7 +727,9 @@ commits it did not make: when the branch holds some and proposes other tiers,
 ``detect`` fails before asking for the approval. Once that pull request is
 merged or closed, the next run with something to propose recreates the branch
 from ``main``, a closed proposal's tiers included. It reports a pre-release
-instead of writing it.
+instead of writing it. The experimental entries are hand-maintained: no source it
+reads rates them, so every run keeps their lines as written, and a hand edit to
+one changes no proposal.
 
 Deployment ``environment:``
 ----------------------------

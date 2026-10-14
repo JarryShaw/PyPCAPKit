@@ -16,7 +16,8 @@ actions/runner-images' READMEs at 2c421200c.
 ``test``, ``integration``, ``compatibility``
     Both tiers. A KTLO leg carries ``ktlo: true``, and ``os`` where
     ``ubuntu-latest`` cannot provide it; ``test`` marks the ``latest`` leg
-    ``coverage: true``.
+    ``coverage: true``, and adds each experimental version as a leg carrying
+    ``experimental: true``. No other output holds an experimental version.
 ``pypcap-parity``
     The versions below 3.12 that run on ``ubuntu-latest``.
 ``pypi``
@@ -57,9 +58,14 @@ if TYPE_CHECKING:
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 FILE = ROOT / '.github' / 'python-versions.toml'
 
-#: Each implementation, and how its versions are spelled.
-SPELLING = {'cpython': re.compile(r'3\.(\d+)'), 'pypy': re.compile(r'pypy3\.(\d+)')}
-TIERS = ('supported', 'ktlo', 'pre-release')
+#: Each implementation, and how its versions are spelled: as setup-python's
+#: ``python-version`` reads them, ``3.14t`` a free-threaded CPython and GraalPy by
+#: its own release line (#1660).
+SPELLING = {'cpython': re.compile(r'3\.(\d+)t?'), 'pypy': re.compile(r'pypy3\.(\d+)'),
+            'graalpy': re.compile(r'graalpy-(\d+)\.(\d+)')}
+#: The implementations every file lists; a GraalPy table is optional.
+MANDATORY = ('cpython', 'pypy')
+TIERS = ('supported', 'ktlo', 'pre-release', 'experimental')
 #: The images a version may name as its ``runner``.
 RUNNER = re.compile(r'ubuntu-\d{2}\.04')
 #: Wheel tag prefix per implementation, as util/wheel_rename.py writes it.
@@ -70,11 +76,24 @@ PARITY_BELOW = (3, 12)
 
 
 def key(version: 'str') -> 'tuple[int, int]':
-    """``'3.10'`` or ``'pypy3.10'`` as ``(3, 10)``, for ordering."""
-    minor = re.search(r'3\.(\d+)$', version)
-    if minor is None:
+    """``'3.10'``, ``'3.10t'`` or ``'pypy3.10'`` as ``(3, 10)``, ``'graalpy-25.4'`` as ``(25, 4)``, for ordering."""
+    found = re.fullmatch(r'(?:pypy)?3\.(?P<minor>\d+)t?|graalpy-(?P<line>\d+)\.(?P<release>\d+)', version)
+    if found is None:
         raise ValueError(f'not a Python version: {version!r}')
-    return 3, int(minor.group(1))
+    if found['minor'] is not None:
+        return 3, int(found['minor'])
+    return int(found['line']), int(found['release'])
+
+
+def experimental_only(impl: 'str', version: 'str') -> 'bool':
+    """Whether ``version`` is a build the experimental tier holds, and no other (#1660).
+
+    Free-threaded CPython and GraalPy: no wheel tag, conda build or ``Compat`` leg
+    handles either, and the weekly job (:file:`util/update_python_versions.py`)
+    has no source to compute a tier for one, so it keeps their lines as written.
+
+    """
+    return impl == 'graalpy' or (impl == 'cpython' and version.endswith('t'))
 
 
 def load(path: 'pathlib.Path' = FILE) -> 'dict[str, Any]':
@@ -88,13 +107,20 @@ def load(path: 'pathlib.Path' = FILE) -> 'dict[str, Any]':
     instead of running it as something else. An exemption's reason is the
     comment above it, which :mod:`tomllib` does not keep.
 
+    The experimental tier holds free-threaded CPython and GraalPy, and they hold
+    no other (:func:`experimental_only`): promoting one to a blocking tier needs
+    its wheel, conda build and ``Compat`` leg first, so that fails here too. They
+    are listed after the other versions of their table, which keeps each tier's
+    lines one run for the prose that cites them.
+
     """
     data = tomllib.loads(pathlib.Path(path).read_text(encoding='utf-8'))
     if set(data) - {'latest', 'versions', 'exemptions'}:
         raise ValueError('the top level holds only "latest", "versions" and "exemptions"')
     versions = data.get('versions')
-    if not isinstance(versions, dict) or set(versions) != set(SPELLING):
-        raise ValueError(f'"versions" maps exactly {sorted(SPELLING)} to their versions')
+    if not isinstance(versions, dict) or not set(MANDATORY) <= set(versions) <= set(SPELLING):
+        raise ValueError(f'"versions" maps {sorted(MANDATORY)}, and optionally '
+                         f'{sorted(set(SPELLING) - set(MANDATORY))}, to their versions')
     for impl, entries in versions.items():
         if not isinstance(entries, dict) or not entries:
             raise ValueError(f'{impl} lists no versions')
@@ -109,10 +135,18 @@ def load(path: 'pathlib.Path' = FILE) -> 'dict[str, Any]':
             if entry['tier'] == 'pre-release':
                 raise ValueError(f'{where}: no workflow runs pre-release legs yet; wire their '
                                  'non-blocking mechanics before listing one (#1660)')
+            if entry['tier'] == 'experimental' and not experimental_only(impl, version):
+                raise ValueError(f'{where}: the experimental tier holds free-threaded CPython and GraalPy '
+                                 'only; the weekly job computes the tier of every other version (#1660)')
+            if entry['tier'] != 'experimental' and experimental_only(impl, version):
+                raise ValueError(f'{where}: free-threaded CPython and GraalPy are experimental only; give them '
+                                 'a wheel, a conda build and a Compat leg before a blocking tier (#1660)')
             if 'runner' in entry and not RUNNER.fullmatch(str(entry['runner'])):
                 raise ValueError(f'{where}: runner {entry["runner"]!r} is not an ubuntu-YY.04 image')
-        if list(entries) != sorted(entries, key=key):
-            raise ValueError(f'{impl}: list the versions oldest first')
+        rest = [version for version, entry in entries.items() if entry['tier'] != 'experimental']
+        last = [version for version, entry in entries.items() if entry['tier'] == 'experimental']
+        if list(entries) != sorted(rest, key=key) + sorted(last, key=key):
+            raise ValueError(f'{impl}: list the versions oldest first, the experimental ones after the rest')
     if data.get('latest') not in tier(data, 'cpython', 'supported'):
         raise ValueError(f'latest {data.get("latest")!r} is not a supported CPython version')
     for index, exemption in enumerate(data.get('exemptions', [])):
@@ -124,8 +158,8 @@ def load(path: 'pathlib.Path' = FILE) -> 'dict[str, Any]':
 
 
 def tier(data: 'dict[str, Any]', impl: 'str', name: 'str') -> 'list[str]':
-    """The versions of ``impl`` in tier ``name``, oldest first."""
-    return [version for version, entry in data['versions'][impl].items() if entry['tier'] == name]
+    """The versions of ``impl`` in tier ``name``, oldest first; none for an implementation not listed."""
+    return [version for version, entry in data['versions'].get(impl, {}).items() if entry['tier'] == name]
 
 
 def runner(data: 'dict[str, Any]', impl: 'str', version: 'str') -> 'Optional[str]':
@@ -160,10 +194,23 @@ def tiered(data: 'dict[str, Any]', impl: 'str' = 'cpython') -> 'dict[str, Any]':
     return {'python-version': tier(data, impl, 'supported'), 'include': include}
 
 
+def experimental_legs(data: 'dict[str, Any]') -> 'list[dict[str, Any]]':
+    """Each experimental version, CPython's then GraalPy's, as a leg of its own (#1660)."""
+    found = []
+    for impl in SPELLING:
+        for version in tier(data, impl, 'experimental'):
+            leg = {'python-version': version, 'experimental': True}  # type: dict[str, Any]
+            if runner(data, impl, version) is not None:
+                leg['os'] = runner(data, impl, version)
+            found.append(leg)
+    return found
+
+
 def test_matrix(data: 'dict[str, Any]') -> 'dict[str, Any]':
-    """unit-tests.yml's ``test``: both tiers, the one coverage leg on ``latest``."""
+    """unit-tests.yml's ``test``: both tiers, the one coverage leg on ``latest``, and the experimental legs."""
     matrix = tiered(data)
     matrix['include'].insert(0, {'python-version': data['latest'], 'coverage': True})
+    matrix['include'].extend(experimental_legs(data))
     return matrix
 
 
@@ -180,8 +227,8 @@ def parity_matrix(data: 'dict[str, Any]') -> 'dict[str, Any]':
 
 
 def pypi_matrix(data: 'dict[str, Any]') -> 'dict[str, Any]':
-    """create-release.yml's ``pypi``: one wheel per CPython and PyPy version, both tiers."""
-    impls = tuple(SPELLING)
+    """create-release.yml's ``pypi``: one wheel per CPython and PyPy version, both tiers, none experimental."""
+    impls = tuple(WHEEL_PREFIX)
     return {'python-version': [v for impl in impls for v in on_latest(data, impl, 'supported', 'pypi')],
             'include': [{'python-version': v, 'ktlo': True}
                         for impl in impls for v in on_latest(data, impl, 'ktlo', 'pypi')]}

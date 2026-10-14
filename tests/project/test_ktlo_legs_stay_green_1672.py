@@ -20,6 +20,14 @@ step's failure is tried on every leg instead of read off the text. Expressions g
 through :mod:`tests.project.test_release_gates`'s evaluator, and the scripts that
 write annotations are executed.
 
+#1660 added an experimental tier, free-threaded CPython and GraalPy, as legs of
+``test`` only. They are non-blocking by the same mechanics, under a guard that
+holds on both tiers, and report through ``Experimental summary``, the step before
+``KTLO summary``: :class:`TestAnExperimentalLegIsNonBlockingTheSameWay`. Their
+setup-python, install and test steps have caps of their own, so a slow or hung leg
+fails a step rather than being cancelled with its job:
+:class:`TestASlowExperimentalLegTimesOutAStepNotTheJob`.
+
 """
 
 from __future__ import annotations
@@ -35,10 +43,12 @@ import tempfile
 import unittest
 from typing import TYPE_CHECKING, NamedTuple
 
-from tests.project.test_python_matrix_tiers_1633 import (ANNOTATION_LEVEL, KTLO_GUARD, KTLO_LEGS,
-                                                         LEG_37, TITLE_37, is_ktlo, job, legs,
-                                                         titles, workflow, workflow_commands)
-from tests.project.test_python_versions_1660 import live_outputs, resolve
+from tests.project.test_python_matrix_tiers_1633 import (EXPERIMENTAL_GUARD, EXPERIMENTAL_JOB, KTLO_GUARD,
+                                                         KTLO_LEGS, LEG_37, TITLE_37, annotation_level,
+                                                         is_experimental, is_ktlo, is_nonblocking, job,
+                                                         leg_label, legs, titles, workflow,
+                                                         workflow_commands)
+from tests.project.test_python_versions_1660 import ROOT, live_outputs, prose, resolve
 from tests.project.test_release_gates import NULL, STATUS, evaluate_condition, evaluate_expression
 
 if TYPE_CHECKING:
@@ -89,6 +99,25 @@ SUMMARY = 'KTLO summary'
 SUMMARY_IF = '${{ !cancelled() && matrix.ktlo == true }}'
 SUMMARY_ENV = {'LEG': "Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}",
                'STEPS': '${{ toJSON(steps) }}'}
+#: ``test``'s report of an experimental leg (#1660), the step before ``KTLO summary``.
+EXPERIMENTAL_SUMMARY = 'Experimental summary'
+EXPERIMENTAL_SUMMARY_IF = '${{ !cancelled() && matrix.experimental == true }}'
+EXPERIMENTAL_SUMMARY_ENV = {'LEG': 'Python ${{ matrix.python-version }} (experimental, non-blocking)',
+                            'STEPS': '${{ toJSON(steps) }}'}
+#: Why each summary's warning says the job still succeeds; the scripts differ in nothing else.
+KTLO_REASON = 'KTLO legs never block (#1633), so this job still succeeds (#1672)'
+EXPERIMENTAL_REASON = 'Experimental legs never block (#1660), so this job still succeeds'
+#: ``test``'s steps with a ``timeout-minutes`` of their own (#1660), by ``id``, and the
+#: cap on an experimental leg: setup-python, the install and the tests, whose runtimes
+#: on GraalPy and free-threaded CPython are unmeasured.
+EXPERIMENTAL_CAPS = {'python': 5, 'install': 10, 'tests': 25}
+#: The job's minutes those caps leave for the rest of an experimental leg. Everything
+#: but the install and the tests took at most 0.32 minutes, setup-python included, on
+#: every uncovered leg of runs 38569321543, 38569429406 and 38569522442.
+UNCAPPED_MINUTES = 5
+#: Those steps' cap on every other leg: the largest a step's ``timeout-minutes`` may be
+#: (docs.github.com, workflow-syntax, ``jobs.<job_id>.steps[*].timeout-minutes``).
+DOCUMENTED_MAXIMUM = 360
 
 
 class Step(NamedTuple):
@@ -111,6 +140,19 @@ def summary_step(spec: 'dict[str, Any]') -> 'dict[str, Any]':
     return found[0]
 
 
+def experimental_summary_step(spec: 'dict[str, Any]') -> 'dict[str, Any]':
+    """``test``'s ``Experimental summary`` step (#1660)."""
+    found = [step for step in spec['steps'] if step.get('name') == EXPERIMENTAL_SUMMARY]
+    if len(found) != 1:
+        raise AssertionError(f'expected one {EXPERIMENTAL_SUMMARY!r} step, found {len(found)}')
+    return found[0]
+
+
+def experimental_legs() -> 'list[dict[str, Any]]':
+    """``test``'s experimental legs, from the tier file."""
+    return [leg for leg in legs(*EXPERIMENTAL_JOB) if is_experimental(leg)]
+
+
 def is_engine_ktlo(step: 'dict[str, Any]') -> 'bool':
     """Whether ``step`` is one of ``engine-tests``'s, which run only the KTLO interpreters."""
     return label(step) in ENGINE_KTLO or step.get('with', {}).get('python-version') == ENGINE_KTLO_OUTPUT
@@ -123,6 +165,11 @@ def stringify(value: 'object') -> 'str':
     if isinstance(value, bool):
         return 'true' if value else 'false'
     return str(value)
+
+
+def interpolate(template: 'str', context: 'dict[str, Any]') -> 'str':
+    """``template`` with each ``${{ ... }}`` in it evaluated, as a step's ``env:`` value."""
+    return re.sub(r'\$\{\{.*?\}\}', lambda match: stringify(evaluate_expression(match.group(0), context)), template)
 
 
 @functools.lru_cache(maxsize=None)
@@ -291,14 +338,15 @@ class TestAKTLOFailureIsAWarning(unittest.TestCase):
         self.tmp = pathlib.Path(tmp.name)
 
     def test_annotation_level_is_a_warning_on_a_ktlo_leg_only(self) -> None:
+        """And on an experimental one (#1660), which is non-blocking the same way."""
         for name, job_id in LEVELLED:
             spec = job(name, job_id)
             with self.subTest(workflow=name, job=job_id):
-                self.assertEqual((spec.get('env') or {}).get('ANNOTATION_LEVEL'), ANNOTATION_LEVEL)
+                self.assertEqual((spec.get('env') or {}).get('ANNOTATION_LEVEL'), annotation_level(name, job_id))
             for leg in legs(name, job_id):
                 with self.subTest(workflow=name, job=job_id, python=leg['python-version']):
                     self.assertEqual(leg_env(name, spec, leg)['ANNOTATION_LEVEL'],
-                                     'warning' if is_ktlo(leg) else 'error')
+                                     'warning' if is_nonblocking(leg) else 'error')
 
     def test_no_step_a_ktlo_leg_runs_writes_an_error(self) -> None:
         for name, job_id in KTLO_JOBS:
@@ -444,7 +492,7 @@ class TestASupportedLegStillFails(unittest.TestCase):
             masked = [label(step) for step in spec['steps'] if step.get('continue-on-error') is True]
             with self.subTest(workflow=name, job=job_id):
                 self.assertEqual(masked, list(MASKED_ON_EVERY_LEG.get((name, job_id), ())))
-            for leg in (leg for leg in legs(name, job_id) if not is_ktlo(leg)):
+            for leg in (leg for leg in legs(name, job_id) if not is_nonblocking(leg)):
                 clean, record = run_leg(name, job_id, spec, leg)
                 with self.subTest(workflow=name, job=job_id, python=leg['python-version']):
                     self.assertEqual(clean, 'success')
@@ -458,6 +506,15 @@ class TestASupportedLegStillFails(unittest.TestCase):
                         for gated in re.findall(r'steps\.([\w-]+)\.outcome', str(step.get('if', ''))):
                             self.assertFalse(continue_on_error(by_id[gated], context), gated)
 
+    def test_neither_summary_runs_on_a_supported_leg(self) -> None:
+        """``test`` has two, one per non-blocking tier (#1660)."""
+        spec = job(*EXPERIMENTAL_JOB)
+        position = spec['steps'].index(experimental_summary_step(spec))
+        for leg in (leg for leg in legs(*EXPERIMENTAL_JOB) if not is_nonblocking(leg)):
+            for _, _, record in scenarios(*EXPERIMENTAL_JOB, spec, leg):
+                with self.subTest(python=leg['python-version']):
+                    self.assertEqual((record[position].outcome, record[-1].outcome), ('skipped', 'skipped'))
+
     def test_a_supported_engine_cell_still_fails_its_job_as_an_error(self) -> None:
         spec = job('unit-tests.yml', 'engine-tests')
         loop = next(step for step in spec['steps'] if step.get('name') == 'Run the supported cells')
@@ -470,6 +527,152 @@ class TestASupportedLegStillFails(unittest.TestCase):
                     continue
                 with self.subTest(engine=leg['engine'], step=label(step)):
                     self.assertEqual(conclusion, 'success' if step.get('continue-on-error') is True else 'failure')
+
+
+class TestAnExperimentalLegIsNonBlockingTheSameWay(unittest.TestCase):
+    """#1660: ``test``'s experimental legs conclude ``success`` and warn, as (a) and (b) pin for KTLO."""
+
+    def setUp(self) -> None:
+        self.spec = job(*EXPERIMENTAL_JOB)
+        self.summary = experimental_summary_step(self.spec)
+        self.position = self.spec['steps'].index(self.summary)
+        self.legs = experimental_legs()
+        self.assertTrue(self.legs, 'the tier file gives `test` no experimental leg')
+
+    def test_no_step_can_fail_an_experimental_leg(self) -> None:
+        for leg in self.legs:
+            runs = scenarios(*EXPERIMENTAL_JOB, self.spec, leg)
+            self.assertGreater(len(runs), 3, f'test on {leg} runs almost nothing')
+            for index, conclusion, _ in runs:
+                with self.subTest(python=leg['python-version'], step=label(self.spec['steps'][index])):
+                    self.assertEqual(conclusion, 'success')
+
+    def test_every_failure_it_masks_reaches_the_experimental_summary(self) -> None:
+        """It runs after any failure on an experimental leg, and only there; ``KTLO summary`` never does."""
+        self.assertIs(self.spec['steps'][self.position + 1], summary_step(self.spec))
+        self.assertEqual(self.summary.get('if'), EXPERIMENTAL_SUMMARY_IF)
+        self.assertEqual(self.summary.get('continue-on-error'), EXPERIMENTAL_GUARD)
+        self.assertEqual(self.summary.get('shell'), 'bash')
+        self.assertEqual(self.summary.get('env'), EXPERIMENTAL_SUMMARY_ENV)
+        for leg in self.legs:
+            for index, _, record in scenarios(*EXPERIMENTAL_JOB, self.spec, leg):
+                step = self.spec['steps'][index]
+                if step is self.summary:
+                    continue
+                with self.subTest(python=leg['python-version'], step=label(step)):
+                    self.assertNotEqual(record[self.position].outcome, 'skipped')
+                    self.assertEqual(record[-1].outcome, 'skipped')
+                    if step.get('continue-on-error') is not True:
+                        self.assertIn('id', step)
+        for leg in filter(is_ktlo, legs(*EXPERIMENTAL_JOB)):
+            for _, _, record in scenarios(*EXPERIMENTAL_JOB, self.spec, leg):
+                with self.subTest(python=leg['python-version']):
+                    self.assertEqual(record[self.position].outcome, 'skipped')
+        # One script with the KTLO summary's, so a fix to either reaches both.
+        self.assertIn(EXPERIMENTAL_REASON, self.summary['run'])
+        self.assertEqual(self.summary['run'].replace(EXPERIMENTAL_REASON, KTLO_REASON),
+                         summary_step(self.spec)['run'])
+
+    def test_each_step_names_the_leg_by_its_tier(self) -> None:
+        """``LEG`` in an annotation's title: ``(experimental, non-blocking)``, ``(KTLO, non-blocking)``, or bare."""
+        named = [step for step in self.spec['steps'] if 'LEG' in (step.get('env') or {})]
+        self.assertEqual([label(step) for step in named],
+                         ['Install package and test dependencies', EXPERIMENTAL_SUMMARY, SUMMARY])
+        for leg in legs(*EXPERIMENTAL_JOB):
+            never_runs = {EXPERIMENTAL_SUMMARY: not is_experimental(leg), SUMMARY: not is_ktlo(leg)}
+            for step in named:
+                if never_runs.get(step['name'], False):
+                    continue
+                with self.subTest(python=leg['python-version'], step=label(step)):
+                    self.assertEqual(interpolate(step['env']['LEG'], {'matrix': leg}), leg_label(leg))
+
+    def test_no_step_an_experimental_leg_runs_writes_an_error(self) -> None:
+        reached = set()  # type: set[int]
+        for leg in self.legs:
+            for _, _, record in scenarios(*EXPERIMENTAL_JOB, self.spec, leg):
+                reached.update(index for index, step in enumerate(record) if step.outcome != 'skipped')
+        self.assertIn(self.position, reached)
+        for index in sorted(reached):
+            step = self.spec['steps'][index]
+            with self.subTest(step=label(step)):
+                self.assertLessEqual(commands(step.get('run', '')), KTLO_COMMANDS)
+
+    def test_the_summary_warns_once_per_failed_step(self) -> None:
+        if shutil.which('bash') is None or shutil.which('jq') is None:  # pragma: no cover
+            self.skipTest('bash and jq, on every Ubuntu runner image, are needed to run the summary')
+        with tempfile.TemporaryDirectory(prefix='pcapkit-1660-') as tmp:
+            for leg in self.legs:
+                name = leg_label(leg)
+                title = name.replace(',', '%2C')
+                page = pathlib.Path(tmp) / 'summary.md'
+                page.write_text('', encoding='utf-8')
+                steps = {'checkout': 'success', 'python': 'success', 'install': 'failure', 'tests': 'skipped'}
+                context = {key: {'outputs': {}, 'outcome': outcome,
+                                 'conclusion': 'success' if outcome == 'failure' else outcome}
+                           for key, outcome in steps.items()}
+                with self.subTest(python=leg['python-version']):
+                    self.assertEqual(interpolate(self.summary['env']['LEG'], {'matrix': leg}), name)
+                    result = bash(self.summary['run'], {'LEG': name, 'STEPS': json.dumps(context),
+                                                        'GITHUB_STEP_SUMMARY': str(page)}, pathlib.Path(tmp))
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    self.assertEqual(workflow_commands(result.stdout), [
+                        f'::warning title=install failed on {title}::{EXPERIMENTAL_REASON}; '
+                        "see the install step's log."])
+                    self.assertEqual(titles(result.stdout), [f'install failed on {name}'])
+                    self.assertEqual(page.read_text(encoding='utf-8'),
+                                     f'- {name}: step `install` failed; non-blocking, so this job still succeeds.\n')
+
+
+class TestASlowExperimentalLegTimesOutAStepNotTheJob(unittest.TestCase):
+    """#1660: an experimental leg's slow or hung step fails, which its guard contains.
+
+    A job past its ``timeout-minutes`` is cancelled, which no step-level
+    ``continue-on-error`` contains, and ``Required checks passed`` takes only
+    ``success`` from ``test`` on a code diff. A step past its own is failed
+    instead, and ``continue-on-error`` then applies to it as to any failure
+    (actions/runner src/Runner.Worker/StepsRunner.cs:322-353, at 5f0b3ddcc) --
+    the path :class:`TestAnExperimentalLegIsNonBlockingTheSameWay` runs.
+
+    """
+
+    def setUp(self) -> None:
+        self.spec = job(*EXPERIMENTAL_JOB)
+        self.job_cap = self.spec['timeout-minutes']
+        self.capped = [step for step in self.spec['steps'] if 'timeout-minutes' in step]
+
+    def caps(self, leg: 'dict[str, Any]') -> 'dict[str, Any]':
+        """Each capped step's ``timeout-minutes`` on ``leg``, by ``id``."""
+        return {step.get('id', label(step)): evaluate_expression(str(step['timeout-minutes']), {'matrix': leg})
+                for step in self.capped}
+
+    def test_an_experimental_legs_steps_end_inside_its_job(self) -> None:
+        """Each cap a whole number under the job's, the install's under the tests', all of them with room left."""
+        self.assertTrue(experimental_legs())
+        for leg in experimental_legs():
+            caps = self.caps(leg)
+            with self.subTest(python=leg['python-version']):
+                self.assertEqual(caps, EXPERIMENTAL_CAPS)
+                for cap in caps.values():
+                    self.assertIsInstance(cap, int)
+                    self.assertTrue(0 < cap < self.job_cap, cap)
+                self.assertLess(caps['install'], caps['tests'])
+                self.assertLessEqual(sum(caps.values()) + UNCAPPED_MINUTES, self.job_cap)
+                for step in self.capped:
+                    self.assertTrue(continue_on_error(step, {'matrix': leg}), label(step))
+
+    def test_every_other_leg_keeps_the_jobs_cap(self) -> None:
+        """Each cap reads the documented maximum, so the job's 45 minutes bind first, as with none."""
+        others = [leg for leg in legs(*EXPERIMENTAL_JOB) if not is_experimental(leg)]
+        self.assertTrue(others)
+        for leg in others:
+            with self.subTest(python=leg['python-version']):
+                self.assertEqual(self.caps(leg), dict.fromkeys(EXPERIMENTAL_CAPS, DOCUMENTED_MAXIMUM))
+                self.assertGreaterEqual(DOCUMENTED_MAXIMUM, self.job_cap)
+
+    def test_the_workflows_page_states_the_caps(self) -> None:
+        page = prose(ROOT / 'docs' / 'source' / 'contributing' / 'workflows.rst')
+        self.assertEqual(re.findall(r'caps of their own, of (\d+), (\d+) and (\d+) minutes', page),
+                         [tuple(str(cap) for cap in EXPERIMENTAL_CAPS.values())])
 
 
 if __name__ == '__main__':
