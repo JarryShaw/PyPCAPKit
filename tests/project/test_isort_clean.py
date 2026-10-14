@@ -156,11 +156,17 @@ own dev environment, and ``make isort`` reads only the latter.
 
 from __future__ import annotations
 
+import importlib.metadata
 import importlib.util
 import pathlib
+import re
 import subprocess
 import sys
 import unittest
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Optional
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 PACKAGE = ROOT / 'pcapkit'
@@ -174,6 +180,69 @@ MAKEFILE = ROOT / 'Makefile'
 #: docstring for why that install line was the right answer here and the wrong
 #: one for ``mypy``.
 HAS_ISORT = importlib.util.find_spec('isort') is not None
+
+#: The oldest isort whose verdict on this tree the test below was written for
+#: (#1696). The ``test`` extra leaves isort unpinned (the comment above it in
+#: :file:`pyproject.toml` says why), so each CI leg gets the newest release its
+#: Python can install: 5.13.2 on 3.8, 6.1.0 on 3.9, 9.x from 3.10. The older
+#: ones place blank lines around function-body ``# isort:skip`` imports
+#: differently from 9.x, so they call a tree red that 9.x calls clean.
+#:
+#: Bisected on CPython 3.10.21, one fresh venv per release, each recipe line run
+#: the way the test runs it (``python -m isort --check-only`` plus that line's
+#: Makefile flags):
+#:
+#: * 5.13.2, 6.1.0, 7.0.0, 8.0.0 -- red on the whole-tree line, in five files
+#:   (``scapy.py``, ``pyshark.py`` and ``dpkt.py`` under
+#:   :file:`pcapkit/foundation/engines/`, :file:`pcapkit/protocols/protocol.py`,
+#:   :file:`pcapkit/protocols/application/http.py`): ten blank lines after
+#:   ``# isort:skip`` imports to drop, and one to add in ``dpkt.py``.
+#:   5.13.2 on 3.8.20 and 6.1.0 on 3.9.25 flag the same five, so the verdict
+#:   follows the isort release, not the Python.
+#: * 8.0.1, 9.0.0a2, 9.0.0a3 -- red on ``dpkt.py`` only: the one added line.
+#: * 9.0.0b1, 9.0.0b2 -- clean. This is where the verdict moved.
+#: * 9.0.0b5, 9.0.0 -- cannot run. Both ship ``isort/__main__`` compiled to an
+#:   extension module, and ``python -m isort`` stops at "No code object
+#:   available for isort.__main__". Their ``isort`` console script calls all
+#:   four lines clean, but this test runs the module.
+#: * 9.0.1, 9.0.2 -- clean, on all four lines.
+#:
+#: So 9.0.1 is the first final release this test gets a verdict from. Anything
+#: older skips, the 9.0.0 pre-releases included; 9.0.1 and newer run as before,
+#: so a later release whose verdict moves still turns the test red, as
+#: :file:`pyproject.toml` intends.
+ISORT_FLOOR = (9, 0, 1)
+
+
+def _isort_version() -> 'Optional[str]':
+    """The installed isort's version, read from its distribution metadata
+    rather than by importing it; :data:`None` when there is none to read.
+
+    """
+    if not HAS_ISORT:
+        return None
+    try:
+        return importlib.metadata.version('isort')
+    except importlib.metadata.PackageNotFoundError:
+        return None
+
+
+def _predates_floor(version: 'Optional[str]') -> 'bool':
+    """Whether ``version`` is older than :data:`ISORT_FLOOR`, by its numeric
+    release segment alone -- ``9.0.0b5`` counts as ``9.0.0``, and a
+    pre-release of the floor itself would count as the floor (isort has
+    published none). An absent or unparsable version is not older, so the
+    test runs rather than skipping on no evidence.
+
+    """
+    match = re.match(r'\d+(?:\.\d+)*', version or '')
+    if match is None:
+        return False
+    return tuple(int(part) for part in match.group().split('.')) < ISORT_FLOOR
+
+
+ISORT_VERSION = _isort_version()
+ISORT_TOO_OLD = _predates_floor(ISORT_VERSION)
 
 
 def _pcapkit_tree_targets() -> 'list[str]':
@@ -323,6 +392,10 @@ class TestIsortIsCleanOnThePackage(unittest.TestCase):
 
     """
 
+    @unittest.skipIf(ISORT_TOO_OLD,
+                     f'isort {ISORT_VERSION} predates '
+                     f"{'.'.join(map(str, ISORT_FLOOR))}, the oldest release whose "
+                     f'verdict on this tree the test was written for (#1696)')
     def test_check_only_is_clean_on_every_makefile_line(self) -> None:
         """Each line of the Makefile's ``isort:`` target, run the way it runs."""
         line_numbers = _isort_recipe_line_numbers()
