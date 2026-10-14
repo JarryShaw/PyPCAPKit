@@ -102,7 +102,7 @@ concurrency:
 # artefact -- the tag it checks is the one it is about to create -- but ``tag``,
 # ``pypi`` and ``conda`` now each read their own evidence instead: ``tag`` checks
 # for the ``conda-<version>+0`` tag it creates, ``pypi`` checks PyPI's file count
-# for the version against the 7 expected, and ``conda`` both checks Anaconda's
+# for the version against the count expected, and ``conda`` both checks Anaconda's
 # aggregate count as a job-level cost saver and, per leg, whether that leg's own
 # platform/Python distribution is already there -- the correctness fix, since
 # retrying an upload Anaconda already has fails outright rather than skipping
@@ -220,8 +220,9 @@ jobs:
           fetch-depth: 0
 
       # #1660: .github/python-versions.toml, read with the runner's own python3:
-      # `latest` for this job, the ``pypi`` and ``conda`` matrices, and the tags
-      # the two completeness checks below count, all from this run's commit.
+      # `latest` for this job and the ``pypi`` and ``conda`` matrices, from this
+      # run's commit, and the tags the two completeness checks below count until
+      # the version is tagged.
       - name: Read the Python versions
         id: python-versions
         run: python3 util/python_versions.py --github-output
@@ -262,11 +263,58 @@ jobs:
         with:
           tag: "conda-${{ steps.get_version.outputs.PCAPKIT_VERSION }}+0"
 
-      # PyPI evidence: compare the file count for this version against the 7
-      # expected -- the 6 supported legs (``pypi``'s ``python-version`` axis,
-      # whose wheel tags ``PCAPKIT_PYPI_WHEELS`` lists) each producing a wheel,
-      # plus the sdist that the "No Source Distribution" step keeps only on the
-      # 3.15 leg, ``latest``. A release-level 200 only proves *some*
+      # #1660: the two checks below count what the version was released with.
+      # Once its ``v*`` tag exists, that is the tier file at the tag's commit,
+      # read by that commit's own util/python_versions.py, not this run's file:
+      # a version added to the supported tier since was never built for it, and
+      # counting it would read a finished release as incomplete, run the gate and
+      # the publishers, and fail #1634's tag check on every run until the next
+      # release. A tag older than the file counts the tiers the file was added
+      # with, which #1677 copied unchanged from the workflows of the time.
+      - name: Read the released Python versions
+        id: released
+        env:
+          PCAPKIT_TAG: v${{ steps.get_version.outputs.PCAPKIT_VERSION }}
+          PCAPKIT_TAG_EXISTS: ${{ steps.check_tag.outputs.exists }}
+          PCAPKIT_PYPI_WHEELS: ${{ steps.python-versions.outputs.pypi-wheels }}
+          PCAPKIT_CONDA_BUILDS: ${{ steps.python-versions.outputs.conda-builds }}
+        run: |
+          set -euo pipefail
+
+          wheels="$PCAPKIT_PYPI_WHEELS"
+          builds="$PCAPKIT_CONDA_BUILDS"
+          tiers=.github/python-versions.toml
+          if [ "$PCAPKIT_TAG_EXISTS" = true ]; then
+            # The checkout fetched every tag, but not one pushed since.
+            git rev-parse -q --verify "refs/tags/${PCAPKIT_TAG}^{commit}" > /dev/null \
+              || git fetch -q --no-tags origin "+refs/tags/${PCAPKIT_TAG}:refs/tags/${PCAPKIT_TAG}"
+            from="$(git rev-parse "refs/tags/${PCAPKIT_TAG}^{commit}")"
+            if ! git cat-file -e "${from}:${tiers}" 2> /dev/null; then
+              from="$(git log --diff-filter=A --format=%H -- "$tiers" | tail -n 1)"
+              if [ -z "$from" ]; then
+                echo "::error title=No tier file in the history::${tiers} was never added to this checkout's history."
+                exit 1
+              fi
+              echo "::notice title=Released before the tier file::${PCAPKIT_TAG} predates ${tiers}; counting the tiers ${from} added it with."
+            fi
+            if [ "$from" != "$(git rev-parse HEAD)" ]; then
+              released="$(mktemp -d)"
+              git show "${from}:${tiers}" > "${released}/python-versions.toml"
+              git show "${from}:util/python_versions.py" > "${released}/python_versions.py"
+              wheels="$(python3 "${released}/python_versions.py" --file "${released}/python-versions.toml" pypi-wheels)"
+              builds="$(python3 "${released}/python_versions.py" --file "${released}/python-versions.toml" conda-builds)"
+            fi
+          fi
+
+          echo "${PCAPKIT_TAG}: counting the wheels ${wheels} and the conda builds ${builds}"
+          echo "pypi-wheels=${wheels}" >> "$GITHUB_OUTPUT"
+          echo "conda-builds=${builds}" >> "$GITHUB_OUTPUT"
+
+      # PyPI evidence: compare the file count for this version against the one
+      # expected -- a wheel from each supported leg (``pypi``'s ``python-version``
+      # axis, whose wheel tags ``PCAPKIT_PYPI_WHEELS`` lists from the tiers read
+      # above), plus the sdist that the "No Source Distribution" step keeps only
+      # on the ``latest`` leg. A release-level 200 only proves *some*
       # file landed, not all of them, so presence alone -- ``PCAPKIT_TAG_EXISTS``'s
       # mistake, repeated -- is not enough. Only the supported tier's wheels are
       # counted (#1633): a KTLO leg's wheel neither completes the release nor,
@@ -292,7 +340,7 @@ jobs:
         id: check_pypi
         env:
           PCAPKIT_VERSION: ${{ steps.get_version.outputs.PCAPKIT_VERSION }}
-          PCAPKIT_PYPI_WHEELS: ${{ steps.python-versions.outputs.pypi-wheels }}
+          PCAPKIT_PYPI_WHEELS: ${{ steps.released.outputs.pypi-wheels }}
         run: |
           set -euo pipefail
 
@@ -342,19 +390,19 @@ jobs:
           echo "http $status, found $count of $expected expected files for ${PCAPKIT_VERSION} on PyPI"
           echo "PCAPKIT_PYPI_COMPLETE=$complete" >> "$GITHUB_OUTPUT"
 
-      # Anaconda evidence, same shape as PyPI's above but for the 10-leg
-      # ``conda`` matrix (2 OS x 5 Python versions). Unlike PyPI's, this endpoint
-      # reported ``cf-cache-status: DYNAMIC`` on every request checked while
-      # writing this, i.e. not cached -- so there is no staleness direction to
+      # Anaconda evidence, same shape as PyPI's above but for the ``conda``
+      # matrix (2 OS x the supported tier read above). Unlike PyPI's, this
+      # endpoint reported ``cf-cache-status: DYNAMIC`` on every request checked
+      # while writing this, i.e. not cached -- so there is no staleness direction to
       # reason about here. This is the job-level cost saver mirroring ``pypi``'s;
       # ``conda``'s own per-leg checks (see that job) are the actual correctness
-      # fix and still run underneath it, since a release with only 9 of 10 legs
+      # fix and still run underneath it, since a release one leg short of
       # complete must not have the missing leg mistaken for "nothing to do".
       - name: Check Anaconda publish completeness
         id: check_conda
         env:
           PCAPKIT_VERSION: ${{ steps.get_version.outputs.PCAPKIT_VERSION }}
-          PCAPKIT_CONDA_BUILDS: ${{ steps.python-versions.outputs.conda-builds }}
+          PCAPKIT_CONDA_BUILDS: ${{ steps.released.outputs.conda-builds }}
         run: |
           set -euo pipefail
 

@@ -316,7 +316,7 @@ jobs:
                    c['num_partial_branches'], round(pct(c), 2)] for name, c in sorted(packages.items())]
           total = round(data['totals']['percent_covered'], 2)
           tests = os.environ['TESTS_OUTCOME']
-          json.dump({'total': total, 'tests': tests, 'packages': rows},
+          json.dump({'total': total, 'tests': tests, 'packages': rows, 'python': os.environ['PYTHON']},
                     open('coverage-comment/coverage-summary.json', 'w'))
           status = '' if tests == 'success' else f' -- **tests {tests}**, so this is partial'
           print(f"**Coverage: {total:.2f}%**{status} (unit tier, Python {os.environ['PYTHON']}, `{os.environ['SHA'][:9]}`)")
@@ -1748,8 +1748,8 @@ jobs:
       - name: Run full test suite
         run: python -m pytest -q -n auto --dist load
 
-  # Ruleset 23497679's required_status_checks requires six contexts: this
-  # job's `Required checks passed`, and five for `Compat Python 3.11`-`3.15`
+  # Ruleset 23497679's required_status_checks requires these contexts: this
+  # job's `Required checks passed`, and a `Compat Python` one per supported version,
   # from the `compatibility` job in `.github/workflows/python-compatibility.yml`.
   # This job aggregates the gating jobs of *this* file, the ones its `needs:`
   # lists, because rulesets match check names literally and support no

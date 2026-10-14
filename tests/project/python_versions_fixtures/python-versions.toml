@@ -1,0 +1,59 @@
+# The Python version tiers (#1660). Every workflow matrix and every
+# single-interpreter job's version is read from here through
+# util/python_versions.py, and tests/project/test_python_versions_1660.py pins
+# the classifiers and docs to it. cron-python-versions.yml recomputes it weekly
+# and proposes each change, and the ruleset 23497679 edit it needs, as a PR.
+#
+# Tiers: supported (blocking), ktlo (end-of-life, non-blocking) and pre-release
+# (non-blocking; none listed today). `runner` is the image a version needs when
+# ubuntu-latest cannot provide it. `latest` is the newest supported CPython,
+# which the single-interpreter jobs run on. See
+# docs/source/contributing/workflows.rst.
+
+latest = "3.15"
+
+[versions.cpython]
+"3.7" = { tier = "ktlo", runner = "ubuntu-22.04" }
+"3.8" = { tier = "ktlo", runner = "ubuntu-24.04" }
+"3.9" = { tier = "ktlo", runner = "ubuntu-24.04" }
+"3.10" = { tier = "ktlo" }
+"3.11" = { tier = "supported" }
+"3.12" = { tier = "supported" }
+"3.13" = { tier = "supported" }
+"3.14" = { tier = "supported" }
+"3.15" = { tier = "supported" }
+
+[versions.pypy]
+"pypy3.10" = { tier = "ktlo" }
+"pypy3.11" = { tier = "supported" }
+
+# The pins kept off the tiers, each with its reason in the comment above it.
+# tests/project/test_python_versions_1660.py fails on a pin not listed here, on
+# an entry that matches no pin, and on an entry without a comment.
+
+# The parity matrix's one supported leg saves the apt cache. Both legs install
+# one set under one key, and a second saver fails with `Unable to reserve
+# cache`.
+[[exemptions]]
+workflow = "unit-tests.yml"
+job = "pypcap-parity"
+where = "env.APT_CACHE_SAVE"
+value = "3.11"
+
+# conda-forge's conda has no py315 build, so installing 3.15 into base fails
+# with `RemoveError: Conda cannot remove itself` (#1633, conda 26.7.2). 3.15
+# leaves base on its own Python; `conda build --python` still builds for 3.15.
+# Drop this once conda publishes a py315 build.
+[[exemptions]]
+workflow = "create-release.yml"
+job = "conda"
+where = "Conda environment creation and activation: with.python-version"
+value = "3.15"
+
+# As for create-release.yml's conda job: conda-forge's conda has no py315 build
+# yet.
+[[exemptions]]
+workflow = "cron-conda.yml"
+job = "conda-dist"
+where = "Conda environment creation and activation: with.python-version"
+value = "3.15"

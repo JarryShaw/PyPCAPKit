@@ -1,8 +1,8 @@
 # The Python version tiers (#1660). Every workflow matrix and every
 # single-interpreter job's version is read from here through
 # util/python_versions.py, and tests/project/test_python_versions_1660.py pins
-# the classifiers and docs to it. A tier change is a one-line edit below plus
-# the matching edit to ruleset 23497679's Compat contexts.
+# the classifiers and docs to it. cron-python-versions.yml recomputes it weekly
+# and proposes each change, and the ruleset 23497679 edit it needs, as a PR.
 #
 # Tiers: supported (blocking), ktlo (end-of-life, non-blocking) and pre-release
 # (non-blocking; none listed today). `runner` is the image a version needs when

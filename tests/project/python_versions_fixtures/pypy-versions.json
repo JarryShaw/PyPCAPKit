@@ -1,0 +1,447 @@
+[
+ {
+  "pypy_version": "8.0.0",
+  "python_version": "3.12.14",
+  "stable": true,
+  "latest_pypy": true,
+  "date": "2026-09-19",
+  "files": [
+   {
+    "filename": "pypy3.12-v8.0.0-linux64.tar.gz",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "8.0.0",
+  "python_version": "3.11.16",
+  "stable": true,
+  "latest_pypy": true,
+  "date": "2026-09-19",
+  "files": [
+   {
+    "filename": "pypy3.11-v8.0.0-linux64.tar.gz",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "7.3.23",
+  "python_version": "3.11.15",
+  "stable": true,
+  "latest_pypy": true,
+  "date": "2026-05-26",
+  "files": [
+   {
+    "filename": "pypy3.11-v7.3.23-linux64.tar.gz",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "7.3.22",
+  "python_version": "3.11.15",
+  "stable": true,
+  "latest_pypy": false,
+  "date": "2026-04-28",
+  "files": [
+   {
+    "filename": "pypy3.11-v7.3.22-linux64.tar.bz2",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "7.3.21",
+  "python_version": "3.11.15",
+  "stable": true,
+  "latest_pypy": false,
+  "date": "2026-03-13",
+  "files": [
+   {
+    "filename": "pypy3.11-v7.3.21-linux64.tar.bz2",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "7.3.20",
+  "python_version": "3.11.13",
+  "stable": true,
+  "latest_pypy": true,
+  "date": "2025-07-04",
+  "files": [
+   {
+    "filename": "pypy3.11-v7.3.20-linux64.tar.bz2",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "7.3.19",
+  "python_version": "3.11.11",
+  "stable": true,
+  "latest_pypy": true,
+  "date": "2025-02-26",
+  "files": [
+   {
+    "filename": "pypy3.11-v7.3.19-linux64.tar.bz2",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "7.3.19",
+  "python_version": "3.10.16",
+  "stable": true,
+  "latest_pypy": true,
+  "date": "2025-02-26",
+  "files": [
+   {
+    "filename": "pypy3.10-v7.3.19-linux64.tar.gz",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "7.3.18",
+  "python_version": "3.11.11",
+  "stable": true,
+  "latest_pypy": false,
+  "date": "2025-02-06",
+  "files": [
+   {
+    "filename": "pypy3.11-v7.3.18-linux64.tar.bz2",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "7.3.18",
+  "python_version": "3.10.16",
+  "stable": true,
+  "latest_pypy": false,
+  "date": "2025-02-06",
+  "files": [
+   {
+    "filename": "pypy3.10-v7.3.18-linux64.tar.bz2",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "7.3.17",
+  "python_version": "3.10.14",
+  "stable": true,
+  "latest_pypy": true,
+  "date": "2024-08-28",
+  "files": [
+   {
+    "filename": "pypy3.10-v7.3.17-linux64.tar.bz2",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "7.3.16",
+  "python_version": "3.10.14",
+  "stable": true,
+  "latest_pypy": false,
+  "date": "2024-04-24",
+  "files": [
+   {
+    "filename": "pypy3.10-v7.3.16-linux64.tar.bz2",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "7.3.16",
+  "python_version": "3.9.19",
+  "stable": true,
+  "latest_pypy": true,
+  "date": "2024-04-24",
+  "files": [
+   {
+    "filename": "pypy3.9-v7.3.16-linux64.tar.gz",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "7.3.15",
+  "python_version": "3.10.13",
+  "stable": true,
+  "latest_pypy": true,
+  "date": "2024-01-15",
+  "files": [
+   {
+    "filename": "pypy3.10-v7.3.15-linux64.tar.bz2",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "7.3.15",
+  "python_version": "3.9.18",
+  "stable": true,
+  "latest_pypy": true,
+  "date": "2024-01-15",
+  "files": [
+   {
+    "filename": "pypy3.9-v7.3.15-linux64.tar.bz2",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "7.3.14",
+  "python_version": "3.10.13",
+  "stable": true,
+  "latest_pypy": false,
+  "date": "2023-12-25",
+  "files": [
+   {
+    "filename": "pypy3.10-v7.3.14-linux64.tar.bz2",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "7.3.14",
+  "python_version": "3.9.18",
+  "stable": true,
+  "latest_pypy": false,
+  "date": "2023-12-25",
+  "files": [
+   {
+    "filename": "pypy3.9-v7.3.14-linux64.tar.bz2",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "7.3.13",
+  "python_version": "3.10.13",
+  "stable": true,
+  "latest_pypy": false,
+  "date": "2023-09-29",
+  "files": [
+   {
+    "filename": "pypy3.10-v7.3.13-linux64.tar.bz2",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "7.3.13",
+  "python_version": "3.9.18",
+  "stable": true,
+  "latest_pypy": false,
+  "date": "2023-09-29",
+  "files": [
+   {
+    "filename": "pypy3.9-v7.3.13-linux64.tar.bz2",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "7.3.12",
+  "python_version": "3.10.12",
+  "stable": true,
+  "latest_pypy": true,
+  "date": "2023-06-16",
+  "files": [
+   {
+    "filename": "pypy3.10-v7.3.12-linux64.tar.bz2",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "7.3.12",
+  "python_version": "3.9.17",
+  "stable": true,
+  "latest_pypy": true,
+  "date": "2023-06-16",
+  "files": [
+   {
+    "filename": "pypy3.9-v7.3.12-linux64.tar.bz2",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "7.3.12rc1",
+  "python_version": "3.10.9",
+  "stable": false,
+  "latest_pypy": false,
+  "date": "2023-05-13",
+  "files": [
+   {
+    "filename": "pypy3.10-v7.3.12rc1-linux64.tar.bz2",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "7.3.12rc1",
+  "python_version": "3.9.16",
+  "stable": false,
+  "latest_pypy": false,
+  "date": "2023-05-13",
+  "files": [
+   {
+    "filename": "pypy3.9-v7.3.12rc1-linux64.tar.bz2",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "7.3.11",
+  "python_version": "3.9.16",
+  "stable": true,
+  "latest_pypy": true,
+  "date": "2022-12-29",
+  "files": [
+   {
+    "filename": "pypy3.9-v7.3.11-linux64.tar.bz2",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "7.3.11",
+  "python_version": "3.8.16",
+  "stable": true,
+  "latest_pypy": true,
+  "date": "2022-12-29",
+  "files": [
+   {
+    "filename": "pypy3.8-v7.3.11-linux64.tar.gz",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "7.3.10",
+  "python_version": "3.9.15",
+  "stable": true,
+  "latest_pypy": true,
+  "date": "2022-12-06",
+  "files": [
+   {
+    "filename": "pypy3.9-v7.3.10-linux64.tar.bz2",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "7.3.10",
+  "python_version": "3.8.15",
+  "stable": true,
+  "latest_pypy": true,
+  "date": "2022-12-06",
+  "files": [
+   {
+    "filename": "pypy3.8-v7.3.10-linux64.tar.bz2",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "7.3.10rc3",
+  "python_version": "3.9.15",
+  "stable": false,
+  "latest_pypy": false,
+  "date": "2022-11-24",
+  "files": [
+   {
+    "filename": "pypy3.9-v7.3.10rc3-linux64.tar.bz2",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "7.3.10rc3",
+  "python_version": "3.8.15",
+  "stable": false,
+  "latest_pypy": false,
+  "date": "2022-11-24",
+  "files": [
+   {
+    "filename": "pypy3.8-v7.3.10rc3-linux64.tar.bz2",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "nightly",
+  "python_version": "3.10",
+  "stable": false,
+  "latest_pypy": false,
+  "files": [
+   {
+    "filename": "pypy-c-jit-latest-linux64.tar.bz2",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "nightly",
+  "python_version": "3.11",
+  "stable": false,
+  "latest_pypy": false,
+  "files": [
+   {
+    "filename": "pypy-c-jit-latest-linux64.tar.gz",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ },
+ {
+  "pypy_version": "nightly",
+  "python_version": "3.12",
+  "stable": false,
+  "latest_pypy": false,
+  "files": [
+   {
+    "filename": "pypy-c-jit-latest-linux64.tar.gz",
+    "arch": "x64",
+    "platform": "linux"
+   }
+  ]
+ }
+]

@@ -1,0 +1,844 @@
+[
+ {
+  "version": "3.15.0",
+  "stable": true,
+  "files": [
+   {
+    "filename": "python-3.15.0-darwin-arm64.tar.gz",
+    "arch": "arm64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.15.0-darwin-x64.tar.gz",
+    "arch": "x64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.15.0-linux-22.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "22.04"
+   },
+   {
+    "filename": "python-3.15.0-linux-24.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "24.04"
+   },
+   {
+    "filename": "python-3.15.0-linux-26.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "26.04"
+   }
+  ]
+ },
+ {
+  "version": "3.14.8",
+  "stable": true,
+  "files": [
+   {
+    "filename": "python-3.14.8-darwin-arm64.tar.gz",
+    "arch": "arm64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.14.8-darwin-x64.tar.gz",
+    "arch": "x64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.14.8-linux-22.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "22.04"
+   },
+   {
+    "filename": "python-3.14.8-linux-24.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "24.04"
+   },
+   {
+    "filename": "python-3.14.8-linux-26.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "26.04"
+   }
+  ]
+ },
+ {
+  "version": "3.14.0-alpha.7",
+  "stable": false,
+  "files": [
+   {
+    "filename": "python-3.14.0-alpha.7-linux-20.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "20.04"
+   }
+  ]
+ },
+ {
+  "version": "3.13.16",
+  "stable": true,
+  "files": [
+   {
+    "filename": "python-3.13.16-darwin-arm64.tar.gz",
+    "arch": "arm64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.13.16-darwin-x64.tar.gz",
+    "arch": "x64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.13.16-linux-22.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "22.04"
+   },
+   {
+    "filename": "python-3.13.16-linux-24.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "24.04"
+   },
+   {
+    "filename": "python-3.13.16-linux-26.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "26.04"
+   }
+  ]
+ },
+ {
+  "version": "3.13.3",
+  "stable": true,
+  "files": [
+   {
+    "filename": "python-3.13.3-darwin-arm64.tar.gz",
+    "arch": "arm64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.13.3-darwin-x64.tar.gz",
+    "arch": "x64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.13.3-linux-20.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "20.04"
+   },
+   {
+    "filename": "python-3.13.3-linux-22.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "22.04"
+   },
+   {
+    "filename": "python-3.13.3-linux-24.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "24.04"
+   }
+  ]
+ },
+ {
+  "version": "3.12.15",
+  "stable": true,
+  "files": [
+   {
+    "filename": "python-3.12.15-linux-22.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "22.04"
+   },
+   {
+    "filename": "python-3.12.15-linux-24.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "24.04"
+   },
+   {
+    "filename": "python-3.12.15-linux-26.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "26.04"
+   }
+  ]
+ },
+ {
+  "version": "3.12.10",
+  "stable": true,
+  "files": [
+   {
+    "filename": "python-3.12.10-darwin-arm64.tar.gz",
+    "arch": "arm64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.12.10-darwin-x64.tar.gz",
+    "arch": "x64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.12.10-linux-20.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "20.04"
+   },
+   {
+    "filename": "python-3.12.10-linux-22.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "22.04"
+   },
+   {
+    "filename": "python-3.12.10-linux-24.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "24.04"
+   }
+  ]
+ },
+ {
+  "version": "3.12.0-alpha.6",
+  "stable": false,
+  "files": [
+   {
+    "filename": "python-3.12.0-alpha.6-linux-18.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "18.04"
+   }
+  ]
+ },
+ {
+  "version": "3.11.17",
+  "stable": true,
+  "files": [
+   {
+    "filename": "python-3.11.17-linux-22.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "22.04"
+   },
+   {
+    "filename": "python-3.11.17-linux-24.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "24.04"
+   },
+   {
+    "filename": "python-3.11.17-linux-26.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "26.04"
+   }
+  ]
+ },
+ {
+  "version": "3.11.12",
+  "stable": true,
+  "files": [
+   {
+    "filename": "python-3.11.12-linux-20.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "20.04"
+   },
+   {
+    "filename": "python-3.11.12-linux-22.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "22.04"
+   },
+   {
+    "filename": "python-3.11.12-linux-24.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "24.04"
+   }
+  ]
+ },
+ {
+  "version": "3.11.9",
+  "stable": true,
+  "files": [
+   {
+    "filename": "python-3.11.9-darwin-arm64.tar.gz",
+    "arch": "arm64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.11.9-darwin-x64.tar.gz",
+    "arch": "x64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.11.9-linux-20.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "20.04"
+   },
+   {
+    "filename": "python-3.11.9-linux-22.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "22.04"
+   },
+   {
+    "filename": "python-3.11.9-linux-24.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "24.04"
+   }
+  ]
+ },
+ {
+  "version": "3.11.0-rc.2",
+  "stable": false,
+  "files": [
+   {
+    "filename": "python-3.11.0-rc.2-linux-18.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "18.04"
+   }
+  ]
+ },
+ {
+  "version": "3.10.22",
+  "stable": true,
+  "files": [
+   {
+    "filename": "python-3.10.22-darwin-x64.tar.gz",
+    "arch": "x64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.10.22-linux-22.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "22.04"
+   },
+   {
+    "filename": "python-3.10.22-linux-24.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "24.04"
+   },
+   {
+    "filename": "python-3.10.22-linux-26.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "26.04"
+   }
+  ]
+ },
+ {
+  "version": "3.10.17",
+  "stable": true,
+  "files": [
+   {
+    "filename": "python-3.10.17-darwin-x64.tar.gz",
+    "arch": "x64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.10.17-linux-20.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "20.04"
+   },
+   {
+    "filename": "python-3.10.17-linux-22.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "22.04"
+   },
+   {
+    "filename": "python-3.10.17-linux-24.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "24.04"
+   }
+  ]
+ },
+ {
+  "version": "3.10.11",
+  "stable": true,
+  "files": [
+   {
+    "filename": "python-3.10.11-darwin-arm64.tar.gz",
+    "arch": "arm64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.10.11-darwin-x64.tar.gz",
+    "arch": "x64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.10.11-linux-20.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "20.04"
+   },
+   {
+    "filename": "python-3.10.11-linux-22.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "22.04"
+   },
+   {
+    "filename": "python-3.10.11-linux-24.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "24.04"
+   }
+  ]
+ },
+ {
+  "version": "3.10.3",
+  "stable": true,
+  "files": [
+   {
+    "filename": "python-3.10.3-darwin-x64.tar.gz",
+    "arch": "x64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.10.3-linux-18.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "18.04"
+   },
+   {
+    "filename": "python-3.10.3-linux-20.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "20.04"
+   }
+  ]
+ },
+ {
+  "version": "3.10.0-beta.3",
+  "stable": false,
+  "files": [
+   {
+    "filename": "python-3.10.0-beta.3-linux-16.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "16.04"
+   }
+  ]
+ },
+ {
+  "version": "3.9.25",
+  "stable": true,
+  "files": [
+   {
+    "filename": "python-3.9.25-darwin-x64.tar.gz",
+    "arch": "x64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.9.25-linux-22.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "22.04"
+   },
+   {
+    "filename": "python-3.9.25-linux-24.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "24.04"
+   }
+  ]
+ },
+ {
+  "version": "3.9.22",
+  "stable": true,
+  "files": [
+   {
+    "filename": "python-3.9.22-darwin-x64.tar.gz",
+    "arch": "x64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.9.22-linux-20.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "20.04"
+   },
+   {
+    "filename": "python-3.9.22-linux-22.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "22.04"
+   },
+   {
+    "filename": "python-3.9.22-linux-24.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "24.04"
+   }
+  ]
+ },
+ {
+  "version": "3.9.13",
+  "stable": true,
+  "files": [
+   {
+    "filename": "python-3.9.13-darwin-arm64.tar.gz",
+    "arch": "arm64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.9.13-darwin-x64.tar.gz",
+    "arch": "x64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.9.13-linux-20.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "20.04"
+   },
+   {
+    "filename": "python-3.9.13-linux-22.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "22.04"
+   },
+   {
+    "filename": "python-3.9.13-linux-24.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "24.04"
+   }
+  ]
+ },
+ {
+  "version": "3.9.11",
+  "stable": true,
+  "files": [
+   {
+    "filename": "python-3.9.11-darwin-x64.tar.gz",
+    "arch": "x64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.9.11-linux-18.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "18.04"
+   },
+   {
+    "filename": "python-3.9.11-linux-20.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "20.04"
+   }
+  ]
+ },
+ {
+  "version": "3.9.5",
+  "stable": true,
+  "files": [
+   {
+    "filename": "python-3.9.5-darwin-x64.tar.gz",
+    "arch": "x64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.9.5-linux-16.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "16.04"
+   },
+   {
+    "filename": "python-3.9.5-linux-18.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "18.04"
+   },
+   {
+    "filename": "python-3.9.5-linux-20.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "20.04"
+   }
+  ]
+ },
+ {
+  "version": "3.8.18",
+  "stable": true,
+  "files": [
+   {
+    "filename": "python-3.8.18-darwin-x64.tar.gz",
+    "arch": "x64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.8.18-linux-20.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "20.04"
+   },
+   {
+    "filename": "python-3.8.18-linux-22.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "22.04"
+   },
+   {
+    "filename": "python-3.8.18-linux-24.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "24.04"
+   }
+  ]
+ },
+ {
+  "version": "3.8.11",
+  "stable": true,
+  "files": [
+   {
+    "filename": "python-3.8.11-darwin-x64.tar.gz",
+    "arch": "x64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.8.11-linux-18.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "18.04"
+   },
+   {
+    "filename": "python-3.8.11-linux-20.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "20.04"
+   }
+  ]
+ },
+ {
+  "version": "3.8.10",
+  "stable": true,
+  "files": [
+   {
+    "filename": "python-3.8.10-darwin-arm64.tar.gz",
+    "arch": "arm64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.8.10-darwin-x64.tar.gz",
+    "arch": "x64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.8.10-linux-20.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "20.04"
+   }
+  ]
+ },
+ {
+  "version": "3.8.9",
+  "stable": true,
+  "files": [
+   {
+    "filename": "python-3.8.9-darwin-x64.tar.gz",
+    "arch": "x64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.8.9-linux-16.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "16.04"
+   },
+   {
+    "filename": "python-3.8.9-linux-18.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "18.04"
+   },
+   {
+    "filename": "python-3.8.9-linux-20.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "20.04"
+   }
+  ]
+ },
+ {
+  "version": "3.7.17",
+  "stable": true,
+  "files": [
+   {
+    "filename": "python-3.7.17-darwin-x64.tar.gz",
+    "arch": "x64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.7.17-linux-20.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "20.04"
+   },
+   {
+    "filename": "python-3.7.17-linux-22.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "22.04"
+   }
+  ]
+ },
+ {
+  "version": "3.7.16",
+  "stable": true,
+  "files": [
+   {
+    "filename": "python-3.7.16-darwin-x64.tar.gz",
+    "arch": "x64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.7.16-linux-18.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "18.04"
+   },
+   {
+    "filename": "python-3.7.16-linux-20.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "20.04"
+   },
+   {
+    "filename": "python-3.7.16-linux-22.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "22.04"
+   }
+  ]
+ },
+ {
+  "version": "3.7.10",
+  "stable": true,
+  "files": [
+   {
+    "filename": "python-3.7.10-darwin-x64.tar.gz",
+    "arch": "x64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.7.10-linux-16.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "16.04"
+   },
+   {
+    "filename": "python-3.7.10-linux-18.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "18.04"
+   },
+   {
+    "filename": "python-3.7.10-linux-20.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "20.04"
+   }
+  ]
+ },
+ {
+  "version": "3.6.15",
+  "stable": true,
+  "files": [
+   {
+    "filename": "python-3.6.15-darwin-x64.tar.gz",
+    "arch": "x64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.6.15-linux-18.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "18.04"
+   },
+   {
+    "filename": "python-3.6.15-linux-20.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "20.04"
+   }
+  ]
+ },
+ {
+  "version": "3.6.13",
+  "stable": true,
+  "files": [
+   {
+    "filename": "python-3.6.13-darwin-x64.tar.gz",
+    "arch": "x64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.6.13-linux-16.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "16.04"
+   },
+   {
+    "filename": "python-3.6.13-linux-18.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "18.04"
+   },
+   {
+    "filename": "python-3.6.13-linux-20.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "20.04"
+   }
+  ]
+ },
+ {
+  "version": "3.5.10",
+  "stable": true,
+  "files": [
+   {
+    "filename": "python-3.5.10-darwin-x64.tar.gz",
+    "arch": "x64",
+    "platform": "darwin"
+   },
+   {
+    "filename": "python-3.5.10-linux-16.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "16.04"
+   },
+   {
+    "filename": "python-3.5.10-linux-18.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "18.04"
+   },
+   {
+    "filename": "python-3.5.10-linux-20.04-x64.tar.gz",
+    "arch": "x64",
+    "platform": "linux",
+    "platform_version": "20.04"
+   }
+  ]
+ }
+]

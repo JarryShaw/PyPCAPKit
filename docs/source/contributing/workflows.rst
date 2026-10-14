@@ -3,7 +3,7 @@ GitHub Actions Workflows
 
 .. important::
 
-   The eleven workflows under :file:`.github/workflows/` trigger each other, and
+   The twelve workflows under :file:`.github/workflows/` trigger each other, and
    the chain that results is not visible from any single file -- reading one
    ``on:`` block never shows what a *different* workflow's completion goes on
    to start. This page is the repository-wide graph. The release *pipeline*
@@ -100,6 +100,13 @@ At a Glance
      - Mon 07:23
      - --
      - ``workflow_dispatch``
+   * - Python Versions
+     - :file:`cron-python-versions.yml`
+     - --
+     - --
+     - Mon 05:41
+     - --
+     - ``workflow_dispatch``
 
 .. note::
 
@@ -142,6 +149,7 @@ than starting a new one.
        PS["Project Status<br/>project-status.yml"]
        CC["Coverage Comment<br/>coverage-comment.yml"]
        CT["CI Timing<br/>ci-timing.yml"]
+       PV["Python Versions<br/>cron-python-versions.yml"]
 
        PUSH --> CQ
        PR --> CQ
@@ -173,6 +181,9 @@ than starting a new one.
 
        SCHED -->|Mon 07:23| CT
        DISPATCH --> CT
+
+       SCHED -->|Mon 05:41| PV
+       DISPATCH --> PV
 
        UT ==>|workflow_run: completed| VU
        UT ==>|workflow_run: completed| CU
@@ -261,7 +272,7 @@ the caller's own workflow run, as one of the caller's own jobs, rather than
 starting an independent run after the caller finishes. All four calls in this
 repository target the same reusable workflow, with the same input:
 
-* ``.github/workflows/create-release.yml:431`` -- job ``unit-tests`` calls
+* ``.github/workflows/create-release.yml:479`` -- job ``unit-tests`` calls
   ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
 * ``.github/workflows/cron-conda.yml:50`` -- job ``unit-tests`` calls
   ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
@@ -318,13 +329,13 @@ anything other than ``success`` -- including
 ``skipped``, which is exactly what Vendor Update's *own* jobs report when
 *their* ``workflow_run``-path guards decline (see ``cron-vendor.yml``'s
 ``vendor-update`` job). ``unit-tests`` then depends on that job with
-``needs: [ version_check ]`` (``create-release.yml:421``) and an ``if:`` that
+``needs: [ version_check ]`` (``create-release.yml:469``) and an ``if:`` that
 calls no status-check function, so a skipped dependency skips it too -- and
 every job past it is gated the same way: ``github`` needs ``[ unit-tests,
-version_check ]`` (``:452``), ``tag`` needs ``[ github, unit-tests,
-version_check ]`` (``:637``), ``pypi`` needs ``[ github, unit-tests,
-version_check ]`` (``:802``), and ``conda`` needs ``[ tag, github,
-unit-tests, version_check ]`` (``:1037``).
+version_check ]`` (``:500``), ``tag`` needs ``[ github, unit-tests,
+version_check ]`` (``:685``), ``pypi`` needs ``[ github, unit-tests,
+version_check ]`` (``:850``), and ``conda`` needs ``[ tag, github,
+unit-tests, version_check ]`` (``:1085``).
 
 .. mermaid::
 
@@ -350,7 +361,7 @@ unit-tests, version_check ]`` (``:1037``).
 
 This is a transitive reduction, as in :doc:`releasing`: ``version_check`` and
 ``unit-tests`` are also direct ``needs:`` of ``tag`` and ``pypi``
-(``create-release.yml:637,802``) and of ``conda`` (``:1037``), but ``github``
+(``create-release.yml:685,850``) and of ``conda`` (``:1085``), but ``github``
 already implies those edges, since it depends on both itself. Drawing them
 would add lines without changing which job can start before which, or which
 job a skip in ``version_check`` reaches.
@@ -580,8 +591,9 @@ between the tiers below means editing the ruleset in the same change.
 (``unit-tests.yml:1841``). ``Compat Python`` is defined by one, the
 ``compatibility`` job in ``python-compatibility.yml`` (``:60``), whose matrix
 (``:74``) comes from :file:`.github/python-versions.toml`: the five required legs
-are its supported tier (``:20-24``), and its four KTLO legs (``:16-19``) have
-names ending in ``(KTLO)``, so no required context matches one. A comment at
+are its supported tier (``python-versions.toml:20-24``), and its four KTLO legs
+(``python-versions.toml:16-19``) have names ending in ``(KTLO)``, so no required
+context matches one. A comment at
 ``unit-tests.yml:1752`` mentions the string without defining it.
 
 ``Required checks passed`` is an aggregate, not a single check run. The ruleset
@@ -672,21 +684,45 @@ edits it names rather than makes: a new ``pypi`` KTLO leg needs its own
 ``ktlo_*`` output for ``release_status``, and a pre-release leg needs
 non-blocking mechanics no workflow has yet, so the script refuses one.
 
+**Python Versions** (:file:`cron-python-versions.yml`) proposes those edits.
+Every Monday, or on dispatch, its ``detect`` job runs
+:file:`util/update_python_versions.py` with no secret: it reads python.org's
+release cycle, PyPy's releases, setup-python's ``versions-manifest.json`` and
+the runner-images README, recomputes the tiers by the rules in that script's
+docstring, rewrites the file and the prose these tests pin to it, and runs the
+three audit modules on the result. Only when that changes something does ``pr``
+enter ``github-release``, so the owner approves only those runs. It mints a
+release App token (:doc:`releasing`, "The Release App") with contents and pull
+requests write, force-pushes ``bot/python-versions`` and opens or updates its
+one pull request, whose body lists each move and why, the ``Compat`` contexts to
+change in the ruleset by hand, and every renamed check run. It never pushes
+``main``, edits the ruleset or writes a workflow file, which that token cannot
+push, so workflow comments name the tiers rather than restate them. While the
+branch's pull request is open, it does not re-push tiers a commit on the branch
+already proposes, hand edits or merges of ``main`` on top or not, nor overwrite
+commits it did not make: when the branch holds some and proposes other tiers,
+``detect`` fails before asking for the approval. Once that pull request is
+merged or closed, the next run with something to propose recreates the branch
+from ``main``, a closed proposal's tiers included. It reports a pre-release
+instead of writing it.
+
 Deployment ``environment:``
 ----------------------------
 
-Four jobs, all in ``create-release.yml``, declare a deployment
-``environment:`` and can therefore pause for an approval:
+Five jobs declare a deployment ``environment:`` and can therefore pause for an
+approval, four in ``create-release.yml`` and one in ``cron-python-versions.yml``:
 
-* ``github`` -- ``environment: github-release`` (``create-release.yml:449``)
-* ``tag`` -- ``environment: conda-tag`` (``create-release.yml:635``)
-* ``pypi`` -- ``environment: pypi`` (``create-release.yml:797``)
-* ``conda`` -- ``environment: anaconda`` (``create-release.yml:1034``)
+* ``github`` -- ``environment: github-release`` (``create-release.yml:497``)
+* ``tag`` -- ``environment: conda-tag`` (``create-release.yml:683``)
+* ``pypi`` -- ``environment: pypi`` (``create-release.yml:845``)
+* ``conda`` -- ``environment: anaconda`` (``create-release.yml:1082``)
+* ``pr`` -- ``environment: github-release``, for the release App's key (see
+  `Python Versions`_)
 
 No other workflow in scope here declares one -- including
 ``deploy-pages.yml``, whose ``deploy-pages`` job pushes straight to the
 ``gh-pages`` branch via ``JamesIves/github-pages-deploy-action`` rather than
-through an ``environment:``-gated deployment. Of the four above, only
+through an ``environment:``-gated deployment. Of the four environments, only
 ``github-release`` carries a required reviewer; :doc:`releasing`
 covers why one approval on that single environment is enough to gate the
 whole release graph, and is the page to read for the reasoning rather than
