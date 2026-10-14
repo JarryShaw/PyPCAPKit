@@ -4,11 +4,11 @@
 # the classifiers and docs to it. cron-python-versions.yml recomputes it weekly
 # and proposes each change, and the ruleset 23497679 edit it needs, as a PR.
 #
-# Tiers: supported (blocking), ktlo (end-of-life, non-blocking) and pre-release
-# (non-blocking; none listed today). `runner` is the image a version needs when
-# ubuntu-latest cannot provide it. `latest` is the newest supported CPython,
-# which the single-interpreter jobs run on. See
-# docs/source/contributing/workflows.rst.
+# Tiers: supported (blocking), ktlo (end-of-life, non-blocking), pre-release
+# (non-blocking; none listed today) and experimental (non-blocking `test` legs;
+# see below). `runner` is the image a version needs when ubuntu-latest cannot
+# provide it. `latest` is the newest supported CPython, which the
+# single-interpreter jobs run on. See docs/source/contributing/workflows.rst.
 
 latest = "3.15"
 
@@ -22,10 +22,21 @@ latest = "3.15"
 "3.13" = { tier = "supported" }
 "3.14" = { tier = "supported" }
 "3.15" = { tier = "supported" }
+"3.14t" = { tier = "experimental" }
 
 [versions.pypy]
 "pypy3.10" = { tier = "ktlo" }
 "pypy3.11" = { tier = "supported" }
+
+# Experimental (#1660): free-threaded CPython (a `t` version, above) and
+# GraalPy, by its release line, spelt as setup-python reads them. Each runs as
+# one non-blocking leg of unit-tests.yml's `test` job, named `(experimental)`,
+# and in no other matrix: no wheel, conda build or required context. The weekly
+# job has no source for either, so it keeps these lines as written, after the
+# other versions of their table. Promoting one once its leg is green is a hand
+# edit, which util/python_versions.py refuses until it has those three.
+[versions.graalpy]
+"graalpy-25.4" = { tier = "experimental" }
 
 # The pins kept off the tiers, each with its reason in the comment above it.
 # tests/project/test_python_versions_1660.py fails on a pin not listed here, on

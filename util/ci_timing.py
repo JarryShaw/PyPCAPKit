@@ -319,7 +319,13 @@ def parse_workflow(text: 'str') -> 'list[dict[str, Any]]':
 
 
 def _parse_steps(section: 'str') -> 'list[dict[str, Any]]':
-    """The named steps of one job section, with any step-level cap."""
+    """The named steps of one job section, with any step-level cap.
+
+    A cap written as an expression differs by leg -- ``test``'s on its experimental
+    legs (#1660) -- and the job's spec does not say which leg a name ran, so it
+    reads as none, as an uncapped step's does.
+
+    """
     found = []  # type: list[dict[str, Any]]
     lines = section.splitlines()
     try:
@@ -342,9 +348,9 @@ def _parse_steps(section: 'str') -> 'list[dict[str, Any]]':
         if 'name' not in keys:
             continue
         template = _scalar(keys['name'])
-        timeout = keys.get('timeout-minutes')
+        timeout = _scalar(keys.get('timeout-minutes') or '')
         found.append({'name': template, 'pattern': template_pattern(template),
-                      'timeout': int(_scalar(timeout)) if timeout else None})
+                      'timeout': int(timeout) if timeout and '${{' not in timeout else None})
     return found
 
 

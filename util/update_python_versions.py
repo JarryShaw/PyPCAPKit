@@ -40,6 +40,11 @@ pre-release
     ``feature`` or ``prerelease`` once setup-python has a build. No workflow runs
     pre-release legs yet, and :func:`python_versions.load` refuses the tier, so
     such a version is reported (:data:`HELD`) rather than written.
+experimental
+    Free-threaded CPython and GraalPy, which no source here rates (#1660), are
+    hand-maintained: every recompute keeps their entries as the file has them,
+    after the computed versions of their table, and :func:`fingerprint` leaves
+    them out, so a hand edit to one neither changes nor re-proposes the tiers.
 
 PyPy has no release cycle of its own: the Python versions of its newest stable
 release are supported, an older one the file lists stays KTLO while a stable
@@ -48,8 +53,8 @@ pre-release. A version enters the file as supported or pre-release; an
 end-of-life version the file does not list is never added.
 
 Each implementation is one entry of :data:`IMPLEMENTATIONS`, with the sources it
-reads, so adding one (GraalPy, free-threaded CPython) is one more source and one
-more entry, besides its spelling in :file:`util/python_versions.py`.
+reads, so computing another is one more source and one more entry, besides its
+spelling in :file:`util/python_versions.py`.
 
 The tier file is rewritten line by line: a version whose entry is unchanged keeps
 its line byte for byte, so comments, the exemptions and the layout survive, and a
@@ -432,11 +437,16 @@ def leg_names(workflows: 'dict[str, Any]', values: 'dict[str, str]') -> 'dict[tu
 
 
 def required_contexts(workflows: 'dict[str, Any]', values: 'dict[str, str]') -> 'list[str]':
-    """Ruleset 23497679's required contexts for ``values``: the aggregate, and :data:`REQUIRED_JOB`'s blocking legs."""
+    """Ruleset 23497679's required contexts for ``values``: the aggregate, and :data:`REQUIRED_JOB`'s blocking legs.
+
+    A KTLO leg never blocks, nor an experimental one (#1660), so neither is ever proposed as required.
+
+    """
     name, job_id = REQUIRED_JOB
     template = str(workflows[name]['jobs'][job_id]['name'])
     legs = matrix_legs(workflows, values)[REQUIRED_JOB]
-    return [REQUIRED_AGGREGATE] + [render_name(template, leg) for leg in legs if leg.get('ktlo') is not True]
+    return [REQUIRED_AGGREGATE] + [render_name(template, leg) for leg in legs
+                                   if leg.get('ktlo') is not True and leg.get('experimental') is not True]
 
 
 def setup_steps(job: 'dict[str, Any]') -> 'list[dict[str, Any]]':
@@ -750,9 +760,17 @@ def validate(rendered: 'str') -> 'dict[str, Any]':
         return pv.load(path)
 
 
+def computed(versions: 'dict[str, dict[str, Any]]') -> 'dict[str, dict[str, Any]]':
+    """``versions`` without the experimental entries, which no rule here computes, and the tables left empty."""
+    found = {impl: {version: entry for version, entry in entries.items() if entry['tier'] != 'experimental'}
+             for impl, entries in versions.items()}
+    return {impl: entries for impl, entries in found.items() if entries}
+
+
 def fingerprint(latest: 'str', versions: 'dict[str, Any]') -> 'str':
-    """A proposal's identity: its tiers, whatever else moved on ``main``."""
-    canonical = json.dumps({'latest': latest, 'versions': versions}, sort_keys=True, separators=(',', ':'))
+    """A proposal's identity: its computed tiers, whatever else moved on ``main``, hand-kept entries included."""
+    canonical = json.dumps({'latest': latest, 'versions': computed(versions)}, sort_keys=True,
+                           separators=(',', ':'))
     return hashlib.sha256(canonical.encode('utf-8')).hexdigest()[:16]
 
 
@@ -883,8 +901,9 @@ CLAIMS = {
               lambda f: counted(len(f['ktlo']), lines_of(f, 'ktlo'))),
         Claim(r'and the (\w+) ``Compat Python (3\.\d+)``-``(3\.\d+)`` legs',
               lambda f: counted(len(f['required']) - 1, span(f['supported']))),
-        Claim(r'``test`` \((\w+) Python legs: (\w+) supported, (\w+) KTLO\)',
-              lambda f: (Word(f['legs']['test']), Word(len(f['supported'])), Word(len(f['ktlo'])))),
+        Claim(r'``test`` \((\w+) Python legs: (\w+) supported, (\w+) KTLO, (\w+) experimental\)',
+              lambda f: (Word(f['legs']['test']), Word(len(f['supported'])), Word(len(f['ktlo'])),
+                         Word(len(f['experimental'])))),
         Claim(r'``integration`` \((\w+)\)', lambda f: (Word(f['legs']['integration']),)),
         Claim(r'each looping over (\w+) Python versions', lambda f: (Word(f['engines']),)),
         Claim(r'``pypcap-parity`` \((\w+)\)', lambda f: (Word(f['legs']['pypcap-parity']),)),
@@ -985,6 +1004,7 @@ def make_facts(data: 'dict[str, Any]', values: 'dict[str, str]', workflows: 'dic
         'latest': data['latest'],
         'supported': pv.tier(data, 'cpython', 'supported'),
         'ktlo': pv.tier(data, 'cpython', 'ktlo'),
+        'experimental': [version for impl in data['versions'] for version in pv.tier(data, impl, 'experimental')],
         'wheels': len(values['pypi-wheels'].split()),
         'conda': len(json.loads(values['conda'])),
         'legs': {job_id: len(found) for (name, job_id), found in legs.items() if name == 'unit-tests.yml'},
@@ -1043,7 +1063,8 @@ def compute_plan(root: 'pathlib.Path', sources: 'dict[str, Any]') -> 'tuple[dict
 
     versions, reasons, notes, latest = {}, {}, [], before['latest']
     for impl, implementation in IMPLEMENTATIONS.items():
-        result = implementation.compute(before['versions'][impl], context)
+        current = computed(before['versions']).get(impl, {})
+        result = implementation.compute(current, context)
         kept = {}
         for version in sorted(result.entries, key=pv.key):
             entry = result.entries[version]
@@ -1057,6 +1078,12 @@ def compute_plan(root: 'pathlib.Path', sources: 'dict[str, Any]') -> 'tuple[dict
         notes.extend(result.notes)
         if result.latest is not None:
             latest = result.latest
+    # The experimental entries, kept as the file has them, after the computed ones
+    # (#1660); so is a table no rule computes, GraalPy's.
+    for impl, entries in before['versions'].items():
+        versions.setdefault(impl, {}).update(
+            (version, entry) for version, entry in entries.items() if entry['tier'] == 'experimental')
+    versions = {impl: versions[impl] for impl in before['versions']}
     after = dict(before, latest=latest, versions=versions)
     new_tier_text = render_tier_file(old_tier_text, latest, versions)
     validate(new_tier_text)

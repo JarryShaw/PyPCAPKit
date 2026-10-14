@@ -87,6 +87,18 @@ PARITY = tuple(v for v in SUPPORTED + KTLO_ON_LATEST if tuple(map(int, v.split('
 KTLO_GUARD = '${{ matrix.ktlo == true }}'
 #: The job-level level of every annotation a failing step writes (#1672).
 ANNOTATION_LEVEL = "${{ matrix.ktlo && 'warning' || 'error' }}"
+#: ``test``'s, which also hold on its experimental legs (#1660), and the guard of its
+#: ``Experimental summary``, which runs on those legs only.
+NONBLOCKING_GUARD = '${{ matrix.ktlo == true || matrix.experimental == true }}'
+EXPERIMENTAL_GUARD = '${{ matrix.experimental == true }}'
+NONBLOCKING_LEVEL = "${{ (matrix.ktlo || matrix.experimental) && 'warning' || 'error' }}"
+#: A step's ``LEG``, the leg's name in its annotations, in a KTLO job and in ``test``.
+LEG_TEMPLATE = "Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}"
+NONBLOCKING_LEG_TEMPLATE = ("Python ${{ matrix.python-version }}"
+                            "${{ matrix.experimental && ' (experimental, non-blocking)' || '' }}"
+                            "${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}")
+#: The job holding experimental legs, the only one (#1660).
+EXPERIMENTAL_JOB = ('unit-tests.yml', 'test')
 #: Ruleset 23497679's required contexts, which a tier change edits with the file.
 REQUIRED = frozenset({'Required checks passed'} | {f'Compat Python {v}' for v in SUPPORTED})
 
@@ -167,7 +179,8 @@ PROSE_SCAN = (
 PROSE_FILES = ('pyproject.toml', 'README.md', 'SECURITY.md', 'CONTRIBUTING.md', 'Makefile')
 #: Spelled-out counts, as the workflows page writes them.
 WORDS = {'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
-         'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10}
+         'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
+         'eleven': 11, 'twelve': 12, 'thirteen': 13, 'fourteen': 14, 'fifteen': 15}
 
 
 def job(name: 'str', job_id: 'str') -> 'dict[str, Any]':
@@ -190,6 +203,37 @@ def is_ktlo(leg: 'dict[str, Any]') -> 'bool':
     return leg.get('ktlo') is True
 
 
+def is_experimental(leg: 'dict[str, Any]') -> 'bool':
+    """An experimental leg (#1660): non-blocking like a KTLO one, but not KTLO."""
+    return leg.get('experimental') is True
+
+
+def is_nonblocking(leg: 'dict[str, Any]') -> 'bool':
+    return is_ktlo(leg) or is_experimental(leg)
+
+
+def guard(name: 'str', job_id: 'str') -> 'str':
+    """The step-level guard of job ``job_id``'s failure-prone steps."""
+    return NONBLOCKING_GUARD if (name, job_id) == EXPERIMENTAL_JOB else KTLO_GUARD
+
+
+def annotation_level(name: 'str', job_id: 'str') -> 'str':
+    """Job ``job_id``'s ``ANNOTATION_LEVEL``."""
+    return NONBLOCKING_LEVEL if (name, job_id) == EXPERIMENTAL_JOB else ANNOTATION_LEVEL
+
+
+def leg_template(name: 'str', job_id: 'str') -> 'str':
+    """Job ``job_id``'s ``LEG``, on each step that names the leg in an annotation."""
+    return NONBLOCKING_LEG_TEMPLATE if (name, job_id) == EXPERIMENTAL_JOB else LEG_TEMPLATE
+
+
+def leg_label(leg: 'dict[str, Any]') -> 'str':
+    """What ``LEG`` reads on ``leg``."""
+    if is_experimental(leg):
+        return f"Python {leg['python-version']} (experimental, non-blocking)"
+    return f"Python {leg['python-version']}{' (KTLO, non-blocking)' if is_ktlo(leg) else ''}"
+
+
 def bash(script: 'str', env: 'dict[str, str]') -> 'subprocess.CompletedProcess[str]':
     """``script`` under ``bash -e``, GitHub's default shell, with ``env`` added."""
     return subprocess.run(['bash', '-e', '-c', script], env=dict(os.environ, **env),
@@ -204,7 +248,7 @@ class TestTheSupportedTierBlocks(unittest.TestCase):
         for name, job_id, blocking in MATRICES:
             with self.subTest(workflow=name, job=job_id):
                 spec = job(name, job_id)
-                versions = sorted({leg['python-version'] for leg in legs(name, job_id) if not is_ktlo(leg)})
+                versions = sorted({leg['python-version'] for leg in legs(name, job_id) if not is_nonblocking(leg)})
                 self.assertEqual(versions, sorted(blocking))
                 # #1672: not even KTLO-only; job-level, a failed leg's check run is red.
                 self.assertNotIn('continue-on-error', spec)
@@ -281,8 +325,11 @@ class TestTheKTLOTierNeverBlocks(unittest.TestCase):
                     continue  # only ever on a supported leg: the coverage one, the cache saver
                 if label in ('Checkout code', "Check the release tags name this run's commit"):
                     continue  # #1634: blocks every leg alike, pinned in its own test module
+                # Each summary's own guard: it runs on its tier's legs only.
+                expected = {'KTLO summary': KTLO_GUARD,
+                            'Experimental summary': EXPERIMENTAL_GUARD}.get(label, guard(name, job_id))
                 with self.subTest(workflow=name, job=job_id, step=label):
-                    self.assertIn(step.get('continue-on-error'), (True, KTLO_GUARD))
+                    self.assertIn(step.get('continue-on-error'), (True, expected))
 
     def test_engine_tests_isolates_the_ktlo_interpreter_and_cell(self) -> None:
         """The KTLO versions ``ubuntu-latest`` can run, in steps of their own that cannot fail the job."""
@@ -535,11 +582,9 @@ class TestPython37IsKTLO(unittest.TestCase):
         spec = job(name, job_id)
         step = next(step for step in spec['steps'] if step.get('name') == step_name)
         self.assertEqual(step.get('shell'), 'bash', 'pipefail is what keeps `tee` from hiding a failure')
-        self.assertEqual(step['env']['LEG'], "Python ${{ matrix.python-version }}"
-                                             "${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}")
-        self.assertEqual(spec['env']['ANNOTATION_LEVEL'], ANNOTATION_LEVEL)
-        env = dict(env, LEG=f"Python {leg['python-version']}{' (KTLO, non-blocking)' if is_ktlo(leg) else ''}",
-                   ANNOTATION_LEVEL='warning' if is_ktlo(leg) else 'error')
+        self.assertEqual(step['env']['LEG'], leg_template(name, job_id))
+        self.assertEqual(spec['env']['ANNOTATION_LEVEL'], annotation_level(name, job_id))
+        env = dict(env, LEG=leg_label(leg), ANNOTATION_LEVEL='warning' if is_nonblocking(leg) else 'error')
         bin_dir = self.tmp / 'bin'
         bin_dir.mkdir(exist_ok=True)
         python = bin_dir / 'python'
@@ -586,7 +631,7 @@ class TestPython37IsKTLO(unittest.TestCase):
                 condition = str(step.get('if', ''))
                 if 'matrix.coverage' in condition:
                     continue  # the `latest` leg only, which a failed install fails anyway
-                if step.get('name') == 'KTLO summary':
+                if step.get('name') in ('KTLO summary', 'Experimental summary'):
                     continue
                 with self.subTest(workflow=name, job=job_id, step=step.get('name') or step.get('uses')):
                     self.assertIn("steps.install.outcome == 'success'", condition)

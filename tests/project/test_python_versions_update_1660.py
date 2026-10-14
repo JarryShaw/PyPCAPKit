@@ -414,9 +414,14 @@ class TestTheTiers(unittest.TestCase):
         self.assertNotIn('3.5', result.entries)
 
     def test_each_implementation_is_one_entry(self) -> None:
-        """Another implementation is one more source and entry here, and its spelling in python_versions.py."""
+        """Another implementation is one more source and entry here, and its spelling in python_versions.py.
+
+        Bar GraalPy, which is experimental only (#1660): no source here rates it.
+
+        """
         module = updater()
-        self.assertEqual(set(module.IMPLEMENTATIONS), set(module.pv.SPELLING))
+        self.assertEqual(set(module.IMPLEMENTATIONS), set(module.pv.SPELLING) - {'graalpy'})
+        self.assertTrue(module.pv.experimental_only('graalpy', 'graalpy-25.4'))
         for name, implementation in module.IMPLEMENTATIONS.items():
             with self.subTest(implementation=name):
                 self.assertLessEqual(set(implementation.sources), set(module.SOURCES))
@@ -576,6 +581,91 @@ class TestTheRewrite(unittest.TestCase):
             view, _ = module.prose_view(path.read_text(encoding='utf-8'))
             with self.subTest(workflow=path.name):
                 self.assertEqual([match.group(0) for match in restated.finditer(view)], [])
+
+
+#: :data:`FROZEN` with one experimental build of each kind (#1660), the CPython one
+#: carrying an inline comment, so "as written" is checked byte for byte.
+FREE_THREADED = '"3.14t" = { tier = "experimental" }  # free-threaded, hand-kept\n'
+GRAALPY = '\n# GraalPy, hand-kept.\n[versions.graalpy]\n"graalpy-25.4" = { tier = "experimental" }\n'
+
+
+def with_experimental(text: 'str') -> 'str':
+    """A tier file's text with :data:`FREE_THREADED` after CPython's last line and :data:`GRAALPY` after PyPy's."""
+    for anchor, added in (('"3.15" = { tier = "supported" }\n', FREE_THREADED),
+                          ('"pypy3.11" = { tier = "supported" }\n', GRAALPY)):
+        if text.count(anchor) != 1:
+            raise AssertionError(f'{anchor!r} is not one line of the tier file')
+        text = text.replace(anchor, anchor + added)
+    return text
+
+
+class TestTheExperimentalEntriesAreHandKept(unittest.TestCase):
+    """#1660: no source rates free-threaded CPython or GraalPy, so every recompute keeps them as written."""
+
+    def scratch(self) -> 'pathlib.Path':
+        """:func:`scratch` with :func:`with_experimental` applied to :data:`FROZEN`, the prose regenerated."""
+        root = scratch(self, regenerate=False)
+        tier_file = root / updater().TIER_FILE
+        tier_file.write_text(with_experimental(FROZEN.read_text(encoding='utf-8')), encoding='utf-8')
+        plan, texts = updater().compute_plan(root, as_of_the_file(snapshot()))
+        self.assertEqual(plan['changes'], [])
+        self.assertNotIn(updater().TIER_FILE, texts)
+        for path, text in texts.items():
+            (root / path).write_bytes(text.encode('utf-8'))
+        return root
+
+    def test_a_run_that_changes_nothing_writes_nothing(self) -> None:
+        root = self.scratch()
+        plan, texts = updater().compute_plan(root, as_of_the_file(snapshot()))
+        self.assertEqual((plan['changes'], texts, plan['notes']), ([], {}, []))
+        self.assertIn('``test`` (eleven Python legs: five supported, four KTLO, two experimental)',
+                      ' '.join((root / 'docs/source/contributing/workflows.rst').read_text(encoding='utf-8').split()))
+
+    def test_a_tier_move_keeps_them_byte_for_byte_after_the_computed_versions(self) -> None:
+        root = self.scratch()
+        before = (root / updater().TIER_FILE).read_text(encoding='utf-8')
+        plan, texts = updater().compute_plan(root, three_eleven_ends_and_three_sixteen_ships(snapshot()))
+        self.assertEqual(changes(plan), {'3.11': ({'tier': 'supported'}, {'tier': 'ktlo'}),
+                                         '3.16': (None, {'tier': 'supported'}),
+                                         'pypy3.12': (None, {'tier': 'supported'})})
+        after = texts[updater().TIER_FILE]
+        self.assertIn('"3.16" = { tier = "supported" }\n' + FREE_THREADED, after)
+        self.assertIn('"pypy3.12" = { tier = "supported" }\n' + GRAALPY, after)
+        self.assertEqual(after.replace('"3.16" = { tier = "supported" }\n', '').replace(
+            '"pypy3.12" = { tier = "supported" }\n', '').replace(
+            '"3.11" = { tier = "ktlo" }', '"3.11" = { tier = "supported" }').replace(
+            'latest = "3.16"', 'latest = "3.15"'), before)
+        self.assertEqual(updater().validate(after)['versions']['graalpy'], {'graalpy-25.4': {'tier': 'experimental'}})
+        self.assertFalse([name for name in plan['added'] + plan['removed'] + sum(plan['renamed'], [])
+                          if 'experimental' in name], plan)
+
+    def test_a_hand_edit_to_one_is_not_a_new_proposal(self) -> None:
+        """The fingerprint is the computed tiers', so an open proposal stays recognised across one."""
+        module = updater()
+        data = frozen()
+        edited = module.validate(with_experimental(FROZEN.read_text(encoding='utf-8')))
+        self.assertNotEqual(edited['versions'], data['versions'])
+        self.assertEqual(module.fingerprint(edited['latest'], edited['versions']),
+                         module.fingerprint(data['latest'], data['versions']))
+        moved = copy.deepcopy(edited['versions'])
+        moved['cpython']['3.11'] = {'tier': 'ktlo'}
+        self.assertNotEqual(module.fingerprint(edited['latest'], moved),
+                            module.fingerprint(edited['latest'], edited['versions']))
+        _, plain, _ = plan_for(self, snapshot())
+        plan, _ = module.compute_plan(self.scratch(), snapshot())
+        self.assertEqual(plan['fingerprint'], plain['fingerprint'])
+
+    def test_no_experimental_leg_is_proposed_as_a_required_context(self) -> None:
+        """Were one ever given a ``Compat`` leg, the ruleset edit the body lists would still leave it out."""
+        module = updater()
+        workflows = module.load_workflows(ROOT)
+        values = module.pv.outputs(frozen())
+        compatibility = json.loads(values['compatibility'])
+        compatibility['include'].append({'python-version': '3.14t', 'experimental': True})
+        widened = dict(values, compatibility=json.dumps(compatibility))
+        self.assertIn('3.14t', [leg['python-version'] for leg in
+                                module.matrix_legs(workflows, widened)[module.REQUIRED_JOB]])
+        self.assertEqual(module.required_contexts(workflows, widened), module.required_contexts(workflows, values))
 
 
 def run_prose_audit(root: 'pathlib.Path') -> 'unittest.TestResult':

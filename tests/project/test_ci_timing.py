@@ -241,6 +241,17 @@ class TestWorkflowText(unittest.TestCase):
             ordering, 'Run tests/protocols and the root-level modules under plain unittest'), 20)
         caps = {spec['id']: spec['timeout'] for spec in specs}
         self.assertEqual((caps['test'], caps['integration'], caps['engine-tests']), (45, 45, 30))
+        # #1660: its experimental legs' caps are expressions, so no leg's is known.
+        self.assertIsNone(ci_timing.step_cap(test, ci_timing.TESTS_STEP))
+
+    def test_a_cap_by_leg_reads_as_none(self) -> 'None':
+        """An expression is no one cap; a literal beside it still reads."""
+        specs = ci_timing.parse_workflow(
+            'jobs:\n  test:\n    timeout-minutes: 45\n    steps:\n'
+            '      - name: Run unit tests\n        timeout-minutes: ${{ matrix.experimental && 25 || 360 }}\n'
+            '      - name: Report coverage\n        timeout-minutes: 15\n')
+        self.assertEqual([(step['name'], step['timeout']) for step in specs[0]['steps']],
+                         [('Run unit tests', None), ('Report coverage', 15)])
 
     def test_every_other_workflow_reads(self) -> 'None':
         """Including CodeQL's four-space step list, and a literal name over a template."""

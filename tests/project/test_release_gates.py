@@ -137,8 +137,8 @@ is the only row in the table that mutation fails.
 
 :func:`evaluate_condition` implements the subset this workflow uses and
 nothing more: ``!``, ``&&``, ``||``, parentheses, ``==``/``!=`` against
-single-quoted literals, ``startsWith``, ``contains``, ``fromJSON``, the
-status-check functions, and ``needs.<job>.result`` /
+single-quoted literals, integer literals, ``startsWith``, ``contains``,
+``fromJSON``, the status-check functions, and ``needs.<job>.result`` /
 ``needs.<job>.outputs.<NAME>`` / ``github.*`` lookups. ``contains``,
 ``fromJSON`` and ``always()`` appear in no gate on the tree -- they are
 implemented because the mutation table needs them *evaluated* rather than
@@ -640,10 +640,13 @@ STATUS = 'status()'
 #: ``!=``, turning ``a != b`` into a negation followed by a stray ``=``.
 #: Property paths are tokenised whole, dots and hyphens included, since
 #: ``needs.unit-tests.result`` is one lookup and not an arithmetic expression.
+#: A number is a non-negative integer only, which is what a step's ``timeout-minutes``
+#: needs (#1660), so ``1.5`` or ``-1`` still raises.
 _EXPR_TOKEN = re.compile(
     r"""  (?P<space>\s+)
         | (?P<op>&&|\|\||==|!=|\(|\)|,|!)
         | (?P<string>'(?:[^']|'')*')
+        | (?P<number>\d+)
         | (?P<name>[A-Za-z_][A-Za-z0-9_.-]*)
     """,
     re.VERBOSE,
@@ -783,6 +786,10 @@ class _Parser:
             # Actions escapes a single quote inside a single-quoted literal by
             # doubling it, so `'it''s'` is one literal and not two.
             return ('lit', text[1:-1].replace("''", "'"))
+
+        if kind == 'number':
+            self.index += 1
+            return ('lit', int(text))
 
         if kind == 'name':
             self.index += 1
@@ -2899,12 +2906,21 @@ class TestTheExpressionEvaluator(unittest.TestCase):
     def test_a_doubled_quote_inside_a_literal_is_one_literal(self) -> None:
         self.assertTrue(self.evaluate("${{ 'it''s' == 'IT''S' }}"))
 
+    def test_an_integer_literal_is_a_number(self) -> None:
+        """What ``&& N || M`` returns, as a step's ``timeout-minutes`` reads it (#1660)."""
+        self.assertEqual(evaluate_expression('${{ true && 25 || 360 }}', {}), 25)
+        self.assertEqual(evaluate_expression('${{ false && 25 || 360 }}', {}), 360)
+        self.assertFalse(self.evaluate('${{ 0 }}'))
+        self.assertTrue(self.evaluate("${{ 25 == '25' }}"))
+
     def test_syntax_outside_the_subset_raises_rather_than_guessing(self) -> None:
         """Each of these is a real Actions expression this module does not
         implement, and each has to fail loudly rather than be approximated.
 
         """
         for condition in ('${{ 1 > 2 }}',                       # no ordering operators
+                          '${{ 1.5 }}',                         # an integer is the only number
+                          '${{ -1 }}',
                           "${{ join(needs.*.result, ',') }}",   # no `*` and no `join`
                           '${{ toJSON(needs) }}',               # not in the subset
                           '${{ needs.version_check.result == }}',
