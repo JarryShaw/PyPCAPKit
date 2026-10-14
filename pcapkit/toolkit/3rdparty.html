@@ -1063,7 +1063,7 @@ for lack of the corresponding <a class="reference external" href="https://kimine
 </div>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.pyshark.tcp_traceflow">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pyshark.</span></span><span class="sig-name descname"><span class="pre">tcp_traceflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">captured</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pyshark.html#tcp_traceflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pyshark.tcp_traceflow" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pyshark.</span></span><span class="sig-name descname"><span class="pre">tcp_traceflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pyshark.html#tcp_traceflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pyshark.tcp_traceflow" title="Link to this definition">¶</a></dt>
 <dd><p>Trace packet flow for TCP.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1072,14 +1072,6 @@ for lack of the corresponding <a class="reference external" href="https://kimine
 <li><p><strong>count</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Packet index. If not provided, default to <code class="docutils literal notranslate"><span class="pre">-1</span></code>. The engine
 passes its own frame count, not tshark’s <code class="docutils literal notranslate"><span class="pre">frame.number</span></code>, which
 also numbers records that are not packets (#1515).</p></li>
-<li><p><strong>captured</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Captured</span></code> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Fetches a frame as the default engine reads it from the
-capture file, given its packet: its link type there and its
-captured octets, neither of which the PDML carries; or
-<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> where it cannot. It is called only for a packet
-<code class="xref py py-data docutils literal notranslate"><span class="pre">OCTETS_FILTER</span></code> matches. The engine passes
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">PyShark._captured</span></code>; without
-it, or where it returns <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>, a packet is read as tshark
-dissects it.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -1090,15 +1082,9 @@ dissects it.</p></li>
 <ul class="simple">
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be used for TCP flow tracing. A packet can be reassembled
 if it contains TCP layer with a whole fixed header (see
-<code class="xref py py-func docutils literal notranslate"><span class="pre">_has_fixed_header()</span></code>), keyed by the addresses of the IP header that
-carries it (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_header_addresses()</span></code>) – in an IP-in-IP tunnel, the
-innermost (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_carrier()</span></code>). Where
-<code class="docutils literal notranslate"><span class="pre">captured</span></code> has the frame, it is instead the TCP the default engine
-reads in the frame’s octets, by the frame’s link type in the capture
-file, and none where the default engine reads none: behind a link
-type, EtherType or tunnel it does not dissect, or past
-<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.FRAME_LAYER_LIMIT" title="pcapkit.protocols.protocol.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a> layers of the
-frame (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_segment()</span></code>).</p></li>
+<code class="xref py py-func docutils literal notranslate"><span class="pre">_has_fixed_header()</span></code>), keyed by the IP layer that carries it – in an
+IP-in-IP tunnel, the innermost (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_carrier()</span></code>) – if tshark reports
+both its addresses (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_has_addresses()</span></code>).</p></li>
 <li><p>If the <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be reassembled, then the <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> mapping of data for TCP
 flow tracing (<a class="reference internal" href="../foundation/traceflow/tcp.html#term-trace.tcp.packet"><span class="xref std std-term">trace.tcp.packet</span></a>) will be returned; otherwise, returns <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p></li>
 </ul>
@@ -1149,13 +1135,6 @@ other 69 refused the rewrite, so they are untested. Those 157 yielded 153 distin
 152 of them are below; <code class="docutils literal notranslate"><span class="pre">frame.encap_type</span></code> 32 (<code class="docutils literal notranslate"><span class="pre">editcap</span> <span class="pre">-T</span> <span class="pre">hhdlc</span></code>, DLT 121) is left out
 because <code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code> has no member for 121. An encapsulation absent from this table raises
 rather than resolving to a near-miss DLT.</p>
-<p>In the read direction, one key can come from several DLTs. Measured with <code class="docutils literal notranslate"><span class="pre">tshark</span></code> 4.6.9 over
-every PCAP-NG link type from 0 to 65535 (bar 144 and 177, under which it rejected the test
-frame), <code class="docutils literal notranslate"><span class="pre">frame.encap_type</span></code> 7 is read from DLTs 12, 14 and 101, 4 from 9 and 50, 10 from 11
-and 100, 11 from 16, 18, 19 and 106, 28 from 104 and 112, and 38 from 13 and 109; each other
-key of this table from one DLT. So where <a class="reference internal" href="#pcapkit.toolkit.pyshark.tcp_traceflow" title="pcapkit.toolkit.pyshark.tcp_traceflow"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_traceflow()</span></code></a> reads a frame as the default
-engine does, it takes the link type from the capture file rather than from this table
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1625">#1625</a>).</p>
 </dd></dl>
 
 <dl class="py data">

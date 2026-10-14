@@ -58,3 +58,5 @@ following objects and functions:
      - Python 3.11
    * - :data:`typing.TypeAlias`
      - Python 3.10
+   * - :data:`threading.__excepthook__`, as ``default_threading_excepthook``
+     - Python 3.10

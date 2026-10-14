@@ -499,6 +499,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="ne">ModuleNotFoundError</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">default_threading_excepthook</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">DEVMODE</span><span class="p">,</span> <span class="n">VERBOSE</span><span class="p">,</span> <span class="n">get_logger</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -822,9 +823,10 @@
 <span class="sd">    traceback -- then its own message tersely, with ``limit=0`` against the real</span>
 <span class="sd">    traceback so a chained exception still comes out right. Anything else is</span>
 <span class="sd">    handed to ``_previous_threading_excepthook`` -- or</span>
-<span class="sd">    :data:`threading.__excepthook__`, the interpreter's own default, if nothing</span>
-<span class="sd">    was previously installed -- unchanged, header included, since that path</span>
-<span class="sd">    does not touch the default hook's own printing at all.</span>
+<span class="sd">    :data:`~pcapkit.utilities.compat.default_threading_excepthook`, the</span>
+<span class="sd">    interpreter's own default, if nothing was previously installed --</span>
+<span class="sd">    unchanged, header included, since that path does not touch the default</span>
+<span class="sd">    hook's own printing at all.</span>
 
 <span class="sd">    This hook is needed because the interpreter's *default*</span>
 <span class="sd">    :data:`threading.excepthook` consults :data:`sys.tracebacklimit`, which</span>
@@ -833,7 +835,7 @@
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">_threading_hook_state</span><span class="p">,</span> <span class="s1">'running'</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
-        <span class="n">threading</span><span class="o">.</span><span class="n">__excepthook__</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+        <span class="n">default_threading_excepthook</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
         <span class="k">return</span>
 
     <span class="n">_threading_hook_state</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="kc">True</span>
@@ -849,7 +851,7 @@
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Exception in thread </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">:'</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
             <span class="n">traceback</span><span class="o">.</span><span class="n">print_exception</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">exc_type</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">exc_value</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">exc_traceback</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">delegate</span> <span class="o">=</span> <span class="n">_previous_threading_excepthook</span> <span class="ow">or</span> <span class="n">threading</span><span class="o">.</span><span class="n">__excepthook__</span>
+            <span class="n">delegate</span> <span class="o">=</span> <span class="n">_previous_threading_excepthook</span> <span class="ow">or</span> <span class="n">default_threading_excepthook</span>
             <span class="n">delegate</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
     <span class="k">finally</span><span class="p">:</span>
         <span class="n">_threading_hook_state</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="kc">False</span>

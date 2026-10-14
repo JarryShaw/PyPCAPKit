@@ -648,6 +648,11 @@ as below:</p>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed packet data.</p>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the packet is one of the errors
+    <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2675.html#section-3"><strong>RFC 2675 Section 3</strong></a> has a receiver detect (see
+    <code class="xref py py-func docutils literal notranslate"><span class="pre">jumbogram_error()</span></code>).</p>
+</dd>
 </dl>
 </dd></dl>
 
@@ -669,7 +674,8 @@ as below:</p>
 <li><p><strong>dst</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6Address</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Destination IP address.</p></li>
 <li><p><strong>payload_length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Length of the payload, extension headers included;
 computed from the payload when omitted, and zero (a jumbogram)
-if that exceeds 65,535 octets.</p></li>
+if that exceeds 65,535 octets or the payload starts with a
+Hop-by-Hop Options header carrying a Jumbo Payload option.</p></li>
 <li><p><strong>payload</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> | <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></span>) – Payload data.</p></li>
 <li><p><strong>trailer</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Octets after the packet, outside the Payload Length, such
 as link-layer padding; written as is.</p></li>
@@ -721,6 +727,11 @@ as link-layer padding; written as is.</p></li>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Current protocol with next layer extracted.</p>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the walk reaches a Fragment header in a packet
+    carrying a Jumbo Payload option, an error by
+    <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2675.html#section-3"><strong>RFC 2675 Section 3</strong></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1687">#1687</a>).</p>
+</dd>
 </dl>
 </dd></dl>
 
@@ -753,7 +764,7 @@ as link-layer padding; written as is.</p></li>
 <dd><p>Version, traffic class and flow label.</p>
 <p>The <a class="reference internal" href="../../corekit/fields/strings.html#pcapkit.corekit.fields.strings.BitField" title="pcapkit.corekit.fields.strings.BitField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BitField</span></code></a> namespace maps each
 subfield to a <code class="docutils literal notranslate"><span class="pre">(start_bit,</span> <span class="pre">length_in_bits)</span></code> pair, <em>not</em> to
-<code class="docutils literal notranslate"><span class="pre">(start_bit,</span> <span class="pre">end_bit)</span></code>. Per <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-3"><strong>RFC 8200 Section 3</strong></a> the first 32 bits of
+<code class="docutils literal notranslate"><span class="pre">(start_bit,</span> <span class="pre">end_bit)</span></code>. Per <span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-3"><strong>RFC 8200 Section 3</strong></a> the first 32 bits of
 the IPv6 header are Version (bits 0-3), Traffic Class (bits 4-11) and
 Flow Label (bits 12-31), so the flow label starts at bit 12 – reading it
 as <code class="docutils literal notranslate"><span class="pre">(8,</span> <span class="pre">20)</span></code> would overlap the low nibble of the traffic class and drop
@@ -808,7 +819,7 @@ padding, c.f. <a class="reference internal" href="ipv4.html#pcapkit.protocols.sc
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6.IPv6.post_process">
 <span class="sig-name descname"><span class="pre">post_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/ipv6.html#IPv6.post_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6.IPv6.post_process" title="Link to this definition">¶</a></dt>
 <dd><p>Revise <code class="docutils literal notranslate"><span class="pre">schema</span></code> data after unpacking process.</p>
-<p>A jumbogram [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2675.html"><strong>RFC 2675</strong></a>] declares a Payload Length of zero and
+<p>A jumbogram [<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2675.html"><strong>RFC 2675</strong></a>] declares a Payload Length of zero and
 carries its real length in a Jumbo Payload option instead, so the
 <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6.IPv6.payload" title="pcapkit.protocols.schema.internet.ipv6.IPv6.payload"><code class="xref py py-attr docutils literal notranslate"><span class="pre">payload</span></code></a> field reads nothing and every octet lands in
 <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6.IPv6.trailer" title="pcapkit.protocols.schema.internet.ipv6.IPv6.trailer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">trailer</span></code></a>. When <code class="xref py py-func docutils literal notranslate"><span class="pre">jumbo_payload_length()</span></code> finds that option,

@@ -536,12 +536,12 @@ landed and is ready to go out.</p>
 <code class="docutils literal notranslate"><span class="pre">tests/project/test_bump_version.py</span></code>’s
 <code class="docutils literal notranslate"><span class="pre">RepositoryCitationTests.test_the_citation_file_names_the_packaged_version</span></code>
 (<code class="docutils literal notranslate"><span class="pre">:494-514</span></code>) asserts the two agree, and <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s
-<code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> job (<code class="docutils literal notranslate"><span class="pre">:419-433</span></code>) calls <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> with
+<code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> job (<code class="docutils literal notranslate"><span class="pre">:467-481</span></code>) calls <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> with
 <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code>, which runs the <strong>full</strong> suite rather than the tiered
 subset an ordinary push runs (its <code class="docutils literal notranslate"><span class="pre">gate</span></code> job, <code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1679-1749</span></code>).
 That gate runs whenever a release will – a moved <code class="docutils literal notranslate"><span class="pre">__version__</span></code> is exactly
 what makes <code class="docutils literal notranslate"><span class="pre">version_check</span></code>’s evidence read “not yet published” – and every
-publishing job requires it to have succeeded (<code class="docutils literal notranslate"><span class="pre">:452,637,802,1037</span></code>), so a
+publishing job requires it to have succeeded (<code class="docutils literal notranslate"><span class="pre">:500,685,850,1085</span></code>), so a
 citation left behind fails the gate well before any approval is requested.
 Either run the script, or move both fields by hand in the same commit.</p>
 <p>This is the <strong>only</strong> edit a person makes to get a release started – the tag,
@@ -551,7 +551,7 @@ process: the <code class="docutils literal notranslate"><span class="pre">change
 <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> has drifted from its source entry under
 <code class="file docutils literal notranslate"><span class="pre">docs/source/changelog/</span></code>, and the release-body step warns, without
 failing, if that entry’s heading still reads “unreleased”
-(<code class="docutils literal notranslate"><span class="pre">create-release.yml:506-507</span></code>). Both enforce what the changelog convention
+(<code class="docutils literal notranslate"><span class="pre">create-release.yml:554-555</span></code>). Both enforce what the changelog convention
 already asks for.</p>
 </section>
 <section id="two-ways-to-start-a-release">
@@ -564,10 +564,10 @@ neither is a workaround for the other:</p>
 release, not which version: <code class="docutils literal notranslate"><span class="pre">version_check</span></code>’s checkout
 (<code class="docutils literal notranslate"><span class="pre">:216-220</span></code>) pins <code class="docutils literal notranslate"><span class="pre">ref:</span> <span class="pre">${{</span> <span class="pre">github.sha</span> <span class="pre">}}</span></code>, which on this trigger is
 the commit the pushed tag points at, and reads <code class="docutils literal notranslate"><span class="pre">pcapkit.__version__</span></code> out
-of <em>that</em> tree (<code class="docutils literal notranslate"><span class="pre">:244</span></code>). Every downstream tag and release name is built
+of <em>that</em> tree (<code class="docutils literal notranslate"><span class="pre">:245</span></code>). Every downstream tag and release name is built
 from that output – <code class="docutils literal notranslate"><span class="pre">v${{</span> <span class="pre">needs.version_check.outputs.PCAPKIT_VERSION</span> <span class="pre">}}</span></code>
-is <code class="docutils literal notranslate"><span class="pre">github</span></code>’s <code class="docutils literal notranslate"><span class="pre">tag_name</span></code> at <code class="docutils literal notranslate"><span class="pre">:548</span></code> and the release <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and
-<code class="docutils literal notranslate"><span class="pre">conda</span></code> upload to at <code class="docutils literal notranslate"><span class="pre">:944</span></code> and <code class="docutils literal notranslate"><span class="pre">:1290</span></code>, always from
+is <code class="docutils literal notranslate"><span class="pre">github</span></code>’s <code class="docutils literal notranslate"><span class="pre">tag_name</span></code> at <code class="docutils literal notranslate"><span class="pre">:596</span></code> and the release <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and
+<code class="docutils literal notranslate"><span class="pre">conda</span></code> upload to at <code class="docutils literal notranslate"><span class="pre">:992</span></code> and <code class="docutils literal notranslate"><span class="pre">:1338</span></code>, always from
 <code class="docutils literal notranslate"><span class="pre">PCAPKIT_VERSION</span></code>, never from <code class="docutils literal notranslate"><span class="pre">github.ref_name</span></code> – so the version
 actually released is whatever <code class="docutils literal notranslate"><span class="pre">__version__</span></code> says on the tagged commit,
 not the name of the tag that was pushed. The two agree only if the tag
@@ -610,19 +610,19 @@ days later, and tagged <code class="docutils literal notranslate"><span class="p
 the default branch, and <code class="docutils literal notranslate"><span class="pre">tag</span></code> pulled <code class="docutils literal notranslate"><span class="pre">main</span></code> before tagging.</p>
 <ul class="simple">
 <li><p>On <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code>, where <code class="docutils literal notranslate"><span class="pre">github</span></code> creates the <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag, it passes
-<code class="docutils literal notranslate"><span class="pre">target_commitish</span></code> <code class="docutils literal notranslate"><span class="pre">github.sha</span></code> (<code class="docutils literal notranslate"><span class="pre">:561</span></code>); on a <code class="docutils literal notranslate"><span class="pre">v*</span></code> push the tag
+<code class="docutils literal notranslate"><span class="pre">target_commitish</span></code> <code class="docutils literal notranslate"><span class="pre">github.sha</span></code> (<code class="docutils literal notranslate"><span class="pre">:609</span></code>); on a <code class="docutils literal notranslate"><span class="pre">v*</span></code> push the tag
 already exists and it passes none. Either way it then checks that the tag
 names that commit.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">tag</span></code> cuts <code class="docutils literal notranslate"><span class="pre">conda-&lt;version&gt;+0</span></code> at that commit (<code class="docutils literal notranslate"><span class="pre">:674-701</span></code>) before it
+<li><p><code class="docutils literal notranslate"><span class="pre">tag</span></code> cuts <code class="docutils literal notranslate"><span class="pre">conda-&lt;version&gt;+0</span></code> at that commit (<code class="docutils literal notranslate"><span class="pre">:722-749</span></code>) before it
 reads <code class="docutils literal notranslate"><span class="pre">main</span></code> at all; the <code class="file docutils literal notranslate"><span class="pre">conda/build</span></code> reset is a separate commit on
-top of <code class="docutils literal notranslate"><span class="pre">main</span></code> (<code class="docutils literal notranslate"><span class="pre">:723-776</span></code>), described under <a class="reference internal" href="#precautions">Precautions</a>.</p></li>
+top of <code class="docutils literal notranslate"><span class="pre">main</span></code> (<code class="docutils literal notranslate"><span class="pre">:771-824</span></code>), described under <a class="reference internal" href="#precautions">Precautions</a>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> check out that commit and, before building, check
 that every tag they publish under names it, as <code class="docutils literal notranslate"><span class="pre">tag</span></code> does for the <code class="docutils literal notranslate"><span class="pre">v*</span></code>
 tag. A run created for a <em>later</em> commit of the same version therefore fails
 with an <code class="docutils literal notranslate"><span class="pre">::error</span></code> instead of publishing a second tree under that version;
 a partial release is finished by re-running the run that tagged it.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> attach their files with <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">release</span> <span class="pre">upload</span></code>
-(<code class="docutils literal notranslate"><span class="pre">:937-974</span></code>, <code class="docutils literal notranslate"><span class="pre">:1285-1320</span></code>), not <code class="docutils literal notranslate"><span class="pre">action-gh-release</span></code>, which calls Update
+(<code class="docutils literal notranslate"><span class="pre">:985-1022</span></code>, <code class="docutils literal notranslate"><span class="pre">:1333-1368</span></code>), not <code class="docutils literal notranslate"><span class="pre">action-gh-release</span></code>, which calls Update
 a release before every upload (3.0.2’s <code class="docutils literal notranslate"><span class="pre">src/github.ts:631-683</span></code>). A file
 the release already has is left alone
 (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1640">#1640</a>): the action
@@ -705,11 +705,11 @@ flags, which unset inputs make the tag, <code class="docutils literal notranslat
 the release with a GitHub App installation token, which Create a release
 accepts for a target that changes a workflow file when it has the “Workflows”
 repository permission (write). “Mint the release App’s token”
-(<code class="docutils literal notranslate"><span class="pre">create-release.yml:521-529</span></code>) runs
+(<code class="docutils literal notranslate"><span class="pre">create-release.yml:569-577</span></code>) runs
 <code class="docutils literal notranslate"><span class="pre">actions/create-github-app-token&#64;v3</span></code> with <code class="docutils literal notranslate"><span class="pre">permission-contents:</span> <span class="pre">write</span></code> and
 <code class="docutils literal notranslate"><span class="pre">permission-workflows:</span> <span class="pre">write</span></code> and no <code class="docutils literal notranslate"><span class="pre">owner</span></code> or <code class="docutils literal notranslate"><span class="pre">repositories</span></code>, so the
 token is “scoped to only the current repository” and revoked in the action’s
-<code class="docutils literal notranslate"><span class="pre">post</span></code> step (v3.3.0’s README). Only Create Release spends it (<code class="docutils literal notranslate"><span class="pre">:565</span></code>).
+<code class="docutils literal notranslate"><span class="pre">post</span></code> step (v3.3.0’s README). Only Create Release spends it (<code class="docutils literal notranslate"><span class="pre">:613</span></code>).
 While <code class="docutils literal notranslate"><span class="pre">vars.RELEASE_APP_CLIENT_ID</span></code> is unset, which reads as “an empty
 string”, the step skips and Create Release spends <code class="docutils literal notranslate"><span class="pre">GITHUB_TOKEN</span></code>, so the
 workflow keeps working, refusals included, until the App exists. A PAT would
@@ -718,27 +718,31 @@ it from a tag pushed by hand.</p>
 <p>One-time setup:</p>
 <ol class="arabic simple">
 <li><p>Register a GitHub App with the <strong>Contents</strong> and <strong>Workflows</strong> repository
-permissions at read and write, and install it on this repository only.</p></li>
+permissions at read and write, and install it on this repository only. Add
+<strong>Pull requests</strong> at read and write too, and accept it on the installation:
+the Python Versions workflow’s <code class="docutils literal notranslate"><span class="pre">pr</span></code> job opens its pull request with a token
+of this App, with contents and pull requests write only (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1660">#1660</a>, <a class="reference internal" href="workflows.html"><span class="doc">GitHub Actions Workflows</span></a>).</p></li>
 <li><p>Add repository variables <code class="docutils literal notranslate"><span class="pre">RELEASE_APP_CLIENT_ID</span></code>, the App’s Client ID, and
 <code class="docutils literal notranslate"><span class="pre">RELEASE_APP_BOT_ID</span></code>, its bot’s user id (<code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">api</span>
 <span class="pre">&quot;/users/&lt;app-slug&gt;[bot]&quot;</span> <span class="pre">--jq</span> <span class="pre">.id</span></code>, as the action’s README reads it).</p></li>
 <li><p>Store the App’s private key as <code class="docutils literal notranslate"><span class="pre">RELEASE_APP_PRIVATE_KEY</span></code>, a secret of the
 <code class="docutils literal notranslate"><span class="pre">github-release</span></code> environment rather than of the repository: “If the
 environment requires approval, a job cannot access environment secrets
-until one of the required reviewers approves it”, and <code class="docutils literal notranslate"><span class="pre">github</span></code> is the only
-job that names the environment or reads the secret.</p></li>
+until one of the required reviewers approves it”. <code class="docutils literal notranslate"><span class="pre">github</span></code> and Python
+Versions’ <code class="docutils literal notranslate"><span class="pre">pr</span></code> are the only jobs that name the environment or read the
+secret.</p></li>
 </ol>
 <p>Unlike <code class="docutils literal notranslate"><span class="pre">GITHUB_TOKEN</span></code>’s, the App’s tag starts a tag-push run. It would rerun
 the release test gate, ask for a second approval and race the first run’s
 uploads from another concurrency group, so <code class="docutils literal notranslate"><span class="pre">version_check</span></code> skips a <code class="docutils literal notranslate"><span class="pre">push</span></code>
 whose <code class="docutils literal notranslate"><span class="pre">github.actor_id</span></code> is <code class="docutils literal notranslate"><span class="pre">vars.RELEASE_APP_BOT_ID</span></code> (<code class="docutils literal notranslate"><span class="pre">:210-212</span></code>), and
 <code class="docutils literal notranslate"><span class="pre">release_status</span></code> reports it with <code class="docutils literal notranslate"><span class="pre">::notice</span> <span class="pre">title=Nothing</span> <span class="pre">to</span> <span class="pre">release</span></code>
-(<code class="docutils literal notranslate"><span class="pre">:1392-1394</span></code>). A tag pushed by a person runs as before. Whether a tag made
+(<code class="docutils literal notranslate"><span class="pre">:1440-1442</span></code>). A tag pushed by a person runs as before. Whether a tag made
 through the Releases API fires <code class="docutils literal notranslate"><span class="pre">push</span></code>, and with the bot as actor, is
 unmeasured; if not, the guard never matches and the cost is one approval to
 reject.</p>
 <p>A refused Create Release (404, or 403 “Resource not accessible by
-integration”) is explained by “Explain a refused release tag” (<code class="docutils literal notranslate"><span class="pre">:598-610</span></code>)
+integration”) is explained by “Explain a refused release tag” (<code class="docutils literal notranslate"><span class="pre">:646-658</span></code>)
 according to the token spent: with <code class="docutils literal notranslate"><span class="pre">GITHUB_TOKEN</span></code> it lists the setup above;
 with the App’s, it points at the App’s permissions and installation. For a
 final release, first delete any draft <code class="docutils literal notranslate"><span class="pre">v&lt;version&gt;</span></code> the refused run left:
@@ -783,6 +787,16 @@ rather than being absorbed.</p></li>
 <p>All three evidence checks run inside <code class="docutils literal notranslate"><span class="pre">version_check</span></code>, curling PyPI’s and
 Anaconda’s public, unauthenticated JSON APIs; the per-leg check runs inside
 <code class="docutils literal notranslate"><span class="pre">conda</span></code> itself, once per matrix leg, against the same Anaconda endpoint.</p>
+<p>The PyPI and Anaconda counts are of the tiers the version was released with.
+Until its <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag exists, that is this run’s
+<code class="file docutils literal notranslate"><span class="pre">.github/python-versions.toml</span></code>; once it does, <code class="docutils literal notranslate"><span class="pre">version_check</span></code> reads the
+file at the tag’s commit with that commit’s <code class="docutils literal notranslate"><span class="pre">util/python_versions.py</span></code>. A
+supported version added since (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1660">#1660</a>) was never built for the
+release, and counting it would read a finished release as incomplete, run the
+gate and <code class="docutils literal notranslate"><span class="pre">pypi</span></code>, and fail <a class="reference internal" href="#one-commit-per-release">One Commit per Release</a>’s tag check on every run
+until the next release. A tag older than the file, as <code class="docutils literal notranslate"><span class="pre">v1.5.0b12</span></code> is, counts
+the tiers the file was added with, which #1677 copied unchanged from the
+workflows of the time.</p>
 <p>On the tag-push path <code class="docutils literal notranslate"><span class="pre">startsWith(github.ref_name,</span> <span class="pre">'v')</span></code> bypasses the
 evidence check unconditionally; on the <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> path it falls through
 to whichever evidence that job owns.</p>
@@ -862,8 +876,8 @@ that it can run regardless of which of them skipped.</p>
 removed on <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/887">#887</a>.
 What still makes one approval mean <em>the whole release</em> is the <code class="docutils literal notranslate"><span class="pre">needs:</span></code>
 graph: <code class="docutils literal notranslate"><span class="pre">tag</span></code> and <code class="docutils literal notranslate"><span class="pre">pypi</span></code> both depend on <code class="docutils literal notranslate"><span class="pre">github</span></code>
-(<code class="docutils literal notranslate"><span class="pre">.github/workflows/create-release.yml:637,802</span></code>), and <code class="docutils literal notranslate"><span class="pre">conda</span></code> depends on
-<code class="docutils literal notranslate"><span class="pre">tag</span></code> and <code class="docutils literal notranslate"><span class="pre">github</span></code> (<code class="docutils literal notranslate"><span class="pre">:1037</span></code>) – so nothing downstream of <code class="docutils literal notranslate"><span class="pre">github</span></code> can
+(<code class="docutils literal notranslate"><span class="pre">.github/workflows/create-release.yml:685,850</span></code>), and <code class="docutils literal notranslate"><span class="pre">conda</span></code> depends on
+<code class="docutils literal notranslate"><span class="pre">tag</span></code> and <code class="docutils literal notranslate"><span class="pre">github</span></code> (<code class="docutils literal notranslate"><span class="pre">:1085</span></code>) – so nothing downstream of <code class="docutils literal notranslate"><span class="pre">github</span></code> can
 start before it is approved, and rejecting it leaves nothing tagged and
 nothing published. Before this change <code class="docutils literal notranslate"><span class="pre">tag</span></code> depended on <code class="docutils literal notranslate"><span class="pre">version_check</span></code>
 alone, so removing its reviewer without moving this dependency would have let
@@ -907,7 +921,7 @@ back, and neither is needed, since a plain re-run self-heals; see
 <a class="reference internal" href="#recovery">Recovery</a> below.</p>
 <p><strong>``environment: pypi`` stays even though its reviewer is gone.</strong> <code class="docutils literal notranslate"><span class="pre">pypi</span></code>
 publishes through PyPI’s OIDC trusted publishing (<code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">pypi</span></code> at
-<code class="docutils literal notranslate"><span class="pre">:797</span></code>, <code class="docutils literal notranslate"><span class="pre">id-token:</span> <span class="pre">write</span></code> at <code class="docutils literal notranslate"><span class="pre">:801</span></code>), and PyPI’s trusted-publisher
+<code class="docutils literal notranslate"><span class="pre">:845</span></code>, <code class="docutils literal notranslate"><span class="pre">id-token:</span> <span class="pre">write</span></code> at <code class="docutils literal notranslate"><span class="pre">:849</span></code>), and PyPI’s trusted-publisher
 configuration can be scoped to a GitHub Actions environment name. If this
 project’s publisher on PyPI is scoped that way, removing the <code class="docutils literal notranslate"><span class="pre">pypi</span></code> name
 – not just its reviewer – would break the upload with a claim mismatch;
@@ -917,7 +931,7 @@ the name regardless, since there is no upside to removing it.</p>
 <p><strong>``conda-tag`` writes to ``main``, so a release is not read-only on the
 branch.</strong> After cutting <code class="docutils literal notranslate"><span class="pre">conda-&lt;version&gt;+0</span></code> at the run’s commit, the
 <code class="docutils literal notranslate"><span class="pre">tag</span></code> job pushes a commit setting <code class="file docutils literal notranslate"><span class="pre">conda/build</span></code> to <code class="docutils literal notranslate"><span class="pre">0</span></code> on top of
-<code class="docutils literal notranslate"><span class="pre">main</span></code> (<code class="docutils literal notranslate"><span class="pre">.github/workflows/create-release.yml:723-776</span></code>) – a plain
+<code class="docutils literal notranslate"><span class="pre">main</span></code> (<code class="docutils literal notranslate"><span class="pre">.github/workflows/create-release.yml:771-824</span></code>) – a plain
 fast-forward push, never a rewrite – so the next Conda Update bump of that
 version is <code class="docutils literal notranslate"><span class="pre">+1</span></code>. There is none when the run’s commit is not on <code class="docutils literal notranslate"><span class="pre">main</span></code>, nor
 when <code class="docutils literal notranslate"><span class="pre">main</span></code>’s tip already says <code class="docutils literal notranslate"><span class="pre">0</span></code> (the usual case, since

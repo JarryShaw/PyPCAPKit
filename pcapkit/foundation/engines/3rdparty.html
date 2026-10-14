@@ -873,8 +873,7 @@ still a bounded handful of <a class="reference external" href="https://docs.pyth
 <dd><p>Call <code class="xref py py-class docutils literal notranslate"><span class="pre">pyshark.FileCapture</span></code> to extract PCAP files.</p>
 <p>This method assigns <a class="reference internal" href="#pcapkit.foundation.engines.pyshark.PyShark._expkg" title="pcapkit.foundation.engines.pyshark.PyShark._expkg"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._expkg</span></code></a>
 as <code class="xref py py-mod docutils literal notranslate"><span class="pre">pyshark</span></code> and <a class="reference internal" href="#pcapkit.foundation.engines.pyshark.PyShark._extmp" title="pcapkit.foundation.engines.pyshark.PyShark._extmp"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._extmp</span></code></a>
-as an iterator from <code class="xref py py-class docutils literal notranslate"><span class="pre">pyshark.FileCapture</span></code>, with
-<strong class="program">tshark</strong>’s IP reassembly off (<code class="xref py py-attr docutils literal notranslate"><span class="pre">OVERRIDE_PREFS</span></code>).</p>
+as an iterator from <code class="xref py py-class docutils literal notranslate"><span class="pre">pyshark.FileCapture</span></code>.</p>
 <p>The global header is parsed and dumped first, by
 <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor.record_header" title="pcapkit.foundation.extraction.Extractor.record_header"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.extractor.record_header</span></code></a>.</p>
 <dl class="field-list simple">
@@ -922,8 +921,7 @@ for more operational information.</p>
 <span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pyshark.html#PyShark.close"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pyshark.PyShark.close" title="Link to this definition">¶</a></dt>
 <dd><p>Close engine.</p>
 <p>This method is to be used for closing the engine instance. It is to
-close the engine instance after the extraction process is finished,
-and what <code class="xref py py-meth docutils literal notranslate"><span class="pre">_captured()</span></code> reads frames from, if anything.</p>
+close the engine instance after the extraction process is finished.</p>
 </dd></dl>
 
 <dl class="py attribute">

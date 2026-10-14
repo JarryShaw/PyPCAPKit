@@ -514,10 +514,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">FRAME_LAYER_LIMIT</span><span class="p">,</span> <span class="n">_frame_depth</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span> <span class="k">as</span> <span class="n">Schema_IPv6</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">jumbo_payload_length</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">jumbo_payload_length</span><span class="p">,</span> <span class="n">jumbogram_error</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">beholder</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">stacklevel</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">warn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">StdlibEnum</span>
@@ -676,10 +675,25 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed packet data.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the packet is one of the errors</span>
+<span class="sd">                :rfc:`2675#section-3` has a receiver detect (see</span>
+<span class="sd">                :func:`~pcapkit.protocols.schema.internet.ipv6.jumbogram_error`).</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
+
+        <span class="c1"># NOTE: A receiver treats each of these as an error (:issue:`1687`), so</span>
+        <span class="c1"># the frame stops here, c.f. :meth:`IPv4.read</span>
+        <span class="c1"># &lt;pcapkit.protocols.internet.ipv4.IPv4.read&gt;`. A Fragment header beside</span>
+        <span class="c1"># the Jumbo Payload option is caught on the walk, see</span>
+        <span class="c1"># :meth:`_decode_next_layer`.</span>
+        <span class="n">rest</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">get_payload</span><span class="p">()</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">jumbogram_error</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span> <span class="n">rest</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">error</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="n">ipv6</span> <span class="o">=</span> <span class="n">Data_IPv6</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span>
             <span class="s1">'version'</span><span class="p">:</span> <span class="n">schema</span><span class="o">.</span><span class="n">hextet</span><span class="p">[</span><span class="s1">'version'</span><span class="p">],</span>
@@ -703,19 +717,9 @@
         <span class="c1"># NOTE: A jumbogram's extent is its Jumbo Payload Length, not the zero</span>
         <span class="c1"># Payload Length, c.f. :meth:`Schema_IPv6.post_process</span>
         <span class="c1"># &lt;pcapkit.protocols.schema.internet.ipv6.IPv6.post_process&gt;`</span>
-        <span class="c1"># (:issue:`1434`). :rfc:`2675#section-2` makes a Jumbo Payload option</span>
-        <span class="c1"># beside a non-zero Payload Length an error; such a packet is still</span>
-        <span class="c1"># kept as captured, with the Payload Length deciding its extent, since</span>
-        <span class="c1"># that is what the receiver had to go by.</span>
-        <span class="n">extent</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span>
-        <span class="n">jumbo</span> <span class="o">=</span> <span class="n">jumbo_payload_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">get_payload</span><span class="p">()</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">jumbo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">extent</span> <span class="o">=</span> <span class="n">jumbo</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: Jumbo Payload option with non-zero Payload Length '</span>
-                     <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s1">; ignoring the Jumbo Payload Length </span><span class="si">{</span><span class="n">jumbo</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span>
-                     <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+        <span class="c1"># (:issue:`1434`); the check above leaves a zero one beside it.</span>
+        <span class="n">jumbo</span> <span class="o">=</span> <span class="n">jumbo_payload_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span> <span class="n">rest</span><span class="p">)</span>
+        <span class="n">extent</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="k">if</span> <span class="n">jumbo</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">jumbo</span>
 
         <span class="c1"># update packet info</span>
         <span class="k">if</span> <span class="n">__packet__</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -758,7 +762,8 @@
 <span class="sd">            dst: Destination IP address.</span>
 <span class="sd">            payload_length: Length of the payload, extension headers included;</span>
 <span class="sd">                computed from the payload when omitted, and zero (a jumbogram)</span>
-<span class="sd">                if that exceeds 65,535 octets.</span>
+<span class="sd">                if that exceeds 65,535 octets or the payload starts with a</span>
+<span class="sd">                Hop-by-Hop Options header carrying a Jumbo Payload option.</span>
 <span class="sd">            payload: Payload data.</span>
 <span class="sd">            trailer: Octets after the packet, outside the Payload Length, such</span>
 <span class="sd">                as link-layer padding; written as is.</span>
@@ -776,12 +781,13 @@
         <span class="c1"># length the sender declared instead of the one that was recorded</span>
         <span class="c1"># (:issue:`1155`). Computed from the octets at hand otherwise, which is</span>
         <span class="c1"># what a plain ``IPv6(payload=...)`` wants -- or zero for a payload too</span>
-        <span class="c1"># long for the field, i.e. a jumbogram, whose length the caller carries</span>
-        <span class="c1"># in a Jumbo Payload option of ``payload``'s Hop-by-Hop Options header</span>
-        <span class="c1"># (:rfc:`2675#section-2`).</span>
+        <span class="c1"># long for the field, or one whose Hop-by-Hop Options header carries a</span>
+        <span class="c1"># Jumbo Payload option, i.e. a jumbogram, whose length the caller gives</span>
+        <span class="c1"># there (:rfc:`2675#section-2`); its Payload Length must be zero</span>
+        <span class="c1"># (:issue:`1687`).</span>
         <span class="k">if</span> <span class="n">payload_length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">payload_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">payload_length</span> <span class="o">&gt;</span> <span class="mh">0xFFFF</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">payload_length</span> <span class="o">&gt;</span> <span class="mh">0xFFFF</span> <span class="ow">or</span> <span class="n">jumbo_payload_length</span><span class="p">(</span><span class="n">next_val</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">payload</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">payload_length</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="k">return</span> <span class="n">Schema_IPv6</span><span class="p">(</span>
@@ -1020,6 +1026,11 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Current protocol with next layer extracted.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the walk reaches a Fragment header in a packet</span>
+<span class="sd">                carrying a Jumbo Payload option, an error by</span>
+<span class="sd">                :rfc:`2675#section-3` (:issue:`1687`).</span>
+
 <span class="sd">        """</span>
         <span class="c1">#: Extension headers.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_exthdr</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: OrderedMultiDict[Enum_ExtensionHeader, ProtocolBase] # pylint: disable=attribute-defined-outside-init</span>
@@ -1128,6 +1139,12 @@
                 <span class="c1"># reassembly, so ``fragment``, ``hdr_len`` and ``raw_len`` keep</span>
                 <span class="c1"># that split however far the walk goes on.</span>
                 <span class="k">if</span> <span class="n">split</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="c1"># NOTE: Nor may a jumbogram carry one (:issue:`1687`), so the</span>
+                    <span class="c1"># frame stops here as for the errors :meth:`read` checks;</span>
+                    <span class="c1"># past those, its Jumbo Payload option is in the payload.</span>
+                    <span class="n">error</span> <span class="o">=</span> <span class="n">jumbogram_error</span><span class="p">(</span><span class="n">ipv6</span><span class="o">.</span><span class="n">payload</span><span class="p">,</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">next</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">get_payload</span><span class="p">(),</span> <span class="k">lambda</span><span class="p">:</span> <span class="kc">True</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">error</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
                     <span class="n">split</span> <span class="o">=</span> <span class="p">(</span><span class="n">hdr_len</span><span class="p">,</span> <span class="n">raw_len</span><span class="p">)</span>
                     <span class="n">ipv6</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span>
                         <span class="s1">'fragment'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_packet</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="n">hdr_len</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="n">raw_len</span><span class="p">),</span>

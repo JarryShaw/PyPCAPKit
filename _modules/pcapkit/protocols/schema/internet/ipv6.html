@@ -492,7 +492,7 @@
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6Address</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 
@@ -623,6 +623,47 @@
         <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Jumbo_Payload</span> <span class="ow">and</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">4</span> <span class="ow">and</span> <span class="n">ptr</span> <span class="o">+</span> <span class="mi">6</span> <span class="o">&lt;=</span> <span class="n">end</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">ptr</span> <span class="o">+</span> <span class="mi">2</span><span class="p">:</span><span class="n">ptr</span> <span class="o">+</span> <span class="mi">6</span><span class="p">],</span> <span class="s1">'big'</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">ptr</span> <span class="o">+=</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">size</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">jumbogram_error</span><span class="p">(</span><span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+                    <span class="n">fragment</span><span class="p">:</span> <span class="s1">'Optional[Callable[[], bool]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[str]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Name the error :rfc:`2675#section-3` has a receiver detect in an IPv6 packet, if any.</span>
+
+<span class="sd">    The four errors that section lists for a node that understands the Jumbo</span>
+<span class="sd">    Payload option, each a packet the default engine rejects (:issue:`1687`):</span>
+
+<span class="sd">    * a Payload Length of zero, a Next Header of Hop-by-Hop Options, and no</span>
+<span class="sd">      Jumbo Payload option;</span>
+<span class="sd">    * a non-zero Payload Length and a Jumbo Payload option;</span>
+<span class="sd">    * a Jumbo Payload option whose Jumbo Payload Length is below 65,536;</span>
+<span class="sd">    * a Jumbo Payload option and a Fragment header.</span>
+
+<span class="sd">    The option counts only where :func:`jumbo_payload_length` finds it.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        length: Payload Length of the IPv6 header.</span>
+<span class="sd">        next: Next Header of the IPv6 header.</span>
+<span class="sd">        data: Octets following the IPv6 header, as captured.</span>
+<span class="sd">        fragment: Tells whether the extension header chain, as the default</span>
+<span class="sd">            engine walks it, has a Fragment header; called only for a packet</span>
+<span class="sd">            carrying the option, so a caller walks the chain only for those.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The error, or :data:`None` if the packet makes none of them.</span>
+
+<span class="sd">    """</span>
+    <span class="n">jumbo</span> <span class="o">=</span> <span class="n">jumbo_payload_length</span><span class="p">(</span><span class="nb">next</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">jumbo</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">length</span> <span class="ow">and</span> <span class="nb">next</span> <span class="o">==</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">HOPOPT</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">'Payload Length 0 and a Hop-by-Hop Options header with no Jumbo Payload option'</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">length</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">'Jumbo Payload option with a non-zero Payload Length </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1">'</span>
+    <span class="k">if</span> <span class="n">jumbo</span> <span class="o">&lt;=</span> <span class="mh">0xFFFF</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">'Jumbo Payload Length </span><span class="si">{</span><span class="n">jumbo</span><span class="si">}</span><span class="s1">, not greater than 65,535'</span>
+    <span class="k">if</span> <span class="n">fragment</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">fragment</span><span class="p">():</span>
+        <span class="k">return</span> <span class="s1">'Jumbo Payload option with a Fragment header'</span>
     <span class="k">return</span> <span class="kc">None</span>
 </pre></div>
         </article>
