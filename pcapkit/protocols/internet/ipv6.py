@@ -197,14 +197,20 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             Parsed packet data.
 
         Raises:
-            ProtocolError: If the packet is one of the errors
-                :rfc:`2675#section-3` has a receiver detect (see
+            ProtocolError: If the version is not 6, or if the packet is one of
+                the errors :rfc:`2675#section-3` has a receiver detect (see
                 :func:`~pcapkit.protocols.schema.internet.ipv6.jumbogram_error`).
 
         """
         if length is None:
             length = len(self)
         schema = self.__header__
+
+        # NOTE: This class reads IPv6 only, as :meth:`IPv4.read
+        # <pcapkit.protocols.internet.ipv4.IPv4.read>` reads IPv4 only; telling
+        # the two apart by the Version is left to the dispatchers (:issue:`1680`).
+        if schema.hextet['version'] != 6:
+            raise ProtocolError(f"[IPv6] invalid version: {schema.hextet['version']}")
 
         # NOTE: A receiver treats each of these as an error (:issue:`1687`), so
         # the frame stops here, c.f. :meth:`IPv4.read

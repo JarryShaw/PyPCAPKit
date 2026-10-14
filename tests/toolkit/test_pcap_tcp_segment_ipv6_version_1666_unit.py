@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
-"""The default engine reads TCP the parser rejected under an IPv6 header whose Version is 4. C.f. #1666.
+"""The default engine reads past an IPv6 header whose Version is 4, and hands it nothing. C.f. #1666, #1680.
 
 :func:`pcapkit.toolkit.pcap.tcp_segment` reads a TCP header the parser rejected
 from its fixed 20 octets, unless the datagram is a later fragment (#1518). It
-took the IPv4 branch of that fragment check by the header's Version field, but
-IPv6 keeps whatever Version it reads, so an IPv6 layer with Version 4 took it
-too and read an ``offset`` IPv6 does not have: the ``AttributeError`` ended the
-extraction, PCAP and PCAP-NG alike. The branch now goes by the layer's class,
-and those frames are read as dpkt and scapy read them.
+took the IPv4 branch of that fragment check by the header's Version field, and
+IPv6 then read any Version, so an IPv6 layer with Version 4 took it too and read
+an ``offset`` IPv6 does not have: the ``AttributeError`` ended the extraction,
+PCAP and PCAP-NG alike (#1666). The branch now goes by the layer's class. And
+IPv6 now rejects a Version other than 6 (#1680), so such a header is kept raw:
+its frame hands over no input, and every frame after it is still read.
+
+dpkt and scapy still read those headers as IPv6 and hand their segments over,
+which the best-effort ruling on third-party engines allows (#1687).
 
 Every capture is built here, so the module is in the unit tier.
 
@@ -33,7 +37,7 @@ if TYPE_CHECKING:
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 
-#: The engines compared with the default engine.
+#: The third-party engines read here besides the default engine.
 ENGINES = ('dpkt', 'scapy')
 
 #: The endpoints of every IPv6 header built here, then of every IPv4 one.
@@ -81,6 +85,10 @@ CASES = {
     'IPv6 (control)': (IPV6, lambda s: eth(wire.ipv6(s, nxt=6), 0x86DD)),
     'IPv4 (control)': (IPV4, lambda s: eth(wire.ipv4(s, proto=6), 0x0800)),
 }
+
+#: The numbers of every frame of :func:`build`, then of the controls alone.
+FRAMES = list(range(1, len(CASES) + 1))
+CONTROLS = [number for number, name in enumerate(CASES, start=1) if name.endswith('(control)')]
 
 
 def build() -> 'list[bytes]':
@@ -147,46 +155,54 @@ def read(test: unittest.TestCase, engine: str, frames: 'list[bytes]', container:
     return seen
 
 
+def check(test: unittest.TestCase, seen: 'dict[str, Any]', numbers: 'list[int]') -> None:
+    """Assert ``seen`` holds the TCP reassembly and trace inputs of the frames ``numbers``, and of no other."""
+    test.assertEqual(sorted(seen['TCP']), numbers)
+    test.assertEqual(sorted(seen['trace']), numbers)
+    test.assertEqual([index for _, index in seen['flows']], [(n,) for n in numbers])
+    for number, (name, ((src, dst), _)) in enumerate(CASES.items(), start=1):
+        if number not in numbers:
+            continue
+        with test.subTest(case=name):
+            segment = bad_tcp(1000 + number)
+            reasm, trace = seen['TCP'][number], seen['trace'][number]
+            test.assertEqual(reasm['bufid'], (src, 1000 + number, dst, 80))
+            test.assertEqual((reasm['dsn'], reasm['ack'], reasm['syn'], reasm['fin'], reasm['rst']),
+                             (1000, 0, False, False, False))
+            # the Data Offset runs past the segment, so all of it is header
+            test.assertEqual((reasm['header'], reasm['payload'], reasm['len']), (segment, b'', 0))
+            test.assertEqual((trace['src'], trace['srcport'], trace['dst'], trace['dstport']),
+                             (src, 1000 + number, dst, 80))
+            test.assertEqual((trace['seq'], trace['ack'], trace['header'], trace['payload']),
+                             (1000, 0, segment, b''))
+
+
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class IPv6VersionFourTests(unittest.TestCase):
-    """An IPv6 header of Version 4 takes the IPv6 branch of the fragment check, PCAP and PCAP-NG alike."""
+    """An IPv6 header of Version 4 is no IPv6 layer to the default engine, PCAP and PCAP-NG alike."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-    def test_the_default_engine_reads_the_segment(self) -> None:
+    def test_the_default_engine_reads_only_the_controls(self) -> None:
         frames = build()
         for container in ('pcap', 'pcapng'):
-            seen = read(self, 'default', frames, container)
-            # every frame is read, those after an H4 one included
-            self.assertEqual(sorted(seen['TCP']), list(range(1, len(CASES) + 1)))
-            self.assertEqual(sorted(seen['trace']), list(range(1, len(CASES) + 1)))
-            self.assertEqual([index for _, index in seen['flows']], [(n,) for n in range(1, len(CASES) + 1)])
-            for number, (name, ((src, dst), _)) in enumerate(CASES.items(), start=1):
-                with self.subTest(container=container, case=name):
-                    segment = bad_tcp(1000 + number)
-                    reasm, trace = seen['TCP'][number], seen['trace'][number]
-                    self.assertEqual(reasm['bufid'], (src, 1000 + number, dst, 80))
-                    self.assertEqual((reasm['dsn'], reasm['ack'], reasm['syn'], reasm['fin'], reasm['rst']),
-                                     (1000, 0, False, False, False))
-                    # the Data Offset runs past the segment, so all of it is header
-                    self.assertEqual((reasm['header'], reasm['payload'], reasm['len']), (segment, b'', 0))
-                    self.assertEqual((trace['src'], trace['srcport'], trace['dst'], trace['dstport']),
-                                     (src, 1000 + number, dst, 80))
-                    self.assertEqual((trace['seq'], trace['ack'], trace['header'], trace['payload']),
-                                     (1000, 0, segment, b''))
+            with self.subTest(container=container):
+                seen = read(self, 'default', frames, container)
+                # the controls come after every H4 frame, so each of those was read
+                check(self, seen, CONTROLS)
+                # nor does the H4 first fragment reach IPv6 reassembly
+                self.assertEqual(seen['IPv6'], {})
+                self.assertEqual(seen['datagrams']['IPv6'], [])
 
-    def test_dpkt_and_scapy_hand_over_the_same_inputs(self) -> None:
+    def test_dpkt_and_scapy_read_every_segment(self) -> None:
         frames = build()
         for container in ('pcap', 'pcapng'):
-            base = read(self, 'default', frames, container)
             for engine in ENGINES:
                 with self.subTest(container=container, engine=engine):
                     if importlib.util.find_spec(engine) is None:
                         self.skipTest(f'{engine} not installed')
-                    seen = read(self, engine, frames, container)
-                    for aspect in ('TCP', 'trace', 'IPv4', 'IPv6', 'datagrams', 'flows'):
-                        self.assertEqual(seen[aspect], base[aspect], aspect)
+                    check(self, read(self, engine, frames, container), FRAMES)
 
 
 if __name__ == '__main__':

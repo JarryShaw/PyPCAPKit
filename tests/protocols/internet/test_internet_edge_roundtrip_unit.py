@@ -65,10 +65,10 @@ def ipx(tlen: 'int | None' = None, tc: int = 0, ptype: int = 0, body: bytes = b'
 
 
 def ipv6(nxt: int, body: bytes, tc: int = 0, fl: int = 0, plen: 'int | None' = None,
-         hlim: int = 64) -> bytes:
+         hlim: int = 64, version: int = 6) -> bytes:
     """An IPv6 header from ``::1`` to ``::2``, then ``body``."""
     plen = len(body) if plen is None else plen
-    return (struct.pack('!IHBB', (6 << 28) | (tc << 20) | fl, plen, nxt, hlim)
+    return (struct.pack('!IHBB', (version << 28) | (tc << 20) | fl, plen, nxt, hlim)
             + bytes(15) + b'\x01' + bytes(15) + b'\x02' + body)
 
 
@@ -201,6 +201,7 @@ CASES = (
     Case('ipv6/ah-then-frag', IPV6, ipv6(51, bytes([44, 1, 0, 0]) + bytes(8) + bytes([59, 0, 0, 1]) + bytes(4))),
     Case('ipv6/hopopt-then-trailer', IPV6, ipv6(0, opts(59, bytes(6)), plen=8) + b'\x00\x00'),
     Case('ipv6/esp', IPV6, ipv6(50, b'\x00\x00\x00\x01\x00\x00\x00\x02' + bytes(8))),
+    Case('ipv6/version-4', IPV6, ipv6(59, b'', version=4)),
     *(Case(label, cls, raw) for label, (cls, raw, _) in EXTENSIONS.items()),
     *(Case(f'{label}/extension', cls, raw, EXT) for label, (cls, raw, _) in EXTENSIONS.items()),
     *(Case(f'{label}/in-ipv6', IPV6, ipv6(nxt, raw)) for label, (cls, raw, nxt) in EXTENSIONS.items()),
@@ -248,6 +249,7 @@ MAKE_CASES = (
 REJECTED = {
     'ipv4/version-6': Reject('ProtocolError', '[IPv4] invalid version: 6'),
     'ipv4/ihl-4': Reject('ProtocolError', 'resolved to a negative length'),
+    'ipv6/version-4': Reject('ProtocolError', '[IPv6] invalid version: 4'),
     # a Jumbo Payload option beside a non-zero Payload Length, an RFC 2675 error (#1687)
     'hopopt/jumbo-payload-0/in-ipv6': Reject('ProtocolError', 'Jumbo Payload option with a non-zero Payload '
                                                               'Length 8'),
