@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     # functions
-    'final', 'localcontext', 'show_flag_values', 'default_threading_excepthook', 'unquote',
+    'final', 'localcontext', 'show_flag_values', 'default_threading_excepthook', 'unquote', 'get_annotations',
 
     # exceptions
     'ModuleNotFoundError',
@@ -21,7 +21,7 @@ __all__ = [
     'pathlib',
 
     # typing
-    'Mapping', 'Tuple', 'List', 'Dict', 'TypeAlias',
+    'Mapping', 'Tuple', 'List', 'Dict', 'TypeAlias', 'UnionType',
 ]
 
 if sys.version_info < (3, 6):
@@ -270,3 +270,28 @@ elif sys.version_info < (3, 10):
     from _thread import _excepthook as default_threading_excepthook
 else:
     from threading import __excepthook__ as default_threading_excepthook  # novermin
+
+# A class's own annotations, never a base's (issue #1692). Below 3.10
+# (bpo-43901), ``cls.__annotations__`` of a class whose body declares none is
+# its nearest base's, so the fallback reads the class's own ``__dict__``, where
+# its body put them, and returns that mapping itself rather than a copy.
+# :func:`inspect.get_annotations` reads the same place for a class on 3.10 to
+# 3.13; from 3.14 a body without ``from __future__ import annotations`` leaves
+# them out of ``__dict__``, so it is the only reader that sees them. Only what
+# this library asks of it is backported: a class, without ``globals``,
+# ``locals`` or ``eval_str``.
+if sys.version_info < (3, 10):
+    def get_annotations(obj: 'type') -> 'dict[str, Any]':
+        """Return the annotations a class's own body declares, which may be empty."""
+        return obj.__dict__.get('__annotations__', {})
+else:
+    from inspect import get_annotations  # novermin
+
+# The :pep:`604` union type, i.e. the origin of ``int | None``, which is the
+# same object as :data:`typing.Union` from 3.14. Below 3.10 only
+# :data:`typing.Union` spells a union, so the name is :data:`None` there rather
+# than a failed import, as ``default_threading_excepthook`` is below 3.8.
+if sys.version_info < (3, 10):
+    UnionType = None
+else:
+    from types import UnionType  # novermin
