@@ -42,6 +42,10 @@ replacement worker xdist starts collects the stale probe. ``collect_ignore`` in
 :mod:`tests.conftest` keeps the probe out of every recursive collection, and
 :class:`ProbeWorkerCrashTests` kills a real worker mid-probe to pin that.
 
+A fourth (#1758): checking for a leftover probe before the exclusive hold is
+granted mistakes another worker's live probe for one. Both probe writers check
+only under the lock, and :class:`ProbeLeftoverCheckTests` pins that ordering.
+
 Kept separate from :mod:`tests.test_tier_guard`, which another change is already
 modifying: this module touches none of its code, only :mod:`tests.conftest`.
 
@@ -50,6 +54,7 @@ from __future__ import annotations
 
 import importlib.util
 import os
+import pathlib
 import shutil
 import subprocess
 import sys
@@ -58,8 +63,12 @@ import textwrap
 import threading
 import unittest
 import unittest.mock
+from typing import TYPE_CHECKING
 
 from tests import _tiers, conftest as _conftest
+
+if TYPE_CHECKING:
+    from typing import ContextManager
 
 #: Capture name the probe module in :class:`XdistSubprocessTests` reads. Not
 #: tracked by git -- see :func:`tests._tiers.committed_captures` -- so it is a
@@ -180,10 +189,6 @@ class XdistSubprocessTests(unittest.TestCase):
             self.skipTest(f'git cannot answer here: {reason}')
 
         self.probe_path = _tiers.TESTS_ROOT / 'protocols' / self.PROBE_NAME
-        self.assertFalse(
-            self.probe_path.exists(),
-            f'{self.probe_path} already exists -- a previous run did not clean up',
-        )
 
         # Exclusive for as long as the probe sits on disk: see
         # tests.conftest._tier_guard_lock for the SuiteIsCleanTests race this
@@ -196,6 +201,14 @@ class XdistSubprocessTests(unittest.TestCase):
         lock = _conftest._tier_guard_lock(exclusive=True)
         lock.__enter__()
         self.addCleanup(lock.__exit__, None, None, None)
+        # Only under the lock (#1758): before it, a probe on disk may be another
+        # worker's live one -- this class's other test, or ProbeWorkerCrashTests
+        # -- rather than a leftover. The release is registered first, so a
+        # failure here still lets go of the lock.
+        self.assertFalse(
+            self.probe_path.exists(),
+            f'{self.probe_path} already exists -- a previous run did not clean up',
+        )
 
         source = textwrap.dedent(f"""
             import unittest
@@ -390,3 +403,106 @@ class ProbeWriteLockTests(unittest.TestCase):
             reader_acquired.wait(timeout=5),
             'the reader never acquired the lock after the writer released it',
         )
+
+
+@unittest.skipUnless(_conftest.fcntl is not None, 'fcntl unavailable on this platform')
+class ProbeLeftoverCheckTests(unittest.TestCase):
+    """:meth:`XdistSubprocessTests.setUp` checks for a leftover probe under the lock (#1758).
+
+    Drives that ``setUp`` directly, so neither :mod:`xdist` nor git is needed. The
+    probe directory and the lock file are redirected into a temporary directory:
+    nothing here writes to the tree or contends with a real probe on another
+    worker. A thread stands in for the other worker, as in
+    :class:`ProbeWriteLockTests`.
+
+    """
+
+    def setUp(self) -> None:
+        root = pathlib.Path(tempfile.mkdtemp(prefix='pcapkit-1758-'))
+        self.addCleanup(shutil.rmtree, root, ignore_errors=True)
+        (root / 'protocols').mkdir()
+        self.probe_path = root / 'protocols' / _conftest.PROBE_MODULE_NAME
+        for patcher in (
+            unittest.mock.patch.object(_tiers, 'TESTS_ROOT', root),
+            unittest.mock.patch.object(_tiers, 'guard_unavailable_reason', return_value=None),
+            unittest.mock.patch.object(_conftest, '_tier_guard_lock_path',
+                                       return_value=root / 'tier-guard.lock'),
+        ):
+            patcher.start()
+            self.addCleanup(patcher.stop)
+        self.real_lock = _conftest._tier_guard_lock
+        self.case = XdistSubprocessTests('test_serial_run_reports_the_diagnostic_and_fails')
+
+    def _assert_lock_free(self) -> None:
+        fcntl = _conftest.fcntl
+        with open(_conftest._tier_guard_lock_path(), 'a', encoding='utf-8') as handle:
+            try:
+                fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                self.fail('setUp left the exclusive lock held')
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+
+    def test_a_live_probe_is_waited_for_not_reported_as_a_leftover(self) -> None:
+        """Fails on the code before this change: ``setUp`` raises "already exists"
+        at once, without ever asking for the lock the live probe's writer holds.
+
+        """
+        progressed = threading.Event()  # setUp asked for the lock, or finished
+        settled = threading.Event()  # setUp finished, either way
+        outcome = []  # type: list[BaseException | None]
+        written = []  # type: list[bool]
+
+        def signalling_lock(exclusive: 'bool') -> 'ContextManager[None]':
+            progressed.set()
+            return self.real_lock(exclusive)
+
+        def other_worker() -> None:
+            try:
+                self.case.setUp()
+                written.append(self.probe_path.exists())
+                outcome.append(None)
+            except BaseException as exc:  # pylint: disable=broad-except
+                outcome.append(exc)
+            finally:
+                self.case.doCleanups()
+                progressed.set()
+                settled.set()
+
+        thread = threading.Thread(target=other_worker, daemon=True)
+        with self.real_lock(exclusive=True):
+            self.probe_path.write_text("# another worker's live probe\n", encoding='utf-8')
+            with unittest.mock.patch.object(_conftest, '_tier_guard_lock', signalling_lock):
+                thread.start()
+                self.addCleanup(thread.join, 5)
+                self.assertTrue(progressed.wait(timeout=5), 'setUp never reached the lock')
+                self.assertFalse(settled.wait(timeout=0.5),
+                                 f'setUp did not wait for the lock: {outcome!r}')
+            self.probe_path.unlink()
+
+        thread.join(timeout=5)
+        self.assertFalse(thread.is_alive(), 'setUp never proceeded once the lock was free')
+        self.assertEqual(outcome, [None])
+        self.assertEqual(written, [True])
+        self.assertFalse(self.probe_path.exists(), "setUp's cleanup left its probe behind")
+        self._assert_lock_free()
+
+    def test_a_real_leftover_still_fails_and_releases_the_lock(self) -> None:
+        """A probe still there under the lock is reported, kept, and the lock let go.
+
+        The failure is kept, traceback and all, as a runner's report keeps it:
+        ``assertRaises`` would clear the frames, and refcounting would then close
+        the lock even if ``setUp`` never registered its release.
+
+        """
+        self.probe_path.write_text('# a leftover\n', encoding='utf-8')
+
+        failure = None  # type: AssertionError | None
+        try:
+            self.case.setUp()
+        except AssertionError as exc:
+            failure = exc
+        self.assertIn('already exists', str(failure))
+        self.case.doCleanups()
+
+        self.assertTrue(self.probe_path.exists(), 'setUp removed a probe it did not write')
+        self._assert_lock_free()
