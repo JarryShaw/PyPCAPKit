@@ -418,6 +418,19 @@ def pytest_collection_modifyitems(session: 'pytest.Session', config: 'pytest.Con
 #: loads this conftest but never collects ``test_tier_guard_xdist.py`` at all.
 PROBE_MODULE_NAME = 'test_zzz_xdist_guard_probe_unit.py'
 
+#: Keeps the probe out of every session that does not name it on the command
+#: line (GitHub issue #1756). A worker that dies mid-probe never runs the
+#: probe's cleanup, and xdist's replacement worker then collects ``tests/``
+#: afresh: without this, its collection-time audit finds the stale probe, sets
+#: ``session.shouldfail``, and the controller interrupts the whole session.
+#: pytest consults ``collect_ignore`` only while recursing into a directory,
+#: never for an initial path (``Dir.collect`` skips the check for
+#: ``session.isinitpath``), so the probe's own nested run, which passes the
+#: probe's path explicitly, still collects and audits it. Only this one
+#: reserved path is ignored, and :class:`tests.test_tier_guard.SuiteIsCleanTests`
+#: still scans it on disk like any other module.
+collect_ignore = [f'protocols/{PROBE_MODULE_NAME}']
+
 #: Module names whose own tests manage :func:`_tier_guard_lock` themselves and
 #: must not also take the shared hold :func:`_tier_guard_reader_lock` puts on
 #: every other unit-tier test.
