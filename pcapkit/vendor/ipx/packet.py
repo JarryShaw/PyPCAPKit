@@ -32,19 +32,19 @@ sys.path.insert(0, path)
 __all__ = ['Packet']
 
 ###############################################################################
-# NOTE: this crawler no longer crawls, and the registry below is maintained by
-# hand; see #518. It is the same failure, on the same article and the same
-# removal revision, that retired the sibling socket crawler in #507.
+# NOTE: this crawler does not crawl: the registry below is maintained by hand;
+# see #518. It is the same failure, on the same article and the same removal
+# revision, that retired the sibling socket crawler in #507.
 #
-# It used to scrape the packet-type table out of
+# Its source was the packet-type table in
 # https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#IPX_packet_structure,
-# and two separate things broke that. Wikipedia now answers ``requests``'
+# and two separate things broke that. Wikipedia answers ``requests``'
 # default ``python-requests/<version>`` User-Agent with HTTP 403 (measured
 # 2026-09-19: 403 and 126 bytes of robot-policy text for the default agent, 200
 # and 114117 bytes for a descriptive one). That half is fixed in
-# ``Vendor._request``, which now sends the descriptive agent
+# ``Vendor._request``, which sends the descriptive agent
 # :func:`~pcapkit.vendor.default.get_user_agent` builds -- but it only gets the
-# crawler as far as a page that no longer holds the data. The table was deleted
+# crawler as far as a page that does not hold the data. The table was deleted
 # from the article on 2026-08-25, in revision 1371327031 ("deleted some
 # irrelevant technical tables"), leaving the live page (revision 1372814585)
 # with a single ``wikitable`` -- the IPX header format one, headers
@@ -54,7 +54,8 @@ __all__ = ['Packet']
 # Pointing ``LINK`` at the last revision that still carries the table
 # (``oldid=1368657333``, re-measured 2026-09-19: 200, 118834 bytes, 4
 # ``wikitable``s, ``table[1]`` headers ``['Value', 'Meaning/Protocol']``, 8 body
-# rows) would have worked, and running the old ``process()`` against it
+# rows) would have worked, and running the crawler's original ``process()``
+# against it
 # reproduces the committed constant file byte for byte. It is still the wrong
 # fix: a network fetch pinned to a frozen snapshot is all of the fragility of a
 # crawler with none of the freshness, and it would go on selecting a table by
@@ -62,8 +63,8 @@ __all__ = ['Packet']
 #
 # What settles it is that the registry is closed. IPX packet types were Novell's
 # to assign -- :rfc:`1362`, :rfc:`1551` and :rfc:`1634` all say "Packet Types
-# also need to be assigned by Novell" -- and there is no longer a Novell to
-# assign them. IPX will not gain new packet types, so there is nothing for a
+# also need to be assigned by Novell" -- and no Novell remains to assign
+# them. IPX will not gain new packet types, so there is nothing for a
 # crawler to pick up on its next run.
 #
 # The table below is therefore transcribed from that last revision that carried
@@ -79,7 +80,8 @@ __all__ = ['Packet']
 #: above it. Names go through :meth:`~Vendor.rename`, so the generated member is
 #: the :meth:`~Vendor.safe_name` of the first element; comments are stored as the
 #: scrape rendered them, reStructuredText markup and all, since the prose-mangling
-#: the old ``process()`` did to Wikipedia's cell text has no source left to mangle.
+#: the crawler's original ``process()`` did to Wikipedia's cell text has no source
+#: left to mangle.
 #:
 #: Every value below is independently corroborated by Wireshark's IPX dissector,
 #: ``epan/dissectors/packet-ipx.h`` (fetched 2026-09-19), which defines
@@ -105,7 +107,7 @@ DATA = {
     1: ('RIP', '``RIP``, Routing Information Protocol ([:rfc:`1582`], [:rfc:`2091`])'),
 
     # XNS IDP inheritances. The archived revision is the only source found for
-    # these two names: no RFC and no Novell document reachable today lists
+    # these two names: no RFC and no reachable Novell document lists
     # either against a packet-type number. Wireshark corroborates the values as
     # ``ECHO 2`` and ``ERROR 3``.
     2: ('Echo Packet', 'Echo Packet'),

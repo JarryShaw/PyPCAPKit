@@ -6,7 +6,7 @@ Base Fields
 .. versionremoved:: 1.5.0
 
    ``pcapkit.corekit.fields.field.NoValueType``, now
-   :class:`pcapkit.corekit.sentinels.NoValueType` (:issue:`922`,
+   :class:`pcapkit.corekit.sentinels.NoValueType` (:issue:`911`,
    :issue:`1744`), and ``pcapkit.corekit.fields.field.NoValue``, now
    :data:`pcapkit.corekit.sentinels.NO_VALUE` (:issue:`937`).
 

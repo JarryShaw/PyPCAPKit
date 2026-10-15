@@ -344,15 +344,15 @@ class OptionType(EnumRegistry, StrEnum):
             temp_ns.update(OptionType.__members_ns__.get(namespace, {}))
             if key in temp_ns:
                 return temp_ns[key]
-            # NOTE: GitHub issue #860. This used to extend_enum(...) a
+            # NOTE: GitHub issue #860. An extend_enum(...) here would mint a
             # permanent member as a side effect of a mere lookup -- exactly
             # the ``get``/``_missing_`` minting the owner's ruling forbids,
             # here on the wire-facing path
             # (:meth:`pcapkit.protocols.misc.pcapng.PCAPNG._make_pcapng_options`
             # calls this with raw option-code bytes off the wire).
             # ``_unregistered_member`` never touches ``__members_ns__``
-            # either, so a genuinely unknown option code no longer grows
-            # either lookup table.
+            # either, so a genuinely unknown option code grows neither
+            # lookup table.
             return OptionType._unregistered_member(key, '%s_unknown' % namespace)
         if key in OptionType.__members__:
             return getattr(OptionType, key)
@@ -360,12 +360,12 @@ class OptionType(EnumRegistry, StrEnum):
         # string, so ``get(member.value)`` resolves it as ``cls(value)`` would.
         if key in OptionType._value2member_map_:  # type: ignore[misc]
             return OptionType._value2member_map_[key]  # type: ignore[misc,return-value]
-        # NOTE: same ruling, the str-keyed path: this used to mint ``key``
-        # itself as the member's name with ``default`` as its value. Neither
+        # NOTE: same ruling, the str-keyed path: rather than mint ``key``
+        # itself as the member's name with ``default`` as its value -- neither
         # ``get`` nor ``_missing_`` has enough information to register one
-        # properly -- there is no namespace, description or anything else
-        # IANA would attach to it -- so this now returns an unregistered
-        # pseudo-member with the same attributes the old mint would have set.
+        # properly, as there is no namespace, description or anything else
+        # IANA would attach to it -- this returns an unregistered
+        # pseudo-member with the same attributes such a mint would set.
         return OptionType._unregistered_member(default, key)
 
     @classmethod
