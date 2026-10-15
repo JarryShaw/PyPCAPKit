@@ -37,6 +37,11 @@ takes the shared hold on behalf of every other unit-tier test, including
 ``SuiteIsCleanTests``, without that module's own source changing at all.
 :class:`ProbeWriteLockTests` pins the mutex itself, independently of xdist.
 
+A third (#1756): a worker that dies mid-probe never runs its cleanup, and the
+replacement worker xdist starts collects the stale probe. ``collect_ignore`` in
+:mod:`tests.conftest` keeps the probe out of every recursive collection, and
+:class:`ProbeWorkerCrashTests` kills a real worker mid-probe to pin that.
+
 Kept separate from :mod:`tests.test_tier_guard`, which another change is already
 modifying: this module touches none of its code, only :mod:`tests.conftest`.
 
@@ -45,8 +50,10 @@ from __future__ import annotations
 
 import importlib.util
 import os
+import shutil
 import subprocess
 import sys
+import tempfile
 import textwrap
 import threading
 import unittest
@@ -235,6 +242,98 @@ class XdistSubprocessTests(unittest.TestCase):
         self.assertGreaterEqual(output.count(_DIAGNOSTIC_MARKER), 1)
         self.assertNotIn('INTERNALERROR', output)
         self.assertNotIn('crashitem', output)
+
+
+#: Module name of the ``-p`` plugin :class:`ProbeWorkerCrashTests` loads into
+#: its throwaway session; written to a temporary directory, never to the tree.
+_CRASH_PLUGIN_NAME = 'pcapkit_tier_guard_probe_crash'
+
+#: Kills a worker mid-probe, as CI's GraalPy leg lost one (job 116215824320):
+#: after :class:`XdistSubprocessTests` has written the probe and before its
+#: cleanup can remove it. The lock becomes a no-op because the test
+#: that launched the session holds the exclusive hold on the probe's behalf.
+_CRASH_PLUGIN_SOURCE = textwrap.dedent(f"""
+    import contextlib
+    import os
+    import subprocess
+
+    _run = subprocess.run
+
+
+    def _crashing_run(args, *posargs, **kwargs):
+        if any(str(arg).endswith({_conftest.PROBE_MODULE_NAME!r}) for arg in args):
+            os._exit(1)
+        return _run(args, *posargs, **kwargs)
+
+
+    def pytest_runtest_setup(item):
+        if hasattr(item.config, 'workerinput'):
+            from tests import conftest
+            conftest._tier_guard_lock = lambda exclusive: contextlib.nullcontext()
+            subprocess.run = _crashing_run
+    """).lstrip('\n')
+
+
+@unittest.skipUnless(importlib.util.find_spec('xdist') is not None,
+                      'pytest-xdist not installed')
+class ProbeWorkerCrashTests(unittest.TestCase):
+    """A worker dying mid-probe fails that one test, not the session (#1756).
+
+    xdist replaces the dead worker, and the replacement collects ``tests/``
+    afresh while the probe's cleanup never ran. Before ``collect_ignore`` in
+    :mod:`tests.conftest`, that collection audited the stale probe and the
+    controller ended the session with ``xdist.dsession.Interrupted``, exit 2.
+
+    """
+
+    def setUp(self) -> None:
+        reason = _tiers.guard_unavailable_reason()
+        if reason is not None:
+            self.skipTest(f'git cannot answer here: {reason}')
+
+        self.probe_path = _tiers.TESTS_ROOT / 'protocols' / _conftest.PROBE_MODULE_NAME
+        # Exclusive for the whole throwaway session and until the stale probe is
+        # gone, so a concurrent SuiteIsCleanTests never sees it; LIFO cleanups
+        # unlink while still holding the lock, as in XdistSubprocessTests.
+        lock = _conftest._tier_guard_lock(exclusive=True)
+        lock.__enter__()
+        self.addCleanup(lock.__exit__, None, None, None)
+        self.assertFalse(
+            self.probe_path.exists(),
+            f'{self.probe_path} already exists -- a previous run did not clean up',
+        )
+        self.addCleanup(self.probe_path.unlink, missing_ok=True)
+
+        self.plugin_dir = tempfile.mkdtemp(prefix='pcapkit-1756-')
+        self.addCleanup(shutil.rmtree, self.plugin_dir, ignore_errors=True)
+        with open(os.path.join(self.plugin_dir, f'{_CRASH_PLUGIN_NAME}.py'), 'w',
+                  encoding='utf-8') as handle:
+            handle.write(_CRASH_PLUGIN_SOURCE)
+
+    def test_a_worker_crash_mid_probe_does_not_interrupt_the_session(self) -> None:
+        """Fails on main: exit 2 and the probe's diagnostic as the interrupt reason."""
+        protocols = self.probe_path.parent
+        environ = _child_environ()
+        environ['PYTHONPATH'] = os.pathsep.join([self.plugin_dir, environ['PYTHONPATH']])
+        probe_test = ('tests/test_tier_guard_xdist.py::XdistSubprocessTests'
+                      '::test_xdist_run_reports_the_diagnostic_and_fails')
+        completed = subprocess.run(
+            [sys.executable, '-m', 'pytest', '-p', 'no:cacheprovider', '-p', _CRASH_PLUGIN_NAME,
+             '-q', '-n', '2', '--dist', 'load', '--max-worker-restart=2', probe_test,
+             # The directory the probe lives in, as CI collects it, minus every
+             # module but test_z*: only the probe could be left there.
+             'tests/protocols', f'--ignore-glob={protocols}/[!t]*',
+             f'--ignore-glob={protocols}/t[!e]*', f'--ignore-glob={protocols}/test_[!z]*'],
+            cwd=str(_tiers.ROOT), env=environ, capture_output=True, text=True,
+            timeout=300, check=False,
+        )
+        output = completed.stdout + completed.stderr
+
+        self.assertIn(f"crashed while running '{probe_test}'", output)
+        self.assertTrue(self.probe_path.exists(), 'the crash did not leave the probe behind')
+        self.assertNotIn('Interrupted', output)
+        self.assertNotIn(_DIAGNOSTIC_MARKER, output)
+        self.assertEqual(completed.returncode, 1, output)
 
 
 class ProbeWriteLockTests(unittest.TestCase):
