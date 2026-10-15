@@ -86,7 +86,7 @@ class TCP(Protocol):
     seq: 'int'
     #: Acknowledgment number.
     ack: 'int'
-    #: Data offset.
+    #: Header length, i.e. the Data Offset in octets.
     hdr_len: 'int'
     #: Flags.
     flags: 'Flags'
@@ -225,9 +225,9 @@ class EchoReply(Option):
 class Timestamps(Option):
     """Data model for TCP timestamp option."""
 
-    #: Timestamp .
+    #: Timestamp value.
     timestamp: 'int'
-    #: Echo data.
+    #: Timestamp echo reply.
     echo: 'int'
 
     if TYPE_CHECKING:
@@ -244,7 +244,7 @@ class PartialOrderConnectionPermitted(Option):
 
 @info_final
 class PartialOrderServiceProfile(Option):
-    """Data model for TCP partial order connection profile option."""
+    """Data model for TCP partial order connection service profile option."""
 
     #: Start flag.
     start: 'bool'
@@ -403,7 +403,7 @@ class MPTCPUnknown(MPTCP):
 class MPTCPCapableFlag(Data):
     """Data model for TCP MPTCP capable option flags."""
 
-    #: Checksum require flag.
+    #: Checksum required flag.
     req: 'bool'
     #: Extensibility flag.
     ext: 'bool'
@@ -411,7 +411,8 @@ class MPTCPCapableFlag(Data):
     deny_join: 'bool'
     #: Reserved flags (``D`` to ``G``).
     reserved: 'int'
-    #: HMAC-SHA1 flag.
+    #: HMAC algorithm flag (``H``): HMAC-SHA1 under version 0 (:rfc:`6824`),
+    #: HMAC-SHA256 under version 1 (:rfc:`8684`).
     hsa: 'bool'
 
     if TYPE_CHECKING:
