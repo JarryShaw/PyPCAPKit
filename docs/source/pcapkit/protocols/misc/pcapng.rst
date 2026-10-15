@@ -213,6 +213,15 @@ Header Schemas
 
 .. module:: pcapkit.protocols.schema.misc.pcapng
 
+.. autodata:: pcapkit.protocols.schema.misc.pcapng.BYTE_ORDER_MAGIC
+
+.. autodata:: pcapkit.protocols.schema.misc.pcapng.GENERIC_BLOCK_MINIMUM
+
+.. autodata:: pcapkit.protocols.schema.misc.pcapng.BLOCK_MINIMUM
+   :no-value:
+
+.. autodata:: pcapkit.protocols.schema.misc.pcapng.DEFAULT_RESOLUTION
+
 .. autoclass:: pcapkit.protocols.schema.misc.pcapng.PCAPNG
    :members:
    :show-inheritance:

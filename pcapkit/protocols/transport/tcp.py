@@ -97,6 +97,7 @@ from pcapkit.protocols.schema.transport.tcp import CC as Schema_CC
 from pcapkit.protocols.schema.transport.tcp import MPTCPDSS as Schema_MPTCPDSS
 from pcapkit.protocols.schema.transport.tcp import SACK as Schema_SACK
 from pcapkit.protocols.schema.transport.tcp import TCP as Schema_TCP
+from pcapkit.protocols.schema.transport.tcp import TCP_MIN_HEADER_LEN
 from pcapkit.protocols.schema.transport.tcp import \
     AlternateChecksumData as Schema_AlternateChecksumData
 from pcapkit.protocols.schema.transport.tcp import \
@@ -519,7 +520,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             raise ProtocolError(f'{self.alias}: header length {tcp.hdr_len} runs past the end of '
                                 f'the data ({len(self)} octets)')
 
-        _optl = tcp.hdr_len - 20
+        _optl = tcp.hdr_len - TCP_MIN_HEADER_LEN
         if _optl:
             # NOTE: the octets after an End of Option List option are kept as
             # read, so that :meth:`make` rebuilds the option area -- and the
@@ -629,7 +630,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         else:
             options_value, total_length = [], 0
 
-        offset = math.ceil((20 + total_length) / 4)
+        offset = math.ceil((TCP_MIN_HEADER_LEN + total_length) / 4)
 
         return Schema_TCP(
             srcport=self._make_port(srcport, Enum_TransportProtocol.tcp),
@@ -701,7 +702,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
     def __length_hint__(self) -> 'Literal[20]':
         """Return an estimated length for the object."""
-        return 20
+        return TCP_MIN_HEADER_LEN  # type: ignore[return-value]
 
     @classmethod
     def __index__(cls) -> 'TransType':  # pylint: disable=invalid-index-returned

@@ -21,6 +21,17 @@ if TYPE_CHECKING:
 
     from pcapkit.protocols.protocol import ProtocolBase
 
+#: The most octets a 16-bit IP length field declares: IPv4's Total Length, the
+#: header included (:rfc:`791#section-3.1`), and IPv6's Payload Length, the
+#: fixed header excluded (:rfc:`8200#section-3`) -- so a longer IPv6 payload is
+#: a jumbogram, whose Jumbo Payload Length must exceed it (:rfc:`2675#section-2`).
+#: The one home of this value (:issue:`1739`), here so that the schema's
+#: jumbogram check and the protocol modules read the same one; it is fixed by
+#: the RFCs, so it is never configurable.
+#:
+#: .. versionadded:: 1.5.0
+IP_MAX_LENGTH = 65535
+
 if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict
 
@@ -179,8 +190,8 @@ def jumbogram_error(length: 'int', next: 'int', data: 'bytes',  # pylint: disabl
         return None
     if length:
         return f'Jumbo Payload option with a non-zero Payload Length {length}'
-    if jumbo <= 0xFFFF:
-        return f'Jumbo Payload Length {jumbo}, not greater than 65,535'
+    if jumbo <= IP_MAX_LENGTH:
+        return f'Jumbo Payload Length {jumbo}, not greater than {IP_MAX_LENGTH:,}'
     if fragment is not None and fragment():
         return 'Jumbo Payload option with a Fragment header'
     return None

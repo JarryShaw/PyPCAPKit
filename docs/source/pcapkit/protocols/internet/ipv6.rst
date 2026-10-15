@@ -44,10 +44,19 @@ Octets      Bits        Name                    Description
 
    .. automethod:: __index__
 
+Protocol Constants
+------------------
+
+.. autodata:: pcapkit.protocols.internet.ipv6.IPV6_HEADER_LEN
+
+.. autodata:: pcapkit.protocols.internet.ipv6.IPV6_NEXT_HEADER_OFFSET
+
 Header Schemas
 --------------
 
 .. module:: pcapkit.protocols.schema.internet.ipv6
+
+.. autodata:: pcapkit.protocols.schema.internet.ipv6.IP_MAX_LENGTH
 
 .. autoclass:: pcapkit.protocols.schema.internet.ipv6.IPv6
    :members:

@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING
 from pcapkit.dumpkit.common import DumperBase
 from pcapkit.protocols.data.misc.pcap.header import Header as Data_Header
 from pcapkit.protocols.misc.pcap.header import Header
+from pcapkit.protocols.schema.misc.pcap.header import RESOLUTION
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibIntEnum
@@ -51,12 +52,6 @@ _RECORD_HEADER = {
 #: the two spellings writing the same octets for every input.
 _UINT32_MASK = 0xFFFF_FFFF
 
-#: Units per second of a record's ``ts_usec`` field, keyed by the global header's
-#: nanosecond flag.
-_RESOLUTION = {
-    False: 1_000_000,
-    True: 1_000_000_000,
-}
 
 
 def _truncates_to(scaled: 'int', den: 'int', fraction: 'int') -> 'bool':
@@ -199,8 +194,8 @@ class PCAPIO(DumperBase):
         #: int: Units per second of the fraction this file's records carry, and
         #: of the one the other resolution would, taken from :attr:`self._ghdr
         #: <_ghdr>` for the same reason as :attr:`self._rechdr <_rechdr>`.
-        self._tsres = _RESOLUTION[self._ghdr.magic_number.nanosecond]
-        self._tsalt = _RESOLUTION[not self._ghdr.magic_number.nanosecond]
+        self._tsres = RESOLUTION[self._ghdr.magic_number.nanosecond]
+        self._tsalt = RESOLUTION[not self._ghdr.magic_number.nanosecond]
 
     def _append_value(self, value: 'Data_Frame', file: 'IO[bytes]', name: 'str') -> 'None':  # pylint: disable=unused-argument
         """Call this function to write contents.

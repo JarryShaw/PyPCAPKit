@@ -18,6 +18,7 @@ from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
 from pcapkit.protocols.data.misc.pcap.frame import Frame as Data_Frame
 from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
+from pcapkit.protocols.schema.misc.pcap.header import RESOLUTION
 from pcapkit.toolkit.pcap import tcp_segment
 
 if TYPE_CHECKING:
@@ -249,7 +250,7 @@ def block2frame(block: 'Packet', *, nanosecond: 'bool' = False) -> 'Data_Frame':
 
     """
     ts_sec = int(block.timestamp_epoch)
-    ts_usec = int((block.timestamp_epoch - ts_sec) * (1_000_000_000 if nanosecond else 1_000_000))
+    ts_usec = int((block.timestamp_epoch - ts_sec) * RESOLUTION[bool(nanosecond)])
 
     frame = Data_Frame(
         frame_info=Data_FrameInfo(

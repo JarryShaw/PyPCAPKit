@@ -38,6 +38,7 @@ from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.data.internet.ipv6 import IPv6 as Data_IPv6
 from pcapkit.protocols.internet.ip import IP
 from pcapkit.protocols.protocol import _frame_depth
+from pcapkit.protocols.schema.internet.ipv6 import IP_MAX_LENGTH
 from pcapkit.protocols.schema.internet.ipv6 import IPv6 as Schema_IPv6
 from pcapkit.protocols.schema.internet.ipv6 import jumbo_payload_length, jumbogram_error
 from pcapkit.utilities import config
@@ -55,6 +56,19 @@ if TYPE_CHECKING:
     from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['IPv6']
+
+#: Length of the fixed IPv6 header, i.e. the offset of the first extension
+#: header, :rfc:`8200#section-3`. The one home of this value (:issue:`1739`); it
+#: is fixed by the RFC, so it is never configurable.
+#:
+#: .. versionadded:: 1.5.0
+IPV6_HEADER_LEN = 40
+
+#: Offset of the Next Header field within the fixed IPv6 header,
+#: :rfc:`8200#section-3`. The one home of this value (:issue:`1739`).
+#:
+#: .. versionadded:: 1.5.0
+IPV6_NEXT_HEADER_OFFSET = 6
 
 
 class IPv6(IP[Data_IPv6, Schema_IPv6],
@@ -128,7 +142,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
     @property
     def length(self) -> 'Literal[40]':
         """Header length of corresponding protocol."""
-        return 40
+        return IPV6_HEADER_LEN  # type: ignore[return-value]
 
     @property
     def protocol(self) -> 'Enum_TransType':
@@ -311,7 +325,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         # (:issue:`1687`).
         if payload_length is None:
             payload_length = len(payload)
-            if payload_length > 0xFFFF or jumbo_payload_length(next_val, bytes(payload)) is not None:
+            if payload_length > IP_MAX_LENGTH or jumbo_payload_length(next_val, bytes(payload)) is not None:
                 payload_length = 0
 
         return Schema_IPv6(
@@ -345,7 +359,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
 
     def __length_hint__(self) -> 'Literal[40]':
         """Return an estimated length for the object."""
-        return 40
+        return IPV6_HEADER_LEN  # type: ignore[return-value]
 
     @classmethod
     def __index__(cls) -> 'Enum_TransType':  # pylint: disable=invalid-index-returned

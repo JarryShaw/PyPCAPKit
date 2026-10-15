@@ -45,6 +45,8 @@ Header Schemas
 
 .. module:: pcapkit.protocols.schema.internet.ah
 
+.. autodata:: pcapkit.protocols.schema.internet.ah.AH_HEADER_LEN
+
 .. autoclass:: pcapkit.protocols.schema.internet.ah.AH
    :members:
    :show-inheritance:

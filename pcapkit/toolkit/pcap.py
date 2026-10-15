@@ -24,6 +24,7 @@ from pcapkit.protocols.internet.ipv4 import IPv4
 from pcapkit.protocols.misc.null import NoPayload
 from pcapkit.protocols.misc.raw import Raw
 from pcapkit.protocols.protocol import ProtocolBase
+from pcapkit.protocols.schema.transport.tcp import TCP_DATA_OFFSET_OCTET, TCP_MIN_HEADER_LEN
 from pcapkit.protocols.transport.tcp import TCP
 
 if TYPE_CHECKING:
@@ -174,8 +175,8 @@ def tcp_segment(frame: 'ProtocolBase') -> 'Optional[TCPSegment]':
         return None
 
     octets = bytes(raw.packet.payload)
-    hdr_len = (octets[12] >> 4) * 4 if len(octets) >= 20 else 0
-    if hdr_len < 20:
+    hdr_len = (octets[TCP_DATA_OFFSET_OCTET] >> 4) * 4 if len(octets) >= TCP_MIN_HEADER_LEN else 0
+    if hdr_len < TCP_MIN_HEADER_LEN:
         return None
     flags = octets[13]
     return TCPSegment(

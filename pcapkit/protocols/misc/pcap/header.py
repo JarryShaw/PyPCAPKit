@@ -34,6 +34,7 @@ from pcapkit.corekit.version import VersionInfo
 from pcapkit.protocols.data.misc.pcap.header import Header as Data_Header
 from pcapkit.protocols.data.misc.pcap.header import MagicNumber as Data_MagicNumber
 from pcapkit.protocols.protocol import ProtocolBase
+from pcapkit.protocols.schema.misc.pcap.header import GLOBAL_HEADER_LEN, MAGIC_NUMBER
 from pcapkit.protocols.schema.misc.pcap.header import Header as Schema_Header
 from pcapkit.protocols.schema.schema import keep_short_read, replay_short_read
 from pcapkit.utilities.exceptions import EndianError, FileError, UnsupportedCall
@@ -47,17 +48,11 @@ if TYPE_CHECKING:
 
 __all__ = ['Header']
 
-#: dict[tuple[str, bool], bytes]: Mapping of PCAP file magic numbers. The key
-#: is a :obj:`tuple` of endianness (``big`` or ``little``) and nanosecond-
-#: timestamp resolution flag (:data:`True` refers to nanosecond-resolution
-#: timestamp, :data:`False` refers to microsecond-resolution timestamp); the
-#: value is the corresponding PCAP file magic number sequence.
-_MAGIC_NUM = {
-    ('big', True):      b'\xa1\xb2\x3c\x4d',
-    ('big', False):     b'\xa1\xb2\xc3\xd4',
-    ('little', True):   b'\x4d\x3c\xb2\xa1',
-    ('little', False):  b'\xd4\xc3\xb2\xa1',
-}
+#: The PCAP magic number for each byte order and nanosecond flag, the reverse of
+#: :data:`~pcapkit.protocols.schema.misc.pcap.header.MAGIC_NUMBER`, so that
+#: :meth:`Header._make_magic` looks one up rather than searching for it -- an
+#: undeclared pair raises :exc:`KeyError`, as it did before :issue:`1739`.
+_DECLARED_MAGIC = {declared: magic for magic, declared in MAGIC_NUMBER.items()}
 
 
 class Header(ProtocolBase[Data_Header, Schema_Header],
@@ -76,7 +71,7 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
     @property
     def length(self) -> 'Literal[24]':
         """Header length of corresponding protocol."""
-        return 24
+        return GLOBAL_HEADER_LEN  # type: ignore[return-value]
 
     @property
     def version(self) -> 'VersionInfo':
@@ -149,20 +144,14 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
         schema = self.__header__
 
         _magn = schema.magic_number
-        if _magn == b'\xd4\xc3\xb2\xa1':
-            self._nsec = False
-            self._byte = 'little'
-        elif _magn == b'\xa1\xb2\xc3\xd4':
-            self._nsec = False
-            self._byte = 'big'
-        elif _magn == b'\x4d\x3c\xb2\xa1':
-            self._nsec = True
-            self._byte = 'little'
-        elif _magn == b'\xa1\xb2\x3c\x4d':
-            self._nsec = True
-            self._byte = 'big'
-        else:
+        # NOTE: looked up as :obj:`bytes`, so that a :obj:`bytearray` magic
+        # number is matched as it was compared before :issue:`1739` rather
+        # than rejected as unhashable.
+        _decl = (MAGIC_NUMBER.get(bytes(_magn))
+                 if isinstance(_magn, (bytes, bytearray, memoryview)) else None)
+        if _decl is None:
             raise FileError(5, 'Unknown file format', self._file.name)  # pylint: disable=no-member
+        self._byte, self._nsec = _decl
 
         header = Data_Header(
             magic_number=Data_MagicNumber(
@@ -280,11 +269,11 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
 
     def __len__(self) -> 'Literal[24]':
         """Total length of corresponding protocol."""
-        return 24
+        return GLOBAL_HEADER_LEN  # type: ignore[return-value]
 
     def __length_hint__(self) -> 'Literal[24]':
         """Return an estimated length for the object."""
-        return 24
+        return GLOBAL_HEADER_LEN  # type: ignore[return-value]
 
     @classmethod
     def from_data(cls, data: 'Data_Header | dict[str, Any]', **kwargs: 'Any') -> 'Self':
@@ -377,5 +366,5 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
         if byteorder not in ('little', 'big'):
             raise EndianError(f"unknown byte order: {byteorder!r}")
 
-        magic_number = _MAGIC_NUM[(byteorder, nanosecond)]
+        magic_number = _DECLARED_MAGIC[(byteorder, nanosecond)]
         return magic_number, (byteorder == 'little')

@@ -14,6 +14,13 @@ __all__ = ['Frame']
 if TYPE_CHECKING:
     from pcapkit.protocols.protocol import ProtocolBase
 
+#: Length of a PCAP record header, which precedes each record's packet data.
+#: The one home of this value (:issue:`1739`); the format fixes it, so it is
+#: never configurable.
+#:
+#: .. versionadded:: 1.5.0
+RECORD_HEADER_LEN = 16
+
 
 @schema_final
 class Frame(Schema):

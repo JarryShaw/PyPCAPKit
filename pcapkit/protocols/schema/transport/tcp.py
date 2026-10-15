@@ -46,6 +46,22 @@ if TYPE_CHECKING:
     from pcapkit.corekit.fields.field import FieldBase as Field
     from pcapkit.protocols.protocol import ProtocolBase
 
+#: Minimum length of a TCP header, i.e. the fixed part with no options,
+#: :rfc:`9293#section-3.1`. The one home of this value (:issue:`1739`), here so
+#: that the schema's option length and the protocol modules read the same one;
+#: it is fixed by the RFC, so it is never configurable.
+#:
+#: .. versionadded:: 1.5.0
+TCP_MIN_HEADER_LEN = 20
+
+#: Offset of the octet whose high four bits are the Data Offset field -- the
+#: header length in 32-bit words -- within a TCP header, :rfc:`9293#section-3.1`.
+#: The one home of this value (:issue:`1739`), beside :data:`TCP_MIN_HEADER_LEN`;
+#: it is fixed by the RFC, so it is never configurable.
+#:
+#: .. versionadded:: 1.5.0
+TCP_DATA_OFFSET_OCTET = 12
+
 if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict
 
@@ -1093,7 +1109,7 @@ class TCP(Schema):
     urgent: 'int' = UInt16Field()
     #: Options.
     options: 'list[Option]' = OptionField(
-        length=lambda pkt: pkt['offset']['offset'] * 4 - 20,
+        length=lambda pkt: pkt['offset']['offset'] * 4 - TCP_MIN_HEADER_LEN,
         base_schema=Option,
         type_name='kind',
         registry=Option.registry,

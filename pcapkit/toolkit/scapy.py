@@ -46,9 +46,12 @@ from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.data import FrameRecord
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
 from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
+from pcapkit.protocols.internet.ipv6 import IPV6_HEADER_LEN
+from pcapkit.protocols.schema.internet.ipv4 import IPV4_HEADER_LEN
 from pcapkit.protocols.schema.internet.ipv6 import jumbo_payload_length
-from pcapkit.toolkit.pypcapfile import (IP_TUNNELS, IPV4_EXTENSION_HEADERS, IPV4_HEADER_LEN,
-                                        IPV6_HEADER_LEN, TCP_MIN_HEADER_LEN, _default_accepts,
+from pcapkit.protocols.schema.misc.pcap.header import RESOLUTION, RESOLUTION_PLACES
+from pcapkit.protocols.schema.transport.tcp import TCP_DATA_OFFSET_OCTET, TCP_MIN_HEADER_LEN
+from pcapkit.toolkit.pypcapfile import (IP_TUNNELS, IPV4_EXTENSION_HEADERS, _default_accepts,
                                         _walk_extension_headers)
 from pcapkit.utilities.compat import ModuleNotFoundError  # pylint: disable=redefined-builtin
 from pcapkit.utilities.exceptions import MissingKeyError, ModuleNotFound, stacklevel
@@ -218,12 +221,12 @@ def packet2frame(packet: 'Packet') -> 'FrameRecord':
     wirelen = getattr(packet, 'wirelen', None)
     orig_len = len(octets) if wirelen is None else int(wirelen)
 
-    nanosecond = getattr(packet, RESOLUTION_ATTR, 1_000_000) > 1_000_000
+    nanosecond = getattr(packet, RESOLUTION_ATTR, RESOLUTION[False]) > RESOLUTION[False]
     stamp = packet.time
     epoch = (decimal.Decimal(stamp) if isinstance(stamp, decimal.Decimal)
-             else round(decimal.Decimal(stamp), 9 if nanosecond else 6))
+             else round(decimal.Decimal(stamp), RESOLUTION_PLACES[nanosecond]))
     ts_sec = int(epoch)
-    ts_usec = int((epoch - ts_sec) * (1_000_000_000 if nanosecond else 1_000_000))
+    ts_usec = int((epoch - ts_sec) * RESOLUTION[nanosecond])
 
     return FrameRecord(mapping, packet=octets, frame_info=Data_FrameInfo(
         ts_sec=ts_sec,
@@ -336,7 +339,7 @@ def _tcp_segment(tcp: 'TCP') -> 'tuple[bytes, bytes] | None':
 
     """
     segment = _within_datagrams(tcp)
-    hdr_len = (segment[12] >> 4) * 4 if len(segment) >= TCP_MIN_HEADER_LEN else 0
+    hdr_len = (segment[TCP_DATA_OFFSET_OCTET] >> 4) * 4 if len(segment) >= TCP_MIN_HEADER_LEN else 0
     if hdr_len < TCP_MIN_HEADER_LEN:
         return None
     return segment[:hdr_len], segment[hdr_len:]
@@ -352,7 +355,7 @@ def _tcp_behind_extension_headers(segment: 'bytes') -> 'tuple[bytes, bytes] | No
     Returns:
         The header, as many octets as the Data Offset counts, and the payload
         after it; or :data:`None` if there are fewer than
-        :data:`TCP_MIN_HEADER_LEN <pcapkit.toolkit.pypcapfile.TCP_MIN_HEADER_LEN>`
+        :data:`TCP_MIN_HEADER_LEN <pcapkit.protocols.schema.transport.tcp.TCP_MIN_HEADER_LEN>`
         octets, the Data Offset counts fewer or more than were captured, or
         pcapkit's own TCP parser rejects the options (see
         :func:`~pcapkit.toolkit.pypcapfile._default_accepts`).
@@ -363,7 +366,7 @@ def _tcp_behind_extension_headers(segment: 'bytes') -> 'tuple[bytes, bytes] | No
         pcapkit's parser to check.
 
     """
-    hdr_len = (segment[12] >> 4) * 4 if len(segment) >= TCP_MIN_HEADER_LEN else 0
+    hdr_len = (segment[TCP_DATA_OFFSET_OCTET] >> 4) * 4 if len(segment) >= TCP_MIN_HEADER_LEN else 0
     if hdr_len < TCP_MIN_HEADER_LEN or hdr_len > len(segment):
         return None
     if hdr_len > TCP_MIN_HEADER_LEN and not _default_accepts('TCP', segment[:hdr_len]):

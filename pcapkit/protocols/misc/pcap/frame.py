@@ -35,7 +35,9 @@ from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.data.misc.pcap.frame import Frame as Data_Frame
 from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
 from pcapkit.protocols.protocol import ProtocolBase
+from pcapkit.protocols.schema.misc.pcap.frame import RECORD_HEADER_LEN
 from pcapkit.protocols.schema.misc.pcap.frame import Frame as Schema_Frame
+from pcapkit.protocols.schema.misc.pcap.header import RESOLUTION
 from pcapkit.utilities.compat import localcontext
 from pcapkit.utilities.exceptions import StreamEOFError, UnsupportedCall, stacklevel
 from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
@@ -118,7 +120,7 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
     @property
     def length(self) -> 'Literal[16]':
         """Header length of corresponding protocol."""
-        return 16
+        return RECORD_HEADER_LEN  # type: ignore[return-value]
 
     @property
     def header(self) -> 'Data_Header':
@@ -261,10 +263,7 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
         _olen = schema.orig_len
 
         with localcontext(prec=64):
-            if self._nsec:
-                _epch = _tsss + decimal.Decimal(_tsus) / 1_000_000_000
-            else:
-                _epch = _tsss + decimal.Decimal(_tsus) / 1_000_000
+            _epch = _tsss + decimal.Decimal(_tsus) / RESOLUTION[bool(self._nsec)]
         _irat = _epch.as_integer_ratio()
 
         try:
@@ -470,7 +469,7 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
 
     def __length_hint__(self) -> 'Literal[16]':
         """Return an estimated length for the object."""
-        return 16
+        return RECORD_HEADER_LEN  # type: ignore[return-value]
 
     def _check_record_floor(self, length: 'Optional[int]') -> 'None':
         """Refuse a tail too short to hold a record header.
@@ -497,9 +496,10 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             length = self._file.seek(0, io.SEEK_END) - current
             self._file.seek(current, io.SEEK_SET)
 
-        if length < 16:
+        if length < RECORD_HEADER_LEN:
             raise StreamEOFError(f'PCAP: record truncated: {length} octet(s) left, '
-                                 'fewer than the 16 a record header needs', quiet=True)
+                                 f'fewer than the {RECORD_HEADER_LEN} a record header needs',
+                                 quiet=True)
 
     # NOTE: This is a hack to make the ``__index__`` method work both as a
     # class method and an instance method.
@@ -579,7 +579,7 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             ts_sec = int(timestamp)
 
         if ts_usec is None:
-            ts_usec = int((timestamp - ts_sec) * (1_000_000_000 if nanosecond else 1_000_000))
+            ts_usec = int((timestamp - ts_sec) * RESOLUTION[bool(nanosecond)])
 
         return ts_sec, ts_usec
 

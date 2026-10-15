@@ -62,7 +62,7 @@ __all__ = [
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
-    from typing import IO, Any, Callable, DefaultDict, Iterable, Optional, Type
+    from typing import IO, Any, Callable, DefaultDict, Dict, Iterable, Optional, Type
 
     from typing_extensions import Literal, Self
 
@@ -167,6 +167,51 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         #: Link-layer-dependent error - symbol error (bit 31).
         symbol_error: int
 
+#: Byte-Order Magic of a Section Header Block, read in the byte order of the
+#: section that wrote it. The one home of this value (:issue:`1739`); the format
+#: fixes it, so it is never configurable.
+#:
+#: .. versionadded:: 1.5.0
+BYTE_ORDER_MAGIC = 0x1A2B3C4D
+
+#: :data:`BYTE_ORDER_MAGIC` read in the other byte order, i.e. as a big-endian
+#: reader sees a little-endian section's.
+_SWAPPED_BYTE_ORDER_MAGIC = int.from_bytes(BYTE_ORDER_MAGIC.to_bytes(4, 'little'), 'big')
+
+#: The octets every block's fixed fields span: Block Type and both copies of
+#: Block Total Length, and so the shortest Block Total Length of any block, and
+#: the whole of it for a block not in :data:`BLOCK_MINIMUM`. The one home of
+#: this value (:issue:`1739`); the format fixes it, so it is never configurable.
+#:
+#: .. versionadded:: 1.5.0
+GENERIC_BLOCK_MINIMUM = 12
+
+#: Block types mapped to the octets their fixed fields span, Block Type and
+#: both copies of Block Total Length included; any other block spans
+#: :data:`GENERIC_BLOCK_MINIMUM`. The one home of these values (:issue:`1739`);
+#: the format fixes them, so they are never configurable.
+#:
+#: .. versionadded:: 1.5.0
+BLOCK_MINIMUM = {
+    Enum_BlockType.Section_Header_Block: 28,
+    Enum_BlockType.Interface_Description_Block: 20,
+    Enum_BlockType.Packet_Block: 32,
+    Enum_BlockType.Simple_Packet_Block: 16,
+    Enum_BlockType.Interface_Statistics_Block: 24,
+    Enum_BlockType.Enhanced_Packet_Block: 32,
+    Enum_BlockType.Decryption_Secrets_Block: 20,
+    Enum_BlockType.Custom_Block_that_rewriters_can_copy_into_new_files: 16,
+    Enum_BlockType.Custom_Block_that_rewriters_should_not_copy_into_new_files: 16,
+}  # type: Dict[int, int]
+
+#: Units per second of a timestamp on an interface that carries no
+#: ``if_tsresol`` option: microseconds, the default the format gives that
+#: option. The one home of this value (:issue:`1739`); the format fixes it, so
+#: it is never configurable.
+#:
+#: .. versionadded:: 1.5.0
+DEFAULT_RESOLUTION = 1_000_000
+
 
 def shb_byteorder_callback(field: 'NumberField', packet: 'dict[str, Any]') -> 'None':
     """Update byte order of PCAP-NG file for SHB.
@@ -192,9 +237,9 @@ def shb_byteorder_callback(field: 'NumberField', packet: 'dict[str, Any]') -> 'N
 
     """
     magic = packet['match']['byteorder']  # type: int
-    if magic in (0x1A2B3C4D, 0x0000000C):
+    if magic in (BYTE_ORDER_MAGIC, 0x0000000C):
         field._byteorder = 'big'
-    elif magic in (0x4D3C2B1A, 0x0C000000):
+    elif magic in (_SWAPPED_BYTE_ORDER_MAGIC, 0x0C000000):
         field._byteorder = 'little'
     else:
         raise ProtocolError(f'unknown byteorder magic: {magic:#x}')
@@ -449,8 +494,12 @@ def captured_area(name: 'str') -> 'Callable[[dict[str, Any]], int]':
     (:issue:`1405`).
 
     """
+    # NOTE: an EPB and the obsolete Packet Block span the same fixed fields, so
+    # the one entry stands for both.
+    framing = BLOCK_MINIMUM[Enum_BlockType.Enhanced_Packet_Block]
+
     def callback(pkt: 'dict[str, Any]') -> 'int':
-        return max(0, min(pkt[name], pkt['length'] - 32))
+        return max(0, min(pkt[name], pkt['length'] - framing))
     return callback
 
 
@@ -785,7 +834,7 @@ class UnknownBlock(BlockType):
     #: Block total length.
     length: 'int' = UInt32Field(callback=byteorder_callback)
     #: Block body (including padding).
-    body: 'bytes' = BytesField(length=nonnegative(lambda pkt: pkt['length'] - 12))
+    body: 'bytes' = BytesField(length=nonnegative(lambda pkt: pkt['length'] - GENERIC_BLOCK_MINIMUM))
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
@@ -1023,7 +1072,7 @@ class SectionHeaderBlock(BlockType, code=Enum_BlockType.Section_Header_Block):
     section_length: 'int' = Int64Field(callback=shb_byteorder_callback, default=0xFFFF_FFFF_FFFF_FFFF)
     #: Options.
     options: 'list[Option]' = OptionAreaField(
-        length=nonnegative(lambda pkt: pkt['length'] - 28),
+        length=nonnegative(lambda pkt: pkt['length'] - BLOCK_MINIMUM[Enum_BlockType.Section_Header_Block]),
         base_schema=_OPT_Option,
         type_name='type',
         registry=Option.registry['opt'],
@@ -1055,7 +1104,8 @@ class SectionHeaderBlock(BlockType, code=Enum_BlockType.Section_Header_Block):
             return
 
         packet['match'] = {
-            'byteorder': 0x1A2B3C4D if packet_byteorder(packet) == 'big' else 0x4D3C2B1A,
+            'byteorder': (BYTE_ORDER_MAGIC if packet_byteorder(packet) == 'big'
+                          else _SWAPPED_BYTE_ORDER_MAGIC),
         }
 
     def post_process(self, packet: 'dict[str, Any]') -> 'SectionHeaderBlock':
@@ -1079,16 +1129,16 @@ class SectionHeaderBlock(BlockType, code=Enum_BlockType.Section_Header_Block):
         Block Total Length (see :func:`shb_byteorder_callback`).
 
         """
-        if self.length >= 28:
+        if self.length >= BLOCK_MINIMUM[Enum_BlockType.Section_Header_Block]:
             self = cast('Self', super().post_process(packet))
 
         if self.section_length == 0xFFFF_FFFF_FFFF_FFFF:
             self.section_length = -1
 
         magic = packet['match']['byteorder']  # type: int
-        if magic == 0x1A2B3C4D or (magic == 0x0000000C and self.length == 12):
+        if magic == BYTE_ORDER_MAGIC or (magic == 0x0000000C and self.length == GENERIC_BLOCK_MINIMUM):
             self.byteorder = 'big'
-        elif magic == 0x4D3C2B1A or (magic == 0x0C000000 and self.length == 12):
+        elif magic == _SWAPPED_BYTE_ORDER_MAGIC or (magic == 0x0C000000 and self.length == GENERIC_BLOCK_MINIMUM):
             self.byteorder = 'little'
         else:
             raise ProtocolError(f'unknown byteorder magic: {magic:#x}')
@@ -1356,7 +1406,7 @@ class InterfaceDescriptionBlock(BlockType, code=Enum_BlockType.Interface_Descrip
     snaplen: 'int' = UInt32Field(default=0, callback=byteorder_callback)
     #: Options.
     options: 'list[Option]' = OptionAreaField(
-        length=nonnegative(lambda pkt: pkt['length'] - 20),
+        length=nonnegative(lambda pkt: pkt['length'] - BLOCK_MINIMUM[Enum_BlockType.Interface_Description_Block]),
         base_schema=_IF_Option,
         type_name='type',
         registry=Option.registry['if'],
@@ -1384,7 +1434,7 @@ class InterfaceDescriptionBlock(BlockType, code=Enum_BlockType.Interface_Descrip
         the block as captured and compares them itself (:issue:`1422`).
 
         """
-        if self.length < 20:
+        if self.length < BLOCK_MINIMUM[Enum_BlockType.Interface_Description_Block]:
             return self
         return super().post_process(packet)
 
@@ -1512,7 +1562,7 @@ class EnhancedPacketBlock(BlockType, code=Enum_BlockType.Enhanced_Packet_Block):
         # ``padding_data``: a PaddingField is written straight into the schema
         # buffer while packing and never lands in the packet data, so its name
         # is not a key here on the packing path.
-        length=bounded_area(lambda pkt: pkt['length'] - 32
+        length=bounded_area(lambda pkt: pkt['length'] - BLOCK_MINIMUM[Enum_BlockType.Enhanced_Packet_Block]
                                         - (captured_area('captured_len')(pkt) + 3) // 4 * 4),
         base_schema=_EPB_Option,
         type_name='type',
@@ -1541,7 +1591,7 @@ class EnhancedPacketBlock(BlockType, code=Enum_BlockType.Enhanced_Packet_Block):
         as captured and compares them itself (:issue:`1414`).
 
         """
-        if self.length < 32:
+        if self.length < BLOCK_MINIMUM[Enum_BlockType.Enhanced_Packet_Block]:
             return self
         return super().post_process(packet)
 
@@ -1568,7 +1618,7 @@ def _spb_data_length(packet: 'dict[str, Any]') -> 'int':
         read where it sits.
 
     """
-    area = max(0, packet['length'] - 16)
+    area = max(0, packet['length'] - BLOCK_MINIMUM[Enum_BlockType.Simple_Packet_Block])
     size = min(packet['original_len'], area)
     snaplen = packet.get('snaplen')
     if snaplen is not None and snaplen < size:
@@ -1780,7 +1830,7 @@ class NameResolutionBlock(BlockType, code=Enum_BlockType.Name_Resolution_Block):
     length: 'int' = UInt32Field(callback=byteorder_callback)
     #: Name resolution records.
     records: 'list[NameResolutionRecord]' = OptionAreaField(
-        length=nonnegative(lambda pkt: pkt['length'] - 12),
+        length=nonnegative(lambda pkt: pkt['length'] - GENERIC_BLOCK_MINIMUM),
         base_schema=NameResolutionRecord,
         type_name='type',
         registry=NameResolutionRecord.registry,
@@ -1940,7 +1990,7 @@ class InterfaceStatisticsBlock(BlockType, code=Enum_BlockType.Interface_Statisti
     timestamp_low: 'int' = UInt32Field(callback=byteorder_callback)
     #: Options.
     options: 'list[Option]' = OptionAreaField(
-        length=nonnegative(lambda pkt: pkt['length'] - 24),
+        length=nonnegative(lambda pkt: pkt['length'] - BLOCK_MINIMUM[Enum_BlockType.Interface_Statistics_Block]),
         base_schema=_ISB_Option,
         type_name='type',
         registry=Option.registry['isb'],
@@ -1965,7 +2015,7 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
     #: Block total length.
     length: 'int' = UInt32Field(callback=byteorder_callback)
     #: Journal entry.
-    entry: 'bytes' = BytesField(length=nonnegative(lambda pkt: pkt['length'] - 12))
+    entry: 'bytes' = BytesField(length=nonnegative(lambda pkt: pkt['length'] - GENERIC_BLOCK_MINIMUM))
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
@@ -2322,8 +2372,8 @@ class DecryptionSecretsBlock(BlockType, code=Enum_BlockType.Decryption_Secrets_B
     options: 'list[Option]' = OptionAreaField(
         # NOTE: see EnhancedPacketBlock.options on why the padding is recomputed
         # here instead of being read back from ``padding_data``.
-        length=nonnegative(lambda pkt: pkt['length'] - 20 - pkt['secrets_length']
-                           - (4 - pkt['secrets_length'] % 4) % 4),
+        length=nonnegative(lambda pkt: pkt['length'] - BLOCK_MINIMUM[Enum_BlockType.Decryption_Secrets_Block]
+                           - pkt['secrets_length'] - (4 - pkt['secrets_length'] % 4) % 4),
         base_schema=_DSB_Option,
         type_name='type',
         registry=Option.registry['dsb'],
@@ -2360,7 +2410,10 @@ class CustomBlock(BlockType, code=[Enum_BlockType.Custom_Block_that_rewriters_ca
     #: Private enterprise number.
     pen: 'int' = UInt32Field(callback=byteorder_callback)
     #: Custom data (incl. padding and options).
-    data: 'bytes' = BytesField(length=nonnegative(lambda pkt: pkt['length'] - 16))
+    # NOTE: both custom block types span the same fixed fields, so the one
+    # entry stands for both.
+    data: 'bytes' = BytesField(length=nonnegative(
+        lambda pkt: pkt['length'] - BLOCK_MINIMUM[Enum_BlockType.Custom_Block_that_rewriters_can_copy_into_new_files]))
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
@@ -2433,7 +2486,7 @@ class PacketBlock(BlockType, code=Enum_BlockType.Packet_Block):
     options: 'list[Option]' = OptionAreaField(
         # NOTE: see EnhancedPacketBlock.options on why the padding is recomputed
         # here instead of being read back from ``padding_data``.
-        length=bounded_area(lambda pkt: pkt['length'] - 32
+        length=bounded_area(lambda pkt: pkt['length'] - BLOCK_MINIMUM[Enum_BlockType.Packet_Block]
                                         - (captured_area('captured_length')(pkt) + 3) // 4 * 4),
         base_schema=_PACK_Option,
         type_name='type',
@@ -2462,7 +2515,7 @@ class PacketBlock(BlockType, code=Enum_BlockType.Packet_Block):
         as captured and compares them itself (:issue:`1414`).
 
         """
-        if self.length < 32:
+        if self.length < BLOCK_MINIMUM[Enum_BlockType.Packet_Block]:
             return self
         return super().post_process(packet)
 

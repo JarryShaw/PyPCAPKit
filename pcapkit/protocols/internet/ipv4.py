@@ -82,6 +82,7 @@ from pcapkit.protocols.data.internet.ipv4 import TROption as Data_TROption
 from pcapkit.protocols.data.internet.ipv4 import TSOption as Data_TSOption
 from pcapkit.protocols.data.internet.ipv4 import UnassignedOption as Data_UnassignedOption
 from pcapkit.protocols.internet.ip import IP
+from pcapkit.protocols.schema.internet.ipv4 import IPV4_HEADER_LEN
 from pcapkit.protocols.schema.internet.ipv4 import EOOLOption as Schema_EOOLOption
 from pcapkit.protocols.schema.internet.ipv4 import ESECOption as Schema_ESECOption
 from pcapkit.protocols.schema.internet.ipv4 import IPv4 as Schema_IPv4
@@ -328,14 +329,14 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             raise ProtocolError(f'{self.alias}: header length {ipv4.hdr_len} runs past the end of '
                                 f'the data ({len(self)} octets)')
 
-        _optl = ipv4.hdr_len - 20
+        _optl = ipv4.hdr_len - IPV4_HEADER_LEN
         if _optl:
             options = self._read_ipv4_options(_optl)
             _used = sum(opt.length for _, opt in options.items(multi=True))
             ipv4.__update__([
                 ('options', options),
                 # octets after the End of Option List, as captured
-                ('padding', self._data[20 + _used:ipv4.hdr_len]),
+                ('padding', self._data[IPV4_HEADER_LEN + _used:ipv4.hdr_len]),
             ])
 
         # NOTE: Octets captured past the Total Length belong to this layer,
@@ -578,7 +579,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
 
     def __length_hint__(self) -> 'Literal[20]':
         """Return an estimated length for the object."""
-        return 20
+        return IPV4_HEADER_LEN  # type: ignore[return-value]
 
     @classmethod
     def __index__(cls) -> 'Enum_TransType':  # pylint: disable=invalid-index-returned
