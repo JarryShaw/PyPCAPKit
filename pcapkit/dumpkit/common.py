@@ -9,12 +9,6 @@ functions for :mod:`pcapkit.dumpkit` implementation, which is
 generally the customised hooks for :class:`dictdumper.Dumper`
 classes.
 
-.. versionremoved:: 1.5.0
-
-   ``pcapkit.dumpkit.common.FALLBACK_LIMIT``, now
-   :data:`pcapkit.utilities.config.FALLBACK_LIMIT`, set with
-   :envvar:`PCAPKIT_FALLBACK_LIMIT` (:issue:`1726`).
-
 """
 import collections
 import datetime
@@ -320,8 +314,9 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
        as the name, ``Flags::0 [0]`` rather than ``Flags::None [0]``
        (:issue:`648`). An :class:`~pcapkit.corekit.multidict.OrderedMultiDict`
        dumps as a list of one-key mappings in wire order, not grouped by key
-       (:issue:`1263`). A timezone dumps as its offset in seconds, and
-       :data:`~pcapkit.corekit.sentinels.NULL` and
+       (:issue:`1263`). An :class:`~ipaddress.IPv4Network` or
+       :class:`~ipaddress.IPv6Network` dumps as its string, a timezone as its
+       offset in seconds, and :data:`~pcapkit.corekit.sentinels.NULL` and
        :data:`~pcapkit.corekit.sentinels.NO_VALUE` as ``'<NULL>'`` and
        ``'<NO_VALUE>'`` (:issue:`1258`). In ``plist`` output, :data:`None` is
        kept (:issue:`1257`), and a string carrying a character XML forbids
@@ -601,7 +596,7 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                     Each :data:`None` value is first converted through
                     :meth:`~dictdumper.plist.PLIST._encode_value`, whose own
                     rendering of it is ``{'type': 'NoneType', 'value': 'None'}``,
-                    so that the writer no longer skips it.
+                    so that the writer does not skip it.
 
                 """
                 value = {key: self._encode_value(val) if val is None else val for key, val in value.items()}

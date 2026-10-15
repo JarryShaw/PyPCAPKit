@@ -400,7 +400,7 @@ def _writes_to(candidate: 'logging.Handler', stream: 'Any') -> 'bool':
 
 
 if DEVMODE:
-    # development mode keeps the historical behaviour: everything, on stderr
+    # development mode logs everything, from DEBUG up, to stderr
     logger.setLevel(logging.DEBUG)
     if not any(_writes_to(installed, handler.stream) for installed in logger.handlers):
         logger.addHandler(handler)

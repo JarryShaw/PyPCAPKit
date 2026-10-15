@@ -670,6 +670,10 @@ class StreamEOFError(BaseError, EOFError):
     A *declared* zero length -- a nested schema legitimately sized to have
     nothing to read -- is a different situation and does not raise this.
 
+    :class:`~pcapkit.protocols.misc.pcap.frame.Frame` and
+    :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` raise it too, quietly, when
+    fewer octets are left than a record header or a block needs.
+
     Note:
         :func:`~pcapkit.corekit.decorators.prepare` always raises this with
         ``quiet=True``: reaching end of stream is the frame reader's ordinary

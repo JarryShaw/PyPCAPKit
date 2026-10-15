@@ -299,7 +299,7 @@ class PCAPNG(EngineBase[P_PCAPNG]):
         # verbose output
         ext._vfunc(ext, block)
 
-        # write plist
+        # write output
         self._write_file(block.info, name=f'Frame {ext._frnum}')
 
         # record fragments

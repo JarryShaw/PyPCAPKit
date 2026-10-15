@@ -539,12 +539,12 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
     Returns:
         Data for TCP flow tracing.
 
-        * If the ``packet`` can be used for TCP flow tracing. A packet can be reassembled
+        * If the ``packet`` can be used for TCP flow tracing. A packet can be traced
           if it contains TCP layer with a whole fixed header (see
           :func:`_has_fixed_header`), keyed by the IP layer that carries it -- in an
           IP-in-IP tunnel, the innermost (see :func:`_carrier`) -- if tshark reports
           both its addresses (see :func:`_has_addresses`).
-        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
+        * If the ``packet`` can be traced, then the :obj:`dict` mapping of data for TCP
           flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
     Raises:
@@ -559,11 +559,13 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
     .. versionchanged:: 1.5.0
 
        The link type is resolved from ``frame.encap_type`` through
-       :data:`~pcapkit.toolkit.pyshark.ENCAP_TYPE_TO_LINKTYPE`, and one that
-       cannot be resolved raises
+       :data:`~pcapkit.toolkit.pyshark.ENCAP_TYPE_TO_LINKTYPE`, or, for a
+       frame without that field, from the root layer's name through
+       :data:`~pcapkit.toolkit.pyshark.FILTER_NAME_TO_LINKTYPE`. One that
+       cannot be resolved either way raises
        :exc:`~pcapkit.utilities.exceptions.MissingKeyError`; 1.4.x looked up
-       the root layer's name, which gave the wrong DLT for ``ppp``, ``null``,
-       ``lapd`` and ``raw`` (:issue:`843`).
+       the root layer's name only, which gave the wrong DLT for ``ppp``,
+       ``null``, ``lapd`` and ``raw`` (:issue:`843`).
 
     """
     ip, tcp = _carrier(packet)

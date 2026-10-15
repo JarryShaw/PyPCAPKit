@@ -15,9 +15,3 @@ which is why it lives here rather than beside either of them.
 .. autofunction:: pcapkit.utilities.chardet.detect
 
 The cache holds :data:`~pcapkit.utilities.config.DETECT_CACHE_SIZE` entries.
-
-.. versionremoved:: 1.5.0
-
-   ``pcapkit.utilities.chardet.DETECT_CACHE_SIZE``, now
-   :data:`pcapkit.utilities.config.DETECT_CACHE_SIZE`, set with
-   :envvar:`PCAPKIT_DETECT_CACHE_SIZE` (:issue:`1726`).

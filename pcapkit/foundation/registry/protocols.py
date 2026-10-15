@@ -199,9 +199,9 @@ def register_protocol(protocol: 'Type[ProtocolBase]') -> 'None':
     name as a plain string, and the ``protocol`` properties on
     :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyMeta` and
     :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowMeta` fall back to
-    :class:`~pcapkit.protocols.misc.raw.Raw`. Re-keying is therefore part of the
-    registry redesign in :issue:`514`, and reporting the collision here is the
-    step that redesign is sequenced behind.
+    :class:`~pcapkit.protocols.misc.raw.Raw`. The registry redesign of
+    :issue:`514` kept this key, so the collision is reported here rather than
+    resolved.
 
     Args:
         protocol: Protocol class.
