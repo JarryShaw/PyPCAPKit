@@ -182,6 +182,13 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
                 guard this shares with ``register_protocol``, and for the
                 shipped descriptor a restore puts back (:issue:`1504`).
 
+        .. versionchanged:: 1.3.0
+
+           Takes the class, or a
+           :class:`~pcapkit.corekit.module.ModuleDescriptor` naming it, as
+           ``protocol``, in place of the ``module`` and ``class_`` name
+           strings.
+
         """
         incumbent = cls.__proto__.get(code)
         entry = cls._next_layer_entry(code, protocol)

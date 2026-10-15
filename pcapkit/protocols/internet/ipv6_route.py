@@ -92,6 +92,12 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
          - :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_rpl`
          - :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_data_type_rpl`
 
+    .. versionchanged:: 1.3.4
+
+       :attr:`length`, and the ``length`` field of the parsed data model, is
+       the header's size in octets rather than the raw Hdr Ext Len value
+       (:issue:`218`).
+
     .. versionchanged:: 1.5.0
 
        * Hdr Ext Len is in 8-octet units both on read and on build

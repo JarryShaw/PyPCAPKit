@@ -111,9 +111,8 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
     #: Three groups are deliberately absent:
     #:
     #: * :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6`
-    #:   has no dedicated parser (``pcapkit/protocols/internet/NotImplemented/shim6.py``
-    #:   is a 0-byte placeholder), so there is no "own parser" for it to raise
-    #:   from. It reaches :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
+    #:   has no dedicated parser class in this package, so there is no "own
+    #:   parser" for it to raise from. It reaches :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
     #:   by *direct* registration (see the bottom of
     #:   :mod:`pcapkit.protocols.internet.ipv6_ext`), which already produces
     #:   exactly this class.

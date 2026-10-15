@@ -329,8 +329,8 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
     def next(self) -> 'Optional[Enum_TransType]':
         """Next header, as parsed off the wire.
 
-        Shared by every subclass rather than fallback-role-only; see
-        :class:`_NextHeaderData` for why that is sound.
+        Shared by every subclass rather than fallback-role-only, since each of
+        their data models records the Next Header value under this name.
 
         :data:`None` when the declared length would have overrun what remained
         of the chain and the walk stopped instead of trusting it; see the

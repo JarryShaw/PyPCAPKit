@@ -1505,7 +1505,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             :attr:`Data_PadOption.length
             <pcapkit.protocols.data.internet.ipv6_opts.Option.length>` counts
             the *whole* option, whereas :attr:`Schema_PadOption.len
-            <pcapkit.protocols.schema.internet.ipv6_opts.PadOption.len>` is the
+            <pcapkit.protocols.schema.internet.ipv6_opts.Option.len>` is the
             ``Opt Data Len`` field: two octets fewer, and absent altogether for a
             ``Pad1``. ``opt`` is honoured so that re-making a parsed padding
             option keeps its type and size. A ``PadN`` with ``length`` ``0`` is
