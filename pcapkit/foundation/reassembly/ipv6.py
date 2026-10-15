@@ -135,9 +135,12 @@ class IPv6(IP):
         the reassembled packet, and that the Next Header field of the last header
         of the unfragmentable part comes from the Fragment header's. Left alone,
         the reassembled datagram would advertise a Fragment header on a datagram
-        that is by definition no longer a fragment. Every toolkit adapter leaves
-        the Fragment header's *octets* out of ``header``, but none rewrites the
-        field that points at it, so only that field is left to fix.
+        that is by definition no longer a fragment. The four toolkit adapters
+        that build IPv6 reassembly data, :mod:`~pcapkit.toolkit.pcap`,
+        :mod:`~pcapkit.toolkit.pcapng`, :mod:`~pcapkit.toolkit.dpkt` and
+        :mod:`~pcapkit.toolkit.scapy`, leave the Fragment header's *octets* out
+        of ``header``, but none rewrites the field that points at it, so only
+        that field is left to fix.
 
         Args:
             header: Raw header octets of the fragment at fragment offset zero.

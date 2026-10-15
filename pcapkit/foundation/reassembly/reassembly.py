@@ -541,6 +541,15 @@ class Reassembly(ReassemblyBase[_PT, _DT, _IT, _BT], Generic[_PT, _DT, _IT, _BT]
         timeout: reassembly timeout in seconds, on the capture's own clock;
             :data:`None` selects the protocol's :attr:`__timeout__` default
 
+    .. versionchanged:: 1.3.0
+
+       :attr:`name` and :attr:`protocol` are read from ``__protocol_name__``
+       and ``__protocol_type__``, where they were abstract properties each
+       reassembly implemented, and the built-in names are short: ``'IPv4'``
+       rather than ``'Internet Protocol version 4'``. A subclass registers
+       itself with :class:`~pcapkit.foundation.extraction.Extractor` at class
+       definition.
+
     .. versionchanged:: 1.5.0
 
        Registration is opt-in, under the ``protocol`` class keyword; 1.4.x

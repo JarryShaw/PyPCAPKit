@@ -217,9 +217,9 @@ EXTENSION_HEADER_LIMIT = read_limit('EXTENSION_HEADER_LIMIT', 32, risk=_RECURSIO
 IPV6_TCP_WARNED_LIMIT = read_limit('IPV6_TCP_WARNED_LIMIT', 32, risk=(
     'each capture remembered pins one of its packets in memory'))
 
-#: int: Most objects :meth:`DictDumper._append_fallback
-#: <pcapkit.dumpkit.common.DictDumper._append_fallback>` expands for one
-#: top-level object, counting an object once per time it is met,
+#: int: Most objects
+#: :meth:`DictDumper._append_fallback <pcapkit.dumpkit.common.DictDumper._append_fallback>`
+#: expands for one top-level object, counting an object once per time it is met,
 #: :envvar:`PCAPKIT_FALLBACK_LIMIT`; ``-1`` expands without bound.
 #:
 #: No fallback object in the ``foundation``, ``dumpkit`` or ``interface`` test
@@ -261,9 +261,9 @@ DETECT_CACHE_SIZE = read_limit('DETECT_CACHE_SIZE', 1024, risk=(
 READ_CHUNK = read_limit('READ_CHUNK', 1 << 20, minimum=1, risk=(
     'a bogus record length allocates up to that many octets in one read'))
 
-#: int: Ceiling on the zero-padding :meth:`FieldBase.unpack
-#: <pcapkit.corekit.fields.field.FieldBase.unpack>` will still perform for a
-#: field whose declared length outruns its buffer.
+#: int: Ceiling on the zero-padding
+#: :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`
+#: will still perform for a field whose declared length outruns its buffer.
 #:
 #: This is libpcap's own ``MAXIMUM_SNAPLEN`` -- the point past which libpcap
 #: itself treats a capture's declared snapshot length as corrupt or
@@ -299,9 +299,9 @@ READ_CHUNK = read_limit('READ_CHUNK', 1 << 20, minimum=1, risk=(
 MAX_ZERO_PAD_LENGTH = read_limit('MAX_ZERO_PAD_LENGTH', 0x40_000, risk=(
     'a hostile capture can declare a field that long and have it zero-filled in memory'))
 
-#: int: Shortfall :meth:`FieldBase.unpack
-#: <pcapkit.corekit.fields.field.FieldBase.unpack>` will always zero-pad for,
-#: whatever else a parse has already padded.
+#: int: Shortfall
+#: :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`
+#: will always zero-pad for, whatever else a parse has already padded.
 #:
 #: :data:`MAX_ZERO_PAD_LENGTH` bounds each field on its own, and a packet holds
 #: many fields, so it leaves the *sum* unbounded: a declared length just under the
