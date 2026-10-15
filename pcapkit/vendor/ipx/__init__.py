@@ -24,14 +24,17 @@ crawlers include:
 ###############################################################################
 import sys
 
-path = sys.path.pop(0)
+# Private: ``__all__`` below is the ``--target ipx`` crawler list that
+# :mod:`pcapkit.vendor.__main__` builds, so this module-level temporary must not
+# read as a public name of the package.
+_path = sys.path.pop(0)
 ###############################################################################
 
 from pcapkit.vendor.ipx.packet import Packet as IPX_Packet
 from pcapkit.vendor.ipx.socket import Socket as IPX_Socket
 
 ###############################################################################
-sys.path.insert(0, path)
+sys.path.insert(0, _path)
 ###############################################################################
 
 __all__ = ['IPX_Packet', 'IPX_Socket']

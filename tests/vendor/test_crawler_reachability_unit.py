@@ -42,14 +42,15 @@ one most likely to be made again, since adding a crawler means editing two
 
 Relationship to :file:`tests/project/test_public_api.py` (GitHub pull request
 #527). That module sweeps :attr:`__all__` across the tree for a related family of
-defects and excludes :mod:`pcapkit.vendor` via its ``EXCLUDED_ROOTS``; its
-docstring records why, and #1772 tracks dropping the exclusion. This module is a
-separate file rather than that edit, for two reasons: #527 had not merged when
-this module was written, so its file did not exist on that branch; and the
-assertion here is not the one it makes. The property it checks -- defined versus
-reachable -- is about the crawler *registry* rather than about :attr:`__all__`
-hygiene. Dropping the exclusion is still worth doing on top of this, and would
-give the duplicate a second, cheaper detector.
+defects. This module is a separate file for two reasons: #527 had not merged
+when #531 added this one, so there was no file to extend; and the assertion here
+is not the one it makes. The property checked here -- defined versus reachable --
+is about the crawler *registry* rather than about :attr:`__all__` hygiene. #527
+also skipped :mod:`pcapkit.vendor` through ``EXCLUDED_ROOTS``, saying the unit
+tier lacked the ``vendor`` extra, though ``requests`` and ``bs4`` were already in
+the ``test`` extra (#507). #1772 dropped that exclusion, so its
+``test_no_duplicate_all_entries`` now gives the duplicate a second, cheaper
+detector.
 
 The suite is unit-tier (see :mod:`tests._tiers`): it reads no capture, and it
 instantiates nothing. That last part is load-bearing rather than incidental.

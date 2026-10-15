@@ -35,31 +35,28 @@ the offending symbol instead of failing on the first one.
 
 Two scoping decisions, both measured rather than assumed.
 
-**:mod:`pcapkit.vendor` is excluded.** Its modules ``import requests`` and
-``import bs4`` at module scope. The exclusion was written on the premise that
-``pip install -e '.[test]'`` -- the install the unit tier, see
-:mod:`tests._tiers`, has to pass on -- lacks both, but the ``test`` extra in
-:file:`pyproject.toml` has carried ``requests`` and ``beautifulsoup4`` since
-#507, so the import is not what keeps it. With ``'vendor'`` dropped from
-:data:`EXCLUDED_ROOTS`, every assertion passes over the vendor subtree bar one:
-:meth:`~PublicAPISurfaceTests.test_every_public_package_exports_every_public_attribute`
-fails for :mod:`pcapkit.vendor`, which holds ``ModuleNotFoundError``,
-``Vendor``, ``VendorWarning``, ``stacklevel`` and ``warn`` without listing them,
-and for :mod:`pcapkit.vendor.ipx`, which holds ``path``. #1772 tracks those
-gaps. When this module was written the same sweep was run by hand over
-:mod:`pcapkit.vendor` and its 134 public descendants, and the single defect it
-found was the duplicate described at the end of this docstring, in
-:mod:`pcapkit.vendor` and :mod:`pcapkit.vendor.mh`.
+**Nothing is excluded, :mod:`pcapkit.vendor` included.** The vendor crawlers
+``import requests`` and ``import bs4`` at module scope, and the subtree used to be
+skipped through :data:`EXCLUDED_ROOTS` on the grounds that those came only from
+the ``vendor`` extra: this module is unit-tier -- see :mod:`tests._tiers` -- so it
+has to pass on ``pip install -e '.[test]'``. Both were already in the ``test``
+extra, since #507 (:file:`pyproject.toml`), so the skip never bought anything.
+Dropping it (#1772) brought in 144 modules and 19 packages, and found two
+packages holding public attributes their :attr:`__all__` omitted:
+:mod:`pcapkit.vendor.ipx` leaked ``path``, the temporary of its ``sys.path``
+save-and-restore, now named ``_path``; :mod:`pcapkit.vendor`'s five are recorded
+in :data:`DELIBERATE_NON_EXPORTS`.
 
-Nothing else is excluded, and no import is wrapped in a skip. That is deliberate
-and also measured: with ``dpkt``, ``scapy``, ``emoji``, ``cryptography`` and
-``pycrate`` all absent, every one of the 325 non-vendor modules there were when
-this module was written still imported, because each optional dependency is
-guarded at its import site -- e.g.
+No import is wrapped in a skip, either. That is deliberate and also measured: with
+``dpkt``, ``scapy``, ``emoji``, ``cryptography`` and ``pycrate`` all absent, every
+one of the 325 non-vendor modules there were when this module was written still
+imported, because each optional dependency is guarded at its import site -- e.g.
 ``pcapkit/toolkit/scapy.py`` catches :exc:`ModuleNotFoundError` and degrades to
-``scapy = None`` with a warning. So an import failure in this sweep is a real
-defect and is allowed to fail the test, rather than being softened into a skip
-that would let the next :attr:`__all__` bug through.
+``scapy = None`` with a warning. The vendor modules need nothing past the ``test``
+extra at import time: the two NGAP crawlers import ``pycrate`` only inside the
+method that reads it. So an import failure in this sweep is a real defect and is
+allowed to fail the test, rather than being softened into a skip that would let
+the next :attr:`__all__` bug through.
 
 **The converse -- every public attribute appears in :attr:`__all__` -- holds for
 every public *package*, against a written-down allowlist of exclusions.** That is
@@ -86,7 +83,8 @@ of the commit that added this assertion -- among them the six
 :attr:`__all__` literal that forgot them and imported by name from six modules, and
 the three decorators :mod:`pcapkit.utilities` then advertised in its own module
 docstring (since moved to :mod:`pcapkit.corekit.decorators` and dropped from that
-package by #1735). The 22 that remain are listed with their reasons, and
+package by #1735). The 22 that remain are listed with their reasons, as are the
+five :mod:`pcapkit.vendor` added once it joined the sweep (#1772), and
 :meth:`~PublicAPISurfaceTests.test_the_non_export_allowlist_is_tight` stops the
 list rotting into a silencer: every entry has to name a package that exists, an
 attribute that package really holds, and a name its :attr:`__all__` really omits,
@@ -129,19 +127,13 @@ against the tree this module was written on, and each is fixed in the same commi
   :meth:`~PublicAPISurfaceTests.test_every_all_entry_resolves`, because the name
   it repeats does resolve -- only counting the entries finds it.
 
-One gap remains, and it is recorded rather than closed because it lies outside
-this module's reach. :mod:`pcapkit.vendor` is excluded from the sweep for the
-dependency reason above, and it carried the *same* displaced-duplicate defect in
-``pcapkit/vendor/__init__.py`` and ``pcapkit/vendor/mh/__init__.py``. That one was
-worse than its :mod:`pcapkit.const` twin rather than merely parallel:
-``pcapkit/vendor/__main__.py`` builds its crawler target list out of
-``pcapkit.vendor.__all__``, so the missing ``MH_HandoverInitiateStatus`` kept the
-``handover_initiate_status`` crawler out of the default target list *and* out of
-``--target mh``, and it had never run. #531 fixed it, and
-:mod:`tests.vendor.test_crawler_reachability_unit` guards it. Dropping
-``'vendor'`` from :data:`EXCLUDED_ROOTS` would let this module cover it too, but
-only once the two :attr:`__all__` gaps named above are closed or recorded in
-:data:`DELIBERATE_NON_EXPORTS`; #1772 tracks that.
+:mod:`pcapkit.vendor` carried the *same* displaced duplicate, in
+``pcapkit/vendor/__init__.py`` and ``pcapkit/vendor/mh/__init__.py``, and there it
+was worse: ``pcapkit/vendor/__main__.py`` builds its crawler target lists out of
+those :attr:`__all__` lists, so the ``handover_initiate_status`` crawler had never
+run. #531 fixed it while the subtree was still excluded, and
+:mod:`tests.vendor.test_crawler_reachability_unit` guards it; since #1772 these
+assertions cover that copy too.
 
 """
 from __future__ import annotations
@@ -152,11 +144,12 @@ import pkgutil
 import types
 import unittest
 
-#: First path component under ``pcapkit.`` whose subtree the sweep skips.
-#: :mod:`pcapkit.vendor` imports, since the ``test`` extra carries ``requests``
-#: and ``beautifulsoup4``, but two of its packages leave public attributes out
-#: of :attr:`__all__` (#1772); see the module docstring.
-EXCLUDED_ROOTS = frozenset({'vendor'})
+#: First path component under ``pcapkit.`` whose subtree the sweep skips. Empty:
+#: it held ``'vendor'`` until #1772, though ``requests`` and ``beautifulsoup4``
+#: were in the ``test`` extra before the exclusion was written, and
+#: :meth:`~PublicAPISurfaceTests.test_public_modules_were_actually_found` pins
+#: :mod:`pcapkit.vendor` in the walk so that restoring it fails.
+EXCLUDED_ROOTS = frozenset()  # type: frozenset[str]
 
 #: The packages whose whole job is to re-export their children, and which
 #: therefore have to list every public name they hold -- with no allowlist, unlike
@@ -183,6 +176,9 @@ AGGREGATORS = (
 #: nor :mod:`pcapkit.corekit` exports any of them either. Three independent export
 #: surfaces agreeing is a convention rather than nine separate oversights, so they
 #: stay reachable by their documented dotted path and out of ``import *``.
+#: :mod:`pcapkit.vendor` imports its base ``Vendor`` the same way, and has a
+#: sharper reason: its :attr:`__all__` is also the default target list
+#: :mod:`pcapkit.vendor.__main__` runs, so exporting the base would run it.
 #:
 #: **Names another module's import dragged in** -- ``Info`` and ``info_final``
 #: belong to :mod:`pcapkit.corekit.infoclass`, which is where they are documented
@@ -197,10 +193,14 @@ AGGREGATORS = (
 #: :mod:`pcapkit.utilities`. ``ROOT`` is bound only on the non-``DEVMODE`` branch,
 #: so exporting it would make ``from pcapkit import *`` raise
 #: :exc:`AttributeError` under ``PCAPKIT_DEVMODE=1`` -- a fresh #515 rather than a
-#: fix for one. ``pcapkit.protocols.name`` is the loop variable of the
-#: ``for name in __all__`` that builds ``__proto__``, left behind in the namespace;
-#: renaming it ``_name`` would express that better than this entry does, but that
-#: is a change to a module body rather than to an export list.
+#: fix for one. :mod:`pcapkit.vendor` likewise imports ``ModuleNotFoundError``,
+#: ``stacklevel``, ``VendorWarning`` and ``warn`` only to warn when ``requests``
+#: or ``bs4`` is missing; they are :mod:`pcapkit.utilities`' names, and listing
+#: them would hand them to that same crawler loop. ``pcapkit.protocols.name`` is
+#: the loop variable of the ``for name in __all__`` that builds ``__proto__``,
+#: left behind in the namespace; renaming it ``_name`` would express that better
+#: than this entry does, but that is a change to a module body rather than to an
+#: export list.
 DELIBERATE_NON_EXPORTS = {
     'pcapkit': ('BaseError', 'DEVMODE', 'DevModeWarning', 'ROOT'),
     'pcapkit.corekit.fields': ('Field',),
@@ -214,6 +214,8 @@ DELIBERATE_NON_EXPORTS = {
     'pcapkit.protocols.internet': ('Internet',),
     'pcapkit.protocols.link': ('Link',),
     'pcapkit.protocols.transport': ('Transport',),
+    'pcapkit.vendor': ('ModuleNotFoundError', 'Vendor', 'VendorWarning',
+                       'stacklevel', 'warn'),
 }
 
 
@@ -284,7 +286,8 @@ class PublicAPISurfaceTests(unittest.TestCase):
         # a silent pass over an empty list, so pin the shape of what it returns.
         # The floor is deliberately far below the 325 modules / 52 packages found
         # when this was written: it catches "found nothing", not "the library
-        # gained a module".
+        # gained a module". The two vendor packages are pinned because the subtree
+        # was excluded until #1772, and both held __all__ gaps the exclusion hid.
         modules = public_modules()
         packages = [name for name, is_package in modules if is_package]
 
@@ -293,7 +296,8 @@ class PublicAPISurfaceTests(unittest.TestCase):
         self.assertGreater(len(packages), 40,
                            'the module walk found implausibly few packages')
         for name in ('pcapkit', 'pcapkit.protocols.data', 'pcapkit.protocols.schema',
-                     'pcapkit.foundation.registry', 'pcapkit.const.mh'):
+                     'pcapkit.foundation.registry', 'pcapkit.const.mh',
+                     'pcapkit.vendor', 'pcapkit.vendor.ipx'):
             self.assertIn((name, True), modules, f'{name} missing from the walk')
         self.assertFalse([name for name, _ in modules if _is_excluded(name)],
                          'the walk yielded a module it was supposed to exclude')
