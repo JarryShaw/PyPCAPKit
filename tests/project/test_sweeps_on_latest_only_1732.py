@@ -172,6 +172,8 @@ class TestTheStepSelectsByLeg(unittest.TestCase):
             if is_experimental(leg):
                 # #1740: the experimental step's own worker count, 3 on GraalPy and `auto` on the rest.
                 want[want.index('-n') + 1] = step_env(leg, EXPERIMENTAL)['WORKERS']
+                # #1753: and its replacements for crashed workers, after `--dist load`.
+                want.insert(want.index('--dist') + 2, '--max-worker-restart=30')
             with self.subTest(python=version):
                 self.assertNotIn('coverage', argv)
                 self.assertEqual(argv[:2], ['-m', 'pytest'])
