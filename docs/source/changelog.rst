@@ -45,7 +45,7 @@ carries only the version being released; this page is the whole history.
   and a logger that no longer hijacks the consumer's. :doc:`Full changelog
   <changelog/1.5.0>`.
 * **1.4.1** (2026-08-22) -- Release engineering only -- no library behaviour
-  changed: a new unit-test CI workflow now gates the packaging, vendor-cron
+  changed: a new unit-test CI workflow gates the packaging, vendor-cron
   and documentation workflows, the vendor cron refuses to publish when the
   registry update itself failed, and unit-test compatibility on Python 3.10
   was fixed. :doc:`Full changelog <changelog/1.4.1>`.
@@ -57,12 +57,12 @@ carries only the version being released; this page is the whole history.
   mis-decoded every TCP and UDP frame under IPv4/IPv6 as raw payload -- skip
   1.3.4 entirely. :doc:`Full changelog <changelog/1.3.5>`.
 * **1.3.4** (2024-11-14) -- Fixed IPv6 Routing header length handling and
-  extension-header chain extraction (#218), but introduced the
+  extension-header chain extraction (:issue:`218`), but introduced the
   transport-layer regression fixed in 1.3.5 -- upgrade past this version
   rather than to it. :doc:`Full changelog <changelog/1.3.4>`.
 * **1.3.3** (2024-11-03) -- Fixed PCAP reading from the CLI and library
-  (#240), a source install broken by ``setup.py`` (#221), and PCAP output
-  during flow tracing (#180); 1.3.2 was never released. :doc:`Full changelog
+  (:issue:`240`), a source install broken by ``setup.py`` (:issue:`221`), and PCAP output
+  during flow tracing (:issue:`180`); 1.3.2 was never released. :doc:`Full changelog
   <changelog/1.3.3>`.
 * **1.3.1** (2023-12-21) -- Renamed ``register_port()`` to
   ``register_apptype()`` with no alias left behind, and revised the
@@ -72,13 +72,13 @@ carries only the version being released; this page is the whole history.
   metaclasses, adding ``ModuleDescriptor`` so a registry entry can name a
   module and class imported lazily on first use. :doc:`Full changelog
   <changelog/1.3.0>`.
-* **1.2.2** (2023-09-14) -- Fixed extraction failing outright (#166).
+* **1.2.2** (2023-09-14) -- Fixed extraction failing outright (:issue:`166`).
   :doc:`Full changelog <changelog/1.2.2>`.
 * **1.2.1** (2023-08-27) -- Fixed bugs in ``SeekableReader`` introduced one
   day earlier in 1.2.0. :doc:`Full changelog <changelog/1.2.1>`.
 * **1.2.0** (2023-08-26) -- Added streaming input through
   ``SeekableReader``, so a capture can be read from ``stdin`` or a pipe
-  (#156), and fixed reassembly, broken since 0.16.3 (#155). :doc:`Full
+  (:issue:`156`), and fixed reassembly, broken since 0.16.3 (:issue:`155`). :doc:`Full
   changelog <changelog/1.2.0>`.
 * **1.1.1** (2023-08-15) -- Fixed ``AppType`` enumeration lookups,
   ``typing.TypeAlias`` compatibility on older interpreters, the flow-tracing
@@ -93,7 +93,7 @@ carries only the version being released; this page is the whole history.
   resolve ports to service names. :doc:`Full changelog <changelog/1.0.3>`.
 * **1.0.2** (2023-06-05) -- Added Mobility Header parsing and construction
   [:rfc:`6275`], and fixed ``pcapkit.extract`` failing on interpreters where
-  ``decimal.localcontext`` takes no keyword arguments (#139). :doc:`Full
+  ``decimal.localcontext`` takes no keyword arguments (:issue:`139`). :doc:`Full
   changelog <changelog/1.0.2>`.
 * **1.0.1** (2023-05-14) -- Changed ``Info`` and ``Schema`` subclasses to
   finalise at class creation rather than on each instantiation, a straight
@@ -103,11 +103,11 @@ carries only the version being released; this page is the whole history.
   backend became pluggable (with PCAP-NG support and the DPKT, Scapy and
   PyShark engines), and roughly 55,000 lines changed across 617 files.
   :doc:`Full changelog <changelog/1.0.0>`.
-* **0.16.3** (2022-10-31) -- Fixed import crashes on some interpreters (#114,
-  #116), the reassembly property caches, and README rendering for PyPI; the
+* **0.16.3** (2022-10-31) -- Fixed import crashes on some interpreters (:issue:`114`,
+  :issue:`116`), the reassembly property caches, and README rendering for PyPI; the
   build chain was revised. :doc:`Full changelog <changelog/0.16.3>`.
 * **0.16.2** (2022-08-03) -- Fixed ``Info`` ``__init__`` generation for
-  classes without annotations (#113), and the IP reassembly algorithm (#82).
+  classes without annotations (:issue:`113`), and the IP reassembly algorithm (:issue:`82`).
   :doc:`Full changelog <changelog/0.16.2>`.
 * **0.16.1** (2022-06-07) -- Changed warnings to raise through
   ``pcapkit.utilities.warnings`` instead of ``warnings.warn`` directly, and
@@ -119,12 +119,12 @@ carries only the version being released; this page is the whole history.
   ``pcapkit.foundation.registry`` for subscribing protocols by name. :doc:`Full
   changelog <changelog/0.16.0>`.
 * **0.15.5** (2020-10-11) -- Added a fallback encoder so ``DictDumper`` no
-  longer raises on data it cannot encode (#65). :doc:`Full changelog
+  longer raises on data it cannot encode (:issue:`65`). :doc:`Full changelog
   <changelog/0.15.5>`.
 * **0.15.4** (2020-08-28) -- Fixed the missing ``stacklevel`` attribute on
-  ``pcapkit.utilities`` (#58); Travis CI was set up. :doc:`Full changelog
+  ``pcapkit.utilities`` (:issue:`58`); Travis CI was set up. :doc:`Full changelog
   <changelog/0.15.4>`.
-* **0.15.3** (2020-08-17) -- Fixed ARP parsing (#55), and added logging
+* **0.15.3** (2020-08-17) -- Fixed ARP parsing (:issue:`55`), and added logging
   through a ``pcapkit`` logger. :doc:`Full changelog <changelog/0.15.3>`.
 * **0.15.2** (2020-06-27) -- Added a register interface on the protocol
   classes and on ``pcapkit.foundation.analysis``, so both extend without
@@ -135,7 +135,7 @@ carries only the version being released; this page is the whole history.
   changelog <changelog/0.15.1>`.
 * **0.15.0** (2020-06-07) -- Merged the parsing and construction logic so a
   protocol is no longer implemented twice, added full API documentation, and
-  fixed the ``DictDumper`` dependency (#37, #40). :doc:`Full changelog
+  fixed the ``DictDumper`` dependency (:issue:`37`, :issue:`40`). :doc:`Full changelog
   <changelog/0.15.0>`.
 * **0.14.5** (2019-10-24) -- Added a CLI for the vendor crawlers, and
   deferred vendor imports so the crawler dependencies are not needed just to
@@ -143,7 +143,7 @@ carries only the version being released; this page is the whole history.
 * **0.14.4** (2019-09-01) -- Shipped the vendor crawler scripts in the
   distribution, and split the CLI and vendor dependencies into separate
   ``setup.py`` extras. :doc:`Full changelog <changelog/0.14.4>`.
-* **0.14.3** (2019-08-08) -- Fixed reported bugs (#29, #30) and a Wikipedia
+* **0.14.3** (2019-08-08) -- Fixed reported bugs (:issue:`29`, :pr:`30`) and a Wikipedia
   block that broke a vendor crawler; the constant enumerations and sample
   output were regenerated. :doc:`Full changelog <changelog/0.14.3>`.
 * **0.14.2** (2019-03-28) -- Fixed the exception classes and the TCP
