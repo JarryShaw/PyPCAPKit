@@ -4,8 +4,8 @@
 The largest release since 1.0, and the first recorded here as it happened rather
 than reconstructed. Three more extraction engines, ESP with payload decryption,
 SCTP and NGAP over SCTP, a library logger that no longer hijacks the consumer's,
-and a defect programme run through the issue tracker, citing 669 issues and pull
-requests from :pr:`340` to :pr:`1754`.
+and a defect programme run through the issue tracker, citing 685 issues and pull
+requests from :pr:`340` to :pr:`1791`.
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` to ``1.5.0b3`` (all 2026-09-19)
 and ``1.5.0b4`` to ``1.5.0b12`` (2026-09-20 to 2026-10-13), dated in UTC and all
@@ -152,7 +152,9 @@ Fixed
   per discarded default. The one deliberate divergence is kept and pinned: mutable
   registries look up, miss, and ``extend_enum`` rather than raising, so
   ``Method('FROBNICATE')``, ``ProtectionAuthority(1 << 70)`` and
-  ``AppType.get(65000, proto=tcp)`` still register. The three flag guards end in
+  ``AppType.get(65000, proto=tcp)`` still register; the :issue:`775` and
+  :issue:`860` entries below record how all three came to return an unregistered
+  member instead. The three flag guards end in
   ``return super()._missing_(value)``, so in-range composites still decompose and
   :issue:`623` stays fixed; ``Flags`` accepts ``0 <= value <= 0xFFFF``. A new
   ``tests/const/test_const_enum_builtin_parity.py`` asserts that every one of the 123
@@ -164,7 +166,8 @@ Fixed
   ``_missing_`` and minted regardless, so ``AppType.get(-1, proto='tcp')``
   returned an unreachable ``PORT_-1_tcp`` while ``TCP(-1)`` raised. It now tests
   ``_missing_`` for ``None`` ("no row for this port") and lets the rejection
-  through; a valid but unassigned port still mints. ``Transport._make_port``
+  through; a valid but unassigned port still minted, until :pr:`874` (below) made it
+  an unregistered member. ``Transport._make_port``
   **passes an unvalidated** ``int``, **so** ``TCP.make(srcport=99999)`` **now raises
   where it minted junk.** Separately, the crawler rendered one ``_missing_`` branch per
   registry row, so the two spans IANA registers on more than one transport
@@ -241,11 +244,11 @@ Fixed
   ``Dynamically Assigned Socket Numbers``, ``Statically Assigned Socket Numbers``,
   ``Dynamically Assigned``) convert, while ``Registered by Xerox`` keeps minting, a
   real ownership fact. 7 of the 89 are left alone: ``CGAType``'s ``Tag_<hex>`` mint is
-  not an IANA-style range, and the other 6 files sit on 9 classes not yet on
-  ``EnumRegistry`` (``AppType``, ``StatusCode``, ``ftp.return_code``, ``ftp.command``,
-  ``Method``, ``OptionType``), left to :pr:`859`/:issue:`860`. Each conversion
-  changes both the vendor crawler and the generated file, per :pr:`838`'s and
-  :pr:`858`'s precedent. The worked examples in
+  not an IANA-style range, and the other 6 files sit on the 9 classes :issue:`860`
+  moves onto ``EnumRegistry`` (``AppType``, ``StatusCode``, ``ftp.return_code``,
+  ``ftp.command``, ``Method``, ``OptionType``; :pr:`869` and :pr:`874`, below).
+  Each conversion changes both the vendor crawler and the generated file, per
+  :pr:`838`'s and :pr:`858`'s precedent. The worked examples in
   ``docs/source/contributing/conventions/mint-criterion.rst`` keep
   ``Registered by Xerox`` under Mint (:pr:`861`).
 * **a breaking change to** ``EtherType``'s ``_missing_`` ordering: values
@@ -695,6 +698,11 @@ Fixed
   to nothing, or one never given, rather than a bare ``AttributeError``; the two
   registry modules share one ``NULL`` sentinel compared by identity, where each had
   its own string (:issue:`832`, :issue:`833`, :pr:`835`).
+* ``PortEnumField`` given a ``proto`` with no ``.name`` -- a string such as
+  ``'tcp'``, or a composite such as ``TransportProtocol.tcp | TransportProtocol.udp``,
+  which is a bare ``int`` -- raised ``AttributeError`` on a port the registry does not
+  hold. The miss takes its transport from the registry's ``__transport__``, as
+  ``AppType.get`` does (:issue:`1774`, :pr:`1781`).
 
 pcapkit.dumpkit
 ---------------
@@ -750,7 +758,10 @@ Fixed
 * **a breaking change to** the dump schema: the output writers dropped or corrupted
   what the packets carried. An ``OrderedMultiDict``, which every option list is, now
   dumps as a list of single-key entries in wire order
-  (:pr:`1305`).
+  (:pr:`1305`). Inside an object the writers fall back on, a class, module or
+  function is written as its qualified name rather than expanded, and an object met
+  again on its own expansion path as ``<circular reference: T>`` (:issue:`1372`,
+  :pr:`1381`).
 * tree output raised on a ``complex`` value, and is now documented as lossy
   (:issue:`1266`, :pr:`1366`).
 * plist dates are written to whole seconds, so ``plistlib`` reads them back
@@ -880,7 +891,7 @@ Changed
   ``__init_subclass__`` registration hook it adds, so the ``EngineBase[_P]`` that
   ``Extractor.engine`` returns leads to an API. Cross-references to ``Engine.run``,
   ``Engine.read_frame``, ``Engine.close`` and ``Engine.unsupported_reason`` now point
-  at ``EngineBase``. Exporting ``EngineBase`` in ``__all__`` is left to :issue:`1016`
+  at ``EngineBase``, which stays out of ``__all__``, as :issue:`1016` settled
   (:issue:`1024`).
 * **a breaking change to** ``register_mh_extension``: ``schema`` is keyword-only, as
   in the other fourteen schema-taking registrars (:issue:`516`, :pr:`526`).
@@ -1286,6 +1297,16 @@ Changed
   is parsed generically, per :rfc:`6564`, rather than collapsing the packet to ``Raw``
   (:issue:`891`, :pr:`904`). ``IPv6_Ext`` does it, and is also the shared base of all
   eight extension headers (:issue:`917`, :pr:`924`).
+* **a breaking change to** ``pack()``: it no longer keeps the header it builds on the
+  instance it is called on, which in 1.4.1 too left ``schema`` disagreeing with
+  ``info``: ``UDP(srcport=1234).pack()`` reset ``schema.srcport`` to 0 while
+  ``info.srcport`` kept 1234. Once an instance has been parsed or constructed,
+  ``pack()`` builds on a shallow copy, so ``schema``, ``info`` and what ``make()``
+  sets, such as TCP's ``connection``, stay as they were. The ``Frame``, ``PCAPNG``
+  and ``HTTPv2`` overrides do the same, and re-packing a PCAP-NG block that carries
+  an option allowed only once no longer raises. Code that relied on ``pack()`` to
+  re-sync ``schema`` calls ``make()`` or constructs a new instance (:issue:`1769`,
+  :pr:`1791`).
 
 Fixed
 ~~~~~
@@ -1990,7 +2011,7 @@ Fixed
   ``PortEnumField`` and PCAP-NG's ``OptionEnumField`` minted a member through
   ``aenum.extend_enum`` for every value no row or documented span covers (111 calls on
   ``http.pcap``, all ephemeral ports). All four now peek at what ``.get()`` would
-  consult and mint only once the value is unresolvable; a genuine miss gets
+  consult and call it only once the value resolves; a genuine miss gets
   ``EnumField._unregistered_member``, a real member of the same registry built through
   its storage base's ``__new__``, so ``isinstance`` holds and the lookup table stops
   growing. Riding along:
@@ -2276,7 +2297,9 @@ Fixed
   ``invalid header length`` message. Lengths 0 to 3 already raised ``ProtocolError``,
   so only the message changes (:issue:`1189`).
 * the RPL option, type ``0x23``, raised ``AttributeError`` in ``HOPOPT`` and
-  ``IPv6_Opts`` (:issue:`1196`, :pr:`1198`).
+  ``IPv6_Opts`` (:issue:`1196`, :pr:`1198`). The test that an option of any type in
+  the last two octets of the header fails in-library no longer skips it; test-only
+  (:issue:`1771`, :pr:`1776`).
 * **a breaking change to** the RPL option: it keeps its reserved flag bits on rebuild
   and reads :rfc:`6553` sub-TLVs (:issue:`1199`, :pr:`1201`).
 * ``make()`` rejected an enum member name given as ``str`` unless a namespace was
@@ -2384,6 +2407,9 @@ Fixed
   unassigned value rather than minting ``Unassigned_N`` (:issue:`880`, :pr:`889`),
   and all four inherit ``get`` and its ``default`` from ``EnumLookup`` rather than
   overriding it (:issue:`935`, :pr:`940`).
+* ``pcapkit.protocols.protocol.__all__`` lists ``Protocol`` beside ``ProtocolBase``,
+  so ``from pcapkit.protocols.protocol import *`` binds the module's public class
+  (:issue:`1770`, :pr:`1778`).
 
 pcapkit.toolkit
 ---------------
@@ -2667,6 +2693,9 @@ Fixed
   piped stdin (:issue:`522`, :pr:`542`).
 * each crawler derives its ``const/`` path from the ``pcapkit.vendor`` root, so a
   crawler nested two levels down writes to the right file (:pr:`741`).
+* ``pcapkit.vendor.ipx`` names its ``sys.path`` temporary ``_path`` rather than
+  ``path``, which read as a public name of the package, and the public-API test
+  covers ``pcapkit.vendor``, which it used to skip (:issue:`1772`, :pr:`1779`).
 
 Project infrastructure
 ----------------------
@@ -2738,9 +2767,9 @@ Changed
   gains ``include README.md``, which is belt-and-braces rather than load-bearing:
   setuptools' ``sdist`` ships a ``README.md`` regardless. Of the ``include`` lines
   only ``CHANGELOG.md`` is load-bearing, measured in the :pr:`631` entry below.
-  ``examples/benchmark/Dockerfile`` copies ``README.md``, and
-  ``examples/benchmark/benchmark.py`` still says ``README.rst`` on purpose, meaning the
-  benchmark suite's own README (:pr:`619`).
+  ``examples/benchmark/Dockerfile`` copies ``README.md``, while the ``README.md``
+  that ``examples/benchmark/benchmark.py`` names is the benchmark suite's own
+  (:pr:`619`).
 * ``CODE_OF_CONDUCT.md`` moves from Contributor Covenant 1.4 to 3.0, at the
   maintainer's request. The text is the canonical 3.0 Markdown fetched from
   https://www.contributor-covenant.org/version/3/0/code_of_conduct/code_of_conduct.md
@@ -2788,7 +2817,7 @@ Changed
   and leave the drift free to recur, the four files are removed from the index and folded
   into ``examples/captures/``'s blanket ``.gitignore`` rule; the genuine inputs
   ``in.pcap`` and ``dhcp.pcapng`` stay tracked. ``examples/legacy_smoke/Makefile`` and
-  its ``README.rst`` now describe regenerating these reports via ``make fixtures``, and
+  its ``README.md`` now describe regenerating these reports via ``make fixtures``, and
   ``tests/project/test_capture_tracking.py`` pins the invariant (:issue:`685`).
 * ``tests/project/test_isort_clean.py`` gated on ``isort`` with a
   ``try``/``except ImportError`` inside ``setUpClass``, which
@@ -2876,6 +2905,13 @@ Changed
 * the ``Scapy`` and ``dev`` extras require ``scapy>=2.6.0`` (:issue:`1572`,
   :pr:`1578`), and the ``docs`` extra ``Sphinx>=7.3``, the first release with
   ``versionremoved`` (:pr:`1743`).
+* the READMEs of ``examples/benchmark`` and ``examples/legacy_smoke`` are Markdown,
+  ``README.md`` rather than ``README.rst``, and ``MANIFEST.in`` ships them through
+  ``recursive-include examples *.md``. Stale build leftovers go: ``setup.py``'s
+  ``bdist_wheel`` override, since ``build_py`` and ``install`` already convert the
+  tree the wheel archives, and ``MANIFEST.in``'s ``prune test``, which named no
+  directory; ``make profile`` runs in ``examples/legacy_smoke`` (:issue:`1773`,
+  :pr:`1780`).
 
 Fixed
 ~~~~~
@@ -3066,3 +3102,9 @@ Fixed
   and ``from pcapkit.protocols.data import *`` raised ``AttributeError`` on the
   unbound ``HOPOPT_QuickStartOption`` (:issue:`515`, :pr:`527`); the public
   attributes several packages left out are listed (:issue:`533`, :pr:`544`).
+* the documentation build's 36 "more than one target found" warnings, fixed where
+  they arise: an implicit reference to ``dict``, ``type`` or ``set`` no longer
+  matches a registry member such as ``TCP.dict``, an enum member's docstring holding
+  a URL no longer gains a spurious type field, and the hand-written ``TypeVar``
+  directives take the bare name under their ``.. module::`` (:issue:`1775`,
+  :pr:`1790`).
