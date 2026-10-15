@@ -9,6 +9,10 @@ from pcapkit.protocols.data.link.arp import Type as ARP_Type
 # Ethernet Protocol
 from pcapkit.protocols.data.link.ethernet import Ethernet
 
+# Layer Two Tunnelling Protocol
+from pcapkit.protocols.data.link.l2tp import L2TP
+from pcapkit.protocols.data.link.l2tp import Flags as L2TP_Flags
+
 # BSD Loopback Encapsulation
 from pcapkit.protocols.data.link.loopback import Loopback
 
@@ -22,6 +26,9 @@ __all__ = [
 
     # Ethernet Protocol
     'Ethernet',
+
+    # Layer Two Tunnelling Protocol
+    'L2TP', 'L2TP_Flags',
 
     # BSD Loopback Encapsulation
     'Loopback',
