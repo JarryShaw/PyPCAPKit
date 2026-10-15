@@ -75,7 +75,7 @@ if TYPE_CHECKING:
 
     from pcapkit.corekit.context import ProtocolContext
 
-__all__ = ['ProtocolBase']
+__all__ = ['Protocol', 'ProtocolBase']
 
 _PT = TypeVar('_PT', bound='Data')
 _ST = TypeVar('_ST', bound='Schema')
