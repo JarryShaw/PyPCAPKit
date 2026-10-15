@@ -1252,10 +1252,12 @@ class TestTheWorkflow(unittest.TestCase):
         self.assertEqual(set(on), {'push', 'workflow_run'})
         self.assertEqual(on['push'], {'tags': ['v*']})
         self.assertEqual(on['workflow_run']['workflows'], ['Vendor Update'])
+        # #1748 added the triggering Vendor Update's own reading, which names no branch either.
         self.assertEqual(' '.join(spec['jobs']['version_check']['if'].split()),
-                         "${{ (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == "
-                         "'success') && !(github.event_name == 'push' && github.actor_id == "
-                         "vars.RELEASE_APP_BOT_ID) }}")
+                         "${{ !cancelled() && (github.event_name != 'workflow_run' || "
+                         "github.event.workflow_run.conclusion == 'success') && !(github.event_name == 'push' "
+                         "&& github.actor_id == vars.RELEASE_APP_BOT_ID) && "
+                         "needs.vendor_update.outputs.updated != 'false' }}")
 
     def test_permissions_are_nothing_by_default_and_little_per_job(self) -> None:
         self.assertEqual(self.spec['permissions'], {})
