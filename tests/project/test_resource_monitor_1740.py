@@ -194,8 +194,9 @@ class TestTheSamplesReachTheTestsLog(unittest.TestCase):
         self.assertEqual(stop.stdout, 'The resource monitor did not start on this leg.\n')
 
 
-#: Round 2's containment, as the issue's research sized it (estimates, until a run shows them).
-HEAP, GRAAL_WORKERS, SCOPE_MEMORY = '--vm.Xmx2g', '3', '12G'
+#: Round 2's containment, as the issue's research sized it (estimates, until a run shows them);
+#: #1753 adds the exit on a spent heap, which tests/project/test_graalpy_worker_heap_1753.py pins.
+HEAP, GRAAL_WORKERS, SCOPE_MEMORY = '--vm.Xmx2g --vm.XX:+ExitOnOutOfMemoryError', '3', '12G'
 FSIZE = 2 * 1024 ** 3
 #: Round 3: the probe is the scope itself, every flag included, under a throwaway unit.
 PROBE = 'if probe=$(scoped "pcapkit-probe-$$.scope" true 2>&1); then'
@@ -364,7 +365,8 @@ class TestTheContainmentRuns(unittest.TestCase):
         self.assertEqual(workflow_commands(result.stdout), [])
         status = self.status()
         self.assertRegex(status.pop('elapsed'), r'^\d+$')
-        self.assertEqual(status, {'exit': '1', 'scope': '12G', 'probe': '', 'oom_kills': '0', 'memory_errors': '0'})
+        self.assertEqual(status, {'exit': '1', 'scope': '12G', 'probe': '', 'oom_kills': '0', 'memory_errors': '0',
+                                  'crashed_workers': '0'})
 
     def test_without_a_scope_the_tests_run_uncapped_with_a_warning(self) -> None:
         self.stub('sudo', 'echo "sudo: a password is required" >&2\nexit 1\n')

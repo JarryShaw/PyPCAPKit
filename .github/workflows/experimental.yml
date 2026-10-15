@@ -262,7 +262,25 @@ jobs:
       # runner alive, and a breach fails this step instead:
       # - GraalPy alone: a 2 GiB heap per process, read by every GraalPy
       #   process, xdist workers included (GRAAL_PYTHON_VM_ARGS), and 3 workers,
-      #   which leaves a CPU of the 4 to the JIT and the runner.
+      #   which leaves a CPU of the 4 to the JIT and the runner. On the native
+      #   standalone `--vm.Xmx` caps the Java heap alone, not thread stacks or
+      #   JIT code (graalvm.org, Native Image, Memory Management), and a heap
+      #   the GC cannot free raises OutOfMemoryError, which GraalPy turns into
+      #   MemoryError (graalpython runtime/exception/ExceptionUtils.java:313-316,
+      #   at graal-25.4.4).
+      # - #1753: a worker's live heap grows with its tests. Job 116172356218's
+      #   three workers reached 2.2-2.6 GB RSS in 16 minutes; four tests raised
+      #   MemoryError, then gw1 raised one in pytest's own failure report,
+      #   which ends the session (exit 3) with 7.9 GB still free. Locally
+      #   (25.4.4, -n 0) the heap after a full GC rose from 199M to 1738M over
+      #   11% of tests/const and tests/corekit, so no heap the 12G holds for 3
+      #   workers lasts the tier. `-XX:+ExitOnOutOfMemoryError` ends that
+      #   worker instead, xdist reports the test it ran as crashed and starts a
+      #   fresh one. `--max-worker-restart=30` allows 30 restarts in all, where
+      #   three heaps that last 16 minutes need about 21 in 110; xdist's default
+      #   is 4 a worker, 12 at -n 3.
+      #   Five corekit files at `--vm.Xmx450m -n 1`: exit 3 after 28 passed
+      #   without the flag; with it, 3 workers replaced and the run finished.
       # - `timeout` sends SIGINT at 110 minutes, under the 120-minute cap, so
       #   pytest still writes the junit XML, and exits 124; SIGKILL 3 minutes on.
       # - `prlimit --fsize`: no file over 2 GiB.
@@ -280,21 +298,24 @@ jobs:
       #   way the tests run the one argv, in the scope or not.
       # `tests-status` holds the exit status, the scope and the probe's error,
       # the seconds the tests took, the kernel's OOM kills while they ran
-      # (/proc/vmstat `oom_kill`) and the MemoryError count, for `Containment
-      # summary`.
+      # (/proc/vmstat `oom_kill`), the MemoryError count (`-w`, so Java's
+      # `OutOfMemoryError` and the flag are not counted) and the workers that
+      # crashed, by xdist's `[gwN] node down:` lines (under `-q` it prints no
+      # `replacing crashed worker`, xdist/dsession.py:78-80 at v3.8.0), for
+      # `Containment summary`.
       - name: Run unit tests
         id: tests
         if: ${{ steps.install.outcome == 'success' }}
         continue-on-error: true
         timeout-minutes: 120
         env:
-          GRAAL_PYTHON_VM_ARGS: ${{ startsWith(matrix.python-version, 'graalpy') && '--vm.Xmx2g' || '' }}
+          GRAAL_PYTHON_VM_ARGS: ${{ startsWith(matrix.python-version, 'graalpy') && '--vm.Xmx2g --vm.XX:+ExitOnOutOfMemoryError' || '' }}
           WORKERS: ${{ startsWith(matrix.python-version, 'graalpy') && '3' || 'auto' }}
         run: |
           tail -n +1 -F "$RUNNER_TEMP/resource-monitor.log" 2>/dev/null &
           monitor=$!
           trap 'kill "$monitor" 2>/dev/null || true' EXIT
-          set -- -q -n "$WORKERS" --dist load \
+          set -- -q -n "$WORKERS" --dist load --max-worker-restart=30 \
             --durations=30 --durations-min=1.0 --junitxml="$RUNNER_TEMP/junit.xml" \
             --ignore=tests/integration \
             --ignore-glob='*_runtime.py' \
@@ -328,10 +349,11 @@ jobs:
           set -e
           elapsed=$((SECONDS - started))
           after=$(oom_kills)
-          memory_errors=$(grep -c MemoryError "$RUNNER_TEMP/pytest.log" || true)
-          printf 'exit=%s\nscope=%s\nprobe=%s\nelapsed=%s\noom_kills=%s\nmemory_errors=%s\n' \
+          memory_errors=$(grep -cw MemoryError "$RUNNER_TEMP/pytest.log" || true)
+          crashed_workers=$(grep -c '\] node down: ' "$RUNNER_TEMP/pytest.log" || true)
+          printf 'exit=%s\nscope=%s\nprobe=%s\nelapsed=%s\noom_kills=%s\nmemory_errors=%s\ncrashed_workers=%s\n' \
             "$status" "$scope" "$probe" "$elapsed" "$(( ${after:-0} - ${before:-0} ))" "$memory_errors" \
-            > "$RUNNER_TEMP/tests-status"
+            "$crashed_workers" > "$RUNNER_TEMP/tests-status"
           exit "$status"
 
       # #1740: after a failed, timed-out or cancelled tests step too. A lost
@@ -382,12 +404,12 @@ jobs:
       # tests, ahead of `Experimental summary`, whose script stays the KTLO
       # summary's (tests/project/test_ktlo_legs_stay_green_1672.py) and which
       # still reports a failed `tests` step as it reports any. Each cause gets a
-      # warning of its own: no 12G scope, an OOM kill, a MemoryError, and a
-      # timeout -- exit 124, or 137 with no OOM kill after 110 minutes, which is
-      # `--kill-after` ending a teardown that SIGINT did not. An OOM kill of
-      # pytest itself also exits 137, so the OOM count and the time tell them
-      # apart. Nothing here fails: a missing or partial status is reported as
-      # what it is.
+      # warning of its own: no 12G scope, an OOM kill, a MemoryError, a worker
+      # xdist replaced (#1753), and a timeout -- exit 124, or 137 with no OOM
+      # kill after 110 minutes, which is `--kill-after` ending a teardown that
+      # SIGINT did not. An OOM kill of pytest itself also exits 137, so the OOM
+      # count and the time tell them apart. Nothing here fails: a missing or
+      # partial status is reported as what it is.
       - name: Containment summary
         if: ${{ !cancelled() }}
         continue-on-error: true
@@ -411,7 +433,7 @@ jobs:
             echo "- ${LEG}: ${1}; non-blocking, so this job still succeeds." >> "$GITHUB_STEP_SUMMARY"
           }
           code=$(value exit) scope=$(value scope) elapsed=$(value elapsed)
-          oom=$(value oom_kills) errors=$(value memory_errors)
+          oom=$(value oom_kills) errors=$(value memory_errors) crashed=$(value crashed_workers)
           if [ "$scope" = none ]; then
             warn "No memory cap" "The probe, sudo -n systemd-run --scope with the tests' flags, failed ($(value probe)), so the tests ran without the 12G scope."
           fi
@@ -426,7 +448,10 @@ jobs:
           if [ "$errors" -gt 0 ] 2>/dev/null; then
             warn "tests raised MemoryError" "${errors} MemoryError line(s) in the pytest output, exit ${code}, scope ${scope}; ${last}."
           fi
-          echo "$LEG: tests exited ${code} after ${elapsed} s, scope ${scope}, ${oom} OOM kill(s), ${errors} MemoryError line(s); ${last}."
+          if [ "$crashed" -gt 0 ] 2>/dev/null; then
+            warn "tests lost an xdist worker" "${crashed} xdist worker(s) went down, each failing the test it ran, and xdist replaces up to 30; exit ${code}, scope ${scope}; ${last}."
+          fi
+          echo "$LEG: tests exited ${code} after ${elapsed} s, scope ${scope}, ${oom} OOM kill(s), ${errors} MemoryError line(s), ${crashed:-0} worker(s) down; ${last}."
 
       # #1660: an experimental leg's report, as unit-tests.yml `test`'s `KTLO
       # summary` is a KTLO leg's, and for the same reasons.
