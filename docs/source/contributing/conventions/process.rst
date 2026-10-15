@@ -42,7 +42,7 @@ once:
    they are on demand -- one extra at a time, ``pip install pypcapkit[Scapy]`` and so
    on. This holds however easy they are to install, and it is what the ruling
    changed: four of them used to be in ``all``.
-*  **``PyPCAP`` and ``PCAP_CT`` were already excluded for installability**, which the
+*  ``PyPCAP`` **and** ``PCAP_CT`` **were already excluded for installability**, which the
    ruling leaves untouched. ``pypcap`` is an sdist-only C extension needing a
    compiler and the libpcap development files; ``pcap-ct`` and ``libpcap`` are
    published only as pre-releases, and ``all`` should not be how somebody acquires a
@@ -317,7 +317,7 @@ carrying it are that kind:
    of the numbering, with nothing labelled at all between them and that change. Three
    of those seven are distribution rollups, each also carrying ``release``; the other
    four are early ``refactor``/``feat`` work from before the project stabilised. On
-   issues it is sparser still, appearing only from :issue:`775` up. So ``breaking``'s
+   issues it is sparser still, appearing only from :issue:`719` up. So ``breaking``'s
    absence on an old pull request is weak evidence at best. The current figures, rather
    than these:
 

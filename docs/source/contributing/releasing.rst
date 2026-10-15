@@ -176,7 +176,7 @@ the default branch, and ``tag`` pulled ``main`` before tagging.
   again (``--clobber``). ``conda``'s upload is not gated on ``check_leg``, so a
   leg whose Anaconda upload landed but whose GitHub upload failed still gets
   its asset on a re-run.
-* Two failures are new, and deliberate. With no release for the tag, the
+* Two failures differ from the action, deliberately. With no release for the tag, the
   upload fails with ``gh``'s "release not found", where the action made one,
   with no notes and ``target_commitish`` unset (``src/github.ts:617-628,1026``),
   which Create a release defaults to "the repository's default branch"; the
@@ -333,7 +333,7 @@ checks *is* the one it is about to create:
   exists.
 * ``pypi`` compares PyPI's file count for the version against the 7 expected
   -- the 6 supported legs' wheels plus the sdist kept only on the 3.15 leg; the
-  KTLO legs' wheels (#1633) are not counted. This job is
+  KTLO legs' wheels (`#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__) are not counted. This job is
   already idempotent (``skip-existing: true`` on both upload steps), so the
   check exists only to save the cost of the build matrix, not for correctness.
 * ``conda`` compares Anaconda's aggregate count against the 10 expected (2 OS
@@ -357,7 +357,7 @@ supported version added since (`#1660
 release, and counting it would read a finished release as incomplete, run the
 gate and ``pypi``, and fail `One Commit per Release`_'s tag check on every run
 until the next release. A tag older than the file, as ``v1.5.0b12`` is, counts
-the tiers the file was added with, which #1677 copied unchanged from the
+the tiers the file was added with, which the change for `#1660 <https://github.com/JarryShaw/PyPCAPKit/issues/1660>`__ copied unchanged from the
 workflows of the time.
 
 On the tag-push path ``startsWith(github.ref_name, 'v')`` bypasses the
@@ -449,7 +449,7 @@ graph: ``tag`` and ``pypi`` both depend on ``github``
 (``.github/workflows/create-release.yml:806,972``), and ``conda`` depends on
 ``tag`` and ``github`` (``:1208``) -- so nothing downstream of ``github`` can
 start before it is approved, and rejecting it leaves nothing tagged and
-nothing published. Before this change ``tag`` depended on ``version_check``
+nothing published. Before that removal ``tag`` depended on ``version_check``
 alone, so removing its reviewer without moving this dependency would have let
 it push a commit to ``main`` and cut a ``conda-*`` tag *ahead of* the
 approval it was supposed to wait for.
@@ -459,7 +459,7 @@ Precautions
 
 .. warning::
 
-   **Do not gate a release job on whether the ``v*`` tag exists.** ``github``
+   **Do not gate a release job on whether the** ``v*`` **tag exists.** ``github``
    creates the tag before ``pypi`` and ``conda`` upload, so a tag proves nothing
    about whether the upload finished. A job keyed on ``PCAPKIT_TAG_EXISTS``
    skips itself on a retry after a partial release, and the run finishes green
@@ -492,7 +492,7 @@ Neither is worth the risk of a double upload to an index that cannot take one
 back, and neither is needed, since a plain re-run self-heals; see
 `Recovery`_ below.
 
-**``environment: pypi`` stays even though its reviewer is gone.** ``pypi``
+``environment: pypi`` **stays even though its reviewer is gone.** ``pypi``
 publishes through PyPI's OIDC trusted publishing (``environment: pypi`` at
 ``:967``, ``id-token: write`` at ``:971``), and PyPI's trusted-publisher
 configuration can be scoped to a GitHub Actions environment name. If this
@@ -502,7 +502,7 @@ this is standard OIDC trusted-publishing behaviour, not something the
 publisher's actual PyPI-side configuration was read to confirm here. Keep
 the name regardless, since there is no upside to removing it.
 
-**``conda-tag`` writes to ``main``, so a release is not read-only on the
+``conda-tag`` **writes to** ``main``\ **, so a release is not read-only on the
 branch.** After cutting ``conda-<version>+0`` at the run's commit, the
 ``tag`` job pushes a commit setting :file:`conda/build` to ``0`` on top of
 ``main`` (``.github/workflows/create-release.yml:893-946``) -- a plain
@@ -512,7 +512,7 @@ when ``main``'s tip already says ``0`` (the usual case, since
 :file:`util/bump_version.py` writes ``0``) or carries another ``__version__``,
 nor when origin already has a ``conda-<version>+N`` tag other than ``+0``,
 since rewinding the counter would then reuse a tagged build number; the first
-and last warn. #1634's own shape -- three Conda Update bumps that `#1632
+and last warn. `#1634 <https://github.com/JarryShaw/PyPCAPKit/issues/1634>`__'s own shape -- three Conda Update bumps that `#1632
 <https://github.com/JarryShaw/PyPCAPKit/issues/1632>`__ left untagged -- gets
 the reset: ``main``'s 3 becomes 0. A rejected push is retried from a fresh
 fetch, three times at most. Approving ``github-release`` therefore also
@@ -535,10 +535,10 @@ existence. ``pypi`` is safe to re-run (``skip-existing: true``), and so is
 ``conda``, because each matrix leg checks Anaconda for its own
 platform/Python distribution before uploading and skips only that leg's
 upload if it is already there. Neither replaces a file the GitHub Release
-already has (#1640).
+already has (`#1640 <https://github.com/JarryShaw/PyPCAPKit/issues/1640>`__).
 
 **A re-run does not need to be verified by hand against the PyPI and Anaconda
-listings, because ``release_status`` does it.** That job runs on every
+listings, because** ``release_status`` **does it.** That job runs on every
 ``Create Release`` attempt regardless of what else skipped, and reconciles
 each of ``github``/``tag``/``pypi``/``conda`` *against its own evidence*
 rather than demanding the same outcome from all four -- a target counts as
