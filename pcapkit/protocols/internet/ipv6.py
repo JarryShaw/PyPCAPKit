@@ -77,11 +77,14 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
 
     .. versionchanged:: 1.5.0
 
-       * An extension header with no dedicated parser is parsed by
-         :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
-         (:issue:`891`).
-       * A rebuild from :meth:`from_data` keeps the Payload Length a truncated
-         capture declares (:issue:`1155`), and the octets past it as
+       * A Shim6 header, which has no dedicated parser, and a header in
+         :attr:`__generic_ext_codes__` whose dedicated parser raises are parsed
+         by :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`, so the
+         rest of the chain is still walked (:issue:`891`).
+       * A rebuild from
+         :meth:`~pcapkit.protocols.internet.internet.Internet.from_data`
+         keeps the Payload Length a truncated capture declares
+         (:issue:`1155`), and the octets past it as
          :attr:`~pcapkit.protocols.schema.internet.ipv6.IPv6.trailer`
          (:issue:`1209`).
        * Next Header codes 253 and 254 are parsed and rebuilt once
@@ -110,9 +113,10 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
     #: * :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6`
     #:   has no dedicated parser (``pcapkit/protocols/internet/NotImplemented/shim6.py``
     #:   is a 0-byte placeholder), so there is no "own parser" for it to raise
-    #:   from. It reaches :class:`IPv6_Ext` by *direct* registration (see the
-    #:   bottom of :mod:`pcapkit.protocols.internet.ipv6_ext`), which already
-    #:   produces exactly this class.
+    #:   from. It reaches :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
+    #:   by *direct* registration (see the bottom of
+    #:   :mod:`pcapkit.protocols.internet.ipv6_ext`), which already produces
+    #:   exactly this class.
     #: * ``ESP`` *does* have a dedicated, registered parser
     #:   (:class:`~pcapkit.protocols.internet.esp.ESP`). It is excluded
     #:   because :rfc:`4303` places the real Next Header byte inside the

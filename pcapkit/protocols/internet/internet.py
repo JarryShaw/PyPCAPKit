@@ -10,12 +10,6 @@ which is a base class for internet layer protocols, eg. :class:`~pcapkit.protoco
 :class:`~pcapkit.protocols.internet.ipsec.IPsec`, :class:`~pcapkit.protocols.internet.ipv4.IPv4`,
 :class:`~pcapkit.protocols.internet.ipv6.IPv6`, :class:`~pcapkit.protocols.internet.ipx.IPX`, and etc.
 
-.. versionremoved:: 1.5.0
-
-   ``pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT``, now
-   :data:`pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`, set with
-   :envvar:`PCAPKIT_EXTENSION_HEADER_LIMIT` (:issue:`1726`).
-
 """
 import collections
 import contextvars
@@ -97,7 +91,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
     .. versionchanged:: 1.5.0
 
        A layer parsed as an IPv6 extension header keeps only its own octets in
-       :attr:`data`, so that ``from_data(info).data`` rebuilds it exactly
+       ``data``, so that ``from_data(info).data`` rebuilds it exactly
        (:issue:`1446`).
 
     """

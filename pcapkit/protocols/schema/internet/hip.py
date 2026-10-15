@@ -129,11 +129,14 @@ def locator_value_selector(pkt: 'dict[str, Any]') -> 'Field':
         pkt: Packet data.
 
     Returns:
-        * If ``kind`` is ``0`` and ``size`` is ``16``,
+        * If ``type`` is ``0`` and ``len`` is ``4``, i.e. a 16-octet locator,
           returns an :class:`~pcapkit.corekit.fields.ipaddress.IPv6AddressField` instance.
-        * If ``kind`` is ``1`` and ``size`` is ``20``,
+        * If ``type`` is ``1`` and ``len`` is ``5``, i.e. a 20-octet locator,
           returns a :class:`~pcapkit.corekit.fields.misc.SchemaField` wrapped
           :class:`~pcapkit.protocols.schema.internet.hip.LocatorData` instance.
+
+    Raises:
+        FieldValueError: For any other locator type and length.
 
     """
     if pkt['type'] == 0 and pkt['len'] == 4:
@@ -162,6 +165,8 @@ def host_id_hi_selector(pkt: 'dict[str, Any]') -> 'Field':
         * If ``algorithm`` is ``13`` (EdDSA), returns a
           :class:`~pcapkit.corekit.fields.misc.SchemaField` wrapped
           :class:`~pcapkit.protocols.schema.internet.hip.EdDSACurveHostIdentity` instance.
+        * Otherwise, returns a :class:`~pcapkit.corekit.fields.strings.BytesField`
+          instance of ``hi_len`` octets.
 
     """
     algo = pkt['algorithm']
@@ -281,9 +286,8 @@ def transport_format_list_len(pkt: 'dict[str, Any]') -> 'int':
     two octets -- the same width the base :class:`Parameter` class uses for
     its own ``type`` field, since a TF type *is* a HIP parameter type number
     -- which is why ``formats``' ``item_type`` is
-    ``EnumField(length=2, ...)``, matching :class:`HIPTransportModeParameter`'s
-    ``mode`` rather than the one-octet items of :func:`two_octet_prefix_list_len`'s
-    other two call sites. This function only answers how many *bytes* the
+    ``EnumField(length=2, ...)``, the width of the items at all three of
+    :func:`two_octet_prefix_list_len`'s call sites as well. This function only answers how many *bytes* the
     list occupies; getting that number right and the item width wrong (one
     octet) would still corrupt every non-empty list, just by reading twice as
     many entries as the wire holds instead of dropping octets.
@@ -510,7 +514,7 @@ class Parameter(EnumSchema[Enum_Parameter]):
 
 @schema_final
 class UnassignedParameter(Parameter):
-    """Header schema for HIP unsigned parameters."""
+    """Header schema for HIP unassigned parameters."""
 
     #: Parameter value.
     value: 'bytes' = BytesField(length=lambda pkt: pkt['len'])
@@ -557,7 +561,7 @@ class R1CounterParameter(Parameter, code=[Enum_Parameter.R1_Counter,
     two hand-written entries -- not a name-normalisation rule; ``R1_Counter``
     and ``R1_COUNTER`` differ only in case, and each needs its own line --
     mapping both codes to the same ``_read_param_r1_counter``, and
-    ``_make_param_r1_counter`` builds this class for 128. The schema lookup
+    ``_make_param_r1_counter`` builds this class for either code. The schema lookup
     this class's own ``code=`` feeds -- consulted on the parse path by
     :class:`~pcapkit.corekit.fields.collections.OptionField` -- would fall
     back to :class:`UnassignedParameter` for 128 if a single-code ``code=``
@@ -794,7 +798,7 @@ class DiffieHellmanParameter(Parameter, code=Enum_Parameter.DIFFIE_HELLMAN):
 
 @schema_final
 class HIPTransformParameter(Parameter, code=Enum_Parameter.HIP_TRANSFORM):
-    """Header schema for HIP ``TRANSFORM`` parameters."""
+    """Header schema for HIP ``HIP_TRANSFORM`` parameters."""
 
     #: Suite IDs.
     suites: 'list[Enum_Suite]' = ListField(
@@ -810,7 +814,7 @@ class HIPTransformParameter(Parameter, code=Enum_Parameter.HIP_TRANSFORM):
 
 @schema_final
 class HIPCipherParameter(Parameter, code=Enum_Parameter.HIP_CIPHER):
-    """Header schema for HIP ``CIPHER`` parameters."""
+    """Header schema for HIP ``HIP_CIPHER`` parameters."""
 
     #: Cipher IDs.
     ciphers: 'list[Enum_Cipher]' = ListField(
@@ -1266,7 +1270,7 @@ class PayloadMICParameter(Parameter, code=Enum_Parameter.PAYLOAD_MIC):
 
     #: Next header.
     next: 'Enum_TransType' = EnumField(length=1, namespace=Enum_TransType)
-    #: Reversed.
+    #: Reserved.
     reserved: 'bytes' = PaddingField(length=3)
     #: Payload data.
     payload: 'bytes' = BytesField(length=4)
