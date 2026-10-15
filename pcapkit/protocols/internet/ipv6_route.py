@@ -104,6 +104,10 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
          (:issue:`1236`), and an RPL source route rebuilds byte for byte, its
          address compression and a truncated address list included
          (:issue:`1456`, :issue:`1457`).
+       * A rebuild keeps the reserved bits of an RPL source route
+         (:issue:`1235`), and the reserved octets of a Source Route or Type 2
+         header and the ``Pad`` octets of an RPL one as captured
+         (:issue:`1223`).
 
     """
 
