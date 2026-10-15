@@ -10,7 +10,9 @@ from pcapkit.protocols.data.protocol import Protocol
 if TYPE_CHECKING:
     from typing import Any
 
-    from pcapkit.protocols.application.ngap import Criticality, PDUKind, ProcedureCode, ProtocolIE
+    from pcapkit.const.ngap.procedure_code import ProcedureCode as Enum_ProcedureCode
+    from pcapkit.const.ngap.protocol_ie import ProtocolIE as Enum_ProtocolIE
+    from pcapkit.protocols.application.ngap import Criticality, PDUKind
 
 __all__ = [
     'NGAP',
@@ -77,7 +79,7 @@ class IE(Data):
     """Data model for one NGAP protocol information element."""
 
     #: Protocol IE ID.
-    id: 'ProtocolIE'
+    id: 'Enum_ProtocolIE'
     #: Criticality, i.e. what a receiver must do when it does not understand
     #: :attr:`id`.
     criticality: 'Criticality'
@@ -89,7 +91,7 @@ class IE(Data):
     value: 'Any'
 
     if TYPE_CHECKING:
-        def __init__(self, id: 'ProtocolIE', criticality: 'Criticality', type: 'str', value: 'Any') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin,line-too-long
+        def __init__(self, id: 'Enum_ProtocolIE', criticality: 'Criticality', type: 'str', value: 'Any') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin,line-too-long
 
 
 @info_final
@@ -106,7 +108,7 @@ class NGAP(Protocol):
     #: Which of the three ``NGAP-PDU`` alternatives this is.
     kind: 'PDUKind'
     #: Procedure code.
-    procedure: 'ProcedureCode'
+    procedure: 'Enum_ProcedureCode'
     #: Criticality of the procedure.
     criticality: 'Criticality'
     #: Name of the message type, e.g. ``NGSetupRequest``.
@@ -120,4 +122,4 @@ class NGAP(Protocol):
     value: 'Sequence'
 
     if TYPE_CHECKING:
-        def __init__(self, kind: 'PDUKind', procedure: 'ProcedureCode', criticality: 'Criticality', message: 'str', ies: 'tuple[IE, ...]', value: 'Sequence') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
+        def __init__(self, kind: 'PDUKind', procedure: 'Enum_ProcedureCode', criticality: 'Criticality', message: 'str', ies: 'tuple[IE, ...]', value: 'Sequence') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long

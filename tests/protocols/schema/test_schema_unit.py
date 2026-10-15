@@ -390,7 +390,7 @@ class SchemaUnitTests(unittest.TestCase):
 
     def test_schema_mapping_payload_list_and_default_edge_branches(self) -> None:
         NestedSchema, FeatureSchema, PayloadOnlySchema, _, _ = self._make_schema_classes()
-        from pcapkit.corekit.fields.field import NO_VALUE
+        from pcapkit.corekit.sentinels import NO_VALUE
         from pcapkit.corekit.fields.numbers import UInt8Field
         from pcapkit.protocols.schema.schema import Schema, schema_final
         from pcapkit.utilities.exceptions import ProtocolUnbound

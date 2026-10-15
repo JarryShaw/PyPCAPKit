@@ -13,30 +13,17 @@ See the "Naming a Sentinel" section of
 house rule the four below follow.
 
 The owner's ruling on GitHub issue :issue:`911` chose one shared module over
-one module per sentinel. Each sentinel is also re-exported, in a single
-import line, from the module of the one class that uses it --
-:class:`NullType` from :mod:`pcapkit.corekit.module`, :class:`NoValueType`
-from :mod:`pcapkit.corekit.fields.field`, :class:`NoDefaultType` from
-:mod:`pcapkit.corekit.enum` and :class:`AbsentType` from
-:mod:`pcapkit.protocols.protocol` -- so that no ``from <module> import <name>``
-breaks, including the ``if TYPE_CHECKING:``-only imports of the *types* that
-:mod:`pcapkit.foundation.registry.foundation`,
-:mod:`pcapkit.foundation.registry.protocols` and
-:mod:`pcapkit.corekit.fields.ipaddress`, :mod:`~pcapkit.corekit.fields.misc`,
-:mod:`~pcapkit.corekit.fields.numbers` and :mod:`~pcapkit.corekit.fields.strings`
-carry.
+one module per sentinel, and this module is the only import path for all
+four. The re-export each one used to keep at the module of the class that
+uses it was dropped under :issue:`1744`, per the ruling on :issue:`1715` that a
+moved name keeps no re-export at its old path. :mod:`pcapkit.corekit.module`,
+:mod:`pcapkit.corekit.fields.field`, :mod:`pcapkit.corekit.enum` and
+:mod:`pcapkit.protocols.protocol` still import the object they use from here,
+but none lists it in ``__all__`` or documents it, and none binds the type.
 
-``NO_VALUE`` and ``ABSENT`` differ in how far the ruling reaches. ``NO_VALUE``
-is documented as the value of
-:attr:`FieldBase.default <pcapkit.corekit.fields.field.FieldBase.default>`,
-so it is a published contract and the re-export at
-:mod:`pcapkit.corekit.fields.field` is load-bearing for callers outside this
-package. ``ABSENT`` is private to :mod:`pcapkit.protocols.protocol` --
-nothing outside that module ever imports it, from here or from there -- so
-its re-export exists only so that module's own code keeps reading
-``ABSENT`` rather than a fully-qualified name. It carries no leading
-underscore; :class:`AbsentType`'s docstring says what marks it private
-instead.
+``ABSENT`` is private to :mod:`pcapkit.protocols.protocol` -- nothing outside
+that module ever reads it. It carries no leading underscore;
+:class:`AbsentType`'s docstring says what marks it private instead.
 
 """
 from typing import TYPE_CHECKING
@@ -103,11 +90,10 @@ class NullType:
     reloads :mod:`pcapkit.corekit.sentinels` after import.
 
     Reloading :mod:`pcapkit.corekit.module` instead has no effect on the
-    singleton at all. That module only re-imports :data:`NULL` and
-    :class:`NullType` from here, and re-running an already-satisfied
-    ``from ... import`` reads the current binding in :mod:`sys.modules`
-    rather than re-executing anything, so it neither mints a new instance
-    nor loses the old one.
+    singleton at all. That module only imports :data:`NULL` from here, and
+    re-running an already-satisfied ``from ... import`` reads the current
+    binding in :mod:`sys.modules` rather than re-executing anything, so it
+    neither mints a new instance nor loses the old one.
 
     """
 
@@ -166,9 +152,7 @@ class NullType:
 #: NullType: Sentinel for an omitted ``class_`` argument to the ``register_*``
 #: helpers in :mod:`pcapkit.foundation.registry.protocols` and
 #: :mod:`pcapkit.foundation.registry.foundation`. Housed here with the
-#: package's other sentinels, per the module docstring above;
-#: :mod:`pcapkit.corekit.module` keeps a re-export so every
-#: ``from pcapkit.corekit.module import NULL`` keeps working.
+#: package's other sentinels, per the module docstring above.
 NULL = NullType()
 
 
@@ -187,8 +171,7 @@ def _get_null() -> 'NullType':
 class NoValueType:
     """Type of :data:`NO_VALUE`, the default value for :mod:`pcapkit.corekit.fields`.
 
-    Housed here per GitHub issue :issue:`911`, and re-exported from
-    :mod:`pcapkit.corekit.fields.field`, where
+    Housed here per GitHub issue :issue:`911`;
     :attr:`FieldBase.default <pcapkit.corekit.fields.field.FieldBase.default>`
     documents it as the field-default sentinel.
 
@@ -201,8 +184,6 @@ class NoValueType:
 
 #: NoValueType: Default value for
 #: :attr:`FieldBase.default <pcapkit.corekit.fields.field.FieldBase.default>`.
-#: :mod:`pcapkit.corekit.fields.field` keeps a re-export, since that
-#: attribute's own documentation is a published contract naming this object.
 NO_VALUE = NoValueType()
 
 
@@ -365,9 +346,7 @@ class NoDefaultType:
 #: back. See :class:`NoDefaultType` for why this is a dedicated class rather
 #: than a bare :class:`object`, why it is a guarded singleton, and why it
 #: defines neither the copy/pickle hooks nor the ``__bool__`` that its
-#: :mod:`pcapkit.corekit` siblings do. :mod:`pcapkit.corekit.enum` keeps a
-#: re-export, since :meth:`EnumLookup.get <pcapkit.corekit.enum.EnumLookup.get>`
-#: names this object in its signature and docstring.
+#: :mod:`pcapkit.corekit` siblings do.
 NO_DEFAULT = NoDefaultType()
 
 
@@ -415,7 +394,7 @@ class AbsentType:
 #: class cannot enumerate its keywords, c.f.
 #: :attr:`ProtocolBase.__keywords__
 #: <pcapkit.protocols.protocol.ProtocolBase.__keywords__>`. Never leaves
-#: :mod:`pcapkit.protocols.protocol`, which keeps a private re-export of it
-#: for exactly that one read. Private by documentation rather than by a
+#: :mod:`pcapkit.protocols.protocol`, which imports it from here for exactly
+#: that one read. Private by documentation rather than by a
 #: leading underscore -- see :class:`AbsentType`'s own docstring.
 ABSENT = AbsentType()

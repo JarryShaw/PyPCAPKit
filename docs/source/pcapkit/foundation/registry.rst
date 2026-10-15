@@ -16,6 +16,12 @@ Foundation Registries
 
 .. module:: pcapkit.foundation.registry.foundation
 
+.. versionchanged:: 1.5.0
+
+   ``NULL``, the default of every ``class_`` argument here, is now the
+   :data:`pcapkit.corekit.sentinels.NULL` sentinel; in 1.4.x it was the
+   string ``'(null)'`` (:issue:`833`).
+
 Engine Registries
 ~~~~~~~~~~~~~~~~~
 
@@ -52,6 +58,12 @@ Protocol Registries
 -------------------
 
 .. module:: pcapkit.foundation.registry.protocols
+
+.. versionchanged:: 1.5.0
+
+   ``NULL``, the default of every ``class_`` argument here, is now the
+   :data:`pcapkit.corekit.sentinels.NULL` sentinel; in 1.4.x it was the
+   string ``'(null)'`` (:issue:`833`).
 
 .. autofunction:: pcapkit.foundation.registry.protocols.register_protocol
 

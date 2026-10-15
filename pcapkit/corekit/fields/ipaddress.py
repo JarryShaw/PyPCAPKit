@@ -7,7 +7,8 @@ import ipaddress
 import re
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
-from pcapkit.corekit.fields.field import NO_VALUE, Field
+from pcapkit.corekit.fields.field import Field
+from pcapkit.corekit.sentinels import NO_VALUE
 from pcapkit.utilities.exceptions import FieldValueError
 
 __all__ = [
@@ -22,7 +23,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal, Self
 
-    from pcapkit.corekit.fields.field import NoValueType
+    from pcapkit.corekit.sentinels import NoValueType
 
 
 _T = TypeVar('_T', 'IPv4Address', 'IPv6Address',

@@ -12,13 +12,13 @@ from pcapkit.const.ipv6.seed_id import SeedID as Enum_SeedID
 from pcapkit.const.ipv6.smf_dpd_mode import SMFDPDMode as Enum_SMFDPDMode
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.collections import OptionField
-from pcapkit.corekit.fields.field import NO_VALUE
 from pcapkit.corekit.fields.ipaddress import IPv6AddressField
 from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, PayloadField,
                                          SwitchField)
 from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, UInt16Field,
                                             UInt32Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
+from pcapkit.corekit.sentinels import NO_VALUE
 from pcapkit.protocols.schema.internet import ipv6_option
 from pcapkit.protocols.schema.internet.ipv6_option import pad_opt_data_len, rpl_opt_sub_tlv_len
 from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final

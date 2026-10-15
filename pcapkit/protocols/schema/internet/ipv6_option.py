@@ -238,10 +238,10 @@ def pad_opt_data_len(pkt: 'dict[str, Any]') -> 'int':
         the option's ``len`` field is declared as a
         :class:`~pcapkit.corekit.fields.misc.ConditionalField` and is skipped
         for it. A skipped conditional field is *recorded* in the packet data as
-        :data:`~pcapkit.corekit.fields.field.NO_VALUE`, rather than being left
+        :data:`~pcapkit.corekit.sentinels.NO_VALUE`, rather than being left
         out of it, so the test below has to be on the **value** and not on the
         presence of the key: ``pkt.get('len', 0)`` on its own hands that
-        :obj:`~pcapkit.corekit.fields.field.NoValueType` straight to
+        :obj:`~pcapkit.corekit.sentinels.NoValueType` straight to
         :class:`~pcapkit.corekit.fields.strings.PaddingField`, where it becomes
         an unusable :mod:`struct` template and surfaces much later as an opaque
         :exc:`struct.error`, which is how a ``Pad1`` option would fail to parse.

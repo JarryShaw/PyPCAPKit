@@ -6,6 +6,12 @@
 
 This module provides the protocol registries for :mod:`pcapkit`.
 
+.. versionchanged:: 1.5.0
+
+   ``NULL``, the default of every ``class_`` argument here, is now the
+   :data:`pcapkit.corekit.sentinels.NULL` sentinel; in 1.4.x it was the
+   string ``'(null)'`` (:issue:`833`).
+
 """
 import collections.abc
 import enum
@@ -21,7 +27,8 @@ from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.const.sctp.payload_protocol_identifier import \
     PayloadProtocolIdentifier as Enum_PayloadProtocolIdentifier
-from pcapkit.corekit.module import NULL, ModuleDescriptor
+from pcapkit.corekit.module import ModuleDescriptor
+from pcapkit.corekit.sentinels import NULL
 from pcapkit.protocols import __proto__ as protocol_registry
 from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
 from pcapkit.protocols.internet.hip import HIP
@@ -81,7 +88,7 @@ if TYPE_CHECKING:
         PayloadProtocolIdentifier as SCTP_PayloadProtocolIdentifier
     from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as TCP_MPTCPOption
     from pcapkit.const.tcp.option import Option as TCP_Option
-    from pcapkit.corekit.module import NullType
+    from pcapkit.corekit.sentinels import NullType
     from pcapkit.protocols.application.httpv2 import FrameConstructor as HTTP_FrameConstructor
     from pcapkit.protocols.application.httpv2 import FrameParser as HTTP_FrameParser
     from pcapkit.protocols.internet.hip import ParameterConstructor as HIP_ParameterConstructor

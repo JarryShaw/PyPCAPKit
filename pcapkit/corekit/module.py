@@ -14,21 +14,15 @@ import importlib
 import sys
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
-# NOTE: ``_get_null`` is re-exported alongside the two public names for
-# backward compatibility, not for use here. Every pickle written before GitHub
-# issue #911 moved the definitions names ``pcapkit.corekit.module _get_null``
-# in its payload -- that is what :meth:`NullType.__reduce__` emitted -- so
-# dropping the name from this module would make those payloads unloadable with
-# ``AttributeError: module 'pcapkit.corekit.module' has no attribute
-# '_get_null'``. Newly written pickles name the new home; both resolve to the
-# same function and yield the same singleton.
-from pcapkit.corekit.sentinels import NULL, NullType, _get_null  # pylint: disable=unused-import
+from pcapkit.corekit.sentinels import NULL
 from pcapkit.utilities.exceptions import ProtocolError
 
-__all__ = ['NULL', 'ModuleDescriptor']
+__all__ = ['ModuleDescriptor']
 
 if TYPE_CHECKING:
     from typing import Type
+
+    from pcapkit.corekit.sentinels import NullType
 
 _T = TypeVar('_T')
 
@@ -41,8 +35,8 @@ class ModuleDescriptor(collections.namedtuple('ModuleDescriptor', ['module', 'na
 
     #: Module name.
     module: str
-    #: Class name, or :data:`NULL` when whatever built this descriptor never
-    #: got one -- see :attr:`klass`.
+    #: Class name, or :data:`~pcapkit.corekit.sentinels.NULL` when whatever
+    #: built this descriptor never got one -- see :attr:`klass`.
     name: 'str | NullType'
 
     @property
@@ -51,8 +45,9 @@ class ModuleDescriptor(collections.namedtuple('ModuleDescriptor', ['module', 'na
 
         Raises:
             pcapkit.utilities.exceptions.ProtocolError: If :attr:`name` is
-                :data:`NULL` -- the caller building this descriptor omitted
-                the class name rather than naming one that turned out wrong --
+                :data:`~pcapkit.corekit.sentinels.NULL` -- the caller building
+                this descriptor omitted the class name rather than naming one
+                that turned out wrong --
                 or if :attr:`module` has no attribute named :attr:`name`.
 
         Important:

@@ -4,7 +4,8 @@
 import io
 from typing import TYPE_CHECKING, TypeVar, cast
 
-from pcapkit.corekit.fields.field import NO_VALUE, FieldBase
+from pcapkit.corekit.fields.field import FieldBase
+from pcapkit.corekit.sentinels import NO_VALUE
 from pcapkit.utilities.compat import Mapping
 from pcapkit.utilities.exceptions import FieldError, NoDefaultValue
 from pcapkit.utilities.warnings import RegistryWarning, warn
@@ -20,7 +21,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Self
 
-    from pcapkit.corekit.fields.field import NoValueType
+    from pcapkit.corekit.sentinels import NoValueType
     from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.schema import Schema
 

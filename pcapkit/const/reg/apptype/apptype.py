@@ -15,7 +15,8 @@ from typing import TYPE_CHECKING, cast
 
 from aenum import IntEnum, StrEnum, auto, extend_enum
 
-from pcapkit.corekit.enum import NO_DEFAULT, EnumLookup, EnumRegistry
+from pcapkit.corekit.enum import EnumLookup, EnumRegistry
+from pcapkit.corekit.sentinels import NO_DEFAULT
 
 __all__ = ['TransportProtocol', 'AppType']
 

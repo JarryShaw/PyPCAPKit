@@ -1313,8 +1313,9 @@ class PCAPNGUnitTests(unittest.TestCase):
     def test_pcapng_record_and_secrets_readers_cover_dispatch(self) -> None:
         from pcapkit.const.pcapng.record_type import RecordType
         from pcapkit.const.pcapng.secrets_type import SecretsType
+        from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.misc.pcapng import PCAPNG, TLSKeyLabel, WireGuardKeyLabel
+        from pcapkit.protocols.misc.pcapng import PCAPNG, WireGuardKeyLabel
         from pcapkit.protocols.schema.misc.pcapng import (EndRecord, IPv4Record, IPv6Record,
                                                           TLSKeyLog, UnknownRecord, UnknownSecrets,
                                                           WireGuardKeyLog, ZigBeeAPSKey,
@@ -1387,14 +1388,10 @@ class PCAPNGUnitTests(unittest.TestCase):
     def test_tls_key_label_tracks_rfc_9850_plus_documented_rsa_exception(self) -> None:
         # GitHub issue #886: the canonical definition moved from a hand-written
         # class in this module to a generated one under
-        # :mod:`pcapkit.const.pcapng.tls_key_label`, with a re-export left here
-        # so ``from pcapkit.protocols.misc.pcapng import TLSKeyLabel`` keeps
-        # working. Both names have to resolve to the *same* object, not merely
-        # to two classes that happen to agree.
-        from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel as CanonicalTLSKeyLabel
-        from pcapkit.protocols.misc.pcapng import TLSKeyLabel
-
-        self.assertIs(TLSKeyLabel, CanonicalTLSKeyLabel)
+        # :mod:`pcapkit.const.pcapng.tls_key_label`. The re-export once left at
+        # ``pcapkit.protocols.misc.pcapng.TLSKeyLabel`` was dropped under #1744;
+        # tests/project/test_no_moved_name_re_exports_1744_unit.py pins that.
+        from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel
 
         # RFC 9850 :rfc:`9850#section-4.2`'s "TLS SSLKEYLOGFILE Labels" registry
         # (10 rows as of 2026-09-28), plus the NSS-historical ``RSA`` label this
@@ -1442,8 +1439,9 @@ class PCAPNGUnitTests(unittest.TestCase):
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.const.pcapng.record_type import RecordType
         from pcapkit.const.pcapng.secrets_type import SecretsType
+        from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel
         from pcapkit.corekit.fields.numbers import UInt16Field, UInt32Field
-        from pcapkit.protocols.misc.pcapng import TLSKeyLabel, WireGuardKeyLabel
+        from pcapkit.protocols.misc.pcapng import WireGuardKeyLabel
         from pcapkit.protocols.schema.misc import pcapng as schema_pcapng
         from pcapkit.utilities.exceptions import FieldValueError, ProtocolError
 
@@ -1768,8 +1766,9 @@ class PCAPNGUnitTests(unittest.TestCase):
                                                         TLSKeyLog as DataTLSKeyLog,
                                                         UnknownBlock as DataUnknownBlock,
                                                         UnknownOption as DataUnknownOption)
+        from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel
         from pcapkit.protocols.misc.pcapng import (PCAPNG, PacketDirection, PacketReception,
-                                                   TLSKeyLabel, WireGuardKeyLabel)
+                                                   WireGuardKeyLabel)
         from pcapkit.protocols.schema.misc.pcapng import CommentOption, EndOfOption
         from pcapkit.utilities.exceptions import ProtocolError
 
@@ -2078,8 +2077,9 @@ class PCAPNGUnitTests(unittest.TestCase):
         from pcapkit.const.pcapng.secrets_type import SecretsType
         from pcapkit.const.pcapng.verdict_type import VerdictType
         from pcapkit.corekit.multidict import OrderedMultiDict
+        from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel
         from pcapkit.protocols.misc.pcapng import (PCAPNG, PacketDirection, PacketReception,
-                                                   TLSKeyLabel, WireGuardKeyLabel)
+                                                   WireGuardKeyLabel)
         from pcapkit.protocols.schema.misc.pcapng import (CommentOption, DecryptionSecretsBlock,
                                                           EndRecord, IPv4Record as SchemaIPv4Record,
                                                           IPv6Record as SchemaIPv6Record,

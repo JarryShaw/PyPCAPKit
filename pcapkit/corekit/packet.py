@@ -62,10 +62,7 @@ class DeferredPacket:
     :class:`pcapkit.foundation.reassembly.data.tcp.Datagram` and
     :class:`pcapkit.foundation.traceflow.data.tcp.Index`, which differ only in
     the placeholder class each names in :attr:`__deferred__`
-    (:issue:`1516`). It is still importable from where it lived before:
-    :mod:`pcapkit.foundation.reassembly.data`,
-    :mod:`pcapkit.foundation.reassembly.data.data` and
-    :mod:`pcapkit.foundation.traceflow.data.data`.
+    (:issue:`1516`).
 
     """
 

@@ -5,10 +5,9 @@ from typing import TYPE_CHECKING
 
 from pcapkit.corekit.enum import EnumLookup
 from pcapkit.corekit.infoclass import Info, info_final
-from pcapkit.corekit.packet import DeferredPacket
 from pcapkit.utilities.compat import StrEnum, auto
 
-__all__ = ['ReassemblyData', 'Completion', 'Deferred', 'DeferredPacket']
+__all__ = ['ReassemblyData', 'Completion', 'Deferred']
 
 if TYPE_CHECKING:
     from typing import Callable, Optional

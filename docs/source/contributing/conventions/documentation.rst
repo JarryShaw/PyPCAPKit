@@ -295,9 +295,9 @@ Format and Mechanics
    adding coverage drops it from every source distribution.
 *  **Prose names the real defining module, not a re-export.** One strand of the
    consistency sweep on :doc:`the roadmap </contributing/pep>`. The sentinels are the
-   worked example: all four are defined in :mod:`pcapkit.corekit.sentinels` and
-   re-exported by the modules that use them, and :ref:`sentinel-convention`'s table
-   names the defining module rather than any of the re-exports.
+   worked example: all four are defined in :mod:`pcapkit.corekit.sentinels`, and
+   :ref:`sentinel-convention`'s table names it rather than any of the modules that
+   use them, which no longer re-export them (:issue:`1744`).
 *  **A verbatim upstream port is exempt from these conventions.**
    :ref:`sentinel-convention` already carries the case that settled it, the
    ``cached_property`` backport in :file:`pcapkit/utilities/compat.py`: the value of a

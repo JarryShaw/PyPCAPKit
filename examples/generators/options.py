@@ -1577,11 +1577,12 @@ def _pcapng_secrets_registry() -> 'Any':
 
 def _pcapng_secrets_overrides() -> 'dict[Any, dict[str, Any]]':
     from pcapkit.const.pcapng.secrets_type import SecretsType as Enum_SecretsType
+    from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel as Enum_TLSKeyLabel
     from pcapkit.corekit.multidict import OrderedMultiDict
-    from pcapkit.protocols.misc.pcapng import TLSKeyLabel, WireGuardKeyLabel
+    from pcapkit.protocols.misc.pcapng import WireGuardKeyLabel
     return {
         Enum_SecretsType.TLS_Key_Log: {
-            'entries': {TLSKeyLabel.CLIENT_RANDOM: OrderedMultiDict(
+            'entries': {Enum_TLSKeyLabel.CLIENT_RANDOM: OrderedMultiDict(
                 [(bytes(range(0x20, 0x40)), bytes(range(0x40, 0x70)))])}},
         Enum_SecretsType.WireGuard_Key_Log: {
             'entries': OrderedMultiDict(

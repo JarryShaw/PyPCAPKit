@@ -2155,7 +2155,7 @@ class BespokeGetReplacementTests(unittest.TestCase):
     five converted classes whose hand-written ``get()`` -- on the
     ``default == -1`` convention #857/#859 already retired everywhere else
     -- was removed in favour of the base's :meth:`~pcapkit.corekit.enum.
-    EnumRegistry.get`, which uses :data:`~pcapkit.corekit.enum.NO_DEFAULT`
+    EnumRegistry.get`, which uses :data:`~pcapkit.corekit.sentinels.NO_DEFAULT`
     and never mints while resolving ``default`` (#864).
 
     Verified before this replacement that no caller in :mod:`pcapkit` or

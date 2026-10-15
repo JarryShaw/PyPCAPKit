@@ -19,16 +19,10 @@ with a class name.
       Module name.
 
    .. property:: name
-      :type: str | pcapkit.corekit.module.NullType
+      :type: str | pcapkit.corekit.sentinels.NullType
 
-      Class name, or :data:`NULL` when whatever built this descriptor never
-      got one -- see :attr:`klass`.
-
-Auxiliaries
------------
-
-.. autoclass:: pcapkit.corekit.module.NullType
-.. autodata:: pcapkit.corekit.module.NULL
+      Class name, or :data:`~pcapkit.corekit.sentinels.NULL` when whatever
+      built this descriptor never got one -- see :attr:`klass`.
 
 Type Variables
 --------------

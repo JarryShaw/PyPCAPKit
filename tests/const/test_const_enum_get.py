@@ -244,10 +244,10 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
 
     def test_omitting_the_default_still_raises_for_the_original_key(self) -> None:
         """GitHub issue #857: ``-1`` used to be compared with ``==`` against
-        :data:`~pcapkit.corekit.enum.NO_DEFAULT`, so a caller-supplied ``-1``
+        :data:`~pcapkit.corekit.sentinels.NO_DEFAULT`, so a caller-supplied ``-1``
         was silently read as *no default was supplied*.
-        :data:`~pcapkit.corekit.enum.NO_DEFAULT` is now an exported instance
-        of the dedicated :class:`~pcapkit.corekit.enum.NoDefaultType`,
+        :data:`~pcapkit.corekit.sentinels.NO_DEFAULT` is now an exported instance
+        of the dedicated :class:`~pcapkit.corekit.sentinels.NoDefaultType`,
         compared with ``is`` rather than ``==`` -- so a caller-supplied
         ``-1`` is never confused with the sentinel. That fact is pinned
         directly, independent of ``get()``, by

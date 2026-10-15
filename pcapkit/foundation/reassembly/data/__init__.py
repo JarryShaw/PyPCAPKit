@@ -2,8 +2,7 @@
 """data models for reassembly"""
 
 # shared
-from pcapkit.foundation.reassembly.data.data import (Completion, Deferred, DeferredPacket,
-                                                     ReassemblyData)
+from pcapkit.foundation.reassembly.data.data import Completion, Deferred, ReassemblyData
 
 # IP reassembly
 from pcapkit.foundation.reassembly.data.ip import Buffer as IP_Buffer
@@ -22,7 +21,7 @@ from pcapkit.foundation.reassembly.data.tcp import HoleDescriptor as TCP_HoleDes
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 
 __all__ = [
-    'ReassemblyData', 'Completion', 'Deferred', 'DeferredPacket',
+    'ReassemblyData', 'Completion', 'Deferred',
 
     'IP_Packet', 'IP_DatagramID', 'IP_Datagram', 'IP_Buffer',
     'IP_BufferID',

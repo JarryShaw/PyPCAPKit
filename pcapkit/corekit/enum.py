@@ -91,7 +91,7 @@ from typing import TYPE_CHECKING
 
 from aenum import extend_enum
 
-from pcapkit.corekit.sentinels import NO_DEFAULT, NoDefaultType  # pylint: disable=unused-import
+from pcapkit.corekit.sentinels import NO_DEFAULT
 from pcapkit.utilities.exceptions import BaseError, EnumKeyError, EnumValueError
 
 if TYPE_CHECKING:
@@ -99,7 +99,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Self
 
-__all__ = ['NO_DEFAULT', 'EnumLookup', 'EnumRegistry']
+__all__ = ['EnumLookup', 'EnumRegistry']
 
 
 class EnumLookup:
@@ -362,9 +362,10 @@ class EnumLookup:
                 ``key`` does not resolve. Resolved through a plain
                 ``_value2member_map_`` lookup, never through
                 ``cls(default)``, so it cannot mint -- see :issue:`864`.
-                :data:`NO_DEFAULT` stands for *no default*; that and a
-                ``default`` naming no registered member both fall through to
-                the same lookup error ``key`` itself would have raised.
+                :data:`~pcapkit.corekit.sentinels.NO_DEFAULT` stands for *no
+                default*; that and a ``default`` naming no registered member
+                both fall through to the same lookup error ``key`` itself would
+                have raised.
 
         Returns:
             The canonical member for ``key``, or for ``default``.
