@@ -138,7 +138,14 @@ __all__ = [
 
 
 class MH(Protocol):
-    """Data model for MH protocol."""
+    """Data model for MH protocol.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved``, which every message data model
+       inherits (:issue:`1329`).
+
+    """
 
     #: Next header.
     next: 'TransType'
@@ -165,7 +172,13 @@ class UnknownMessage(MH):
 
 @info_final
 class BindingRefreshRequestMessage(MH):
-    """Data model for MH Binding Refresh Request (BRR) message type."""
+    """Data model for MH Binding Refresh Request (BRR) message type.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``msg_reserved`` (:issue:`1329`).
+
+    """
 
     #: Reserved field of the message body, before the mobility options. Named
     #: apart from :attr:`MH.reserved`, the reserved octet of the fixed header.
@@ -180,7 +193,13 @@ class BindingRefreshRequestMessage(MH):
 
 @info_final
 class HomeTestInitMessage(MH):
-    """Data model for MH Home Test Init (HoTI) message type."""
+    """Data model for MH Home Test Init (HoTI) message type.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``msg_reserved`` (:issue:`1437`).
+
+    """
 
     #: The two reserved octets of the message body, as captured. Named apart
     #: from :attr:`MH.reserved`, the reserved octet of the fixed header.
@@ -198,7 +217,13 @@ class HomeTestInitMessage(MH):
 
 @info_final
 class CareofTestInitMessage(MH):
-    """Data model for MH Care-of Test Init (CoTI) message type."""
+    """Data model for MH Care-of Test Init (CoTI) message type.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``msg_reserved`` (:issue:`1437`).
+
+    """
 
     #: The two reserved octets of the message body, as captured. Named apart
     #: from :attr:`MH.reserved`, the reserved octet of the fixed header.
@@ -254,13 +279,20 @@ class CareofTestMessage(MH):
 
 @info_final
 class BindingUpdateMessage(MH):
-    """Data model for MH Binding Update message type."""
+    """Data model for MH Binding Update message type.
+
+    .. versionchanged:: 1.5.0
+
+       New required fields for the flag bits later RFCs assign, ``map_reg``
+       through ``dmm``, and ``flags_reserved`` for the rest (:issue:`1329`).
+
+    """
 
     #: Sequence number.
     seq: 'int'
     #: Acknowledge flag.
     ack: 'bool'
-    #: home registration flag.
+    #: Home registration flag.
     home: 'bool'
     #: Link-local address compatibility flag.
     lla_compat: 'bool'
@@ -300,7 +332,15 @@ class BindingUpdateMessage(MH):
 
 @info_final
 class BindingAcknowledgementMessage(MH):
-    """Data model for MH Binding Acknowledge (BA) message type."""
+    """Data model for MH Binding Acknowledge (BA) message type.
+
+    .. versionchanged:: 1.5.0
+
+       New required fields for the flag bits later RFCs assign,
+       ``mobile_router`` through ``dmm``, and ``flags_reserved`` for the rest
+       (:issue:`1329`).
+
+    """
 
     #: Status.
     status: 'Enum_StatusCode'
@@ -337,7 +377,13 @@ class BindingAcknowledgementMessage(MH):
 
 @info_final
 class BindingErrorMessage(MH):
-    """Data model for MH Binding Error (BE) message type."""
+    """Data model for MH Binding Error (BE) message type.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``msg_reserved`` (:issue:`1437`).
+
+    """
 
     #: Status.
     status: 'Enum_BindingError'
@@ -736,9 +782,6 @@ class SubscriptionResponseMessage(MH):
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
 
-# TODO: Implement other message types.
-
-
 class Option(Data):
     """Data model for MH options."""
 
@@ -761,7 +804,13 @@ class UnassignedOption(Option):
 
 @info_final
 class PadOption(Option):
-    """Data model for Pad option."""
+    """Data model for Pad option.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``data`` (:issue:`1223`).
+
+    """
 
     #: Padding octets, i.e. the ``PadN`` option data as captured (empty for a
     #: ``Pad1``).
@@ -820,7 +869,13 @@ class AuthorizationDataOption(Option):
 
 @info_final
 class MobileNetworkPrefixOption(Option):
-    """Data model for Mobile Network Prefix option."""
+    """Data model for Mobile Network Prefix option.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1437`).
+
+    """
 
     #: The reserved octet, as captured.
     reserved: 'bytes'
@@ -931,7 +986,13 @@ class ExperimentalExtension(CGAExtension):
 
 @info_final
 class MultiPrefixExtension(CGAExtension):
-    """Data model for Multi-Prefix CGA extension."""
+    """Data model for Multi-Prefix CGA extension.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1418`).
+
+    """
 
     #: P flag. Set if a public key is included in the Public Key field of
     #: the CGA Parameter Data Structure, reset otherwise.
@@ -1001,7 +1062,7 @@ class PermanentHomeKeygenTokenOption(Option):
 
 @info_final
 class CareofTestInitOption(Option):
-    """Header schema for MH Care-of Test Init options."""
+    """Data model for MH Care-of Test Init option."""
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int') -> 'None': ...
@@ -1009,7 +1070,7 @@ class CareofTestInitOption(Option):
 
 @info_final
 class CareofTestOption(Option):
-    """Header schema for MH Care-of Test options."""
+    """Data model for MH Care-of Test option."""
 
     #: Care-of keygen token.
     token: 'bytes'
@@ -2258,6 +2319,3 @@ class DLIFLinkLayerAddressOption(Option):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', reserved: 'bytes', lla: 'bytes') -> 'None': ...
-
-
-# TODO: Implement other options.

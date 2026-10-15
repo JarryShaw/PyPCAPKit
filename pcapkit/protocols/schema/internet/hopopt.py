@@ -99,7 +99,7 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         ver: int
         #: Duplicate flag.
         dup: int
-        #: Retune flag.
+        #: Return flag.
         ret: int
         #: Reserved bits.
         reserved: int

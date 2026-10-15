@@ -5,7 +5,7 @@
 .. module:: pcapkit.protocols.internet.esp
 
 :mod:`pcapkit.protocols.internet.esp` contains
-:class:`~pcapkit.protocols.internet.esp.ESP` only,
+:class:`~pcapkit.protocols.internet.esp.ESP`,
 which implements extractor for Encapsulating
 Security Payload (ESP) [*]_, whose structure is
 described as below:

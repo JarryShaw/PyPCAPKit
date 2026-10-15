@@ -14,11 +14,17 @@ __all__ = ['AH']
 
 @info_final
 class AH(Protocol):
-    """Data model for AH protocol."""
+    """Data model for AH protocol.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1327`).
+
+    """
 
     #: Next header.
     next: 'TransType'
-    #: Payload length.
+    #: Header length, in octets, decoded from the Payload Len field.
     length: 'int'
     #: Reserved.
     reserved: 'int'
