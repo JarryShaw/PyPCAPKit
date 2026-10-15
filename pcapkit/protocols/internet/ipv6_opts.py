@@ -13,9 +13,9 @@ as below:
 ======= ========= =================== =================================
 Octets      Bits        Name                    Description
 ======= ========= =================== =================================
-  0           0   ``opt.next``              Next Header
-  1           8   ``opt.length``            Header Extension Length
-  2          16   ``opt.options``           Options
+  0           0   ``opts.next``             Next Header
+  1           8   ``opts.length``           Header Extension Length
+  2          16   ``opts.options``          Options
 ======= ========= =================== =================================
 
 .. [*] https://en.wikipedia.org/wiki/IPv6_packet#Hop-by-hop_options_and_destination_options
@@ -187,6 +187,19 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
        * - :attr:`~pcapkit.const.ipv6.option.Option.IP_DFF`
          - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_ip_dff`
          - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._make_opt_ip_dff`
+
+    .. versionchanged:: 1.5.0
+
+       * The ILNP nonce is sized with a ceiling rather than a floor
+         (:issue:`601`).
+       * The RPL option keeps its reserved flag bits on rebuild and accepts
+         :rfc:`6553` sub-TLVs (:issue:`1199`).
+       * A rebuild reproduces the option area byte for byte: its padding, a
+         PadN with no data, the SMF_DPD, CALIPSO, PDM and ILNP Nonce options,
+         and unassigned Quick-Start function codes (:issue:`1200`,
+         :issue:`1228`, :issue:`1229`, :issue:`1232` to :issue:`1234`,
+         :issue:`1237`); a CALIPSO option keeps its trailing pad and its
+         length (:issue:`1403`).
 
     """
 

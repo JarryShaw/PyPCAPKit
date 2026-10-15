@@ -15,6 +15,7 @@ which is a base class for internet layer protocols, eg. :class:`~pcapkit.protoco
    .. autoproperty:: layer
 
    .. automethod:: register
+   .. automethod:: from_data
 
    .. automethod:: _decode_next_layer
    .. automethod:: _import_next_layer

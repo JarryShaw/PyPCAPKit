@@ -14,7 +14,7 @@ Octets      Bits        Name                    Description
 ======= ========= ======================= ===================================
   0           0   ``ah.next``               Next Header
   1           8   ``ah.length``             Payload Length
-  2          16                             Reserved (must be zero)
+  2          16   ``ah.reserved``           Reserved (must be zero)
   4          32   ``ah.spi``                Security Parameters Index (SPI)
   8          64   ``ah.seq``                Sequence Number Field
   12         96   ``ah.icv``                Integrity Check Value (ICV)

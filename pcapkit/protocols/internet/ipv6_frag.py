@@ -10,16 +10,16 @@ only, which implements extractor for Fragment Header for
 IPv6 (IPv6-Frag) [*]_, whose structure is described as
 below:
 
-======= ========= ==================== =======================
+======= ========= ========================= =======================
 Octets      Bits        Name                    Description
-======= ========= ==================== =======================
+======= ========= ========================= =======================
   0           0   ``frag.next``               Next Header
-  1           8                               Reserved
+  1           8   ``frag.reserved_octet``     Reserved
   2          16   ``frag.offset``             Fragment Offset
-  3          29                               Reserved
+  3          29   ``frag.reserved``           Reserved
   3          31   ``frag.mf``                 More Flag
   4          32   ``frag.id``                 Identification
-======= ========= ==================== =======================
+======= ========= ========================= =======================
 
 .. [*] https://en.wikipedia.org/wiki/IPv6_packet#Fragment
 
@@ -48,7 +48,13 @@ __all__ = ['IPv6_Frag']
 
 class IPv6_Frag(IPv6_Ext[Data_IPv6_Frag, Schema_IPv6_Frag],
                 schema=Schema_IPv6_Frag, data=Data_IPv6_Frag):
-    """This class implements Fragment Header for IPv6."""
+    """This class implements Fragment Header for IPv6.
+
+    .. versionchanged:: 1.5.0
+
+       A rebuild keeps the reserved bits (:issue:`1235`).
+
+    """
 
     ##########################################################################
     # Properties.

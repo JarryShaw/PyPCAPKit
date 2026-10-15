@@ -94,6 +94,12 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
        * - :attr:`~pcapkit.const.reg.transtype.TransType.OSPFIGP`
          - :class:`pcapkit.protocols.application.ospf.OSPF`
 
+    .. versionchanged:: 1.5.0
+
+       A layer parsed as an IPv6 extension header keeps only its own octets in
+       :attr:`data`, so that ``from_data(info).data`` rebuilds it exactly
+       (:issue:`1446`).
+
     """
 
     ##########################################################################

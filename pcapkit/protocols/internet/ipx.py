@@ -50,7 +50,17 @@ __all__ = ['IPX']
 
 class IPX(Internet[Data_IPX, Schema_IPX],
           schema=Schema_IPX, data=Data_IPX):
-    """This class implements Internetwork Packet Exchange."""
+    """This class implements Internetwork Packet Exchange.
+
+    .. versionchanged:: 1.5.0
+
+       :meth:`from_data` rebuilds a parsed packet rather than raising
+       :exc:`struct.error` (:issue:`1315`), and the octets past the IPX Length
+       field are kept as
+       :attr:`~pcapkit.protocols.schema.internet.ipx.IPX.trailer`
+       (:issue:`1433`).
+
+    """
 
     ##########################################################################
     # Properties.

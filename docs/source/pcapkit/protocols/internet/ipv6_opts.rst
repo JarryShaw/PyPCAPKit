@@ -13,7 +13,7 @@ as below:
 Octets      Bits        Name                    Description
 ======= ========= =================== =================================
   0           0   ``opts.next``             Next Header
-  1           8   ``opts.length``           Header Extensive Length
+  1           8   ``opts.length``           Header Extension Length
   2          16   ``opts.options``          Options
 ======= ========= =================== =================================
 
@@ -22,6 +22,7 @@ Octets      Bits        Name                    Description
    :show-inheritance:
 
    .. autoproperty:: name
+   .. autoproperty:: alias
    .. autoproperty:: length
    .. autoproperty:: payload
    .. autoproperty:: protocol

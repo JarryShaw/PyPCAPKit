@@ -80,9 +80,10 @@ def ipv6_route_header_length(hdr_ext_len: 'int') -> 'int':
     ``4 + 8 * hdr_ext_len`` there), not a duplicate of it. It is what each
     ``_read_data_type_*`` in
     :mod:`pcapkit.protocols.internet.ipv6_route` reports back as the parsed
-    route data's own ``.length``, which :meth:`~pcapkit.protocols.internet.
-    ipv6_route.IPv6_Route.read` then subtracts from the outer packet length
-    to find the next layer's length. It is the read-side counterpart of
+    route data's own ``.length``, which
+    :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route.read` then
+    subtracts from the outer packet length to find the next layer's length.
+    It is the read-side counterpart of
     :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_hdr_ext_len`,
     which does the inverse arithmetic on the write side.
 
@@ -185,7 +186,14 @@ class Type2(RoutingType, code=Enum_Routing.Type_2_Routing_Header):
 
 @schema_final
 class RPL(RoutingType, code=Enum_Routing.RPL_Source_Route_Header):
-    """Header schema for IPv6-Route RPL routing data."""
+    """Header schema for IPv6-Route RPL routing data.
+
+    .. versionremoved:: 1.5.0
+
+       ``cmpr_i`` and ``cmpr_e``, now the keys of :attr:`cmpr`
+       (:issue:`1456`).
+
+    """
 
     #: CmprI and CmprE -- two 4-bit counts sharing one octet.
     #:

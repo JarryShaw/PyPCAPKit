@@ -15,11 +15,11 @@ Octets      Bits        Name                    Description
 ======= ========= ====================== ==================================
   0           0   ``hip.next``              Next Header
   1           8   ``hip.length``            Header Length
-  2          16                             Reserved (``\\x00``)
+  2          16   ``hip.packet_fixed``      Reserved (``\\x00``)
   2          17   ``hip.type``              Packet Type
   3          24   ``hip.version``           Version
   3          28   ``hip.reserved``          Reserved
-  3          31                             Reserved (``\\x01``)
+  3          31   ``hip.version_fixed``     Reserved (``\\x01``)
   4          32   ``hip.chksum``            Checksum
   6          48   ``hip.control``           Controls
   8          64   ``hip.shit``              Sender's Host Identity Tag
@@ -300,6 +300,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
          - Parameter Parser
        * - :attr:`~pcapkit.const.hip.parameter.Parameter.ESP_INFO`
          - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_esp_info`
+       * - :attr:`~pcapkit.const.hip.parameter.Parameter.R1_Counter`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_r1_counter`
        * - :attr:`~pcapkit.const.hip.parameter.Parameter.R1_COUNTER`
          - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_r1_counter`
        * - :attr:`~pcapkit.const.hip.parameter.Parameter.LOCATOR_SET`
@@ -394,6 +396,20 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
          - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_via_rvs`
        * - :attr:`~pcapkit.const.hip.parameter.Parameter.RELAY_HMAC`
          - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_relay_hmac`
+
+    .. versionchanged:: 1.5.0
+
+       * Parameters dispatch through :attr:`__parameter__` rather than by
+         method name (:issue:`429`).
+       * A parameter is padded to the record length :rfc:`7401` gives
+         (:issue:`651`), and ``PUZZLE``, ``SOLUTION``, ``R1_COUNTER`` and
+         ``LOCATOR_SET`` are sized as the RFCs give them (:issue:`608`,
+         :issue:`653` to :issue:`655`, :issue:`672`, :issue:`679`).
+       * A rebuild reproduces the Header Length, a packet with no parameters,
+         the ``PUZZLE`` lifetime, the reserved, padding and Locator flag bits,
+         and the two fixed header bits (:issue:`1313`, :issue:`1314`,
+         :issue:`1323`, :issue:`1328`, :issue:`1365`, :issue:`1417`,
+         :issue:`1459`).
 
     """
 
@@ -3526,7 +3542,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                 rewriting it, and to that mandated zero otherwise. Pass it
                 explicitly to override either -- notably to write the conformant
                 zero over a non-conformant one received from a peer, which is
-                otherwise unreachable because :class:`Data_SolutionParameter` is
+                otherwise unreachable because
+                :class:`~pcapkit.protocols.data.internet.hip.SolutionParameter` is
                 immutable
             opaque: opaque data
             random: random #I value
@@ -4996,6 +5013,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             code: parameter code
             param: parameter data
             version: HIP protocol version
+            opaque: opaque data
 
         Returns:
             HIP parameter schema.

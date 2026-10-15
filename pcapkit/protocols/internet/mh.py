@@ -1153,6 +1153,14 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
          - :meth:`~pcapkit.protocols.internet.mh.MH._read_ext_exp`
          - :meth:`~pcapkit.protocols.internet.mh.MH._make_ext_exp`
 
+    .. versionchanged:: 1.5.0
+
+       * The FBU and FBack Lifetime is read and built as plain seconds, per
+         :rfc:`5568` (:issue:`493`).
+       * A rebuild keeps a PadN with no data, the reserved fields, the reserved
+         bits of the flag fields and the octets each padding field captured
+         (:issue:`1324`, :issue:`1418`, :issue:`1437`).
+
     """
 
     ##########################################################################
@@ -5566,7 +5574,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             The membership context is an IGMP group address (:rfc:`1112`,
             :rfc:`2236`) or an IGMPv3 group record (:rfc:`3376#section-4.2`),
             which belong to IGMP rather than to the mobility header, so they are
-            recorded opaquely. :attr:`igmp_type` says which: ``0x12`` IGMPv1,
+            recorded opaquely.
+            :attr:`~pcapkit.protocols.data.internet.mh.ActiveMulticastSubscriptionIPv4Option.igmp_type`
+            says which: ``0x12`` IGMPv1,
             ``0x16`` IGMPv2, ``0x22`` IGMPv3.
 
         Args:
@@ -5611,7 +5621,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             For MLDv2 the context is an :rfc:`3810#section-5.2` multicast address
             record; for MLDv1 it is a reserved word followed by a multicast address
             [:rfc:`7161#section-4.1.3`]. Both belong to MLD, so the context is
-            recorded opaquely and :attr:`mld_type` says which form it is in.
+            recorded opaquely and
+            :attr:`~pcapkit.protocols.data.internet.mh.ActiveMulticastSubscriptionIPv6Option.mld_type`
+            says which form it is in.
 
         Args:
             schema: Parsed option schema.
@@ -9514,7 +9526,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Note:
             The option length is derived from the address family rather than from
-            :attr:`code`, so that the two cannot be emitted disagreeing.
+            ``code``, so that the two cannot be emitted disagreeing.
 
         """
         if option is not None:
