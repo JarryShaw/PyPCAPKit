@@ -138,6 +138,12 @@ jobs:
   # 3.14 run and the 3.14, 3.15 and 3.14t legs of run 38581834697: 88-113
   # minutes on GraalPy (estimate). 3.14t, which shares the caps, took 5.8
   # minutes over the whole unit tier in that run.
+  #
+  # #1740 gives GraalPy 3 workers, not 4, so at 4/3 of that time its tests should
+  # take about 117-151 minutes (an inference from the 88-113, not measured),
+  # past the 110-minute `timeout` in `Run unit tests`. GraalPy's leg may then end
+  # on that timeout, which `Containment summary` reports as a warning: that is
+  # expected, blocks nothing, and leaves the caps as they are.
   experimental:
     name: Python ${{ matrix.python-version }} (experimental)
     if: ${{ needs.changes.outputs.code != 'false' }}
@@ -191,23 +197,174 @@ jobs:
           nproc
           python -c "import os; print('cpu_count', os.cpu_count())"
 
+      # #1740: GraalPy's leg loses its runner 18-30 minutes into its tests ("The
+      # runner has received a shutdown signal"), under a 120-minute cap. So every
+      # 30 s this samples `free -m`, `df -h` of `/` and the workspace's volume,
+      # /proc/loadavg and the five processes with the most RSS, each line led by
+      # `[monitor]`, into $RUNNER_TEMP/resource-monitor.log. The sampler holds none
+      # of this step's output: the runner kills a step's process tree 5 s after
+      # its shell exits while a child still holds it (actions/runner
+      # src/Runner.Sdk/ProcessInvoker.cs:485-505, at 796cc18ff). `Run unit tests`
+      # follows the file into its own log instead, which is the evidence a lost
+      # runner leaves: once it has the shutdown signal, the runner evaluates no
+      # later step's condition, `always()` included (src/Runner.Worker/StepsRunner.cs:205-208,
+      # same commit), and job 116057255255 skipped every step after the tests.
+      # `set +eo pipefail`: `shell: bash` sets both, and `ps | head` can end
+      # `ps` with SIGPIPE. Started here, the sampler is outside the tests' memory
+      # scope (`Run unit tests`), so an OOM kill there leaves it running; each
+      # sample also holds the kernel's OOM-kill count and, while it exists, the
+      # scope's own memory use and events.
+      - name: Start the resource monitor
+        id: monitor
+        if: ${{ steps.install.outcome == 'success' }}
+        continue-on-error: true
+        shell: bash
+        run: |
+          log="$RUNNER_TEMP/resource-monitor.log"
+          : > "$log"
+          scope=/sys/fs/cgroup/system.slice/pcapkit-tests.scope
+          sample() {
+            echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) sample $1"
+            free -m
+            df -h / "$GITHUB_WORKSPACE"
+            echo "loadavg $(cat /proc/loadavg)"
+            echo "oom_kill $(awk '$1 == "oom_kill" { print $2 }' /proc/vmstat)"
+            if [ -r "$scope/memory.events" ]; then
+              echo "scope memory.current $(cat "$scope/memory.current") $(tr '\n' ' ' < "$scope/memory.events")"
+            fi
+            ps -eo pid,rss,vsz,etime,args --sort=-rss | head -6 | cut -c1-300
+          }
+          (
+            set +eo pipefail
+            trap 'kill "$sleeper" 2>/dev/null; exit 0' TERM
+            count=0
+            while :; do
+              count=$((count + 1))
+              # One write a sample, opening on a newline: `Run unit tests` copies
+              # it into a log where pytest may have left a line unfinished.
+              printf '\n%s\n' "$(sample "$count" 2>&1 | sed 's/^/[monitor] /')"
+              sleep 30 &
+              sleeper=$!
+              wait "$sleeper"
+            done
+          ) >> "$log" 2>&1 < /dev/null &
+          echo "$!" > "$RUNNER_TEMP/resource-monitor.pid"
+          echo "Sampling every 30 s into $log, pid $!."
+
       # unit-tests.yml `test`'s selection on every leg but `latest`: no
       # experimental version is `latest`, which util/python_versions.py holds to
       # a supported CPython, so the round-trip sweeps (#1732) are always left out
-      # here.
+      # here. #1740: `tail -F` copies the resource monitor's samples into this
+      # step's log as they are taken, and stops with the step.
+      #
+      # #1740, containment: a lost runner fails the job, and so the check, which
+      # no `continue-on-error` prevents, so the tests are held to what leaves the
+      # runner alive, and a breach fails this step instead:
+      # - GraalPy alone: a 2 GiB heap per process, read by every GraalPy
+      #   process, xdist workers included (GRAAL_PYTHON_VM_ARGS), and 3 workers,
+      #   which leaves a CPU of the 4 to the JIT and the runner.
+      # - `timeout` sends SIGINT at 110 minutes, under the 120-minute cap, so
+      #   pytest still writes the junit XML, and exits 124; SIGKILL 3 minutes on.
+      # - `prlimit --fsize`: no file over 2 GiB.
+      # - A transient scope, 12G and no swap, at a fifth of the runner's CPU
+      #   weight, where `sudo -n` can start one; otherwise uncapped. A scope's
+      #   command "will thus inherit the execution environment of the caller"
+      #   (systemd-run(1), systemd v255 man/systemd-run.xml:70-71), but sudo
+      #   resets PATH to its secure_path and drops `LD_*` even under
+      #   --preserve-env (sudo plugins/sudoers/env.c:133-141, at 43defa130),
+      #   where setup-python puts its lib/ (src/find-python.ts:163-170, at
+      #   ff73b2463), so `env` sets those again, and the heap too. systemd-run
+      #   drops to the runner's uid and gid itself, with no setgroups
+      #   (src/run/run.c:1645-1683, v255). The probe is `scoped` itself, every
+      #   flag included, under a throwaway unit and running `true`, and either
+      #   way the tests run the one argv, in the scope or not.
+      # `tests-status` holds the exit status, the scope and the probe's error,
+      # the seconds the tests took, the kernel's OOM kills while they ran
+      # (/proc/vmstat `oom_kill`) and the MemoryError count, for `Containment
+      # summary`.
       - name: Run unit tests
         id: tests
         if: ${{ steps.install.outcome == 'success' }}
         continue-on-error: true
         timeout-minutes: 120
+        env:
+          GRAAL_PYTHON_VM_ARGS: ${{ startsWith(matrix.python-version, 'graalpy') && '--vm.Xmx2g' || '' }}
+          WORKERS: ${{ startsWith(matrix.python-version, 'graalpy') && '3' || 'auto' }}
         run: |
-          set -- -q -n auto --dist load \
+          tail -n +1 -F "$RUNNER_TEMP/resource-monitor.log" 2>/dev/null &
+          monitor=$!
+          trap 'kill "$monitor" 2>/dev/null || true' EXIT
+          set -- -q -n "$WORKERS" --dist load \
             --durations=30 --durations-min=1.0 --junitxml="$RUNNER_TEMP/junit.xml" \
             --ignore=tests/integration \
             --ignore-glob='*_runtime.py' \
             --ignore-glob='*_regression.py' \
             --ignore-glob='*roundtrip*'
-          python -m pytest "$@"
+          set -- prlimit --fsize=2147483648 timeout --signal=INT --kill-after=3m 110m python -m pytest "$@"
+          scoped() {
+            unit=$1
+            shift
+            sudo -n --preserve-env systemd-run --scope --quiet --unit="$unit" \
+              -p MemoryMax=12G -p MemorySwapMax=0 -p CPUWeight=20 --uid="$(id -u)" --gid="$(id -g)" \
+              -- env PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="${LD_LIBRARY_PATH-}" \
+              GRAAL_PYTHON_VM_ARGS="$GRAAL_PYTHON_VM_ARGS" "$@"
+          }
+          if probe=$(scoped "pcapkit-probe-$$.scope" true 2>&1); then
+            scope=12G
+            probe=
+            set -- scoped pcapkit-tests.scope "$@"
+          else
+            scope=none
+            probe=$(echo "$probe" | tail -n 1)
+            # A log line, not an annotation: on a lost runner this log is all that is left.
+            echo "No 12G scope: the probe failed (${probe}), so the tests run uncapped."
+          fi
+          oom_kills() { awk '$1 == "oom_kill" { print $2 }' /proc/vmstat; }
+          before=$(oom_kills)
+          started=$SECONDS
+          set +e
+          "$@" 2>&1 | tee "$RUNNER_TEMP/pytest.log"
+          status=${PIPESTATUS[0]}
+          set -e
+          elapsed=$((SECONDS - started))
+          after=$(oom_kills)
+          memory_errors=$(grep -c MemoryError "$RUNNER_TEMP/pytest.log" || true)
+          printf 'exit=%s\nscope=%s\nprobe=%s\nelapsed=%s\noom_kills=%s\nmemory_errors=%s\n' \
+            "$status" "$scope" "$probe" "$elapsed" "$(( ${after:-0} - ${before:-0} ))" "$memory_errors" \
+            > "$RUNNER_TEMP/tests-status"
+          exit "$status"
+
+      # #1740: after a failed, timed-out or cancelled tests step too. A lost
+      # runner skips it, as above, and its orphan cleanup ends the sampler.
+      - name: Stop the resource monitor
+        if: ${{ always() }}
+        continue-on-error: true
+        shell: bash
+        run: |
+          pidfile="$RUNNER_TEMP/resource-monitor.pid"
+          if [ ! -s "$pidfile" ]; then
+            echo 'The resource monitor did not start on this leg.'
+            exit 0
+          fi
+          pid=$(cat "$pidfile")
+          kill "$pid" 2>/dev/null || echo "The resource monitor, pid $pid, had already stopped."
+          echo "$(grep -c '^\[monitor\] .* sample [0-9]*$' "$RUNNER_TEMP/resource-monitor.log") samples taken."
+
+      # #1740: the monitor's file, where the runner survives the tests. docs.github.com
+      # says `always()` runs a step "even when canceled" (Expressions, `always`)
+      # and nothing about a runner's shutdown, which runs no later step (above):
+      # job 116057255255 skipped even `Post Run actions/checkout@v7`, whose action
+      # sets no `post-if`, which "defaults to `always()`" (Metadata syntax,
+      # `runs.post-if`). So on a lost runner the samples are in the tests' log alone.
+      - name: Upload the resource monitor's log
+        if: ${{ always() }}
+        continue-on-error: true
+        uses: actions/upload-artifact@v7
+        with:
+          name: resource-monitor-${{ matrix.python-version }}
+          path: ${{ runner.temp }}/resource-monitor.log
+          if-no-files-found: ignore
+          retention-days: 14
 
       # As `test`'s, under a name of its own: ci-timing.yml reads `test`'s
       # `junit-unit-*` files alone, and this one is the record of GraalPy's
@@ -220,6 +377,56 @@ jobs:
           name: junit-experimental-${{ matrix.python-version }}
           path: ${{ runner.temp }}/junit.xml
           retention-days: 14
+
+      # #1740: what `tests-status` and the monitor's last sample say about the
+      # tests, ahead of `Experimental summary`, whose script stays the KTLO
+      # summary's (tests/project/test_ktlo_legs_stay_green_1672.py) and which
+      # still reports a failed `tests` step as it reports any. Each cause gets a
+      # warning of its own: no 12G scope, an OOM kill, a MemoryError, and a
+      # timeout -- exit 124, or 137 with no OOM kill after 110 minutes, which is
+      # `--kill-after` ending a teardown that SIGINT did not. An OOM kill of
+      # pytest itself also exits 137, so the OOM count and the time tell them
+      # apart. Nothing here fails: a missing or partial status is reported as
+      # what it is.
+      - name: Containment summary
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        shell: bash
+        env:
+          LEG: Python ${{ matrix.python-version }} (experimental, non-blocking)
+        run: |
+          status="$RUNNER_TEMP/tests-status"
+          if [ ! -s "$status" ]; then
+            echo "$LEG: the tests step wrote no tests-status."
+            exit 0
+          fi
+          value() { sed -n "s/^$1=//p" "$status" | tail -n 1; }
+          last=$(awk '/^\[monitor\] .* sample [0-9]+$/ { at = $2; n = $4; mem = "" }
+                      /^\[monitor\] Mem:/ { mem = "used " $4 " MiB of " $3 ", " $8 " available" }
+                      END { if (n) print "last sample " n " at " at ": " (mem ? mem : "no free -m line") }' \
+                 "$RUNNER_TEMP/resource-monitor.log" 2>/dev/null || true)
+          last=${last:-no resource-monitor sample}
+          warn() {
+            echo "::warning title=${1} on ${LEG//,/%2C}::${2//%/%25} Experimental legs never block (#1660), so this job still succeeds."
+            echo "- ${LEG}: ${1}; non-blocking, so this job still succeeds." >> "$GITHUB_STEP_SUMMARY"
+          }
+          code=$(value exit) scope=$(value scope) elapsed=$(value elapsed)
+          oom=$(value oom_kills) errors=$(value memory_errors)
+          if [ "$scope" = none ]; then
+            warn "No memory cap" "The probe, sudo -n systemd-run --scope with the tests' flags, failed ($(value probe)), so the tests ran without the 12G scope."
+          fi
+          if [ "$oom" -gt 0 ] 2>/dev/null; then
+            warn "tests lost a process to the OOM killer" "${oom} OOM kill(s) while the tests ran, scope ${scope}, exit ${code}, ${elapsed} s; ${last}."
+          fi
+          if [ "$code" = 124 ]; then
+            warn "tests timed out at 110 minutes" "timeout sent SIGINT (exit 124), scope ${scope}, ${elapsed} s; ${last}."
+          elif [ "$code" = 137 ] && [ "$oom" -eq 0 ] 2>/dev/null && [ "$elapsed" -ge 6600 ] 2>/dev/null; then
+            warn "tests timed out at 110 minutes" "SIGINT did not end them, so timeout sent SIGKILL 3 minutes on (exit 137, no OOM kill), scope ${scope}, ${elapsed} s; ${last}."
+          fi
+          if [ "$errors" -gt 0 ] 2>/dev/null; then
+            warn "tests raised MemoryError" "${errors} MemoryError line(s) in the pytest output, exit ${code}, scope ${scope}; ${last}."
+          fi
+          echo "$LEG: tests exited ${code} after ${elapsed} s, scope ${scope}, ${oom} OOM kill(s), ${errors} MemoryError line(s); ${last}."
 
       # #1660: an experimental leg's report, as unit-tests.yml `test`'s `KTLO
       # summary` is a KTLO leg's, and for the same reasons.

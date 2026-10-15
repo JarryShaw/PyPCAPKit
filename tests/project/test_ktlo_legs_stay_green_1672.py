@@ -597,7 +597,9 @@ class TestAnExperimentalLegIsNonBlockingTheSameWay(unittest.TestCase):
     def test_each_step_names_the_leg_by_its_tier(self) -> None:
         """``LEG`` in an annotation's title: ``(experimental, non-blocking)``."""
         named = [step for step in self.spec['steps'] if 'LEG' in (step.get('env') or {})]
-        self.assertEqual([label(step) for step in named], ['Install package and test dependencies', EXPERIMENTAL_SUMMARY])
+        # #1740's `Containment summary` titles the tests' causes by the leg, as the others do.
+        self.assertEqual([label(step) for step in named],
+                         ['Install package and test dependencies', 'Containment summary', EXPERIMENTAL_SUMMARY])
         for leg in legs(*EXPERIMENTAL_JOB):
             for step in named:
                 with self.subTest(python=leg['python-version'], step=label(step)):
