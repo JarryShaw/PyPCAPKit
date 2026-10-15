@@ -850,12 +850,13 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
             this way, which is what keeps this safe to return from
             ``post_process``. A direct call to
             :meth:`~pcapkit.const.reg.apptype.apptype.AppType.get` for the same port
-            is a different matter and deliberately so: asking the
-            registry for a name is an explicit request for a named member, so
-            it still mints one -- measured on this tree,
-            ``AppType.get(54321, proto=tcp)`` returns ``PORT_54321_tcp`` and
-            takes ``TCP.__members__`` from 6147 to 6148, and a second call
-            with the same port returns that member rather than raising. Two
+            does not come through here, and it does not mint either: it
+            builds an unregistered member of its own, through the registry's
+            ``_unregistered_member`` -- measured on this tree,
+            ``AppType.get(54321, proto=tcp)`` returns
+            ``<TCP.unknown: 54321 [tcp]>``, ``TCP.__members__`` stays at
+            6147, and a second call with the same port returns an equal
+            member rather than the same one. Two
             unregistered members for the same value also compare equal
             without being identical, since
             :class:`~pcapkit.const.reg.apptype.apptype.AppType` and
@@ -1087,18 +1088,31 @@ class PortEnumField(EnumField):
             the port itself, when the registry declares none.
 
         Notes:
-            :meth:`~pcapkit.const.reg.apptype.apptype.AppType.get` mints a fresh
-            member -- via :func:`aenum.extend_enum` -- for any port neither an
-            existing row nor one of :meth:`_missing_`'s documented IANA spans
-            accounts for, which in practice means the ephemeral/dynamic range.
-            Calling it on every parsed port would therefore grow the registry
-            without bound. This peeks at the registry
+            This peeks at what
             :meth:`~pcapkit.const.reg.apptype.apptype.AppType.get` itself would
-            consult -- its per-port rows via ``__registry__.getlist``, then
-            its documented spans via ``_missing_`` -- and only calls
-            :meth:`~pcapkit.const.reg.apptype.apptype.AppType.get` once one of those is
-            already known to hold, so a genuine miss gets
-            :meth:`EnumField._unregistered_member` instead of a mint.
+            consult -- the per-port rows via ``__registry__.getlist``, then the
+            documented IANA spans via
+            :meth:`~pcapkit.const.reg.apptype.apptype.AppType._missing_` -- and
+            only calls ``get`` once one of those is known to hold. It is not a
+            guard against growth: ``get`` answers a port neither accounts for
+            with an unregistered member rather than minting one (GitHub issue
+            :issue:`860`), and the registry does not grow either way
+            (:issue:`1774`). It exists because that member is not the one a
+            parse needs. ``get`` builds it through
+            ``AppType._unregistered_member``, which installs no
+            ``__reduce_ex__``, so ``pickle.loads(pickle.dumps(...))`` raises
+            ``ValueError: 'unknown [50000 - tcp]' is not a valid TCP``; and its
+            ``.name`` is ``'unknown'``, so it dumps as ``TCP::unknown [...]``
+            rather than as the ``TCP::<unassigned> [...]`` of every other
+            unassigned wire value. A genuine miss therefore builds its member
+            through :meth:`EnumField._unregistered_member` instead.
+
+            That member carries the registry's own ``__transport__``, as
+            ``get``'s does, rather than ``self._proto``. The two are the same
+            member for each of the three schemas, but a composite built by hand
+            such as ``TransportProtocol.tcp | TransportProtocol.udp`` is a bare
+            :class:`int` (``3``, which dispatches to SCTP), and reading ``.name``
+            off it would raise :exc:`AttributeError` on a miss ``get`` resolves.
 
             A port outside this field's own width is rejected *before* any of
             that, rather than being let through to :meth:`_missing_` and
@@ -1149,8 +1163,11 @@ class PortEnumField(EnumField):
                 # DictDumper.object_hook renders a member's addon keys straight
                 # out of its ``__dict__`` in insertion order -- so any other
                 # order here would make an unassigned port dump ``port`` before
-                # ``svc`` while every declared one dumps ``svc`` first.
+                # ``svc`` while every declared one dumps ``svc`` first. The
+                # transport is ``owner.__transport__``, as AppType.get uses,
+                # since ``proto`` may be a bare int with no ``.name`` (#1774).
+                transport = owner.__transport__
                 return self._unregistered_member(
-                    owner, f'unknown [{value:d} - {proto.name}]',
-                    svc='unknown', port=value, proto=proto)
+                    owner, f'unknown [{value:d} - {transport.name}]',
+                    svc='unknown', port=value, proto=transport)
         return self._namespace.get(value, proto=proto)
