@@ -82,14 +82,13 @@ class EndToEndTestCase(unittest.TestCase):
         the one imported here.
 
         The re-import is guarded because nothing depends on it, so it must not be
-        able to turn a test failure into a class error. Most
-        subclasses carry ``@skipUnless(HAS_RUNTIME, ...)`` and never reach this
-        method without the runtime dependencies installed, but
-        ``PlistRoundTripTests`` and ``PcapngUnescapedKeyTests`` do not, so on a
-        checkout without them an unguarded ``import`` here would raise
-        :exc:`ModuleNotFoundError` out of ``setUpClass`` and error the whole
-        class, where before it was the individual tests that failed. Swallowed,
-        the table simply stays cold and those tests fail exactly as they did.
+        able to turn a test failure into a class error. Every subclass carries
+        ``@skipUnless(HAS_RUNTIME, ...)`` and so never reaches this method
+        without the runtime dependencies installed, but one added without it
+        would: on a checkout without them an unguarded ``import`` here would
+        raise :exc:`ModuleNotFoundError` out of ``setUpClass`` and error the
+        whole class, where otherwise its individual tests would fail. Swallowed,
+        the table simply stays cold and those tests fail as they would anyway.
         :exc:`BaseException` is deliberately not caught, for the same reason as
         in :func:`tests._support._close_quietly`.
 
