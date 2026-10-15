@@ -88,7 +88,7 @@ class TCPHTTPDispatchTests(unittest.TestCase):
 
         The HTTP/2 half is what the repoint buys: before it, these nine octets
         decoded as ``TCP:Raw``, because ``httpv1.HTTP`` refused them and
-        :func:`~pcapkit.protocols.misc.raw.beholder` turned the refusal into
+        :func:`~pcapkit.corekit.decorators.beholder` turned the refusal into
         ``Raw``. The HTTP/1.1 half is the guard on the 231 HTTP/1.1 frames in the
         fixture corpus that this change routes through
         :meth:`HTTP._guess_version

@@ -241,7 +241,7 @@ import_module` or :data:`sys.modules` succeeding -- the omission is caught
 
         Each protocol's assertion also runs a second time, outside
         :meth:`~unittest.TestCase.subTest`, and the results are asserted
-        together at the end. This repository's ``pytest-subtests`` reports
+        together at the end. This repository's :program:`pytest` reports
         the *parent* test node as passed when only a ``subTest`` failed inside
         it -- confirmed by reproducing it directly: a single failing
         ``subTest`` iteration renders its own ``SUBFAILED`` line while the

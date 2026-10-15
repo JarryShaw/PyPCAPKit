@@ -129,11 +129,11 @@ def bound_names(tree: 'ast.AST') -> 'set[str]':
     against a function's locals, so narrowing to those scopes catches a real
     defect: a module that binds ``Optional`` as an ordinary local somewhere and
     then writes ``'Optional[int]'`` without importing it. But the same narrowing
-    false-positives on real code here, because a :func:`typing.cast` string is
-    resolved *lexically*, in the function containing the call --
-    ``pcapkit/toolkit/scapy.py:208`` casts to ``'IPv6ExtHdrFragment'``, imported
+    false-positived on real code here, because a :func:`typing.cast` string is
+    resolved *lexically*, in the function containing the call -- until #1652,
+    :file:`pcapkit/toolkit/scapy.py` cast to ``'IPv6ExtHdrFragment'``, imported
     six lines above it inside the same function, which is correct and which mypy
-    accordingly does not flag. Distinguishing the two would mean tracking a
+    accordingly did not flag. Distinguishing the two would mean tracking a
     binding set per scope and knowing which construct resolves in which, i.e.
     reimplementing the type checker this deliberately is not.
 
@@ -392,8 +392,8 @@ class AnnotationNamesAreInScopeTests(unittest.TestCase):
     def test_a_cast_to_a_function_local_import_is_not_a_finding(self) -> None:
         """The case that keeps :func:`bound_names` scope-blind.
 
-        ``pcapkit/toolkit/scapy.py:202-208`` imports ``IPv6ExtHdrFragment`` inside
-        a function and casts to it six lines later in the same function. A
+        Until #1652, :file:`pcapkit/toolkit/scapy.py` imported ``IPv6ExtHdrFragment``
+        inside a function and cast to it six lines later in the same function. A
         :func:`typing.cast` string resolves lexically, so that is correct code and
         mypy does not flag it -- and a check narrowed to module and class scope
         reports it, which is how the stricter version of :func:`bound_names` was

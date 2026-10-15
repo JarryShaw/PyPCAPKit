@@ -61,8 +61,8 @@ And one thing is softened rather than left alone, in :class:`ReconstructionTests
 warns where a caller would be raised at, because the keywords it spreads came out
 of :meth:`ProtocolBase._make_data
 <pcapkit.protocols.protocol.ProtocolBase._make_data>` rather than out of anybody's
-editor. Three protocols have a mismatch of exactly that kind today and have been
-losing a field to it in silence; they are recorded there.
+editor. Mismatches of exactly that kind have lost fields in silence (#1097), so
+the case there builds its own rather than depending on a real one.
 
 This module is unit tier: it constructs its own octets and reads no capture, so
 it runs on a fresh checkout with nothing generated.
@@ -289,10 +289,10 @@ class RejectionTests(unittest.TestCase):
         Not a new exception type: the library already answers "you passed a
         keyword I do not accept" with
         :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`, in five places with
-        this exact message shape -- ``protocol.py:1064``,
-        ``dumpkit/common.py:142``, ``foundation/reassembly/reassembly.py:580``,
-        ``foundation/engines/engine.py:313`` and
-        ``foundation/traceflow/traceflow.py:514``. Reusing it keeps one answer to
+        this exact message shape -- ``protocol.py:1412``,
+        ``dumpkit/common.py:168``, ``foundation/reassembly/reassembly.py:587``,
+        ``foundation/engines/engine.py:314`` and
+        ``foundation/traceflow/traceflow.py:555``. Reusing it keeps one answer to
         one question rather than adding a second.
 
         The honest caveat, recorded so it is a decision rather than an oversight:

@@ -94,7 +94,7 @@ catch, because none of them executed anything the workflow itself executes:
   indentation forces onto it, measured directly against each one. Two of the
   three snippets run before ``actions/setup-python`` even installs a chosen
   version, so ``python3`` there is whatever the runner image ships by
-  default -- 3.12 on ``ubuntu-latest`` as of writing, never 3.14.
+  default -- 3.12 on ``ubuntu-latest`` when #905 measured it, never 3.14.
   :class:`TestPythonSnippetsSurviveOlderInterpreters` extracts each snippet
   and actually runs it under an interpreter older than 3.14 when one can be
   found on ``PATH``, skipping otherwise -- ``compile()`` under whatever
@@ -3494,7 +3494,7 @@ class TestPythonSnippetsSurviveOlderInterpreters(WorkflowMixin, unittest.TestCas
     3.14 -- 3.9 through 3.13 all raise ``IndentationError: unexpected
     indent``, measured directly. Two of the three run before
     ``actions/setup-python`` installs a chosen version, so ``python3`` there
-    is the runner image's default (3.12 on ``ubuntu-latest`` as of writing),
+    is the runner image's default (3.12 on ``ubuntu-latest`` when #905 measured it),
     never 3.14. #905's fix feeds one line per ``printf`` argument instead, so
     no line in the actual Python source is indented that Python did not
     itself put there -- this class is what actually runs each snippet under

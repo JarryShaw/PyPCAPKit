@@ -46,7 +46,7 @@ SPI then plain       9               **60**  56
 ===================  ==============  ======  =========================
 
 Four of the seven were not even multiples of eight. A sweep over n = 1..5 of
-plain locators passes today by cancellation and would pass a half-fix too, so it
+plain locators passed by cancellation before the fix and would pass a half-fix too, so it
 discriminates nothing; the empty set, the SPI-bearing variant and a mixed set in
 both orders are the shapes that do.
 

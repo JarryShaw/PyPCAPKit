@@ -29,12 +29,14 @@ All six now carry a guard raising a bare :exc:`ValueError`, emitted by their
 templates under :mod:`pcapkit.vendor` rather than hand-written -- the tree is
 generated, so a fix that is not in the template is reverted by the next crawl.
 
-The one deliberate divergence from the built-in is preserved and pinned here:
-the *mutable* registries look a value up, miss, and then **register** it with
-:func:`~aenum.extend_enum` instead of raising. That is the exception the owner
-named, and :class:`ConstEnumRegisterFallbackTests` exists so a future guard
-cannot quietly turn a registration into a rejection -- the failure mode GitHub
-issues #584 and #623 are both about.
+The one divergence from the built-in the owner named was the *mutable*
+registries': look a value up, miss, and then **register** it with
+:func:`~aenum.extend_enum` instead of raising. GitHub issues #775 and #860
+retired it, so a miss resolves to an equal, unregistered member instead, and
+only :class:`~pcapkit.const.mh.cga_type.CGAType` still extends on a miss.
+:class:`ConstEnumRegisterFallbackTests` pins that, and that no guard turns the
+lookup into an outright crash -- the failure mode GitHub issues #584 and #623
+are both about.
 
 The guard for the three flag registries delegates in-range composites to
 ``super()._missing_`` rather than resolving them itself, because GitHub issue
@@ -854,7 +856,7 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
         for why composing stopped mattering -- but left the doubling itself
         alone: stock ``ad4805f5f`` still mints at ``max_val * 2``, so
         ``.get('quic')`` there returns ``16``, right after ``dccp``'s ``8``.
-        This PR's own intermediate revision, not #808, is what switched an
+        #836's own intermediate revision, not #808, is what switched an
         unrecognised name to ``max_val + 1`` instead, minting ``9``. The
         review ruling on PR #836 removes the registration from
         ``TransportProtocol.get`` entirely, regardless of which scheme numbered
@@ -868,9 +870,9 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
         module's ruling changing which registries are mutable, not a
         regression the sweep above would otherwise have to catch.
 
-        Regression check: this fails against this PR's own prior head,
+        Regression check: this fails against #836's own prior head,
         ``3567359e2``, which still registers ``'quic'`` at value 9 rather
-        than raising -- see the session report for the quoted failure.
+        than raising.
         """
         from pcapkit.const.reg.apptype import TransportProtocol
 

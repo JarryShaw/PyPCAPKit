@@ -184,7 +184,7 @@ class PcapngUnescapedKeyTests(EndToEndTestCase):
 
         For this fixture it is not, and two things stack up to make it so:
 
-        1. ``pcapkit/protocols/schema/misc/pcapng.py:1982`` keys the TLS key log
+        1. ``pcapkit/protocols/schema/misc/pcapng.py:2244`` keys the TLS key log
            entries by ``bytes.fromhex(random)``, i.e. by a raw :class:`bytes`
            client random rather than by its hex text, so the report's key is a
            Python ``bytes`` repr: ``b' !"#$%&\\'()*+,-./0123456789:;<=>?'``.
@@ -205,7 +205,7 @@ class PcapngUnescapedKeyTests(EndToEndTestCase):
         since a stale instance of exactly this number is what #785 was filed
         over. The same key used to make the ``plist`` report invalid XML too;
         #784 fixed that half by adding an ``escape_key`` helper in
-        ``pcapkit/dumpkit/common.py:250`` that XML-escapes mapping keys, leaving
+        ``pcapkit/dumpkit/common.py:351`` that XML-escapes mapping keys, leaving
         only this ``json`` quoting defect, still open upstream as
         JarryShaw/DictDumper#121.
 

@@ -3,7 +3,7 @@
 The engine itself is exercised with a stand-in for :class:`pcap.pcap`, so that the
 routing decisions -- format gating, capability warnings, output, storage, close --
 are covered whether or not `pypcap`_ is installed. End-to-end agreement with the
-``default`` engine lives in :mod:`tests.foundation.engines.test_new_engine_parity`.
+``default`` engine lives in :mod:`tests.foundation.engines.test_new_engine_parity_runtime`.
 
 .. _pypcap: https://github.com/pynetwork/pypcap
 

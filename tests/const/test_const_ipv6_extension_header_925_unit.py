@@ -68,7 +68,7 @@ class ExtensionHeaderBitEmuRemovedTests(unittest.TestCase):
         self.assertNotIn('BIT_EMU', names)
 
     def test_bit_emu_value_no_longer_resolves(self) -> None:
-        # The exact call pcapkit/protocols/internet/ipv6.py:378 makes at the
+        # The exact call IPv6._decode_next_layer makes at the
         # top of its extension-header walk loop. With BIT_EMU gone and no
         # _missing_ defined on this generated file (neither EnumLookup nor
         # EnumRegistry in pcapkit.corekit.enum defines one either), 147 now

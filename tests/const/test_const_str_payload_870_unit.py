@@ -30,7 +30,7 @@ comparison of a :class:`~pcapkit.const.http.method.Method` member against its
 own wire string now succeeds where it used to fail silently (no exception --
 just an unexpected :data:`False`). Nothing under :mod:`pcapkit.protocols`
 compared a member this way before the fix (the one caller,
-:meth:`pcapkit.protocols.application.httpv1.HTTP.read_http_header`, only ever
+:meth:`pcapkit.protocols.application.httpv1.HTTP._read_http_header`, only ever
 reads ``.value`` indirectly through :meth:`~pcapkit.const.http.method.Method.
 get`, never ``str()`` or ``==`` against the member itself), so the change is
 observable only to external callers and to this module's own dunders

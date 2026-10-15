@@ -6,7 +6,7 @@ capture through each engine and wrote four reports nobody checked, into
 assertions on what each engine reports, against constants.
 
 ``pyshark`` is left out on purpose -- not for want of :program:`tshark`, which
-the ``pypcap-parity`` job (the one whose selection collects this file) now
+the ``pypcap-parity`` job (the one whose selection collects this file)
 installs, but because on Python 3.14 it fails inside its own
 ``get_event_loop()`` before it reads a byte, so it cannot take part in a check
 that runs on every version;

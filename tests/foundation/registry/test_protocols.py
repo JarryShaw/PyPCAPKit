@@ -54,7 +54,7 @@ class ProtocolRegistryTests(unittest.TestCase):
         a test that writes into one has to put back exactly what it found. A
         plain read-and-restore is not enough: a key that was *absent* has no
         value to restore, and writing one back leaves a stray entry that the
-        next test in the process inherits -- the class of defect #674 is open
+        next test in the process inherits -- the class of defect #674 was opened
         for. Hence the sentinel and the ``pop``.
 
         """

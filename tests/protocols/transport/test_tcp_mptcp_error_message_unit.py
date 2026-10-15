@@ -11,11 +11,11 @@ subtype were always right, and nothing downstream parses these strings -- but it
 is the string a user sees when an MP_JOIN or DSS option is rejected, and an empty
 field reads as a value that failed to interpolate.
 
-The correct form is not a matter of taste. The same file spells the same prefix
-without the doubling in 28 other places, all
+The correct form is not a matter of taste. When #649 was fixed, the same file
+spelled the same prefix without the doubling in 28 other places, all
 ``f'{self.alias}: [OptNo {schema.kind}] …'``, so the four were outliers against a
-house form in their own module; the fix moves them into it and the count becomes
-32. Two sibling test modules already quote the single-separator form in their
+house form in their own module; the fix moved them into it and the count became
+32. Two sibling test modules already quoted the single-separator form in their
 docstrings, which is further evidence of what was intended.
 
 Every message here is asserted **in full** rather than by substring. That is the
@@ -23,10 +23,10 @@ point of the change: a substring assertion on ``'invalid flags combination'``
 passes both before and after it, so the two places that already exercise these
 messages could not have caught this, and needed no edit --
 
-* ``test_tcp_mptcp_join_flag_ordering_unit.py:404``, which asserts
+* ``test_tcp_mptcp_join_flag_ordering_unit.py:423``, which asserts
   ``assertIn('invalid flags combination', str(caught.exception))`` against
   ``_make_mptcp_join``, and
-* ``test_tcp_udp_unit.py:1629``, which asserts
+* ``test_tcp_udp_unit.py:1632``, which asserts
   ``assertRaisesRegex(ProtocolError, 'invalid flags combination')`` against
   ``_read_mptcp_join``.
 
@@ -34,7 +34,7 @@ Two, not one: both match a substring that straddles the defect, and both still
 pass unchanged. Neither module is touched by this change.
 
 All four lines arrived together in ``3bba8a1748`` (2023-04-10) and were untouched
-until now.
+until #649.
 
 """
 from __future__ import annotations
