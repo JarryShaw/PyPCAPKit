@@ -78,5 +78,5 @@ Internal Definitions
 Type Variables
 --------------
 
-.. data:: pcapkit.foundation.engines.engine._T
+.. data:: _T
    :type: typing.Any

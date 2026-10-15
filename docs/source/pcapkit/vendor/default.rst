@@ -74,7 +74,7 @@ Internal Definitions
    :no-members:
    :show-inheritance:
 
-.. function:: pcapkit.vendor.default.LINE(NAME, DOCS, FLAG, ENUM, MISS, MODL)
+.. function:: LINE(NAME, DOCS, FLAG, ENUM, MISS, MODL)
 
    Default constant template of enumeration registry from IANA CSV.
 

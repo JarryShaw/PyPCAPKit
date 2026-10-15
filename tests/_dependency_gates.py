@@ -230,6 +230,11 @@ MODULE_PROVIDERS = {
     # ``HAS_PYPCAP``'s candidates -- see :func:`ambiguous_satisfactions`'s own
     # docstring.
     'pcap._pcap': ('pcap-ct',),
+    # The two :file:`docs/source/conf.py` imports at module level, which the
+    # ``HAS_SPHINX`` gate on its hook tests (#1775) asks for. Only the ``docs``
+    # extra carries either.
+    'sphinx': ('Sphinx',),
+    'sphinx_autodoc_typehints': ('sphinx-autodoc-typehints',),
 }
 
 #: Flags whose condition is not a distribution, with what it is instead. A flag
@@ -614,6 +619,22 @@ DEPENDENCY_GATE_EXCLUSIONS = {
             'the same reason they are absent from HAS_VENDOR_DEPS above. If a lint extra '
             'is ever declared in pyproject.toml, the right change is to delete this entry '
             'and let the gap close on its own rather than to widen it.'
+        ),
+    ),
+    'HAS_SPHINX': Exclusion(
+        dark={'test': ('sphinx', 'sphinx_autodoc_typehints'),
+              'gate': ('sphinx', 'sphinx_autodoc_typehints')},
+        reason=(
+            'The two classes it gates (#1775) load docs/source/conf.py and drive its '
+            'cross-reference and napoleon hooks with the nodes Sphinx itself builds, so '
+            'they need the docs extra, which only deploy-pages.yml installs -- and that '
+            'workflow builds the documentation rather than running pytest. The same '
+            'argument declines it here as declines HAS_MYPY above: the docs build is '
+            'already the end-to-end check of those hooks, and putting Sphinx, furo and '
+            'their dependencies on every unit-test leg would cost each one an install for '
+            'two classes. They run wherever Sphinx is importable, a developer checkout '
+            'with the docs extra included, and skip visibly elsewhere. The '
+            'directive-name test in the same module needs nothing and runs on every leg.'
         ),
     ),
 }

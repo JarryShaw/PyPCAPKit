@@ -4,12 +4,16 @@
 # list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+import builtins
 import datetime
+import enum
 import importlib
 import logging
 import os
 import pkgutil
 from typing import TYPE_CHECKING
+
+from sphinx import addnodes
 
 # NB: a private module of ``sphinx-autodoc-typehints``, used deliberately -- see
 # ``bind_type_checking_names`` below for what it buys and why reimplementing it
@@ -28,7 +32,8 @@ os.environ['PCAPKIT_SPHINX'] = '1'
 import pcapkit
 
 if TYPE_CHECKING:
-    from typing import Any, Dict, Optional
+    from typing import Any, Dict, List, Optional
+    from docutils.nodes import document
     from sphinx.application import Sphinx
 
 logger = logging.getLogger('pcapkit-sphinx')
@@ -393,6 +398,124 @@ def claim_attribute_signature(app: 'Sphinx', what: str, name: str,  # pylint: di
     return None
 
 
+#: Every name :mod:`builtins` binds -- ``dict``, ``set``, ``type`` and the rest.
+BUILTIN_NAMES = frozenset(dir(builtins))
+
+
+def resolve_builtins_exactly(app: 'Sphinx', doctree: 'document') -> None:  # pylint: disable=unused-argument
+    """Stop a bare builtin name in a type being suffix-matched to a pcapkit member.
+
+    The Python domain resolves a reference carrying a ``refspecific`` attribute
+    by *fuzzy* search when no exact match exists: any documented object whose
+    name ends in ``.dict`` will do. Every type it builds implicitly carries that
+    attribute -- the doc-field types (``:type:``, ``:vartype:``) set it to
+    :data:`True`, and an annotation sets it to :data:`False`, which counts all
+    the same, because the domain only asks whether the attribute is *present*.
+    So ``dict`` in an annotation found the registry members
+    :attr:`TCP.dict <pcapkit.const.reg.apptype.tcp.TCP.dict>` and
+    ``UDP.dict`` and linked to the first, with a ``more than one target found``
+    warning; ``type`` and ``set`` went the same way. A registry growing one
+    member named like a builtin would mislink it *silently*.
+
+    Dropping the attribute for a builtin name leaves only the exact lookup, by
+    the bare name and within the current module and class. That finds nothing
+    for ``dict``, so :mod:`~sphinx.ext.intersphinx` links it to the Python docs.
+
+    An explicit role is left alone: ``:class:`.dict``` asks for the fuzzy
+    search by its leading dot, and only a role's node carries ``refwarn``.
+
+    Args:
+        app: Sphinx application.
+        doctree: The document just read.
+
+    """
+    for node in doctree.findall(addnodes.pending_xref):
+        attributes = node.attributes
+        if (attributes.get('refdomain') == 'py' and 'refspecific' in attributes
+                and 'refwarn' not in attributes
+                and attributes.get('reftarget') in BUILTIN_NAMES):
+            del attributes['refspecific']
+
+
+#: Enum member docstrings as autodoc read them, held from
+#: :func:`save_enum_member_docstring` until :func:`restore_enum_member_docstring`.
+_ENUM_MEMBER_DOCSTRINGS = {}  # type: Dict[str, List[str]]
+
+
+def is_enum_member(name: str) -> bool:
+    """Whether ``name`` is the fully qualified name of an enum member.
+
+    Decided from the name, because autodoc does not hand over the member: for
+    ``PayloadProtocolIdentifier.H_323`` Sphinx 9.1 passes the plain ``int`` 13.
+
+    Args:
+        name: Fully qualified name of the object being documented.
+
+    Returns:
+        :data:`True` if the name before the last dot is an enumeration and the
+        last part is one of its members.
+
+    """
+    parent_name, _, member = name.rpartition('.')
+    try:
+        parent = pkgutil.resolve_name(parent_name)
+    except (ImportError, AttributeError, ValueError):
+        return False
+    return isinstance(parent, enum.EnumMeta) and member in parent.__members__
+
+
+def save_enum_member_docstring(app: 'Sphinx', what: str, name: str,  # pylint: disable=unused-argument
+                               obj: 'Any', options: 'Any', lines: 'List[str]') -> None:  # pylint: disable=unused-argument
+    """Keep an enum member's docstring before :mod:`~sphinx.ext.napoleon` reads it.
+
+    Napoleon takes the first line of every attribute docstring as Google's
+    inline ``type: description`` form and splits it at the first colon. A
+    registry member's docstring is the registry's own text, so the colon is
+    usually a URL's: ``H.323 [http://standard.pictel.com/...]`` rendered as
+    *Type:* ``H.323 [http`` above the description ``//standard.pictel.com/...``,
+    on 51 members. The bogus type was also parsed as a cross-reference, which is
+    where the ``http`` and ``Echo`` ``more than one target found`` warnings came
+    from.
+
+    Args:
+        app: Sphinx application.
+        what: Type of the object being documented.
+        name: Fully qualified name of the object.
+        obj: The object itself.
+        options: Directive options.
+        lines: The docstring, which is not changed here.
+
+    """
+    if what == 'attribute' and is_enum_member(name):
+        _ENUM_MEMBER_DOCSTRINGS[name] = list(lines)
+
+
+def restore_enum_member_docstring(app: 'Sphinx', what: str, name: str,  # pylint: disable=unused-argument
+                                  obj: 'Any', options: 'Any', lines: 'List[str]') -> None:  # pylint: disable=unused-argument
+    """Undo napoleon's inline type on an enum member, from the saved docstring.
+
+    An enum member's type is its enumeration, which autodoc already shows, so a
+    ``:type:`` field napoleon added there is always a misread line. Only that
+    case is undone: a docstring napoleon rewrote in any other way keeps the
+    rewrite.
+
+    Args:
+        app: Sphinx application.
+        what: Type of the object being documented.
+        name: Fully qualified name of the object.
+        obj: The object itself.
+        options: Directive options.
+        lines: The docstring after napoleon, restored in place.
+
+    """
+    original = _ENUM_MEMBER_DOCSTRINGS.pop(name, None)
+    if original is None:
+        return
+    if (any(line.startswith(':type:') for line in lines)
+            and not any(line.startswith(':type:') for line in original)):
+        lines[:] = original
+
+
 # NB: four handlers used to sit here -- ``remove_module_docstring``,
 # ``process_docstring``, ``process_fields`` and ``source_read`` -- each with its
 # ``app.connect`` call commented out in ``setup`` below, so none of them had run
@@ -422,3 +545,8 @@ def setup(app: 'Sphinx') -> None:
     # would otherwise win the tie on registration order -- conf.py's ``setup`` runs
     # after the extensions in ``extensions`` have been set up.
     app.connect('autodoc-process-signature', claim_attribute_signature, priority=400)
+    app.connect('doctree-read', resolve_builtins_exactly)
+    # NB: either side of napoleon's ``autodoc-process-docstring`` handler, which
+    # connects at the default 500.
+    app.connect('autodoc-process-docstring', save_enum_member_docstring, priority=400)
+    app.connect('autodoc-process-docstring', restore_enum_member_docstring, priority=600)

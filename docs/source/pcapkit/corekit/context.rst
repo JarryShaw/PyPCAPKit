@@ -75,5 +75,5 @@ Decoding an ESP tunnel end to end:
 Type Variables
 --------------
 
-.. data:: pcapkit.corekit.context._CT
+.. data:: _CT
    :type: pcapkit.corekit.context.ProtocolContext

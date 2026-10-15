@@ -55,11 +55,11 @@ Internal Definitions
 Type Variables
 ~~~~~~~~~~~~~~
 
-.. data:: pcapkit.corekit.fields.ipaddress._T
+.. data:: _T
    :type: ipaddress.IPv4Address | ipaddress.IPv6Address | ipaddress.IPv4Interface | ipaddress.IPv6Interface
 
-.. data:: pcapkit.corekit.fields.ipaddress._AT
+.. data:: _AT
    :type: ipaddress.IPv4Address | ipaddress.IPv6Address
 
-.. data:: pcapkit.corekit.fields.ipaddress._IT
+.. data:: _IT
    :type: ipaddress.IPv4Interface | ipaddress.IPv6Interface

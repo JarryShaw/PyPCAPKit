@@ -23,6 +23,7 @@ transport layer, with detailed implementation and methods.
 Protocol Registry
 -----------------
 
-.. data:: pcapkit.protocols.transport.TRANSTYPE
+.. data:: TRANSTYPE
+   :module: pcapkit.protocols.transport
 
    alias of :class:`pcapkit.const.reg.transtype.TransType`

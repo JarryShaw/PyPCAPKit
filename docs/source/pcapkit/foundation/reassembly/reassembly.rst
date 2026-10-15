@@ -102,22 +102,22 @@ Internal Definitions
 Type Variables
 --------------
 
-.. data:: pcapkit.foundation.reassembly.reassembly._PT
+.. data:: _PT
    :type: pcapkit.corekit.infoclass.Info
 
    Packet data structure.
 
-.. data:: pcapkit.foundation.reassembly.reassembly._DT
+.. data:: _DT
    :type: pcapkit.corekit.infoclass.Info
 
    Datagram data structure.
 
-.. data:: pcapkit.foundation.reassembly.reassembly._IT
+.. data:: _IT
    :type: tuple
 
    Buffer ID data structure.
 
-.. data:: pcapkit.foundation.reassembly.reassembly._BT
+.. data:: _BT
    :type: pcapkit.corekit.infoclass.Info
 
    Buffer data structure.

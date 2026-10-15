@@ -170,5 +170,6 @@ Data Structures
 Type Variables
 --------------
 
-.. data:: pcapkit.foundation.traceflow.data.tcp._AT
+.. data:: _AT
+   :module: pcapkit.foundation.traceflow.data.tcp
    :type: ipaddress.IPv4Address | ipaddress.IPv6Address
