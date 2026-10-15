@@ -100,15 +100,15 @@ commands down instead of a figure that will be stale by the next merge:
 
 The grouping scheme was settled on :issue:`918`: **a section per top-level module, with**
 ``Added``/``Changed``/``Fixed`` **nested inside each** -- module granularity, not
-per-file and not per-subpackage. The file carries **9** module-level sections holding
-200 entries, and no entry carries an inline kind label::
+per-file and not per-subpackage. The file carries **10** module-level sections holding
+269 entries, and no entry carries an inline kind label::
 
    $ grep -cE '^\* \*\*(Added|Changed|Fixed)\*\*' docs/source/changelog/1.5.0.rst
    0
 
-Eight of those nine name a module; the ninth, *Project infrastructure*, is for what
-belongs to none. Nor is the map one-to-one with the package list below --
-:mod:`pcapkit.interface` has no 1.5.0 entry, so it has no section of its own:
+Nine of those ten name a module; the tenth, *Project infrastructure*, is for what
+belongs to none. The map is one-to-one with the package list below -- every package,
+:mod:`pcapkit.interface` included, has a section of its own:
 
 .. code-block:: shell
 
