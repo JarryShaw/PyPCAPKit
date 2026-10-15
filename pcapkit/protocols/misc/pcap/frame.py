@@ -205,11 +205,17 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             global packet data to underlying methods. This is useful when
             the packet data is not available in the current instance.
 
+            As in :meth:`Protocol.pack <pcapkit.protocols.protocol.Protocol.pack>`,
+            the header is made on a copy outside construction, so the instance
+            keeps its own (:issue:`1769`).
+
         """
-        self.__header__ = self.make(**kwargs)
+        # pylint: disable=protected-access
+        target = self._packing_target()
+        target.__header__ = target.make(**kwargs)
         packet = kwargs.get('__packet__', {})  # packet data
-        packet['byteorder'] = self._ghdr.magic_number.byteorder
-        return self.__header__.pack(packet)
+        packet['byteorder'] = target._ghdr.magic_number.byteorder
+        return target.__header__.pack(packet)
 
     def unpack(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_Frame':
         r"""Unpack (parse) packet data.

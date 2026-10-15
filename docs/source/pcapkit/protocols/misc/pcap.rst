@@ -131,6 +131,7 @@ whose structure is described as below:
    .. automethod:: index
 
    .. automethod:: unpack
+   .. automethod:: pack
 
    .. automethod:: read
    .. automethod:: make

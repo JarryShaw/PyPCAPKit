@@ -26,6 +26,7 @@ import collections
 import collections.abc
 import contextlib
 import contextvars
+import copy
 import difflib
 import enum
 import functools
@@ -485,6 +486,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         _next: 'ProtocolBase'
         #: Protocol chain instance.
         _protos: 'ProtoChain'
+        #: If a header set before :meth:`unpack` may hold raw items.
+        _make_raw: 'bool'
 
         # Internal data storage for cached properties.
         __cached__: 'dict[str, Any]'
@@ -772,17 +775,56 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             The octets are built from ``kwargs`` alone, through :meth:`make`;
             the instance's own parsed or constructed state is not read. A bare
             ``SomeProtocol(...).pack()`` therefore returns the octets of a
-            default header, not the instance's: :attr:`data` holds those. The
-            schema made here also replaces the instance's
-            :attr:`__header__ <Protocol.__header__>`.
+            default header, not the instance's: :attr:`data` holds those.
+
+            Nor is that state written. Once the instance has been parsed or
+            constructed, the header is made on a shallow copy of it (see
+            :meth:`_packing_target`), so :attr:`schema`, :attr:`info` and
+            anything :meth:`make` sets along the way, such as
+            :attr:`TCP.connection <pcapkit.protocols.transport.tcp.TCP.connection>`,
+            still describe that packet. Only the call that
+            :meth:`__post_init__` makes to construct the instance keeps the
+            header made here, as the one :meth:`unpack` reads back.
+
+        .. versionchanged:: 1.5.0
+
+           Calling it no longer replaces the instance's
+           :attr:`__header__ <Protocol.__header__>`, which left :attr:`schema`
+           disagreeing with :attr:`info` (:issue:`1769`).
 
         """
-        self.__header__ = self.make(**kwargs)
+        target = self._packing_target()
+        header = target.__header__ = target.make(**kwargs)
         #: bool: If the made header may hold raw items (see :meth:`unpack`).
-        self._make_raw = _passes_raw(kwargs) or any(
-            isinstance(self.__header__.get(name), bytes) for name in _schema_slots(type(self.__header__)))
+        target._make_raw = _passes_raw(kwargs) or any(  # pylint: disable=protected-access
+            isinstance(header.get(name), bytes) for name in _schema_slots(type(header)))
         packet = kwargs.get('__packet__', {})  # packet data
-        return self.__header__.pack(packet)
+        return header.pack(packet)
+
+    def _packing_target(self) -> 'Self':
+        """Return the instance that :meth:`pack` makes its header on.
+
+        Returns:
+            The instance itself while it is being constructed, i.e. before
+            :meth:`__post_init__` has set its :attr:`info`, since its
+            :meth:`unpack` reads the made header back; a shallow copy of it
+            otherwise, so that neither that header nor an attribute that
+            :meth:`make` sets is left on the instance (:issue:`1769`).
+
+        Note:
+            A :meth:`pack` override that does not call this one has to build
+            on this target too, as :meth:`Frame.pack
+            <pcapkit.protocols.misc.pcap.frame.Frame.pack>` and
+            :meth:`PCAPNG.pack <pcapkit.protocols.misc.pcapng.PCAPNG.pack>` do.
+            The copy is shallow, so a :meth:`make` that mutates a container
+            in place still reaches the instance's.
+
+        """
+        # NOTE: ``_info`` is the last thing ``__post_init__`` sets, from
+        # ``unpack``; until then the instance holds no packet to keep.
+        if '_info' not in vars(self):
+            return self
+        return copy.copy(self)
 
     def unpack(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> '_PT':
         """Unpack (parse) packet data.
