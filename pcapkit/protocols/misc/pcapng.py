@@ -6,16 +6,36 @@
 .. module:: pcapkit.protocols.misc.pcapng
 
 :mod:`pcapkit.protocols.misc.pcapng` contains
-:class:`~pcapkit.protocols.misc.pcapng.PCAPNG` only,
-which implements extractor for PCAP-NG file format [*]_.
+:class:`~pcapkit.protocols.misc.pcapng.PCAPNG`,
+which implements extractor for PCAP-NG file format [*]_, and the
+:class:`~pcapkit.protocols.misc.pcapng.PacketDirection`,
+:class:`~pcapkit.protocols.misc.pcapng.PacketReception` and
+:class:`~pcapkit.protocols.misc.pcapng.WireGuardKeyLabel` enumerations.
 
 .. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html
 
 .. versionremoved:: 1.5.0
 
    ``pcapkit.protocols.misc.pcapng.TLSKeyLabel``, now
-   :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` (:issue:`890`,
+   :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` (:issue:`886`,
    :issue:`1744`).
+
+.. versionchanged:: 1.5.0
+
+   A block rebuilds as it was parsed, byte for byte: its lengths, padding,
+   byte order, flag bits and repeated options are kept, and so is a block
+   that is unknown, malformed, shorter than its fixed fields or cut short
+   (:issue:`1272`, :issue:`1273`, :issue:`1276`, :issue:`1277`,
+   :issue:`1278`, :issue:`1279`, :issue:`1280`, :issue:`1281`,
+   :issue:`1282`, :issue:`1283`, :issue:`1284`, :issue:`1382`,
+   :issue:`1383`, :issue:`1384`, :issue:`1405`, :issue:`1413`,
+   :issue:`1414`, :issue:`1422`, :issue:`1470`). A packet block keeps the
+   octets it captured (:issue:`646`); an option running past its block's
+   option area leaves the whole area kept as captured in ``options_raw``,
+   with a :exc:`~pcapkit.utilities.warnings.ProtocolWarning`, where it was
+   read as zeros (:issue:`594`, :issue:`1325`); a truncated capture does not
+   raise :exc:`ValueError` (:issue:`678`); and ``timestamp_epoch`` is not
+   shifted by the host's timezone (:issue:`361`).
 
 """
 import base64
@@ -399,7 +419,7 @@ class PacketReception(EnumLookup, enum.IntEnum):
 # closed, hand-picked set, so the TLS key label enumeration is the generated
 # :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`, imported above as
 # ``Enum_TLSKeyLabel`` like its seven :mod:`pcapkit.const.pcapng` siblings. This
-# module no longer re-exports it under the unaliased name (:issue:`1744`).
+# module does not re-export it under the unaliased name (:issue:`1744`).
 # :class:`WireGuardKeyLabel` below stays hand-written: it is a closed set
 # (draft-ietf-opsawg-pcapng-06 section 4.7's "is one of" four names), not a
 # registry, so filing it under :mod:`pcapkit.const` would misrepresent it as
@@ -426,7 +446,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
              schema=Schema_PCAPNG, data=Data_PCAPNG):
     """PCAP-NG file block extractor.
 
-    The class currently supports parsing of the following protocols, which are
+    The class supports parsing of the following protocols, which are
     registered in the :attr:`self.__proto__ <pcapkit.protocols.misc.pcapng.PCAPNG.__proto__>`
     attribute:
 
@@ -450,7 +470,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
     its data is dispatched as ``IPV4`` or ``IPV6`` by the version nibble of
     its first octet, see :meth:`_dispatch_linktype`.
 
-    The class currently supports parsing of the following block types, which
+    The class supports parsing of the following block types, which
     are registered in the :attr:`self.__block__ <pcapkit.protocols.misc.pcapng.PCAPNG.__block__>`
     attribute:
 
@@ -494,7 +514,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
          - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_block_packet`
          - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_block_packet`
 
-    The class currently supports parsing of the following option types, which
+    The class supports parsing of the following option types, which
     are registered in the :attr:`self.__option__ <pcapkit.protocols.misc.pcapng.PCAPNG.__option__>`
     attribute:
 
@@ -619,7 +639,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
          - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_pack_hash`
          - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_pack_hash`
 
-    The class currently supports parsing of the following name resolution
+    The class supports parsing of the following name resolution
     record types, which are registered in the :attr:`self.__record__ <pcapkit.protocols.misc.pcapng.PCAPNG.__record__>`
     attribute:
 
@@ -639,7 +659,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
          - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_record_ipv6`
          - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_record_ipv6`
 
-    The class currently supports parsing of the following decryption secrets
+    The class supports parsing of the following decryption secrets
     types, which are registered in the :attr:`self.__secrets__ <pcapkit.protocols.misc.pcapng.PCAPNG.__secrets__>`
     attribute:
 
@@ -1018,11 +1038,11 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         Arguments:
             code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
             protocol: module descriptor or a
-                :class:`~pcapkit.protocols.protocol.Protocol` subclass
+                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
 
         Raises:
             pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a
-                class, or not a :class:`~pcapkit.protocols.protocol.Protocol` subclass.
+                class, or not a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
 
         Warns:
             pcapkit.utilities.warnings.RegistryWarning: If this link type is
@@ -1618,7 +1638,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             Payload of :attr:`self.__header__ <pcapkit.protocols.protocol.Protocol.__header__>` as :obj:`bytes`.
 
         See Also:
-            This is a wrapper function for :meth:`pcapkit.protocols.schema.Schema.get_payload`.
+            This is a wrapper function for :meth:`pcapkit.protocols.schema.schema.Schema.get_payload`.
 
         Note:
             A packet block kept as captured has no payload (see
@@ -1889,8 +1909,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                 form a fresh build writes -- rather than whenever there are any.
 
         The octets are kept as ``key`` only when there is something a rebuild
-        would otherwise lose, so a data model reading as before for well-formed
-        input gains no key (:issue:`1437`). :meth:`_make_padding` writes them back.
+        would otherwise lose, so the data model of well-formed input gains no
+        key (:issue:`1437`). :meth:`_make_padding` writes them back.
 
         """
         padding = schema.__dict__.get(name)

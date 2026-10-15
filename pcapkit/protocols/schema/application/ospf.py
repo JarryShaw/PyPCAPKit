@@ -41,7 +41,20 @@ def ospf_auth_data_selector(pkt: 'dict[str, Any]') -> 'Field':
 
 @schema_final
 class CryptographicAuthentication(Schema):
-    """Header schema for OSPF cryptographic authentication."""
+    """Header schema for OSPF cryptographic authentication.
+
+    .. versionadded:: 1.5.0
+
+       Renamed from ``CrytographicAuthentication``, which
+       :mod:`pcapkit.protocols.schema` exported as
+       ``OSPF_CrytographicAuthentication`` (:issue:`1090`).
+
+    .. versionremoved:: 1.5.0
+
+       ``CrytographicAuthentication`` and ``OSPF_CrytographicAuthentication``,
+       with no alias (:issue:`1090`).
+
+    """
 
     #: Reserved bytes.
     reserved: 'bytes' = PaddingField(length=2)

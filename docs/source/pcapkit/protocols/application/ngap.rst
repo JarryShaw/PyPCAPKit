@@ -91,7 +91,7 @@ Known Limitations
 * **NGAP over a fragmented SCTP association is not reassembled.** A DATA chunk
   is decoded on its own, so an ``NGAP-PDU`` split across chunks by SCTP
   fragmentation fails to decode rather than being reassembled first.
-* **Private IEs (``PrivateMessage``) carry no schema.** Their contents are
+* **Private IEs** (``PrivateMessage``) **carry no schema.** Their contents are
   vendor defined, so the generic conversion reports whatever ASN.1 shape the
   encoding declares and cannot name the fields.
 

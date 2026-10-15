@@ -23,6 +23,17 @@ Octets      Bits        Name                    Description
 
 .. [*] https://en.wikipedia.org/wiki/HTTP/2
 
+.. versionchanged:: 1.5.0
+
+   A frame's Length counts its payload alone, not the 9-octet frame header,
+   as :rfc:`9113#section-4.1` defines it, and the payload is read to that
+   Length rather than to the end of the buffer (:issue:`1121`,
+   :issue:`1243`). A frame rebuilds byte for byte: ``END_STREAM``, undefined
+   flag bits, the reserved bits, a zero Pad Length, duplicate SETTINGS
+   entries and the payload of an unpadded DATA, HEADERS or PUSH_PROMISE frame
+   are kept (:issue:`652`, :issue:`668`, :issue:`1244`, :issue:`1245`,
+   :issue:`1246`, :issue:`1247`).
+
 """
 import collections
 from typing import TYPE_CHECKING, cast

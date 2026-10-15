@@ -18,6 +18,14 @@ derive from :class:`~pcapkit.protocols.protocol.ProtocolBase`, whose metaclass
 is :class:`~pcapkit.protocols.protocol.ProtocolMeta`; both are listed under
 Internal Definitions below.
 
+.. versionchanged:: 1.5.0
+
+   Constructing a protocol with a keyword that none of its signatures
+   declares raises :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`,
+   where it was discarded (:issue:`617`). A next layer captured shorter than
+   its header is kept as :class:`~pcapkit.protocols.misc.raw.Raw`, where it
+   was parsed with zero-filled fields (:issue:`1170`).
+
 .. autoclass:: pcapkit.protocols.protocol.Protocol
    :no-members:
    :show-inheritance:

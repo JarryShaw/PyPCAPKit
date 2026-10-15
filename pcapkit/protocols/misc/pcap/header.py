@@ -23,6 +23,11 @@ of PCAP, whose structure is described as below:
 
 .. [*] https://wiki.wireshark.org/Development/LibpcapFileFormat#Global_Header
 
+.. versionchanged:: 1.5.0
+
+   A global header cut short rebuilds as captured, where it rebuilt at full
+   width (:issue:`1470`).
+
 """
 import io
 import operator
@@ -51,7 +56,7 @@ __all__ = ['Header']
 #: The PCAP magic number for each byte order and nanosecond flag, the reverse of
 #: :data:`~pcapkit.protocols.schema.misc.pcap.header.MAGIC_NUMBER`, so that
 #: :meth:`Header._make_magic` looks one up rather than searching for it -- an
-#: undeclared pair raises :exc:`KeyError`, as it did before :issue:`1739`.
+#: undeclared pair raises :exc:`KeyError`.
 _DECLARED_MAGIC = {declared: magic for magic, declared in MAGIC_NUMBER.items()}
 
 
@@ -145,8 +150,7 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
 
         _magn = schema.magic_number
         # NOTE: looked up as :obj:`bytes`, so that a :obj:`bytearray` magic
-        # number is matched as it was compared before :issue:`1739` rather
-        # than rejected as unhashable.
+        # number is matched rather than rejected as unhashable.
         _decl = (MAGIC_NUMBER.get(bytes(_magn))
                  if isinstance(_magn, (bytes, bytearray, memoryview)) else None)
         if _decl is None:

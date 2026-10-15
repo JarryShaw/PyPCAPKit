@@ -737,8 +737,9 @@ class OptionEnumField(EnumField):
             instead of ``get()``'s own miss path, for pickle-safety: that method
             carries its own ``__reduce_ex__``, so a member built this way
             round-trips through :mod:`pickle` -- see its own docstring -- which
-            :meth:`~pcapkit.const.pcapng.option_type.OptionType.
-            _unregistered_member`'s override, the miss path, does not. The override's
+            the override of
+            :meth:`~pcapkit.const.pcapng.option_type.OptionType._unregistered_member`,
+            the miss path, does not. The override's
             :attr:`~pcapkit.const.pcapng.option_type.OptionType._value_` is the
             *formatted* display string (``'opt_unknown [8888]'``, not ``8888``),
             so ``pickle.dumps`` on one succeeds but ``pickle.loads`` of the result
@@ -896,6 +897,11 @@ class Option(EnumSchema[Enum_OptionType]):
 
         See Also:
             - :class:`pcapkit.const.pcapng.option_type.OptionType`
+
+        .. versionchanged:: 1.5.0
+
+           The class keyword ``namespace`` is renamed ``ns``, with no alias
+           (:issue:`439`).
 
         """
         # NOTE: the base hook goes first, before any of the registration work
