@@ -841,9 +841,10 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             global packet data to underlying methods. This is useful when
             the packet data is not available in the current instance.
 
-            When :meth:`pack` or :meth:`from_schema` has already set
-            :attr:`self.__header__ <Protocol.__header__>`, that schema is
-            kept, unless it still holds raw :obj:`bytes` where parsing its
+            When :attr:`self.__header__ <Protocol.__header__>` is already set,
+            by :meth:`from_schema` or by the :meth:`pack` call that
+            :meth:`__post_init__` makes to construct the instance, that schema
+            is kept, unless it still holds raw :obj:`bytes` where parsing its
             packed octets yields a schema -- e.g. a raw option given to
             ``make()`` -- which :meth:`read` cannot consume. The header is
             then replaced by the parsed one (:issue:`1312`).
@@ -2488,6 +2489,13 @@ class Protocol(ProtocolBase, Generic[_PT, _ST]):
     an existing layer subclasses that layer's base class instead, c.f.
     :doc:`/ext`. The built-in protocol families do not derive from this class
     but from :class:`ProtocolBase`, whose metaclass is :class:`ProtocolMeta`.
+
+    .. versionchanged:: 1.3.0
+
+       The built-in protocol families derive from :class:`ProtocolBase`, so a
+       built-in protocol is not an instance of this class, where every one
+       was; and a subclass is registered in :data:`pcapkit.protocols.__proto__`
+       when it is defined.
 
     """
 

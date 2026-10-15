@@ -342,7 +342,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            bytes: Constructed packet data.
+            The header schema the versioned ``make`` constructs.
 
         Raises:
             ProtocolError: If ``version`` is unknown, or if ``preface`` is
