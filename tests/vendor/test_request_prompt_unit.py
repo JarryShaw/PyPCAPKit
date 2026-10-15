@@ -98,10 +98,11 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 #: subpackages that ``import bs4`` at module scope.
 VENDOR_DEPS = ('requests', 'bs4', 'html5lib')
 
-#: Whether the crawlers are importable at all. They ship in the ``vendor`` extra
-#: (:file:`pyproject.toml`), not ``test`` -- so these cases skip on the ``test``
-#: and ``gate`` jobs of :file:`.github/workflows/unit-tests.yml`, but run for
-#: real on ``engine-tests``, which installs ``vendor`` too (#738).
+#: Whether the crawlers are importable at all. ``html5lib`` ships in the
+#: ``vendor`` extra (:file:`pyproject.toml`), not ``test`` -- so these cases skip
+#: on the ``test`` and ``gate`` jobs of :file:`.github/workflows/unit-tests.yml`.
+#: ``engine-tests`` ran them for real (#738) until #849 narrowed each of its
+#: cells to that engine's own test files.
 #: Guarded the way :file:`tests/protocols/test_dispatch_registry_unit.py` guards
 #: its own optional dependencies rather than making the whole unit tier depend on
 #: the crawlers'.

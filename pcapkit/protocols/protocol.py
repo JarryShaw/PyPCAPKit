@@ -19,12 +19,6 @@ from which the built-in protocol families derive, with its metaclass
    its header is kept as :class:`~pcapkit.protocols.misc.raw.Raw`, where it
    was parsed with zero-filled fields (:issue:`1170`).
 
-.. versionremoved:: 1.5.0
-
-   ``pcapkit.protocols.protocol.FRAME_LAYER_LIMIT``, now
-   :data:`pcapkit.utilities.config.FRAME_LAYER_LIMIT`, set with
-   :envvar:`PCAPKIT_FRAME_LAYER_LIMIT` (:issue:`1726`).
-
 """
 import abc
 import ast
@@ -972,7 +966,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         Arguments:
             code: protocol code
             protocol: module descriptor or a
-                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
+                :class:`~pcapkit.protocols.protocol.Protocol` subclass
 
         Raises:
             pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a

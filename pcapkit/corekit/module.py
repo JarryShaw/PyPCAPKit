@@ -43,6 +43,12 @@ class ModuleDescriptor(collections.namedtuple('ModuleDescriptor', ['module', 'na
     def klass(self) -> 'Type[_T]':
         """Import class from module.
 
+        .. versionchanged:: 1.5.0
+
+           A missing class raises
+           :exc:`~pcapkit.utilities.exceptions.ProtocolError` rather than a bare
+           :exc:`AttributeError` (:issue:`832`).
+
         Raises:
             pcapkit.utilities.exceptions.ProtocolError: If :attr:`name` is
                 :data:`~pcapkit.corekit.sentinels.NULL` -- the caller building

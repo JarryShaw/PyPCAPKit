@@ -1158,7 +1158,8 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             padded: Padded flag, implied by a non-zero ``pad_len``.
             pad_len: Padding length.
             excl_dep: Exclusive dependency flag.
-            sid_dep: Dependency stream identifier.
+            sid_dep: Dependency stream identifier. Giving one sets the
+                ``PRIORITY`` flag.
             weight: Priority weight value.
             fragment: Header block fragment.
             padding: Padding octets, truncated or zero-filled to ``pad_len``
@@ -1276,11 +1277,17 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         Args:
             frame: Frame data model.
             ack: Acknowledge flag.
-            settings: Settings.
+            settings: Settings, as raw octets, an
+                :class:`~pcapkit.corekit.multidict.OrderedMultiDict` or a list of
+                ``(identifier, value)`` pairs.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed frame schema and updated flags.
+
+        Raises:
+            ProtocolError: If ``settings`` is not :obj:`bytes`, a :obj:`dict`
+                or a :obj:`list`, :data:`None` (the default) included.
 
         """
         if frame is not None:

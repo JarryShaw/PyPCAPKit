@@ -177,7 +177,7 @@ class Type2(RoutingType, code=Enum_Routing.Type_2_Routing_Header):
 
     #: Reserved.
     reserved: 'bytes' = PaddingField(length=4)
-    #: Addresses.
+    #: Home address.
     ip: 'IPv6Address' = IPv6AddressField()
 
     if TYPE_CHECKING:

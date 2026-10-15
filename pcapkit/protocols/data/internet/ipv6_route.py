@@ -24,7 +24,7 @@ class IPv6_Route(Protocol):
 
     #: Next header.
     next: 'TransType'
-    #: Header extension length.
+    #: Header length, in octets, decoded from ``Hdr Ext Len``.
     length: 'int'
     #: Routing type.
     type: 'Routing'
@@ -46,7 +46,13 @@ class UnknownType(IPv6_Route):
 
 @info_final
 class SourceRoute(IPv6_Route):
-    """Data model for IPv6-Route Source Route data type."""
+    """Data model for IPv6-Route Source Route data type.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1223`).
+
+    """
 
     #: The four reserved octets, as captured.
     reserved: 'bytes'
@@ -60,7 +66,13 @@ class SourceRoute(IPv6_Route):
 
 @info_final
 class Type2(IPv6_Route):
-    """Data model for IPv6-Route Type 2 data type."""
+    """Data model for IPv6-Route Type 2 data type.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1223`).
+
+    """
 
     #: The four reserved octets, as captured.
     reserved: 'bytes'
@@ -74,7 +86,14 @@ class Type2(IPv6_Route):
 
 @info_final
 class RPL(IPv6_Route):
-    """Data model for RPL Source data type."""
+    """Data model for RPL Source data type.
+
+    .. versionchanged:: 1.5.0
+
+       New required fields ``reserved`` (:issue:`1235`) and ``padding``
+       (:issue:`1223`).
+
+    """
 
     #: CmprI.
     cmpr_i: 'int'

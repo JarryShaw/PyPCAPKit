@@ -43,11 +43,11 @@ class Option(Data):
 
     #: Option type.
     type: 'Enum_Option'
-    #: Unknown option cation.
+    #: Unknown option action.
     action: 'OptionAction'
     #: Change flag.
     change: 'bool'
-    #: Content length.
+    #: Option length (incl. type and length fields).
     length: 'int'
 
 
@@ -57,7 +57,7 @@ class IPv6_Opts(Protocol):
 
     #: Next header.
     next: 'TransType'
-    #: Header extension length.
+    #: Header length, in octets, decoded from ``Hdr Ext Len``.
     length: 'int'
     #: IPv6-Opts options.
     options: 'OrderedMultiInfo[Enum_Option, Option]'
@@ -81,7 +81,13 @@ class UnassignedOption(Option):
 
 @info_final
 class PadOption(Option):
-    """Data model for IPv6-Opts padding options."""
+    """Data model for IPv6-Opts padding options.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``pad`` (:issue:`1223`).
+
+    """
 
     #: Padding octets, i.e. the ``PadN`` option data as captured (empty for
     #: a ``Pad1``).
@@ -106,9 +112,9 @@ class TunnelEncapsulationLimitOption(Option):
 
 @info_final
 class RouterAlertOption(Option):
-    """Data model for IPv6-Opts router alter option."""
+    """Data model for IPv6-Opts router alert option."""
 
-    #: Router alter value.
+    #: Router alert value.
     value: 'RouterAlert'
 
     if TYPE_CHECKING:
@@ -118,7 +124,13 @@ class RouterAlertOption(Option):
 
 @info_final
 class CALIPSOOption(Option):
-    """Data model for IPv6-Opts Common Architecture Label IPv6 Security Option (CALIPSO) option."""
+    """Data model for IPv6-Opts Common Architecture Label IPv6 Security Option (CALIPSO) option.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``pad`` (:issue:`1403`).
+
+    """
 
     #: CALIPSO domain of interpretation.
     domain: 'int'
@@ -209,7 +221,13 @@ class QuickStartOption(Option):
 
 @info_final
 class QuickStartRequestOption(QuickStartOption):
-    """Data model for IPv6-Opts Quick Start request option."""
+    """Data model for IPv6-Opts Quick Start request option.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1235`).
+
+    """
 
     #: TTL.
     ttl: 'timedelta'
@@ -225,7 +243,14 @@ class QuickStartRequestOption(QuickStartOption):
 
 @info_final
 class QuickStartReportOption(QuickStartOption):
-    """Data model for IPv6-Opts Quick Start report of approved rate option."""
+    """Data model for IPv6-Opts Quick Start report of approved rate option.
+
+    .. versionchanged:: 1.5.0
+
+       New required fields ``reserved`` (:issue:`1235`) and ``unused``
+       (:issue:`1223`).
+
+    """
 
     #: Nonce.
     nonce: 'int'
@@ -241,7 +266,13 @@ class QuickStartReportOption(QuickStartOption):
 
 @info_final
 class RPLFlags(Data):
-    """Data model for IPv6-Opts RPL option flags fields."""
+    """Data model for IPv6-Opts RPL option flags fields.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1199`).
+
+    """
 
     #: Down flag.
     down: 'bool'
@@ -259,7 +290,13 @@ class RPLFlags(Data):
 
 @info_final
 class RPLOption(Option):
-    """Data model for IPv6-Opts Routing Protocol for Low-Power and Lossy Networks (RPL) option."""
+    """Data model for IPv6-Opts Routing Protocol for Low-Power and Lossy Networks (RPL) option.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``sub_tlvs`` (:issue:`1199`).
+
+    """
 
     #: Flags.
     flags: 'RPLFlags'
@@ -277,11 +314,17 @@ class RPLOption(Option):
 
 @info_final
 class MPLFlags(Data):
-    """Data model for IPv6-Opts MPL option flags fields."""
+    """Data model for IPv6-Opts MPL option flags fields.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1235`).
+
+    """
 
     #: Max flag.
     max: 'bool'
-    #: Non-conformation flag.
+    #: Non-conformance flag.
     drop: 'bool'
     #: Reserved bits (``rsv``).
     reserved: 'int'
@@ -360,7 +403,13 @@ class HomeAddressOption(Option):
 
 @info_final
 class DFFFlags(Data):
-    """Data model for IPv6-Opts ``IP_DFF`` option flags."""
+    """Data model for IPv6-Opts ``IP_DFF`` option flags.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1235`).
+
+    """
 
     #: Duplicate flag.
     dup: 'bool'

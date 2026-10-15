@@ -77,8 +77,8 @@ class FEATCode(EnumRegistry, StrEnum):
        minting the per-command ones at import time as an incidental side
        effect of building :class:`Command`'s own rows. GitHub issue :issue:`860`:
        that import-time mutation was the same defect shape :issue:`775` removed
-       from :class:`~pcapkit.const.pcapng.filter_type.FilterType`, just not
-       previously noticed here. ``_missing_`` still unmints for a keyword that
+       from :class:`~pcapkit.const.pcapng.filter_type.FilterType`. ``_missing_``
+       still unmints for a keyword that
        turns up on the wire but names none of these -- the extendability the
        owner conditionally asked to keep on GitHub issue :issue:`860`: unsure what a
        FEAT value absent from the RFC's list means in the CSV table, the owner
@@ -255,16 +255,16 @@ class ConformanceRequirement(EnumLookup, IntEnum):
 class {NAME}(EnumRegistry, StrEnum):
     """[{NAME}] {DOCS}
 
-    .. note::
+    .. versionchanged:: 1.5.0
 
-       Neither ``_missing_`` nor ``get()`` mints any more. The owner ruled on
+       Neither ``_missing_`` nor ``get()`` mints a member. The owner ruled on
        GitHub issue :issue:`860` that ``get`` should not mint: only IANA-registered
        values are legitimate members, a new one is properly created through
        :meth:`register`, and ``get`` is not given enough information to create
        one. Concretely true here -- a bare wire command word carries no
-       :attr:`feat`/:attr:`desc`/:attr:`type`/:attr:`conf`, so minting one used
-       to register a permanent member with all four hollowed out to their
-       defaults; :meth:`register` is the path that can actually supply them.
+       :attr:`feat`/:attr:`desc`/:attr:`type`/:attr:`conf`, so a minted member
+       had all four hollowed out to their defaults; :meth:`register` is the
+       path that can actually supply them.
 
     """
 
@@ -402,10 +402,10 @@ class {NAME}(EnumRegistry, StrEnum):
             # unchanged. Two calls naming the same command in different
             # case, e.g. ``get('xyzw')`` and ``get('XYZW')``, therefore build
             # results that are *not* equal -- each is exactly what its own
-            # caller passed, which minting's ``_member_map_`` cache used to
-            # paper over by returning the *first* casing seen for every
-            # later call regardless of case. Losing that is the one
-            # observable behaviour change in GitHub issue #860's conversion.
+            # caller passed. Minting instead returned, through the
+            # ``_member_map_`` cache, the *first* casing seen for every later
+            # call regardless of case; that is the one observable behaviour
+            # change in GitHub issue #860's conversion.
             return {NAME}._unregistered_member(default if default is not None else key, name)
         return {NAME}[name]  # type: ignore[misc]
 
@@ -481,12 +481,12 @@ class Command(Vendor):
             if isinstance(feat, str):
                 # NOTE: GitHub issue #860. Every FEAT code the registry
                 # names -- lower-case group marker or upper-case per-command
-                # keyword alike -- is now a declared member of FEATCode (see
+                # keyword alike -- is a declared member of FEATCode (see
                 # feat_codes below and FEATCode's own template), so both
-                # cases resolve by plain attribute access; neither ever
-                # calls FEATCode(...) at import time any more, which used to
-                # mint the upper-case ones as a side effect of evaluating
-                # this very module.
+                # cases resolve by plain attribute access, and nothing calls
+                # FEATCode(...) at import time, which would mint the
+                # upper-case ones as a side effect of evaluating this very
+                # module.
                 if feat.isupper() and feat not in feat_codes:
                     feat_codes[feat] = f'#: {cmmt}\n    {feat} = {feat!r}'
                 feat = f'FEATCode.{feat}'

@@ -139,7 +139,7 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict
 
     class ANSIKeyLengthTest(TypedDict):
-        """Length test for ANSI.1 encoded data, c.f.,
+        """Length test for ASN.1 encoded data, c.f.,
         :attr:`CGAParameter.public_key_test`."""
 
         len: int
@@ -745,7 +745,7 @@ class LinkLayerAddressOption(Option, code=Enum_Option.Mobility_Header_Link_Layer
 
     #: Option code.
     code: 'Enum_LLACode' = EnumField(length=1, namespace=Enum_LLACode)
-    #: Link-layer address (LAA).
+    #: Link-layer address (LLA).
     lla: 'bytes' = BytesField(length=lambda pkt: pkt['length'] - 1)
 
     if TYPE_CHECKING:
@@ -2526,9 +2526,6 @@ class DLIFLinkLayerAddressOption(Option, code=Enum_Option.DLIF_Link_Layer_Addres
         def __init__(self, type: 'Enum_Option', length: 'int', reserved: 'bytes', lla: 'bytes') -> 'None': ...
 
 
-# TODO: Implement other options.
-
-
 class Packet(EnumSchema[Enum_Packet]):
     """Header schema for MH packet data."""
 
@@ -3234,6 +3231,3 @@ class SubscriptionResponseMessage(Packet, code=Enum_Packet.Subscription_Response
     if TYPE_CHECKING:
         def __init__(self, seq: 'int', flags: 'SubscriptionResponseMessageFlags',
                      options: 'list[Option | bytes]') -> 'None': ...
-
-
-# TODO: Implement other message types.

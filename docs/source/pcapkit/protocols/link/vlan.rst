@@ -18,16 +18,17 @@ modules of their own:
    * - ``0x88A8`` (service tag, 802.1ad)
      - :class:`~pcapkit.protocols.link.s_tag.S_Tag`
 
-The tag structure is described as below:
+The tag structure is described as below, keyed as for a customer tag; a service
+tag's keys start ``s_tag`` instead:
 
 ======= ========= ====================== =============================
 Octets      Bits        Name                    Description
 ======= ========= ====================== =============================
-  0           0   ``vlan.tci``              Tag Control Information
-  0           0   ``vlan.tci.pcp``          Priority Code Point
-  0           3   ``vlan.tci.dei``          Drop Eligible Indicator
-  0           4   ``vlan.tci.vid``          VLAN Identifier
-  2          16   ``vlan.type``             Protocol (Internet Layer)
+  0           0   ``c_tag.tci``             Tag Control Information
+  0           0   ``c_tag.tci.pcp``         Priority Code Point
+  0           3   ``c_tag.tci.dei``         Drop Eligible Indicator
+  0           4   ``c_tag.tci.vid``         VLAN Identifier
+  2          16   ``c_tag.type``            Protocol (Internet Layer)
 ======= ========= ====================== =============================
 
 The two tags carry an identical tag control information layout and differ only
