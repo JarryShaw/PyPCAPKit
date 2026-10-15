@@ -108,6 +108,10 @@ Header Schemas
    :members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts._SMFDPDOption
+   :members:
+   :show-inheritance:
+
 .. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.SMFDPDOption
    :members:
    :show-inheritance:
@@ -288,6 +292,14 @@ Data Models
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.QuickStartOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.QuickStartRequestOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.QuickStartReportOption
    :members:
    :show-inheritance:
 

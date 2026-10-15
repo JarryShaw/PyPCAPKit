@@ -1516,7 +1516,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             :attr:`Data_PadOption.length
             <pcapkit.protocols.data.internet.hopopt.Option.length>` counts the
             *whole* option, whereas :attr:`Schema_PadOption.len
-            <pcapkit.protocols.schema.internet.hopopt.PadOption.len>` is the
+            <pcapkit.protocols.schema.internet.hopopt.Option.len>` is the
             ``Opt Data Len`` field: two octets fewer, and absent altogether for a
             ``Pad1``. ``opt`` is honoured so that re-making a parsed padding
             option keeps its type and size. A ``PadN`` with ``length`` ``0`` is

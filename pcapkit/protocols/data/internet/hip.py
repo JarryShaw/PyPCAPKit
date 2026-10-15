@@ -62,7 +62,13 @@ __all__ = [
 
 @info_final
 class Control(Data):
-    """Data model for HIP controls."""
+    """Data model for HIP controls.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1328`).
+
+    """
 
     #: Anonymous flag.
     anonymous: 'bool'
@@ -92,7 +98,14 @@ class Parameter(Data):
 
 @info_final
 class HIP(Protocol):
-    """Data model for HIP header."""
+    """Data model for HIP header.
+
+    .. versionchanged:: 1.5.0
+
+       New required fields ``packet_fixed``, ``reserved`` and ``version_fixed``
+       (:issue:`1417`, :issue:`1459`).
+
+    """
 
     #: Next header.
     next: 'TransType'
@@ -142,7 +155,13 @@ class UnassignedParameter(Parameter):
 
 @info_final
 class ESPInfoParameter(Parameter):
-    """Data model for HIP ``ESP_INFO`` parameter."""
+    """Data model for HIP ``ESP_INFO`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1328`).
+
+    """
 
     #: Reserved octets, carried verbatim so that re-serialising reproduces them.
     reserved: 'int'
@@ -159,7 +178,13 @@ class ESPInfoParameter(Parameter):
 
 @info_final
 class R1CounterParameter(Parameter):
-    """Data model for HIP ``R1_COUNTER`` parameter."""
+    """Data model for HIP ``R1_COUNTER`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1223`).
+
+    """
 
     #: The four reserved octets, as captured.
     reserved: 'bytes'
@@ -185,7 +210,13 @@ class LocatorData(Data):
 
 @info_final
 class Locator(Data):
-    """Data model for HIP locator."""
+    """Data model for HIP locator.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1365`).
+
+    """
 
     #: Traffic.
     traffic: 'int'
@@ -220,7 +251,14 @@ class LocatorSetParameter(Parameter):
 
 @info_final
 class PuzzleParameter(Parameter):
-    """Data model for HIP ``PUZZLE`` parameter."""
+    """Data model for HIP ``PUZZLE`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required fields ``lifetime_exponent`` and ``rhash_len``
+       (:issue:`653`, :issue:`1323`).
+
+    """
 
     #: Numeric index.
     index: 'int'
@@ -253,6 +291,10 @@ class PuzzleParameter(Parameter):
 @info_final
 class SolutionParameter(Parameter):
     """Data model for HIP ``SOLUTION`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``rhash_len`` (:issue:`653`).
 
     .. versionremoved:: 1.5.0
 
@@ -361,7 +403,13 @@ class HIPCipherParameter(Parameter):
 
 @info_final
 class NATTraversalModeParameter(Parameter):
-    """Data model for HIP ``NAT_TRAVERSAL_MODE`` parameter."""
+    """Data model for HIP ``NAT_TRAVERSAL_MODE`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1223`).
+
+    """
 
     #: The two reserved octets, as captured.
     reserved: 'bytes'
@@ -385,7 +433,13 @@ class TransactionPacingParameter(Parameter):
 
 @info_final
 class EncryptedParameter(Parameter):
-    """Data model for HIP ``ENCRYPTED`` parameter."""
+    """Data model for HIP ``ENCRYPTED`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1223`).
+
+    """
 
     #: The four reserved octets, as captured.
     reserved: 'bytes'
@@ -468,7 +522,13 @@ class CertParameter(Parameter):
 
 @info_final
 class NotificationParameter(Parameter):
-    """Data model for HIP ``NOTIFICATION`` parameter."""
+    """Data model for HIP ``NOTIFICATION`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1223`).
+
+    """
 
     #: The two reserved octets, as captured.
     reserved: 'bytes'
@@ -559,7 +619,13 @@ class RegFailedParameter(Parameter):
 
 @info_final
 class RegFromParameter(Parameter):
-    """Data model for HIP ``REG_FROM`` parameter."""
+    """Data model for HIP ``REG_FROM`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1223`).
+
+    """
 
     #: The reserved octet, as captured.
     reserved: 'bytes'
@@ -598,7 +664,13 @@ class TransportFormatListParameter(Parameter):
 
 @info_final
 class ESPTransformParameter(Parameter):
-    """Data model for HIP ``ESP_TRANSFORM`` parameter."""
+    """Data model for HIP ``ESP_TRANSFORM`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1223`).
+
+    """
 
     #: The two reserved octets, as captured.
     reserved: 'bytes'
@@ -633,7 +705,13 @@ class AckDataParameter(Parameter):
 
 @info_final
 class PayloadMICParameter(Parameter):
-    """Data model for HIP ``PAYLOAD_MIC`` parameter."""
+    """Data model for HIP ``PAYLOAD_MIC`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1223`).
+
+    """
 
     #: The three reserved octets, as captured.
     reserved: 'bytes'
@@ -672,7 +750,13 @@ class OverlayIDParameter(Parameter):
 
 @info_final
 class Flags(Data):
-    """Data model for the flags in HIP ``ROUTE_DST`` and ``ROUTE_VIA`` parameters."""
+    """Data model for the flags in HIP ``ROUTE_DST`` and ``ROUTE_VIA`` parameters.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1417`).
+
+    """
 
     #: Symmetric flag.
     symmetric: 'bool'
@@ -688,7 +772,13 @@ class Flags(Data):
 
 @info_final
 class RouteDstParameter(Parameter):
-    """Data model for HIP ``ROUTE_DST`` parameter."""
+    """Data model for HIP ``ROUTE_DST`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1223`).
+
+    """
 
     #: The two reserved octets, as captured.
     reserved: 'bytes'
@@ -786,7 +876,13 @@ class EchoResponseUnsignedParameter(Parameter):
 
 @info_final
 class RelayFromParameter(Parameter):
-    """Data model for HIP ``RELAY_FROM`` parameter."""
+    """Data model for HIP ``RELAY_FROM`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1223`).
+
+    """
 
     #: The reserved octet, as captured.
     reserved: 'bytes'
@@ -803,7 +899,13 @@ class RelayFromParameter(Parameter):
 
 @info_final
 class RelayToParameter(Parameter):
-    """Data model for HIP ``RELAY_TO`` parameter."""
+    """Data model for HIP ``RELAY_TO`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1223`).
+
+    """
 
     #: The reserved octet, as captured.
     reserved: 'bytes'
@@ -820,7 +922,13 @@ class RelayToParameter(Parameter):
 
 @info_final
 class OverlayTTLParameter(Parameter):
-    """Data model for HIP ``OVERLAY_TTL`` parameter."""
+    """Data model for HIP ``OVERLAY_TTL`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1223`).
+
+    """
 
     #: The two reserved octets, as captured.
     reserved: 'bytes'
@@ -833,7 +941,13 @@ class OverlayTTLParameter(Parameter):
 
 @info_final
 class RouteViaParameter(Parameter):
-    """Data model for HIP ``ROUTE_VIA`` parameter."""
+    """Data model for HIP ``ROUTE_VIA`` parameter.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1223`).
+
+    """
 
     #: The two reserved octets, as captured.
     reserved: 'bytes'

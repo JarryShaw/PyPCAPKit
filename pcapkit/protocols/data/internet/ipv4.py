@@ -79,7 +79,13 @@ class ToSField(Data):
 
 @info_final
 class Flags(Data):
-    """Data model for IPv4 Flags."""
+    """Data model for IPv4 Flags.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1326`).
+
+    """
 
     #: Reserved flag bit.
     reserved: 'int'
@@ -193,7 +199,13 @@ class NOPOption(Option):
 
 @info_final
 class SECOption(Option):
-    """Data model for IPv4 Security (``SEC``) option."""
+    """Data model for IPv4 Security (``SEC``) option.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``termination`` (:issue:`1393`).
+
+    """
 
     #: Classification level.
     level: 'ClassificationLevel'
@@ -209,7 +221,13 @@ class SECOption(Option):
 
 @info_final
 class LSROption(Option):
-    """Data model for IPv4 Loose Source Route (``LSR``) option."""
+    """Data model for IPv4 Loose Source Route (``LSR``) option.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``remaining`` (:issue:`1319`).
+
+    """
 
     #: Pointer.
     pointer: 'int'
@@ -224,7 +242,14 @@ class LSROption(Option):
 
 @info_final
 class TSOption(Option):
-    """Data model for IPv4 Time Stamp (``TS``) option."""
+    """Data model for IPv4 Time Stamp (``TS``) option.
+
+    .. versionchanged:: 1.5.0
+
+       New required fields ``remaining`` and ``remainder`` (:issue:`1349`,
+       :issue:`1392`).
+
+    """
 
     #: Pointer.
     pointer: 'int'
@@ -258,7 +283,13 @@ class ESECOption(Option):
 
 @info_final
 class RROption(Option):
-    """Data model for IPv4 Record Route (``RR``) option."""
+    """Data model for IPv4 Record Route (``RR``) option.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``remaining`` (:issue:`1319`).
+
+    """
 
     #: Pointer.
     pointer: 'int'
@@ -284,7 +315,13 @@ class SIDOption(Option):
 
 @info_final
 class SSROption(Option):
-    """Data model for IPv4 Strict Source Route (``SSR``) option."""
+    """Data model for IPv4 Strict Source Route (``SSR``) option.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``remaining`` (:issue:`1319`).
+
+    """
 
     #: Pointer.
     pointer: 'int'
@@ -371,7 +408,13 @@ class QSOption(Option):
 
 @info_final
 class QuickStartRequestOption(QSOption):
-    """Data model for IPv4 Quick Start request option."""
+    """Data model for IPv4 Quick Start request option.
+
+    .. versionchanged:: 1.5.0
+
+       New required field ``reserved`` (:issue:`1326`).
+
+    """
 
     #: TTL.
     ttl: 'timedelta'
@@ -386,7 +429,13 @@ class QuickStartRequestOption(QSOption):
 
 @info_final
 class QuickStartReportOption(QSOption):
-    """Data model for IPv4 Quick Start report of approved rate option."""
+    """Data model for IPv4 Quick Start report of approved rate option.
+
+    .. versionchanged:: 1.5.0
+
+       New required fields ``unused`` and ``reserved`` (:issue:`1326`).
+
+    """
 
     #: Not-used octet, where a request carries its TTL.
     unused: 'int'

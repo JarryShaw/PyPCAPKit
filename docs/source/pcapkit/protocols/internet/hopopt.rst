@@ -108,6 +108,10 @@ Header Schemas
    :members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.protocols.schema.internet.hopopt._SMFDPDOption
+   :members:
+   :show-inheritance:
+
 .. autoclass:: pcapkit.protocols.schema.internet.hopopt.SMFDPDOption
    :members:
    :show-inheritance:
@@ -288,6 +292,14 @@ Data Models
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.data.internet.hopopt.QuickStartOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.internet.hopopt.QuickStartRequestOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.internet.hopopt.QuickStartReportOption
    :members:
    :show-inheritance:
 

@@ -287,10 +287,11 @@ def transport_format_list_len(pkt: 'dict[str, Any]') -> 'int':
     its own ``type`` field, since a TF type *is* a HIP parameter type number
     -- which is why ``formats``' ``item_type`` is
     ``EnumField(length=2, ...)``, the width of the items at all three of
-    :func:`two_octet_prefix_list_len`'s call sites as well. This function only answers how many *bytes* the
-    list occupies; getting that number right and the item width wrong (one
-    octet) would still corrupt every non-empty list, just by reading twice as
-    many entries as the wire holds instead of dropping octets.
+    :func:`two_octet_prefix_list_len`'s call sites as well. This function
+    only answers how many *bytes* the list occupies; getting that number
+    right and the item width wrong -- one octet instead of two -- would still
+    corrupt every non-empty list, just by reading twice as many entries as
+    the wire holds instead of dropping octets.
 
     Args:
         pkt: Parameter unpacked schema.

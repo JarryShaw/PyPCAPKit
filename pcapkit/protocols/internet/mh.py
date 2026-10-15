@@ -3003,12 +3003,12 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Note:
             A ``Pad1`` option occupies a single octet and carries no
             ``Option Length`` field, so its
-            :attr:`~pcapkit.protocols.data.internet.mh.PadOption.length` is
+            :attr:`~pcapkit.protocols.data.internet.mh.Option.length` is
             ``1`` rather than ``length + 2``. That one-octet wire shape is
             enforced by
             :class:`~pcapkit.protocols.schema.internet.mh.PadOption` itself,
             which sizes both the length octet and the padding data from the
-            option type [:rfc:`6275#section-6.2.5`]; ``clen`` is therefore
+            option type [:rfc:`6275#section-6.2.2`]; ``clen`` is therefore
             always ``0`` here for a parsed ``Pad1``, and the check below only
             guards a schema built by hand. A ``PadN`` whose ``Option Length``
             is ``0`` is a valid two-octet padding option
@@ -7744,7 +7744,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             ``pad_len`` octets means an ``Option Length`` of ``pad_len - 2``.
             One or two octets are padded with ``Pad1`` options instead, that
             being the only form which can occupy a single octet
-            [:rfc:`6275#section-6.2.5`]; two octets need two separate ``Pad1``
+            [:rfc:`6275#section-6.2.2`]; two octets need two separate ``Pad1``
             schemas, since a schema instance is mutable and must not be shared
             between two entries of the option list.
 
@@ -7769,7 +7769,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Note:
             The padding goes into the message's mobility options, which is where
-            :rfc:`6275#section-6.2.5` puts it. A message whose body is opaque has
+            :rfc:`6275#section-6.1.1` puts it. A message whose body is opaque has
             nowhere to put it --
             :class:`~pcapkit.protocols.schema.internet.mh.UnknownMessage` and
             :class:`~pcapkit.protocols.schema.internet.mh.ExperimentalMessage`
@@ -7913,9 +7913,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Note:
             :attr:`Data_PadOption.length
-            <pcapkit.protocols.data.internet.mh.PadOption.length>` counts the
+            <pcapkit.protocols.data.internet.mh.Option.length>` counts the
             *whole* option, whereas :attr:`Schema_PadOption.length
-            <pcapkit.protocols.schema.internet.mh.PadOption.length>` is the
+            <pcapkit.protocols.schema.internet.mh.Option.length>` is the
             ``Option Length`` field -- two octets fewer, and absent altogether
             for a ``Pad1``. Copying one into the other unconverted would make a
             re-made parsed ``PadN`` come back two octets too long.

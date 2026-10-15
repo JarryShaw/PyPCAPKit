@@ -822,7 +822,15 @@ class PadOption(Option):
 
 @info_final
 class BindingRefreshAdviceOption(Option):
-    """Data model for Binding Refresh Advice option."""
+    """Data model for Binding Refresh Advice option.
+
+    .. versionremoved:: 1.1.0
+
+       ``BindRefreshAdviceOption``, this class's former name, and its
+       re-export ``pcapkit.protocols.data.internet.MH_BindRefreshAdviceOption``,
+       with no alias.
+
+    """
 
     #: Refresh interval before re-registration. Counted on the wire in units of
     #: 4 seconds [:rfc:`6275#section-6.2.4`].
@@ -858,7 +866,16 @@ class NonceIndicesOption(Option):
 
 @info_final
 class AuthorizationDataOption(Option):
-    """Data model for Binding Authorization Data option."""
+    """Data model for Binding Authorization Data option.
+
+    .. versionremoved:: 1.1.0
+
+       ``BindingAuthorizationDataOption``, this class's former name, and
+       its re-export
+       ``pcapkit.protocols.data.internet.MH_BindingAuthorizationDataOption``,
+       with no alias.
+
+    """
 
     #: Authenticator.
     data: 'bytes'

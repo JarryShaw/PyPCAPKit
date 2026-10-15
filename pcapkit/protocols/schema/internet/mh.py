@@ -408,7 +408,7 @@ def pad_opt_data_len(pkt: 'dict[str, Any]') -> 'int':
 
     Note:
         A ``Pad1`` option is a single octet with neither an ``Option Length``
-        field nor any option data (c.f. :rfc:`6275#section-6.2.5`), which is why
+        field nor any option data (c.f. :rfc:`6275#section-6.2.2`), which is why
         :attr:`Option.length` is declared as a
         :class:`~pcapkit.corekit.fields.misc.ConditionalField` and is skipped
         for it. A skipped conditional field is *recorded* in the packet data as
@@ -664,8 +664,8 @@ class PadOption(Option, code=[Enum_Option.Pad1,
     The two padding options do **not** share a wire shape: a ``Pad1`` option is
     a lone type octet, whereas a ``PadN`` option is a type octet, an
     ``Option Length`` octet, and that many padding octets
-    [:rfc:`6275#section-6.2.5`]. Both the ``Option Length`` octet
-    (:attr:`Option.length`) and the padding data
+    [:rfc:`6275#section-6.2.2`, :rfc:`6275#section-6.2.3`]. Both the
+    ``Option Length`` octet (:attr:`Option.length`) and the padding data
     (:attr:`self.data <PadOption.data>`) are therefore sized from the option
     type, so that a ``Pad1`` option consumes exactly one octet.
 
@@ -680,7 +680,15 @@ class PadOption(Option, code=[Enum_Option.Pad1,
 
 @schema_final
 class BindingRefreshAdviceOption(Option, code=Enum_Option.Binding_Refresh_Advice):
-    """Header schema for MH binding refresh advice options."""
+    """Header schema for MH binding refresh advice options.
+
+    .. versionremoved:: 1.1.0
+
+       ``BindRefreshAdviceOption``, this class's former name, and its
+       re-export ``pcapkit.protocols.schema.internet.MH_BindRefreshAdviceOption``,
+       with no alias.
+
+    """
 
     #: Refresh interval. One time unit is 4 seconds [:rfc:`6275#section-6.2.4`].
     interval: 'int' = UInt16Field()
@@ -715,7 +723,16 @@ class NonceIndicesOption(Option, code=Enum_Option.Nonce_Indices):
 
 @schema_final
 class AuthorizationDataOption(Option, code=Enum_Option.Authorization_Data):
-    """Header schema for MH binding authorization data options."""
+    """Header schema for MH binding authorization data options.
+
+    .. versionremoved:: 1.1.0
+
+       ``BindingAuthorizationDataOption``, this class's former name, and
+       its re-export
+       ``pcapkit.protocols.schema.internet.MH_BindingAuthorizationDataOption``,
+       with no alias.
+
+    """
 
     #: Authenticator.
     data: 'bytes' = BytesField(length=lambda pkt: pkt['length'])

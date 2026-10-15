@@ -330,6 +330,14 @@ Data Models
    :members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.protocols.data.internet.ipv4.QuickStartRequestOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv4.QuickStartReportOption
+   :members:
+   :show-inheritance:
+
 .. rubric:: Footnotes
 
 .. [*] https://en.wikipedia.org/wiki/IPv4
