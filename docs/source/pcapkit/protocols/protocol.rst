@@ -64,6 +64,8 @@ Internal Definitions below.
       :no-value:
    .. autoattribute:: __proto__
       :no-value:
+   .. autoattribute:: __keywords__
+      :no-value:
 
    .. autoattribute:: __schema__
       :no-value:
@@ -104,6 +106,7 @@ Internal Definitions below.
    .. automethod:: __getitem__
    .. automethod:: __contains__
    .. automethod:: __index__
+   .. automethod:: __length_hint__
 
    .. autoattribute:: _exlayer
    .. autoattribute:: _exproto
@@ -128,12 +131,6 @@ The ``pyshark``, ``scapy`` and ``pypcapfile`` engines dissect with their own
 parsers, which do not apply the frame's layer bound (:issue:`1609`). The
 ``dpkt`` toolkit reads what :mod:`dpkt` decodes, which applies neither bound.
 
-.. versionremoved:: 1.5.0
-
-   ``pcapkit.protocols.protocol.FRAME_LAYER_LIMIT``, now
-   :data:`pcapkit.utilities.config.FRAME_LAYER_LIMIT`, set with
-   :envvar:`PCAPKIT_FRAME_LAYER_LIMIT` (:issue:`1726`).
-
 Data Models
 -----------
 
@@ -147,6 +144,113 @@ Internal Definitions
 .. autoclass:: pcapkit.protocols.protocol.ProtocolBase
    :no-members:
    :show-inheritance:
+
+   .. automethod:: __init_subclass__
+
+   :class:`Protocol` inherits the other members of this class, and they are
+   documented under it above; each group below links to its entries.
+
+   .. py:property:: name
+                    alias
+                    info_name
+                    info
+                    data
+                    length
+                    payload
+                    protocol
+                    protochain
+                    packet
+                    schema
+      :no-index-entry:
+      :no-contents-entry:
+
+      :attr:`~Protocol.name`, :attr:`~Protocol.alias`,
+      :attr:`~Protocol.info_name`, :attr:`~Protocol.info`,
+      :attr:`~Protocol.data`, :attr:`~Protocol.length`,
+      :attr:`~Protocol.payload`, :attr:`~Protocol.protocol`,
+      :attr:`~Protocol.protochain`, :attr:`~Protocol.packet`,
+      :attr:`~Protocol.schema`
+
+   .. py:method:: id
+                  register
+                  analyze
+                  from_schema
+                  from_data
+                  read
+                  make
+                  unpack
+                  pack
+                  decode
+                  unquote
+                  expand_comp
+                  _read_packet
+                  _get_payload
+                  _make_data
+                  _make_index
+                  _make_payload
+                  _lookup_registry
+                  _lookup_next_layer
+                  _decode_next_layer
+                  _import_next_layer
+                  _parse_next_layer
+                  _get_context
+                  __init__
+                  __post_init__
+                  __repr__
+                  __str__
+                  __getitem__
+                  __contains__
+                  __index__
+                  __length_hint__
+      :no-index-entry:
+      :no-contents-entry:
+
+      :meth:`~Protocol.id`, :meth:`~Protocol.register`,
+      :meth:`~Protocol.analyze`, :meth:`~Protocol.from_schema`,
+      :meth:`~Protocol.from_data`, :meth:`~Protocol.read`,
+      :meth:`~Protocol.make`, :meth:`~Protocol.unpack`, :meth:`~Protocol.pack`,
+      :meth:`~Protocol.decode`, :meth:`~Protocol.unquote`,
+      :meth:`~Protocol.expand_comp`, :meth:`~Protocol._read_packet`,
+      :meth:`~Protocol._get_payload`, :meth:`~Protocol._make_data`,
+      :meth:`~Protocol._make_index`, :meth:`~Protocol._make_payload`,
+      :meth:`~Protocol._lookup_registry`, :meth:`~Protocol._lookup_next_layer`,
+      :meth:`~Protocol._decode_next_layer`,
+      :meth:`~Protocol._import_next_layer`,
+      :meth:`~Protocol._parse_next_layer`, :meth:`~Protocol._get_context`,
+      :meth:`~Protocol.__init__`, :meth:`~Protocol.__post_init__`,
+      :meth:`~Protocol.__repr__`, :meth:`~Protocol.__str__`,
+      :meth:`~Protocol.__getitem__`, :meth:`~Protocol.__contains__`,
+      :meth:`~Protocol.__index__`, :meth:`~Protocol.__length_hint__`
+
+   .. py:attribute:: __layer__
+                     __proto__
+                     __keywords__
+                     __schema__
+                     __header__
+                     _data
+                     _file
+                     _info
+                     _next
+                     _protos
+                     _seekset
+                     _sigterm
+                     _past_layer_limit
+                     __data__
+                     _exlayer
+                     _exproto
+                     _exctx
+      :no-index-entry:
+      :no-contents-entry:
+
+      :attr:`~Protocol.__layer__`, :attr:`~Protocol.__proto__`,
+      :attr:`~Protocol.__keywords__`, :attr:`~Protocol.__schema__`,
+      :attr:`~Protocol.__header__`, :attr:`~Protocol._data`,
+      :attr:`~Protocol._file`, :attr:`~Protocol._info`,
+      :attr:`~Protocol._next`, :attr:`~Protocol._protos`,
+      :attr:`~Protocol._seekset`, :attr:`~Protocol._sigterm`,
+      :attr:`~Protocol._past_layer_limit`, :attr:`~Protocol.__data__`,
+      :attr:`~Protocol._exlayer`, :attr:`~Protocol._exproto`,
+      :attr:`~Protocol._exctx`
 
 .. autoclass:: pcapkit.protocols.protocol.ProtocolMeta
    :no-members:

@@ -486,7 +486,7 @@ class EnhancedPacketBlock(PCAPNG):
 
     #: Interface ID.
     interface_id: 'int'
-    #: Timestamp (in seconds).
+    #: Timestamp.
     timestamp: 'dt_type'
     #: Timestamp as in UNIX epoch (in seconds).
     timestamp_epoch: 'Decimal'
@@ -543,11 +543,12 @@ class SimplePacketBlock(PCAPNG):
         #: Protocol chain.
         protocols: 'str'
 
-        #: Interface ID.
+        #: Interface ID, always 0: the block refers to the section's first
+        #: interface.
         interface_id: 'int'
-        #: Timestamp (in seconds).
+        #: Timestamp, always the UNIX epoch, as the block carries none.
         timestamp: 'dt_type'
-        #: Timestamp as in UNIX epoch (in seconds).
+        #: Timestamp as in UNIX epoch (in seconds), always 0.
         timestamp_epoch: 'Decimal'
 
         def __init__(self, section_number: 'int', number: 'int', type: 'Enum_BlockType',
@@ -853,7 +854,7 @@ class WireGuardKeyLog(DSBSecrets):
 class ZigBeeNWKKey(DSBSecrets):
     """Data model for ZigBee NWK Key and ZigBee PANID secrets data."""
 
-    #: AES-128 NKW key.
+    #: AES-128 NWK key.
     nwk_key: 'bytes'
     #: PAN ID.
     pan_id: 'int'
