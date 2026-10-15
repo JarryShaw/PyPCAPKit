@@ -442,8 +442,9 @@ class CompatTests(unittest.TestCase):
 
         The closing lines are the symptom rather than a proxy for it. Building
         an :class:`aenum.IntFlag` subclass is exactly what
-        ``pcapkit/const/reg/apptype.py:26`` does, and it is the statement that
-        raised ``AttributeError: 'TransportProtocol' object has no attribute
+        ``pcapkit/const/reg/apptype.py:26`` did for ``TransportProtocol`` when
+        #687 was found, and it is the statement that raised
+        ``AttributeError: 'TransportProtocol' object has no attribute
         '__set_name__'`` for ten tests of :mod:`tests.project.test_public_api`
         when this file ran before them under :mod:`unittest`. Asserting on it
         here costs two lines and no ``import pcapkit``, which keeps this module in

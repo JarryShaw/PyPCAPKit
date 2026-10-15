@@ -204,8 +204,8 @@ HANDLES_MISSING_FILE = frozenset({
     'Exception', 'BaseException',
 })
 
-#: ``try`` statement node types. :class:`ast.TryStar` is 3.11+, and CI still runs
-#: 3.8-3.10 (#1633), so it is looked up rather than named.
+#: ``try`` statement node types. :class:`ast.TryStar` is 3.11+, and CI runs
+#: older interpreters as well (#1633), so it is looked up rather than named.
 _TRY_NODES = (ast.Try,) + ((ast.TryStar,) if hasattr(ast, 'TryStar') else ())  # type: ignore[attr-defined]
 
 
@@ -887,9 +887,9 @@ def fixture_tier_paths() -> 'tuple[str, ...]':
     added by :func:`skip_idiom_test_ids` rather than by
     :func:`skip_idiom_modules` directly, so that pulling in one skip-idiom test
     does not also pull in every unrelated method the same module happens to
-    hold. Without that, the two files this suite has today would add roughly a
-    hundred tests back into this selection to reach the two or three that
-    actually need it.
+    hold. Without that, the skip-idiom modules would add every one of their
+    tests back into this selection -- well over a hundred -- to reach the
+    handful that actually need it.
 
     This is deliberately *not* "the complement of :func:`is_unit_tier`"
     expressed as a single predicate the way :func:`is_unit_tier` itself is: the

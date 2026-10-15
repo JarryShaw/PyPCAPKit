@@ -120,7 +120,18 @@ if TYPE_CHECKING:
 
 
 class TransportProtocol(EnumLookup, IntEnum):
-    """Transport layer protocol."""
+    """Transport layer protocol.
+
+    .. versionchanged:: 1.5.0
+
+       An ``aenum.IntEnum`` rather than an ``aenum.IntFlag`` (:issue:`808`),
+       numbered sequentially: ``sctp`` is ``3`` and ``dccp`` is ``4``, where
+       they were ``4`` and ``8``, and no :class:`int` is decoded as a ``|``
+       composite (:issue:`860`). :meth:`get` refuses a name no member
+       declares, with :exc:`~pcapkit.utilities.exceptions.EnumKeyError`,
+       rather than minting a member for it (:issue:`808`, :issue:`923`).
+
+    """
 
     # mypy has no aenum plugin, so this class is a plain class to it: every
     # member below is cast rather than left as a bare auto()-valued one --
@@ -315,6 +326,15 @@ class {NAME}(EnumRegistry, StrEnum):
     makes it subclassable at all, since :mod:`aenum` refuses to extend an
     enumeration that already has members.
 
+    .. versionchanged:: 1.5.0
+
+       Split by transport protocol (:issue:`732`): :mod:`pcapkit.const.reg.apptype`
+       is a package, and every assignment is a member of one of the four
+       registries above rather than of this class. ``get()`` raises
+       :exc:`ValueError` for a port outside ``0``-``65535`` (:issue:`758`), and
+       returns an unregistered member rather than minting one for a port the
+       registry does not assign (:issue:`860`).
+
     Note:
         The rows below are the registry entries whose **transport protocol column
         is empty**. A blank transport is not an assignment to anything, so there
@@ -483,9 +503,9 @@ class {NAME}(EnumRegistry, StrEnum):
                 of the work for :issue:`808` -- so it is looked up as the one whole
                 value it already is, exactly like any other bare int: refused
                 when that whole value names no registry, resolved when it
-                happens to equal one instead. Since GitHub issue :issue:`860` moved
-                this class off power-of-two spacing, a hand-built composite
-                is no longer guaranteed to be the former -- see
+                happens to equal one instead. With the sequential values of
+                GitHub issue :issue:`860`, a hand-built composite
+                is not guaranteed to be the former -- see
                 :meth:`_dispatch`'s own body for a value that resolves.
 
         Returns:
@@ -710,10 +730,10 @@ class {NAME}(EnumRegistry, StrEnum):
         The counterpart of :meth:`register_alias`: that method requires
         ``port`` to already carry a member and adds a further name for it;
         this requires the opposite -- ``port`` unclaimed in this registry --
-        and mints the first. :meth:`get` can no longer do this itself as of
+        and mints the first. :meth:`get` does not do this itself, per
         GitHub issue :issue:`860` (the owner's ruling there: only IANA-registered values
         are legitimate, a new entry is properly created through :meth:`register`,
-        and ``get`` lacks the information to create one), so this is now the only
+        and ``get`` lacks the information to create one), so this is the only
         way to add a service this registry does not already carry.
 
         Deliberately scoped like :meth:`register_alias` to **this**
@@ -855,9 +875,9 @@ class {NAME}(EnumRegistry, StrEnum):
         its :data:`__registry__` side table alike.
 
         Used by :meth:`_missing_` and :meth:`get` for a port neither resolves
-        to a real, IANA-registered service, so that such a lookup no longer
-        grows either table -- contrast :meth:`register`, the explicit,
-        caller-named path that still does.
+        to a real, IANA-registered service, so that such a lookup grows
+        neither table -- contrast :meth:`register`, the explicit,
+        caller-named path that does.
 
         Reconstructs :attr:`svc`, :attr:`port` and :attr:`proto` the same way
         :meth:`__new__` would:
@@ -1198,15 +1218,13 @@ class AppType(Vendor):
                 flag = self.flag([proto])
                 claim = '' if proto == 'undefined' else f' and cls.__transport__ is {flag}'
 
-                # NOTE: GitHub issue #860. This used to extend_enum(...) a
-                # brand-new, permanent member under a generated Python
-                # identifier (``f'{self.safe_name(svc)}_{{value}}'``) every
-                # time a port in this span was looked up. It no longer takes a
-                # Python identifier at all -- an unregistered member is never
-                # set as a class attribute, so there is nothing for one to
-                # collide with -- only the bare label IANA (or this span)
-                # assigns the whole range, exactly what used to be the third
-                # positional argument to extend_enum.
+                # NOTE: GitHub issue #860. A port in this span resolves to an
+                # unregistered member rather than an extend_enum(...)-ed,
+                # permanent one, so the branch takes no Python identifier at
+                # all -- an unregistered member is never set as a class
+                # attribute, so there is nothing for one to collide with --
+                # only the bare label IANA (or this span) assigns the whole
+                # range.
                 miss.append(f'if {start} <= value <= {stop}{claim}:')
                 miss.append(f'    #: {cmmt}')
                 miss.append(f'    return cls._unregistered_member(value, {svc!r}, {flag})')

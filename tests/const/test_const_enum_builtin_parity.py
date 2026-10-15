@@ -384,7 +384,8 @@ class ConstEnumBuiltinParityTests(unittest.TestCase):
         # 112 became 114 with GitHub issue #880's ngap.ProcedureCode and
         # ngap.ProtocolIE, moved onto EnumRegistry from hand-rolled IntEnum
         # classes in pcapkit.protocols.application.ngap -- two more IntEnum
-        # registries, two more modules, no change to the flag or str counts.
+        # registries, two more modules, no change to the flag or str counts --
+        # and the sum in tests.const.test_const_enum_get became 120 with them.
         self.assertEqual(len(ints), 114)
         self.assertEqual(len(flags), 6)
         self.assertEqual(len(strs), 10)

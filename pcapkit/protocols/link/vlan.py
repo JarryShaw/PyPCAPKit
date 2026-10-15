@@ -10,16 +10,17 @@ the tag layout shared by every VLAN tag [*]_. The two concrete tags live in
 modules of their own, since they are reached through different registry indices
 -- :class:`~pcapkit.protocols.link.c_tag.C_Tag` for the 802.1Q customer tag
 (``0x8100``) and :class:`~pcapkit.protocols.link.s_tag.S_Tag` for the 802.1ad
-service tag (``0x88A8``). The tag structure is described as below:
+service tag (``0x88A8``). The tag structure is described as below, keyed as for
+a customer tag; a service tag's keys start ``s_tag`` instead:
 
 ======= ========= ====================== =============================
 Octets      Bits        Name                    Description
 ======= ========= ====================== =============================
-  0           0   ``vlan.tci``              Tag Control Information
-  0           0   ``vlan.tci.pcp``          Priority Code Point
-  0           3   ``vlan.tci.dei``          Drop Eligible Indicator
-  0           4   ``vlan.tci.vid``          VLAN Identifier
-  2          16   ``vlan.type``             Protocol (Internet Layer)
+  0           0   ``c_tag.tci``             Tag Control Information
+  0           0   ``c_tag.tci.pcp``         Priority Code Point
+  0           3   ``c_tag.tci.dei``         Drop Eligible Indicator
+  0           4   ``c_tag.tci.vid``         VLAN Identifier
+  2          16   ``c_tag.type``            Protocol (Internet Layer)
 ======= ========= ====================== =============================
 
 The two tags carry an **identical** tag control information layout -- the same

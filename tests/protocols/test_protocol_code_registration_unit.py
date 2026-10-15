@@ -6,11 +6,12 @@ GitHub issue #514 part (b): :class:`~pcapkit.protocols.protocol.Protocol`/
 keyword that registers a subclass into the next-layer dispatch registry (or
 registries) it names -- e.g. :attr:`Link.__proto__
 <pcapkit.protocols.link.link.Link.__proto__>`. Registration is opt-in,
-exactly like the ``name=``/``protocol=``/``fmt=`` keywords part (a) (#547)
+exactly like the ``engine=``/``protocol=``/``fmt=`` keywords part (a) (#547)
 gave :class:`~pcapkit.foundation.engines.engine.Engine`,
 :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly`,
 :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` and
-:class:`~pcapkit.dumpkit.common.Dumper`: omitting ``code`` leaves the
+:class:`~pcapkit.dumpkit.common.Dumper` (#557 renamed ``Engine``'s from
+``name=``): omitting ``code`` leaves the
 subclass unregistered, which is exactly what every built-in protocol class
 does today, since the built-in dispatch tables are populated by literal
 assignment in each layer module rather than by ``__init_subclass__``.

@@ -223,10 +223,12 @@ class AppTypeSplitTests(unittest.TestCase):
 
         The suffix is display-only: it never reaches ``_value_``, which is the
         live lookup key in ``_value2member_map_`` and is built once when the
-        class is created -- see ``test_the_new_dunders_are_byte_identical_to_the_percent_form``
-        and ``test_every_member_renders_its_own_registrys_transport_protocol``
-        for the sweep over all 12,391 members that pins this for every one of
-        them, aliased or not.
+        class is created -- see
+        ``test_every_member_renders_its_own_registrys_transport_protocol`` for
+        the sweep over all 12,391 members that pins this for every one of them,
+        aliased or not, and
+        ``test_the_new_dunders_are_byte_identical_to_the_percent_form`` for the
+        sample #1062 formats against the pre-#798 form.
         """
         from pcapkit.const.reg.apptype import TCP
 
@@ -390,7 +392,7 @@ class AppTypeSplitTests(unittest.TestCase):
         """Aliasing names a second service on a port that already has one.
 
         A port with nothing there yet is what the generator and ``get``'s own
-        mint-on-miss are for, not this -- so this refuses rather than quietly
+        fallback on a miss are for, not this -- so this refuses rather than quietly
         becoming the port's first and only member.
         """
         from pcapkit.const.reg.apptype import TCP
@@ -483,7 +485,8 @@ class AppTypeSplitTests(unittest.TestCase):
         by transport protocol, so a name never matched and
         ``AppType.get('ssh')`` returned a **new** member with port ``-1`` instead
         of the one at 22. Nothing in :mod:`pcapkit` resolves a service by name, so
-        it now raises; #734 stays open for whether a real name lookup is wanted.
+        it now raises; #734 was closed on that, with the name lookup removed
+        rather than repaired.
         """
         from pcapkit.const.reg.apptype import TCP
 
@@ -567,7 +570,7 @@ class AppTypeSplitTests(unittest.TestCase):
                                      cls.__members__)
 
         # Paid for by narrowing nothing: a valid but unassigned port is what the
-        # mint is *for*, and it still answers with one.
+        # fallback member is *for*, and it still answers with one.
         minted = AppType.get(59000, proto=TransportProtocol.tcp)
         self.addCleanup(self._purge_member, TCP, 'PORT_59000_tcp', 59000)
         self.assertEqual(minted.svc, 'unknown')
@@ -601,8 +604,8 @@ class AppTypeSplitTests(unittest.TestCase):
                 self.assertIs(resolved.proto, cls.__transport__)
 
         # A span IANA assigns to TCP and UDP assigns nothing to SCTP, so the third
-        # registry mints rather than inheriting the TCP row -- which it did, as
-        # ``<SCTP.x11: 6010 [tcp]>``.
+        # registry answers with an ``unknown`` member of its own rather than
+        # inheriting the TCP row -- which it did, as ``<SCTP.x11: 6010 [tcp]>``.
         resolved = AppType.get(6010, proto='sctp')
         self.addCleanup(self._purge_member, SCTP, 'PORT_6010_sctp', 6010)
         self.assertEqual(resolved.svc, 'unknown')

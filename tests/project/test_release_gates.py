@@ -2729,8 +2729,9 @@ class TestGateMutationsChangeTheTruthTable(WorkflowMixin, unittest.TestCase):
     #: row is #967's, and is the only row here that the table as #962 left it
     #: did not catch at all: it is rejected by exactly one scenario -- the
     #: ``null`` evidence row :func:`gate_rows` grew for it -- and by no text
-    #: assertion. The last three are #1052's, for the release test gate
-    #: conjunct that issue added.
+    #: assertion. The three after it are #1052's, for the release test gate
+    #: conjunct that issue added, and the last three are #1748's, for its
+    #: released-elsewhere conjunct.
     MUTATIONS = [
         ('the && before the version_check clause becomes ||',
          "!cancelled() && needs.version_check.result",

@@ -304,7 +304,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
     .. versionchanged:: 1.5.0
 
-       * :meth:`read` reports the flags of a flagless segment as an empty
+       * :meth:`read` reports the :attr:`connection` flags of a flagless
+         segment, and ``info.connection``, as an empty
          :class:`~pcapkit.const.tcp.flags.Flags` rather than a plain
          :obj:`int` (:issue:`616`).
        * A constructed MPTCP option sets its ``subtype`` (:issue:`566`), and
@@ -2893,7 +2894,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             flag_deny_join: flag for not establishing new subflows to the
                 source address
             flag_reserved: reserved flags (``D`` to ``G``)
-            flag_hsa: use of HMAC-SHA1 flag
+            flag_hsa: use of HMAC-SHA1 (version 0) or HMAC-SHA256
+                (version 1) flag
             skey: option sender's key
             rkey: option receiver's key
             dl_len: data-level length

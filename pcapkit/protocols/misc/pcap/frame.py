@@ -150,11 +150,11 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
         Arguments:
             code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
             protocol: module descriptor or a
-                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
+                :class:`~pcapkit.protocols.protocol.Protocol` subclass
 
         Raises:
             pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a
-                class, or not a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
+                class, or not a :class:`~pcapkit.protocols.protocol.Protocol` subclass.
 
         Warns:
             pcapkit.utilities.warnings.RegistryWarning: If this link type is
