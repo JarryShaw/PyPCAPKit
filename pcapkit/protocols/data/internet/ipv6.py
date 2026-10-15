@@ -27,7 +27,8 @@ class IPv6(Protocol):
     """Data model for Internet Protocol version 6.
 
     Important:
-        Due to the reserved keyword conflict, please use :meth:`from_dict`
+        Due to the reserved keyword conflict, please use
+        :meth:`~pcapkit.corekit.infoclass.Info.from_dict`
         to create an instance of this data model.
 
     """

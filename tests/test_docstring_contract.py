@@ -226,16 +226,12 @@ KNOWN_DEFECTS = (
     # parameter is 'name', which is #546's item 2. The remaining 34 register_*
     # functions in that file were checked at the same time and none of them
     # carries the same defect, so there is nothing left to record here for it.
-    Known(Finding('pcapkit/protocols/internet/ipv4.py',
-                  '_make_ipv4_options', 'option'),
-          "documents 'option' where the parameter is 'options'; ipv4.py is "
-          'owned by another change'),
     Known(Finding('pcapkit/vendor/mh/binding_ack_flag.py', 'context', 'soup'),
           "documents 'soup: Parsed HTML source.' where the parameter is 'data' "
           "and holds CSV rows. Nothing was renamed here despite the "
           '``# pylint: disable=arguments-renamed`` pragma -- the parameter '
           'matches the base ``Vendor.context(self, data)`` in '
-          'pcapkit/vendor/default.py:288, which documents it as '
+          'pcapkit/vendor/default.py:417, which documents it as '
           "'data: CSV data.'. The line was copy-pasted from a sibling whose "
           "process()/context() really does take 'soup', so both the name and "
           'the description are wrong'),
@@ -252,13 +248,10 @@ KNOWN_DEFECTS = (
           "documents 'data' where the parameter is 'soup'"),
 )
 
-#: Swallowed section headers left unfixed, for the same ownership reason.
-KNOWN_SWALLOWED = (
-    Known(Finding('pcapkit/protocols/internet/ipv4.py', '_make_opt_e_sec', 'Returns'),
-          'the ``Returns:`` header is indented into the ``Args:`` block, so '
-          'napoleon renders ``:param Returns:`` and drops the return '
-          'documentation; ipv4.py is owned by another change'),
-)
+#: Swallowed section headers excused from
+#: :meth:`DocstringParameterTests.test_section_headers_are_not_swallowed`, in
+#: the same form as :data:`KNOWN_DEFECTS`. None is excused.
+KNOWN_SWALLOWED = ()
 
 
 def _header(line: 'str') -> 'Optional[str]':

@@ -45,6 +45,9 @@ Octets      Bits        Name                    Description
 
    .. automethod:: __index__
 
+   .. autoattribute:: __generic_ext_codes__
+      :no-value:
+
 Protocol Constants
 ------------------
 

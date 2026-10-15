@@ -50,7 +50,8 @@ class ToSField(Data):
     """Data model for IPv4 ToS fields.
 
     Important:
-        Due to the reserved keyword conflict, please use :meth:`from_dict`
+        Due to the reserved keyword conflict, please use
+        :meth:`~pcapkit.corekit.infoclass.Info.from_dict`
         to create an instance of this data model.
 
     """
@@ -323,7 +324,8 @@ class TROption(Option):
     """Data model for IPv4 Traceroute (``TR``) option.
 
     Important:
-        Due to the reserved keyword conflict, please use :meth:`from_dict`
+        Due to the reserved keyword conflict, please use
+        :meth:`~pcapkit.corekit.infoclass.Info.from_dict`
         to create an instance of this data model.
 
     """
