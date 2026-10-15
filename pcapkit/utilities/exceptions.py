@@ -82,9 +82,9 @@ def stacklevel() -> 'int':
         level 0             stacklevel() itself
         level 1             whoever called stacklevel()
         ...
-        level ``boundary``  the outermost frame inside pcapkit
+        level boundary      the outermost frame inside pcapkit
         ...
-        level ``outermost`` the interpreter entry point
+        level outermost     the interpreter entry point
 
     The frame to name is the first one *past* the boundary, hence
     ``boundary + 1``. ``boundary`` is measured from the *inside* out: it depends
@@ -204,6 +204,11 @@ class BaseError(Exception):
 
     See Also:
         :func:`pcapkit.utilities.exceptions.stacklevel`
+
+    .. versionchanged:: 1.5.0
+
+       A quiet error logs nothing, where 1.4.x logged it at ``ERROR``, and no
+       error sets :data:`sys.tracebacklimit` (:issue:`362`).
 
     """
 
@@ -665,6 +670,10 @@ class StreamEOFError(BaseError, EOFError):
     A *declared* zero length -- a nested schema legitimately sized to have
     nothing to read -- is a different situation and does not raise this.
 
+    :class:`~pcapkit.protocols.misc.pcap.frame.Frame` and
+    :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` raise it too, quietly, when
+    fewer octets are left than a record header or a block needs.
+
     Note:
         :func:`~pcapkit.corekit.decorators.prepare` always raises this with
         ``quiet=True``: reaching end of stream is the frame reader's ordinary
@@ -721,6 +730,8 @@ class EnumKeyError(BaseError, KeyError):
         :mod:`pcapkit.toolkit` extractors raise it, and conflating the two
         would leave a caller unable to tell a registry that has no such member
         from a packet dict that has no such field.
+
+    .. versionadded:: 1.5.0
 
     """
 

@@ -190,7 +190,7 @@ def packet2frame(packet: 'Packet') -> 'FrameRecord':
 
     Returns:
         The :func:`packet2dict` mapping of the packet, which every trace format
-        but PCAP writes as it always has, carrying the octets `Scapy`_ dissected
+        but PCAP writes unchanged, carrying the octets `Scapy`_ dissected
         the packet from, the PCAP record header the PCAP trace dumper writes, and
         the exact timestamp it reads the header's resolution from.
 
@@ -671,12 +671,12 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
         count: Packet index. If not provided, default to ``-1``.
 
     Returns:
-        Data for TCP reassembly.
+        Data for TCP flow tracing.
 
-        * If the ``packet`` can be used for TCP flow tracing. A packet can be reassembled
+        * If the ``packet`` can be used for TCP flow tracing. A packet can be traced
           if it contains TCP layer (:class:`scapy.layers.inet.TCP`), on the terms
           :func:`tcp_reassembly` sets.
-        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
+        * If the ``packet`` can be traced, then the :obj:`dict` mapping of data for TCP
           flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:

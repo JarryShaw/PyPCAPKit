@@ -22,7 +22,7 @@ jobs:
   # against a commit the Unit Tests workflow is already testing, and it bought
   # nothing: CodeQL reads the source, so its findings do not depend on the test
   # suite passing. Worse, it meant a failing test suppressed the security
-  # analysis for that commit. Static analysis now runs on its own.
+  # analysis for that commit. Static analysis runs on its own.
   analyze:
     name: Analyze
     runs-on: ubuntu-latest

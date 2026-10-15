@@ -86,7 +86,7 @@ hole, but those bounds were absolute TCP sequence numbers
 indexed from the start of the direction's data, so with any real initial
 sequence number every slice started far beyond the end of the buffer, every
 fragment came out empty, and ``if data:`` discarded the datagram without a word.
-That is fixed -- ``submit`` now converts each hole's absolute bounds into
+That is fixed -- ``submit`` converts each hole's absolute bounds into
 offsets into the buffer it is reading, and decides completeness from whether any
 hole survives that conversion -- and GitHub issue #349 records the whole of it.
 Regenerating these two fixtures to carry a permanently lost segment as well was

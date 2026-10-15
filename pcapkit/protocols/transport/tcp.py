@@ -32,7 +32,7 @@ Octets      Bits        Name                    Description
   14        112   ``tcp.window_size``       Size of Receive Window
   16        128   ``tcp.checksum``          Checksum
   18        144   ``tcp.urgent_pointer``    Urgent Pointer (if URG set)
-  20        160   ``tcp.opt``               TCP Options (if data offset > 5)
+  20        160   ``tcp.options``           TCP Options (if data offset > 5)
 ======= ========= ========================= =======================================
 
 .. [*] https://en.wikipedia.org/wiki/Transmission_Control_Protocol
@@ -172,7 +172,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
           schema=Schema_TCP, data=Data_TCP):
     """This class implements Transmission Control Protocol.
 
-    This class currently supports parsing of the following protocols, which are
+    This class supports parsing of the following protocols, which are
     registered in the :attr:`self.__proto__ <pcapkit.protocols.transport.tcp.TCP.__proto__>`
     attribute:
 
@@ -190,7 +190,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
        * - 8080
          - :class:`pcapkit.protocols.application.http.HTTP`
 
-    This class currently supports parsing of the following TCP options,
+    This class supports parsing of the following TCP options,
     which are directly mapped to the :class:`pcapkit.const.tcp.option.Option`
     enumeration:
 
@@ -267,7 +267,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_fastopen`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mode_fastopen`
 
-    This class currently supports parsing of the following Multipath TCP options,
+    This class supports parsing of the following Multipath TCP options,
     which are directly mapped to the :class:`pcapkit.const.tcp.mp_tcp_option.MPTCPOption`
     enumeration:
 
@@ -301,6 +301,31 @@ class TCP(Transport[Data_TCP, Schema_TCP],
        * - :attr:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_FASTCLOSE`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_fastclose`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mptcp_fastclose`
+
+    .. versionchanged:: 1.5.0
+
+       * :meth:`read` reports the :attr:`connection` flags of a flagless
+         segment, and ``info.connection``, as an empty
+         :class:`~pcapkit.const.tcp.flags.Flags` rather than a plain
+         :obj:`int` (:issue:`616`).
+       * A constructed MPTCP option sets its ``subtype`` (:issue:`566`), and
+         MP_CAPABLE is written at the :rfc:`8684` lengths (:issue:`567`) and
+         read at all five of them (:issue:`1042`).
+       * A rebuild keeps what was parsed: the option order and padding
+         (:issue:`1151`), the reserved bits of the header and of the POCSP,
+         Quick-Start and MPTCP options (:issue:`1211`, :issue:`1212`), the
+         octets after EOOL (:issue:`1218`), the User Timeout granularity
+         (:issue:`1219`), and the MP_CAPABLE ``C`` flag and ``D``-``G`` bits
+         (:issue:`1220`).
+       * :meth:`read` refuses a Data Offset that declares more header than the
+         data holds, rather than reading the missing octets as zeros
+         (:issue:`1404`).
+       * MPTCP parsing follows the flags and the option length: MP_FAIL reads
+         its DSN at the right offset (:issue:`1213`), an unknown subtype stays
+         within its option (:issue:`1214`), DSS sizes its Data ACK and DSN from
+         the ``a`` and ``m`` flags and reads a checksum only when one is
+         present (:issue:`1215`, :issue:`1216`), and ADD_ADDR parses the
+         :rfc:`8684` layout (:issue:`1217`).
 
     """
 
@@ -990,7 +1015,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             Parsed option data.
 
         Raises:
-            ProtocolError: If length is **NOT** multiply of ``8`` plus ``2``.
+            ProtocolError: If length is **NOT** a multiple of ``8`` plus ``2``.
 
         """
         if (schema.length - 2) % 8 != 0:
@@ -1107,7 +1132,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         return data
 
     def _read_mode_poc(self, schema: 'Schema_PartialOrderConnectionPermitted', *, options: 'Option') -> 'Data_PartialOrderConnectionPermitted':  # pylint: disable=unused-argument
-        """Read TCP partial order connection service profile option.
+        """Read TCP partial order connection permitted option.
 
         Structure of TCP ``POC-Permitted`` option [:rfc:`1693`][:rfc:`6247`]:
 
@@ -2869,7 +2894,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             flag_deny_join: flag for not establishing new subflows to the
                 source address
             flag_reserved: reserved flags (``D`` to ``G``)
-            flag_hsa: use of HMAC-SHA1 flag
+            flag_hsa: use of HMAC-SHA1 (version 0) or HMAC-SHA256
+                (version 1) flag
             skey: option sender's key
             rkey: option receiver's key
             dl_len: data-level length

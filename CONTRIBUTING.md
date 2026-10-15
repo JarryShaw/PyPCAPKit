@@ -130,7 +130,7 @@ Two mechanical points that decide real cases:
 One invisible shape: the `pcapkit/const/` enums carry a `_missing_` fallback that resolves an
 unregistered value rather than raising as a plain `enum` would. This is deliberate
 and is the extensibility behaviour of the whole `pcapkit.const` package, so it is documented once on
-the package's landing page rather than on each of the 121 registries that implement it.
+the package's landing page rather than on each of the registries that implement it.
 `docs/source/conf.py` already names `_missing_` in `autodoc_default_options['exclude-members']`, so a
 per-class directive would argue with the project's own configuration.
 

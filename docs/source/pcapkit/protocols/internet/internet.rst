@@ -15,6 +15,7 @@ which is a base class for internet layer protocols, eg. :class:`~pcapkit.protoco
    .. autoproperty:: layer
 
    .. automethod:: register
+   .. automethod:: from_data
 
    .. automethod:: _decode_next_layer
    .. automethod:: _import_next_layer
@@ -45,9 +46,3 @@ behind IPv4, its toolkit steps over them in the octets to find TCP, up to
 :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` of them in a row. The
 ``pypcapfile`` toolkit walks no extension header chain, so it finds no upper
 layer behind one.
-
-.. versionremoved:: 1.5.0
-
-   ``pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT``, now
-   :data:`pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`, set with
-   :envvar:`PCAPKIT_EXTENSION_HEADER_LIMIT` (:issue:`1726`).

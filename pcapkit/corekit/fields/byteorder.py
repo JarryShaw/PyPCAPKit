@@ -10,6 +10,11 @@ it. It acts on a :class:`~pcapkit.corekit.fields.numbers.NumberField` and on the
 nested schema, so it lives with the fields rather than with either schema
 (:issue:`1711`).
 
+.. versionadded:: 1.5.0
+
+   :func:`byteorder_callback` moves here from
+   :mod:`pcapkit.protocols.schema.misc.pcap.frame` (:issue:`1711`).
+
 """
 
 import sys

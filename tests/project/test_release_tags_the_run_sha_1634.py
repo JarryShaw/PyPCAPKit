@@ -954,7 +954,7 @@ class TestTagJobScripts(ScratchRepository):
         self.assertEqual(self.remote(self.conda_tag), other)
 
     def test_a_release_tag_on_another_commit_stops_the_conda_tag(self) -> None:
-        """What a later run sees after a release tagged elsewhere -- 1.5.0b9 today."""
+        """What a later run sees after a release tagged elsewhere, as ``v1.5.0b9`` is."""
         run_sha = self.commit(self.VERSION, '0')
         tip = self.commit(self.VERSION, '3')
         self.push(tip, 'refs/heads/main')

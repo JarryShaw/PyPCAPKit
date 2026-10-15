@@ -15,6 +15,14 @@ They act on a protocol's file and on the schema it unpacks, and
 so they live with the packet model rather than in :mod:`pcapkit.utilities`
 (:issue:`1735`).
 
+.. versionadded:: 1.5.0
+
+.. versionremoved:: 1.5.0
+
+   ``pcapkit.utilities.decorators``, now :mod:`pcapkit.corekit.decorators`
+   (:issue:`1735`). :mod:`pcapkit.utilities` does not export the three
+   decorators either.
+
 """
 import functools
 import io

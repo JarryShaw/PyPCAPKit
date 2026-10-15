@@ -291,7 +291,7 @@ def packet2frame(packet: 'Packet', timestamp: 'float | Decimal', *,
 
     Returns:
         The :func:`packet2dict` mapping of the packet, which every trace format
-        but PCAP writes as it always has, carrying the captured octets, from
+        but PCAP writes unchanged, carrying the captured octets, from
         :func:`packet2bytes`, the PCAP record header the PCAP trace dumper
         writes, and the exact timestamp it reads the header's resolution from.
 
@@ -603,6 +603,11 @@ def ipv4_reassembly(packet: 'Packet', timestamp: 'float', *,
     See Also:
         :class:`pcapkit.foundation.reassembly.ipv4.IPv4`
 
+    .. versionchanged:: 1.5.0
+
+       ``timestamp`` is a new second positional parameter, so a 1.4.x call
+       with ``packet`` alone fails.
+
     """
     network = _network(packet)
     # an IPv6 layer is the one with extension headers, as in ``_wire_hdr_len``
@@ -681,6 +686,11 @@ def ipv6_reassembly(packet: 'Packet', timestamp: 'float', *,
 
     See Also:
         :class:`pcapkit.foundation.reassembly.ipv6.IPv6`
+
+    .. versionchanged:: 1.5.0
+
+       ``timestamp`` is a new second positional parameter, so a 1.4.x call
+       with ``packet`` alone fails.
 
     """
     network = _network(packet)
@@ -791,6 +801,11 @@ def tcp_reassembly(packet: 'Packet', timestamp: 'float', *,
     See Also:
         :class:`pcapkit.foundation.reassembly.tcp.TCP`
 
+    .. versionchanged:: 1.5.0
+
+       ``timestamp`` is a new second positional parameter, so a 1.4.x call
+       with ``packet`` alone fails.
+
     """
     ip = _network(packet)
     if ip is None:
@@ -842,13 +857,13 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
         count: Packet index. If not provided, default to ``-1``.
 
     Returns:
-        Data for TCP reassembly.
+        Data for TCP flow tracing.
 
-        * If the ``packet`` can be used for TCP flow tracing. A packet can be reassembled
+        * If the ``packet`` can be used for TCP flow tracing. A packet can be traced
           if its network layer carries TCP layer (:class:`dpkt.tcp.TCP`), behind any IPv6
           extension headers :mod:`dpkt` decodes. TCP in an IP-in-IP tunnel, or behind an AH or
           IPv6 extension header carried in IPv4, is not read.
-        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
+        * If the ``packet`` can be traced, then the :obj:`dict` mapping of data for TCP
           flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
     Note:

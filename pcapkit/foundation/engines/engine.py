@@ -240,6 +240,13 @@ class Engine(EngineBase[_T], Generic[_T]):
     Args:
         extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.
 
+    .. versionchanged:: 1.5.0
+
+       Registration is opt-in, under the ``engine`` class keyword, which
+       replaces 1.4.x's ``name`` with no alias; 1.4.x registered every
+       subclass, under its :attr:`~EngineBase.name` (its ``__engine_name__``,
+       else its class name) when ``name`` was omitted (:issue:`514`).
+
     """
 
     def __init_subclass__(cls, /, engine: 'Optional[str]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':

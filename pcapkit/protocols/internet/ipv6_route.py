@@ -92,6 +92,23 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
          - :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_rpl`
          - :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_data_type_rpl`
 
+    .. versionchanged:: 1.5.0
+
+       * Hdr Ext Len is in 8-octet units both on read and on build
+         (:issue:`487`).
+       * The RPL fixed area is sized at 4 octets, per :rfc:`6554`
+         (:issue:`564`).
+       * A :obj:`bool` given as an address raises
+         :exc:`~pcapkit.utilities.exceptions.FieldValueError` (:issue:`540`).
+       * :meth:`make` takes ``data`` as :obj:`bytes` for every routing type
+         (:issue:`1236`), and an RPL source route rebuilds byte for byte, its
+         address compression and a truncated address list included
+         (:issue:`1456`, :issue:`1457`).
+       * A rebuild keeps the reserved bits of an RPL source route
+         (:issue:`1235`), and the reserved octets of a Source Route or Type 2
+         header and the ``Pad`` octets of an RPL one as captured
+         (:issue:`1223`).
+
     """
 
     ##########################################################################

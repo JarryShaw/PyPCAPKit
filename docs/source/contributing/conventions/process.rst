@@ -42,7 +42,7 @@ once:
    they are on demand -- one extra at a time, ``pip install pypcapkit[Scapy]`` and so
    on. This holds however easy they are to install, and it is what the ruling
    changed: four of them used to be in ``all``.
-*  **``PyPCAP`` and ``PCAP_CT`` were already excluded for installability**, which the
+*  ``PyPCAP`` **and** ``PCAP_CT`` **were already excluded for installability**, which the
    ruling leaves untouched. ``pypcap`` is an sdist-only C extension needing a
    compiler and the libpcap development files; ``pcap-ct`` and ``libpcap`` are
    published only as pre-releases, and ``all`` should not be how somebody acquires a
@@ -100,15 +100,15 @@ commands down instead of a figure that will be stale by the next merge:
 
 The grouping scheme was settled on :issue:`918`: **a section per top-level module, with**
 ``Added``/``Changed``/``Fixed`` **nested inside each** -- module granularity, not
-per-file and not per-subpackage. The file carries **9** module-level sections holding
-200 entries, and no entry carries an inline kind label::
+per-file and not per-subpackage. The file carries **10** module-level sections holding
+292 entries, and no entry carries an inline kind label::
 
    $ grep -cE '^\* \*\*(Added|Changed|Fixed)\*\*' docs/source/changelog/1.5.0.rst
    0
 
-Eight of those nine name a module; the ninth, *Project infrastructure*, is for what
-belongs to none. Nor is the map one-to-one with the package list below --
-:mod:`pcapkit.interface` has no 1.5.0 entry, so it has no section of its own:
+Nine of those ten name a module; the tenth, *Project infrastructure*, is for what
+belongs to none. The map is one-to-one with the package list below -- every package,
+:mod:`pcapkit.interface` included, has a section of its own:
 
 .. code-block:: shell
 
@@ -317,7 +317,7 @@ carrying it are that kind:
    of the numbering, with nothing labelled at all between them and that change. Three
    of those seven are distribution rollups, each also carrying ``release``; the other
    four are early ``refactor``/``feat`` work from before the project stabilised. On
-   issues it is sparser still, appearing only from :issue:`775` up. So ``breaking``'s
+   issues it is sparser still, appearing only from :issue:`719` up. So ``breaking``'s
    absence on an old pull request is weak evidence at best. The current figures, rather
    than these:
 

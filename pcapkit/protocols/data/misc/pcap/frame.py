@@ -20,7 +20,7 @@ class FrameInfo(Data):
 
     #: Timestamp seconds.
     ts_sec: 'int'
-    #: Timestamp microseconds.
+    #: Timestamp microseconds, or nanoseconds in a nanosecond-resolution file.
     ts_usec: 'int'
     #: Number of octets of packet saved in file.
     incl_len: 'int'

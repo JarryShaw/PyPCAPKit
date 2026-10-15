@@ -124,7 +124,7 @@ class ScapyToolkitTests(unittest.TestCase):
 
     def _make_ip_rooted_tcp_packet(self):
         # No Ether layer, so ``packet.name`` (what #775's tier 1 fix at
-        # scapy.py:324 feeds ``Enum_LinkType.get()``) is ``'IP'`` -- not a
+        # scapy.py:716 feeds ``Enum_LinkType.get()``) is ``'IP'`` -- not a
         # LinkType member name, unlike the Ether-rooted packets above whose
         # name is ``'Ethernet'``.
         from scapy.layers.inet import IP, TCP

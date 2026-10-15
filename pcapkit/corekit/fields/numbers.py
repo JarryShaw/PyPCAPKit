@@ -45,7 +45,8 @@ class _CapturedInt(int):
 
     It equals, hashes and renders as the plain :obj:`int` it holds, and any
     arithmetic on it yields a plain :obj:`int`, which is what lets a value a
-    caller derives from a parsed one keep today's truncating semantics. See
+    caller derives from a parsed one keep a plain :obj:`int`'s truncating
+    semantics. See
     GitHub issue :issue:`1488`.
 
     """
@@ -734,10 +735,11 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
             unconditional ``except ValueError: pass``.
 
             No registry under :mod:`pcapkit.const` raises an in-library error
-            from its guard today, and deliberately so: a generated guard raises a
-            bare, unlogged :exc:`ValueError` precisely because the generated
-            ``get()``'s ``except ValueError`` fallback has to keep catching it
-            (GitHub issues :issue:`584` and :issue:`647`). The registries that
+            from its guard, and deliberately so: a generated guard raises a
+            bare, unlogged :exc:`ValueError` precisely because the ``except
+            ValueError`` fallback of :meth:`~pcapkit.corekit.enum.EnumLookup.get`
+            has to keep catching it (GitHub issues :issue:`584` and
+            :issue:`647`). The registries that
             *do* bound themselves to a width and reject outside it are the
             bit-flag ones -- :class:`pcapkit.const.tcp.flags.Flags` among them --
             and none of those is named as the namespace of a plain
@@ -753,6 +755,12 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
             by :meth:`_unregistered_member`: ``isinstance`` against the
             registry and equality with the member still hold, identity does
             not. See GitHub issue :issue:`1488`.
+
+        .. versionchanged:: 1.5.0
+
+           A value the registry has no member for resolves to a nameless
+           pseudo-member, where :mod:`aenum`'s bare :exc:`ValueError` escaped
+           (:issue:`701`).
 
         """
         value = super().post_process(value, packet)
@@ -810,8 +818,7 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
         wire value should resolve to a real member of the registry the field
         names -- ``isinstance`` against it and every ancestor holds, and it
         renders and dispatches exactly like a declared one -- provided
-        building it never grows the registry, which is the whole reason the
-        field does not call ``get()`` unconditionally.
+        building it never grows the registry.
         This is what gets there: it calls ``namespace``'s own storage base's
         ``__new__`` directly -- :class:`str` or :class:`int`, whichever
         ``namespace`` derives from -- which skips ``namespace``'s *own*
@@ -841,16 +848,17 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
             parse or reconstruction path does that to a value it just resolved
             this way, which is what keeps this safe to return from
             ``post_process``. A direct call to
-            :meth:`~pcapkit.const.reg.apptype.AppType.get` for the same port
-            is a different matter and deliberately so: asking the
-            registry for a name is an explicit request for a named member, so
-            it still mints one -- measured on this tree,
-            ``AppType.get(54321, proto=tcp)`` returns ``PORT_54321_tcp`` and
-            takes ``TCP.__members__`` from 6147 to 6148, and a second call
-            with the same port returns that member rather than raising. Two
+            :meth:`~pcapkit.const.reg.apptype.apptype.AppType.get` for the same port
+            does not come through here, and it does not mint either: it
+            builds an unregistered member of its own, through the registry's
+            ``_unregistered_member`` -- measured on this tree,
+            ``AppType.get(54321, proto=tcp)`` returns
+            ``<TCP.unknown: 54321 [tcp]>``, ``TCP.__members__`` stays at
+            6147, and a second call with the same port returns an equal
+            member rather than the same one. Two
             unregistered members for the same value also compare equal
             without being identical, since
-            :class:`~pcapkit.const.reg.apptype.AppType` and
+            :class:`~pcapkit.const.reg.apptype.apptype.AppType` and
             :class:`~pcapkit.const.pcapng.option_type.OptionType` both define
             ``__eq__``/``__hash__`` off an attribute (``.port`` /
             ``.opt_value``) rather than object identity -- harmless for every
@@ -895,7 +903,7 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
                 ancestor; it never gains an entry in any of its own tables.
             value: The value ``namespace``'s own constructor would have
                 wrapped -- e.g. the crafted string
-                :meth:`~pcapkit.const.reg.apptype.AppType.__new__` builds from
+                :meth:`~pcapkit.const.reg.apptype.apptype.AppType.__new__` builds from
                 a name, a port and a transport, or
                 :meth:`~pcapkit.const.pcapng.option_type.OptionType.__new__`'s
                 equivalent -- kept the same shape here so a rendered or
@@ -904,7 +912,7 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
                 other nameless value this package produces.
             **attrs: Extra attributes to set on the returned member, matching
                 the shape the caller's registry gives its real members --
-                :class:`~pcapkit.const.reg.apptype.AppType`'s ``.port``,
+                :class:`~pcapkit.const.reg.apptype.apptype.AppType`'s ``.port``,
                 ``.svc`` and ``.proto``, or
                 :class:`~pcapkit.const.pcapng.option_type.OptionType`'s
                 ``.opt_name`` and ``.opt_value``.
@@ -1015,17 +1023,19 @@ class PortEnumField(EnumField):
         byteorder: Field byte order.
         bit_length: Field bit length.
         namespace: The port registry, i.e.
-            :class:`~pcapkit.const.reg.apptype.AppType`.
+            :class:`~pcapkit.const.reg.apptype.apptype.AppType`.
         callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
         proto: The transport protocol whose ports this field carries -- a single
-            :class:`~pcapkit.const.reg.apptype.TransportProtocol` member, which
+            :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol` member, which
             is what tells e.g. TCP/80 from UDP/80. The TCP, UDP and SCTP
             schemas each pass their own.
 
     Important:
-        This class is specifically designed for :class:`~pcapkit.const.reg.apptype.AppType`
+        This class is specifically designed for :class:`~pcapkit.const.reg.apptype.apptype.AppType`
         as it is actually a :class:`~enum.StrEnum` class.
+
+    .. versionadded:: 1.5.0
 
     """
     if TYPE_CHECKING:
@@ -1077,16 +1087,16 @@ class PortEnumField(EnumField):
             the port itself, when the registry declares none.
 
         Notes:
-            :meth:`~pcapkit.const.reg.apptype.AppType.get` mints a fresh
+            :meth:`~pcapkit.const.reg.apptype.apptype.AppType.get` mints a fresh
             member -- via :func:`aenum.extend_enum` -- for any port neither an
             existing row nor one of :meth:`_missing_`'s documented IANA spans
             accounts for, which in practice means the ephemeral/dynamic range.
             Calling it on every parsed port would therefore grow the registry
             without bound. This peeks at the registry
-            :meth:`~pcapkit.const.reg.apptype.AppType.get` itself would
+            :meth:`~pcapkit.const.reg.apptype.apptype.AppType.get` itself would
             consult -- its per-port rows via ``__registry__.getlist``, then
             its documented spans via ``_missing_`` -- and only calls
-            :meth:`~pcapkit.const.reg.apptype.AppType.get` once one of those is
+            :meth:`~pcapkit.const.reg.apptype.apptype.AppType.get` once one of those is
             already known to hold, so a genuine miss gets
             :meth:`EnumField._unregistered_member` instead of a mint.
 
@@ -1094,7 +1104,7 @@ class PortEnumField(EnumField):
             that, rather than being let through to :meth:`_missing_` and
             caught alongside a genuine miss. Both are a bare :exc:`ValueError`
             with nothing to tell them apart by type, and
-            :meth:`~pcapkit.const.reg.apptype.AppType.get` rejects the
+            :meth:`~pcapkit.const.reg.apptype.apptype.AppType.get` rejects the
             out-of-range case deliberately, so that it is never minted over -- a
             catch keyed on exception type alone cannot see the difference
             between that and :mod:`aenum`'s own "no member has this value",
@@ -1103,7 +1113,7 @@ class PortEnumField(EnumField):
             distinction at all. ``self.length`` is the field's own declared byte
             width (``2`` for every caller of this class, hence ``0``-``65535``)
             rather than a hard-coded ``65535`` borrowed from
-            :meth:`~pcapkit.const.reg.apptype.AppType._missing_`'s own guard,
+            :meth:`~pcapkit.const.reg.apptype.apptype.AppType._missing_`'s own guard,
             so the two stay in lockstep by construction.
 
         """

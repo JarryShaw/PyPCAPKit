@@ -529,8 +529,8 @@ def _ipv4_overrides() -> 'dict[Any, dict[str, Any]]':
         # more than one does, not because one is unrepresentable: it used to be,
         # a single ``GENSER`` (value 0) making ``_make_opt_sec`` size a
         # zero-octet bitmap and then index into it for a bare ``IndexError``, and
-        # #537 fixed that arithmetic. So this is a coverage choice now and no
-        # longer routes around anything.
+        # #537 fixed that arithmetic. So this is a coverage choice and routes
+        # around nothing.
         OptionNumber.SEC: {'authorities': [ProtectionAuthority.GENSER,
                                            ProtectionAuthority.NSA]},
         # ``counts=10``, the default, needs 43 option octets, which overflows
@@ -1002,8 +1002,7 @@ HIP_VERSION = {129: 2, 128: 1, 577: 1}
 
 #: How many copies of the parameter under test go in one packet.
 #:
-#: One, since #689. This note used to be a history of why the constant was two;
-#: it is now the history of why it no longer is.
+#: One, since #689. What follows is why it was two, and why it is not.
 #:
 #: It was two because of the defect #651 fixed. ``HIP.make`` computes the
 #: header's ``len`` field as ``total_length // 8 + 4``, which is lossless only
@@ -1029,7 +1028,7 @@ HIP_VERSION = {129: 2, 128: 1, 577: 1}
 #: which is what moved the one-copy figure from 44 to 46, level with two copies.
 #:
 #: Two remained after that, neither helped by a second copy since each failed at
-#: two copies as well as at one. Both are closed now:
+#: two copies as well as at one. Both are closed:
 #:
 #: * ``HOST_ID`` declared four octets for the single 16-bit DI-Type/DI-Length
 #:   word of :rfc:`7401` Section 5.2.9, so it packed two surplus octets -- 18 at
@@ -1037,7 +1036,7 @@ HIP_VERSION = {129: 2, 128: 1, 577: 1}
 #:   conformant record two octets late, taking the curve as ``Algorithm``. #1118
 #:   made the field two octets.
 #: * ``HIP_TRANSFORM`` is HIPv1-only -- ``_read_param_hip_transform`` raises for
-#:   any other version -- and is now built at version 1 through
+#:   any other version -- and is built at version 1 through
 #:   :data:`HIP_VERSION`, so it round-trips and is no longer recorded.
 #:
 #: A third gap here, ``R1_Counter`` (128), was closed separately by #690 and was
@@ -1046,7 +1045,7 @@ HIP_VERSION = {129: 2, 128: 1, 577: 1}
 #: ``code=`` of the class statement and ``R1CounterParameter`` declared only
 #: 129 -- even though ``__parameter__``'s ``_read_param_*``/``_make_param_*``
 #: entries already existed for both codes, as two hand-written dict entries,
-#: not because of any name-normalisation rule. No longer recorded as of #690,
+#: not because of any name-normalisation rule. Not recorded since #690,
 #: which registered ``R1CounterParameter`` for 128 too.
 #:
 #: So the pair was routing around nothing by the time #672, #679 and #690 had
@@ -1074,8 +1073,7 @@ HIP_VERSION = {129: 2, 128: 1, 577: 1}
 #: The single-parameter case is asserted directly, and positively, by
 #: ``test_a_hip_packet_carrying_one_parameter_round_trips`` in
 #: :mod:`tests.protocols.test_option_roundtrip_unit`, which is also where the
-#: two-copy shape is still exercised now that this constant no longer produces
-#: it.
+#: two-copy shape is exercised, since this constant does not produce it.
 HIP_COPIES = 1
 
 
@@ -1109,7 +1107,7 @@ def _hip_overrides() -> 'dict[Any, dict[str, Any]]':
         # ``aabbccdd`` turned that silence into ``type 0 padding not zeroed:
         # aabbccdd``. With a non-zero counter the fixture can no longer conceal
         # a mis-stride here, whether or not the width is right -- which is the
-        # reason to keep this override now that #672 has corrected the width.
+        # reason to keep this override, #672 having corrected the width.
         Parameter.R1_COUNTER: {'counter': 0xaabbccdd},
         Parameter.R1_Counter: {'counter': 0xaabbccdd},
     }

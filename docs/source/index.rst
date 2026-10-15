@@ -167,7 +167,7 @@ missing :program:`tshark`, a missing :manpage:`libpcap(3)`, the wrong ``pcap``
 distribution) and a clean fall back, rather than an error from inside the
 third-party package.
 
-Engine support by Python version
+Engine Support by Python Version
 --------------------------------
 
 Which engines can run at all, by interpreter. Verified by installing each engine
@@ -350,6 +350,13 @@ plug-in functions, you may want to install the optional ones:
    explicitly: ``pip install pypcapkit[PyPCAP]`` or
    ``pip install pypcapkit[PCAP_CT]``.
 
+.. versionchanged:: 1.5.0
+
+   ``all`` installs the core addons only: ``emoji``, ``cryptography`` and
+   ``pycrate``. The engines and vendor-crawler dependencies it carried in 1.4
+   -- ``dpkt``, ``scapy``, ``pyshark``, ``requests`` and ``beautifulsoup4`` --
+   moved to the ``dev`` extra, alongside ``pypcapfile`` (:issue:`910`).
+
 .. warning::
 
    **Install only one of** ``pypcap`` **and** ``pcap-ct``. Both own the top-level
@@ -361,7 +368,7 @@ plug-in functions, you may want to install the optional ones:
    and which one won, but it cannot undo it.
 
 --------------------
-Engine prerequisites
+Engine Prerequisites
 --------------------
 
 Four of the engines need something beyond a ``pip install``. Each constraint
@@ -465,7 +472,7 @@ For CLI usage, you will need to install the optional packages:
    pip install pypcapkit emoji
 
 ==================
-Indices and tables
+Indices and Tables
 ==================
 
 * :ref:`genindex`

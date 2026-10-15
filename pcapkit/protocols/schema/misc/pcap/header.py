@@ -71,8 +71,7 @@ def magic_number_callback(field: 'NumberField', packet: 'dict[str, Any]') -> 'No
     """
     magic_number = packet['magic_number']
     # NOTE: looked up as :obj:`bytes`, so that a :obj:`bytearray` magic number
-    # is matched as it was compared before :issue:`1739` rather than rejected
-    # as unhashable.
+    # is matched rather than rejected as unhashable.
     declared = (MAGIC_NUMBER.get(bytes(magic_number))
                 if isinstance(magic_number, (bytes, bytearray, memoryview)) else None)
     if declared is None:

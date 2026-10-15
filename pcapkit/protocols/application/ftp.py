@@ -13,6 +13,14 @@ for its data channel.
 
 .. [*] https://en.wikipedia.org/wiki/File_Transfer_Protocol
 
+.. versionchanged:: 1.5.0
+
+   A command or reply rebuilds byte for byte, its CRLF included, and keeps
+   the command's case and any octets that are not UTF-8 as captured. A line
+   with no argument and a multi-line reply, whole in one segment or not,
+   parse and rebuild as captured (:issue:`1238`, :issue:`1239`,
+   :issue:`1240`, :issue:`1241`, :issue:`1303`, :issue:`1333`).
+
 """
 import re
 from typing import TYPE_CHECKING
@@ -113,7 +121,7 @@ class FTP(Application[Data_FTP, Schema_FTP],
         # NOTE: A multi-line reply (:rfc:`959#section-4`) may arrive whole in one
         # segment. Its first line is parsed as any reply line, and the lines
         # after it are kept as received in ``lines``. A segment holding anything
-        # else -- no closing line, or more after it -- is refused as before.
+        # else -- no closing line, or more after it -- is refused.
         line, lines = data, ()  # type: bytes, tuple[bytes, ...]
         if FTP_RESPONSE.match(data) is None and data.endswith(b'\r\n'):
             first, _, rest = data.partition(b'\r\n')

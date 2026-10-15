@@ -21,6 +21,14 @@ whose structure is described as below:
 
 .. [*] https://wiki.wireshark.org/Development/LibpcapFileFormat#Record_.28Packet.29_Header
 
+.. versionchanged:: 1.5.0
+
+   ``bytes(frame)`` and :attr:`~pcapkit.protocols.misc.pcap.frame.Frame.packet`
+   hold this frame's own octets, where they held the next frame's
+   (:issue:`357`), and the parsed ``time`` is timezone-aware UTC. The parsed
+   ``len`` is the on-wire length and ``cap_len`` the captured one, where the
+   two were swapped (:issue:`618`).
+
 """
 import collections
 import datetime
@@ -62,7 +70,7 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             schema=Schema_Frame, data=Data_Frame):
     """Per packet frame header extractor.
 
-    This class currently supports parsing of the following protocols, which are
+    This class supports parsing of the following protocols, which are
     registered in the :attr:`self.__proto__ <pcapkit.protocols.misc.pcap.frame.Frame.__proto__>`
     attribute:
 

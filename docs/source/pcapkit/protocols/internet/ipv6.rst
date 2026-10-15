@@ -41,8 +41,12 @@ Octets      Bits        Name                    Description
    .. automethod:: _make_data
 
    .. automethod:: _decode_next_layer
+   .. automethod:: _import_next_layer
 
    .. automethod:: __index__
+
+   .. autoattribute:: __generic_ext_codes__
+      :no-value:
 
 Protocol Constants
 ------------------
@@ -83,6 +87,12 @@ Type Stubs
       :type: int
 
       Flow label.
+
+Auxiliary Functions
+~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: pcapkit.protocols.schema.internet.ipv6.jumbo_payload_length
+.. autofunction:: pcapkit.protocols.schema.internet.ipv6.jumbogram_error
 
 Data Models
 -----------

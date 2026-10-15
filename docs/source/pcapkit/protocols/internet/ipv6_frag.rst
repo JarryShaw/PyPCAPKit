@@ -9,16 +9,16 @@ only, which implements extractor for Fragment Header for
 IPv6 (IPv6-Frag) [*]_, whose structure is described as
 below:
 
-======= ========= ==================== =======================
+======= ========= ========================= =======================
 Octets      Bits        Name                    Description
-======= ========= ==================== =======================
+======= ========= ========================= =======================
   0           0   ``frag.next``               Next Header
-  1           8                               Reserved
+  1           8   ``frag.reserved_octet``     Reserved
   2          16   ``frag.offset``             Fragment Offset
-  3          29                               Reserved
+  3          29   ``frag.reserved``           Reserved
   3          31   ``frag.mf``                 More Flag
   4          32   ``frag.id``                 Identification
-======= ========= ==================== =======================
+======= ========= ========================= =======================
 
 .. autoclass:: pcapkit.protocols.internet.ipv6_frag.IPv6_Frag
    :no-members:

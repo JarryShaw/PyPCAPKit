@@ -58,7 +58,13 @@ __all__ = ['{NAME}']
 
 
 class {NAME}(EnumRegistry, StrEnum):
-    """[{NAME}] {DOCS}"""
+    """[{NAME}] {DOCS}
+
+    .. versionadded:: 1.5.0
+
+       Moved here from ``pcapkit.protocols.misc.pcapng`` (:issue:`886`).
+
+    """
 
     {ENUM}
 '''  # type: Callable[[str, str, str, str], str]
@@ -115,8 +121,8 @@ class TLSKeyLabel(Vendor):
             # mis-cite a row citing a different RFC entirely -- section 4.2 is
             # specifically RFC 9850's own "TLS SSLKEYLOGFILE Labels" registry
             # section, not a fact about any other RFC's structure. All ten
-            # rows fetched as of 2026-09-28 are ``[RFC9850]``, so this always
-            # takes the ``rfc == '9850'`` branch today; a future registry
+            # rows fetched on 2026-09-28 are ``[RFC9850]``, so each takes the
+            # ``rfc == '9850'`` branch; a future registry
             # change either still fits it or raises here for a human to look
             # at, rather than rendering a citation nobody checked. IANA has
             # spelt it ``[RFC 9850]`` since 2026-10-13, which fits too (#1664).
@@ -134,8 +140,8 @@ class TLSKeyLabel(Vendor):
 
             pref = f"{renm} = '{label}'"
             # NOTE: mirrors the ``# nosec B105`` bandit suppression every
-            # such member already carries in
-            # the hand-written ``pcapkit.protocols.misc.pcapng.TLSKeyLabel`` as of #882 --
+            # such member carried in the hand-written
+            # ``pcapkit.protocols.misc.pcapng.TLSKeyLabel`` (#882) --
             # bandit's B105 (hardcoded password string) flags a string
             # constant assigned to a name containing ``SECRET``, which eight
             # of these ten labels' names do.

@@ -38,7 +38,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Only earns its runners on the schedule trigger now: `Unit Tests` has no
+  # Only earns its runners on the schedule trigger: `Unit Tests` has no
   # schedule trigger of its own, so Saturday's cron run is the one case left
   # where nothing else has already verified this tree. `workflow_run` carries
   # its own verdict instead -- see `conda-update` below.
@@ -95,7 +95,7 @@ jobs:
     # skip. `!cancelled()` rather than `always()` so that cancelling the run
     # still cancels the update; a gate that actually failed still blocks.
     #
-    # The `workflow_run` clause is the real gate for a push to main now: it
+    # The `workflow_run` clause is the real gate for a push to main: it
     # reads the verdict `Unit Tests` already reached instead of re-running it,
     # and `verdict` says whether that verdict covers the commit checked out
     # below (#1643). `.event == 'push'` and `.head_branch == 'main'`
@@ -162,7 +162,7 @@ jobs:
       # which raises unless that distribution is installed here -- and that
       # file names `dpkt`, `scapy`, `pyshark`, `requests` and `beautifulsoup4`
       # with no marker. #910 narrowed `all` to core addons only, so those five
-      # now come from `dev` instead; without it this step would install
+      # come from `dev` instead; without it this step would install
       # cleanly and the next one would crash on the first missing name.
       - name: Install and Setup
         run: |
@@ -219,7 +219,7 @@ jobs:
       # drops it as "previously applied", while `files_changed` still reads
       # 'true'. Conda Update 38325136710 and 38325153882 were such a pair, both
       # on 2e941bbb7 and raised 2 s after two different `Unit Tests` runs, for
-      # 9083163f5 and for 01151b13f, completed; `verdict` now refuses both.
+      # 9083163f5 and for 01151b13f, completed; `verdict` refuses both.
       # Asking about that file rather than "is a commit left to push" also
       # covers a rebase that keeps part of the commit but drops its bump: that
       # remainder would land under a build already tagged, so it is not pushed,

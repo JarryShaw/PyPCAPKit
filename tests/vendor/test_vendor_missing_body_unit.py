@@ -22,7 +22,7 @@ deliberately does **not** register -- so ``cls(value)`` missed again, re-entered
 The invariant is deliberately not "every emitted line returns": the base
 crawler itself emits legitimate non-returning lines for a range-guarded body.
 :meth:`pcapkit.vendor.default.Vendor.process` (see
-:file:`pcapkit/vendor/default.py:341-343`) renders such a body as three
+:file:`pcapkit/vendor/default.py:397-399`) renders such a body as three
 lines -- an ``if`` header, a ``#:`` comment, then an indented ``return`` --
 and only the third of the three returns::
 

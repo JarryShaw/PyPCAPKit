@@ -18,7 +18,20 @@ __all__ = ['OSPF', 'CryptographicAuthentication']
 
 @info_final
 class CryptographicAuthentication(Data):
-    """Data model for OSPF cryptographic authentication."""
+    """Data model for OSPF cryptographic authentication.
+
+    .. versionadded:: 1.5.0
+
+       Renamed from ``CrytographicAuthentication``, which
+       :mod:`pcapkit.protocols.data` exported as
+       ``OSPF_CrytographicAuthentication`` (:issue:`1090`).
+
+    .. versionremoved:: 1.5.0
+
+       ``CrytographicAuthentication`` and ``OSPF_CrytographicAuthentication``,
+       with no alias (:issue:`1090`).
+
+    """
 
     #: The two reserved octets, as captured.
     reserved: 'bytes'

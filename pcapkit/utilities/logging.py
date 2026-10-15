@@ -32,9 +32,15 @@ and :func:`reset` puts everything back the way importing :mod:`pcapkit` left it.
 
 .. seealso::
 
-   :envvar:`PCAPKIT_DEVMODE` still bootstraps the historical :obj:`sys.stderr`
-   handler at :data:`logging.DEBUG`, so a development session needs no explicit
+   :envvar:`PCAPKIT_DEVMODE` attaches the 1.4.x :obj:`sys.stderr` handler at
+   :data:`logging.DEBUG` on import, so a development session needs no explicit
    :func:`configure` call.
+
+.. versionchanged:: 1.5.0
+
+   Importing :mod:`pcapkit` attaches only a :class:`logging.NullHandler` and
+   sets no level; 1.4.x attached a :obj:`sys.stderr` handler at
+   :data:`logging.INFO`.
 
 """
 import logging
@@ -150,6 +156,8 @@ def get_logger(name: 'Optional[str]' = None) -> 'logging.Logger':
     Returns:
         The requested logger.
 
+    .. versionadded:: 1.5.0
+
     """
     if not name or name == ROOT_LOGGER_NAME:
         return logger
@@ -225,6 +233,8 @@ def ensure_output(level: 'Union[int, str]' = logging.DEBUG, *,
         :data:`True` if a handler was added, :data:`False` if output was already
         going somewhere and the existing configuration was left alone.
 
+    .. versionadded:: 1.5.0
+
     """
     if _has_output(logger):
         return False
@@ -251,6 +261,8 @@ def reset(name: 'Optional[str]' = None) -> 'logging.Logger':
         This discards the :envvar:`PCAPKIT_DEVMODE` bootstrap along with
         everything else. To reinstate it, call
         ``configure(logging.DEBUG, stream=sys.stderr)``.
+
+    .. versionadded:: 1.5.0
 
     """
     target = get_logger(name)
@@ -327,6 +339,8 @@ def configure(level: 'Optional[Union[int, str]]' = None, *,
            configure(logging.DEBUG, handler=logging.FileHandler('pcapkit.log'))
            configure(logging.INFO, name='pcapkit.foundation.registry')
 
+    .. versionadded:: 1.5.0
+
     """
     if stream is not None and handler is not None:
         raise ValueError("configure() accepts 'stream' or 'handler', not both")
@@ -386,7 +400,7 @@ def _writes_to(candidate: 'logging.Handler', stream: 'Any') -> 'bool':
 
 
 if DEVMODE:
-    # development mode keeps the historical behaviour: everything, on stderr
+    # development mode logs everything, from DEBUG up, to stderr
     logger.setLevel(logging.DEBUG)
     if not any(_writes_to(installed, handler.stream) for installed in logger.handlers):
         logger.addHandler(handler)

@@ -7,11 +7,11 @@
 :mod:`pcapkit.foundation.reassembly.ip` contains
 :class:`~pcapkit.foundation.reassembly.ip.IP`
 only, which reconstructs fragmented IP packets back to
-origin. The following algorithm implement is based on IP
-reassembly procedure introduced in :rfc:`791`, using
-``RCVBT`` (fragment received bit table). Though another
-algorithm is explained in :rfc:`815`, replacing ``RCVBT``,
-however, this implement still used the elder one.
+origin. The implementation follows the IP reassembly
+procedure introduced in :rfc:`791`, using ``RCVBT``
+(fragment received bit table). :rfc:`815` explains another
+algorithm, replacing ``RCVBT``, but this implementation
+uses the elder one.
 
 """
 from typing import TYPE_CHECKING, Generic
@@ -56,6 +56,16 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         This class is not intended to be instantiated directly,
         but rather used as a base class for the protocol-aware
         reassembly classes.
+
+    .. versionchanged:: 1.5.0
+
+       An overlapping fragment that disagrees with octets already received
+       overwrites them, as :rfc:`791` asks, and the disagreement is recorded in
+       :attr:`Datagram.conflict
+       <pcapkit.foundation.reassembly.data.ip.Datagram.conflict>`
+       (:issue:`477`). An incomplete buffer expires
+       after ``timeout`` seconds of capture time, 60 by default for both IPv4
+       and IPv6.
 
     """
     if TYPE_CHECKING:
@@ -408,7 +418,7 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
             Completion.TIMEOUT if timeout else Completion.PARTIAL
         )
 
-        # if datagram is not implemented
+        # if datagram is incomplete
         if not flag and self._flag_s:
             data = []  # type: list[bytes]
             byte = bytearray()

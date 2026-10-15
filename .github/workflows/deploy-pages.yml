@@ -42,7 +42,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  # Only earns its runners on the schedule trigger now: `Unit Tests` has no
+  # Only earns its runners on the schedule trigger: `Unit Tests` has no
   # schedule trigger of its own, so Saturday's cron run is the one case left
   # where nothing else has already verified this tree, and a gate is still
   # needed. Pull requests never published anyway, and `workflow_run` carries
@@ -94,12 +94,12 @@ jobs:
   deploy-pages:
     needs: [ unit-tests, verdict ]
     # `needs` cannot itself be conditional, so a skipped gate (pull requests,
-    # and now `workflow_run`) has to be accepted explicitly -- by default this
+    # and `workflow_run`) has to be accepted explicitly -- by default this
     # job would inherit the skip. `!cancelled()` rather than `always()` so that
     # cancelling the run still cancels the docs build; a gate that actually
     # failed still blocks.
     #
-    # The `workflow_run` clause is the real gate for a push to main now: it
+    # The `workflow_run` clause is the real gate for a push to main: it
     # reads the verdict `Unit Tests` already reached instead of re-running it,
     # and `verdict` says whether that verdict covers the commit checked out
     # below (#1643). `.event == 'push'` and `.head_branch == 'main'`

@@ -2952,7 +2952,7 @@ class MHUnitTests(unittest.TestCase):
 
         ``NonceIndicesOption.home`` is a
         :class:`~pcapkit.corekit.fields.numbers.UInt16Field` at
-        ``pcapkit/protocols/schema/internet/mh.py:670`` -- a nonce *index* rather
+        ``pcapkit/protocols/schema/internet/mh.py:708`` -- a nonce *index* rather
         than an address -- so ``home=True`` packing as ``1`` is correct, not a
         defect. ``BindingRevocationMessage.code`` makes the same point through a
         :class:`~pcapkit.corekit.fields.misc.SwitchField`, which is why the guard

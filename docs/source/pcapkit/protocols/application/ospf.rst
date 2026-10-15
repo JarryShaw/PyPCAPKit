@@ -31,6 +31,25 @@ as below:
    16       128 ``ospf.auth``      Authentication
    ====== ===== ================== ===============================
 
+.. versionadded:: 1.5.0
+
+   Moved here from ``pcapkit.protocols.link.ospf``, with its data model and
+   header schema. :class:`~pcapkit.protocols.application.ospf.OSPF` derives
+   from :class:`~pcapkit.protocols.application.application.Application`, so
+   its layer is ``'Application'`` (:issue:`719`).
+
+.. versionremoved:: 1.5.0
+
+   ``pcapkit.protocols.link.ospf``, ``pcapkit.protocols.data.link.ospf`` and
+   ``pcapkit.protocols.schema.link.ospf``, with no alias (:issue:`719`).
+
+.. versionchanged:: 1.5.0
+
+   A rebuild keeps the parsed Packet Length and the octets past it, where
+   :meth:`~pcapkit.protocols.application.ospf.OSPF.make` recomputed the
+   length from the payload and dropped those octets; it takes them as
+   ``packet_length`` and ``trailer`` (:issue:`1249`, :issue:`1455`).
+
 .. raw:: html
 
    <br />

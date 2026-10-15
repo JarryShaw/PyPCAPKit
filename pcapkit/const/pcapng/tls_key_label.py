@@ -18,7 +18,13 @@ __all__ = ['TLSKeyLabel']
 
 
 class TLSKeyLabel(EnumRegistry, StrEnum):
-    """[TLSKeyLabel] TLS Key Log Labels"""
+    """[TLSKeyLabel] TLS Key Log Labels
+
+    .. versionadded:: 1.5.0
+
+       Moved here from ``pcapkit.protocols.misc.pcapng`` (:issue:`886`).
+
+    """
 
     #: NSS-historical: not a registered label of :rfc:`9850#section-4.2`'s "TLS
     #: SSLKEYLOGFILE Labels" registry. Defined by the Mozilla NSS

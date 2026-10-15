@@ -164,7 +164,7 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         deny_join: int
         #: Reserved flags (``D`` to ``G``).
         reserved: int
-        #: Use of HMAC-SHA1.
+        #: Use of HMAC-SHA1 under version 0, HMAC-SHA256 under version 1.
         hsa: int
 
     class MPTCPSubtypeJoin(TypedDict):
@@ -679,7 +679,8 @@ class _MPTCP(Schema):
     #: Subtype and flags.
     #:
     #: The forward match is anchored at the option's first octet, not after the
-    #: option header: this schema is what :data:`Option.registry` dispatches to
+    #: option header: this schema is what :attr:`Option.registry
+    #: <pcapkit.protocols.schema.schema.EnumSchema.registry>` dispatches to
     #: for ``kind == Multipath_TCP`` and, unlike the other option schemas, it
     #: does not inherit :class:`Option` and so consumes ``kind`` and ``length``
     #: itself. :rfc:`8684` section 3 therefore puts ``kind`` in bits 0-7,
@@ -1058,7 +1059,7 @@ class MPTCPFastclose(MPTCP, code=Enum_MPTCPOption.MP_FASTCLOSE):
 
 @schema_final
 class FastOpenCookie(Option, code=Enum_Option.TCP_Fast_Open_Cookie):
-    """"Header schema for TCP Fast Open option."""
+    """Header schema for TCP Fast Open option."""
 
     #: Cookie.
     cookie: 'bytes' = ConditionalField(

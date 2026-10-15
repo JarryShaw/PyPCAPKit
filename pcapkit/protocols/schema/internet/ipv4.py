@@ -220,8 +220,10 @@ def quick_start_data_selector(pkt: 'dict[str, Any]') -> 'Field':
         leftover octets are read as a further, fabricated option.
 
     """
-    # NOTE: The enumeration admits ``0`` to ``8`` only, while the field is four
-    # bits wide; a function above ``8`` is just as unassigned.
+    # NOTE: The enumeration admits the whole four-bit range, ``0`` to ``15``,
+    # as an ``Unassigned`` member for every code but ``0`` and ``8``, and only
+    # those two have a schema registered. A value past four bits, which only a
+    # caller-built packet can carry, fails the lookup and is just as unassigned.
     try:
         func = Enum_QSFunction.get(pkt['flags']['func'])
     except EnumValueError:

@@ -27,10 +27,10 @@ schema definitions as well as various customisable interfaces.
    interface/index
    foundation/index
    protocols/index
+   utilities/index
    corekit/index
    toolkit/index
    dumpkit/index
-   utilities/index
    const/index
    vendor/index
 

@@ -298,7 +298,7 @@ class PyShark(EngineBase['PySharkPacket']):
         ext._frnum += 1
         ext._vfunc(ext, packet)
 
-        # write plist
+        # write output
         frnum = f'Frame {ext._frnum}'
         if not ext._flag_q:
             info = packet2dict(packet)

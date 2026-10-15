@@ -27,7 +27,18 @@ if TYPE_CHECKING:
 
 
 class TransportProtocol(EnumLookup, IntEnum):
-    """Transport layer protocol."""
+    """Transport layer protocol.
+
+    .. versionchanged:: 1.5.0
+
+       An ``aenum.IntEnum`` rather than an ``aenum.IntFlag`` (:issue:`808`),
+       numbered sequentially: ``sctp`` is ``3`` and ``dccp`` is ``4``, where
+       they were ``4`` and ``8``, and no :class:`int` is decoded as a ``|``
+       composite (:issue:`860`). :meth:`get` refuses a name no member
+       declares, with :exc:`~pcapkit.utilities.exceptions.EnumKeyError`,
+       rather than minting a member for it (:issue:`808`, :issue:`923`).
+
+    """
 
     # mypy has no aenum plugin, so this class is a plain class to it: every
     # member below is cast rather than left as a bare auto()-valued one --
@@ -148,8 +159,8 @@ class TransportProtocol(EnumLookup, IntEnum):
         Args:
             key: Key to get enum item.
             default: An already-registered value to fall back to when
-                ``key`` resolves to nothing. :data:`~pcapkit.corekit.enum.
-                NO_DEFAULT`, the default, means *no default* -- see
+                ``key`` resolves to nothing.
+                :data:`~pcapkit.corekit.sentinels.NO_DEFAULT`, the default, means *no default* -- see
                 :meth:`~pcapkit.corekit.enum.EnumLookup.get`.
 
         Raises:
@@ -221,6 +232,15 @@ class AppType(EnumRegistry, StrEnum):
     :class:`~pcapkit.const.reg.apptype.dccp.DCCP`. Being memberless is also what
     makes it subclassable at all, since :mod:`aenum` refuses to extend an
     enumeration that already has members.
+
+    .. versionchanged:: 1.5.0
+
+       Split by transport protocol (:issue:`732`): :mod:`pcapkit.const.reg.apptype`
+       is a package, and every assignment is a member of one of the four
+       registries above rather than of this class. ``get()`` raises
+       :exc:`ValueError` for a port outside ``0``-``65535`` (:issue:`758`), and
+       returns an unregistered member rather than minting one for a port the
+       registry does not assign (:issue:`860`).
 
     Note:
         The rows below are the registry entries whose **transport protocol column
@@ -2528,9 +2548,9 @@ class AppType(EnumRegistry, StrEnum):
                 of the work for :issue:`808` -- so it is looked up as the one whole
                 value it already is, exactly like any other bare int: refused
                 when that whole value names no registry, resolved when it
-                happens to equal one instead. Since GitHub issue :issue:`860` moved
-                this class off power-of-two spacing, a hand-built composite
-                is no longer guaranteed to be the former -- see
+                happens to equal one instead. With the sequential values of
+                GitHub issue :issue:`860`, a hand-built composite
+                is not guaranteed to be the former -- see
                 :meth:`_dispatch`'s own body for a value that resolves.
 
         Returns:
@@ -2755,10 +2775,10 @@ class AppType(EnumRegistry, StrEnum):
         The counterpart of :meth:`register_alias`: that method requires
         ``port`` to already carry a member and adds a further name for it;
         this requires the opposite -- ``port`` unclaimed in this registry --
-        and mints the first. :meth:`get` can no longer do this itself as of
+        and mints the first. :meth:`get` does not do this itself, per
         GitHub issue :issue:`860` (the owner's ruling there: only IANA-registered values
         are legitimate, a new entry is properly created through :meth:`register`,
-        and ``get`` lacks the information to create one), so this is now the only
+        and ``get`` lacks the information to create one), so this is the only
         way to add a service this registry does not already carry.
 
         Deliberately scoped like :meth:`register_alias` to **this**
@@ -2900,13 +2920,14 @@ class AppType(EnumRegistry, StrEnum):
         its :data:`__registry__` side table alike.
 
         Used by :meth:`_missing_` and :meth:`get` for a port neither resolves
-        to a real, IANA-registered service, so that such a lookup no longer
-        grows either table -- contrast :meth:`register`, the explicit,
-        caller-named path that still does.
+        to a real, IANA-registered service, so that such a lookup grows
+        neither table -- contrast :meth:`register`, the explicit,
+        caller-named path that does.
 
         Reconstructs :attr:`svc`, :attr:`port` and :attr:`proto` the same way
-        :meth:`__new__` would: :meth:`~pcapkit.corekit.enum.
-        EnumRegistry._unregistered_member` bypasses :meth:`__new__` entirely
+        :meth:`__new__` would:
+        :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`
+        bypasses :meth:`__new__` entirely
         (it builds through ``cls._member_type_.__new__`` directly), so this
         class's own three attributes would otherwise be missing and every
         method reading them (:meth:`__repr__`, :meth:`__str__`, :meth:`__int__`,

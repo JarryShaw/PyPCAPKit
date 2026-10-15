@@ -21,8 +21,7 @@ Octets      Bits        Name                    Description
   ?           ?   ``esp.icv``             Integrity Check Value (ICV, variable)
 ======= ========= ===================== ==============================================
 
-Unlike every other protocol in :mod:`pcapkit`, ESP is **not** self
-describing. :rfc:`4303` places the ``Pad Length`` and ``Next Header``
+ESP is **not** self describing. :rfc:`4303` places the ``Pad Length`` and ``Next Header``
 fields *inside* the ciphertext, and leaves the length of the ``Integrity
 Check Value`` to be determined by the Security Association (SA), which is
 negotiated out of band. Therefore:
@@ -36,6 +35,8 @@ negotiated out of band. Therefore:
   off the ICV, verifies integrity, decrypts, strips the padding using
   ``Pad Length``, and dispatches the recovered plaintext to the next layer
   using ``Next Header`` -- so an ESP tunnelled TCP segment decodes as TCP.
+
+.. versionadded:: 1.5.0
 
 .. autoclass:: pcapkit.protocols.internet.esp.ESP
    :no-members:

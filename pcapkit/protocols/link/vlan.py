@@ -10,16 +10,17 @@ the tag layout shared by every VLAN tag [*]_. The two concrete tags live in
 modules of their own, since they are reached through different registry indices
 -- :class:`~pcapkit.protocols.link.c_tag.C_Tag` for the 802.1Q customer tag
 (``0x8100``) and :class:`~pcapkit.protocols.link.s_tag.S_Tag` for the 802.1ad
-service tag (``0x88A8``). The tag structure is described as below:
+service tag (``0x88A8``). The tag structure is described as below, keyed as for
+a customer tag; a service tag's keys start ``s_tag`` instead:
 
 ======= ========= ====================== =============================
 Octets      Bits        Name                    Description
 ======= ========= ====================== =============================
-  0           0   ``vlan.tci``              Tag Control Information
-  0           0   ``vlan.tci.pcp``          Priority Code Point
-  0           3   ``vlan.tci.dei``          Drop Eligible Indicator
-  0           4   ``vlan.tci.vid``          VLAN Identifier
-  2          16   ``vlan.type``             Protocol (Internet Layer)
+  0           0   ``c_tag.tci``             Tag Control Information
+  0           0   ``c_tag.tci.pcp``         Priority Code Point
+  0           3   ``c_tag.tci.dei``         Drop Eligible Indicator
+  0           4   ``c_tag.tci.vid``         VLAN Identifier
+  2          16   ``c_tag.type``            Protocol (Internet Layer)
 ======= ========= ====================== =============================
 
 The two tags carry an **identical** tag control information layout -- the same
@@ -82,14 +83,22 @@ class VLAN(Link[Data_VLAN, Schema_VLAN],  # pylint: disable=abstract-method
     The class implements the whole of the tag -- both parsing and construction --
     since the customer and service tags are byte-for-byte identical. What it
     deliberately leaves to its subclasses is only how the tag *names* itself:
-    :attr:`name`, :attr:`alias` and
+    :attr:`~pcapkit.protocols.protocol.Protocol.name`,
+    :attr:`~pcapkit.protocols.protocol.Protocol.alias` and
     :attr:`~pcapkit.protocols.protocol.Protocol.info_name`.
 
     It is abstract for the same reason :class:`~pcapkit.protocols.internet.ip.IP`
     is: :attr:`~pcapkit.protocols.protocol.Protocol.name` is declared
     abstract by :class:`~pcapkit.protocols.protocol.ProtocolBase` and is not
     defined here, so the class cannot be instantiated. Bind
-    :class:`C_Tag` or :class:`S_Tag`, never this class.
+    :class:`~pcapkit.protocols.link.c_tag.C_Tag` or
+    :class:`~pcapkit.protocols.link.s_tag.S_Tag`, never this class.
+
+    .. versionchanged:: 1.5.0
+
+       Became an abstract base. The 802.1Q customer tag it implemented, with its
+       ``name``, ``alias`` and ``info_name``, moved to
+       :class:`~pcapkit.protocols.link.c_tag.C_Tag`.
 
     """
 

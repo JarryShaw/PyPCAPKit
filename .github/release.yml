@@ -11,12 +11,12 @@
 # matching on the `type(scope):` subject prefix this project actually uses, so
 # the type a pull request announces in its title cannot reach this file.
 #
-# A labelling programme has since put a type label on every merged pull request
-# (zero exceptions, and every new one too), so the old survey this file cited --
-# 40 pull requests, mostly untyped, hence a bare Dependencies/catch-all split --
-# is stale, and a category per label is now possible. Sampling 334 merged pull
-# requests (`gh pr list --state merged --limit 400`) gives the frequency below;
-# zero carry no type label:
+# Merged pull requests carry a type label, set by hand, which is what makes a
+# category per label possible -- an earlier survey of 40 pull requests,
+# mostly untyped, supported only a bare Dependencies/catch-all split.
+#
+# Sampling 334 merged pull requests (`gh pr list --state merged --limit 400`)
+# gives the frequency below; zero carry no type label:
 #
 #   fix 124, dependencies 97, breaking 50, ci 41, test 31, docs 28, feat 12,
 #   release 10, chore 9, perf 7, const 2, refactor 2
@@ -67,8 +67,8 @@
 # of everything else on a first read. This file takes the former; flip its
 # position in the list below if that judgement is wrong.
 #
-# `*` catches whatever matches none of the categories above -- currently
-# nothing, since every merged pull request carries a type label, but it stays
+# `*` catches whatever matches none of the categories above -- nothing in the
+# sample, since every pull request in it carries a type label, but it stays
 # last regardless so an unlabelled future pull request still lands somewhere
 # instead of silently vanishing from the notes.
 #

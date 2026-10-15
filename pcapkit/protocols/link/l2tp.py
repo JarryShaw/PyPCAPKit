@@ -120,6 +120,11 @@ class L2TP(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-metho
     defined here, so the class cannot be instantiated. Bind a version, never this
     class.
 
+    .. versionchanged:: 1.5.0
+
+       Became an abstract base for the family; its version-2 parsing moved to
+       :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2`.
+
     """
 
     ##########################################################################
@@ -134,7 +139,7 @@ class L2TP(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-metho
     #: every consumer would have to know the version to find the data.
     @property
     def info_name(self) -> 'Literal["l2tp"]':
-        """Key name of the :attr:`info` dict."""
+        """Key name of the :attr:`~pcapkit.protocols.protocol.Protocol.info` dict."""
         return 'l2tp'
 
     ##########################################################################

@@ -14,9 +14,6 @@ Security (IPsec) protocol family [*]_, eg.
    :no-members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
    .. automethod:: id
 
 .. rubric:: Footnotes

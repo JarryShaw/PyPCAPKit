@@ -184,14 +184,17 @@ protocol number is refused.
 
 **Swapping** :class:`~pcapkit.protocols.link.link.Link` **for**
 :class:`~pcapkit.protocols.application.application.Application` **is not name-for-name.**
-Counting the names each class body sets, whether new or overriding
-:class:`~pcapkit.protocols.protocol.ProtocolBase`'s, ``Link`` has
-seven -- ``__data__``, ``__layer__``, ``__proto__``, ``__schema__``,
-``_read_protos``, ``register`` and ``layer`` -- and ``Application`` eight: the four
-they share (``__data__``, ``__layer__``, ``__schema__``, ``layer``) plus
-``__index__``, ``__post_init__``, ``_decode_next_layer`` and ``_import_next_layer``.
-``Link`` overrides three of those that ``Application`` does not -- ``__proto__``,
-``register`` and ``_read_protos`` -- but all three also exist on ``ProtocolBase``, so
+Counting the names in each class's own namespace, whether new or overriding
+:class:`~pcapkit.protocols.protocol.ProtocolBase`'s, and including those
+``ProtocolBase.__init_subclass__`` sets there, ``Link`` has
+ten -- ``__data__``, ``__layer__``, ``__post_init__``, ``__proto__``,
+``__schema__``, ``_read_protos``, ``_shipped_proto``, ``from_data``, ``register`` and
+``layer`` -- and ``Application`` nine: the six they share (``__data__``, ``__layer__``,
+``__post_init__``, ``__schema__``, ``from_data``, ``layer``) plus ``__index__``,
+``_decode_next_layer`` and ``_import_next_layer``.
+``Link`` overrides four of those that ``Application`` does not -- ``__proto__``,
+``register``, ``_read_protos`` and ``_shipped_proto``, the last set because ``Link``
+defines its own ``__proto__`` -- but all four also exist on ``ProtocolBase``, so
 the strict difference ``Link`` minus ``Application`` minus ``ProtocolBase`` is **empty**
 and every one of them still resolves on ``OSPF``. What changes is which registry it
 resolves *to*: ``OSPF.__proto__`` is ``ProtocolBase.__proto__`` rather than

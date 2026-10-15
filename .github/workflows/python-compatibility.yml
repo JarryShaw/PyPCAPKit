@@ -45,8 +45,8 @@ jobs:
         run: python3 util/python_versions.py --github-output
 
   compatibility:
-    # Named "Python ${{ matrix.python-version }}" until now, which collided
-    # exactly with the Unit Tests matrix job of the same name: `gh pr checks`
+    # Not named "Python ${{ matrix.python-version }}": that name collided
+    # exactly with the Unit Tests matrix job of the same name, and `gh pr checks`
     # showed two rows reading `Python 3.10`, one a 13-second import smoke test
     # and one a three-minute test run, with nothing to tell them apart.
     #
@@ -94,8 +94,8 @@ jobs:
           python -m pip install -U pip setuptools wheel
           python -m pip install -e .
 
-      # One annotation saying why, so a failed leg -- 3.7's, today, where the
-      # editable install succeeds and 41 modules do not compile -- is legible
+      # One annotation saying why, so a failed leg -- such as 3.7's, where the
+      # editable install succeeds and the sources do not compile -- is legible
       # from the run summary without opening the log. ANNOTATION_LEVEL makes it
       # a warning on a KTLO leg (#1672). Each title escapes `,` as `%2C`: the
       # runner splits a command's properties on `,`, so the KTLO leg's title

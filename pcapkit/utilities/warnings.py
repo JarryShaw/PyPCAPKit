@@ -55,6 +55,12 @@ The one exception is a parse :mod:`pcapkit` runs on trial: :class:`hold_warnings
 holds back its warnings, on both channels, until the parse is kept, and drops
 them if it is discarded (:issue:`1580`).
 
+.. versionremoved:: 1.5.0
+
+   ``pcapkit.utilities.warnings.DEVMODE``, which 1.4.x imported from
+   :mod:`pcapkit.utilities.logging`; read
+   :data:`pcapkit.utilities.logging.DEVMODE` instead.
+
 """
 import contextvars
 import inspect
@@ -136,6 +142,12 @@ def warn(message: 'Union[str, Warning]', category: 'Type[Warning]',
         Inside a :class:`hold_warnings` block the warning is held back instead,
         with the frame it is attributed to, and reported from there only if the
         block keeps it.
+
+    .. versionchanged:: 1.5.0
+
+       A warning is reported exactly once on each channel, in development mode
+       as outside it (:issue:`363`), and the :mod:`warnings` channel answers to
+       the application's filters alone (:issue:`364`).
 
     """
     if stacklevel is None:
@@ -319,17 +331,18 @@ class BaseWarning(UserWarning):
     of :func:`warn`, which is called once per complaint; a warning object may be
     built without ever being reported, and the two must not be confused.
 
-    Note:
-        Up to and including v1.4.1, this constructor called
-        ``warnings.simplefilter('ignore', type(self))`` outside development
-        mode, which inserted an entry at the front of the process-global
-        :data:`warnings.filters` -- overriding whatever the host application,
-        :option:`-W` or the test runner had configured, and invalidating every
-        module's ``__warningregistry__`` so that unrelated warnings re-fired.
-        It also logged the warning a second time under
-        :data:`~pcapkit.utilities.logging.DEVMODE`. Both are gone; filtering is
-        the application's business, and is done through the standard
-        :mod:`warnings` machinery.
+    .. versionchanged:: 1.5.0
+
+       The constructor has no side effects (:issue:`364`). In 1.4.x it called
+       ``warnings.simplefilter('ignore', type(self))`` outside development
+       mode, which inserted an entry at the front of the process-global
+       :data:`warnings.filters` -- overriding whatever the host application,
+       :option:`-W` or the test runner had configured, and invalidating every
+       module's ``__warningregistry__`` so that unrelated warnings re-fired.
+       It also logged the warning a second time under
+       :data:`~pcapkit.utilities.logging.DEVMODE`. Filtering is the
+       application's business, and is done through the standard
+       :mod:`warnings` machinery.
 
     """
 

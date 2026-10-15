@@ -85,6 +85,15 @@ class ARP(Link[Data_ARP, Schema_ARP],
     - Dynamic Reverse Address Resolution Protocol (:class:`~pcapkit.protocols.application.rarp.DRARP`) [:rfc:`1931`]
     - Inverse Address Resolution Protocol (:class:`~pcapkit.protocols.link.arp.InARP`) [:rfc:`2390`]
 
+    .. versionchanged:: 1.5.0
+
+       :meth:`make` refuses a :obj:`bool` protocol address (:issue:`540`), packs
+       a non-IP protocol address from its *hex* text rather than as ASCII, and
+       checks every address against ``hlen`` and ``plen`` (:issue:`1139`). An
+       Ethernet ``hlen`` other than 6 rebuilds (:issue:`1205`), and
+       :meth:`read` takes an IPv4 or IPv6 protocol address only when both
+       ``ptype`` and the address length agree (:issue:`1206`).
+
     """
     #: Name of corresponding protocol.
     _name: 'Literal["Address Resolution Protocol", "Inverse Address Resolution Protocol", "Reverse Address Resolution Protocol", "Dynamic Reverse Address Resolution Protocol"]'  # pylint: disable=line-too-long
@@ -484,7 +493,14 @@ class ARP(Link[Data_ARP, Schema_ARP],
 
 
 class InARP(ARP, schema=Schema_ARP, data=Data_ARP):
-    """This class implements Inverse Address Resolution Protocol."""
+    """This class implements Inverse Address Resolution Protocol.
+
+    .. versionchanged:: 1.5.0
+
+       Parses with the ARP schema rather than falling back to the raw one
+       (:issue:`1204`).
+
+    """
 
     ##########################################################################
     # Methods.

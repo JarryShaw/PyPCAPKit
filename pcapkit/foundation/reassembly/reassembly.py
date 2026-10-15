@@ -7,8 +7,8 @@
 :mod:`pcapkit.foundation.reassembly.reassembly` contains
 :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` only,
 which is an abstract base class for all reassembly classes,
-bases on algorithms described in :rfc:`791` and :rfc:`815`,
-implements datagram reassembly of IP and TCP packets.
+based on algorithms described in :rfc:`791` and :rfc:`815`,
+that implement datagram reassembly of IP and TCP packets.
 
 """
 import abc
@@ -540,6 +540,13 @@ class Reassembly(ReassemblyBase[_PT, _DT, _IT, _BT], Generic[_PT, _DT, _IT, _BT]
             will be discarded after callback)
         timeout: reassembly timeout in seconds, on the capture's own clock;
             :data:`None` selects the protocol's :attr:`__timeout__` default
+
+    .. versionchanged:: 1.5.0
+
+       Registration is opt-in, under the ``protocol`` class keyword; 1.4.x
+       registered every subclass, under its :attr:`name` when the keyword was
+       omitted (:issue:`514`). The ``timeout`` argument is added: a buffer
+       older than it on the capture's clock is abandoned.
 
     """
 

@@ -184,6 +184,24 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
          - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_ip_dff`
          - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_ip_dff`
 
+    .. versionchanged:: 1.5.0
+
+       * The ILNP nonce is sized with a ceiling rather than a floor
+         (:issue:`601`).
+       * The RPL option keeps its reserved flag bits on rebuild and accepts
+         :rfc:`6553` sub-TLVs (:issue:`1199`).
+       * A rebuild reproduces the option area byte for byte: its padding, a
+         PadN with no data, the SMF_DPD, CALIPSO, PDM and ILNP Nonce options,
+         and unassigned Quick-Start function codes (:issue:`1200`,
+         :issue:`1228`, :issue:`1229`, :issue:`1232` to :issue:`1234`,
+         :issue:`1237`); a CALIPSO option keeps its trailing pad and its
+         length (:issue:`1403`).
+       * The MPL, ``IP_DFF`` and Quick-Start options keep their reserved bits
+         on rebuild, and ``IP_DFF`` takes the ``Opt Data Len`` of ``3`` that
+         :rfc:`6971` Errata ID 3937 gives, where it took ``2`` (:issue:`1235`).
+       * A PadN option's data and the "Not Used" octet of a Quick-Start report
+         are kept as captured rather than zeroed (:issue:`1223`).
+
     """
 
     ##########################################################################

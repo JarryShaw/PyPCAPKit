@@ -3,7 +3,7 @@
 """Mobility Header
 
 :mod:`pcapkit.protocols.internet.mh` contains
-:class:`~pcapkit.protocols.internet.mh.MH` only,
+:class:`~pcapkit.protocols.internet.mh.MH`,
 which implements extractor for Mobility Header
 (MH) [*]_, whose structure is described as below:
 
@@ -13,7 +13,7 @@ Octets      Bits        Name                    Description
   0           0   ``mh.next``                 Next Header
   1           8   ``mh.length``               Header Length
   2          16   ``mh.type``                 Mobility Header Type
-  3          24                               Reserved
+  3          24   ``mh.reserved``             Reserved
   4          32   ``mh.chksum``               Checksum
   6          48   ``mh.data``                 Message Data
 ======= ========= ================== ===============================
@@ -1152,6 +1152,15 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
        * - :attr:`~pcapkit.const.mh.cga_extension.CGAExtension.Exp_FFFF`
          - :meth:`~pcapkit.protocols.internet.mh.MH._read_ext_exp`
          - :meth:`~pcapkit.protocols.internet.mh.MH._make_ext_exp`
+
+    .. versionchanged:: 1.5.0
+
+       * The FBU and FBack Lifetime is read and built as plain seconds, per
+         :rfc:`5568` (:issue:`493`).
+       * A rebuild keeps a PadN with no data, the reserved fields, the reserved
+         bits of the flag fields and the octets each padding field captured
+         (:issue:`1223`, :issue:`1324`, :issue:`1329`, :issue:`1418`,
+         :issue:`1437`).
 
     """
 
@@ -4821,35 +4830,13 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         :attr:`self.__option__ <MH.__option__>`.
 
         Note:
-            Dispatch is on the sub-option **type code**, never on ``isinstance`` of
-            the schema class, and that is load-bearing rather than a matter of
-            taste. Every schema class descends from
-            :class:`collections.abc.Mapping`, and on Python 3.10 and older they do
-            **not** each get their own ``_abc_impl`` -- they share
-            :class:`~pcapkit.protocols.schema.schema.Schema`'s. One
-            :class:`abc.ABCMeta` cache therefore serves the whole family, and it is
-            keyed only on the class being *tested*, not on the class being tested
-            *against*. So one ``issubclass`` answer poisons every later question
-            about the same class:
-
-            .. code-block:: python
-
-               >>> issubclass(ANIGeoLocationSuboption, Schema)                 # True, cached
-               True
-               >>> issubclass(ANIGeoLocationSuboption, ANINetworkIdentifierSuboption)
-               True   # wrong -- the cached True for Schema is handed back
-
-            The wrong answer goes both ways: a correct ``False`` against a sibling
-            then makes ``isinstance(sub, Schema)`` ``False``, which is what
-            :meth:`ListField.pack
-            <pcapkit.corekit.fields.collections.ListField.pack>` consults, so
-            packing a perfectly good option fails with
-            :exc:`~pcapkit.utilities.exceptions.FieldValueError`. Python 3.11 and
-            newer give each class its own cache, so the checks behave there.
-
-            The code is on the wire and the registry keys on it, so it is both the
-            cheaper discriminator and the only one that cannot be poisoned. The
-            same reasoning applies to :meth:`_read_ani_suboptions`,
+            Dispatch is on the sub-option **type code** rather than on
+            ``isinstance`` of the schema class: the code is on the wire and the
+            registry keys on it, so it is the cheaper discriminator. A class test
+            would also be sound, since every
+            :class:`~pcapkit.protocols.schema.schema.Schema` subclass carries its
+            own :class:`abc.ABCMeta` cache (:issue:`439`). The same reasoning
+            applies to :meth:`_read_ani_suboptions`,
             :meth:`_read_qos_attributes`, :meth:`_read_lcmp_suboptions` and their
             four constructor counterparts.
 
@@ -5566,7 +5553,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             The membership context is an IGMP group address (:rfc:`1112`,
             :rfc:`2236`) or an IGMPv3 group record (:rfc:`3376#section-4.2`),
             which belong to IGMP rather than to the mobility header, so they are
-            recorded opaquely. :attr:`igmp_type` says which: ``0x12`` IGMPv1,
+            recorded opaquely.
+            :attr:`~pcapkit.protocols.data.internet.mh.ActiveMulticastSubscriptionIPv4Option.igmp_type`
+            says which: ``0x12`` IGMPv1,
             ``0x16`` IGMPv2, ``0x22`` IGMPv3.
 
         Args:
@@ -5611,7 +5600,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             For MLDv2 the context is an :rfc:`3810#section-5.2` multicast address
             record; for MLDv1 it is a reserved word followed by a multicast address
             [:rfc:`7161#section-4.1.3`]. Both belong to MLD, so the context is
-            recorded opaquely and :attr:`mld_type` says which form it is in.
+            recorded opaquely and
+            :attr:`~pcapkit.protocols.data.internet.mh.ActiveMulticastSubscriptionIPv6Option.mld_type`
+            says which form it is in.
 
         Args:
             schema: Parsed option schema.
@@ -9514,7 +9505,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Note:
             The option length is derived from the address family rather than from
-            :attr:`code`, so that the two cannot be emitted disagreeing.
+            ``code``, so that the two cannot be emitted disagreeing.
 
         """
         if option is not None:

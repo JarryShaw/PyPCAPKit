@@ -48,7 +48,7 @@ class UDP(Transport[Data_UDP, Schema_UDP],
           schema=Schema_UDP, data=Data_UDP):
     """This class implements User Datagram Protocol.
 
-    This class currently supports parsing of the following protocols, which are
+    This class supports parsing of the following protocols, which are
     registered in the :attr:`self.__proto__ <pcapkit.protocols.transport.udp.UDP.__proto__>`
     attribute:
 
@@ -70,6 +70,14 @@ class UDP(Transport[Data_UDP, Schema_UDP],
         version from the payload and delegates.
         :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.TCP.__proto__>`
         binds the same class for its HTTP ports.
+
+    .. versionchanged:: 1.5.0
+
+       :meth:`make` takes ``total_length``, which a
+       :meth:`~pcapkit.protocols.protocol.Protocol.from_data` rebuild
+       passes so that a truncated capture keeps its declared Length
+       (:issue:`1155`), and ``trailer``, so that the octets past the Length
+       field rebuild as captured (:issue:`1461`).
 
     """
 

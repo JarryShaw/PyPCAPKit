@@ -13,25 +13,25 @@ as below:
 ======= ========= ====================== =============================================
 Octets      Bits        Name                    Description
 ======= ========= ====================== =============================================
-  0           0   ``ip.version``              Version (``4``)
-  0           4   ``ip.hdr_len``              Internal Header Length (IHL)
-  1           8   ``ip.tos.pre``              ToS Precedence
-  1          11   ``ip.tos.del``              ToS Delay
-  1          12   ``ip.tos.thr``              ToS Throughput
-  1          13   ``ip.tos.rel``              ToS Reliability
-  1          14   ``ip.tos.ecn``              Explicit Congestion Notification (ECN)
-  2          16   ``ip.len``                  Total Length
-  4          32   ``ip.id``                   Identification
-  6          48                               Reserved Bit (must be ``\\x00``)
-  6          49   ``ip.flags.df``             Don't Fragment (DF)
-  6          50   ``ip.flags.mf``             More Fragments (MF)
-  6          51   ``ip.offset``               Fragment Offset
-  8          64   ``ip.ttl``                  Time To Live (TTL)
-  9          72   ``ip.protocol``             Protocol (Transport Layer)
-  10         80   ``ip.checksum``             Header Checksum
-  12         96   ``ip.src``                  Source IP Address
-  16        128   ``ip.dst``                  Destination IP Address
-  20        160   ``ip.options``              IP Options (if IHL > ``5``)
+  0           0   ``ipv4.version``        Version (``4``)
+  0           4   ``ipv4.hdr_len``        Internet Header Length (IHL)
+  1           8   ``ipv4.tos.pre``        Precedence
+  1          11   ``ipv4.tos.del``        Delay
+  1          12   ``ipv4.tos.thr``        Throughput
+  1          13   ``ipv4.tos.rel``        Reliability
+  1          14   ``ipv4.tos.ecn``        Explicit Congestion Notification (ECN)
+  2          16   ``ipv4.len``            Total Length
+  4          32   ``ipv4.id``             Identification
+  6          48                           Reserved Bit (must be ``\\x00``)
+  6          49   ``ipv4.flags.df``       Don't Fragment (DF)
+  6          50   ``ipv4.flags.mf``       More Fragments (MF)
+  6          51   ``ipv4.offset``         Fragment Offset
+  8          64   ``ipv4.ttl``            Time To Live (TTL)
+  9          72   ``ipv4.protocol``       Protocol (Transport Layer)
+  10         80   ``ipv4.checksum``       Header Checksum
+  12         96   ``ipv4.src``            Source IP Address
+  16        128   ``ipv4.dst``            Destination IP Address
+  20        160   ``ipv4.options``        IP Options (if IHL > ``5``)
 ======= ========= ====================== =============================================
 
 .. [*] https://en.wikipedia.org/wiki/IPv4
@@ -185,6 +185,28 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
        * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.QS`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_qs`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_qs`
+
+    .. versionchanged:: 1.5.0
+
+       * Options dispatch through :attr:`__option__` rather than by method
+         name (:issue:`429`).
+       * A rebuild keeps the fragment offset in 8-octet units, and a header
+         without options rebuilds (:issue:`494`).
+       * A rebuild from
+         :meth:`~pcapkit.protocols.internet.internet.Internet.from_data`
+         keeps the Total Length a truncated capture declares (:issue:`1155`),
+         and the octets past it as
+         :attr:`~pcapkit.protocols.schema.internet.ipv4.IPv4.trailer`
+         (:issue:`1209`).
+       * A header length declared past the data raises
+         :exc:`~pcapkit.utilities.exceptions.ProtocolError` on read
+         (:issue:`1404`).
+       * A rebuild reproduces the option area, the route and timestamp slots,
+         the SEC and TS fields and the reserved bits byte for byte
+         (:issue:`1316` to :issue:`1322`, :issue:`1326`, :issue:`1349`,
+         :issue:`1391` to :issue:`1393`).
+       * The TS option's maker takes an address as a string as well
+         (:issue:`1402`).
 
     """
 
@@ -1347,7 +1369,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         octets for options.
 
         Args:
-            option: IPv4 options
+            options: IPv4 options
             padding: octets after the End of Option List
 
         Returns:
@@ -1665,6 +1687,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             kind: option type code
             option: option data
             counts: maximum number of timestamps to record
+            overflow: overflow count, i.e. the number of modules that could not
+                register a timestamp (:rfc:`791#section-3.1`)
             timestamp: list of timestamps, i.e. the slots before the pointer, or
                 a mapping of the addresses to their timestamps; an address may
                 be anything :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`
@@ -1790,8 +1814,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             info: additional security information
             **kwargs: arbitrary keyword arguments
 
-            Returns:
-                Constructed option schema.
+        Returns:
+            Constructed option schema.
 
         """
         if option is not None:

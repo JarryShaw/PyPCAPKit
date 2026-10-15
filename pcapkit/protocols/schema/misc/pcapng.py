@@ -737,8 +737,9 @@ class OptionEnumField(EnumField):
             instead of ``get()``'s own miss path, for pickle-safety: that method
             carries its own ``__reduce_ex__``, so a member built this way
             round-trips through :mod:`pickle` -- see its own docstring -- which
-            :meth:`~pcapkit.const.pcapng.option_type.OptionType.
-            _unregistered_member`'s override, the miss path, does not. The override's
+            the override of
+            :meth:`~pcapkit.const.pcapng.option_type.OptionType._unregistered_member`,
+            the miss path, does not. The override's
             :attr:`~pcapkit.const.pcapng.option_type.OptionType._value_` is the
             *formatted* display string (``'opt_unknown [8888]'``, not ``8888``),
             so ``pickle.dumps`` on one succeeds but ``pickle.loads`` of the result
@@ -896,6 +897,11 @@ class Option(EnumSchema[Enum_OptionType]):
 
         See Also:
             - :class:`pcapkit.const.pcapng.option_type.OptionType`
+
+        .. versionchanged:: 1.5.0
+
+           The class keyword ``namespace`` is renamed ``ns``, with no alias
+           (:issue:`439`).
 
         """
         # NOTE: the base hook goes first, before any of the registration work
@@ -1545,9 +1551,9 @@ class EnhancedPacketBlock(BlockType, code=Enum_BlockType.Enhanced_Packet_Block):
     length: 'int' = UInt32Field(callback=byteorder_callback)
     #: Interface ID.
     interface_id: 'int' = UInt32Field(callback=byteorder_callback)
-    #: Higher 32-bit of timestamp (in seconds).
+    #: Timestamp (higher 32 bits).
     timestamp_high: 'int' = UInt32Field(callback=byteorder_callback)
-    #: Lower 32-bit of timestamp (in seconds).
+    #: Timestamp (lower 32 bits).
     timestamp_low: 'int' = UInt32Field(callback=byteorder_callback)
     #: Captured packet length.
     captured_len: 'int' = UInt32Field(callback=byteorder_callback)
@@ -2311,7 +2317,7 @@ class WireGuardKeyLog(DSBSecrets, code=Enum_SecretsType.WireGuard_Key_Log):
 class ZigBeeNWKKey(DSBSecrets, code=Enum_SecretsType.ZigBee_NWK_Key):
     """Header schema for ZigBee NWK Key and ZigBee PANID secrets data."""
 
-    #: AES-128 NKW key.
+    #: AES-128 NWK key.
     key: 'bytes' = BytesField(length=16)
     #: ZigBee PANID.
     panid: 'int' = UInt16Field(byteorder='little')

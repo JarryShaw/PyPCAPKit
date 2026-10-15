@@ -10,6 +10,15 @@ which is a base class for application layer protocols, eg.
 :class:`HTTP/2 <pcapkit.protocols.application.httpv2.HTTP>`
 and etc.
 
+.. versionchanged:: 1.5.0
+
+   :meth:`~pcapkit.protocols.application.application.Application._decode_next_layer`
+   and
+   :meth:`~pcapkit.protocols.application.application.Application._import_next_layer`
+   accept the ``-1`` sentinel, so an application layer protocol can carry the
+   rest of its packet undissected as its payload; every call raised
+   :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` (:issue:`719`).
+
 .. autoclass:: pcapkit.protocols.application.application.Application
    :no-members:
    :show-inheritance:

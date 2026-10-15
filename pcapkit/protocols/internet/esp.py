@@ -5,7 +5,7 @@
 .. module:: pcapkit.protocols.internet.esp
 
 :mod:`pcapkit.protocols.internet.esp` contains
-:class:`~pcapkit.protocols.internet.esp.ESP` only,
+:class:`~pcapkit.protocols.internet.esp.ESP`,
 which implements extractor for Encapsulating
 Security Payload (ESP) [*]_, whose structure is
 described as below:
@@ -159,6 +159,8 @@ Known Limitations
 .. _cryptography: https://cryptography.io
 
 .. [*] https://en.wikipedia.org/wiki/IPsec
+
+.. versionadded:: 1.5.0
 
 """
 import enum
@@ -502,7 +504,8 @@ class SecurityAssociation:
             unless ``salt`` is given separately.
         salt: AEAD salt, when not appended to ``encryption_key``.
         integrity: Integrity algorithm, c.f. :meth:`IntegritySuite.get`. Must
-            be :attr:`Integrity.NONE` for an AEAD suite, which provides its own.
+            be :attr:`Integrity.NONE <pcapkit.const.esp.integrity.Integrity.NONE>`
+            for an AEAD suite, which provides its own.
         integrity_key: Integrity key.
         icv_length: Override for the ICV length, in octets. Needed for the
             long standing implementation bug noted in :rfc:`8221` §6, where
@@ -984,9 +987,11 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
     next-layer protocol in IPv4, so it also travels directly as an IPv4
     payload, which is what qualifies it for a base besides
     :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`.
-    :attr:`payload` and :attr:`protochain` come from
-    :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`; :attr:`protocol`
-    is spelled out below for the reason given there.
+    :attr:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.payload` and
+    :attr:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protochain` come from
+    :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`; ``protocol`` is
+    spelled out here for the reason given on
+    :attr:`IPv6_Ext.protocol <pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protocol>`.
 
     Note:
         :rfc:`8200#section-4.5` says outright that ESP "is not considered an

@@ -27,7 +27,7 @@ died outright::
 
 The parse path has the identical pair of branches in ``_read_mptcp_join`` and is fine,
 because :meth:`~pcapkit.protocols.transport.tcp.TCP.read` assigns ``self._flags`` at
-``tcp.py:485``, before it parses the options at ``tcp.py:494``. Only the make path was
+``tcp.py:510``, before it parses the options at ``tcp.py:530``. Only the make path was
 inverted.
 
 The fix is the hoist: the ``flags`` dict and the ``_flag`` accumulation move above the
@@ -104,7 +104,7 @@ in-library exception contract.
 
 The read path was checked for the same shape of problem and does **not** have it:
 :func:`~pcapkit.protocols.schema.transport.tcp.mptcp_data_selector` guards the flagless
-case at ``schema/transport/tcp.py:204-212`` and raises
+case at ``schema/transport/tcp.py:242-250`` and raises
 :exc:`~pcapkit.utilities.exceptions.FieldError` before ``_read_mptcp_join`` is reached at
 all, so its own closing ``ProtocolError`` stays unreachable and its
 ``cast('Enum_Flags', 0)`` is left alone. Changing it would alter the ``connection`` value

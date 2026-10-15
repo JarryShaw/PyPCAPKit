@@ -32,7 +32,7 @@ class UDP(Schema):
     #: Checksum of UDP packet.
     checksum: 'bytes' = BytesField(length=2)
     #: Payload. A Length below the header's own 8 octets leaves the length
-    #: negative, which takes the rest of the datagram, as before.
+    #: negative, which takes the rest of the datagram.
     payload: 'bytes' = PayloadField(length=lambda pkt: pkt['len'] - 8)
     #: Octets captured past the Length field, c.f.
     #: :attr:`IPv4.trailer <pcapkit.protocols.schema.internet.ipv4.IPv4.trailer>`.

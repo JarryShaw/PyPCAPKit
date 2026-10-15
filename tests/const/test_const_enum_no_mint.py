@@ -1045,9 +1045,9 @@ def is_manufactured(name_arg: 'Optional[ast.expr]') -> 'bool':
         # safe one (a false positive is loud and gets a fixture; a false
         # negative ships quietly), and no real call site under
         # ``pcapkit/const``/``pcapkit/vendor`` is affected either way
-        # (measured: the sweep stays at 1012/0). It genuinely does over-flag:
-        # ``value.upper()`` alone is exempt (it is the receiver case just
-        # above), but the exact same expression as an *argument* --
+        # (measured at round 5: the sweep stayed at 1012/0). It genuinely
+        # does over-flag: ``value.upper()`` alone is exempt (it is the
+        # receiver case just above), but the exact same expression as an *argument* --
         # ``str(value.upper())``, ``helper(value.upper())`` -- flags, so
         # wrapping an already-exempt transform in one more call changes the
         # verdict. ``NAMES.get(value, 'unknown')`` flags while the
@@ -1346,7 +1346,7 @@ class UnregisteredMemberNameIsBareTests(unittest.TestCase):
         # and the one ``super()._unregistered_member(...)`` forward its own
         # override makes -- 768 more, in one file, for 1012 total. #775's
         # final round then added the 52 on EtherType and the 1 on Socket --
-        # 53 more, for 1065 total measured on this tree.
+        # 53 more, for 1065 total when that round landed.
         self.assertGreaterEqual(call_count, 1065,
                                  f'expected at least 1065 _unregistered_member call sites, found {call_count}')
         # And that the exemption is actually earning its keep, rather than a
@@ -1785,7 +1785,7 @@ class BespokeUnmintConvertedRegistriesTests(unittest.TestCase):
 
     def test_optiontype_get_int_path_no_longer_mints(self) -> None:
         """:meth:`OptionType.get` used to mint directly on a miss (bypassing
-        ``_missing_`` entirely) -- a second, independent mint site this PR's
+        ``_missing_`` entirely) -- a second, independent mint site #869's
         first pass left alone. Round 2 review measured it live on the
         wire-facing path (:meth:`pcapkit.protocols.misc.pcapng.PCAPNG.
         _make_pcapng_options` calls ``get()`` with raw option-code bytes),
@@ -1882,16 +1882,15 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
     converted, since the owner's reasoning names ``get`` explicitly and
     leaving it minting while ``_missing_`` did not would have been a
     direct contradiction. ``Command``/``Method``'s ``_unregistered_member``
-    override canonicalises the constructed value to the same upper-case
-    ``name`` used for the lookup (rather than the caller's incidental input
-    casing), which is also what makes ``get('frob')`` and ``get('FROB')``
-    compare *equal* even though, with nothing cached any more, they can
-    never again be *identical* -- see the two production regression tests
-    this forced: ``tests/protocols/application/test_ftp_unit.py::
-    FTPTestCase::test_command_get_is_case_insensitive`` and
-    ``tests/protocols/application/test_http_unit.py::HTTPTestCase::
-    test_method_get_is_case_insensitive``, both updated from ``assertIs`` to
-    ``assertEqual`` + ``assertIsNot`` for exactly this reason.
+    override canonicalises the member's *name* to upper case and keeps the
+    caller's own casing as its value, so ``get('frob')`` and ``get('FROB')``
+    are unequal, and a repeated ``get('frob')`` is equal but, with nothing
+    cached any more, never again *identical* -- see the production
+    regression test this forced,
+    ``tests/protocols/application/test_ftp_unit.py::FTPUnitTests::test_command_get_is_case_insensitive``,
+    which pins exactly that with ``assertEqual``, ``assertIsNot`` and
+    ``assertNotEqual``. Its HTTP twin was replaced under #896 by
+    ``tests/protocols/application/test_http_unit.py::HTTPUnitTests::test_method_get_is_now_case_sensitive``.
 
     """
 
@@ -1980,7 +1979,7 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
         measured regression risk: swapping the value for the canonicalised
         name (as an earlier revision of this conversion did) would make
         ``Command('xyzw') == 'xyzw'`` false, which never held on ``main``
-        and would have been this PR's one real behaviour break."""
+        and would have been #869's one real behaviour break."""
         from pcapkit.const.ftp.command import Command, CommandType, ConformanceRequirement
 
         before = len(Command.__members__)
@@ -2250,7 +2249,7 @@ class BespokeGetUnchangedTests(unittest.TestCase):
     :class:`Method` used to resolve case-insensitively the same way (#583),
     but GitHub issue #896 retired that: RFC 9110 Section 9.1 makes the HTTP
     method token case-sensitive, unlike FTP's command codes (RFC 959 Section
-    4.1), so ``Method.get('Get')`` no longer returns :attr:`Method.GET` --
+    5.3), so ``Method.get('Get')`` no longer returns :attr:`Method.GET` --
     see ``test_method_get_is_now_case_sensitive`` below, which replaces the
     case-insensitive pin this class used to carry for it. ``Method`` still
     keeps its own ``get()`` rather than the base's, because it still needs to
@@ -2347,13 +2346,13 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
     genuine IANA-registered name or a manufactured placeholder, because
     only ``register()`` may create a new entry and ``get()`` never has
     enough information to build one itself. A lookup resolving
-    ``TCP(6010)`` after this PR therefore returns an *unregistered* ``x11``
+    ``TCP(6010)`` therefore returns an *unregistered* ``x11``
     member -- correct as a service name, but absent from
     ``__members__``/``_value2member_map_`` until someone calls
     ``TCP.register(6010, 'x11')`` explicitly.
 
     Unlike every bespoke class #860 step 2's PR 1 converted,
-    :meth:`AppType.get` already existed before this PR and does genuine
+    :meth:`AppType.get` already existed before #874 and does genuine
     transport-protocol dispatch through :meth:`~AppType._dispatch` -- so,
     unlike :class:`~pcapkit.const.http.status_code.StatusCode`/
     :class:`~pcapkit.const.ftp.return_code.ReturnCode`, it keeps its own
@@ -2367,7 +2366,7 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
     :meth:`__repr__`/:meth:`__str__`/:meth:`__int__`/the comparison
     operators/:attr:`~AppType.aliases` to run on the result without raising.
 
-    :meth:`AppType.register` is new on this PR. ``AppType`` already had a
+    :meth:`AppType.register` arrived with #874. ``AppType`` already had a
     working ``get``/``get_all``/``register_alias`` of its own, but never a
     working ``register`` -- and the base's generic one (which calls
     ``cls.__new__(cls, value)`` with only ``value``) would have built a
@@ -2388,7 +2387,7 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
         """#842's ruling is that ``get``/``get_all``/``register``/
         ``register_alias`` exist on every registry -- #860 step 2 PR 2 is
         what actually delivers that for this family, including ``register``,
-        which none of the five had a working version of before this PR."""
+        which none of the five had a working version of before #874."""
         from pcapkit.const.reg.apptype.apptype import AppType
         from pcapkit.const.reg.apptype.dccp import DCCP
         from pcapkit.const.reg.apptype.sctp import SCTP
@@ -2503,7 +2502,7 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
         self.assertFalse(TCP.__registry__.getlist(54321))
 
     def test_missing_direct_call_still_raises_for_the_same_port(self) -> None:
-        """The asymmetry this PR leaves in place, deliberately: a direct
+        """The asymmetry #874 leaves in place, deliberately: a direct
         ``TCP(54321)`` has no ``get()`` around it to catch ``_missing_``'s
         :obj:`None` answer and build an ``'unknown'`` member from it, so it
         still raises exactly as it did on ``main`` -- only :meth:`AppType.
@@ -2609,8 +2608,8 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
     def test_apptype_unrecognised_proto_is_still_refused(self) -> None:
         """A ``proto`` naming no registry at all -- not one of the two real
         collision cases ``auto()`` introduced, just an ordinary invalid value
-        -- is still refused by :meth:`AppType._dispatch`, unaffected by this
-        PR. (Deliberately not a composite like ``tcp | udp``: under
+        -- is still refused by :meth:`AppType._dispatch`, unaffected by
+        #874. (Deliberately not a composite like ``tcp | udp``: under
         ``auto()`` that now equals ``sctp`` numerically and dispatches
         there rather than raising, which is the one accepted, explicitly
         untested consequence of the ``auto()`` change -- see
@@ -2649,7 +2648,7 @@ class TransportProtocolAutoTests(unittest.TestCase):
         self.assertEqual(int(TransportProtocol.dccp), 4)
 
     def test_still_not_a_registry(self) -> None:
-        """Unaffected by this PR: ``TransportProtocol`` never minted through
+        """Unaffected by #874: ``TransportProtocol`` never minted through
         :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`, and
         does not mix in :class:`~pcapkit.corekit.enum.EnumRegistry` now
         either -- only ``AppType`` and its four transport subclasses do."""

@@ -89,6 +89,14 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
         start is the SYN's own sequence number, and a FIN completes the
         stream only when every octet from there up to the FIN has arrived.
 
+    .. versionchanged:: 1.5.0
+
+       Of two overlapping segments that disagree, the octets received first
+       are kept, per :rfc:`9293#section-3.10`, and the contested range is
+       recorded in :attr:`Datagram.conflict
+       <pcapkit.foundation.reassembly.data.tcp.Datagram.conflict>`; 1.4.x
+       kept the later octets without a record (:issue:`443`).
+
     """
     if TYPE_CHECKING:
         protocol: 'Type[TCP_Protocol]'
@@ -694,7 +702,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
                 Completion.TIMEOUT if timeout else Completion.PARTIAL
             )
 
-            # if this buffer is not implemented
+            # if this buffer is incomplete
             # go through every hole and extract received payload
             if completion is not Completion.COMPLETE and self._flag_s:
                 data = []  # type: list[bytes]
@@ -723,7 +731,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
                     )
                     datagram.append(packet)
 
-            # if this buffer is implemented -- or if it is not, and ``strict``
+            # if this buffer is complete -- or if it is not, and ``strict``
             # asked for one contiguous payload rather than the received runs
             #
             # NOTE: ``strict=False`` deliberately keeps reporting the whole

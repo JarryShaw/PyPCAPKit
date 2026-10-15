@@ -213,9 +213,9 @@ class HTTPUnitTests(unittest.TestCase):
         ``protocol.make(**kwargs)`` dispatch this issue is actually about.
 
         The real, supported entry point is construction:
-        :meth:`ProtocolBase.__init__` (``protocol.py:519``, the ``**kwargs``-
-        only overload at ``:517``) calls ``self.pack(**kwargs)`` when built
-        with no ``file``, and :meth:`ProtocolBase.pack` (``protocol.py:284``)
+        :meth:`ProtocolBase.__init__` (``protocol.py:1146``, the ``**kwargs``-
+        only overload at ``:1144``) calls ``self.pack(**kwargs)`` when built
+        with no ``file``, and :meth:`ProtocolBase.pack` (``protocol.py:750``)
         is ``self.__header__ = self.make(**kwargs)`` -- a *bound* call on the
         outer ``HTTP`` instance, which is what actually reaches the inner,
         previously-unbound ``protocol.make(**kwargs)``. So the reachable
@@ -1016,10 +1016,8 @@ class HTTPUnitTests(unittest.TestCase):
 
         Asserted on ``httpv1.HTTP`` directly rather than through the proxy
         because that is the difference between the two candidate fixes: the
-        contract now holds for every caller, including
-        ``Transport._decode_next_layer``, which dispatches TCP ports 80 and 8080
-        straight to this class and never passes through ``_guess_version`` at
-        all.
+        contract now holds for every caller of ``httpv1.HTTP``, not only for
+        ``_guess_version``'s first arm.
 
         ``__cause__`` is asserted because the chain is what keeps the underlying
         unpacking error reportable, and what keeps
@@ -1643,8 +1641,8 @@ class HTTPUnitTests(unittest.TestCase):
         """``Method.get`` used to test the upper-cased key, so a mixed-case
         method resolved to the same registered member regardless of its own
         casing -- #583, item 1, at the time framed the same way as #582's fix
-        in :mod:`pcapkit.const.ftp.command` (`Command.get` stays that way; see
-        its own RFC 959 Section 4.1 rationale). GitHub issue #896 retired that
+        in :mod:`pcapkit.const.ftp.command` (``Command.get`` stays that way, per
+        RFC 959 Section 5.3). GitHub issue #896 retired that
         for ``Method`` specifically: RFC 9110 Section 9.1 makes the HTTP
         method *token* case-sensitive -- "standardized methods are defined in
         all-uppercase US-ASCII letters" by convention, not by requirement --
@@ -2160,7 +2158,7 @@ class HTTPUnitTests(unittest.TestCase):
         own -- regardless of how far past the real buffer it reached -- still
         passed the guard and reported the declared, attacker-controlled value
         as if the capture actually contained it. Measured pre-fix, identical on
-        base and the first revision of this PR: a nine-octet buffer declaring
+        base and the first revision of #802: a nine-octet buffer declaring
         16777215 parsed and reported ``length=16777215``, overstated by
         16,777,206 octets, at every one of these buffer sizes.
 

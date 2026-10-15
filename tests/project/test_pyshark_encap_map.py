@@ -10,7 +10,7 @@ holding a ``/``, and the bogus token in ``editcap -T``'s own help banner), the
 formatting that has to be byte-stable for a re-run to change nothing, and the
 two exclusion rules (an unmapped DLT, an ambiguous filter name) generically --
 against the real :class:`~pcapkit.const.reg.linktype.LinkType` registry, whose
-``_missing_`` mints a placeholder member for *any* unknown value rather than
+``_missing_`` answers *any* unknown value with an unregistered placeholder rather than
 raising, which is itself worth pinning (#575).
 
 Most of this is unit-tier: it exercises the parsing and formatting helpers
@@ -372,12 +372,12 @@ class ReplaceBlockTests(unittest.TestCase):
 class BuildTablesExclusionTests(unittest.TestCase):
     """The two exclusion rules, against the real, mutable ``LinkType`` registry.
 
-    ``LinkType``'s own ``_missing_`` mints a placeholder ``Unassigned_N`` member
+    ``LinkType``'s own ``_missing_`` answers with an unregistered ``Unassigned`` member
     for *any* value in range rather than raising (#575) -- so a naive
     ``try: linktype(dlt) except ValueError`` never fires, and would silently
     invent a table entry for a DLT the registry never actually named. These
     exercise :func:`~pyshark_encap_map.build_tables` against a DLT (121) picked
-    to be absent from the registry *right now*, which is what makes the
+    because the registry does not name it, which is what makes the
     assertion meaningful rather than assumed.
 
     """
@@ -574,7 +574,7 @@ class VersionIndependentInvariantTests(unittest.TestCase):
             raise unittest.SkipTest(f'{source} is absent')
 
         # The same value-must-already-be-registered guard build_tables() uses
-        # (#575): Enum_LinkType(dlt) mints a placeholder member for any value
+        # (#575): Enum_LinkType(dlt) answers with a placeholder member for any value
         # in range rather than raising, so "is this DLT really in the table"
         # has to be answered by membership, never by calling the constructor
         # first and asking forgiveness.

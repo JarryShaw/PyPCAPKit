@@ -475,8 +475,8 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
 
         GitHub issue #775's tier 3 moved #584's fix off the per-file generated
         ``get()`` entirely: it now lives permanently in
-        :meth:`~pcapkit.corekit.enum.EnumRegistry.get`, which every one of the
-        105 default-template registries *inherits* rather than copies, so
+        :meth:`~pcapkit.corekit.enum.EnumRegistry.get`, which every
+        default-template registry *inherits* rather than copies, so
         there is no longer a ``get()`` block here for a regeneration to drop
         the fix from -- the block this test used to extract and compare no
         longer exists in either the template's output or the generated

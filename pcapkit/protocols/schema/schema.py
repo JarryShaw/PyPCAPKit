@@ -78,6 +78,12 @@ def schema_final(cls: '_ST', *, _finalised: 'bool' = True) -> '_ST':
             :attr:`~pcapkit.corekit.infoclass.FinalisedState.FINAL` in its own
             ``__dict__``. The class is returned untouched.
 
+    .. versionchanged:: 1.5.0
+
+       A class finalised with ``_finalised=True`` refuses to be subclassed,
+       and a schema marked ``@final`` without this decorator cannot be
+       instantiated (:issue:`778`).
+
     :meta decorator:
     """
     # NOTE: keyed on ``__finalised__`` rather than on ``final``'s ``__final__``,
@@ -378,7 +384,8 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
         __fields__: 'OrderedDict[str, FieldBase]'
         #: Mapping of field names to packed values.
         __buffer__: 'dict[str, bytes]'
-        #: Flag for whether the schema is recently updated.
+        #: Whether the schema has changed since it was last packed, so that
+        #: :meth:`__bytes__` packs it again.
         __updated__: 'bool'
         #: Octets of an enclosing :class:`~pcapkit.corekit.fields.misc.SchemaField`
         #: span that this nested schema left unread; set only when non-empty.
@@ -440,6 +447,16 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
         the same signature as specified in class variables' type annotations,
         which is inspired by :pep:`557` (:mod:`dataclasses`).
 
+        Note:
+            Whether ``cls`` still needs finalising is read from its *own*
+            ``__dict__``, never inherited (GitHub issue :issue:`1498`). Each
+            class is finalised on its first construction, whatever its
+            ancestors' state, so a subclass of a
+            :attr:`~pcapkit.corekit.infoclass.FinalisedState.BASE` ancestor
+            still gets its own ``__builtin__``, ``__excluded__`` and generated
+            ``__init__``, and a ``@final`` class under a ``BASE`` ancestor is
+            refused like any other.
+
         Args:
             *args: Arbitrary positional arguments.
             **kwargs: Arbitrary keyword arguments.
@@ -450,16 +467,6 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
                 :func:`schema_final`, i.e. it carries ``__final__`` in its own
                 ``__dict__`` without
                 :attr:`~pcapkit.corekit.infoclass.FinalisedState.FINAL`.
-
-        Note:
-            Whether ``cls`` still needs finalising is read from its *own*
-            ``__dict__``, never inherited (GitHub issue :issue:`1498`). Each
-            class is finalised on its first construction, whatever its
-            ancestors' state, so a subclass of a
-            :attr:`~pcapkit.corekit.infoclass.FinalisedState.BASE` ancestor
-            still gets its own ``__builtin__``, ``__excluded__`` and generated
-            ``__init__``, and a ``@final`` class under a ``BASE`` ancestor is
-            refused like any other.
 
         """
         # NOTE: first instantiation is the earliest point a bare ``@final`` can
@@ -828,7 +835,7 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             if isinstance(field, PayloadField):
                 # NOTE: ``ProtocolBase``, not ``Protocol``: ``Protocol`` is a thin
                 # subclass that only adds auto-registration for externally defined
-                # engines, and no protocol in the library subclasses it. Testing
+                # protocols, and no protocol in the library subclasses it. Testing
                 # against it would send any protocol instance -- which is exactly
                 # what :meth:`ProtocolBase._make_payload
                 # <pcapkit.protocols.protocol.ProtocolBase._make_payload>` returns,

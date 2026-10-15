@@ -211,7 +211,7 @@ class TCPMPTCPSubtypeUnitTests(unittest.TestCase):
         """``DSS`` built through ``TCP()`` reports its own subtype.
 
         ``ack`` alone (no ``dsn``) keeps clear of the unrelated length-arithmetic defect
-        tracked as #576, which is not what this test is about.
+        that #576 fixed, which is not what this test is about.
 
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption

@@ -58,8 +58,8 @@ if TYPE_CHECKING:
 # unrelated ``<table>`` elements from a navigation template, which can change
 # whenever the service is redeployed, is gratuitous risk for no gain.
 #
-# NOTE: the draft has since moved to the OPSAWG working group as
-# ``draft-ietf-opsawg-pcapng``, currently at ``-05``. Tracking it is a separate
+# NOTE: the draft moved to the OPSAWG working group as
+# ``draft-ietf-opsawg-pcapng``. Tracking it is a separate
 # change, not a URL swap: the newer revisions alter the registries, and from
 # ``draft-ietf-opsawg-pcapng-03`` onwards ``process()`` below dies with
 # ``ValueError: invalid literal for int() with base 16: '0x0A0D0AXX'`` on a

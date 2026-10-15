@@ -21,11 +21,11 @@ internet layer, with detailed implementation and methods.
    ipv6_route
    hopopt
    ipv6_option
+   mh
    ipsec
    ah
    esp
    hip
-   mh
    ipx
 
 .. todo::

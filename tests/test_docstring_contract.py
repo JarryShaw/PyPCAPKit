@@ -226,16 +226,12 @@ KNOWN_DEFECTS = (
     # parameter is 'name', which is #546's item 2. The remaining 34 register_*
     # functions in that file were checked at the same time and none of them
     # carries the same defect, so there is nothing left to record here for it.
-    Known(Finding('pcapkit/protocols/internet/ipv4.py',
-                  '_make_ipv4_options', 'option'),
-          "documents 'option' where the parameter is 'options'; ipv4.py is "
-          'owned by another change'),
     Known(Finding('pcapkit/vendor/mh/binding_ack_flag.py', 'context', 'soup'),
           "documents 'soup: Parsed HTML source.' where the parameter is 'data' "
           "and holds CSV rows. Nothing was renamed here despite the "
           '``# pylint: disable=arguments-renamed`` pragma -- the parameter '
           'matches the base ``Vendor.context(self, data)`` in '
-          'pcapkit/vendor/default.py:288, which documents it as '
+          'pcapkit/vendor/default.py:417, which documents it as '
           "'data: CSV data.'. The line was copy-pasted from a sibling whose "
           "process()/context() really does take 'soup', so both the name and "
           'the description are wrong'),
@@ -252,13 +248,10 @@ KNOWN_DEFECTS = (
           "documents 'data' where the parameter is 'soup'"),
 )
 
-#: Swallowed section headers left unfixed, for the same ownership reason.
-KNOWN_SWALLOWED = (
-    Known(Finding('pcapkit/protocols/internet/ipv4.py', '_make_opt_e_sec', 'Returns'),
-          'the ``Returns:`` header is indented into the ``Args:`` block, so '
-          'napoleon renders ``:param Returns:`` and drops the return '
-          'documentation; ipv4.py is owned by another change'),
-)
+#: Swallowed section headers excused from
+#: :meth:`DocstringParameterTests.test_section_headers_are_not_swallowed`, in
+#: the same form as :data:`KNOWN_DEFECTS`. None is excused.
+KNOWN_SWALLOWED = ()
 
 
 def _header(line: 'str') -> 'Optional[str]':
@@ -385,22 +378,26 @@ def _raised_names(node: 'ast.AST') -> 'set[str]':
     * Only :class:`ast.Name` and :class:`ast.Attribute` raise targets are
       resolved, so a computed ``raise REGISTRY[code]`` would register neither as
       a matching raise nor, in :func:`_calls_anything_callable`, as a call.
-      Currently inert: across ``pcapkit/`` the 858 raise targets break down as
-      856 ``Name`` and 2 ``Attribute``, and **no** ``Subscript``.
+      Inert: across ``pcapkit/`` the 1,060 raise targets break down as
+      1,058 ``Name`` and 2 ``Attribute``, and **no** ``Subscript``.
     * :func:`ast.walk` descends into nested ``def``\\ s, so a ``raise`` inside a
-      local helper is attributed to the function enclosing it. 11 documented
-      functions contain a nested ``def`` and 3 of those raise inside it.
+      local helper is attributed to the function enclosing it. 19 documented
+      functions contain a nested ``def`` and 6 of those raise inside it.
 
-    That second one reads like a bug and is in fact the right answer here, which
-    is why it is left alone. In all three cases the nested ``def`` is a local
-    helper the enclosing body actually calls, so the exception really does
-    propagate out of the enclosing function: :meth:`HIP._read_param_locator_set
+    That second one reads like a bug and is the right answer for a nested
+    ``def`` that is a local helper the enclosing body actually calls, so the
+    exception really does propagate out of the enclosing function:
+    :meth:`HIP._read_param_locator_set
     <pcapkit.protocols.internet.hip.HIP._read_param_locator_set>` documents
     ``ProtocolError`` and raises none itself, but its ``_read_locator`` helper
     does and it calls that helper once per locator. Attributing the raise
-    outward is therefore correct, and the clause is not a phantom. It would only
-    mislead for a nested ``def`` that is *returned* rather than called, which
-    this package does not currently do.
+    outward is therefore correct there, and the clause is not a phantom. It can
+    mislead for a nested ``def`` that is *returned* rather than called, and four
+    of the six are: the wrappers inside
+    :func:`~pcapkit.corekit.decorators.prepare` and
+    :mod:`pcapkit.protocols.schema.misc.pcapng`'s ``bounded_option``, and the
+    methods of the classes :func:`~pcapkit.dumpkit.common.make_dumper` and the
+    Scapy engine's ``_reader_type`` build.
 
     """
     raised = set()  # type: set[str]

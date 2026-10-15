@@ -20,7 +20,7 @@ efficiency in some way.
 .. _DPKT: https://dpkt.readthedocs.io
 .. _PyShark: https://kiminewt.github.io/pyshark
 
-In :mod:`pcapkit`, all files can be described as following eight
+In :mod:`pcapkit`, all files can be described as following nine
 different components.
 
 - Interface (:mod:`pcapkit.interface`)
@@ -61,6 +61,11 @@ different components.
 
   Constant enumerations used in :mod:`pcapkit` for protocol
   family extraction and representation.
+
+- Vendor Crawlers (:mod:`pcapkit.vendor`)
+
+  Web crawlers that generate the constant enumerations in
+  :mod:`pcapkit.const`.
 
 """
 ###############################################################################

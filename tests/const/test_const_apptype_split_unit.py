@@ -223,10 +223,12 @@ class AppTypeSplitTests(unittest.TestCase):
 
         The suffix is display-only: it never reaches ``_value_``, which is the
         live lookup key in ``_value2member_map_`` and is built once when the
-        class is created -- see ``test_the_new_dunders_are_byte_identical_to_the_percent_form``
-        and ``test_every_member_renders_its_own_registrys_transport_protocol``
-        for the sweep over all 12,391 members that pins this for every one of
-        them, aliased or not.
+        class is created -- see
+        ``test_every_member_renders_its_own_registrys_transport_protocol`` for
+        the sweep over all 12,391 members that pins this for every one of them,
+        aliased or not, and
+        ``test_the_new_dunders_are_byte_identical_to_the_percent_form`` for the
+        sample #1062 formats against the pre-#798 form.
         """
         from pcapkit.const.reg.apptype import TCP
 
@@ -390,7 +392,7 @@ class AppTypeSplitTests(unittest.TestCase):
         """Aliasing names a second service on a port that already has one.
 
         A port with nothing there yet is what the generator and ``get``'s own
-        mint-on-miss are for, not this -- so this refuses rather than quietly
+        fallback on a miss are for, not this -- so this refuses rather than quietly
         becoming the port's first and only member.
         """
         from pcapkit.const.reg.apptype import TCP
@@ -483,7 +485,8 @@ class AppTypeSplitTests(unittest.TestCase):
         by transport protocol, so a name never matched and
         ``AppType.get('ssh')`` returned a **new** member with port ``-1`` instead
         of the one at 22. Nothing in :mod:`pcapkit` resolves a service by name, so
-        it now raises; #734 stays open for whether a real name lookup is wanted.
+        it now raises; #734 was closed on that, with the name lookup removed
+        rather than repaired.
         """
         from pcapkit.const.reg.apptype import TCP
 
@@ -567,7 +570,7 @@ class AppTypeSplitTests(unittest.TestCase):
                                      cls.__members__)
 
         # Paid for by narrowing nothing: a valid but unassigned port is what the
-        # mint is *for*, and it still answers with one.
+        # fallback member is *for*, and it still answers with one.
         minted = AppType.get(59000, proto=TransportProtocol.tcp)
         self.addCleanup(self._purge_member, TCP, 'PORT_59000_tcp', 59000)
         self.assertEqual(minted.svc, 'unknown')
@@ -601,8 +604,8 @@ class AppTypeSplitTests(unittest.TestCase):
                 self.assertIs(resolved.proto, cls.__transport__)
 
         # A span IANA assigns to TCP and UDP assigns nothing to SCTP, so the third
-        # registry mints rather than inheriting the TCP row -- which it did, as
-        # ``<SCTP.x11: 6010 [tcp]>``.
+        # registry answers with an ``unknown`` member of its own rather than
+        # inheriting the TCP row -- which it did, as ``<SCTP.x11: 6010 [tcp]>``.
         resolved = AppType.get(6010, proto='sctp')
         self.addCleanup(self._purge_member, SCTP, 'PORT_6010_sctp', 6010)
         self.assertEqual(resolved.svc, 'unknown')
@@ -674,7 +677,7 @@ class AppTypeSplitTests(unittest.TestCase):
         transport whose bit was set -- the fix for #759, where resolving one by
         picking the lowest set bit (``tcp``, iterating **LSB-first**) dispatched
         every composite containing it into the TCP registry whatever else it
-        named. The owner's ruling on this PR (#836) retires that decoding
+        named. The owner's ruling on #836 retires that decoding
         instead of refining it: with ``TransportProtocol`` no longer a flag,
         ``|``-joined values are no longer parsed and accepted, and the value is
         treated as a whole rather than split. A bare-int composite is therefore
@@ -1440,20 +1443,20 @@ class AppTypeSplitTests(unittest.TestCase):
         self.assertEqual(len(TransportProtocol.__members__), 5)
 
     def test_get_refuses_an_unrecognised_name_rather_than_minting_it(self) -> None:
-        """Maintainer ruling on this PR (#836), the ``TransportProtocol.get`` inline comment.
+        """Maintainer ruling on #836, the ``TransportProtocol.get`` inline comment.
 
         ``TransportProtocol.get`` used to mint a brand-new member for any
-        name it did not recognise. This PR's own prior revision minted at
+        name it did not recognise. #836's own prior revision minted at
         ``max_val + 1`` -- right after ``dccp``'s 8, so ``.get('bogus')``
         minted 9 -- rather than stock ``ad4805f5f``'s ``max_val * 2``
         doubling, which mints 16 for that same call; the difference between
         the two schemes is explained below. The maintainer's ruling, given in
-        an inline review comment on this PR, refuses minting outright either
+        an inline review comment on #836, refuses minting outright either
         way: ``TransportProtocol`` is not to be extended at all. There is no
         bound left to walk and nothing left to mint, so the refusal is the one
         plain :class:`ValueError` every unrecognised name gets, whether or not
         it happens to spell a composite like ``'tcp|udp'``. A later round of
-        this PR briefly gave the composite case its own, more specific message;
+        #836 briefly gave the composite case its own, more specific message;
         the owner's ruling retired that split too -- with ``TransportProtocol``
         no longer a flag, ``|``-joined values are no longer parsed and
         accepted, and the value is treated as a whole rather than split -- so
@@ -1476,9 +1479,9 @@ class AppTypeSplitTests(unittest.TestCase):
         :meth:`AppType._dispatch` nothing minted to mis-decode in the first
         place.
 
-        Regression check: this fails against this PR's own prior head,
+        Regression check: this fails against #836's own prior head,
         ``3567359e2``, which still mints ``9`` and returns it rather than
-        raising -- see the session report for the quoted failure.
+        raising.
         """
         from pcapkit.utilities.exceptions import ProtocolError
 
@@ -1521,12 +1524,12 @@ class AppTypeSplitTests(unittest.TestCase):
         ``test_a_bare_int_composite_is_refused_as_a_whole``).
         :func:`~pcapkit.foundation.registry.protocols.register_apptype` refuses
         the identical string the same generic way it refuses any other
-        unrecognised one, and the owner's ruling on this PR -- with
+        unrecognised one, and the owner's ruling on #836 -- with
         ``TransportProtocol`` no longer a flag, ``|``-joined values are no
         longer parsed and accepted, and the value is treated as a whole rather
         than split -- settles :meth:`TransportProtocol.get` onto that same
         answer: ``'|'`` is not special, it is simply not the name of a declared
-        member. A review round of this PR briefly carved the composite case out
+        member. A review round of #836 briefly carved the composite case out
         with its own diagnostic message; the owner's ruling retired that too.
         """
         from pcapkit.const.reg.apptype import TransportProtocol
@@ -1546,8 +1549,8 @@ class AppTypeSplitTests(unittest.TestCase):
         ``17`` is ``1 | 16`` -- ``tcp`` plus a bit no registry declares -- so
         it never named a clean composite of real transports the way ``3``
         (``tcp | udp``) once did either, back when ``_dispatch`` still
-        decoded a bare int's bits at all. The owner's ruling on this PR
-        (#836) retired that decoding entirely (see
+        decoded a bare int's bits at all. The owner's ruling on #836
+        retired that decoding entirely (see
         ``test_a_bare_int_composite_is_refused_as_a_whole``), so ``17`` and
         ``3`` are no longer two different cases -- both are simply an
         ``int`` that names no registry, and both get the identical plain

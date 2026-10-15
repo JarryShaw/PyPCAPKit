@@ -39,12 +39,6 @@ cannot be used for it.
    :class:`~pcapfile.protocols.transport.tcp.TCP` class rather than a
    reimplementation.
 
-.. versionremoved:: 1.5.0
-
-   ``pcapkit.toolkit.pypcapfile.IPV6_TCP_WARNED_LIMIT``, now
-   :data:`pcapkit.utilities.config.IPV6_TCP_WARNED_LIMIT`, set with
-   :envvar:`PCAPKIT_IPV6_TCP_WARNED_LIMIT` (:issue:`1726`).
-
 """
 import binascii
 import collections

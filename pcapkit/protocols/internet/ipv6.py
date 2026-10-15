@@ -13,14 +13,14 @@ as below:
 ======= ========= ===================== =======================================
 Octets      Bits        Name                    Description
 ======= ========= ===================== =======================================
-  0           0   ``ip.version``              Version (``6``)
-  0           4   ``ip.class``                Traffic Class
-  1          12   ``ip.label``                Flow Label
-  4          32   ``ip.payload``              Payload Length (header excludes)
-  6          48   ``ip.next``                 Next Header
-  7          56   ``ip.limit``                Hop Limit
-  8          64   ``ip.src``                  Source Address
-  24        192   ``ip.dst``                  Destination Address
+  0           0   ``ipv6.version``            Version (``6``)
+  0           4   ``ipv6.class``              Traffic Class
+  1          12   ``ipv6.label``              Flow Label
+  4          32   ``ipv6.payload``            Payload Length (header excludes)
+  6          48   ``ipv6.next``               Next Header
+  7          56   ``ipv6.limit``              Hop Limit
+  8          64   ``ipv6.src``                Source Address
+  24        192   ``ipv6.dst``                Destination Address
 ======= ========= ===================== =======================================
 
 .. [*] https://en.wikipedia.org/wiki/IPv6_packet
@@ -73,7 +73,25 @@ IPV6_NEXT_HEADER_OFFSET = 6
 
 class IPv6(IP[Data_IPv6, Schema_IPv6],
            schema=Schema_IPv6, data=Data_IPv6):
-    """This class implements Internet Protocol version 6."""
+    """This class implements Internet Protocol version 6.
+
+    .. versionchanged:: 1.5.0
+
+       * A Shim6 header, which has no dedicated parser, and a header in
+         :attr:`__generic_ext_codes__` whose dedicated parser raises are parsed
+         by :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`, so the
+         rest of the chain is still walked (:issue:`891`).
+       * A rebuild from
+         :meth:`~pcapkit.protocols.internet.internet.Internet.from_data`
+         keeps the Payload Length a truncated capture declares
+         (:issue:`1155`), and the octets past it as
+         :attr:`~pcapkit.protocols.schema.internet.ipv6.IPv6.trailer`
+         (:issue:`1209`).
+       * Next Header codes 253 and 254 are parsed and rebuilt once
+         (:issue:`1231`), and a cut extension header chain rebuilds byte for
+         byte (:issue:`1471`, :issue:`1473`).
+
+    """
 
     ##########################################################################
     # Defaults.
@@ -95,9 +113,10 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
     #: * :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6`
     #:   has no dedicated parser (``pcapkit/protocols/internet/NotImplemented/shim6.py``
     #:   is a 0-byte placeholder), so there is no "own parser" for it to raise
-    #:   from. It reaches :class:`IPv6_Ext` by *direct* registration (see the
-    #:   bottom of :mod:`pcapkit.protocols.internet.ipv6_ext`), which already
-    #:   produces exactly this class.
+    #:   from. It reaches :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
+    #:   by *direct* registration (see the bottom of
+    #:   :mod:`pcapkit.protocols.internet.ipv6_ext`), which already produces
+    #:   exactly this class.
     #: * ``ESP`` *does* have a dedicated, registered parser
     #:   (:class:`~pcapkit.protocols.internet.esp.ESP`). It is excluded
     #:   because :rfc:`4303` places the real Next Header byte inside the
@@ -174,7 +193,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
              __packet__: 'Optional[dict[str, Any]]' = None, **kwargs: 'Any') -> 'Data_IPv6':  # pylint: disable=unused-argument
         """Read Internet Protocol version 6 (IPv6).
 
-        Structure of IPv6 header [:rfc:`2460`]:
+        Structure of IPv6 header [:rfc:`8200`]:
 
         .. code-block:: text
 

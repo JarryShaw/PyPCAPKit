@@ -26,8 +26,8 @@ silently link to a dead anchor exactly as ``secion-3`` did.
 The sweep this test is built on also turned up a **second** instance of the
 same defect: ``:rfc:`5797#secion-2.2``` in the ``feat`` attribute docstring of
 the ``Command`` class (not ``FEATCode``), at
-:file:`pcapkit/vendor/ftp/command.py:269` and its generated copy
-:file:`pcapkit/const/ftp/command.py:257`. Same missing ``t``, same two files,
+:file:`pcapkit/vendor/ftp/command.py:273` and its generated copy
+:file:`pcapkit/const/ftp/command.py:261`. Same missing ``t``, same two files,
 same one-character fix -- fixed alongside #942's rather than carried as a
 documented exception.
 
@@ -41,7 +41,7 @@ do not exist either -- RFC 8684's real HTML uses ``id="section-3.1"``, never
 test exists to catch, the same mistake as the allowlist above one layer down.
 The generators that produce them,
 :file:`pcapkit/vendor/tcp/mp_tcp_option.py:59` and
-:file:`pcapkit/vendor/reg/apptype/apptype.py:1146` (both parsing IANA's
+:file:`pcapkit/vendor/reg/apptype/apptype.py:1148` (both parsing IANA's
 ``RFC8684, Section 3.1`` with the same ``re.fullmatch(r'RFC(?P<rfc>\\d+)(, Section
 (?P<sec>.*?))?', ...)``, which discards the literal word ``Section`` and
 keeps only the number), are fixed to emit ``#section-{sec}``, and the ten

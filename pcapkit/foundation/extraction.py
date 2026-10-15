@@ -10,7 +10,7 @@
 :class:`~pcapkit.foundation.extraction.Extractor` only,
 which synthesises file I/O and protocol analysis,
 coordinates information exchange in all network layers,
-extracts parametres from a PCAP file.
+extracts parameters from a PCAP file.
 
 """
 import collections
@@ -107,6 +107,18 @@ class Extractor(Generic[_P]):
     Notes:
         For supported engines, please refer to
         :meth:`~pcapkit.foundation.extraction.Extractor.run`.
+
+    .. versionchanged:: 1.5.0
+
+       ``layer`` and ``protocol`` stop the dissection where they say, which
+       1.4.x ignored (:issue:`356`). A stream given as ``fin`` is left open:
+       only a file the extractor opened itself is closed (:issue:`610`).
+       ``reasm_timeout``, ``trace_bidirectional`` and ``trace_analyse`` are
+       inserted among the positional parameters and ``context`` is appended,
+       so a positional argument after ``reasm_store`` has to move to a
+       keyword. Flows are traced bidirectionally by default. :attr:`engine`
+       is typed :class:`~pcapkit.foundation.engines.engine.EngineBase`, the
+       base every engine derives from (:issue:`1022`).
 
     """
     if TYPE_CHECKING:
@@ -1075,7 +1087,7 @@ class Extractor(Generic[_P]):
 
         Args:
             fin: file name to be read or a binary IO object;
-                if file not exist, raise :exc:`FileNotFound`
+                if file not exist, raise :exc:`~pcapkit.utilities.exceptions.FileNotFound`
             fout: file name to be written
             format: file format of output
 

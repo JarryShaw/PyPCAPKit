@@ -1999,9 +1999,9 @@ class HIPUnitTests(unittest.TestCase):
         Each ``TF type`` entry is two octets, not one -- :rfc:`7401` Section
         5.2.11 fixes it at "2x number of TF types" and the diagram shows two
         16-bit ``TF type`` fields per 32-bit row, matching
-        :class:`HIPTransportModeParameter`'s ``mode`` field rather than the
-        one-octet items :func:`two_octet_prefix_list_len`'s other two call
-        sites use. So this test's four entries are four *two*-octet values
+        :class:`HIPTransportModeParameter`'s ``mode`` field and the items at
+        :func:`two_octet_prefix_list_len`'s other two call sites, all three
+        two-octet. So this test's four entries are four *two*-octet values
         (``Length = 8``), and with both defects fixed --
         :func:`~pcapkit.protocols.schema.internet.hip.
         transport_format_list_len` returning ``Length`` unchanged, and
@@ -2691,7 +2691,7 @@ class HIPUnitTests(unittest.TestCase):
         self.assertNotEqual(rebuilt.len, 6)  # what the unfixed builder produced
         # Compared without the trailing padding, and then against the re-packed
         # source schema rather than against the literal. Both are deliberate: the
-        # padding rule is itself in flight (#651/#664), and this test is about the
+        # padding rule is pinned separately (#651/#664), and this test is about the
         # `Length` field and the payload octets, not about how many alignment octets
         # follow them. Either assertion alone would be weaker -- the first pins the
         # octets that came off the wire, the second pins losslessness end to end.
@@ -2782,7 +2782,7 @@ class HIPUnitTests(unittest.TestCase):
         # Compared against the re-packed source schema rather than against the
         # literal, and with the trailing padding excluded, for the reason given in
         # `test_hip_puzzle_and_solution_keep_the_on_wire_field_width`: the padding
-        # rule is in flight (#651/#664) and is not what this test is about.
+        # rule is pinned separately (#651/#664) and is not what this test is about.
         conformant = bytes.fromhex('0141' '0014' '01' '00' '6f70'
                                    '8000000000000000' '8000000000000000' '00000000')
         conformant_schema = hip_schema.SolutionParameter.unpack(conformant)

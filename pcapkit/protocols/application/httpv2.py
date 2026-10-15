@@ -23,6 +23,17 @@ Octets      Bits        Name                    Description
 
 .. [*] https://en.wikipedia.org/wiki/HTTP/2
 
+.. versionchanged:: 1.5.0
+
+   A frame's Length counts its payload alone, not the 9-octet frame header,
+   as :rfc:`9113#section-4.1` defines it, and the payload is read to that
+   Length rather than to the end of the buffer (:issue:`1121`,
+   :issue:`1243`). A frame rebuilds byte for byte: ``END_STREAM``, undefined
+   flag bits, the reserved bits, a zero Pad Length, duplicate SETTINGS
+   entries and the payload of an unpadded DATA, HEADERS or PUSH_PROMISE frame
+   are kept (:issue:`652`, :issue:`668`, :issue:`1244`, :issue:`1245`,
+   :issue:`1246`, :issue:`1247`).
+
 """
 import collections
 from typing import TYPE_CHECKING, cast
@@ -1147,7 +1158,8 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             padded: Padded flag, implied by a non-zero ``pad_len``.
             pad_len: Padding length.
             excl_dep: Exclusive dependency flag.
-            sid_dep: Dependency stream identifier.
+            sid_dep: Dependency stream identifier. Giving one sets the
+                ``PRIORITY`` flag.
             weight: Priority weight value.
             fragment: Header block fragment.
             padding: Padding octets, truncated or zero-filled to ``pad_len``
@@ -1265,11 +1277,17 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         Args:
             frame: Frame data model.
             ack: Acknowledge flag.
-            settings: Settings.
+            settings: Settings, as raw octets, an
+                :class:`~pcapkit.corekit.multidict.OrderedMultiDict` or a list of
+                ``(identifier, value)`` pairs.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed frame schema and updated flags.
+
+        Raises:
+            ProtocolError: If ``settings`` is not :obj:`bytes`, a :obj:`dict`
+                or a :obj:`list`, :data:`None` (the default) included.
 
         """
         if frame is not None:

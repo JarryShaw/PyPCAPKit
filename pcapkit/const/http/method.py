@@ -24,16 +24,17 @@ __all__ = ['Method']
 class Method(EnumRegistry, StrEnum):
     """[Method] HTTP Method
 
-    .. note::
+    .. versionchanged:: 1.5.0
 
-       Neither ``_missing_`` nor ``get()`` mints any more. The owner ruled on
-       GitHub issue :issue:`860` that ``get`` should not mint: only IANA-registered
-       values are legitimate members, a new one is properly created through
-       :meth:`register`, and ``get`` is not given enough information to create
-       one. Concretely true here -- a bare wire method verb carries no
-       :attr:`safe`/:attr:`idempotent`, so minting one used to register a
-       permanent member with both hollowed out to their defaults;
-       :meth:`register` is the path that can actually supply them.
+       Neither ``_missing_`` nor ``get()`` mints a member, per the owner's
+       ruling on GitHub issue :issue:`860`: only IANA-registered values are
+       legitimate members, and a new one is created through :meth:`register`,
+       which can supply :attr:`safe` and :attr:`idempotent` where a bare wire
+       method verb carries neither. ``get()`` matches ``key`` case-sensitively,
+       as :rfc:`9110` makes the method token (:issue:`896`), and checks it
+       against member values as well as names (:issue:`908`). A member's
+       :class:`str` payload is its value, so ``Method.GET == 'GET'``
+       (:issue:`870`).
 
     """
 
@@ -201,21 +202,13 @@ class Method(EnumRegistry, StrEnum):
                 declared, never reformatted. Only :attr:`name` -- the
                 identifier, not the value -- is canonicalised.
 
-                A *registered* member of this class used to carry something
-                different here: GitHub issue :issue:`870` found that
-                :meth:`__new__` called ``str.__new__(cls)`` with no
-                argument at all, so every one of the 40 declared members'
-                own :class:`str` payload was permanently empty regardless
-                of ``value`` (``str(Method.GET) == ''``, and
-                ``Method.GET == 'GET'`` was :obj:`False`) -- true on
-                ``main`` at ``60b85e3a4`` as well as when this docstring
-                was first written. :issue:`870` fixed :meth:`__new__` to
-                ``str.__new__(cls, value)``, mirroring
+                A *registered* member carries its value the same way:
+                :meth:`__new__` passes ``value`` to ``str.__new__``, as
                 :class:`~pcapkit.const.ftp.command.Command`'s own
-                ``__new__``, so a registered member's payload now agrees
-                with an *unregistered* member built through this method:
-                both carry their own value as real :class:`str` content
-                (``str(Method('frob')) == 'frob'``).
+                ``__new__`` does (:issue:`870`), so both kinds of member
+                carry their own value as real :class:`str` content
+                (``str(Method.GET) == 'GET'`` and
+                ``str(Method('frob')) == 'frob'``).
             name: Bare label for the unregistered member -- here, the
                 canonical upper-case form of ``value``, matching the name
                 every *registered* member of this class is looked up by,
@@ -233,62 +226,55 @@ class Method(EnumRegistry, StrEnum):
         """Backport support for original codes.
 
         Delegates to :meth:`~pcapkit.corekit.enum.EnumLookup.get` for the
-        lookup itself, per GitHub issue :issue:`908`: the previous override checked
-        only ``_member_map_`` (names), never ``_value2member_map_``
-        (values), so the two IANA methods whose member *name* differs from
-        their *value* -- ``BASELINE_CONTROL`` / ``'BASELINE-CONTROL'`` and
+        lookup itself, so ``key`` is checked against member values as well
+        as names (GitHub issue :issue:`908`). That is what resolves the two
+        IANA methods whose member *name* differs from their *value* --
+        ``BASELINE_CONTROL`` / ``'BASELINE-CONTROL'`` and
         ``VERSION_CONTROL`` / ``'VERSION-CONTROL'``, a hyphen being unusable
-        in a Python identifier -- failed to resolve through ``get`` even
-        though :meth:`_missing_` (and so the constructor) already found
-        them via that same value-side lookup.
+        in a Python identifier -- which :meth:`_missing_` (and so the
+        constructor) also finds by value.
 
-        The base is a :class:`classmethod`
-        (:meth:`~pcapkit.corekit.enum.EnumLookup.get`), and a zero-argument
-        ``super()`` needs a first argument to bind, so this override had to
-        move from :class:`staticmethod` to :class:`classmethod` to delegate
-        at all -- see GitHub issue :issue:`908`'s own correction of the fix it
-        originally proposed. Callers are unaffected by the switch itself:
-        ``Method.get('X')`` binds identically either way.
+        It is a :class:`classmethod`, as the base is, because a
+        zero-argument ``super()`` needs a first argument to bind
+        (:issue:`908`). ``Method.get('X')`` binds the same as it would on a
+        :class:`staticmethod`.
 
-        ``default`` keeps its existing meaning here rather than adopting
-        the base's ``NO_DEFAULT`` sentinel and its value-only fallback --
-        widening it would be caller-visible, since the base's ``default``
-        must already name a *registered* value (resolved through
-        ``_value2member_map_``), while this override's ``default`` instead
-        supplies the *value* of a freshly minted unregistered member.
-        Nothing in this tree calls ``get`` with a non-``None`` ``default``
-        to notice today, but widening the signature is a separate change
-        from this defect and stays out of scope.
+        ``default`` does not follow the base's ``NO_DEFAULT`` sentinel and
+        value-only fallback: the base's ``default`` must name a
+        *registered* value (resolved through ``_value2member_map_``), while
+        this override's ``default`` supplies the *value* of the
+        unregistered member it builds on a miss.
+
+        .. versionchanged:: 1.5.0
+
+           A non-:class:`str` ``key`` raises :exc:`ValueError`
+           (:issue:`908`). ``get(42)`` and ``get(None)`` raised
+           :exc:`AttributeError` from ``key.upper()``, and ``get(b'GET')``
+           raised :exc:`TypeError`.
 
         Args:
             key: Key to get enum item. Looked up case-**sensitively**,
                 per :rfc:`9110#section-9.1` -- the method token is
-                case-sensitive, unlike :meth:`~pcapkit.const.ftp.command.
-                Command.get`'s equivalent override, which stays
+                case-sensitive, unlike
+                :meth:`~pcapkit.const.ftp.command.Command.get`'s equivalent override, which stays
                 case-insensitive because :rfc:`959#section-5` says FTP
                 command codes are not. Checked against both member names
                 and values, via the base's own precedence -- name before
                 value -- so a value-only match such as
-                ``'BASELINE-CONTROL'`` now resolves too, closing GitHub
-                issue :issue:`908`.
+                ``'BASELINE-CONTROL'`` resolves too (:issue:`908`).
             default: Value for the unregistered member built when ``key``
                 matches neither a name nor a value. ``None``, the
-                default, uses ``key`` itself -- unchanged from before
-                GitHub issue :issue:`908`.
+                default, uses ``key`` itself.
 
         Raises:
             ValueError: If ``key`` is not a :class:`str`. This reaches the
                 caller from the base's non-``str`` branch, which calls
                 ``cls(key)`` and so ``_missing_``, and is **not** caught by
                 the ``except KeyError`` fallback below -- only a failed
-                *name* lookup is. The non-``str`` surface therefore moved
-                with GitHub issue :issue:`908`: ``get(42)`` and ``get(None)`` used
-                to raise :exc:`AttributeError` from ``key.upper()``, and
-                ``get(b'GET')`` used to *return* a member whose name and
-                value were both the :class:`bytes` object. Raising is the
-                intended behaviour -- a ``bytes``-valued ``Method`` is not a
-                thing this registry should hand back -- but it is a change,
-                so it is stated rather than left to be discovered.
+                *name* lookup is. Raising is the intended behaviour for
+                ``get(b'GET')`` as well: a member whose name and
+                value were both the :class:`bytes` object is not a thing
+                this registry should hand back.
 
         :meta private:
         """

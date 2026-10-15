@@ -87,6 +87,13 @@ class IPv6(IP):
         # Fetch result:
         >>> result = ipv6_reassembly.datagram
 
+    .. versionchanged:: 1.5.0
+
+       The reassembled ``header`` leaves out the Fragment header and carries
+       its Next Header, per :rfc:`8200#section-4.5`, whichever engine fed it;
+       1.4.x kept the Fragment header on the ``default`` and ``pcapng``
+       engines (:issue:`415`).
+
     """
 
     ##########################################################################
@@ -128,10 +135,9 @@ class IPv6(IP):
         the reassembled packet, and that the Next Header field of the last header
         of the unfragmentable part comes from the Fragment header's. Left alone,
         the reassembled datagram would advertise a Fragment header on a datagram
-        that is by definition no longer a fragment. The toolkit adapters differ
-        over whether the Fragment header's *octets* belong to ``header``, but none
-        rewrites the field that points at it; the octets are already excluded, so
-        only that field is left to fix.
+        that is by definition no longer a fragment. Every toolkit adapter leaves
+        the Fragment header's *octets* out of ``header``, but none rewrites the
+        field that points at it, so only that field is left to fix.
 
         Args:
             header: Raw header octets of the fragment at fragment offset zero.

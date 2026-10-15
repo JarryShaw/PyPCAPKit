@@ -15,7 +15,7 @@ on:
     workflows: ["Unit Tests"]
     types: [completed]
 
-# Least privilege by default now that `workflow_run` is in the trigger list --
+# Least privilege by default, since `workflow_run` is in the trigger list --
 # that event can be raised by a pull request's `Unit Tests` run completing, so
 # the ambient token this workflow gets should default to nothing rather than
 # whatever the repository's default is. Both jobs below already declare their
@@ -44,7 +44,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Only earns its runners on the schedule trigger now: `Unit Tests` has no
+  # Only earns its runners on the schedule trigger: `Unit Tests` has no
   # schedule trigger of its own, so Saturday's cron run is the one case left
   # where nothing else has already verified this tree. `workflow_run` carries
   # its own verdict instead -- see `vendor-update` below.
@@ -100,7 +100,7 @@ jobs:
     # skip. `!cancelled()` rather than `always()` so that cancelling the run
     # still cancels the update; a gate that actually failed still blocks.
     #
-    # The `workflow_run` clause is the real gate for a push to main now: it
+    # The `workflow_run` clause is the real gate for a push to main: it
     # reads the verdict `Unit Tests` already reached instead of re-running it,
     # and `verdict` says whether that verdict covers the commit checked out
     # below (#1643). `.event == 'push'` and `.head_branch == 'main'`
@@ -203,7 +203,7 @@ jobs:
           # would already have failed to create the log file at all --
           # `cat` on a missing file returns 1 under `-e` and would abort the
           # whole step right here, exactly the "one dead crawler kills every
-          # good regeneration" failure mode this PR exists to remove.
+          # good regeneration" failure mode this handling exists to remove.
           cat "$RUNNER_TEMP/vendor-stderr.log" >&2 || true
 
           if [ "$vendor_exit" -ne 0 ]; then
