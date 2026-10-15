@@ -7,9 +7,9 @@ does not discover crawlers -- it reads :attr:`__all__`:
 
 .. code-block:: python
 
-   # pcapkit/vendor/__main__.py:230, the `--target <name>` path
+   # pcapkit/vendor/__main__.py:228, the `--target <name>` path
    target_list.extend(getattr(module, name) for name in module.__all__)
-   # pcapkit/vendor/__main__.py:238, the default path, i.e. a bare `pcapkit-vendor`
+   # pcapkit/vendor/__main__.py:236, the default path, i.e. a bare `pcapkit-vendor`
    target_list.extend(getattr(vendor_module, name) for name in vendor_module.__all__)
 
 :attr:`pcapkit.vendor.__all__` listed ``'MH_HandoverACKStatus'`` *twice* and had

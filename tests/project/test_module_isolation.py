@@ -5,7 +5,7 @@ Issue #660: three files, run in one order, gave ``12 failed, 5 passed``; the sam
 three in the opposite order gave ``17 passed``. The cause was a test that bound a
 non-generic ``ProtocolBase`` stand-in into :data:`sys.modules` and finished
 without removing it, so the next test to import :mod:`pcapkit` died at
-``pcapkit/protocols/misc/pcap/frame.py:61`` with ``TypeError: type 'ProtocolBase'
+``pcapkit/protocols/misc/pcap/frame.py:69`` with ``TypeError: type 'ProtocolBase'
 is not subscriptable``.
 
 The tests here run :program:`pytest` in a subprocess over the exact selections

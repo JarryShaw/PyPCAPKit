@@ -213,10 +213,12 @@ class HTTPUnitTests(unittest.TestCase):
         ``protocol.make(**kwargs)`` dispatch this issue is actually about.
 
         The real, supported entry point is construction:
-        :meth:`ProtocolBase.__init__` (``protocol.py:1146``, the ``**kwargs``-
-        only overload at ``:1144``) calls ``self.pack(**kwargs)`` when built
-        with no ``file``, and :meth:`ProtocolBase.pack` (``protocol.py:750``)
-        is ``self.__header__ = self.make(**kwargs)`` -- a *bound* call on the
+        :meth:`ProtocolBase.__init__` (``protocol.py:1203``, the ``**kwargs``-
+        only overload at ``:1201``) calls ``self.pack(**kwargs)``, through
+        :meth:`~ProtocolBase.__post_init__`, when built with no ``file``, and
+        :meth:`ProtocolBase.pack` (``protocol.py:761``) calls
+        ``target.make(**kwargs)`` on :meth:`~ProtocolBase._packing_target`,
+        which while constructing is the instance itself -- a *bound* call on the
         outer ``HTTP`` instance, which is what actually reaches the inner,
         previously-unbound ``protocol.make(**kwargs)``. So the reachable
         reproduction is ``HTTP(version=1, ...)``, not ``HTTP.make(...)``:

@@ -1853,7 +1853,7 @@ class MHUnitTests(unittest.TestCase):
         with self.subTest('over IPv6, the raise now costs only the MH slot (GitHub issue #891)'):
             # Mobility Header is *also* one of IPv6's own chained extension
             # headers (``Enum_ExtensionHeader.Mobility_Header``, value 135 --
-            # ``pcapkit/const/ipv6/extension_header.py:42``), so IPv6 never
+            # ``pcapkit/const/ipv6/extension_header.py:49``), so IPv6 never
             # reaches the fallback through the base ``_import_next_layer`` at
             # all -- it walks its own ``@beholder``-decorated override
             # (``pcapkit/protocols/internet/ipv6.py:_import_next_layer``).

@@ -27,7 +27,7 @@ died outright::
 
 The parse path has the identical pair of branches in ``_read_mptcp_join`` and is fine,
 because :meth:`~pcapkit.protocols.transport.tcp.TCP.read` assigns ``self._flags`` at
-``tcp.py:510``, before it parses the options at ``tcp.py:530``. Only the make path was
+``tcp.py:535``, before it parses the options at ``tcp.py:555``. Only the make path was
 inverted.
 
 The fix is the hoist: the ``flags`` dict and the ``_flag`` accumulation move above the
@@ -552,7 +552,7 @@ class TCPMPTCPJoinStaleFlagsUnitTests(unittest.TestCase):
 
         Adding an ``options`` argument would not turn this into a discriminator, which is
         worth recording since it is the obvious thing to try. Pre-fix, ``make`` assigned
-        ``self._flags`` *after* building the options -- so by the time ``pack`` returned,
+        ``self._flags`` *after* building the options -- so by the time ``make`` returned,
         the attribute held the new call's flags either way, and only the option octets
         built in between were wrong. The assertion that separates the two trees is
         therefore on those octets, and

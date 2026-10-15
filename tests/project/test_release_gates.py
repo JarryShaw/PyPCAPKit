@@ -2722,7 +2722,7 @@ class TestGateMutationsChangeTheTruthTable(WorkflowMixin, unittest.TestCase):
     #: mutations have to be the *small* edits a review round produces -- a
     #: regenerated condition would differ in ways nobody would have typed.
     #:
-    #: The first eight are the mutations #962 names; the next five are this
+    #: The first eight are the mutations #962 names; the next six are this
     #: module's own, covering the clauses the issue only points at -- the
     #: publishing predecessors' equality pair, the ``startsWith``
     #: short-circuit, and reading somebody else's evidence. The ``!= 'true'``

@@ -280,7 +280,7 @@ class CaseSensitiveDefaultStillHoldsTests(unittest.TestCase):
 
     def test_command_keeps_its_own_rfc_959_fold(self) -> 'None':
         """:class:`~pcapkit.const.ftp.command.Command` shares this module and
-        folds for a different reason -- RFC 959 Section 4.1's *"Upper and
+        folds for a different reason -- RFC 959 Section 5.3's *"Upper and
         lower case alphabetic characters are to be treated identically"* --
         so it must be unaffected by the sibling class changing."""
         self.assertIs(Command.get('RETR'), Command.RETR)  # type: ignore[attr-defined]

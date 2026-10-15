@@ -289,10 +289,10 @@ class RejectionTests(unittest.TestCase):
         Not a new exception type: the library already answers "you passed a
         keyword I do not accept" with
         :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`, in five places with
-        this exact message shape -- ``protocol.py:1412``,
-        ``dumpkit/common.py:168``, ``foundation/reassembly/reassembly.py:587``,
-        ``foundation/engines/engine.py:314`` and
-        ``foundation/traceflow/traceflow.py:555``. Reusing it keeps one answer to
+        this exact message shape -- ``protocol.py:1469``,
+        ``dumpkit/common.py:169``, ``foundation/reassembly/reassembly.py:594``,
+        ``foundation/engines/engine.py:321`` and
+        ``foundation/traceflow/traceflow.py:563``. Reusing it keeps one answer to
         one question rather than adding a second.
 
         The honest caveat, recorded so it is a decision rather than an oversight:
