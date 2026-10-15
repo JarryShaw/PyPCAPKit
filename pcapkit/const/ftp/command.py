@@ -469,8 +469,9 @@ class Command(EnumRegistry, StrEnum):
 
         Leaves :attr:`feat`, :attr:`desc`, :attr:`type` and :attr:`conf` at
         the same defaults :meth:`__new__` itself would, rather than missing
-        entirely -- :meth:`~pcapkit.corekit.enum.EnumRegistry.
-        _unregistered_member` bypasses :meth:`__new__` (it calls
+        entirely --
+        :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`
+        bypasses :meth:`__new__` (it calls
         :class:`str`'s directly), so those four attributes would otherwise
         be absent and :meth:`__repr__` (which reads :attr:`desc`) would
         raise on the result. There is no more specific value to reconstruct

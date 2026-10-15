@@ -8,11 +8,13 @@ decorators, including :func:`~pcapkit.corekit.decorators.seekset`,
 :func:`~pcapkit.corekit.decorators.beholder` and
 :func:`~pcapkit.corekit.decorators.prepare`.
 
-.. note::
+.. versionadded:: 1.5.0
 
-   This module was ``pcapkit.utilities.decorators`` until :issue:`1735` moved it
-   here, and :mod:`pcapkit.utilities` no longer exports the three decorators.
-   Nothing is left at the old path, so import them from this module.
+.. versionremoved:: 1.5.0
+
+   ``pcapkit.utilities.decorators``, now :mod:`pcapkit.corekit.decorators`
+   (:issue:`1735`). :mod:`pcapkit.utilities` does not export the three
+   decorators either.
 
 .. autodecorator:: pcapkit.corekit.decorators.seekset
 

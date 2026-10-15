@@ -11,8 +11,9 @@ which is automatically generating
 See :mod:`pcapkit.vendor.ngap.procedure_code`'s module docstring for why this
 crawler's source is |pycrate|_'s already-installed, compiled NGAP
 specification rather than a network registry, and why an in-range value it has
-not seen answers through :meth:`~pcapkit.corekit.enum.EnumRegistry.
-_unregistered_member` rather than raising or minting a permanent, shared-value
+not seen answers through
+:meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`
+rather than raising or minting a permanent, shared-value
 member -- the same GitHub issue :issue:`880` ruling, applied to the sibling registry.
 
 .. |pycrate| replace:: ``pycrate``

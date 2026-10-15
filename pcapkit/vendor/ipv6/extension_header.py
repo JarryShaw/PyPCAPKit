@@ -44,7 +44,14 @@ __all__ = ['{NAME}']
 
 
 class {NAME}(EnumRegistry, IntEnum):
-    """[{NAME}] {DOCS}"""
+    """[{NAME}] {DOCS}
+
+    .. versionchanged:: 1.5.0
+
+       Generated from IANA's *IPv6 Extension Header Types* registry, where it
+       was generated from the protocol-numbers registry (:issue:`925`).
+
+    """
 
     {ENUM}
 '''  # type: Callable[[str, str, str, str], str]
@@ -58,14 +65,15 @@ class ExtensionHeader(Vendor):
     #: (``protocol-numbers-1.csv``, this crawler's :attr:`LINK` before GitHub
     #: issue :issue:`925`) paired each of these headers with a short ``Keyword``
     #: column value, e.g. ``IPv6-Route`` for header 43. The registry
-    #: :attr:`LINK` now points at -- IANA's authoritative *IPv6 Extension
+    #: :attr:`LINK` points at -- IANA's authoritative *IPv6 Extension
     #: Header Types* registry -- has no such column, only a verbose
     #: ``Description`` (``Routing Header for IPv6`` for the same header), so
     #: deriving names the same way :meth:`process` does for every other
-    #: 3-column registry (see e.g. :class:`~pcapkit.vendor.ipv6.router_alert.
-    #: RouterAlert`) would silently rename these members. This mapping keeps
-    #: the existing, shorter names instead; any header not listed here still
-    #: falls back to a name derived from its description, same as always.
+    #: 3-column registry (see e.g.
+    #: :class:`~pcapkit.vendor.ipv6.router_alert.RouterAlert`)
+    #: would silently rename these members. This mapping keeps
+    #: the shorter names instead; any header not listed here falls back to a
+    #: name derived from its description.
     NAMES = {
         0: 'HOPOPT',
         43: 'IPv6-Route',
@@ -81,24 +89,22 @@ class ExtensionHeader(Vendor):
     #:
     #: .. note::
     #:
-    #:    Until GitHub issue :issue:`925`, this pointed at the *Protocol Numbers*
-    #:    registry (``protocol-numbers/protocol-numbers-1.csv``), filtered on
-    #:    its ``IPv6 Extension Header`` column -- a derived signal, not the
-    #:    registry :rfc:`8200#section-4` names as authoritative for this
-    #:    enumeration. That registry disagreed with this one on header 147
-    #:    (``BIT-EMU``): it flagged 147 as an IPv6 extension header, citing
-    #:    :rfc:`9801`, while this registry omits 147 entirely -- see the issue
-    #:    for the reading of :rfc:`9801` that makes the omission look
-    #:    intentional rather than an erratum. Fixing :attr:`LINK` also let
-    #:    :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` drop
-    #:    ``BIT_EMU``: :attr:`pcapkit.protocols.internet.ipv6.IPv6
-    #:    ._decode_next_layer`'s walk used to rely on ``ExtensionHeader(147)``
-    #:    resolving, but its own test (``tests.protocols.internet
-    #:    .test_ipv6_ext_unit.IPv6ExtUnitTests
+    #:    This is the registry :rfc:`8200#section-4` names as authoritative for
+    #:    this enumeration, rather than the *Protocol Numbers* registry
+    #:    (``protocol-numbers/protocol-numbers-1.csv``) filtered on its ``IPv6
+    #:    Extension Header`` column, which is a derived signal (GitHub issue
+    #:    :issue:`925`). The two disagree on header 147 (``BIT-EMU``): the
+    #:    Protocol Numbers registry flags 147 as an IPv6 extension header,
+    #:    citing :rfc:`9801`, while this registry omits 147 entirely -- see the
+    #:    issue for the reading of :rfc:`9801` that makes the omission look
+    #:    intentional rather than an erratum. So
+    #:    :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` has no
+    #:    ``BIT_EMU``, and the walk in :meth:`IPv6._decode_next_layer
+    #:    <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>` does not
+    #:    depend on ``ExtensionHeader(147)`` resolving: its test
+    #:    (``tests.protocols.internet.test_ipv6_ext_unit.IPv6ExtUnitTests
     #:    .test_unimplemented_terminal_code_stops_the_walk_not_the_packet``)
-    #:    now exercises the identical code path on 253 -- a code this
-    #:    registry *does* list -- so nothing outside this package depends on
-    #:    147 resolving any more.
+    #:    exercises that code path on 253, a code this registry *does* list.
     LINK = 'https://www.iana.org/assignments/ipv6-parameters/extension-header.csv'
 
     def count(self, data: 'list[str]') -> 'Counter[str]':

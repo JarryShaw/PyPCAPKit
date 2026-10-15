@@ -412,6 +412,12 @@ class OptionField(ListField, Generic[_TS]):
             ProtocolError: If an option that begins with octets present reads
                 past the end of the data.
 
+        .. versionchanged:: 1.5.0
+
+           An option that begins with octets present and reads past the end of
+           the data raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`,
+           where it was parsed from zero-filled octets (:issue:`1325`).
+
         """
         length = self._length
         if isinstance(buffer, bytes):
@@ -432,9 +438,9 @@ class OptionField(ListField, Generic[_TS]):
         #
         # Remembering where the previous option ended gives the loop a measure of
         # progress that does not depend on what a schema reports, and one octet of
-        # it per iteration is what bounds the iteration count. ``length`` is still
-        # decremented by ``len(data)``, so that an option area which parses today
-        # parses identically.
+        # it per iteration is what bounds the iteration count. ``length`` is
+        # decremented by ``len(data)`` as well, so the guard changes nothing for
+        # an option area that parses.
         #
         # ``start`` is where the option area itself begins. The comparison needs
         # stream positions, but the diagnostic wants an offset into the area, and

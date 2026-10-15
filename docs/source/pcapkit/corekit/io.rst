@@ -10,12 +10,6 @@ I/O Objects
 stream, and :class:`~pcapkit.corekit.io.NamedStream`, which gives a stream a
 ``name``.
 
-.. versionremoved:: 1.5.0
-
-   ``pcapkit.corekit.io._READ_CHUNK``, now
-   :data:`pcapkit.utilities.config.READ_CHUNK`, set with
-   :envvar:`PCAPKIT_READ_CHUNK` (:issue:`1726`).
-
 .. autoclass:: pcapkit.corekit.io.SeekableReader
    :no-members:
    :show-inheritance:

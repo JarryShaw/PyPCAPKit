@@ -58,7 +58,13 @@ __all__ = ['{NAME}']
 
 
 class {NAME}(EnumRegistry, StrEnum):
-    """[{NAME}] {DOCS}"""
+    """[{NAME}] {DOCS}
+
+    .. versionadded:: 1.5.0
+
+       Moved here from ``pcapkit.protocols.misc.pcapng`` (:issue:`886`).
+
+    """
 
     {ENUM}
 '''  # type: Callable[[str, str, str, str], str]
