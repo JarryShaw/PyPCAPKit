@@ -492,6 +492,15 @@
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 
+<span class="c1">#: Length of the fixed part of an IP Authentication Header (AH), before its</span>
+<span class="c1">#: Integrity Check Value, :rfc:`4302#section-2`. The one home of this value</span>
+<span class="c1">#: (:issue:`1739`), here so that the schema's ICV length and the protocol</span>
+<span class="c1">#: modules read the same one; it is fixed by the RFC, so it is never</span>
+<span class="c1">#: configurable.</span>
+<span class="c1">#:</span>
+<span class="c1">#: .. versionadded:: 1.5.0</span>
+<span class="n">AH_HEADER_LEN</span> <span class="o">=</span> <span class="mi">12</span>
+
 
 <div class="viewcode-block" id="AH">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ah.html#pcapkit.protocols.schema.internet.ah.AH">[docs]</a>
@@ -510,7 +519,7 @@
     <span class="c1">#: Sequence number field.</span>
     <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
     <span class="c1">#: Integrity check value.</span>
-    <span class="n">icv</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">-</span> <span class="mi">12</span><span class="p">)</span>
+    <span class="n">icv</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">-</span> <span class="n">AH_HEADER_LEN</span><span class="p">)</span>
     <span class="c1">#: Payload.</span>
     <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">()</span>
 

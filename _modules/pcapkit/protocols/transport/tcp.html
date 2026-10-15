@@ -574,6 +574,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">MPTCPDSS</span> <span class="k">as</span> <span class="n">Schema_MPTCPDSS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">SACK</span> <span class="k">as</span> <span class="n">Schema_SACK</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">Schema_TCP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP_MIN_HEADER_LEN</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.transport.tcp</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">AlternateChecksumData</span> <span class="k">as</span> <span class="n">Schema_AlternateChecksumData</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.transport.tcp</span><span class="w"> </span><span class="kn">import</span> \
@@ -1000,7 +1001,7 @@
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: header length </span><span class="si">{</span><span class="n">tcp</span><span class="o">.</span><span class="n">hdr_len</span><span class="si">}</span><span class="s1"> runs past the end of '</span>
                                 <span class="sa">f</span><span class="s1">'the data (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s1"> octets)'</span><span class="p">)</span>
 
-        <span class="n">_optl</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">hdr_len</span> <span class="o">-</span> <span class="mi">20</span>
+        <span class="n">_optl</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">hdr_len</span> <span class="o">-</span> <span class="n">TCP_MIN_HEADER_LEN</span>
         <span class="k">if</span> <span class="n">_optl</span><span class="p">:</span>
             <span class="c1"># NOTE: the octets after an End of Option List option are kept as</span>
             <span class="c1"># read, so that :meth:`make` rebuilds the option area -- and the</span>
@@ -1113,7 +1114,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="p">[],</span> <span class="mi">0</span>
 
-        <span class="n">offset</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="mi">20</span> <span class="o">+</span> <span class="n">total_length</span><span class="p">)</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="n">TCP_MIN_HEADER_LEN</span> <span class="o">+</span> <span class="n">total_length</span><span class="p">)</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_TCP</span><span class="p">(</span>
             <span class="n">srcport</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_port</span><span class="p">(</span><span class="n">srcport</span><span class="p">,</span> <span class="n">Enum_TransportProtocol</span><span class="o">.</span><span class="n">tcp</span><span class="p">),</span>
@@ -1192,7 +1193,7 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[20]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Return an estimated length for the object."""</span>
-        <span class="k">return</span> <span class="mi">20</span>
+        <span class="k">return</span> <span class="n">TCP_MIN_HEADER_LEN</span>  <span class="c1"># type: ignore[return-value]</span>
 
 <div class="viewcode-block" id="TCP.__index__">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP.__index__">[docs]</a>

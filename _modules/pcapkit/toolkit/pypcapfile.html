@@ -538,7 +538,12 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">IP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TCP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">ipv6</span> <span class="k">as</span> <span class="n">Module_IPv6</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv4</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4</span> <span class="k">as</span> <span class="n">Protocol_IPv4</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">ah</span> <span class="k">as</span> <span class="n">Schema_AH_Module</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">ipv4</span> <span class="k">as</span> <span class="n">Schema_IPv4_Module</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcap.header</span><span class="w"> </span><span class="kn">import</span> <span class="n">RESOLUTION</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.transport</span><span class="w"> </span><span class="kn">import</span> <span class="n">tcp</span> <span class="k">as</span> <span class="n">Schema_TCP_Module</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">Protocol_TCP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span>
@@ -564,20 +569,11 @@
 <span class="c1">#: :meth:`pcapkit.protocols.link.ethernet.Ethernet._read_mac_addr`.</span>
 <span class="n">py38</span> <span class="o">=</span> <span class="p">((</span><span class="n">version_info</span> <span class="o">:=</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">)</span><span class="o">.</span><span class="n">major</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">version_info</span><span class="o">.</span><span class="n">minor</span> <span class="o">&gt;=</span> <span class="mi">8</span><span class="p">)</span>
 
-<span class="c1">#: Minimum length of a TCP header, i.e. the fixed part with no options.</span>
-<span class="n">TCP_MIN_HEADER_LEN</span> <span class="o">=</span> <span class="mi">20</span>
-
 <span class="c1">#: IPv4 **DF** (don't fragment) bit, within the three-bit flags field.</span>
 <span class="n">IPV4_FLAG_DF</span> <span class="o">=</span> <span class="mb">0b010</span>
 
 <span class="c1">#: IPv4 **MF** (more fragments) bit, within the three-bit flags field.</span>
 <span class="n">IPV4_FLAG_MF</span> <span class="o">=</span> <span class="mb">0b001</span>
-
-<span class="c1">#: Length of the fixed IPv4 header, i.e. with no options, :rfc:`791#section-3.1`.</span>
-<span class="n">IPV4_HEADER_LEN</span> <span class="o">=</span> <span class="mi">20</span>
-
-<span class="c1">#: Length of the fixed IPv6 header, :rfc:`8200#section-3`.</span>
-<span class="n">IPV6_HEADER_LEN</span> <span class="o">=</span> <span class="mi">40</span>
 
 <span class="c1">#: The captures :func:`_decline_ipv6_tcp` has warned about, oldest first. Each</span>
 <span class="c1">#: key :func:`_capture_of` gives maps to the anchor that keeps that key unique.</span>
@@ -586,13 +582,9 @@
 <span class="c1"># NOTE: the definitions from here to ``packet2timestamp``, and</span>
 <span class="c1"># ``_default_accepts``, ``_default_extension_header`` and</span>
 <span class="c1"># ``_walk_extension_headers`` below, are kept for :mod:`pcapkit.toolkit.scapy`:</span>
-<span class="c1"># it imports the rest, and ``_walk_extension_headers`` uses ``AH_HEADER_LEN``</span>
-<span class="c1"># and ``_default_extension_header``. This module's adapters use none of them</span>
+<span class="c1"># it imports the rest, and ``_walk_extension_headers`` uses</span>
+<span class="c1"># ``_default_extension_header``. This module's adapters use none of them</span>
 <span class="c1"># (#1708).</span>
-
-<span class="c1">#: Length of the fixed part of an IP Authentication Header (AH), before its</span>
-<span class="c1">#: Integrity Check Value, :rfc:`4302#section-2`.</span>
-<span class="n">AH_HEADER_LEN</span> <span class="o">=</span> <span class="mi">12</span>
 
 <span class="c1">#: IP protocol numbers of the headers :func:`_walk_extension_headers` steps</span>
 <span class="c1">#: over inside IPv4: AH and the IPv6 Hop-by-Hop Options, Routing, Fragment,</span>
@@ -635,7 +627,7 @@
 <span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
 
 <span class="sd">    """</span>
-    <span class="n">divisor</span> <span class="o">=</span> <span class="mi">1_000_000_000</span> <span class="k">if</span> <span class="n">packet</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ns_resolution</span> <span class="k">else</span> <span class="mi">1_000_000</span>
+    <span class="n">divisor</span> <span class="o">=</span> <span class="n">RESOLUTION</span><span class="p">[</span><span class="nb">bool</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ns_resolution</span><span class="p">)]</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">*</span> <span class="n">divisor</span> <span class="o">+</span> <span class="n">packet</span><span class="o">.</span><span class="n">timestamp_us</span><span class="p">)</span> <span class="o">/</span> <span class="n">divisor</span></div>
 
 
@@ -838,8 +830,8 @@
     <span class="n">payload</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="s1">'payload'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># type: Any</span>
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">!=</span> <span class="s1">'IP'</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="n">payload</span><span class="o">.</span><span class="n">hl</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">&gt;</span> <span class="n">IPV4_HEADER_LEN</span> <span class="ow">and</span> <span class="p">(</span>
-            <span class="n">IPV4_HEADER_LEN</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">_maybe_unhex</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">payload</span><span class="o">.</span><span class="n">opt</span><span class="p">)))</span> <span class="o">&lt;</span> <span class="n">payload</span><span class="o">.</span><span class="n">hl</span> <span class="o">*</span> <span class="mi">4</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">payload</span><span class="o">.</span><span class="n">hl</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">&gt;</span> <span class="n">Schema_IPv4_Module</span><span class="o">.</span><span class="n">IPV4_HEADER_LEN</span> <span class="ow">and</span> <span class="p">(</span>
+            <span class="n">Schema_IPv4_Module</span><span class="o">.</span><span class="n">IPV4_HEADER_LEN</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">_maybe_unhex</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">payload</span><span class="o">.</span><span class="n">opt</span><span class="p">)))</span> <span class="o">&lt;</span> <span class="n">payload</span><span class="o">.</span><span class="n">hl</span> <span class="o">*</span> <span class="mi">4</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">return</span> <span class="n">payload</span>
 
@@ -871,7 +863,8 @@
         <span class="k">return</span> <span class="kc">False</span>
 
     <span class="n">data</span> <span class="o">=</span> <span class="n">_maybe_unhex</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">payload</span><span class="p">))</span>
-    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">IPV6_HEADER_LEN</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">==</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">TCP</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">Module_IPv6</span><span class="o">.</span><span class="n">IPV6_HEADER_LEN</span>
+            <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="n">Module_IPv6</span><span class="o">.</span><span class="n">IPV6_NEXT_HEADER_OFFSET</span><span class="p">]</span> <span class="o">==</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">TCP</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_capture_of</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[int, Any]'</span><span class="p">:</span>
@@ -969,7 +962,8 @@
     <span class="n">segment</span> <span class="o">=</span> <span class="n">_maybe_unhex</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">segment</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">len</span><span class="p">:</span>
         <span class="n">segment</span> <span class="o">=</span> <span class="n">segment</span><span class="p">[:</span><span class="nb">max</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">len</span> <span class="o">-</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hl</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">TCP_MIN_HEADER_LEN</span> <span class="ow">or</span> <span class="n">segment</span><span class="p">[</span><span class="mi">12</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">:</span>  <span class="c1"># Data Offset, in words</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">Schema_TCP_Module</span><span class="o">.</span><span class="n">TCP_MIN_HEADER_LEN</span>
+            <span class="ow">or</span> <span class="p">(</span><span class="n">segment</span><span class="p">[</span><span class="n">Schema_TCP_Module</span><span class="o">.</span><span class="n">TCP_DATA_OFFSET_OCTET</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">&lt;</span> <span class="n">Schema_TCP_Module</span><span class="o">.</span><span class="n">TCP_MIN_HEADER_LEN</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">return</span> <span class="n">segment</span>
 
@@ -1041,7 +1035,8 @@
 <span class="sd">        is cut short or rejected, or more than</span>
 <span class="sd">        :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`</span>
 <span class="sd">        follow in a row. An AH is ``(Payload Length + 2) * 4`` octets long</span>
-<span class="sd">        (:rfc:`4302#section-2.2`), and no shorter than :data:`AH_HEADER_LEN`;</span>
+<span class="sd">        (:rfc:`4302#section-2.2`), and no shorter than</span>
+<span class="sd">        :data:`~pcapkit.protocols.schema.internet.ah.AH_HEADER_LEN`;</span>
 <span class="sd">        any other is read by :func:`_default_extension_header`.</span>
 
 <span class="sd">    """</span>
@@ -1051,8 +1046,8 @@
             <span class="k">return</span> <span class="kc">None</span>
         <span class="n">depth</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="n">protocol</span> <span class="o">==</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">AH</span><span class="p">:</span>
-            <span class="n">length</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">AH_HEADER_LEN</span> <span class="k">else</span> <span class="mi">0</span>
-            <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="n">AH_HEADER_LEN</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">Schema_AH_Module</span><span class="o">.</span><span class="n">AH_HEADER_LEN</span> <span class="k">else</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="n">Schema_AH_Module</span><span class="o">.</span><span class="n">AH_HEADER_LEN</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">None</span>
             <span class="n">protocol</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">length</span><span class="p">:]</span>
             <span class="k">continue</span>
@@ -1343,7 +1338,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapfile.protocols.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span>  <span class="c1"># isort:skip</span>
 
     <span class="n">tcp</span> <span class="o">=</span> <span class="n">TCP</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
-    <span class="n">hdr_len</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">data_offset</span>  <span class="c1"># at least TCP_MIN_HEADER_LEN, see ``_transport``</span>
+    <span class="n">hdr_len</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">data_offset</span>  <span class="c1"># at least ``TCP_MIN_HEADER_LEN``, see ``_transport``</span>
     <span class="n">payload</span> <span class="o">=</span> <span class="n">segment</span><span class="p">[</span><span class="n">hdr_len</span><span class="p">:]</span>
 
     <span class="k">return</span> <span class="n">TCP_Packet</span><span class="p">(</span>
@@ -1420,7 +1415,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapfile.protocols.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span>  <span class="c1"># isort:skip</span>
 
     <span class="n">tcp</span> <span class="o">=</span> <span class="n">TCP</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
-    <span class="n">hdr_len</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">data_offset</span>  <span class="c1"># at least TCP_MIN_HEADER_LEN, see ``_transport``</span>
+    <span class="n">hdr_len</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">data_offset</span>  <span class="c1"># at least ``TCP_MIN_HEADER_LEN``, see ``_transport``</span>
     <span class="k">return</span> <span class="n">TF_TCP_Packet</span><span class="p">(</span>  <span class="c1"># type: ignore[type-var]</span>
         <span class="n">protocol</span><span class="o">=</span><span class="n">data_link</span><span class="p">,</span>                                 <span class="c1"># data link type from savefile header</span>
         <span class="n">index</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>                                        <span class="c1"># frame number</span>

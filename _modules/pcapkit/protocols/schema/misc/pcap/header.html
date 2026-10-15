@@ -490,9 +490,52 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Header'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">NumberField</span>
+
+<span class="c1">#: Length of the PCAP global header, which opens the file. The one home of</span>
+<span class="c1">#: this value (:issue:`1739`); the format fixes it, so it is never configurable.</span>
+<span class="c1">#:</span>
+<span class="c1">#: .. versionadded:: 1.5.0</span>
+<span class="n">GLOBAL_HEADER_LEN</span> <span class="o">=</span> <span class="mi">24</span>
+
+<span class="c1">#: PCAP magic numbers, as the octets open the file, mapped to the byte order</span>
+<span class="c1">#: (``'big'`` or ``'little'``) and the timestamp resolution (:data:`True` for</span>
+<span class="c1">#: nanoseconds, :data:`False` for microseconds) each one declares. The one home</span>
+<span class="c1">#: of these values (:issue:`1739`); the format fixes them, so they are never</span>
+<span class="c1">#: configurable.</span>
+<span class="c1">#:</span>
+<span class="c1">#: .. versionadded:: 1.5.0</span>
+<span class="n">MAGIC_NUMBER</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="sa">b</span><span class="s1">'</span><span class="se">\xa1\xb2\x3c\x4d</span><span class="s1">'</span><span class="p">:</span> <span class="p">(</span><span class="s1">'big'</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+    <span class="sa">b</span><span class="s1">'</span><span class="se">\xa1\xb2\xc3\xd4</span><span class="s1">'</span><span class="p">:</span> <span class="p">(</span><span class="s1">'big'</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+    <span class="sa">b</span><span class="s1">'</span><span class="se">\x4d\x3c\xb2\xa1</span><span class="s1">'</span><span class="p">:</span> <span class="p">(</span><span class="s1">'little'</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+    <span class="sa">b</span><span class="s1">'</span><span class="se">\xd4\xc3\xb2\xa1</span><span class="s1">'</span><span class="p">:</span> <span class="p">(</span><span class="s1">'little'</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+<span class="p">}</span>  <span class="c1"># type: Dict[bytes, tuple[Literal['big', 'little'], bool]]</span>
+
+<span class="c1">#: Units per second of a record's ``ts_usec`` field, keyed by the nanosecond</span>
+<span class="c1">#: flag its file's magic number declares (:data:`MAGIC_NUMBER`): microseconds,</span>
+<span class="c1">#: or nanoseconds. The one home of these values (:issue:`1739`); the format</span>
+<span class="c1">#: fixes them, so they are never configurable.</span>
+<span class="c1">#:</span>
+<span class="c1">#: .. versionadded:: 1.5.0</span>
+<span class="n">RESOLUTION</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="kc">False</span><span class="p">:</span> <span class="mi">1_000_000</span><span class="p">,</span>
+    <span class="kc">True</span><span class="p">:</span> <span class="mi">1_000_000_000</span><span class="p">,</span>
+<span class="p">}</span>  <span class="c1"># type: Dict[bool, int]</span>
+
+<span class="c1">#: Decimal places of a ``ts_usec`` fraction at each resolution of</span>
+<span class="c1">#: :data:`RESOLUTION`, keyed the same way -- six for microseconds, nine for</span>
+<span class="c1">#: nanoseconds -- and derived from it, so that an epoch rounded to its file's</span>
+<span class="c1">#: resolution follows the one home (:issue:`1739`).</span>
+<span class="c1">#:</span>
+<span class="c1">#: .. versionadded:: 1.5.0</span>
+<span class="n">RESOLUTION_PLACES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">flag</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">units</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">flag</span><span class="p">,</span> <span class="n">units</span> <span class="ow">in</span> <span class="n">RESOLUTION</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+<span class="p">}</span>  <span class="c1"># type: Dict[bool, int]</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">magic_number_callback</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="s1">'NumberField'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
@@ -504,16 +547,14 @@
 
 <span class="sd">    """</span>
     <span class="n">magic_number</span> <span class="o">=</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'magic_number'</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">magic_number</span> <span class="o">==</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\xd4\xc3\xb2\xa1</span><span class="s1">'</span><span class="p">:</span>
-        <span class="n">field</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">=</span> <span class="s1">'little'</span>
-    <span class="k">elif</span> <span class="n">magic_number</span> <span class="o">==</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\xa1\xb2\xc3\xd4</span><span class="s1">'</span><span class="p">:</span>
-        <span class="n">field</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">=</span> <span class="s1">'big'</span>
-    <span class="k">elif</span> <span class="n">magic_number</span> <span class="o">==</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x4d\x3c\xb2\xa1</span><span class="s1">'</span><span class="p">:</span>
-        <span class="n">field</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">=</span> <span class="s1">'little'</span>
-    <span class="k">elif</span> <span class="n">magic_number</span> <span class="o">==</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\xa1\xb2\x3c\x4d</span><span class="s1">'</span><span class="p">:</span>
-        <span class="n">field</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">=</span> <span class="s1">'big'</span>
-    <span class="k">else</span><span class="p">:</span>
+    <span class="c1"># NOTE: looked up as :obj:`bytes`, so that a :obj:`bytearray` magic number</span>
+    <span class="c1"># is matched as it was compared before :issue:`1739` rather than rejected</span>
+    <span class="c1"># as unhashable.</span>
+    <span class="n">declared</span> <span class="o">=</span> <span class="p">(</span><span class="n">MAGIC_NUMBER</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">magic_number</span><span class="p">))</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">magic_number</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">,</span> <span class="nb">memoryview</span><span class="p">))</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">declared</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'invalid magic number'</span><span class="p">)</span>
+    <span class="n">field</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">=</span> <span class="n">declared</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="Header">

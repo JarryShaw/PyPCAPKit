@@ -494,6 +494,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.dumpkit.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">DumperBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcap.header</span><span class="w"> </span><span class="kn">import</span> <span class="n">Header</span> <span class="k">as</span> <span class="n">Data_Header</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap.header</span><span class="w"> </span><span class="kn">import</span> <span class="n">Header</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcap.header</span><span class="w"> </span><span class="kn">import</span> <span class="n">RESOLUTION</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">StdlibIntEnum</span>
@@ -528,12 +529,6 @@
 <span class="c1">#: the two spellings writing the same octets for every input.</span>
 <span class="n">_UINT32_MASK</span> <span class="o">=</span> <span class="mh">0xFFFF_FFFF</span>
 
-<span class="c1">#: Units per second of a record's ``ts_usec`` field, keyed by the global header's</span>
-<span class="c1">#: nanosecond flag.</span>
-<span class="n">_RESOLUTION</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="kc">False</span><span class="p">:</span> <span class="mi">1_000_000</span><span class="p">,</span>
-    <span class="kc">True</span><span class="p">:</span> <span class="mi">1_000_000_000</span><span class="p">,</span>
-<span class="p">}</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_truncates_to</span><span class="p">(</span><span class="n">scaled</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">den</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">fraction</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
@@ -678,8 +673,8 @@
         <span class="c1">#: int: Units per second of the fraction this file's records carry, and</span>
         <span class="c1">#: of the one the other resolution would, taken from :attr:`self._ghdr</span>
         <span class="c1">#: &lt;_ghdr&gt;` for the same reason as :attr:`self._rechdr &lt;_rechdr&gt;`.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_tsres</span> <span class="o">=</span> <span class="n">_RESOLUTION</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_ghdr</span><span class="o">.</span><span class="n">magic_number</span><span class="o">.</span><span class="n">nanosecond</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_tsalt</span> <span class="o">=</span> <span class="n">_RESOLUTION</span><span class="p">[</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ghdr</span><span class="o">.</span><span class="n">magic_number</span><span class="o">.</span><span class="n">nanosecond</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tsres</span> <span class="o">=</span> <span class="n">RESOLUTION</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_ghdr</span><span class="o">.</span><span class="n">magic_number</span><span class="o">.</span><span class="n">nanosecond</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tsalt</span> <span class="o">=</span> <span class="n">RESOLUTION</span><span class="p">[</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ghdr</span><span class="o">.</span><span class="n">magic_number</span><span class="o">.</span><span class="n">nanosecond</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_append_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Data_Frame'</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'IO[bytes]'</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Call this function to write contents.</span>

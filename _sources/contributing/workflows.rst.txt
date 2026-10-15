@@ -256,7 +256,10 @@ the verdict for 9083163f5 (`#1643 <https://github.com/JarryShaw/PyPCAPKit/issues
 So Vendor Update, Conda Update and GitHub Pages each run a ``verdict`` job first,
 and act only when the tip is the verified commit, or that commit plus bot commits
 to ``conda/build`` and ``conda/requirements.txt`` alone; otherwise they skip, and
-the tip's own Unit Tests run raises them again. The rule and its evidence are in
+the tip's own Unit Tests run raises them again. Vendor Update's run still
+concludes ``success`` then, since ``verdict`` ran, so Create Release reads its
+``vendor-update`` job to tell it from a real one
+(`#1748 <https://github.com/JarryShaw/PyPCAPKit/issues/1748>`__). The rule and its evidence are in
 ``util/verdict_covers_checkout.py``. Conda Update also writes after the
 checkout, so it applies the same rule a second time: its push rebases onto
 ``main``'s tip only when the commits that brings in pass it, and otherwise
@@ -283,7 +286,7 @@ the caller's own workflow run, as one of the caller's own jobs, rather than
 starting an independent run after the caller finishes. All four calls in this
 repository target the same reusable workflow, with the same input:
 
-* ``.github/workflows/create-release.yml:479`` -- job ``unit-tests`` calls
+* ``.github/workflows/create-release.yml:593`` -- job ``unit-tests`` calls
   ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
 * ``.github/workflows/cron-conda.yml:50`` -- job ``unit-tests`` calls
   ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
@@ -323,35 +326,43 @@ The Skip Cascade (`#888 <https://github.com/JarryShaw/PyPCAPKit/issues/888>`__)
 -------------------------------------------------------------------------------
 
 The two relationships above compose into a failure mode worth seeing on its
-own graph. Create Release's first job, ``version_check`` -- ahead of the
-``uses:`` call above -- carries:
+own graph. Create Release's ``version_check`` -- ahead of the ``uses:`` call
+above -- carries:
 
 .. code-block:: yaml
 
    if: >-
-     ${{ (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') &&
-     !(github.event_name == 'push' && github.actor_id == vars.RELEASE_APP_BOT_ID) }}
+     ${{ !cancelled() &&
+     (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') &&
+     !(github.event_name == 'push' && github.actor_id == vars.RELEASE_APP_BOT_ID) &&
+     needs.vendor_update.outputs.updated != 'false' }}
 
-(``create-release.yml:210-212``). Its second half skips the tag-push run that
+(``create-release.yml:290-294``). Its third clause skips the tag-push run that
 the release App's own tag starts (:doc:`releasing`, "The Release App"). On the
 ``workflow_run`` path, this evaluates **false**, and the job is skipped
 outright, whenever the upstream Vendor Update run's own conclusion was
 anything other than ``success`` -- including
 ``skipped``, which is exactly what Vendor Update's *own* jobs report when
 *their* ``workflow_run``-path guards decline (see ``cron-vendor.yml``'s
-``vendor-update`` job). ``unit-tests`` then depends on that job with
-``needs: [ version_check ]`` (``create-release.yml:469``) and an ``if:`` that
+``vendor-update`` job). Since
+`#1748 <https://github.com/JarryShaw/PyPCAPKit/issues/1748>`__ it is also false
+for a Vendor Update that concluded ``success`` with ``vendor-update`` skipped --
+its ``verdict`` job found the Unit Tests verdict was for another commit -- which
+the ``vendor_update`` job reads from that run's jobs first, as run 38650191283
+was. ``!cancelled()`` keeps a skipped ``vendor_update``, on a push, from
+skipping it. ``unit-tests`` then depends on that job with
+``needs: [ version_check ]`` (``create-release.yml:581``) and an ``if:`` that
 calls no status-check function, so a skipped dependency skips it too -- and
 every job past it is gated the same way: ``github`` needs ``[ unit-tests,
-version_check ]`` (``:500``), ``tag`` needs ``[ github, unit-tests,
-version_check ]`` (``:685``), ``pypi`` needs ``[ github, unit-tests,
-version_check ]`` (``:850``), and ``conda`` needs ``[ tag, github,
-unit-tests, version_check ]`` (``:1085``).
+version_check ]`` (``:619``), ``tag`` needs ``[ github, unit-tests,
+version_check ]`` (``:806``), ``pypi`` needs ``[ github, unit-tests,
+version_check ]`` (``:972``), and ``conda`` needs ``[ tag, github,
+unit-tests, version_check ]`` (``:1208``).
 
 .. mermaid::
 
    flowchart TD
-       WR["Vendor Update completed<br/>conclusion != success"]
+       WR["Vendor Update completed<br/>conclusion != success,<br/>or vendor-update skipped"]
        VC["version_check<br/>SKIPPED"]
        UTX["unit-tests (uses: unit-tests.yml)<br/>SKIPPED"]
        GH["github (GitHub Release)<br/>SKIPPED"]
@@ -372,7 +383,7 @@ unit-tests, version_check ]`` (``:1085``).
 
 This is a transitive reduction, as in :doc:`releasing`: ``version_check`` and
 ``unit-tests`` are also direct ``needs:`` of ``tag`` and ``pypi``
-(``create-release.yml:685,850``) and of ``conda`` (``:1085``), but ``github``
+(``create-release.yml:806,972``) and of ``conda`` (``:1208``), but ``github``
 already implies those edges, since it depends on both itself. Drawing them
 would add lines without changing which job can start before which, or which
 job a skip in ``version_check`` reaches.
@@ -400,7 +411,11 @@ Such a run is also kept out of the release's concurrency group
 its own ``github.run_id`` rather than on the ref, so it cannot cancel a run
 waiting there with release work. Keyed on the ref, run 38499295798 joined at
 02:06:32Z on 2026-10-14, and the pending 38499150441, whose Vendor Update had
-succeeded, was cancelled a second later.
+succeeded, was cancelled a second later. A run whose Vendor Update concluded
+``success`` with ``vendor-update`` skipped (#1748) is still keyed on the ref:
+the group reads only the event, which does not say which jobs ran. It can still
+displace a run pending there, and now releases nothing in its place, so that
+release waits for the next Vendor Update on ``main``.
 
 ``pull_request_target``
 -----------------------
@@ -757,6 +772,63 @@ and 8% of the unit tier's time in a serial 3.14 run (86 of 1,031 s), and 10-11% 
 3.14, 3.15 and 3.14t legs of run 38581834697, so the rest should take GraalPy 88-113
 minutes (estimate).
 
+GraalPy's leg still loses its runner 18-30 minutes into its tests, with ``The runner
+has received a shutdown signal`` (`#1740 <https://github.com/JarryShaw/PyPCAPKit/issues/1740>`__),
+so each experimental leg samples its runner while the tests run. ``Start the resource
+monitor`` writes ``free -m``, ``df -h`` of ``/`` and the workspace's volume,
+``/proc/loadavg`` and the five processes with the most RSS every 30 seconds, each
+line led by ``[monitor]``, to ``$RUNNER_TEMP/resource-monitor.log``; ``Run unit
+tests`` copies the file into its own log with ``tail -F``; ``Stop the resource
+monitor`` ends the sampler, ``if: always()``. The file is uploaded as
+``resource-monitor-<version>`` (14 days, ``if: always()``, ``continue-on-error``)
+only where the runner survives the tests. `always()
+<https://docs.github.com/en/actions/reference/workflows-and-actions/expressions#always>`__
+runs a step "even when canceled", and docs.github.com says nothing of a runner's
+shutdown, after which the runner evaluates no later step's condition (actions/runner
+``src/Runner.Worker/StepsRunner.cs:205-208``, at ``796cc18ff``). Job 116057255255
+skipped every step after its tests, ``Post Run actions/checkout@v7`` too, whose
+`post-if
+<https://docs.github.com/en/actions/reference/workflows-and-actions/metadata-syntax#runspost-if>`__
+"defaults to ``always()``". On a lost runner, then, the ``[monitor]`` lines in the
+tests' log are the record. The monitor's three steps, start, stop and upload, are each
+``continue-on-error`` with no cap of their own, so the caps above and the check names
+are as they were.
+
+A lost runner fails the job, and so its check, whatever ``continue-on-error`` says,
+so ``Run unit tests`` holds the tests to what leaves the runner alive, and a breach
+fails the step, which ``Containment summary`` and ``Experimental summary`` report as
+warnings:
+
+* GraalPy alone gets ``GRAAL_PYTHON_VM_ARGS=--vm.Xmx2g``, a 2 GiB heap for every
+  GraalPy process, xdist workers included, and ``-n 3``, a CPU of the runner's 4 left
+  to the JIT and the runner; 3.14t keeps ``-n auto``.
+* ``timeout --signal=INT --kill-after=3m 110m`` ends pytest under the step's 120-minute
+  cap, so it still writes the junit XML, and exits 124; ``prlimit --fsize=2147483648``
+  caps any file at 2 GiB.
+* Where the scope starts ``true`` under a throwaway unit, ``pcapkit-probe-<pid>.scope``,
+  with every flag the tests get (``sudo -n --preserve-env``, ``MemoryMax=12G``,
+  ``MemorySwapMax=0``, ``CPUWeight=20``, ``--uid``, ``--gid``), the tests run in the
+  transient scope ``pcapkit-tests.scope`` as the runner's own user; otherwise they run
+  the same pytest command line uncapped, under a ``No memory cap`` warning. sudo
+  resets ``PATH`` and drops ``LD_*``, where setup-python puts its ``lib/``, so ``env``
+  sets them, and the heap, again. The sampler started a step earlier, outside the scope, so an OOM kill there
+  leaves it running; each sample adds the kernel's ``oom_kill`` count and the scope's
+  ``memory.current`` and ``memory.events``.
+
+The step writes ``$RUNNER_TEMP/tests-status``: the exit status, the scope and the
+probe's error, the seconds the tests took, the OOM kills while they ran
+(``/proc/vmstat``) and the ``MemoryError`` lines in their output. From it and the
+monitor's last sample, ``Containment summary`` warns ``No memory cap``, ``tests lost a
+process to the OOM killer``, ``tests timed out at 110 minutes`` or ``tests raised
+MemoryError``, each a warning of its own. A timeout is exit 124, or 137 with no OOM kill
+after 110 minutes: ``--kill-after``'s SIGKILL to a teardown SIGINT did not end, where an
+OOM kill of pytest exits 137 too. ``Experimental summary``, the job's last step and the
+KTLO summary's script, still warns of every failed step, ``tests`` included. The 2 GiB,
+``-n 3`` and 12G are estimates for a 16 GB, 4-CPU runner until a run shows them. At 3
+workers rather than 4, GraalPy's tests should take about 117-151 minutes (an inference
+from the 88-113 above, not measured), so its leg may end on the 110-minute timeout as a
+warning: that is expected, blocks nothing, and leaves the caps as they are.
+
 Python Versions
 ---------------
 
@@ -804,9 +876,17 @@ commits it did not make: when the branch holds some and proposes other tiers,
 ``detect`` fails before asking for the approval. Once that pull request is
 merged or closed, the next run with something to propose recreates the branch
 from ``main``, a closed proposal's tiers included. It reports a pre-release
-instead of writing it. The experimental entries are hand-maintained: no source it
-reads rates them, so every run keeps their lines as written, and a hand edit to
-one changes no proposal.
+instead of writing it. Nor does it retire a job (`#1747
+<https://github.com/JarryShaw/PyPCAPKit/issues/1747>`__): when the tiers leave
+a matrix job with no leg, as 3.11 reaching end of life leaves
+``pypcap-parity``, it writes them as computed, warns, and puts the job first in
+the body as a manual step: retire or remove it, and the ``needs:`` that list it,
+such as the one in ``required-checks``, before merging. A proposal is still
+identified by its tiers alone, so retiring the job on ``main`` does not propose
+them again. The
+experimental entries are hand-maintained: no source it reads rates them, so
+every run keeps their lines as written, and a hand edit to one changes no
+proposal.
 
 Deployment ``environment:``
 ----------------------------
@@ -814,10 +894,10 @@ Deployment ``environment:``
 Five jobs declare a deployment ``environment:`` and can therefore pause for an
 approval, four in ``create-release.yml`` and one in ``cron-python-versions.yml``:
 
-* ``github`` -- ``environment: github-release`` (``create-release.yml:497``)
-* ``tag`` -- ``environment: conda-tag`` (``create-release.yml:683``)
-* ``pypi`` -- ``environment: pypi`` (``create-release.yml:845``)
-* ``conda`` -- ``environment: anaconda`` (``create-release.yml:1082``)
+* ``github`` -- ``environment: github-release`` (``create-release.yml:616``)
+* ``tag`` -- ``environment: conda-tag`` (``create-release.yml:804``)
+* ``pypi`` -- ``environment: pypi`` (``create-release.yml:967``)
+* ``conda`` -- ``environment: anaconda`` (``create-release.yml:1205``)
 * ``pr`` -- ``environment: github-release``, for the release App's key (see
   `Python Versions`_)
 

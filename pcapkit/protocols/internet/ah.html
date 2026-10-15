@@ -746,6 +746,19 @@ but written as given so that a parsed header rebuilds unchanged.</p></li>
 
 <section id="module-pcapkit.protocols.schema.internet.ah">
 <span id="header-schemas"></span><h2>Header Schemas<a class="headerlink" href="#module-pcapkit.protocols.schema.internet.ah" title="Link to this heading">¶</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ah.AH_HEADER_LEN">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.ah.</span></span><span class="sig-name descname"><span class="pre">AH_HEADER_LEN</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ah.AH_HEADER_LEN" title="Link to this definition">¶</a></dt>
+<dd><p>Length of the fixed part of an IP Authentication Header (AH), before its
+Integrity Check Value, <span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4302.html#section-2"><strong>RFC 4302 Section 2</strong></a>. The one home of this value
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1739">#1739</a>), here so that the schema’s ICV length and the protocol
+modules read the same one; it is fixed by the RFC, so it is never
+configurable.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.5.0.</span></p>
+</div>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ah.AH">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.ah.</span></span><span class="sig-name descname"><span class="pre">AH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.pcapkit.protocols.schema.schema._VT" title="pcapkit.protocols.schema.schema.pcapkit.protocols.schema.schema._VT"><span class="pre">_VT</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.pcapkit.protocols.schema.schema._VT" title="pcapkit.protocols.schema.schema.pcapkit.protocols.schema.schema._VT"><span class="pre">_VT</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/ah.html#AH"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.ah.AH" title="Link to this definition">¶</a></dt>

@@ -495,6 +495,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">Data_Frame</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameInfo</span> <span class="k">as</span> <span class="n">Data_FrameInfo</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcap.header</span><span class="w"> </span><span class="kn">import</span> <span class="n">RESOLUTION</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.pcap</span><span class="w"> </span><span class="kn">import</span> <span class="n">tcp_segment</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -740,7 +741,7 @@
 
 <span class="sd">    """</span>
     <span class="n">ts_sec</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">timestamp_epoch</span><span class="p">)</span>
-    <span class="n">ts_usec</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">block</span><span class="o">.</span><span class="n">timestamp_epoch</span> <span class="o">-</span> <span class="n">ts_sec</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1_000_000_000</span> <span class="k">if</span> <span class="n">nanosecond</span> <span class="k">else</span> <span class="mi">1_000_000</span><span class="p">))</span>
+    <span class="n">ts_usec</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">block</span><span class="o">.</span><span class="n">timestamp_epoch</span> <span class="o">-</span> <span class="n">ts_sec</span><span class="p">)</span> <span class="o">*</span> <span class="n">RESOLUTION</span><span class="p">[</span><span class="nb">bool</span><span class="p">(</span><span class="n">nanosecond</span><span class="p">)])</span>
 
     <span class="n">frame</span> <span class="o">=</span> <span class="n">Data_Frame</span><span class="p">(</span>
         <span class="n">frame_info</span><span class="o">=</span><span class="n">Data_FrameInfo</span><span class="p">(</span>

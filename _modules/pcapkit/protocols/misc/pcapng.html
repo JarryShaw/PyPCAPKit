@@ -588,6 +588,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">ZigBeeNWKKey</span> <span class="k">as</span> <span class="n">Data_ZigBeeNWKKey</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">Data_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcap.header</span><span class="w"> </span><span class="kn">import</span> <span class="n">RESOLUTION</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">BLOCK_MINIMUM</span><span class="p">,</span> <span class="n">BYTE_ORDER_MAGIC</span><span class="p">,</span>
+                                                  <span class="n">DEFAULT_RESOLUTION</span><span class="p">,</span> <span class="n">GENERIC_BLOCK_MINIMUM</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAPNG</span> <span class="k">as</span> <span class="n">Schema_PCAPNG</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">BlockType</span> <span class="k">as</span> <span class="n">Schema_BlockType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">CommentOption</span> <span class="k">as</span> <span class="n">Schema_CommentOption</span>
@@ -1172,10 +1175,12 @@
 
     <span class="c1">#: Header blocks mapped to the octets their fixed fields span, so that a</span>
     <span class="c1">#: shorter Block Total Length is kept as captured (see</span>
-    <span class="c1">#: :meth:`_read_block_short_header`).</span>
+    <span class="c1">#: :meth:`_read_block_short_header`). The lengths are read from their one</span>
+    <span class="c1">#: home, :data:`pcapkit.protocols.schema.misc.pcapng.BLOCK_MINIMUM`</span>
+    <span class="c1">#: (:issue:`1739`).</span>
     <span class="n">SHORT_HEADER_TYPES</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Section_Header_Block</span><span class="p">:</span> <span class="mi">28</span><span class="p">,</span>
-        <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Interface_Description_Block</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+        <span class="n">block</span><span class="p">:</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">block</span><span class="p">]</span> <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Section_Header_Block</span><span class="p">,</span>
+                                                  <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Interface_Description_Block</span><span class="p">)</span>
     <span class="p">}</span>
 
     <span class="c1">#: Blocks that resolve an interface of their section, mapped to the tag used</span>
@@ -1426,7 +1431,7 @@
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">nanosecond</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Whether the timestamp is in nanosecond."""</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_resolution</span> <span class="o">&gt;</span> <span class="mi">1_000_000</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_resolution</span> <span class="o">&gt;</span> <span class="n">RESOLUTION</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">ts_resolution</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
@@ -1435,7 +1440,7 @@
             <span class="c1">#raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'ts_resolution'")</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">' object has no attribute 'ts_resolution'"</span><span class="p">,</span>
                  <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
-            <span class="k">return</span> <span class="mi">1_000_000</span>
+            <span class="k">return</span> <span class="n">DEFAULT_RESOLUTION</span>
 
         <span class="n">info</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Packet'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_resolution</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">interface_id</span><span class="p">)</span>
@@ -1778,7 +1783,7 @@
 <span class="sd">        """</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
 
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">12</span> <span class="ow">or</span> <span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="n">GENERIC_BLOCK_MINIMUM</span> <span class="ow">or</span> <span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Block </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid length: </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span>
 
@@ -1787,7 +1792,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__block__</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">SHORT_PACKET_TYPES</span> <span class="ow">and</span> <span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">32</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">SHORT_PACKET_TYPES</span> <span class="ow">and</span> <span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">]:</span>
             <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'BlockParser'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_block_short</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">SHORT_HEADER_TYPES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
             <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'BlockParser'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_block_short_header</span><span class="p">)</span>
@@ -1999,7 +2004,7 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[12]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Return an estimated length for the object."""</span>
-        <span class="k">return</span> <span class="mi">12</span>
+        <span class="k">return</span> <span class="n">GENERIC_BLOCK_MINIMUM</span>  <span class="c1"># type: ignore[return-value]</span>
 
     <span class="c1"># NOTE: This is a hack to make the ``__index__`` method work both as a</span>
     <span class="c1"># class method and an instance method.</span>
@@ -2083,9 +2088,9 @@
             <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_END</span><span class="p">)</span> <span class="o">-</span> <span class="n">current</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">12</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="n">GENERIC_BLOCK_MINIMUM</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">StreamEOFError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: block truncated: </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1"> octet(s) left, '</span>
-                                 <span class="s1">'fewer than the 12 a block needs'</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                                 <span class="sa">f</span><span class="s1">'fewer than the </span><span class="si">{</span><span class="n">GENERIC_BLOCK_MINIMUM</span><span class="si">}</span><span class="s1"> a block needs'</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_captured</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Count the octets left in the stream from ``offset`` on.</span>
@@ -2124,7 +2129,7 @@
 
         <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="mi">8</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
-        <span class="n">body</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">12</span><span class="p">)</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="n">GENERIC_BLOCK_MINIMUM</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Data_UnknownBlock</span><span class="p">(</span>
@@ -2239,13 +2244,13 @@
             <span class="c1"># raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_get_resolution'")</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">' object has no attribute '_get_resolution'"</span><span class="p">,</span>
                  <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
-            <span class="k">return</span> <span class="mi">1_000_000</span>
+            <span class="k">return</span> <span class="n">DEFAULT_RESOLUTION</span>
 
         <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_interface</span><span class="p">(</span><span class="n">interface_id</span><span class="p">)</span><span class="o">.</span><span class="n">options</span>
         <span class="n">tsresol</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[Data_IF_TSResolOption]'</span><span class="p">,</span>
                        <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_tsresol</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">tsresol</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="mi">1_000_000</span>
+            <span class="k">return</span> <span class="n">DEFAULT_RESOLUTION</span>
         <span class="k">return</span> <span class="n">tsresol</span><span class="o">.</span><span class="n">resolution</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interface_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
@@ -5032,7 +5037,7 @@
         <span class="c1"># NOTE: The body is padded to 32 bits, and Block Total Length counts it</span>
         <span class="c1"># together with the 12 octets of block type and both length fields.</span>
         <span class="n">data</span> <span class="o">+=</span> <span class="nb">bytes</span><span class="p">(</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
-        <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">+</span> <span class="mi">12</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">+</span> <span class="n">GENERIC_BLOCK_MINIMUM</span>
 
         <span class="k">return</span> <span class="n">Schema_UnknownBlock</span><span class="p">(</span>
             <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
@@ -5091,13 +5096,13 @@
         <span class="n">total_length</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_options_trailer</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">options_value</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_SectionHeaderBlock</span><span class="p">(</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="mi">28</span><span class="p">,</span>
-            <span class="n">magic</span><span class="o">=</span><span class="mh">0x1A2B3C4D</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Section_Header_Block</span><span class="p">],</span>
+            <span class="n">magic</span><span class="o">=</span><span class="n">BYTE_ORDER_MAGIC</span><span class="p">,</span>
             <span class="n">major</span><span class="o">=</span><span class="n">major_version</span><span class="p">,</span>
             <span class="n">minor</span><span class="o">=</span><span class="n">minor_version</span><span class="p">,</span>
             <span class="n">section_length</span><span class="o">=</span><span class="n">section_length</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="n">options_value</span><span class="p">,</span>
-            <span class="n">length2</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="mi">28</span><span class="p">,</span>
+            <span class="n">length2</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Section_Header_Block</span><span class="p">],</span>
         <span class="p">)</span></div>
 
 
@@ -5144,11 +5149,11 @@
         <span class="n">total_length</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_options_trailer</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">options_value</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_padding</span><span class="p">(</span><span class="n">Schema_InterfaceDescriptionBlock</span><span class="p">(</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="mi">20</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Interface_Description_Block</span><span class="p">],</span>
             <span class="n">linktype</span><span class="o">=</span><span class="n">linktype_val</span><span class="p">,</span>
             <span class="n">snaplen</span><span class="o">=</span><span class="n">snaplen</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="n">options_value</span><span class="p">,</span>
-            <span class="n">length2</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="mi">20</span><span class="p">,</span>
+            <span class="n">length2</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Interface_Description_Block</span><span class="p">],</span>
         <span class="p">),</span> <span class="n">block</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">)</span></div>
 
 
@@ -5212,7 +5217,7 @@
         <span class="n">total_length</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_options_trailer</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">options_value</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_padding</span><span class="p">(</span><span class="n">Schema_EnhancedPacketBlock</span><span class="p">(</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="mi">32</span> <span class="o">+</span> <span class="n">packet_len</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Enhanced_Packet_Block</span><span class="p">]</span> <span class="o">+</span> <span class="n">packet_len</span><span class="p">,</span>
             <span class="n">interface_id</span><span class="o">=</span><span class="n">interface_id</span><span class="p">,</span>
             <span class="n">timestamp_high</span><span class="o">=</span><span class="n">timestamp_high</span><span class="p">,</span>
             <span class="n">timestamp_low</span><span class="o">=</span><span class="n">timestamp_low</span><span class="p">,</span>
@@ -5220,7 +5225,7 @@
             <span class="n">original_len</span><span class="o">=</span><span class="n">original_len</span><span class="p">,</span>
             <span class="n">packet_data</span><span class="o">=</span><span class="n">packet_data</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="n">options_value</span><span class="p">,</span>
-            <span class="n">length2</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="mi">32</span> <span class="o">+</span> <span class="n">packet_len</span><span class="p">,</span>
+            <span class="n">length2</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Enhanced_Packet_Block</span><span class="p">]</span> <span class="o">+</span> <span class="n">packet_len</span><span class="p">,</span>
         <span class="p">),</span> <span class="n">block</span><span class="p">,</span> <span class="s1">'padding_data'</span><span class="p">)</span></div>
 
 
@@ -5264,10 +5269,10 @@
         <span class="n">packet_len</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">packet_data</span><span class="p">)</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_padding</span><span class="p">(</span><span class="n">Schema_SimplePacketBlock</span><span class="p">(</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">packet_len</span> <span class="o">+</span> <span class="mi">16</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">packet_len</span> <span class="o">+</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Simple_Packet_Block</span><span class="p">],</span>
             <span class="n">original_len</span><span class="o">=</span><span class="n">original_len</span><span class="p">,</span>
             <span class="n">packet_data</span><span class="o">=</span><span class="n">packet_data</span><span class="p">,</span>
-            <span class="n">length2</span><span class="o">=</span><span class="n">packet_len</span> <span class="o">+</span> <span class="mi">16</span><span class="p">,</span>
+            <span class="n">length2</span><span class="o">=</span><span class="n">packet_len</span> <span class="o">+</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Simple_Packet_Block</span><span class="p">],</span>
         <span class="p">),</span> <span class="n">block</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="s1">'padding_data'</span><span class="p">)</span></div>
 
 
@@ -5321,10 +5326,10 @@
         <span class="n">options_length</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_options_trailer</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">options_value</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_NameResolutionBlock</span><span class="p">(</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">options_length</span> <span class="o">+</span> <span class="n">records_length</span> <span class="o">+</span> <span class="mi">12</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">options_length</span> <span class="o">+</span> <span class="n">records_length</span> <span class="o">+</span> <span class="n">GENERIC_BLOCK_MINIMUM</span><span class="p">,</span>
             <span class="n">records</span><span class="o">=</span><span class="n">records_value</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="n">options_value</span><span class="p">,</span>
-            <span class="n">length2</span><span class="o">=</span><span class="n">options_length</span> <span class="o">+</span> <span class="n">records_length</span> <span class="o">+</span> <span class="mi">12</span><span class="p">,</span>
+            <span class="n">length2</span><span class="o">=</span><span class="n">options_length</span> <span class="o">+</span> <span class="n">records_length</span> <span class="o">+</span> <span class="n">GENERIC_BLOCK_MINIMUM</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -5365,12 +5370,12 @@
         <span class="n">total_length</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_options_trailer</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">options_value</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_InterfaceStatisticsBlock</span><span class="p">(</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="mi">24</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Interface_Statistics_Block</span><span class="p">],</span>
             <span class="n">interface_id</span><span class="o">=</span><span class="n">interface_id</span><span class="p">,</span>
             <span class="n">timestamp_high</span><span class="o">=</span><span class="n">timestamp_high</span><span class="p">,</span>
             <span class="n">timestamp_low</span><span class="o">=</span><span class="n">timestamp_low</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="n">options_value</span><span class="p">,</span>
-            <span class="n">length2</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="mi">24</span><span class="p">,</span>
+            <span class="n">length2</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Interface_Statistics_Block</span><span class="p">],</span>
         <span class="p">)</span></div>
 
 
@@ -5407,9 +5412,9 @@
         <span class="n">data</span> <span class="o">+=</span> <span class="nb">bytes</span><span class="p">(</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_SystemdJournalExportBlock</span><span class="p">(</span>
-            <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">+</span> <span class="mi">12</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">+</span> <span class="n">GENERIC_BLOCK_MINIMUM</span><span class="p">,</span>
             <span class="n">entry</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
-            <span class="n">length2</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">+</span> <span class="mi">12</span><span class="p">,</span>
+            <span class="n">length2</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">+</span> <span class="n">GENERIC_BLOCK_MINIMUM</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -5478,12 +5483,12 @@
         <span class="n">total_length</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_options_trailer</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">options_value</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_padding</span><span class="p">(</span><span class="n">Schema_DecryptionSecretsBlock</span><span class="p">(</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="n">secrets_padded</span> <span class="o">+</span> <span class="mi">20</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="n">secrets_padded</span> <span class="o">+</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Decryption_Secrets_Block</span><span class="p">],</span>
             <span class="n">secrets_type</span><span class="o">=</span><span class="n">secrets_type_val</span><span class="p">,</span>
             <span class="n">secrets_length</span><span class="o">=</span><span class="n">secrets_length</span><span class="p">,</span>
             <span class="n">secrets_data</span><span class="o">=</span><span class="n">secrets_data_val</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="n">options_value</span><span class="p">,</span>
-            <span class="n">length2</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="n">secrets_padded</span> <span class="o">+</span> <span class="mi">20</span><span class="p">,</span>
+            <span class="n">length2</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="n">secrets_padded</span> <span class="o">+</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Decryption_Secrets_Block</span><span class="p">],</span>
         <span class="p">),</span> <span class="n">block</span><span class="p">,</span> <span class="s1">'padding_data'</span><span class="p">)</span></div>
 
 
@@ -5533,11 +5538,14 @@
             <span class="n">cb_data</span> <span class="o">+=</span> <span class="n">option</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">Schema</span><span class="p">)</span> <span class="k">else</span> <span class="n">option</span>
         <span class="n">cb_data</span> <span class="o">+=</span> <span class="nb">bytes</span><span class="p">(</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">cb_data</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
 
+        <span class="c1"># NOTE: both custom block types span the same fixed fields, and this</span>
+        <span class="c1"># method makes either, so the one entry stands for both.</span>
+        <span class="n">minimum</span> <span class="o">=</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Custom_Block_that_rewriters_can_copy_into_new_files</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">Schema_CustomBlock</span><span class="p">(</span>
-            <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">cb_data</span><span class="p">)</span> <span class="o">+</span> <span class="mi">16</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">cb_data</span><span class="p">)</span> <span class="o">+</span> <span class="n">minimum</span><span class="p">,</span>
             <span class="n">pen</span><span class="o">=</span><span class="n">pen</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">cb_data</span><span class="p">,</span>
-            <span class="n">length2</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">cb_data</span><span class="p">)</span> <span class="o">+</span> <span class="mi">16</span><span class="p">,</span>
+            <span class="n">length2</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">cb_data</span><span class="p">)</span> <span class="o">+</span> <span class="n">minimum</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -5607,7 +5615,7 @@
         <span class="n">total_length</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_options_trailer</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">options_value</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_padding</span><span class="p">(</span><span class="n">Schema_PacketBlock</span><span class="p">(</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="mi">32</span> <span class="o">+</span> <span class="n">packet_len</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Packet_Block</span><span class="p">]</span> <span class="o">+</span> <span class="n">packet_len</span><span class="p">,</span>
             <span class="n">interface_id</span><span class="o">=</span><span class="n">interface_id</span><span class="p">,</span>
             <span class="n">drop_count</span><span class="o">=</span><span class="n">drop_count</span><span class="p">,</span>
             <span class="n">timestamp_high</span><span class="o">=</span><span class="n">timestamp_high</span><span class="p">,</span>
@@ -5616,7 +5624,7 @@
             <span class="n">original_length</span><span class="o">=</span><span class="n">original_len</span><span class="p">,</span>
             <span class="n">packet_data</span><span class="o">=</span><span class="n">packet_data</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="n">options_value</span><span class="p">,</span>
-            <span class="n">length2</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="mi">32</span> <span class="o">+</span> <span class="n">packet_len</span><span class="p">,</span>
+            <span class="n">length2</span><span class="o">=</span><span class="n">total_length</span> <span class="o">+</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Packet_Block</span><span class="p">]</span> <span class="o">+</span> <span class="n">packet_len</span><span class="p">,</span>
         <span class="p">),</span> <span class="n">block</span><span class="p">,</span> <span class="s1">'padding_data'</span><span class="p">)</span></div>
 
 
@@ -6062,7 +6070,7 @@
 <div class="viewcode-block" id="PCAPNG._make_option_if_tsresol">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_tsresol">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_option_if_tsresol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_OptionType'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_IF_TSResolOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                                <span class="n">resolution</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">1000000</span><span class="p">,</span>
+                                <span class="n">resolution</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">DEFAULT_RESOLUTION</span><span class="p">,</span>
                                 <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_IF_TSResolOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make PCAP-NG ``if_tsresol`` option.</span>
 

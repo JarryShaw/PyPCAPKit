@@ -497,6 +497,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">NamedStream</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">EngineBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReassemblyManager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">RECORD_HEADER_LEN</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FormatError</span><span class="p">,</span> <span class="n">stacklevel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">warn</span>
 
@@ -856,8 +857,8 @@
         <span class="n">number</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">number</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="n">record</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">record</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">16</span><span class="p">:</span>
+            <span class="n">record</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">RECORD_HEADER_LEN</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">record</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">RECORD_HEADER_LEN</span><span class="p">:</span>
                 <span class="k">return</span>
             <span class="n">timestamp</span><span class="p">,</span> <span class="n">timestamp_us</span><span class="p">,</span> <span class="n">capture_len</span><span class="p">,</span> <span class="n">packet_len</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">order</span><span class="si">}</span><span class="s1">IIII'</span><span class="p">,</span> <span class="n">record</span><span class="p">)</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">capture_len</span><span class="p">)</span>

@@ -559,6 +559,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.ipv4</span><span class="w"> </span><span class="kn">import</span> <span class="n">TSOption</span> <span class="k">as</span> <span class="n">Data_TSOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.ipv4</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnassignedOption</span> <span class="k">as</span> <span class="n">Data_UnassignedOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv4</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPV4_HEADER_LEN</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv4</span><span class="w"> </span><span class="kn">import</span> <span class="n">EOOLOption</span> <span class="k">as</span> <span class="n">Schema_EOOLOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv4</span><span class="w"> </span><span class="kn">import</span> <span class="n">ESECOption</span> <span class="k">as</span> <span class="n">Schema_ESECOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv4</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4</span> <span class="k">as</span> <span class="n">Schema_IPv4</span>
@@ -809,14 +810,14 @@
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: header length </span><span class="si">{</span><span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span><span class="si">}</span><span class="s1"> runs past the end of '</span>
                                 <span class="sa">f</span><span class="s1">'the data (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s1"> octets)'</span><span class="p">)</span>
 
-        <span class="n">_optl</span> <span class="o">=</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span> <span class="o">-</span> <span class="mi">20</span>
+        <span class="n">_optl</span> <span class="o">=</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span> <span class="o">-</span> <span class="n">IPV4_HEADER_LEN</span>
         <span class="k">if</span> <span class="n">_optl</span><span class="p">:</span>
             <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_options</span><span class="p">(</span><span class="n">_optl</span><span class="p">)</span>
             <span class="n">_used</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">opt</span><span class="o">.</span><span class="n">length</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
             <span class="n">ipv4</span><span class="o">.</span><span class="n">__update__</span><span class="p">([</span>
                 <span class="p">(</span><span class="s1">'options'</span><span class="p">,</span> <span class="n">options</span><span class="p">),</span>
                 <span class="c1"># octets after the End of Option List, as captured</span>
-                <span class="p">(</span><span class="s1">'padding'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="mi">20</span> <span class="o">+</span> <span class="n">_used</span><span class="p">:</span><span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">]),</span>
+                <span class="p">(</span><span class="s1">'padding'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">IPV4_HEADER_LEN</span> <span class="o">+</span> <span class="n">_used</span><span class="p">:</span><span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">]),</span>
             <span class="p">])</span>
 
         <span class="c1"># NOTE: Octets captured past the Total Length belong to this layer,</span>
@@ -1069,7 +1070,7 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[20]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Return an estimated length for the object."""</span>
-        <span class="k">return</span> <span class="mi">20</span>
+        <span class="k">return</span> <span class="n">IPV4_HEADER_LEN</span>  <span class="c1"># type: ignore[return-value]</span>
 
 <div class="viewcode-block" id="IPv4.__index__">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4.__index__">[docs]</a>

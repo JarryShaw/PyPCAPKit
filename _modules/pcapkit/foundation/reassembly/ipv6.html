@@ -491,6 +491,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPV6_HEADER_LEN</span><span class="p">,</span> <span class="n">IPV6_NEXT_HEADER_OFFSET</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span> <span class="k">as</span> <span class="n">IPv6_Protocol</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -498,14 +499,6 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'IPv6'</span><span class="p">]</span>
 
-<span class="c1">#: Length of the fixed IPv6 header, i.e. the offset of the first extension</span>
-<span class="c1">#: header (:rfc:`8200#section-3`). A literal because it is a *byte offset* into</span>
-<span class="c1">#: the header rather than a protocol number, so no enumeration carries it.</span>
-<span class="n">_IPV6_HDR_LEN</span> <span class="o">=</span> <span class="mi">40</span>
-
-<span class="c1">#: Offset of the Next Header field within the fixed IPv6 header. A literal for</span>
-<span class="c1">#: the same reason as :data:`_IPV6_HDR_LEN`.</span>
-<span class="n">_IPV6_NEXT_HEADER</span> <span class="o">=</span> <span class="mi">6</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_next_header_offset</span><span class="p">(</span><span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Locate the Next Header field of a datagram's last header.</span>
@@ -524,8 +517,8 @@
 <span class="sd">        Offset, within ``header``, of the Next Header field to rewrite.</span>
 
 <span class="sd">    """</span>
-    <span class="n">offset</span> <span class="o">=</span> <span class="n">_IPV6_NEXT_HEADER</span>
-    <span class="n">position</span> <span class="o">=</span> <span class="n">_IPV6_HDR_LEN</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="n">IPV6_NEXT_HEADER_OFFSET</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="n">IPV6_HEADER_LEN</span>
     <span class="n">proto</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="n">offset</span><span class="p">]</span>
 
     <span class="c1"># NOTE: ``header[position]`` is the Next Header field of the extension</span>
@@ -631,7 +624,7 @@
         <span class="c1"># a header too short to hold the fixed IPv6 header cannot be walked, and</span>
         <span class="c1"># a chain not ending in the Fragment header has nothing to rewrite --</span>
         <span class="c1"># which also makes this idempotent</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">_IPV6_HDR_LEN</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">IPV6_HEADER_LEN</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">header</span>
         <span class="n">offset</span> <span class="o">=</span> <span class="n">_next_header_offset</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">header</span><span class="p">[</span><span class="n">offset</span><span class="p">]</span> <span class="o">!=</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Frag</span><span class="p">:</span>
@@ -653,7 +646,7 @@
 <span class="sd">            How many of those octets the Payload Length counts.</span>
 
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">length</span> <span class="o">-</span> <span class="n">_IPV6_HDR_LEN</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">length</span> <span class="o">-</span> <span class="n">IPV6_HEADER_LEN</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
 </pre></div>
         </article>

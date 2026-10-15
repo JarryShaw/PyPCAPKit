@@ -4455,6 +4455,58 @@ defines neither <code class="docutils literal notranslate"><span class="pre">get
 </section>
 <section id="module-pcapkit.protocols.schema.misc.pcapng">
 <span id="header-schemas"></span><h2>Header Schemas<a class="headerlink" href="#module-pcapkit.protocols.schema.misc.pcapng" title="Link to this heading">¶</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.BYTE_ORDER_MAGIC">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.misc.pcapng.</span></span><span class="sig-name descname"><span class="pre">BYTE_ORDER_MAGIC</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">439041101</span></span><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.BYTE_ORDER_MAGIC" title="Link to this definition">¶</a></dt>
+<dd><p>Byte-Order Magic of a Section Header Block, read in the byte order of the
+section that wrote it. The one home of this value (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1739">#1739</a>); the format
+fixes it, so it is never configurable.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.5.0.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.GENERIC_BLOCK_MINIMUM">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.misc.pcapng.</span></span><span class="sig-name descname"><span class="pre">GENERIC_BLOCK_MINIMUM</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></span><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.GENERIC_BLOCK_MINIMUM" title="Link to this definition">¶</a></dt>
+<dd><p>Block Type and both copies of
+Block Total Length, and so the shortest Block Total Length of any block, and
+the whole of it for a block not in <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.BLOCK_MINIMUM" title="pcapkit.protocols.schema.misc.pcapng.BLOCK_MINIMUM"><code class="xref py py-data docutils literal notranslate"><span class="pre">BLOCK_MINIMUM</span></code></a>. The one home of
+this value (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1739">#1739</a>); the format fixes it, so it is never configurable.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.5.0.</span></p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The octets every block’s fixed fields span</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.BLOCK_MINIMUM">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.misc.pcapng.</span></span><span class="sig-name descname"><span class="pre">BLOCK_MINIMUM</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.15)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.BLOCK_MINIMUM" title="Link to this definition">¶</a></dt>
+<dd><p>Block types mapped to the octets their fixed fields span, Block Type and
+both copies of Block Total Length included; any other block spans
+<a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.GENERIC_BLOCK_MINIMUM" title="pcapkit.protocols.schema.misc.pcapng.GENERIC_BLOCK_MINIMUM"><code class="xref py py-data docutils literal notranslate"><span class="pre">GENERIC_BLOCK_MINIMUM</span></code></a>. The one home of these values (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1739">#1739</a>);
+the format fixes them, so they are never configurable.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.5.0.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.DEFAULT_RESOLUTION">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.misc.pcapng.</span></span><span class="sig-name descname"><span class="pre">DEFAULT_RESOLUTION</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1000000</span></span><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.DEFAULT_RESOLUTION" title="Link to this definition">¶</a></dt>
+<dd><p>Units per second of a timestamp on an interface that carries no
+<code class="docutils literal notranslate"><span class="pre">if_tsresol</span></code> option: microseconds, the default the format gives that
+option. The one home of this value (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1739">#1739</a>); the format fixes it, so
+it is never configurable.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.5.0.</span></p>
+</div>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.PCAPNG">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.misc.pcapng.</span></span><span class="sig-name descname"><span class="pre">PCAPNG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.pcapkit.protocols.schema.schema._VT" title="pcapkit.protocols.schema.schema.pcapkit.protocols.schema.schema._VT"><span class="pre">_VT</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.pcapkit.protocols.schema.schema._VT" title="pcapkit.protocols.schema.schema.pcapkit.protocols.schema.schema._VT"><span class="pre">_VT</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/misc/pcapng.html#PCAPNG"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.PCAPNG" title="Link to this definition">¶</a></dt>
@@ -5161,7 +5213,7 @@ with one blank line between entries.</p>
 <p class="admonition-title">Note</p>
 <p>The block carries no length for its custom data, so where the custom
 data ends and the block options begin is known only to the owner of
-the private enterprise number. <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.CustomBlock.data" title="pcapkit.protocols.schema.misc.pcapng.CustomBlock.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></a> therefore spans the whole
+the private enterprise number. <code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code> therefore spans the whole
 region between <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.CustomBlock.pen" title="pcapkit.protocols.schema.misc.pcapng.CustomBlock.pen"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pen</span></code></a> and the trailing block total length, i.e.
 the custom data, its padding to a 32-bit boundary, and any options.</p>
 </div>
@@ -5175,12 +5227,6 @@ the custom data, its padding to a 32-bit boundary, and any options.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.CustomBlock.pen">
 <span class="sig-name descname"><span class="pre">pen</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt32Field</span> <span class="pre">pen&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.CustomBlock.pen" title="Link to this definition">¶</a></dt>
 <dd><p>Private enterprise number.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.CustomBlock.data">
-<span class="sig-name descname"><span class="pre">data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BytesField</span> <span class="pre">data&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.CustomBlock.data" title="Link to this definition">¶</a></dt>
-<dd><p>Custom data (incl. padding and options).</p>
 </dd></dl>
 
 <dl class="py attribute">

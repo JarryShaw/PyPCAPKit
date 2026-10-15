@@ -753,8 +753,52 @@ as link-layer padding; written as is.</p></li>
 
 </dd></dl>
 
+<section id="protocol-constants">
+<h2>Protocol Constants<a class="headerlink" href="#protocol-constants" title="Link to this heading">¶</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.IPV6_HEADER_LEN">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6.</span></span><span class="sig-name descname"><span class="pre">IPV6_HEADER_LEN</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">40</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.IPV6_HEADER_LEN" title="Link to this definition">¶</a></dt>
+<dd><p>Length of the fixed IPv6 header, i.e. the offset of the first extension
+header, <span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-3"><strong>RFC 8200 Section 3</strong></a>. The one home of this value (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1739">#1739</a>); it
+is fixed by the RFC, so it is never configurable.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.5.0.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6.IPV6_NEXT_HEADER_OFFSET">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6.</span></span><span class="sig-name descname"><span class="pre">IPV6_NEXT_HEADER_OFFSET</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6.IPV6_NEXT_HEADER_OFFSET" title="Link to this definition">¶</a></dt>
+<dd><p>Offset of the Next Header field within the fixed IPv6 header,
+<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-3"><strong>RFC 8200 Section 3</strong></a>. The one home of this value (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1739">#1739</a>).</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.5.0.</span></p>
+</div>
+</dd></dl>
+
+</section>
 <section id="module-pcapkit.protocols.schema.internet.ipv6">
 <span id="header-schemas"></span><h2>Header Schemas<a class="headerlink" href="#module-pcapkit.protocols.schema.internet.ipv6" title="Link to this heading">¶</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6.IP_MAX_LENGTH">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.ipv6.</span></span><span class="sig-name descname"><span class="pre">IP_MAX_LENGTH</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">65535</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6.IP_MAX_LENGTH" title="Link to this definition">¶</a></dt>
+<dd><p>IPv4’s Total Length, the
+header included (<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html#section-3.1"><strong>RFC 791 Section 3.1</strong></a>), and IPv6’s Payload Length, the
+fixed header excluded (<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-3"><strong>RFC 8200 Section 3</strong></a>) – so a longer IPv6 payload is
+a jumbogram, whose Jumbo Payload Length must exceed it (<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2675.html#section-2"><strong>RFC 2675 Section 2</strong></a>).
+The one home of this value (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1739">#1739</a>), here so that the schema’s
+jumbogram check and the protocol modules read the same one; it is fixed by
+the RFCs, so it is never configurable.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.5.0.</span></p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The most octets a 16-bit IP length field declares</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6.IPv6">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.ipv6.</span></span><span class="sig-name descname"><span class="pre">IPv6</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.pcapkit.protocols.schema.schema._VT" title="pcapkit.protocols.schema.schema.pcapkit.protocols.schema.schema._VT"><span class="pre">_VT</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.pcapkit.protocols.schema.schema._VT" title="pcapkit.protocols.schema.schema.pcapkit.protocols.schema.schema._VT"><span class="pre">_VT</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/ipv6.html#IPv6"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6.IPv6" title="Link to this definition">¶</a></dt>
@@ -766,7 +810,7 @@ as link-layer padding; written as is.</p></li>
 <dd><p>Version, traffic class and flow label.</p>
 <p>The <a class="reference internal" href="../../corekit/fields/strings.html#pcapkit.corekit.fields.strings.BitField" title="pcapkit.corekit.fields.strings.BitField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BitField</span></code></a> namespace maps each
 subfield to a <code class="docutils literal notranslate"><span class="pre">(start_bit,</span> <span class="pre">length_in_bits)</span></code> pair, <em>not</em> to
-<code class="docutils literal notranslate"><span class="pre">(start_bit,</span> <span class="pre">end_bit)</span></code>. Per <span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-3"><strong>RFC 8200 Section 3</strong></a> the first 32 bits of
+<code class="docutils literal notranslate"><span class="pre">(start_bit,</span> <span class="pre">end_bit)</span></code>. Per <span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-3"><strong>RFC 8200 Section 3</strong></a> the first 32 bits of
 the IPv6 header are Version (bits 0-3), Traffic Class (bits 4-11) and
 Flow Label (bits 12-31), so the flow label starts at bit 12 – reading it
 as <code class="docutils literal notranslate"><span class="pre">(8,</span> <span class="pre">20)</span></code> would overlap the low nibble of the traffic class and drop
@@ -821,7 +865,7 @@ padding, c.f. <a class="reference internal" href="ipv4.html#pcapkit.protocols.sc
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6.IPv6.post_process">
 <span class="sig-name descname"><span class="pre">post_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/ipv6.html#IPv6.post_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6.IPv6.post_process" title="Link to this definition">¶</a></dt>
 <dd><p>Revise <code class="docutils literal notranslate"><span class="pre">schema</span></code> data after unpacking process.</p>
-<p>A jumbogram [<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2675.html"><strong>RFC 2675</strong></a>] declares a Payload Length of zero and
+<p>A jumbogram [<span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2675.html"><strong>RFC 2675</strong></a>] declares a Payload Length of zero and
 carries its real length in a Jumbo Payload option instead, so the
 <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6.IPv6.payload" title="pcapkit.protocols.schema.internet.ipv6.IPv6.payload"><code class="xref py py-attr docutils literal notranslate"><span class="pre">payload</span></code></a> field reads nothing and every octet lands in
 <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6.IPv6.trailer" title="pcapkit.protocols.schema.internet.ipv6.IPv6.trailer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">trailer</span></code></a>. When <code class="xref py py-func docutils literal notranslate"><span class="pre">jumbo_payload_length()</span></code> finds that option,
@@ -1036,6 +1080,7 @@ past the Jumbo Payload Length – present only when there are any.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">IPv6 - Internet Protocol version 6</a><ul>
+<li><a class="reference internal" href="#protocol-constants">Protocol Constants</a></li>
 <li><a class="reference internal" href="#module-pcapkit.protocols.schema.internet.ipv6">Header Schemas</a><ul>
 <li><a class="reference internal" href="#type-stubs">Type Stubs</a></li>
 </ul>

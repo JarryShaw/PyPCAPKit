@@ -760,7 +760,10 @@ the verdict for 9083163f5 (<a class="reference external" href="https://github.co
 So Vendor Update, Conda Update and GitHub Pages each run a <code class="docutils literal notranslate"><span class="pre">verdict</span></code> job first,
 and act only when the tip is the verified commit, or that commit plus bot commits
 to <code class="docutils literal notranslate"><span class="pre">conda/build</span></code> and <code class="docutils literal notranslate"><span class="pre">conda/requirements.txt</span></code> alone; otherwise they skip, and
-the tip’s own Unit Tests run raises them again. The rule and its evidence are in
+the tip’s own Unit Tests run raises them again. Vendor Update’s run still
+concludes <code class="docutils literal notranslate"><span class="pre">success</span></code> then, since <code class="docutils literal notranslate"><span class="pre">verdict</span></code> ran, so Create Release reads its
+<code class="docutils literal notranslate"><span class="pre">vendor-update</span></code> job to tell it from a real one
+(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1748">#1748</a>). The rule and its evidence are in
 <code class="docutils literal notranslate"><span class="pre">util/verdict_covers_checkout.py</span></code>. Conda Update also writes after the
 checkout, so it applies the same rule a second time: its push rebases onto
 <code class="docutils literal notranslate"><span class="pre">main</span></code>’s tip only when the commits that brings in pass it, and otherwise
@@ -785,7 +788,7 @@ the caller’s own workflow run, as one of the caller’s own jobs, rather than
 starting an independent run after the caller finishes. All four calls in this
 repository target the same reusable workflow, with the same input:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/create-release.yml:479</span></code> – job <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> calls
+<li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/create-release.yml:593</span></code> – job <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> calls
 <code class="docutils literal notranslate"><span class="pre">./.github/workflows/unit-tests.yml</span></code> with <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/cron-conda.yml:50</span></code> – job <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> calls
 <code class="docutils literal notranslate"><span class="pre">./.github/workflows/unit-tests.yml</span></code> with <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code>.</p></li>
@@ -823,31 +826,39 @@ existed then – <code class="docutils literal notranslate"><span class="pre">Py
 <section id="the-skip-cascade-888">
 <h2>The Skip Cascade (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/888">#888</a>)<a class="headerlink" href="#the-skip-cascade-888" title="Link to this heading">¶</a></h2>
 <p>The two relationships above compose into a failure mode worth seeing on its
-own graph. Create Release’s first job, <code class="docutils literal notranslate"><span class="pre">version_check</span></code> – ahead of the
-<code class="docutils literal notranslate"><span class="pre">uses:</span></code> call above – carries:</p>
+own graph. Create Release’s <code class="docutils literal notranslate"><span class="pre">version_check</span></code> – ahead of the <code class="docutils literal notranslate"><span class="pre">uses:</span></code> call
+above – carries:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;-</span>
-<span class="w">  </span><span class="no">${{ (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') &amp;&amp;</span>
-<span class="w">  </span><span class="no">!(github.event_name == 'push' &amp;&amp; github.actor_id == vars.RELEASE_APP_BOT_ID) }}</span>
+<span class="w">  </span><span class="no">${{ !cancelled() &amp;&amp;</span>
+<span class="w">  </span><span class="no">(github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') &amp;&amp;</span>
+<span class="w">  </span><span class="no">!(github.event_name == 'push' &amp;&amp; github.actor_id == vars.RELEASE_APP_BOT_ID) &amp;&amp;</span>
+<span class="w">  </span><span class="no">needs.vendor_update.outputs.updated != 'false' }}</span>
 </pre></div>
 </div>
-<p>(<code class="docutils literal notranslate"><span class="pre">create-release.yml:210-212</span></code>). Its second half skips the tag-push run that
+<p>(<code class="docutils literal notranslate"><span class="pre">create-release.yml:290-294</span></code>). Its third clause skips the tag-push run that
 the release App’s own tag starts (<a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a>, “The Release App”). On the
 <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> path, this evaluates <strong>false</strong>, and the job is skipped
 outright, whenever the upstream Vendor Update run’s own conclusion was
 anything other than <code class="docutils literal notranslate"><span class="pre">success</span></code> – including
 <code class="docutils literal notranslate"><span class="pre">skipped</span></code>, which is exactly what Vendor Update’s <em>own</em> jobs report when
 <em>their</em> <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code>-path guards decline (see <code class="docutils literal notranslate"><span class="pre">cron-vendor.yml</span></code>’s
-<code class="docutils literal notranslate"><span class="pre">vendor-update</span></code> job). <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> then depends on that job with
-<code class="docutils literal notranslate"><span class="pre">needs:</span> <span class="pre">[</span> <span class="pre">version_check</span> <span class="pre">]</span></code> (<code class="docutils literal notranslate"><span class="pre">create-release.yml:469</span></code>) and an <code class="docutils literal notranslate"><span class="pre">if:</span></code> that
+<code class="docutils literal notranslate"><span class="pre">vendor-update</span></code> job). Since
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1748">#1748</a> it is also false
+for a Vendor Update that concluded <code class="docutils literal notranslate"><span class="pre">success</span></code> with <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code> skipped –
+its <code class="docutils literal notranslate"><span class="pre">verdict</span></code> job found the Unit Tests verdict was for another commit – which
+the <code class="docutils literal notranslate"><span class="pre">vendor_update</span></code> job reads from that run’s jobs first, as run 38650191283
+was. <code class="docutils literal notranslate"><span class="pre">!cancelled()</span></code> keeps a skipped <code class="docutils literal notranslate"><span class="pre">vendor_update</span></code>, on a push, from
+skipping it. <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> then depends on that job with
+<code class="docutils literal notranslate"><span class="pre">needs:</span> <span class="pre">[</span> <span class="pre">version_check</span> <span class="pre">]</span></code> (<code class="docutils literal notranslate"><span class="pre">create-release.yml:581</span></code>) and an <code class="docutils literal notranslate"><span class="pre">if:</span></code> that
 calls no status-check function, so a skipped dependency skips it too – and
 every job past it is gated the same way: <code class="docutils literal notranslate"><span class="pre">github</span></code> needs <code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">unit-tests,</span>
-<span class="pre">version_check</span> <span class="pre">]</span></code> (<code class="docutils literal notranslate"><span class="pre">:500</span></code>), <code class="docutils literal notranslate"><span class="pre">tag</span></code> needs <code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">github,</span> <span class="pre">unit-tests,</span>
-<span class="pre">version_check</span> <span class="pre">]</span></code> (<code class="docutils literal notranslate"><span class="pre">:685</span></code>), <code class="docutils literal notranslate"><span class="pre">pypi</span></code> needs <code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">github,</span> <span class="pre">unit-tests,</span>
-<span class="pre">version_check</span> <span class="pre">]</span></code> (<code class="docutils literal notranslate"><span class="pre">:850</span></code>), and <code class="docutils literal notranslate"><span class="pre">conda</span></code> needs <code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">tag,</span> <span class="pre">github,</span>
-<span class="pre">unit-tests,</span> <span class="pre">version_check</span> <span class="pre">]</span></code> (<code class="docutils literal notranslate"><span class="pre">:1085</span></code>).</p>
+<span class="pre">version_check</span> <span class="pre">]</span></code> (<code class="docutils literal notranslate"><span class="pre">:619</span></code>), <code class="docutils literal notranslate"><span class="pre">tag</span></code> needs <code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">github,</span> <span class="pre">unit-tests,</span>
+<span class="pre">version_check</span> <span class="pre">]</span></code> (<code class="docutils literal notranslate"><span class="pre">:806</span></code>), <code class="docutils literal notranslate"><span class="pre">pypi</span></code> needs <code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">github,</span> <span class="pre">unit-tests,</span>
+<span class="pre">version_check</span> <span class="pre">]</span></code> (<code class="docutils literal notranslate"><span class="pre">:972</span></code>), and <code class="docutils literal notranslate"><span class="pre">conda</span></code> needs <code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">tag,</span> <span class="pre">github,</span>
+<span class="pre">unit-tests,</span> <span class="pre">version_check</span> <span class="pre">]</span></code> (<code class="docutils literal notranslate"><span class="pre">:1208</span></code>).</p>
 <pre  class="mermaid">
         flowchart TD
-    WR[&quot;Vendor Update completed&lt;br/&gt;conclusion != success&quot;]
+    WR[&quot;Vendor Update completed&lt;br/&gt;conclusion != success,&lt;br/&gt;or vendor-update skipped&quot;]
     VC[&quot;version_check&lt;br/&gt;SKIPPED&quot;]
     UTX[&quot;unit-tests (uses: unit-tests.yml)&lt;br/&gt;SKIPPED&quot;]
     GH[&quot;github (GitHub Release)&lt;br/&gt;SKIPPED&quot;]
@@ -867,7 +878,7 @@ every job past it is gated the same way: <code class="docutils literal notransla
     class UTX,VC,GH,TAGJ,PY,CD skipped
     </pre><p>This is a transitive reduction, as in <a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a>: <code class="docutils literal notranslate"><span class="pre">version_check</span></code> and
 <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> are also direct <code class="docutils literal notranslate"><span class="pre">needs:</span></code> of <code class="docutils literal notranslate"><span class="pre">tag</span></code> and <code class="docutils literal notranslate"><span class="pre">pypi</span></code>
-(<code class="docutils literal notranslate"><span class="pre">create-release.yml:685,850</span></code>) and of <code class="docutils literal notranslate"><span class="pre">conda</span></code> (<code class="docutils literal notranslate"><span class="pre">:1085</span></code>), but <code class="docutils literal notranslate"><span class="pre">github</span></code>
+(<code class="docutils literal notranslate"><span class="pre">create-release.yml:806,972</span></code>) and of <code class="docutils literal notranslate"><span class="pre">conda</span></code> (<code class="docutils literal notranslate"><span class="pre">:1208</span></code>), but <code class="docutils literal notranslate"><span class="pre">github</span></code>
 already implies those edges, since it depends on both itself. Drawing them
 would add lines without changing which job can start before which, or which
 job a skip in <code class="docutils literal notranslate"><span class="pre">version_check</span></code> reaches.</p>
@@ -890,7 +901,11 @@ because the upstream Vendor Update run did not itself conclude <code class="docu
 its own <code class="docutils literal notranslate"><span class="pre">github.run_id</span></code> rather than on the ref, so it cannot cancel a run
 waiting there with release work. Keyed on the ref, run 38499295798 joined at
 02:06:32Z on 2026-10-14, and the pending 38499150441, whose Vendor Update had
-succeeded, was cancelled a second later.</p>
+succeeded, was cancelled a second later. A run whose Vendor Update concluded
+<code class="docutils literal notranslate"><span class="pre">success</span></code> with <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code> skipped (#1748) is still keyed on the ref:
+the group reads only the event, which does not say which jobs ran. It can still
+displace a run pending there, and now releases nothing in its place, so that
+release waits for the next Vendor Update on <code class="docutils literal notranslate"><span class="pre">main</span></code>.</p>
 </section>
 <section id="pull-request-target">
 <h2><code class="docutils literal notranslate"><span class="pre">pull_request_target</span></code><a class="headerlink" href="#pull-request-target" title="Link to this heading">¶</a></h2>
@@ -1257,6 +1272,59 @@ since pytest applies no ignore to a path it was handed. On 2026-10-14 they were 
 and 8% of the unit tier’s time in a serial 3.14 run (86 of 1,031 s), and 10-11% on the
 3.14, 3.15 and 3.14t legs of run 38581834697, so the rest should take GraalPy 88-113
 minutes (estimate).</p>
+<p>GraalPy’s leg still loses its runner 18-30 minutes into its tests, with <code class="docutils literal notranslate"><span class="pre">The</span> <span class="pre">runner</span>
+<span class="pre">has</span> <span class="pre">received</span> <span class="pre">a</span> <span class="pre">shutdown</span> <span class="pre">signal</span></code> (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1740">#1740</a>),
+so each experimental leg samples its runner while the tests run. <code class="docutils literal notranslate"><span class="pre">Start</span> <span class="pre">the</span> <span class="pre">resource</span>
+<span class="pre">monitor</span></code> writes <code class="docutils literal notranslate"><span class="pre">free</span> <span class="pre">-m</span></code>, <code class="docutils literal notranslate"><span class="pre">df</span> <span class="pre">-h</span></code> of <code class="docutils literal notranslate"><span class="pre">/</span></code> and the workspace’s volume,
+<code class="docutils literal notranslate"><span class="pre">/proc/loadavg</span></code> and the five processes with the most RSS every 30 seconds, each
+line led by <code class="docutils literal notranslate"><span class="pre">[monitor]</span></code>, to <code class="docutils literal notranslate"><span class="pre">$RUNNER_TEMP/resource-monitor.log</span></code>; <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">unit</span>
+<span class="pre">tests</span></code> copies the file into its own log with <code class="docutils literal notranslate"><span class="pre">tail</span> <span class="pre">-F</span></code>; <code class="docutils literal notranslate"><span class="pre">Stop</span> <span class="pre">the</span> <span class="pre">resource</span>
+<span class="pre">monitor</span></code> ends the sampler, <code class="docutils literal notranslate"><span class="pre">if:</span> <span class="pre">always()</span></code>. The file is uploaded as
+<code class="docutils literal notranslate"><span class="pre">resource-monitor-&lt;version&gt;</span></code> (14 days, <code class="docutils literal notranslate"><span class="pre">if:</span> <span class="pre">always()</span></code>, <code class="docutils literal notranslate"><span class="pre">continue-on-error</span></code>)
+only where the runner survives the tests. <a class="reference external" href="https://docs.github.com/en/actions/reference/workflows-and-actions/expressions#always">always()</a>
+runs a step “even when canceled”, and docs.github.com says nothing of a runner’s
+shutdown, after which the runner evaluates no later step’s condition (actions/runner
+<code class="docutils literal notranslate"><span class="pre">src/Runner.Worker/StepsRunner.cs:205-208</span></code>, at <code class="docutils literal notranslate"><span class="pre">796cc18ff</span></code>). Job 116057255255
+skipped every step after its tests, <code class="docutils literal notranslate"><span class="pre">Post</span> <span class="pre">Run</span> <span class="pre">actions/checkout&#64;v7</span></code> too, whose
+<a class="reference external" href="https://docs.github.com/en/actions/reference/workflows-and-actions/metadata-syntax#runspost-if">post-if</a>
+“defaults to <code class="docutils literal notranslate"><span class="pre">always()</span></code>”. On a lost runner, then, the <code class="docutils literal notranslate"><span class="pre">[monitor]</span></code> lines in the
+tests’ log are the record. The monitor’s three steps, start, stop and upload, are each
+<code class="docutils literal notranslate"><span class="pre">continue-on-error</span></code> with no cap of their own, so the caps above and the check names
+are as they were.</p>
+<p>A lost runner fails the job, and so its check, whatever <code class="docutils literal notranslate"><span class="pre">continue-on-error</span></code> says,
+so <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">unit</span> <span class="pre">tests</span></code> holds the tests to what leaves the runner alive, and a breach
+fails the step, which <code class="docutils literal notranslate"><span class="pre">Containment</span> <span class="pre">summary</span></code> and <code class="docutils literal notranslate"><span class="pre">Experimental</span> <span class="pre">summary</span></code> report as
+warnings:</p>
+<ul class="simple">
+<li><p>GraalPy alone gets <code class="docutils literal notranslate"><span class="pre">GRAAL_PYTHON_VM_ARGS=--vm.Xmx2g</span></code>, a 2 GiB heap for every
+GraalPy process, xdist workers included, and <code class="docutils literal notranslate"><span class="pre">-n</span> <span class="pre">3</span></code>, a CPU of the runner’s 4 left
+to the JIT and the runner; 3.14t keeps <code class="docutils literal notranslate"><span class="pre">-n</span> <span class="pre">auto</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">timeout</span> <span class="pre">--signal=INT</span> <span class="pre">--kill-after=3m</span> <span class="pre">110m</span></code> ends pytest under the step’s 120-minute
+cap, so it still writes the junit XML, and exits 124; <code class="docutils literal notranslate"><span class="pre">prlimit</span> <span class="pre">--fsize=2147483648</span></code>
+caps any file at 2 GiB.</p></li>
+<li><p>Where the scope starts <code class="docutils literal notranslate"><span class="pre">true</span></code> under a throwaway unit, <code class="docutils literal notranslate"><span class="pre">pcapkit-probe-&lt;pid&gt;.scope</span></code>,
+with every flag the tests get (<code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">-n</span> <span class="pre">--preserve-env</span></code>, <code class="docutils literal notranslate"><span class="pre">MemoryMax=12G</span></code>,
+<code class="docutils literal notranslate"><span class="pre">MemorySwapMax=0</span></code>, <code class="docutils literal notranslate"><span class="pre">CPUWeight=20</span></code>, <code class="docutils literal notranslate"><span class="pre">--uid</span></code>, <code class="docutils literal notranslate"><span class="pre">--gid</span></code>), the tests run in the
+transient scope <code class="docutils literal notranslate"><span class="pre">pcapkit-tests.scope</span></code> as the runner’s own user; otherwise they run
+the same pytest command line uncapped, under a <code class="docutils literal notranslate"><span class="pre">No</span> <span class="pre">memory</span> <span class="pre">cap</span></code> warning. sudo
+resets <code class="docutils literal notranslate"><span class="pre">PATH</span></code> and drops <code class="docutils literal notranslate"><span class="pre">LD_*</span></code>, where setup-python puts its <code class="docutils literal notranslate"><span class="pre">lib/</span></code>, so <code class="docutils literal notranslate"><span class="pre">env</span></code>
+sets them, and the heap, again. The sampler started a step earlier, outside the scope, so an OOM kill there
+leaves it running; each sample adds the kernel’s <code class="docutils literal notranslate"><span class="pre">oom_kill</span></code> count and the scope’s
+<code class="docutils literal notranslate"><span class="pre">memory.current</span></code> and <code class="docutils literal notranslate"><span class="pre">memory.events</span></code>.</p></li>
+</ul>
+<p>The step writes <code class="docutils literal notranslate"><span class="pre">$RUNNER_TEMP/tests-status</span></code>: the exit status, the scope and the
+probe’s error, the seconds the tests took, the OOM kills while they ran
+(<code class="docutils literal notranslate"><span class="pre">/proc/vmstat</span></code>) and the <code class="docutils literal notranslate"><span class="pre">MemoryError</span></code> lines in their output. From it and the
+monitor’s last sample, <code class="docutils literal notranslate"><span class="pre">Containment</span> <span class="pre">summary</span></code> warns <code class="docutils literal notranslate"><span class="pre">No</span> <span class="pre">memory</span> <span class="pre">cap</span></code>, <code class="docutils literal notranslate"><span class="pre">tests</span> <span class="pre">lost</span> <span class="pre">a</span>
+<span class="pre">process</span> <span class="pre">to</span> <span class="pre">the</span> <span class="pre">OOM</span> <span class="pre">killer</span></code>, <code class="docutils literal notranslate"><span class="pre">tests</span> <span class="pre">timed</span> <span class="pre">out</span> <span class="pre">at</span> <span class="pre">110</span> <span class="pre">minutes</span></code> or <code class="docutils literal notranslate"><span class="pre">tests</span> <span class="pre">raised</span>
+<span class="pre">MemoryError</span></code>, each a warning of its own. A timeout is exit 124, or 137 with no OOM kill
+after 110 minutes: <code class="docutils literal notranslate"><span class="pre">--kill-after</span></code>’s SIGKILL to a teardown SIGINT did not end, where an
+OOM kill of pytest exits 137 too. <code class="docutils literal notranslate"><span class="pre">Experimental</span> <span class="pre">summary</span></code>, the job’s last step and the
+KTLO summary’s script, still warns of every failed step, <code class="docutils literal notranslate"><span class="pre">tests</span></code> included. The 2 GiB,
+<code class="docutils literal notranslate"><span class="pre">-n</span> <span class="pre">3</span></code> and 12G are estimates for a 16 GB, 4-CPU runner until a run shows them. At 3
+workers rather than 4, GraalPy’s tests should take about 117-151 minutes (an inference
+from the 88-113 above, not measured), so its leg may end on the 110-minute timeout as a
+warning: that is expected, blocks nothing, and leaves the caps as they are.</p>
 </section>
 <section id="python-versions">
 <h2>Python Versions<a class="headerlink" href="#python-versions" title="Link to this heading">¶</a></h2>
@@ -1302,19 +1370,26 @@ commits it did not make: when the branch holds some and proposes other tiers,
 <code class="docutils literal notranslate"><span class="pre">detect</span></code> fails before asking for the approval. Once that pull request is
 merged or closed, the next run with something to propose recreates the branch
 from <code class="docutils literal notranslate"><span class="pre">main</span></code>, a closed proposal’s tiers included. It reports a pre-release
-instead of writing it. The experimental entries are hand-maintained: no source it
-reads rates them, so every run keeps their lines as written, and a hand edit to
-one changes no proposal.</p>
+instead of writing it. Nor does it retire a job (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1747">#1747</a>): when the tiers leave
+a matrix job with no leg, as 3.11 reaching end of life leaves
+<code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code>, it writes them as computed, warns, and puts the job first in
+the body as a manual step: retire or remove it, and the <code class="docutils literal notranslate"><span class="pre">needs:</span></code> that list it,
+such as the one in <code class="docutils literal notranslate"><span class="pre">required-checks</span></code>, before merging. A proposal is still
+identified by its tiers alone, so retiring the job on <code class="docutils literal notranslate"><span class="pre">main</span></code> does not propose
+them again. The
+experimental entries are hand-maintained: no source it reads rates them, so
+every run keeps their lines as written, and a hand edit to one changes no
+proposal.</p>
 </section>
 <section id="deployment-environment">
 <h2>Deployment <code class="docutils literal notranslate"><span class="pre">environment:</span></code><a class="headerlink" href="#deployment-environment" title="Link to this heading">¶</a></h2>
 <p>Five jobs declare a deployment <code class="docutils literal notranslate"><span class="pre">environment:</span></code> and can therefore pause for an
 approval, four in <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code> and one in <code class="docutils literal notranslate"><span class="pre">cron-python-versions.yml</span></code>:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">github</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">github-release</span></code> (<code class="docutils literal notranslate"><span class="pre">create-release.yml:497</span></code>)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">tag</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">conda-tag</span></code> (<code class="docutils literal notranslate"><span class="pre">create-release.yml:683</span></code>)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">pypi</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">pypi</span></code> (<code class="docutils literal notranslate"><span class="pre">create-release.yml:845</span></code>)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">conda</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">anaconda</span></code> (<code class="docutils literal notranslate"><span class="pre">create-release.yml:1082</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">github</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">github-release</span></code> (<code class="docutils literal notranslate"><span class="pre">create-release.yml:616</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tag</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">conda-tag</span></code> (<code class="docutils literal notranslate"><span class="pre">create-release.yml:804</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pypi</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">pypi</span></code> (<code class="docutils literal notranslate"><span class="pre">create-release.yml:967</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">conda</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">anaconda</span></code> (<code class="docutils literal notranslate"><span class="pre">create-release.yml:1205</span></code>)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">pr</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">github-release</span></code>, for the release App’s key (see
 <a class="reference internal" href="#python-versions">Python Versions</a>)</p></li>
 </ul>

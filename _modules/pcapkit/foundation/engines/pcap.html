@@ -492,6 +492,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">EngineBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcap.header</span><span class="w"> </span><span class="kn">import</span> <span class="n">Header</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">RECORD_HEADER_LEN</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcap.header</span><span class="w"> </span><span class="kn">import</span> <span class="n">MAGIC_NUMBER</span> <span class="k">as</span> <span class="n">Schema_MAGIC_NUMBER</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'PCAP'</span><span class="p">]</span>
@@ -525,12 +527,10 @@
         <span class="c1">#: Nanosecond flag.</span>
         <span class="n">_nnsec</span><span class="p">:</span> <span class="s1">'bool'</span>
 
-    <span class="n">MAGIC_NUMBER</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="sa">b</span><span class="s1">'</span><span class="se">\xa1\xb2\x3c\x4d</span><span class="s1">'</span><span class="p">,</span>
-        <span class="sa">b</span><span class="s1">'</span><span class="se">\xa1\xb2\xc3\xd4</span><span class="s1">'</span><span class="p">,</span>
-        <span class="sa">b</span><span class="s1">'</span><span class="se">\x4d\x3c\xb2\xa1</span><span class="s1">'</span><span class="p">,</span>
-        <span class="sa">b</span><span class="s1">'</span><span class="se">\xd4\xc3\xb2\xa1</span><span class="s1">'</span><span class="p">,</span>
-    <span class="p">)</span>
+    <span class="c1">#: The PCAP magic numbers this engine claims, read from their one home,</span>
+    <span class="c1">#: :data:`pcapkit.protocols.schema.misc.pcap.header.MAGIC_NUMBER`</span>
+    <span class="c1">#: (:issue:`1739`).</span>
+    <span class="n">MAGIC_NUMBER</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">Schema_MAGIC_NUMBER</span><span class="p">)</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Defaults.</span>
@@ -719,11 +719,11 @@
             <span class="k">return</span>
 
         <span class="n">position</span> <span class="o">=</span> <span class="n">ifile</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
-        <span class="n">head</span> <span class="o">=</span> <span class="n">ifile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
+        <span class="n">head</span> <span class="o">=</span> <span class="n">ifile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">RECORD_HEADER_LEN</span><span class="p">)</span>
         <span class="n">ifile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
 
-        <span class="n">size</span> <span class="o">=</span> <span class="mi">16</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">head</span><span class="p">)</span> <span class="o">==</span> <span class="mi">16</span><span class="p">:</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="n">RECORD_HEADER_LEN</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">head</span><span class="p">)</span> <span class="o">==</span> <span class="n">RECORD_HEADER_LEN</span><span class="p">:</span>
             <span class="n">size</span> <span class="o">+=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">head</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">12</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gbhdr</span><span class="o">.</span><span class="n">byteorder</span><span class="p">)</span>
         <span class="n">ifile</span><span class="o">.</span><span class="n">_read_ahead_size</span> <span class="o">=</span> <span class="n">size</span></div>
 

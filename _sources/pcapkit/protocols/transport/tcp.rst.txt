@@ -143,6 +143,10 @@ Header Schemas
 
 .. module:: pcapkit.protocols.schema.transport.tcp
 
+.. autodata:: pcapkit.protocols.schema.transport.tcp.TCP_MIN_HEADER_LEN
+
+.. autodata:: pcapkit.protocols.schema.transport.tcp.TCP_DATA_OFFSET_OCTET
+
 .. autoclass:: pcapkit.protocols.schema.transport.tcp.TCP
    :members:
    :show-inheritance:

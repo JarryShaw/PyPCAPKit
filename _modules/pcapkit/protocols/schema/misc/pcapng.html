@@ -539,7 +539,7 @@
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv4Interface</span><span class="p">,</span> <span class="n">IPv6Address</span><span class="p">,</span> <span class="n">IPv6Interface</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Self</span>
 
@@ -656,6 +656,51 @@
         <span class="n">symbol_error</span><span class="p">:</span> <span class="nb">int</span></div>
 
 
+<span class="c1">#: Byte-Order Magic of a Section Header Block, read in the byte order of the</span>
+<span class="c1">#: section that wrote it. The one home of this value (:issue:`1739`); the format</span>
+<span class="c1">#: fixes it, so it is never configurable.</span>
+<span class="c1">#:</span>
+<span class="c1">#: .. versionadded:: 1.5.0</span>
+<span class="n">BYTE_ORDER_MAGIC</span> <span class="o">=</span> <span class="mh">0x1A2B3C4D</span>
+
+<span class="c1">#: :data:`BYTE_ORDER_MAGIC` read in the other byte order, i.e. as a big-endian</span>
+<span class="c1">#: reader sees a little-endian section's.</span>
+<span class="n">_SWAPPED_BYTE_ORDER_MAGIC</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">BYTE_ORDER_MAGIC</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s1">'little'</span><span class="p">),</span> <span class="s1">'big'</span><span class="p">)</span>
+
+<span class="c1">#: The octets every block's fixed fields span: Block Type and both copies of</span>
+<span class="c1">#: Block Total Length, and so the shortest Block Total Length of any block, and</span>
+<span class="c1">#: the whole of it for a block not in :data:`BLOCK_MINIMUM`. The one home of</span>
+<span class="c1">#: this value (:issue:`1739`); the format fixes it, so it is never configurable.</span>
+<span class="c1">#:</span>
+<span class="c1">#: .. versionadded:: 1.5.0</span>
+<span class="n">GENERIC_BLOCK_MINIMUM</span> <span class="o">=</span> <span class="mi">12</span>
+
+<span class="c1">#: Block types mapped to the octets their fixed fields span, Block Type and</span>
+<span class="c1">#: both copies of Block Total Length included; any other block spans</span>
+<span class="c1">#: :data:`GENERIC_BLOCK_MINIMUM`. The one home of these values (:issue:`1739`);</span>
+<span class="c1">#: the format fixes them, so they are never configurable.</span>
+<span class="c1">#:</span>
+<span class="c1">#: .. versionadded:: 1.5.0</span>
+<span class="n">BLOCK_MINIMUM</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Section_Header_Block</span><span class="p">:</span> <span class="mi">28</span><span class="p">,</span>
+    <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Interface_Description_Block</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+    <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Packet_Block</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
+    <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Simple_Packet_Block</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+    <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Interface_Statistics_Block</span><span class="p">:</span> <span class="mi">24</span><span class="p">,</span>
+    <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Enhanced_Packet_Block</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
+    <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Decryption_Secrets_Block</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+    <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Custom_Block_that_rewriters_can_copy_into_new_files</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+    <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Custom_Block_that_rewriters_should_not_copy_into_new_files</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+<span class="p">}</span>  <span class="c1"># type: Dict[int, int]</span>
+
+<span class="c1">#: Units per second of a timestamp on an interface that carries no</span>
+<span class="c1">#: ``if_tsresol`` option: microseconds, the default the format gives that</span>
+<span class="c1">#: option. The one home of this value (:issue:`1739`); the format fixes it, so</span>
+<span class="c1">#: it is never configurable.</span>
+<span class="c1">#:</span>
+<span class="c1">#: .. versionadded:: 1.5.0</span>
+<span class="n">DEFAULT_RESOLUTION</span> <span class="o">=</span> <span class="mi">1_000_000</span>
+
 
 <div class="viewcode-block" id="shb_byteorder_callback">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.shb_byteorder_callback">[docs]</a>
@@ -683,9 +728,9 @@
 
 <span class="sd">    """</span>
     <span class="n">magic</span> <span class="o">=</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'match'</span><span class="p">][</span><span class="s1">'byteorder'</span><span class="p">]</span>  <span class="c1"># type: int</span>
-    <span class="k">if</span> <span class="n">magic</span> <span class="ow">in</span> <span class="p">(</span><span class="mh">0x1A2B3C4D</span><span class="p">,</span> <span class="mh">0x0000000C</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">magic</span> <span class="ow">in</span> <span class="p">(</span><span class="n">BYTE_ORDER_MAGIC</span><span class="p">,</span> <span class="mh">0x0000000C</span><span class="p">):</span>
         <span class="n">field</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">=</span> <span class="s1">'big'</span>
-    <span class="k">elif</span> <span class="n">magic</span> <span class="ow">in</span> <span class="p">(</span><span class="mh">0x4D3C2B1A</span><span class="p">,</span> <span class="mh">0x0C000000</span><span class="p">):</span>
+    <span class="k">elif</span> <span class="n">magic</span> <span class="ow">in</span> <span class="p">(</span><span class="n">_SWAPPED_BYTE_ORDER_MAGIC</span><span class="p">,</span> <span class="mh">0x0C000000</span><span class="p">):</span>
         <span class="n">field</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">=</span> <span class="s1">'little'</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown byteorder magic: </span><span class="si">{</span><span class="n">magic</span><span class="si">:</span><span class="s1">#x</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
@@ -941,8 +986,12 @@
 <span class="sd">    (:issue:`1405`).</span>
 
 <span class="sd">    """</span>
+    <span class="c1"># NOTE: an EPB and the obsolete Packet Block span the same fixed fields, so</span>
+    <span class="c1"># the one entry stands for both.</span>
+    <span class="n">framing</span> <span class="o">=</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Enhanced_Packet_Block</span><span class="p">]</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">callback</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">32</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="n">framing</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">callback</span>
 
 
@@ -1294,7 +1343,7 @@
     <span class="c1">#: Block total length.</span>
     <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
     <span class="c1">#: Block body (including padding).</span>
-    <span class="n">body</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">nonnegative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">12</span><span class="p">))</span>
+    <span class="n">body</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">nonnegative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="n">GENERIC_BLOCK_MINIMUM</span><span class="p">))</span>
     <span class="c1">#: Block total length.</span>
     <span class="n">length2</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
 
@@ -1559,7 +1608,7 @@
     <span class="n">section_length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">Int64Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">shb_byteorder_callback</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mh">0xFFFF_FFFF_FFFF_FFFF</span><span class="p">)</span>
     <span class="c1">#: Options.</span>
     <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionAreaField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="n">nonnegative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">28</span><span class="p">),</span>
+        <span class="n">length</span><span class="o">=</span><span class="n">nonnegative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Section_Header_Block</span><span class="p">]),</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">_OPT_Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
         <span class="n">registry</span><span class="o">=</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">'opt'</span><span class="p">],</span>
@@ -1593,7 +1642,8 @@
             <span class="k">return</span>
 
         <span class="n">packet</span><span class="p">[</span><span class="s1">'match'</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">'byteorder'</span><span class="p">:</span> <span class="mh">0x1A2B3C4D</span> <span class="k">if</span> <span class="n">packet_byteorder</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span> <span class="o">==</span> <span class="s1">'big'</span> <span class="k">else</span> <span class="mh">0x4D3C2B1A</span><span class="p">,</span>
+            <span class="s1">'byteorder'</span><span class="p">:</span> <span class="p">(</span><span class="n">BYTE_ORDER_MAGIC</span> <span class="k">if</span> <span class="n">packet_byteorder</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span> <span class="o">==</span> <span class="s1">'big'</span>
+                          <span class="k">else</span> <span class="n">_SWAPPED_BYTE_ORDER_MAGIC</span><span class="p">),</span>
         <span class="p">}</span></div>
 
 
@@ -1620,16 +1670,16 @@
 <span class="sd">        Block Total Length (see :func:`shb_byteorder_callback`).</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">&gt;=</span> <span class="mi">28</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">&gt;=</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Section_Header_Block</span><span class="p">]:</span>
             <span class="bp">self</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Self'</span><span class="p">,</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_length</span> <span class="o">==</span> <span class="mh">0xFFFF_FFFF_FFFF_FFFF</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">section_length</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
 
         <span class="n">magic</span> <span class="o">=</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'match'</span><span class="p">][</span><span class="s1">'byteorder'</span><span class="p">]</span>  <span class="c1"># type: int</span>
-        <span class="k">if</span> <span class="n">magic</span> <span class="o">==</span> <span class="mh">0x1A2B3C4D</span> <span class="ow">or</span> <span class="p">(</span><span class="n">magic</span> <span class="o">==</span> <span class="mh">0x0000000C</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="mi">12</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">magic</span> <span class="o">==</span> <span class="n">BYTE_ORDER_MAGIC</span> <span class="ow">or</span> <span class="p">(</span><span class="n">magic</span> <span class="o">==</span> <span class="mh">0x0000000C</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="n">GENERIC_BLOCK_MINIMUM</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">byteorder</span> <span class="o">=</span> <span class="s1">'big'</span>
-        <span class="k">elif</span> <span class="n">magic</span> <span class="o">==</span> <span class="mh">0x4D3C2B1A</span> <span class="ow">or</span> <span class="p">(</span><span class="n">magic</span> <span class="o">==</span> <span class="mh">0x0C000000</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="mi">12</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="n">magic</span> <span class="o">==</span> <span class="n">_SWAPPED_BYTE_ORDER_MAGIC</span> <span class="ow">or</span> <span class="p">(</span><span class="n">magic</span> <span class="o">==</span> <span class="mh">0x0C000000</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="n">GENERIC_BLOCK_MINIMUM</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">byteorder</span> <span class="o">=</span> <span class="s1">'little'</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown byteorder magic: </span><span class="si">{</span><span class="n">magic</span><span class="si">:</span><span class="s1">#x</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
@@ -1955,7 +2005,7 @@
     <span class="n">snaplen</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
     <span class="c1">#: Options.</span>
     <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionAreaField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="n">nonnegative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">20</span><span class="p">),</span>
+        <span class="n">length</span><span class="o">=</span><span class="n">nonnegative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Interface_Description_Block</span><span class="p">]),</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">_IF_Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
         <span class="n">registry</span><span class="o">=</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">'if'</span><span class="p">],</span>
@@ -1985,7 +2035,7 @@
 <span class="sd">        the block as captured and compares them itself (:issue:`1422`).</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">20</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Interface_Description_Block</span><span class="p">]:</span>
             <span class="k">return</span> <span class="bp">self</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span></div>
 
@@ -2138,7 +2188,7 @@
         <span class="c1"># ``padding_data``: a PaddingField is written straight into the schema</span>
         <span class="c1"># buffer while packing and never lands in the packet data, so its name</span>
         <span class="c1"># is not a key here on the packing path.</span>
-        <span class="n">length</span><span class="o">=</span><span class="n">bounded_area</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">32</span>
+        <span class="n">length</span><span class="o">=</span><span class="n">bounded_area</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Enhanced_Packet_Block</span><span class="p">]</span>
                                         <span class="o">-</span> <span class="p">(</span><span class="n">captured_area</span><span class="p">(</span><span class="s1">'captured_len'</span><span class="p">)(</span><span class="n">pkt</span><span class="p">)</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">4</span><span class="p">),</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">_EPB_Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
@@ -2169,7 +2219,7 @@
 <span class="sd">        as captured and compares them itself (:issue:`1414`).</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">32</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Enhanced_Packet_Block</span><span class="p">]:</span>
             <span class="k">return</span> <span class="bp">self</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span></div>
 
@@ -2198,7 +2248,7 @@
 <span class="sd">        read where it sits.</span>
 
 <span class="sd">    """</span>
-    <span class="n">area</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">16</span><span class="p">)</span>
+    <span class="n">area</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Simple_Packet_Block</span><span class="p">])</span>
     <span class="n">size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">packet</span><span class="p">[</span><span class="s1">'original_len'</span><span class="p">],</span> <span class="n">area</span><span class="p">)</span>
     <span class="n">snaplen</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'snaplen'</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">snaplen</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">snaplen</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">:</span>
@@ -2448,7 +2498,7 @@
     <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
     <span class="c1">#: Name resolution records.</span>
     <span class="n">records</span><span class="p">:</span> <span class="s1">'list[NameResolutionRecord]'</span> <span class="o">=</span> <span class="n">OptionAreaField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="n">nonnegative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">12</span><span class="p">),</span>
+        <span class="n">length</span><span class="o">=</span><span class="n">nonnegative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="n">GENERIC_BLOCK_MINIMUM</span><span class="p">),</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">NameResolutionRecord</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
         <span class="n">registry</span><span class="o">=</span><span class="n">NameResolutionRecord</span><span class="o">.</span><span class="n">registry</span><span class="p">,</span>
@@ -2638,7 +2688,7 @@
     <span class="n">timestamp_low</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
     <span class="c1">#: Options.</span>
     <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionAreaField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="n">nonnegative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">24</span><span class="p">),</span>
+        <span class="n">length</span><span class="o">=</span><span class="n">nonnegative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Interface_Statistics_Block</span><span class="p">]),</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">_ISB_Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
         <span class="n">registry</span><span class="o">=</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">'isb'</span><span class="p">],</span>
@@ -2666,7 +2716,7 @@
     <span class="c1">#: Block total length.</span>
     <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
     <span class="c1">#: Journal entry.</span>
-    <span class="n">entry</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">nonnegative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">12</span><span class="p">))</span>
+    <span class="n">entry</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">nonnegative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="n">GENERIC_BLOCK_MINIMUM</span><span class="p">))</span>
     <span class="c1">#: Block total length.</span>
     <span class="n">length2</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
 
@@ -3062,8 +3112,8 @@
     <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionAreaField</span><span class="p">(</span>
         <span class="c1"># NOTE: see EnhancedPacketBlock.options on why the padding is recomputed</span>
         <span class="c1"># here instead of being read back from ``padding_data``.</span>
-        <span class="n">length</span><span class="o">=</span><span class="n">nonnegative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">20</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'secrets_length'</span><span class="p">]</span>
-                           <span class="o">-</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'secrets_length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="n">length</span><span class="o">=</span><span class="n">nonnegative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Decryption_Secrets_Block</span><span class="p">]</span>
+                           <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'secrets_length'</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'secrets_length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">),</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">_DSB_Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
         <span class="n">registry</span><span class="o">=</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">'dsb'</span><span class="p">],</span>
@@ -3103,7 +3153,10 @@
     <span class="c1">#: Private enterprise number.</span>
     <span class="n">pen</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
     <span class="c1">#: Custom data (incl. padding and options).</span>
-    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">nonnegative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">16</span><span class="p">))</span>
+    <span class="c1"># NOTE: both custom block types span the same fixed fields, so the one</span>
+    <span class="c1"># entry stands for both.</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">nonnegative</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Custom_Block_that_rewriters_can_copy_into_new_files</span><span class="p">]))</span>
     <span class="c1">#: Block total length.</span>
     <span class="n">length2</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
 
@@ -3188,7 +3241,7 @@
     <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionAreaField</span><span class="p">(</span>
         <span class="c1"># NOTE: see EnhancedPacketBlock.options on why the padding is recomputed</span>
         <span class="c1"># here instead of being read back from ``padding_data``.</span>
-        <span class="n">length</span><span class="o">=</span><span class="n">bounded_area</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">32</span>
+        <span class="n">length</span><span class="o">=</span><span class="n">bounded_area</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Packet_Block</span><span class="p">]</span>
                                         <span class="o">-</span> <span class="p">(</span><span class="n">captured_area</span><span class="p">(</span><span class="s1">'captured_length'</span><span class="p">)(</span><span class="n">pkt</span><span class="p">)</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">4</span><span class="p">),</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">_PACK_Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
@@ -3219,7 +3272,7 @@
 <span class="sd">        as captured and compares them itself (:issue:`1414`).</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">32</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Packet_Block</span><span class="p">]:</span>
             <span class="k">return</span> <span class="bp">self</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span></div>
 

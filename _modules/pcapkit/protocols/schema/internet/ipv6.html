@@ -498,6 +498,17 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 
+<span class="c1">#: The most octets a 16-bit IP length field declares: IPv4's Total Length, the</span>
+<span class="c1">#: header included (:rfc:`791#section-3.1`), and IPv6's Payload Length, the</span>
+<span class="c1">#: fixed header excluded (:rfc:`8200#section-3`) -- so a longer IPv6 payload is</span>
+<span class="c1">#: a jumbogram, whose Jumbo Payload Length must exceed it (:rfc:`2675#section-2`).</span>
+<span class="c1">#: The one home of this value (:issue:`1739`), here so that the schema's</span>
+<span class="c1">#: jumbogram check and the protocol modules read the same one; it is fixed by</span>
+<span class="c1">#: the RFCs, so it is never configurable.</span>
+<span class="c1">#:</span>
+<span class="c1">#: .. versionadded:: 1.5.0</span>
+<span class="n">IP_MAX_LENGTH</span> <span class="o">=</span> <span class="mi">65535</span>
+
 <span class="k">if</span> <span class="n">SPHINX_TYPE_CHECKING</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypedDict</span>
 
@@ -662,8 +673,8 @@
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">length</span><span class="p">:</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s1">'Jumbo Payload option with a non-zero Payload Length </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1">'</span>
-    <span class="k">if</span> <span class="n">jumbo</span> <span class="o">&lt;=</span> <span class="mh">0xFFFF</span><span class="p">:</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">'Jumbo Payload Length </span><span class="si">{</span><span class="n">jumbo</span><span class="si">}</span><span class="s1">, not greater than 65,535'</span>
+    <span class="k">if</span> <span class="n">jumbo</span> <span class="o">&lt;=</span> <span class="n">IP_MAX_LENGTH</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">'Jumbo Payload Length </span><span class="si">{</span><span class="n">jumbo</span><span class="si">}</span><span class="s1">, not greater than </span><span class="si">{</span><span class="n">IP_MAX_LENGTH</span><span class="si">:</span><span class="s1">,</span><span class="si">}</span><span class="s1">'</span>
     <span class="k">if</span> <span class="n">fragment</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">fragment</span><span class="p">():</span>
         <span class="k">return</span> <span class="s1">'Jumbo Payload option with a Fragment header'</span>
     <span class="k">return</span> <span class="kc">None</span>

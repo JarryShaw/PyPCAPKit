@@ -512,7 +512,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">Data_Frame</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameInfo</span> <span class="k">as</span> <span class="n">Data_FrameInfo</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">RECORD_HEADER_LEN</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcap.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">Schema_Frame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcap.header</span><span class="w"> </span><span class="kn">import</span> <span class="n">RESOLUTION</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">localcontext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">StreamEOFError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span>
@@ -597,7 +599,7 @@
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[16]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Header length of corresponding protocol."""</span>
-        <span class="k">return</span> <span class="mi">16</span>
+        <span class="k">return</span> <span class="n">RECORD_HEADER_LEN</span>  <span class="c1"># type: ignore[return-value]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">header</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_Header'</span><span class="p">:</span>
@@ -751,10 +753,7 @@
         <span class="n">_olen</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">orig_len</span>
 
         <span class="k">with</span> <span class="n">localcontext</span><span class="p">(</span><span class="n">prec</span><span class="o">=</span><span class="mi">64</span><span class="p">):</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nsec</span><span class="p">:</span>
-                <span class="n">_epch</span> <span class="o">=</span> <span class="n">_tsss</span> <span class="o">+</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">_tsus</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1_000_000_000</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">_epch</span> <span class="o">=</span> <span class="n">_tsss</span> <span class="o">+</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">_tsus</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1_000_000</span>
+            <span class="n">_epch</span> <span class="o">=</span> <span class="n">_tsss</span> <span class="o">+</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">_tsus</span><span class="p">)</span> <span class="o">/</span> <span class="n">RESOLUTION</span><span class="p">[</span><span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nsec</span><span class="p">)]</span>
         <span class="n">_irat</span> <span class="o">=</span> <span class="n">_epch</span><span class="o">.</span><span class="n">as_integer_ratio</span><span class="p">()</span>
 
         <span class="k">try</span><span class="p">:</span>
@@ -967,7 +966,7 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[16]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Return an estimated length for the object."""</span>
-        <span class="k">return</span> <span class="mi">16</span>
+        <span class="k">return</span> <span class="n">RECORD_HEADER_LEN</span>  <span class="c1"># type: ignore[return-value]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_record_floor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Refuse a tail too short to hold a record header.</span>
@@ -994,9 +993,10 @@
             <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_END</span><span class="p">)</span> <span class="o">-</span> <span class="n">current</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">16</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="n">RECORD_HEADER_LEN</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">StreamEOFError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP: record truncated: </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1"> octet(s) left, '</span>
-                                 <span class="s1">'fewer than the 16 a record header needs'</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                                 <span class="sa">f</span><span class="s1">'fewer than the </span><span class="si">{</span><span class="n">RECORD_HEADER_LEN</span><span class="si">}</span><span class="s1"> a record header needs'</span><span class="p">,</span>
+                                 <span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># NOTE: This is a hack to make the ``__index__`` method work both as a</span>
     <span class="c1"># class method and an instance method.</span>
@@ -1082,7 +1082,7 @@
             <span class="n">ts_sec</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">ts_usec</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">ts_usec</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">timestamp</span> <span class="o">-</span> <span class="n">ts_sec</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1_000_000_000</span> <span class="k">if</span> <span class="n">nanosecond</span> <span class="k">else</span> <span class="mi">1_000_000</span><span class="p">))</span>
+            <span class="n">ts_usec</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">timestamp</span> <span class="o">-</span> <span class="n">ts_sec</span><span class="p">)</span> <span class="o">*</span> <span class="n">RESOLUTION</span><span class="p">[</span><span class="nb">bool</span><span class="p">(</span><span class="n">nanosecond</span><span class="p">)])</span>
 
         <span class="k">return</span> <span class="n">ts_sec</span><span class="p">,</span> <span class="n">ts_usec</span>
 

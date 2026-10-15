@@ -515,6 +515,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span> <span class="k">as</span> <span class="n">Data_IPv6</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">_frame_depth</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP_MAX_LENGTH</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span> <span class="k">as</span> <span class="n">Schema_IPv6</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">jumbo_payload_length</span><span class="p">,</span> <span class="n">jumbogram_error</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>
@@ -532,6 +533,19 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'IPv6'</span><span class="p">]</span>
+
+<span class="c1">#: Length of the fixed IPv6 header, i.e. the offset of the first extension</span>
+<span class="c1">#: header, :rfc:`8200#section-3`. The one home of this value (:issue:`1739`); it</span>
+<span class="c1">#: is fixed by the RFC, so it is never configurable.</span>
+<span class="c1">#:</span>
+<span class="c1">#: .. versionadded:: 1.5.0</span>
+<span class="n">IPV6_HEADER_LEN</span> <span class="o">=</span> <span class="mi">40</span>
+
+<span class="c1">#: Offset of the Next Header field within the fixed IPv6 header,</span>
+<span class="c1">#: :rfc:`8200#section-3`. The one home of this value (:issue:`1739`).</span>
+<span class="c1">#:</span>
+<span class="c1">#: .. versionadded:: 1.5.0</span>
+<span class="n">IPV6_NEXT_HEADER_OFFSET</span> <span class="o">=</span> <span class="mi">6</span>
 
 
 <div class="viewcode-block" id="IPv6">
@@ -607,7 +621,7 @@
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[40]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Header length of corresponding protocol."""</span>
-        <span class="k">return</span> <span class="mi">40</span>
+        <span class="k">return</span> <span class="n">IPV6_HEADER_LEN</span>  <span class="c1"># type: ignore[return-value]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Enum_TransType'</span><span class="p">:</span>
@@ -795,7 +809,7 @@
         <span class="c1"># (:issue:`1687`).</span>
         <span class="k">if</span> <span class="n">payload_length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">payload_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">payload_length</span> <span class="o">&gt;</span> <span class="mh">0xFFFF</span> <span class="ow">or</span> <span class="n">jumbo_payload_length</span><span class="p">(</span><span class="n">next_val</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">payload</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">payload_length</span> <span class="o">&gt;</span> <span class="n">IP_MAX_LENGTH</span> <span class="ow">or</span> <span class="n">jumbo_payload_length</span><span class="p">(</span><span class="n">next_val</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">payload</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">payload_length</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="k">return</span> <span class="n">Schema_IPv6</span><span class="p">(</span>
@@ -833,7 +847,7 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[40]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Return an estimated length for the object."""</span>
-        <span class="k">return</span> <span class="mi">40</span>
+        <span class="k">return</span> <span class="n">IPV6_HEADER_LEN</span>  <span class="c1"># type: ignore[return-value]</span>
 
 <div class="viewcode-block" id="IPv6.__index__">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6.__index__">[docs]</a>
