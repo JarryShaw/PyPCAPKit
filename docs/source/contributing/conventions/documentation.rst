@@ -289,10 +289,10 @@ Format and Mechanics
    ruled this on :issue:`719`, correcting a blanket *always* ``.rst`` that had been in
    circulation: the Sphinx documentation is reST, and the other documents --
    the READMEs included -- are Markdown where that applies. ``CONTRIBUTING.md``'s own
-   *Documentation* section records the same split. One trap arrived with the ruling:
-   :file:`MANIFEST.in` reaches the two READMEs under :file:`examples/` through
-   ``global-include *.rst`` and has no ``*.md`` equivalent, so renaming one without
-   adding coverage drops it from every source distribution.
+   *Documentation* section records the same split. Neither ``global-include`` in
+   :file:`MANIFEST.in` reaches Markdown, so the two READMEs under :file:`examples/`
+   ship through ``recursive-include examples *.md``, and any other Markdown file
+   ships only if setuptools or an ``include`` line adds it.
 *  **Prose names the real defining module, not a re-export.** One strand of the
    consistency sweep on :doc:`the roadmap </contributing/pep>`. The sentinels are the
    worked example: all four are defined in :mod:`pcapkit.corekit.sentinels`, and

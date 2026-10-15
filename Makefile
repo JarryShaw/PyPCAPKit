@@ -193,8 +193,10 @@ mypy:
 bandit:
 	$(RUN) bandit $(BANDIT_FLAGS) pcapkit
 
+# Profile one extraction and render its call graph; the tools the recipe needs
+# are listed in examples/legacy_smoke/README.md.
 profile:
-	$(MAKE) -C test profile
+	$(MAKE) -C examples/legacy_smoke profile
 
 mypy-types:
 	pipenv run mypy --install-types

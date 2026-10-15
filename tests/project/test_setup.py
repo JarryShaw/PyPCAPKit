@@ -28,7 +28,6 @@ class SetupModuleTests(unittest.TestCase):
             'setuptools.command.build_py': 'build_py',
             'setuptools.command.develop': 'develop',
             'setuptools.command.install': 'install',
-            'setuptools.command.bdist_wheel': 'bdist_wheel',
         }
 
         loaded = ['setuptools']

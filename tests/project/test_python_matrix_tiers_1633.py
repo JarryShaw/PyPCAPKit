@@ -170,7 +170,7 @@ RETIRED_CLAIMS = re.compile('|'.join((
 PROSE_SCAN = (
     ('.github', ('*.yml', '*.md')),
     ('docs', ('*.rst', '*.py')),
-    ('examples', ('*.rst', '*.txt', '*.py', '*.sh')),
+    ('examples', ('*.md', '*.txt', '*.py', '*.sh')),
     ('pcapkit', ('*.py',)),
     ('tests', ('*.py',)),
     ('util', ('*.py',)),

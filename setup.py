@@ -47,7 +47,7 @@ def refactor(path: "str") -> "None":
             )
         except subprocess.CalledProcessError as error:
             logger.error(
-                "Failed to perform assignment expression backport compiling. "
+                "Failed to perform f-string backport compiling. "
                 "Please consider manually install `bpc-f2format` and try again."
             )
             sys.exit(error.returncode)
@@ -70,7 +70,7 @@ def refactor(path: "str") -> "None":
             )
         except subprocess.CalledProcessError as error:
             logger.error(
-                "Failed to perform assignment expression backport compiling. "
+                "Failed to perform positional-only parameter backport compiling. "
                 "Please consider manually install `bpc-poseur` and try again."
             )
             sys.exit(error.returncode)
@@ -156,24 +156,9 @@ except ImportError:
         "setuptools version is too old to support PyBPC conversion in install."
     )
 
-try:
-    from setuptools.command.bdist_wheel import bdist_wheel
-
-    class pcapkit_bdist_wheel(bdist_wheel):
-        """Modified bdist_wheel to run PyBPC conversion."""
-
-        def run(self) -> "None":
-            super(pcapkit_bdist_wheel, self).run()
-            logger.info("running bdist_wheel")
-
-            # PyBPC compatibility enforcement
-            refactor(os.path.join(self.dist_dir, "pcapkit"))  # type: ignore[arg-type]
-
-    cmdclass["bdist_wheel"] = pcapkit_bdist_wheel
-except ImportError:
-    logger.warning(
-        "setuptools version is too old to support PyBPC conversion in bdist_wheel."
-    )
+# No bdist_wheel override: ``bdist_wheel`` runs ``build_py`` and ``install``
+# above, so the tree it archives is already converted before the wheel is
+# written, and ``dist_dir`` holds only the finished wheels (#1773).
 
 setup(
     cmdclass=cmdclass,
