@@ -44,7 +44,13 @@ __all__ = ['C_Tag']
 # the base class's pair. c.f. :class:`~pcapkit.protocols.application.rarp.RARP`, which
 # restates them for the same reason.
 class C_Tag(VLAN, schema=Schema_VLAN, data=Data_VLAN):
-    """This class implements 802.1Q Customer VLAN Tag Type."""
+    """This class implements 802.1Q Customer VLAN Tag Type.
+
+    .. versionadded:: 1.5.0
+
+       Takes over the customer tag from :class:`~pcapkit.protocols.link.vlan.VLAN`.
+
+    """
 
     ##########################################################################
     # Properties.
@@ -65,7 +71,7 @@ class C_Tag(VLAN, schema=Schema_VLAN, data=Data_VLAN):
     #: class-name default -- a rename must not silently move the output key.
     @property
     def info_name(self) -> 'Literal["c_tag"]':
-        """Key name of the :attr:`info` dict."""
+        """Key name of the :attr:`~pcapkit.protocols.protocol.Protocol.info` dict."""
         return 'c_tag'
 
     ##########################################################################

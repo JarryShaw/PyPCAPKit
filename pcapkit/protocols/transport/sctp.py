@@ -335,7 +335,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
     :class:`~pcapkit.protocols.misc.raw.Raw`. It is registered so that the PPID
     is *named* in the protochain rather than reported as an unassigned number.
 
-    This class currently supports parsing of the following SCTP chunks, which
+    This class supports parsing of the following SCTP chunks, which
     are directly mapped to the :class:`pcapkit.const.sctp.chunk.Chunk`
     enumeration:
 
@@ -390,7 +390,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
     :meth:`~pcapkit.protocols.transport.sctp.SCTP._read_chunk_donone`, which
     records the chunk's raw flags and value verbatim rather than raising.
 
-    This class currently supports parsing of the following chunk parameters,
+    This class supports parsing of the following chunk parameters,
     which are directly mapped to the
     :class:`pcapkit.const.sctp.parameter.Parameter` enumeration:
 
@@ -425,12 +425,14 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
          - :meth:`~pcapkit.protocols.transport.sctp.SCTP._read_param_addrtypes`
          - :meth:`~pcapkit.protocols.transport.sctp.SCTP._make_param_addrtypes`
 
-    This class currently supports parsing of all thirteen error causes defined
+    This class supports parsing of all thirteen error causes defined
     by :rfc:`9260#section-3.3.10`, which are directly mapped to the
     :class:`pcapkit.const.sctp.cause_code.CauseCode` enumeration; see
     :attr:`self.__cause__ <SCTP.__cause__>` for the mapping. Unknown cause
     codes fall through to
     :meth:`~pcapkit.protocols.transport.sctp.SCTP._read_cause_donone`.
+
+    .. versionadded:: 1.5.0
 
     """
 
@@ -992,8 +994,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Raises:
             ProtocolError: If a raw chunk given to :meth:`make` is not a whole
                 chunk. Parsed, its octets would fall to the trailer rather than
-                to the chunk list, so it is rejected, as it was before
-                :issue:`1468`.
+                to the chunk list, so it is rejected (:issue:`1468`).
 
         """
         chunks = OrderedMultiDict()  # type: Chunks

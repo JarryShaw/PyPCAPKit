@@ -45,6 +45,8 @@ class S_Tag(VLAN, schema=Schema_VLAN, data=Data_VLAN):
         the only thing distinguishing this class from
         :class:`~pcapkit.protocols.link.c_tag.C_Tag` by name.
 
+    .. versionadded:: 1.5.0
+
     """
 
     ##########################################################################
@@ -66,7 +68,7 @@ class S_Tag(VLAN, schema=Schema_VLAN, data=Data_VLAN):
     #: and customer tag apart in the parsed info dict.
     @property
     def info_name(self) -> 'Literal["s_tag"]':
-        """Key name of the :attr:`info` dict."""
+        """Key name of the :attr:`~pcapkit.protocols.protocol.Protocol.info` dict."""
         return 's_tag'
 
     ##########################################################################

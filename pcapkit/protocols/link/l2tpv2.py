@@ -33,7 +33,7 @@ nibble reading ``2``. Its structure is described as below:
    ------- ----- --------------------- ------------------------------------------
     1          8                       Reserved (must be zero ``x00``)
    ------- ----- --------------------- ------------------------------------------
-    1         12 ``l2tp.ver``          Version (``2``)
+    1         12 ``l2tp.version``      Version (``2``)
    ------- ----- --------------------- ------------------------------------------
     2         16 ``l2tp.length``       Length (optional by ``len``)
    ------- ----- --------------------- ------------------------------------------
@@ -92,6 +92,12 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
     version nibble is not ``2``, so a v3 datagram arriving on port 1701
     (:rfc:`3931` §4.1.2 shares the port) degrades to
     :class:`~pcapkit.protocols.misc.raw.Raw` instead of being reported as v2.
+
+    .. versionadded:: 1.5.0
+
+       Takes over the version-2 parsing that
+       :class:`~pcapkit.protocols.link.l2tp.L2TP` carried, and refuses a version
+       nibble other than ``2`` (:issue:`548`).
 
     Note:
         IANA protocol number 115 (``L2TP``) is deliberately left unbound. It
