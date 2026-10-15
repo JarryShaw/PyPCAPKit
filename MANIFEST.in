@@ -2,6 +2,8 @@ global-exclude .DS_Store
 
 global-include *.rst
 global-include *.py
+# Neither global-include reaches Markdown, which the examples' READMEs are (#719).
+recursive-include examples *.md
 
 prune .eggs
 prune .github
@@ -9,7 +11,6 @@ prune .venv
 prune docs
 prune examples/captures
 prune temp
-prune test
 
 # Belt-and-braces, both of them: setuptools ships these two whether or not this
 # file mentions them, so neither line is load-bearing. An earlier version of this
