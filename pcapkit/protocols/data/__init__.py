@@ -61,6 +61,9 @@ __all__ = [
     # Ethernet Protocol
     'Ethernet',
 
+    # Layer Two Tunnelling Protocol
+    'L2TP', 'L2TP_Flags',
+
     # BSD Loopback Encapsulation
     'Loopback',
 

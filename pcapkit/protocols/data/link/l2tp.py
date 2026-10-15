@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
     from pcapkit.const.l2tp.type import Type
 
-__all__ = ['L2TP']
+__all__ = ['L2TP', 'Flags']
 
 
 @info_final
