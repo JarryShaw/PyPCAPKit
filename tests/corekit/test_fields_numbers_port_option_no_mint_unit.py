@@ -174,10 +174,11 @@ class PortEnumFieldBoundedFallbackTests(unittest.TestCase):
 
         A direct call to ``.get()`` is different on purpose and stays that
         way: the owner's ruling and the docstring above are both explicit
-        that ``get()`` is the public API and minting for a caller who asked
-        for this exact value directly is defensible, which is also what
-        ``tests/const/test_const_apptype_split_unit.py`` pins for
-        ``PORT_59001_tcp``/``PORT_51_tcp``. So this only asserts the
+        that ``get()`` is the public API and answering a caller who asked for
+        this exact value directly is defensible -- since #874 with an
+        unregistered ``unknown`` member rather than a mint -- which is also
+        what ``tests/const/test_const_apptype_split_unit.py`` pins for ports
+        59001 and 51. So this only asserts the
         value-lookup side, never the ``.get()`` side.
 
         """
@@ -307,8 +308,9 @@ class OptionEnumFieldBoundedFallbackTests(unittest.TestCase):
     def test_an_undeclared_option_code_resolves_without_growing_the_registry(self) -> None:
         """An interface-block option code no ``if`` or ``opt`` row covers.
 
-        ``OptionType._missing_`` never declines -- unlike ``AppType``'s, it
-        mints unconditionally on any miss -- so this fallback cannot consult
+        ``OptionType._missing_`` never declines an in-range code -- unlike
+        ``AppType``'s, it answers every such miss with an unregistered member
+        -- so this fallback cannot consult
         it the way the port fields consult ``AppType``'s, and instead
         replicates the read-only membership test ``OptionType.get`` itself
         runs first. ``.opt_name`` and ``.opt_value`` are read unconditionally

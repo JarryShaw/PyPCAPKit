@@ -1999,9 +1999,9 @@ class HIPUnitTests(unittest.TestCase):
         Each ``TF type`` entry is two octets, not one -- :rfc:`7401` Section
         5.2.11 fixes it at "2x number of TF types" and the diagram shows two
         16-bit ``TF type`` fields per 32-bit row, matching
-        :class:`HIPTransportModeParameter`'s ``mode`` field rather than the
-        one-octet items :func:`two_octet_prefix_list_len`'s other two call
-        sites use. So this test's four entries are four *two*-octet values
+        :class:`HIPTransportModeParameter`'s ``mode`` field and the items at
+        :func:`two_octet_prefix_list_len`'s other two call sites, all three
+        two-octet. So this test's four entries are four *two*-octet values
         (``Length = 8``), and with both defects fixed --
         :func:`~pcapkit.protocols.schema.internet.hip.
         transport_format_list_len` returning ``Length`` unchanged, and

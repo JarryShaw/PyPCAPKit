@@ -546,9 +546,10 @@ class DumpkitIOTests(unittest.TestCase):
             self.assertEqual([str(entry.message) for entry in caught], [])
 
     def test_pcap_dumper_cannot_serialise_a_mapping_frame(self) -> None:
-        # Why Extractor substitutes a dict-capable trace format for the DPKT, Scapy,
-        # PyShark and PyPCAPFile engines: their flow-tracing adapters report each
-        # frame as a plain dict from ``packet2dict``, and this dumper reads
+        # Why Extractor substitutes a dict-capable trace format for the PyShark
+        # and PyPCAPFile engines (DPKT and Scapy left that guard in #1507): their
+        # flow-tracing adapters report each frame as a plain dict from
+        # ``packet2dict``, and this dumper reads
         # ``value.packet`` and ``value.frame_info`` off a dissected Frame. Pinned
         # here so the guard's justification is checked rather than asserted in a
         # comment -- if this dumper ever learns to take a mapping, the guard is what

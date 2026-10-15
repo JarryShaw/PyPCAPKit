@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 """Every ``__proto__`` dispatch-registry entry, enumerated rather than hand-picked.
 
-GitHub issue #496: :file:`pcapkit/foundation/registry/protocols.py` documents
-seven registries -- 39 entries in total as of #904, which added
-``Internet.__proto__[TransType.Shim6]`` -- that decide which
+GitHub issue #496: the ``__proto__`` dispatch registries decide which
 :class:`~pcapkit.protocols.protocol.Protocol` subclass parses the next layer.
-Nothing walked all of them. :file:`test_registry_runtime.py` checks that a
-table entry *resolves* to the right class object, and
+#496 named seven of them; #904 took them to 39 entries by adding
+``Internet.__proto__[TransType.Shim6]``, and #1574 to 47 across eight tables by
+adding the loopback one. Nothing walked all of them.
+:file:`test_registry_runtime.py` checks that a table entry *resolves* to the
+right class object, and
 :file:`test_dispatch_bindings_unit.py` checks that eleven hand-picked codes
 actually parse a packet into the class the table names -- the property that
 matters, since a resolvable entry whose target cannot parse a packet is
@@ -15,7 +16,7 @@ reachable from no table at all, per that module's own docstring.
 
 This module closes the gap the same way
 :file:`test_option_roundtrip_unit.py` closed it for the option/parameter
-registries: :func:`examples.generators.dispatch.cases` walks the seven
+registries: :func:`examples.generators.dispatch.cases` walks the eight
 ``__proto__`` tables directly, so a code registered tomorrow gets a case here
 tomorrow -- or fails :meth:`DispatchRegistryTests
 .test_every_registered_code_has_a_case`, which is what makes the coverage

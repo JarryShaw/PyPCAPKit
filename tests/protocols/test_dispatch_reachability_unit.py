@@ -9,7 +9,7 @@ GitHub issue #548 asked for this directly:
     rather than just this one.
 
 :file:`test_dispatch_registry_unit.py` walks the problem from the other end: it
-takes each of the 38 ``__proto__`` entries that *exist* and checks the class it
+takes each ``__proto__`` entry that *exists* and checks the class it
 names can parse a packet. That cannot see a class nobody registered at all,
 which is exactly how :class:`~pcapkit.protocols.application.ospf.OSPF` shipped
 reachable from no table (fixed in #436). This module walks it from the class

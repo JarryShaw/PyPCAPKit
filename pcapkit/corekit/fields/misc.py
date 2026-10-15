@@ -586,7 +586,7 @@ def nested_packet_context(packet: 'dict[str, Any]') -> 'dict[str, Any]':
         the inner ``length`` overwrite the outer one mid-pack.
 
         Two consequences of it being a copy rather than a live view, both
-        deliberate and neither reached by any current call site. A name
+        deliberate and neither reached by any call site in this package. A name
         deleted from the returned mapping is simply gone, rather than
         reverting to the enclosing schema's value. And the copy is taken when
         this function is called, so a later mutation of ``packet`` is not
@@ -602,8 +602,8 @@ def nested_packet_context(packet: 'dict[str, Any]') -> 'dict[str, Any]':
         raised on :issue:`439`, that a :class:`~collections.ChainMap` here
         corrupted the :class:`~abc.ABCMeta` cache :class:`Schema
         <pcapkit.protocols.schema.schema.Schema>` subclasses shared on CPython
-        <= 3.10. The suspicion is *probably* wrong and can no longer be
-        tested: the cache keys on the **exact type queried**, so asking about a
+        <= 3.10. The suspicion is *probably* wrong, and this code cannot
+        test it: the cache keys on the **exact type queried**, so asking about a
         :class:`~collections.ChainMap` instance caches lookups for
         :class:`~collections.ChainMap` and not for :class:`dict`, the poisoning
         observed in :issue:`439` came from ordinary code asking
@@ -842,7 +842,7 @@ class ForwardMatchField(FieldBase[_TC]):
         Returns:
             Updated field instance.
 
-        This method will return a new instance of :class:`ConditionalField`
+        This method will return a new instance of :class:`ForwardMatchField`
         instead of updating the current instance.
 
         """

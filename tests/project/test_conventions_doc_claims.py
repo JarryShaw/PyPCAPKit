@@ -446,7 +446,7 @@ class PhaseTwoRemainderTests(unittest.TestCase):
 
         Vacuous while :attr:`self.outside` is empty -- GitHub issue #930 emptied
         it, and an empty dict gives the loop below nothing to iterate, so this
-        method cannot fail no matter what the page says right now.
+        method cannot fail no matter what the page says.
         ``test_the_page_states_the_measured_number_outside_the_hierarchy`` is
         what actually pins the empty state; this one is dormant rather than
         deleted, for whenever a future regression makes :attr:`self.outside`
@@ -982,9 +982,10 @@ class GetOverrideContractTests(unittest.TestCase):
         """#933: the owner ruled that overrides follow the base and stay quiet.
 
         Measured rather than read off the source, because the cost the ruling turns
-        on is the side effect: a loud :class:`BaseError` sets
+        on is the side effect: a loud :class:`BaseError` logs at
+        :data:`logging.CRITICAL` and, until #983, also set
         :data:`sys.tracebacklimit` to ``0`` for the whole process (#362), and a
-        quiet one leaves it alone.
+        quiet one does neither.
 
         """
         import sys

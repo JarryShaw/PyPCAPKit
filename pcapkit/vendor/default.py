@@ -79,7 +79,7 @@ LINE = lambda NAME, DOCS, FLAG, ENUM, MISS, MODL: f'''\
 
 .. module:: {MODL.replace('vendor', 'const')}
 
-This module contains the constant enumeration for **{name}**,
+This module contains the constant enumeration for **{name.replace('``', '')}**,
 which is automatically generated from :class:`{MODL}.{NAME}`.
 
 """
@@ -262,10 +262,10 @@ class Vendor(metaclass=VendorMeta):
         """Split an IANA reference cell into its citations.
 
         IANA's CSV exports have spelt a cell citing two documents in two ways
-        (:issue:`1664`). It used to be ``[RFC1072][RFC6247]``, or one citation
-        per line of a quoted cell. The port number registry began writing
-        ``RFC 3501`` by 2026-09-29, and every registry re-exported on 2026-10-13
-        (17:26Z to 17:54Z) now reads ``[RFC 1072]; [RFC 6247]``. Both give
+        (:issue:`1664`). The older form is ``[RFC1072][RFC6247]``, or one
+        citation per line of a quoted cell. The port number registry began
+        writing ``RFC 3501`` by 2026-09-29, and every registry re-exported on
+        2026-10-13 (17:26Z to 17:54Z) reads ``[RFC 1072]; [RFC 6247]``. Both give
         ``['RFC1072', 'RFC6247']`` here, so every crawler renders them
         identically:
 
@@ -491,25 +491,18 @@ class Vendor(metaclass=VendorMeta):
         """Resolve the ``const/`` file this crawler's module mirrors.
 
         :attr:`~Vendor.__module__` sits somewhere under the :mod:`pcapkit.vendor`
-        package -- today always exactly one level down, e.g.
-        :mod:`pcapkit.vendor.reg.apptype`, but :issue:`732` needs deeper nesting such as
-        :mod:`pcapkit.vendor.reg.apptype.tcp`. The output file mirrors that same
-        position, whatever its depth, under :mod:`pcapkit.const` instead.
+        package, at any depth -- e.g. :mod:`pcapkit.vendor.reg.linktype` one
+        level down, or :mod:`pcapkit.vendor.reg.apptype.tcp` (:issue:`732`)
+        two. The output file mirrors that same position under
+        :mod:`pcapkit.const`.
 
-        This used to split the module's absolute path into exactly two levels
-        (``ROOT, STEM = os.path.split(temp)``) and assume the second was always
-        the module's one-and-only position under ``vendor/``. That holds for the
-        flat ``vendor/<stem>/<file>.py`` layout every crawler has today, but
-        breaks for any deeper nesting -- e.g. ``vendor/reg/apptype/tcp.py``
-        resolved to ``vendor/const/apptype/tcp.py``, *inside* ``vendor/`` itself
-        rather than under ``pcapkit/const/`` at all.
-
-        Anchoring on the ``vendor`` package's own ``__file__`` instead of a fixed
-        split count handles arbitrary nesting: whatever path a module sits at
+        The position is taken relative to the ``vendor`` package's own
+        ``__file__`` rather than by splitting the module's path a fixed number
+        of times, so any nesting works: whatever path a module sits at
         *relative to* ``vendor/``, the same relative path is mirrored under
-        ``const/``, which also happens to be what the flat case already did --
-        so every crawler that exists today keeps writing to exactly the file it
-        writes to now.
+        ``const/``. A fixed two-level split would send
+        ``vendor/reg/apptype/tcp.py`` to ``vendor/const/apptype/tcp.py``,
+        *inside* ``vendor/`` itself rather than under ``pcapkit/const/``.
 
         ``pcapkit.vendor`` is imported here, inside the method, rather than at
         module scope: it imports *this* module while it is still initialising

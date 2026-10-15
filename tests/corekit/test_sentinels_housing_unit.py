@@ -20,8 +20,8 @@ re-export at its old path; ``tests/project/test_no_moved_name_re_exports_1744_un
 pins that. Each still imports the *object* it uses from here.
 
 None of this module exists before that move, which is exactly what makes it a
-regression test rather than a description: on ``origin/main`` at ``d31c0aaf6``
-(the tip this branch was cut from), ``import pcapkit.corekit.sentinels`` itself
+regression test rather than a description: at ``d31c0aaf6``, a ``main``
+commit from before #922, ``import pcapkit.corekit.sentinels`` itself
 fails --
 
 .. code-block:: text
@@ -48,12 +48,12 @@ would quietly break every ``is NULL`` (etc.) check in that module.
 asserts that with ``is``, never ``==``.
 
 :class:`NoImportCycleTests` pins the other thing the issue asked to be checked
-"on purpose" rather than left to the 39 pre-existing ``cyclic-import`` findings
-:command:`pylint` already reports for this package (which would swallow a 40th
-without comment): that :mod:`pcapkit.corekit.sentinels` itself imports nothing
-from any of the four modules it is now depended on by, so the dependency graph
-between them is a star with :mod:`pcapkit.corekit.sentinels` at the centre and no
-edge pointing back into it.
+"on purpose" rather than left to the pre-existing ``cyclic-import`` findings
+:command:`pylint` reports for this package, which run to hundreds and would
+swallow one more without comment: that :mod:`pcapkit.corekit.sentinels` itself
+imports nothing from any of the four modules it is now depended on by, so the
+dependency graph between them is a star with :mod:`pcapkit.corekit.sentinels`
+at the centre and no edge pointing back into it.
 
 """
 from __future__ import annotations
@@ -111,8 +111,8 @@ class NoImportCycleTests(unittest.TestCase):
     """:mod:`pcapkit.corekit.sentinels` must not import back into a consumer.
 
     The issue's own instruction: check for a cycle *deliberately*, because
-    :command:`pylint` already reports 39 ``cyclic-import`` findings in this
-    package, so a fortieth would be invisible in the noise rather than caught.
+    :command:`pylint` already reports hundreds of ``cyclic-import`` findings in
+    this package, so one more would be invisible in the noise rather than caught.
     This does not run :command:`pylint` -- that check is done separately and
     reported alongside #922 -- it instead pins the one fact that actually
     rules a cycle out for this specific set of modules: that

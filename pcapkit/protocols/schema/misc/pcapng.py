@@ -1551,9 +1551,9 @@ class EnhancedPacketBlock(BlockType, code=Enum_BlockType.Enhanced_Packet_Block):
     length: 'int' = UInt32Field(callback=byteorder_callback)
     #: Interface ID.
     interface_id: 'int' = UInt32Field(callback=byteorder_callback)
-    #: Higher 32-bit of timestamp (in seconds).
+    #: Timestamp (higher 32 bits).
     timestamp_high: 'int' = UInt32Field(callback=byteorder_callback)
-    #: Lower 32-bit of timestamp (in seconds).
+    #: Timestamp (lower 32 bits).
     timestamp_low: 'int' = UInt32Field(callback=byteorder_callback)
     #: Captured packet length.
     captured_len: 'int' = UInt32Field(callback=byteorder_callback)
@@ -2317,7 +2317,7 @@ class WireGuardKeyLog(DSBSecrets, code=Enum_SecretsType.WireGuard_Key_Log):
 class ZigBeeNWKKey(DSBSecrets, code=Enum_SecretsType.ZigBee_NWK_Key):
     """Header schema for ZigBee NWK Key and ZigBee PANID secrets data."""
 
-    #: AES-128 NKW key.
+    #: AES-128 NWK key.
     key: 'bytes' = BytesField(length=16)
     #: ZigBee PANID.
     panid: 'int' = UInt16Field(byteorder='little')
