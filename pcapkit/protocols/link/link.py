@@ -135,7 +135,7 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
                 replacement so a caller can tell *what* was lost. Fires only
                 when the incumbent differs from the replacement -- see
                 :meth:`ProtocolBase.register
-                <pcapkit.protocols.protocol.ProtocolBase.register>` for the
+                <pcapkit.protocols.protocol.Protocol.register>` for the
                 guard this shares with ``register_protocol``, and for the
                 shipped descriptor a restore puts back (:issue:`1504`).
 
@@ -156,7 +156,7 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
         Args:
             data: Protocol data.
             **kwargs: Construction keywords, as for :meth:`ProtocolBase.from_data
-                <pcapkit.protocols.protocol.ProtocolBase.from_data>`.
+                <pcapkit.protocols.protocol.Protocol.from_data>`.
 
         Returns:
             Protocol instance, cut back to what was captured when the header
@@ -179,9 +179,9 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
             **kwargs: Arbitrary keyword arguments.
 
         Notes:
-            A header the data ends inside keeps that in its :attr:`info`, so
-            that :meth:`from_data` rebuilds only what was captured
-            (:issue:`1458`).
+            A header the data ends inside keeps that in its
+            :attr:`~pcapkit.protocols.protocol.Protocol.info`, so that
+            :meth:`from_data` rebuilds only what was captured (:issue:`1458`).
 
         """
         super().__post_init__(file, length, **kwargs)  # type: ignore[arg-type]

@@ -80,6 +80,13 @@ class PCAPIO(DumperBase):
         **kwargs: further global header fields, i.e. ``version``, ``thiszone``,
             ``sigfigs`` and ``snaplen``, and arbitrary keyword arguments
 
+    .. versionchanged:: 1.5.0
+
+       The global header takes ``version``, ``thiszone``, ``sigfigs`` and
+       ``snaplen`` from ``**kwargs``, so ``format='pcap'`` output keeps the
+       input's values; 1.4.x wrote the defaults (:issue:`1165`,
+       :issue:`1255`).
+
     """
     if TYPE_CHECKING:
         #: PCAP file global header.

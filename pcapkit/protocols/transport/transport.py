@@ -99,7 +99,7 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
                 :class:`~pcapkit.corekit.module.ModuleDescriptor` counts as
                 different from the class it names. See
                 :meth:`ProtocolBase.register
-                <pcapkit.protocols.protocol.ProtocolBase.register>` for the
+                <pcapkit.protocols.protocol.Protocol.register>` for the
                 guard this shares with ``register_protocol``, and for the
                 shipped descriptor a restore puts back (:issue:`1504`).
 
@@ -163,7 +163,7 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
         Args:
             data: Protocol data.
             **kwargs: Construction keywords, as for :meth:`ProtocolBase.from_data
-                <pcapkit.protocols.protocol.ProtocolBase.from_data>`.
+                <pcapkit.protocols.protocol.Protocol.from_data>`.
 
         Returns:
             Protocol instance, cut back to what was captured when the header
@@ -186,9 +186,9 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
             **kwargs: Arbitrary keyword arguments.
 
         Notes:
-            A header the data ends inside keeps that in its :attr:`info`, so
-            that :meth:`from_data` rebuilds only what was captured
-            (:issue:`1458`).
+            A header the data ends inside keeps that in its
+            :attr:`~pcapkit.protocols.protocol.Protocol.info`, so that
+            :meth:`from_data` rebuilds only what was captured (:issue:`1458`).
 
         """
         super().__post_init__(file, length, **kwargs)  # type: ignore[arg-type]
@@ -209,16 +209,17 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
                 distinguishes e.g. TCP/80 from UDP/80
 
         Returns:
-            The :class:`~pcapkit.const.reg.apptype.AppType` for ``port``.
+            The :class:`~pcapkit.const.reg.apptype.apptype.AppType` for ``port``.
 
         Important:
-            :meth:`self.make <ProtocolBase.make>` accepts a bare :obj:`int` for a
-            port, but the schema field converts it only on the way *out* (in
+            :meth:`self.make <pcapkit.protocols.protocol.Protocol.make>` accepts
+            a bare :obj:`int` for a port, but the schema field converts it only
+            on the way *out* (in
             :meth:`PortEnumField.pre_process
             <pcapkit.corekit.fields.numbers.PortEnumField.pre_process>`),
             so the schema attribute keeps whatever it was handed. Normalising
             here makes a constructed packet carry the same
-            :class:`~pcapkit.const.reg.apptype.AppType` as a parsed one, so
+            :class:`~pcapkit.const.reg.apptype.apptype.AppType` as a parsed one, so
             reading ``.port`` off it works on both paths.
 
         """

@@ -108,6 +108,12 @@ def info_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
             :attr:`FinalisedState.FINAL` in its own ``__dict__``. The class is
             returned untouched.
 
+    .. versionchanged:: 1.5.0
+
+       ``@final`` is enforced at runtime: a class marked with it but never
+       passed through this decorator is refused at first construction
+       (:issue:`778`).
+
     :meta decorator:
     """
     # NOTE: keyed on ``__finalised__`` rather than on
@@ -695,6 +701,12 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
             :class:`~pcapkit.corekit.multidict.OrderedMultiDict` it was
             written as in.
 
+        .. versionchanged:: 1.5.0
+
+           Returns an :class:`~pcapkit.corekit.multidict.OrderedMultiDict`
+           rather than a :obj:`dict`, so a key held more than once keeps every
+           value (:issue:`1484`).
+
         """
         dict_ = _OrderedMultiDict()  # type: OrderedMultiDict[str, Any]
         for (key, value) in self.__items_multi():
@@ -864,6 +876,8 @@ class MultiInfo(_MultiInfo[KT, VT], MultiDict[KT, VT]):
         mapping: The initial value, as for
             :class:`~pcapkit.corekit.multidict.MultiDict`.
 
+    .. versionadded:: 1.5.0
+
     """
 
     # NOTE: :class:`Info` and :class:`~collections.abc.Mapping` precede
@@ -954,6 +968,8 @@ class OrderedMultiInfo(_MultiInfo[KT, VT], OrderedMultiDict[KT, VT]):
     Args:
         mapping: The initial value, as for
             :class:`~pcapkit.corekit.multidict.OrderedMultiDict`.
+
+    .. versionadded:: 1.5.0
 
     """
 

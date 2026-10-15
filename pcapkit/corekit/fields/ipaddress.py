@@ -1,5 +1,14 @@
 # -*- coding: utf-8 -*-
-"""IP address field class"""
+"""IP address field class
+
+.. versionchanged:: 1.5.0
+
+   Every field here rejects a :obj:`bool` with
+   :exc:`~pcapkit.utilities.exceptions.FieldValueError`, where an IPv4 field
+   packed :obj:`True` and :obj:`False` as ``0.0.0.1`` and ``0.0.0.0``
+   (:issue:`491`).
+
+"""
 
 import abc
 import contextlib
@@ -188,6 +197,8 @@ def parse_ip_address(value: 'IPv4Address | IPv6Address | bytes | int | str',
         so the difference is invisible to ``except BaseError`` and ``except
         ValueError``, and nothing in the library catches either one
         specifically.
+
+    .. versionadded:: 1.5.0
 
     """
     _reject_bool(value, description)
@@ -541,6 +552,13 @@ class IPv4InterfaceField(_IPInterfaceField[ipaddress.IPv4Interface]):
         default: Field default value, if any.
         callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
+
+    .. versionchanged:: 1.5.0
+
+       A mask that is not a contiguous netmask unpacks to an
+       :class:`~ipaddress.IPv4Interface` subclass that keeps its four octets,
+       where a hostmask-shaped one was read as a prefix length and any other
+       raised (:issue:`1294`).
 
     """
 

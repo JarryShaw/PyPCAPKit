@@ -44,8 +44,6 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         analyse: reassemble each flow's application layer, so that
             :attr:`Index.packet <pcapkit.foundation.traceflow.data.tcp.Index.packet>`
             can be read
-        *args: Arbitrary positional arguments.
-        **kwargs: Arbitrary keyword arguments.
 
     Note:
         A TCP connection has two halves, and by default they are traced as **one

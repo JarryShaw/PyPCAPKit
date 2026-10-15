@@ -12,7 +12,7 @@ only, which implements extractor for Routing Header for IPv6
 Octets      Bits        Name                    Description
 ======= ========= ==================== ===============================
   0           0   ``route.next``            Next Header
-  1           8   ``route.length``          Header Extensive Length
+  1           8   ``route.length``          Header Extension Length
   2          16   ``route.type``            Routing Type
   3          24   ``route.seg_left``        Segments Left
   4          32   ``route.data``            Type-Specific Data

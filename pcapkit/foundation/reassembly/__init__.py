@@ -5,7 +5,7 @@
 
 .. module:: pcapkit.foundation.reassembly
 
-:mod:`pcapkit.foundation.reassembly` bases on algorithms described
+:mod:`pcapkit.foundation.reassembly`, based on algorithms described
 in :rfc:`791` and :rfc:`815`, implements datagram reassembly
 of IP and TCP packets.
 

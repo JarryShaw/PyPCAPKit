@@ -81,7 +81,8 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
     """Follow TCP streams.
 
     Arguments:
-        fin: file name to be read; if file not exist, raise :exc:`FileNotFound`
+        fin: file name to be read; if file not exist, raise
+            :exc:`~pcapkit.utilities.exceptions.FileNotFound`
         extension: if check and append extensions to output file
         verbose: if print verbose output information
         engine: extraction engine to be used
@@ -103,13 +104,20 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
             either way.
 
     Returns:
-        List of extracted TCP streams.
+        Tuple of extracted TCP streams.
+
+    .. versionchanged:: 1.5.0
+
+       ``trace_bidirectional`` and ``trace_analyse`` are added. By default a
+       stream holds both directions of a conversation; 1.4.x returned one
+       stream per direction.
 
     """
-    # NOTE: all of these engines disable TCP flow tracing outright -- PyShark
-    # because ``pcapkit`` has no reassembly adapter for it, PyPCAP and PCAP_CT
-    # because they perform no protocol dissection at all -- so
-    # ``extraction.trace`` below would raise instead of yielding streams.
+    # NOTE: none of these engines can follow a stream. PyShark traces flows, but
+    # ``pcapkit`` has no reassembly adapter for it, so the conversations below
+    # could not be rebuilt; PyPCAP and PCAP_CT perform no protocol dissection at
+    # all and disable TCP flow tracing outright, so ``extraction.trace`` below
+    # would raise instead of yielding streams.
     if engine is not None and engine.lower() in ('pyshark', 'pypcap', 'pcap_ct'):
         warn(f'unsupported extraction engine: {engine}; fallback to default engine',
              EngineWarning, stacklevel=stacklevel())
@@ -199,7 +207,7 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
             filename=stream.fpout,
             packets=tuple(packets),
             conversations=tuple(datagram.payload for datagram in sorted(
-                reassembly.datagram, key=lambda datagram: datagram.index  # make sure the converstations are in order
+                reassembly.datagram, key=lambda datagram: datagram.index  # make sure the conversations are in order
             )),
         ))
     return tuple(streams)

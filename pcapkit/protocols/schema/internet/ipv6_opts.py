@@ -371,7 +371,14 @@ class SMFDPDOption(Option, EnumSchema[Enum_SMFDPDMode]):
 
 @schema_final
 class SMFIdentificationBasedDPDOption(SMFDPDOption, code=Enum_SMFDPDMode.I_DPD):
-    """Header schema for IPv6-Opts SMF identification-based DPD options."""
+    """Header schema for IPv6-Opts SMF identification-based DPD options.
+
+    .. versionremoved:: 1.5.0
+
+       ``test``, a field the HOPOPT schema lacks, so that the same octets
+       parse alike under both headers (:issue:`441`).
+
+    """
 
     #: TaggerID information.
     info: 'TaggerIDInfo' = BitField(length=1, namespace={

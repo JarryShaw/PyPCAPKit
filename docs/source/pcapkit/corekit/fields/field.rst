@@ -5,23 +5,10 @@ Base Fields
 
 .. versionremoved:: 1.5.0
 
-   Moved to :mod:`pcapkit.utilities.config` (:issue:`1726`):
-
-   * ``pcapkit.corekit.fields.field._MAX_ZERO_PAD_LENGTH``, now
-     :data:`pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH`, set with
-     :envvar:`PCAPKIT_MAX_ZERO_PAD_LENGTH`;
-   * ``pcapkit.corekit.fields.field._MAX_ZERO_PAD_SHORTFALL``, now
-     :data:`pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL`, set with
-     :envvar:`PCAPKIT_MAX_ZERO_PAD_SHORTFALL`;
-   * ``pcapkit.corekit.fields.field._ZERO_PAD_BUDGET_RATIO``, now
-     :data:`pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO`, set with
-     :envvar:`PCAPKIT_ZERO_PAD_BUDGET_RATIO`.
-
-.. versionremoved:: 1.5.0
-
    ``pcapkit.corekit.fields.field.NoValueType``, now
    :class:`pcapkit.corekit.sentinels.NoValueType` (:issue:`922`,
-   :issue:`1744`).
+   :issue:`1744`), and ``pcapkit.corekit.fields.field.NoValue``, now
+   :data:`pcapkit.corekit.sentinels.NO_VALUE` (:issue:`937`).
 
 .. autoclass:: pcapkit.corekit.fields.field.Field
    :members:

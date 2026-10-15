@@ -14,11 +14,11 @@ Octets      Bits        Name                    Description
 ======= ========= ====================== ==================================
   0           0   ``hip.next``              Next Header
   1           8   ``hip.length``            Header Length
-  2          16                             Reserved (``\x00``)
+  2          16   ``hip.packet_fixed``      Reserved (``\x00``)
   2          17   ``hip.type``              Packet Type
   3          24   ``hip.version``           Version
-  3          28                             Reserved
-  3          31                             Reserved (``\x01``)
+  3          28   ``hip.reserved``          Reserved
+  3          31   ``hip.version_fixed``     Reserved (``\x01``)
   4          32   ``hip.chksum``            Checksum
   6          48   ``hip.control``           Controls
   8          64   ``hip.shit``              Sender's Host Identity Tag

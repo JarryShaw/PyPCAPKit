@@ -24,16 +24,14 @@ __all__ = ['Method']
 class Method(EnumRegistry, StrEnum):
     """[Method] HTTP Method
 
-    .. note::
+    .. versionchanged:: 1.5.0
 
-       Neither ``_missing_`` nor ``get()`` mints any more. The owner ruled on
-       GitHub issue :issue:`860` that ``get`` should not mint: only IANA-registered
-       values are legitimate members, a new one is properly created through
-       :meth:`register`, and ``get`` is not given enough information to create
-       one. Concretely true here -- a bare wire method verb carries no
-       :attr:`safe`/:attr:`idempotent`, so minting one used to register a
-       permanent member with both hollowed out to their defaults;
-       :meth:`register` is the path that can actually supply them.
+       Neither ``_missing_`` nor ``get()`` mints a member, per the owner's
+       ruling on GitHub issue :issue:`860`: only IANA-registered values are
+       legitimate members, and a new one is created through :meth:`register`,
+       which can supply :attr:`safe` and :attr:`idempotent` where a bare wire
+       method verb carries neither. ``get()`` matches ``key`` case-sensitively,
+       as :rfc:`9110` makes the method token (:issue:`896`).
 
     """
 
@@ -263,8 +261,8 @@ class Method(EnumRegistry, StrEnum):
         Args:
             key: Key to get enum item. Looked up case-**sensitively**,
                 per :rfc:`9110#section-9.1` -- the method token is
-                case-sensitive, unlike :meth:`~pcapkit.const.ftp.command.
-                Command.get`'s equivalent override, which stays
+                case-sensitive, unlike
+                :meth:`~pcapkit.const.ftp.command.Command.get`'s equivalent override, which stays
                 case-insensitive because :rfc:`959#section-5` says FTP
                 command codes are not. Checked against both member names
                 and values, via the base's own precedence -- name before

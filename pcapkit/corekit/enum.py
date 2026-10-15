@@ -86,6 +86,13 @@ the class at runtime under the name the caller specifies, so nothing has to be
 guessed; ``register_alias`` (and ``register_aliases``) adds further alias names
 to a given member's mapping.
 
+.. versionadded:: 1.5.0
+
+   The ``get`` each :mod:`pcapkit.const` enumeration carried as generated text
+   moves onto :class:`EnumLookup`, and :class:`EnumRegistry` adds ``register``,
+   which is how a member is minted at runtime: outside ``CGAType``, looking up
+   an unknown value does not mint one (:issue:`775`).
+
 """
 from typing import TYPE_CHECKING
 
@@ -269,8 +276,8 @@ class EnumLookup:
         constructor would let a mere ``get()`` call mint a permanent member
         where it should just raise. Defensive rather than observed: none of
         the ``str``-valued registries that reach this method
-        (:class:`~pcapkit.const.ftp.command.Command`, :class:`~pcapkit.const.
-        ftp.command.FEATCode`, :class:`~pcapkit.const.http.method.Method`,
+        (:class:`~pcapkit.const.ftp.command.Command`,
+        :class:`~pcapkit.const.ftp.command.FEATCode`, :class:`~pcapkit.const.http.method.Method`,
         :class:`~pcapkit.const.pcapng.option_type.OptionType`,
         :class:`~pcapkit.const.reg.apptype.apptype.AppType` and its four
         transport subclasses :class:`~pcapkit.const.reg.apptype.tcp.TCP`,

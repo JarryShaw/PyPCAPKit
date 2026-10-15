@@ -8,23 +8,10 @@
 
 .. versionremoved:: 1.5.0
 
-   Moved to :mod:`pcapkit.utilities.config` (:issue:`1726`):
-
-   * ``pcapkit.corekit.fields.field._MAX_ZERO_PAD_LENGTH``, now
-     :data:`pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH`, set with
-     :envvar:`PCAPKIT_MAX_ZERO_PAD_LENGTH`;
-   * ``pcapkit.corekit.fields.field._MAX_ZERO_PAD_SHORTFALL``, now
-     :data:`pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL`, set with
-     :envvar:`PCAPKIT_MAX_ZERO_PAD_SHORTFALL`;
-   * ``pcapkit.corekit.fields.field._ZERO_PAD_BUDGET_RATIO``, now
-     :data:`pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO`, set with
-     :envvar:`PCAPKIT_ZERO_PAD_BUDGET_RATIO`.
-
-.. versionremoved:: 1.5.0
-
    ``pcapkit.corekit.fields.field.NoValueType``, now
    :class:`pcapkit.corekit.sentinels.NoValueType` (:issue:`922`,
-   :issue:`1744`).
+   :issue:`1744`), and ``pcapkit.corekit.fields.field.NoValue``, now
+   :data:`pcapkit.corekit.sentinels.NO_VALUE` (:issue:`937`).
 
 """
 
@@ -246,6 +233,12 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
                 :func:`struct.calcsize`'s own error says -- rather than by the
                 error message. See :issue:`825`.
 
+        .. versionchanged:: 1.5.0
+
+           Raises :exc:`~pcapkit.utilities.exceptions.ProtocolError` where
+           :func:`struct.calcsize` raised a bare :exc:`struct.error`
+           (:issue:`805`, :issue:`825`).
+
         """
         try:
             return struct.calcsize(self.template)
@@ -306,8 +299,9 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
             directly rather than :func:`copy.copy(self) <copy.copy>`.
             :func:`copy.copy` still has to *find* this method before it can call
             it -- ``getattr(cls, '__copy__', None)`` -- and that lookup alone
-            was profiled at 55,846 calls (~1.7% of an :func:`~pcapkit.interface.
-            core.extract` run) on ``examples/captures/http.pcap``, one per field
+            was profiled at 55,846 calls (~1.7% of an
+            :func:`~pcapkit.interface.core.extract` run) on
+            ``examples/captures/http.pcap``, one per field
             per packet, all from this exact path. Calling ``__copy__``
             directly is exactly what :func:`copy.copy` would have done once it
             found it, so this changes nothing about *when* a field is copied or
@@ -407,6 +401,11 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
                 for the octets it has actually been given. A shortfall within
                 :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL` is always padded and never
                 raises.
+
+        .. versionchanged:: 1.5.0
+
+           A short read is zero-filled on the tail, where its missing octets
+           are, rather than on the head (:issue:`604`).
 
         """
         # NOTE: ``length`` recomputes struct.calcsize() on every read, so it is

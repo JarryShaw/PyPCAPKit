@@ -123,7 +123,7 @@ Algorithm
       } give up until (no entry from HDL)
    }
 
-The following algorithm implement is based on the **IP Datagram
+The following algorithm implementation is based on the **IP Datagram
 Reassembly Algorithm** introduced in :rfc:`815`, which presents hole
 descriptors as an alternative to the ``RCVBT`` (fragment received bit
 table) approach used by the reassembly procedure in :rfc:`791`. And
@@ -378,5 +378,6 @@ Type Variables
 
 .. data:: pcapkit.foundation.reassembly.data.tcp.BufferID
    :type: typing.Tuple[_AT, int, _AT, int]
+   :no-index:
 
    Buffer ID data structure.

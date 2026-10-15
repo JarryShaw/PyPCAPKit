@@ -17,7 +17,7 @@ Octets      Bits        Name                    Description
   4          32   ``tcp.seq``               Sequence Number
   8          64   ``tcp.ack``               Acknowledgement Number (if ACK set)
   12         96   ``tcp.hdr_len``           Data Offset
-  12        100                             Reserved (must be ``\x00``)
+  12        100   ``tcp.flags.reserved``    Reserved (must be ``\x00``)
   12        103   ``tcp.flags.ns``          ECN Concealment Protection (NS)
   13        104   ``tcp.flags.cwr``         Congestion Window Reduced (CWR)
   13        105   ``tcp.flags.ece``         ECN-Echo (ECE)
@@ -187,6 +187,10 @@ Header Schemas
    :members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.SACKBlock
+   :members:
+   :show-inheritance:
+
 .. autoclass:: pcapkit.protocols.schema.transport.tcp.Echo
    :members:
    :show-inheritance:
@@ -248,6 +252,10 @@ Header Schemas
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.schema.transport.tcp.FastOpenCookie
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp._MPTCP
    :members:
    :show-inheritance:
 
@@ -372,6 +380,7 @@ Auxiliary Functions
 
 .. autofunction:: pcapkit.protocols.schema.transport.tcp.mptcp_data_selector
 .. autofunction:: pcapkit.protocols.schema.transport.tcp.mptcp_add_address_selector
+.. autofunction:: pcapkit.protocols.schema.transport.tcp.mptcp_dss_checksum
 .. autofunction:: pcapkit.protocols.schema.transport.tcp.mptcp_dss_ack_selector
 .. autofunction:: pcapkit.protocols.schema.transport.tcp.mptcp_dss_dsn_selector
 
@@ -417,6 +426,10 @@ Data Models
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.data.transport.tcp.SACK
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.transport.tcp.SACKBlock
    :members:
    :show-inheritance:
 
@@ -493,6 +506,10 @@ Data Models
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPCapable
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPCapableFlag
    :members:
    :show-inheritance:
 

@@ -28,16 +28,15 @@ Such an error emits nothing on any channel and touches no process-global state.
 It is still an ordinary exception carrying its message, so ``except`` clauses and
 :func:`repr` are unaffected.
 
-.. attention::
+.. versionchanged:: 1.5.0
 
-   Up to and including v1.4.1, ``quiet=True`` logged at ``ERROR`` instead of
-   ``CRITICAL`` rather than not logging, and :data:`sys.tracebacklimit` was set
-   on both paths. A single ``MultiDict.get()`` miss therefore produced an
-   ``ERROR`` record -- one per frame when parsing unfragmented IPv6 with
-   reassembly enabled -- and truncated the tracebacks of unrelated exceptions
-   for the rest of the process. Those records never corresponded to a fault and
-   are gone; to observe internal lookup misses, catch the exception rather than
-   read the log.
+   In 1.4.x, ``quiet=True`` logged at ``ERROR`` instead of ``CRITICAL`` rather
+   than not logging, and :data:`sys.tracebacklimit` was set on both paths. A
+   single ``MultiDict.get()`` miss therefore produced an ``ERROR`` record -- one
+   per frame when parsing unfragmented IPv6 with reassembly enabled -- and
+   truncated the tracebacks of unrelated exceptions for the rest of the process.
+   Those records never corresponded to a fault; to observe internal lookup
+   misses, catch the exception rather than read the log (:issue:`362`).
 
 .. autoexception:: pcapkit.utilities.exceptions.BaseError
    :no-members:
