@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/utilities/config.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.utilities.config holds every tunable limit of pcapkit, and the settings of the pcapkit.vendor crawlers (#1726). Each limit is read from a PCAPKIT_* environment variable once, when the modul..." />
-<meta name="description" content="pcapkit.utilities.config holds every tunable limit of pcapkit, and the settings of the pcapkit.vendor crawlers (#1726). Each limit is read from a PCAPKIT_* environment variable once, when the modul..." />
+<meta property="og:description" content="pcapkit.utilities.config holds every tunable limit of pcapkit(#1726). Each limit is read from a PCAPKIT_* environment variable once, when the module is imported: A value that is not an integer, or ..." />
+<meta name="description" content="pcapkit.utilities.config holds every tunable limit of pcapkit(#1726). Each limit is read from a PCAPKIT_* environment variable once, when the module is imported: A value that is not an integer, or ..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Character Set Detection" href="chardet.html"><link rel="prev" title="Logging System" href="logging.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -493,10 +493,9 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.utilities.config">
 <span id="configuration"></span><h1>Configuration<a class="headerlink" href="#module-pcapkit.utilities.config" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.utilities.config" title="pcapkit.utilities.config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.config</span></code></a> holds every tunable limit of <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, and
-the settings of the <a class="reference internal" href="../vendor/index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a> crawlers (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1726">#1726</a>). Each limit
-is read from a <code class="docutils literal notranslate"><span class="pre">PCAPKIT_*</span></code> environment variable once, when the module is
-imported:</p>
+<p><a class="reference internal" href="#module-pcapkit.utilities.config" title="pcapkit.utilities.config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.config</span></code></a> holds every tunable limit of <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1726">#1726</a>). Each limit is read from a <code class="docutils literal notranslate"><span class="pre">PCAPKIT_*</span></code> environment variable
+once, when the module is imported:</p>
 <ul class="simple">
 <li><p>A value that is not an integer, or is below the variable’s minimum, warns with
 a <a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.ConfigWarning" title="pcapkit.utilities.warnings.ConfigWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ConfigWarning</span></code></a> and falls back to the
@@ -511,10 +510,12 @@ naming the risk below.</p></li>
 <a class="reference external" href="https://docs.python.org/3/using/cmdline.html#cmdoption-W" title="(in Python v3.15)"><code class="xref std std-option docutils literal notranslate"><span class="pre">-W</span> <span class="pre">error</span></code></a> or <code class="docutils literal notranslate"><span class="pre">PYTHONWARNINGS=error</span></code> an out-of-range value makes
 <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pcapkit</span></code> raise <a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.ConfigWarning" title="pcapkit.utilities.warnings.ConfigWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ConfigWarning</span></code></a>.</p>
 <p>Readers look each value up as <code class="docutils literal notranslate"><span class="pre">config.&lt;NAME&gt;</span></code> at call time, so patching a name
-here reaches every engine and protocol that reads it. The proxy addresses are
-read on every call of <a class="reference internal" href="#pcapkit.utilities.config.http_proxy" title="pcapkit.utilities.config.http_proxy"><code class="xref py py-func docutils literal notranslate"><span class="pre">http_proxy()</span></code></a> and
-<a class="reference internal" href="#pcapkit.utilities.config.https_proxy" title="pcapkit.utilities.config.https_proxy"><code class="xref py py-func docutils literal notranslate"><span class="pre">https_proxy()</span></code></a> instead.</p>
-<p><span class="target" id="index-0"></span><a class="reference internal" href="../index.html#envvar-PCAPKIT_DEVMODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DEVMODE</span></code></a>, <span class="target" id="index-1"></span><a class="reference internal" href="../index.html#envvar-PCAPKIT_VERBOSE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_VERBOSE</span></code></a> and <span class="target" id="index-2"></span><a class="reference internal" href="../index.html#envvar-PCAPKIT_SPHINX"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_SPHINX</span></code></a>
+here reaches every engine and protocol that reads it.</p>
+<p>The <a class="reference internal" href="../vendor/index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a> crawlers’ <span class="target" id="index-0"></span><a class="reference internal" href="../vendor/default.html#envvar-PCAPKIT_VENDOR_RETRY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_VENDOR_RETRY</span></code></a>,
+<span class="target" id="index-1"></span><a class="reference internal" href="../vendor/default.html#envvar-PCAPKIT_CI_MODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_CI_MODE</span></code></a>, <span class="target" id="index-2"></span><a class="reference internal" href="../vendor/default.html#envvar-PCAPKIT_HTTP_PROXY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_HTTP_PROXY</span></code></a> and
+<span class="target" id="index-3"></span><a class="reference internal" href="../vendor/default.html#envvar-PCAPKIT_HTTPS_PROXY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_HTTPS_PROXY</span></code></a> are not held here. They are read by
+<a class="reference internal" href="../vendor/default.html#module-pcapkit.vendor.default" title="pcapkit.vendor.default"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.default</span></code></a>, the first two with the <a class="reference internal" href="#config-readers"><span class="std std-ref">readers</span></a> below, and documented with it under <a class="reference internal" href="../vendor/default.html#vendor-variables"><span class="std std-ref">Environment Variables</span></a>.</p>
+<p><span class="target" id="index-4"></span><a class="reference internal" href="../index.html#envvar-PCAPKIT_DEVMODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DEVMODE</span></code></a>, <span class="target" id="index-5"></span><a class="reference internal" href="../index.html#envvar-PCAPKIT_VERBOSE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_VERBOSE</span></code></a> and <span class="target" id="index-6"></span><a class="reference internal" href="../index.html#envvar-PCAPKIT_SPHINX"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_SPHINX</span></code></a>
 are read by <a class="reference internal" href="logging.html#module-pcapkit.utilities.logging" title="pcapkit.utilities.logging"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.logging</span></code></a>, which needs them while it loads
 and so cannot import this module. A bad value of one falls back to off, and is
 reported with a <a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.ConfigWarning" title="pcapkit.utilities.warnings.ConfigWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ConfigWarning</span></code></a> once
@@ -534,49 +535,49 @@ reported with a <a class="reference internal" href="warnings.html#pcapkit.utilit
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><span class="target" id="index-3"></span><a class="reference internal" href="#envvar-PCAPKIT_FRAME_LAYER_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_FRAME_LAYER_LIMIT</span></code></a></p></td>
+<tr class="row-even"><td><p><span class="target" id="index-7"></span><a class="reference internal" href="#envvar-PCAPKIT_FRAME_LAYER_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_FRAME_LAYER_LIMIT</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">64</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">&gt;=</span> <span class="pre">0</span></code>, or <code class="docutils literal notranslate"><span class="pre">-1</span></code></p></td>
 <td><p>Python’s recursion limit: a deep frame may raise <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#RecursionError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RecursionError</span></code></a>
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1610">#1610</a>)</p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="target" id="index-4"></span><a class="reference internal" href="#envvar-PCAPKIT_EXTENSION_HEADER_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_EXTENSION_HEADER_LIMIT</span></code></a></p></td>
+<tr class="row-odd"><td><p><span class="target" id="index-8"></span><a class="reference internal" href="#envvar-PCAPKIT_EXTENSION_HEADER_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_EXTENSION_HEADER_LIMIT</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">32</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">&gt;=</span> <span class="pre">0</span></code>, or <code class="docutils literal notranslate"><span class="pre">-1</span></code></p></td>
-<td><p>as above, once <span class="target" id="index-5"></span><a class="reference internal" href="#envvar-PCAPKIT_FRAME_LAYER_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_FRAME_LAYER_LIMIT</span></code></a> is raised too</p></td>
+<td><p>as above, once <span class="target" id="index-9"></span><a class="reference internal" href="#envvar-PCAPKIT_FRAME_LAYER_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_FRAME_LAYER_LIMIT</span></code></a> is raised too</p></td>
 </tr>
-<tr class="row-even"><td><p><span class="target" id="index-6"></span><a class="reference internal" href="#envvar-PCAPKIT_IPV6_TCP_WARNED_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_IPV6_TCP_WARNED_LIMIT</span></code></a></p></td>
+<tr class="row-even"><td><p><span class="target" id="index-10"></span><a class="reference internal" href="#envvar-PCAPKIT_IPV6_TCP_WARNED_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_IPV6_TCP_WARNED_LIMIT</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">32</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">&gt;=</span> <span class="pre">0</span></code>, or <code class="docutils literal notranslate"><span class="pre">-1</span></code></p></td>
 <td><p>each capture remembered pins one packet in memory</p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="target" id="index-7"></span><a class="reference internal" href="#envvar-PCAPKIT_FALLBACK_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_FALLBACK_LIMIT</span></code></a></p></td>
+<tr class="row-odd"><td><p><span class="target" id="index-11"></span><a class="reference internal" href="#envvar-PCAPKIT_FALLBACK_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_FALLBACK_LIMIT</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">10000</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">&gt;=</span> <span class="pre">0</span></code>, or <code class="docutils literal notranslate"><span class="pre">-1</span></code></p></td>
 <td><p>a large or endless object graph is dumped without bound</p></td>
 </tr>
-<tr class="row-even"><td><p><span class="target" id="index-8"></span><a class="reference internal" href="#envvar-PCAPKIT_DETECT_CACHE_SIZE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DETECT_CACHE_SIZE</span></code></a></p></td>
+<tr class="row-even"><td><p><span class="target" id="index-12"></span><a class="reference internal" href="#envvar-PCAPKIT_DETECT_CACHE_SIZE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DETECT_CACHE_SIZE</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">1024</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">&gt;=</span> <span class="pre">0</span></code>, or <code class="docutils literal notranslate"><span class="pre">-1</span></code></p></td>
 <td><p>the cache retains every bytestring it was asked about</p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="target" id="index-9"></span><a class="reference internal" href="#envvar-PCAPKIT_READ_CHUNK"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_READ_CHUNK</span></code></a></p></td>
+<tr class="row-odd"><td><p><span class="target" id="index-13"></span><a class="reference internal" href="#envvar-PCAPKIT_READ_CHUNK"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_READ_CHUNK</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">1048576</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">&gt;=</span> <span class="pre">1</span></code>, or <code class="docutils literal notranslate"><span class="pre">-1</span></code></p></td>
 <td><p>a bogus record length allocates that much in one read</p></td>
 </tr>
-<tr class="row-even"><td><p><span class="target" id="index-10"></span><a class="reference internal" href="#envvar-PCAPKIT_MAX_ZERO_PAD_LENGTH"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_MAX_ZERO_PAD_LENGTH</span></code></a></p></td>
+<tr class="row-even"><td><p><span class="target" id="index-14"></span><a class="reference internal" href="#envvar-PCAPKIT_MAX_ZERO_PAD_LENGTH"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_MAX_ZERO_PAD_LENGTH</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">262144</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">&gt;=</span> <span class="pre">0</span></code>, or <code class="docutils literal notranslate"><span class="pre">-1</span></code> to lift the ceiling and the running budget</p></td>
 <td><p>a hostile capture’s declared length is zero-filled in memory
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/554">#554</a>)</p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="target" id="index-11"></span><a class="reference internal" href="#envvar-PCAPKIT_MAX_ZERO_PAD_SHORTFALL"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_MAX_ZERO_PAD_SHORTFALL</span></code></a></p></td>
+<tr class="row-odd"><td><p><span class="target" id="index-15"></span><a class="reference internal" href="#envvar-PCAPKIT_MAX_ZERO_PAD_SHORTFALL"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_MAX_ZERO_PAD_SHORTFALL</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">65536</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">&gt;=</span> <span class="pre">0</span></code>, or <code class="docutils literal notranslate"><span class="pre">-1</span></code> to disable the running budget</p></td>
 <td><p>lying lengths amplify into memory without being charged (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/573">#573</a>)</p></td>
 </tr>
-<tr class="row-even"><td><p><span class="target" id="index-12"></span><a class="reference internal" href="#envvar-PCAPKIT_ZERO_PAD_BUDGET_RATIO"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_ZERO_PAD_BUDGET_RATIO</span></code></a></p></td>
+<tr class="row-even"><td><p><span class="target" id="index-16"></span><a class="reference internal" href="#envvar-PCAPKIT_ZERO_PAD_BUDGET_RATIO"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_ZERO_PAD_BUDGET_RATIO</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">16</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">&gt;=</span> <span class="pre">0</span></code>, or <code class="docutils literal notranslate"><span class="pre">-1</span></code> to lift the running budget</p></td>
 <td><p>as above, per octet actually read (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/573">#573</a>)</p></td>
@@ -643,7 +644,7 @@ reported with a <a class="reference internal" href="warnings.html#pcapkit.utilit
 <dt class="sig sig-object py" id="pcapkit.utilities.config.FRAME_LAYER_LIMIT">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.config.</span></span><span class="sig-name descname"><span class="pre">FRAME_LAYER_LIMIT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">64</span></span><a class="headerlink" href="#pcapkit.utilities.config.FRAME_LAYER_LIMIT" title="Link to this definition">¶</a></dt>
 <dd><p>Most layers dissected in one frame (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1610">#1610</a>),
-<span class="target" id="index-13"></span><a class="reference internal" href="#envvar-PCAPKIT_FRAME_LAYER_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_FRAME_LAYER_LIMIT</span></code></a>.</p>
+<span class="target" id="index-17"></span><a class="reference internal" href="#envvar-PCAPKIT_FRAME_LAYER_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_FRAME_LAYER_LIMIT</span></code></a>.</p>
 <p>A layer is one entry of the frame’s protocol chain, counted from the first
 layer the frame record carries, usually its link layer; a protocol
 constructed from its own octets is not counted itself, so the count starts at
@@ -674,7 +675,7 @@ does the end of a chain of extension headers, which
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.config.</span></span><span class="sig-name descname"><span class="pre">EXTENSION_HEADER_LIMIT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32</span></span><a class="headerlink" href="#pcapkit.utilities.config.EXTENSION_HEADER_LIMIT" title="Link to this definition">¶</a></dt>
 <dd><p>Most IPv6 extension headers dissected in one chain, i.e. one after
 another with no other layer between them (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1604">#1604</a>),
-<span class="target" id="index-14"></span><a class="reference internal" href="#envvar-PCAPKIT_EXTENSION_HEADER_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_EXTENSION_HEADER_LIMIT</span></code></a>.</p>
+<span class="target" id="index-18"></span><a class="reference internal" href="#envvar-PCAPKIT_EXTENSION_HEADER_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_EXTENSION_HEADER_LIMIT</span></code></a>.</p>
 <p>The walk stops there, and what follows the last of them is kept as
 <a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, with one
 <a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.ProtocolWarning" title="pcapkit.utilities.warnings.ProtocolWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolWarning</span></code></a>. That holds whether the
@@ -684,7 +685,7 @@ layer such as IPv4, where each header dissects the next one itself
 (<a class="reference internal" href="../protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet._import_next_layer" title="pcapkit.protocols.internet.internet.Internet._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Internet._import_next_layer</span></code></a>). Behind
 IPv4, the <code class="docutils literal notranslate"><span class="pre">scapy</span></code> toolkit steps over at most this many in the octets to find
 TCP; the third-party engines are otherwise best effort here (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1687">#1687</a>).</p>
-<p><span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.1"><strong>RFC 8200 Section 4.1</strong></a> allows each extension header at most once, and the
+<p><span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.1"><strong>RFC 8200 Section 4.1</strong></a> allows each extension header at most once, and the
 Destination Options header at most twice, so no compliant chain gets close.
 Without the bound, a chain dissected header by header stops wherever
 Python’s recursion limit falls, which depends on the interpreter. Each
@@ -706,7 +707,7 @@ stops where parsing it did, and warns once too (<a class="extlink-issue referenc
 <dt class="sig sig-object py" id="pcapkit.utilities.config.IPV6_TCP_WARNED_LIMIT">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.config.</span></span><span class="sig-name descname"><span class="pre">IPV6_TCP_WARNED_LIMIT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32</span></span><a class="headerlink" href="#pcapkit.utilities.config.IPV6_TCP_WARNED_LIMIT" title="Link to this definition">¶</a></dt>
 <dd><p>How many captures the <code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code> engine remembers having warned
-about for TCP over IPv6, <span class="target" id="index-16"></span><a class="reference internal" href="#envvar-PCAPKIT_IPV6_TCP_WARNED_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_IPV6_TCP_WARNED_LIMIT</span></code></a>.</p>
+about for TCP over IPv6, <span class="target" id="index-20"></span><a class="reference internal" href="#envvar-PCAPKIT_IPV6_TCP_WARNED_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_IPV6_TCP_WARNED_LIMIT</span></code></a>.</p>
 <p>Each one pins a packet of its own in memory, so the memory is bounded and the
 oldest is forgotten first. Up to this many captures read at the same time
 warn exactly once each.</p>
@@ -726,7 +727,7 @@ warn exactly once each.</p>
 <dd><p>meth:<cite>DictDumper._append_fallback
 &lt;pcapkit.dumpkit.common.DictDumper._append_fallback&gt;</cite> expands for one
 top-level object, counting an object once per time it is met,
-<span class="target" id="index-17"></span><a class="reference internal" href="#envvar-PCAPKIT_FALLBACK_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_FALLBACK_LIMIT</span></code></a>; <code class="docutils literal notranslate"><span class="pre">-1</span></code> expands without bound.</p>
+<span class="target" id="index-21"></span><a class="reference internal" href="#envvar-PCAPKIT_FALLBACK_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_FALLBACK_LIMIT</span></code></a>; <code class="docutils literal notranslate"><span class="pre">-1</span></code> expands without bound.</p>
 <p>No fallback object in the <code class="docutils literal notranslate"><span class="pre">foundation</span></code>, <code class="docutils literal notranslate"><span class="pre">dumpkit</span></code> or <code class="docutils literal notranslate"><span class="pre">interface</span></code> test
 legs expands into more than 7, so the default leaves three orders of
 magnitude of room.</p>
@@ -747,7 +748,7 @@ magnitude of room.</p>
 <dt class="sig sig-object py" id="pcapkit.utilities.config.DETECT_CACHE_SIZE">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.config.</span></span><span class="sig-name descname"><span class="pre">DETECT_CACHE_SIZE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1024</span></span><a class="headerlink" href="#pcapkit.utilities.config.DETECT_CACHE_SIZE" title="Link to this definition">¶</a></dt>
 <dd><p>How many distinct bytestrings <a class="reference internal" href="chardet.html#pcapkit.utilities.chardet.detect" title="pcapkit.utilities.chardet.detect"><code class="xref py py-func docutils literal notranslate"><span class="pre">detect()</span></code></a>
-remembers, <span class="target" id="index-18"></span><a class="reference internal" href="#envvar-PCAPKIT_DETECT_CACHE_SIZE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DETECT_CACHE_SIZE</span></code></a>; <code class="docutils literal notranslate"><span class="pre">-1</span></code> leaves the cache
+remembers, <span class="target" id="index-22"></span><a class="reference internal" href="#envvar-PCAPKIT_DETECT_CACHE_SIZE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DETECT_CACHE_SIZE</span></code></a>; <code class="docutils literal notranslate"><span class="pre">-1</span></code> leaves the cache
 unbounded.</p>
 <p>Unlike the other limits, this one is read once, when
 <a class="reference internal" href="chardet.html#module-pcapkit.utilities.chardet" title="pcapkit.utilities.chardet"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.chardet</span></code></a> is imported, as the size of its
@@ -766,7 +767,7 @@ unbounded.</p>
 <dt class="sig sig-object py" id="pcapkit.utilities.config.READ_CHUNK">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.config.</span></span><span class="sig-name descname"><span class="pre">READ_CHUNK</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1048576</span></span><a class="headerlink" href="#pcapkit.utilities.config.READ_CHUNK" title="Link to this definition">¶</a></dt>
 <dd><p>Most octets <a class="reference internal" href="../corekit/io.html#pcapkit.corekit.io.SeekableReader" title="pcapkit.corekit.io.SeekableReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">SeekableReader</span></code></a> asks of its
-stream in one read, <span class="target" id="index-19"></span><a class="reference internal" href="#envvar-PCAPKIT_READ_CHUNK"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_READ_CHUNK</span></code></a>; <code class="docutils literal notranslate"><span class="pre">-1</span></code> asks for the whole
+stream in one read, <span class="target" id="index-23"></span><a class="reference internal" href="#envvar-PCAPKIT_READ_CHUNK"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_READ_CHUNK</span></code></a>; <code class="docutils literal notranslate"><span class="pre">-1</span></code> asks for the whole
 read at once.</p>
 <p>A read allocates what it asks for up front, so a record’s bogus length is read
 in pieces.</p>
@@ -805,7 +806,7 @@ no fixed-width field ever legitimately is – gets refused.</p>
 <p>A ceiling on one field says nothing about how many fields a parse may pad,
 which is what <a class="reference internal" href="#pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL" title="pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL"><code class="xref py py-data docutils literal notranslate"><span class="pre">MAX_ZERO_PAD_SHORTFALL</span></code></a> and
 <a class="reference internal" href="#pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO" title="pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO"><code class="xref py py-data docutils literal notranslate"><span class="pre">ZERO_PAD_BUDGET_RATIO</span></code></a> below are for. See <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/573">#573</a>.</p>
-<p>Set with <span class="target" id="index-20"></span><a class="reference internal" href="#envvar-PCAPKIT_MAX_ZERO_PAD_LENGTH"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_MAX_ZERO_PAD_LENGTH</span></code></a>. <code class="docutils literal notranslate"><span class="pre">-1</span></code> lifts the ceiling, and
+<p>Set with <span class="target" id="index-24"></span><a class="reference internal" href="#envvar-PCAPKIT_MAX_ZERO_PAD_LENGTH"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_MAX_ZERO_PAD_LENGTH</span></code></a>. <code class="docutils literal notranslate"><span class="pre">-1</span></code> lifts the ceiling, and
 lifts the running budget of <a class="reference internal" href="#pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO" title="pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO"><code class="xref py py-data docutils literal notranslate"><span class="pre">ZERO_PAD_BUDGET_RATIO</span></code></a> with it, since the
 ceiling is the one-off term of that budget’s allowance.</p>
 <div class="versionadded">
@@ -860,7 +861,7 @@ amplification lives – and legitimately that is a once-per-file event, since
 only the last block of a truncated capture is cut short. So the band gets the
 running budget below, whose one-off term already covers any single such event
 outright.</p>
-<p>Set with <span class="target" id="index-21"></span><a class="reference internal" href="#envvar-PCAPKIT_MAX_ZERO_PAD_SHORTFALL"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_MAX_ZERO_PAD_SHORTFALL</span></code></a>. <code class="docutils literal notranslate"><span class="pre">-1</span></code> disables the running
+<p>Set with <span class="target" id="index-25"></span><a class="reference internal" href="#envvar-PCAPKIT_MAX_ZERO_PAD_SHORTFALL"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_MAX_ZERO_PAD_SHORTFALL</span></code></a>. <code class="docutils literal notranslate"><span class="pre">-1</span></code> disables the running
 budget: every shortfall within <a class="reference internal" href="#pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH" title="pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH"><code class="xref py py-data docutils literal notranslate"><span class="pre">MAX_ZERO_PAD_LENGTH</span></code></a> is then padded
 without being charged to it.</p>
 <div class="versionadded">
@@ -896,7 +897,7 @@ hundred; <a class="extlink-issue reference external" href="https://github.com/Ja
 rather than cut. 16 octets of further allowance per octet genuinely read
 leaves any real file an allowance orders of magnitude past the one event it
 can want, while bounding the sum for a file whose blocks all lie.</p>
-<p>Set with <span class="target" id="index-22"></span><a class="reference internal" href="#envvar-PCAPKIT_ZERO_PAD_BUDGET_RATIO"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_ZERO_PAD_BUDGET_RATIO</span></code></a>. <code class="docutils literal notranslate"><span class="pre">-1</span></code> lifts the running
+<p>Set with <span class="target" id="index-26"></span><a class="reference internal" href="#envvar-PCAPKIT_ZERO_PAD_BUDGET_RATIO"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_ZERO_PAD_BUDGET_RATIO</span></code></a>. <code class="docutils literal notranslate"><span class="pre">-1</span></code> lifts the running
 budget; <a class="reference internal" href="#pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH" title="pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH"><code class="xref py py-data docutils literal notranslate"><span class="pre">MAX_ZERO_PAD_LENGTH</span></code></a> still bounds each field.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.5.0: </span>Moved from <code class="docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.field._ZERO_PAD_BUDGET_RATIO</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1726">#1726</a>).</p>
@@ -909,82 +910,33 @@ budget; <a class="reference internal" href="#pcapkit.utilities.config.MAX_ZERO_P
 </dd></dl>
 
 </section>
-<section id="vendor-crawlers">
-<h2>Vendor Crawlers<a class="headerlink" href="#vendor-crawlers" title="Link to this heading">¶</a></h2>
-<dl class="std envvar">
-<dt class="sig sig-object std" id="envvar-PCAPKIT_VENDOR_RETRY">
-<span class="sig-name descname"><span class="pre">PCAPKIT_VENDOR_RETRY</span></span><a class="headerlink" href="#envvar-PCAPKIT_VENDOR_RETRY" title="Link to this definition">¶</a></dt>
-<dd><p>Sets <a class="reference internal" href="#pcapkit.utilities.config.VENDOR_RETRY" title="pcapkit.utilities.config.VENDOR_RETRY"><code class="xref py py-data docutils literal notranslate"><span class="pre">VENDOR_RETRY</span></code></a>: an integer <code class="docutils literal notranslate"><span class="pre">&gt;=</span> <span class="pre">1</span></code>,
-default <code class="docutils literal notranslate"><span class="pre">5</span></code>.</p>
-</dd></dl>
-
-<dl class="std envvar">
-<dt class="sig sig-object std" id="envvar-PCAPKIT_CI_MODE">
-<span class="sig-name descname"><span class="pre">PCAPKIT_CI_MODE</span></span><a class="headerlink" href="#envvar-PCAPKIT_CI_MODE" title="Link to this definition">¶</a></dt>
-<dd><p>Sets <a class="reference internal" href="#pcapkit.utilities.config.CI_MODE" title="pcapkit.utilities.config.CI_MODE"><code class="xref py py-data docutils literal notranslate"><span class="pre">CI_MODE</span></code></a>: <code class="docutils literal notranslate"><span class="pre">1</span></code>/<code class="docutils literal notranslate"><span class="pre">yes</span></code>/<code class="docutils literal notranslate"><span class="pre">true</span></code>/<code class="docutils literal notranslate"><span class="pre">on</span></code>
-or <code class="docutils literal notranslate"><span class="pre">0</span></code>/<code class="docutils literal notranslate"><span class="pre">no</span></code>/<code class="docutils literal notranslate"><span class="pre">false</span></code>/<code class="docutils literal notranslate"><span class="pre">off</span></code>, default off.</p>
-</dd></dl>
-
-<dl class="std envvar">
-<dt class="sig sig-object std" id="envvar-PCAPKIT_HTTP_PROXY">
-<span class="sig-name descname"><span class="pre">PCAPKIT_HTTP_PROXY</span></span><a class="headerlink" href="#envvar-PCAPKIT_HTTP_PROXY" title="Link to this definition">¶</a></dt>
-<dd><p>The HTTP proxy address for the <a class="reference internal" href="../vendor/index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a> crawlers, read by
-<a class="reference internal" href="#pcapkit.utilities.config.http_proxy" title="pcapkit.utilities.config.http_proxy"><code class="xref py py-func docutils literal notranslate"><span class="pre">http_proxy()</span></code></a> on every call. Unset by default.</p>
-</dd></dl>
-
-<dl class="std envvar">
-<dt class="sig sig-object std" id="envvar-PCAPKIT_HTTPS_PROXY">
-<span class="sig-name descname"><span class="pre">PCAPKIT_HTTPS_PROXY</span></span><a class="headerlink" href="#envvar-PCAPKIT_HTTPS_PROXY" title="Link to this definition">¶</a></dt>
-<dd><p>The HTTPS proxy address for the <a class="reference internal" href="../vendor/index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a> crawlers, read by
-<a class="reference internal" href="#pcapkit.utilities.config.https_proxy" title="pcapkit.utilities.config.https_proxy"><code class="xref py py-func docutils literal notranslate"><span class="pre">https_proxy()</span></code></a> on every call. Unset by
-default.</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.utilities.config.VENDOR_RETRY">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.config.</span></span><span class="sig-name descname"><span class="pre">VENDOR_RETRY</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></span><a class="headerlink" href="#pcapkit.utilities.config.VENDOR_RETRY" title="Link to this definition">¶</a></dt>
-<dd><p>How many times a <a class="reference internal" href="../vendor/index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a> crawler retries a failed request,
-<span class="target" id="index-23"></span><a class="reference internal" href="#envvar-PCAPKIT_VENDOR_RETRY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_VENDOR_RETRY</span></code></a>.</p>
-<div class="versionadded">
-<p><span class="versionmodified added">Added in version 1.5.0: </span>Moved from <code class="docutils literal notranslate"><span class="pre">pcapkit.vendor.default.MAX_RETRY</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1726">#1726</a>), which
-crashed the import on a value that was not an integer, and read <code class="docutils literal notranslate"><span class="pre">0</span></code> as
-<code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.utilities.config.CI_MODE">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.config.</span></span><span class="sig-name descname"><span class="pre">CI_MODE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#pcapkit.utilities.config.CI_MODE" title="Link to this definition">¶</a></dt>
-<dd><p>Whether a <a class="reference internal" href="../vendor/index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a> crawler runs in CI, where a failed
-fetch fails the run instead of prompting, <span class="target" id="index-24"></span><a class="reference internal" href="#envvar-PCAPKIT_CI_MODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_CI_MODE</span></code></a>.</p>
-<div class="versionadded">
-<p><span class="versionmodified added">Added in version 1.5.0: </span>Moved from <code class="docutils literal notranslate"><span class="pre">pcapkit.vendor.default.CI_MODE</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1726">#1726</a>).</p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)">bool</a></p>
-</dd>
-</dl>
-</dd></dl>
-
+<section id="readers">
+<span id="config-readers"></span><h2>Readers<a class="headerlink" href="#readers" title="Link to this heading">¶</a></h2>
+<p>The limits above are read with these, and a module that keeps a variable of its
+own reads it with them too, so that a bad value is reported the same way.</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.utilities.config.http_proxy">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.config.</span></span><span class="sig-name descname"><span class="pre">http_proxy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/config.html#http_proxy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.config.http_proxy" title="Link to this definition">¶</a></dt>
-<dd><p>HTTP proxy address for the <a class="reference internal" href="../vendor/index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a> crawlers.</p>
-<p>Unlike the limits, <span class="target" id="index-25"></span><a class="reference internal" href="#envvar-PCAPKIT_HTTP_PROXY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_HTTP_PROXY</span></code></a> is read on every call, as
-<a class="reference internal" href="../vendor/default.html#pcapkit.vendor.default.get_proxies" title="pcapkit.vendor.default.get_proxies"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_proxies()</span></code></a> always has, so a proxy set after
-<a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> is imported is still honoured.</p>
+<dt class="sig sig-object py" id="pcapkit.utilities.config.read_limit">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.config.</span></span><span class="sig-name descname"><span class="pre">read_limit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">risk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/config.html#read_limit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.config.read_limit" title="Link to this definition">¶</a></dt>
+<dd><p>Read the integer environment variable <code class="docutils literal notranslate"><span class="pre">PCAPKIT_&lt;name&gt;</span></code>.</p>
+<p>A value that is not an integer, or is below <code class="docutils literal notranslate"><span class="pre">minimum</span></code>, is reported with a
+<a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.ConfigWarning" title="pcapkit.utilities.warnings.ConfigWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ConfigWarning</span></code></a> naming the variable and the
+value, and <code class="docutils literal notranslate"><span class="pre">default</span></code> is used instead.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Variable name, without the <code class="docutils literal notranslate"><span class="pre">PCAPKIT_</span></code> prefix.</p></li>
+<li><p><strong>default</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value used when the variable is unset or invalid.</p></li>
+<li><p><strong>minimum</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Smallest value accepted, besides <code class="docutils literal notranslate"><span class="pre">-1</span></code> where <code class="docutils literal notranslate"><span class="pre">risk</span></code> is set.</p></li>
+<li><p><strong>risk</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – What lifting the limit risks. If set, <code class="docutils literal notranslate"><span class="pre">-1</span></code> means no limit, and
+<code class="docutils literal notranslate"><span class="pre">-1</span></code> or any value above <code class="docutils literal notranslate"><span class="pre">default</span></code> is reported with it. If
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>, <code class="docutils literal notranslate"><span class="pre">-1</span></code> is not accepted and nothing is reported.</p></li>
+</ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The value of <span class="target" id="index-26"></span><a class="reference internal" href="#envvar-PCAPKIT_HTTP_PROXY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_HTTP_PROXY</span></code></a>, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> if unset.</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The value of the variable, or <code class="docutils literal notranslate"><span class="pre">default</span></code>.</p>
 </dd>
 </dl>
 <div class="versionadded">
@@ -993,18 +945,26 @@ fetch fails the run instead of prompting, <span class="target" id="index-24"></s
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.utilities.config.https_proxy">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.config.</span></span><span class="sig-name descname"><span class="pre">https_proxy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/config.html#https_proxy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.config.https_proxy" title="Link to this definition">¶</a></dt>
-<dd><p>HTTPS proxy address for the <a class="reference internal" href="../vendor/index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a> crawlers.</p>
-<p>Unlike the limits, <span class="target" id="index-27"></span><a class="reference internal" href="#envvar-PCAPKIT_HTTPS_PROXY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_HTTPS_PROXY</span></code></a> is read on every call, as
-<a class="reference internal" href="../vendor/default.html#pcapkit.vendor.default.get_proxies" title="pcapkit.vendor.default.get_proxies"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_proxies()</span></code></a> always has, so a proxy set after
-<a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> is imported is still honoured.</p>
+<dt class="sig sig-object py" id="pcapkit.utilities.config.read_flag">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.config.</span></span><span class="sig-name descname"><span class="pre">read_flag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/config.html#read_flag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.config.read_flag" title="Link to this definition">¶</a></dt>
+<dd><p>Read the boolean environment variable <code class="docutils literal notranslate"><span class="pre">PCAPKIT_&lt;name&gt;</span></code>.</p>
+<p>The value is read with surrounding whitespace stripped and
+case-insensitively, and is one of <code class="docutils literal notranslate"><span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">yes</span></code>, <code class="docutils literal notranslate"><span class="pre">true</span></code> or <code class="docutils literal notranslate"><span class="pre">on</span></code>, or of
+<code class="docutils literal notranslate"><span class="pre">0</span></code>, <code class="docutils literal notranslate"><span class="pre">no</span></code>, <code class="docutils literal notranslate"><span class="pre">false</span></code> or <code class="docutils literal notranslate"><span class="pre">off</span></code>. Any other value is reported with a
+<a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.ConfigWarning" title="pcapkit.utilities.warnings.ConfigWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ConfigWarning</span></code></a> naming the variable and the
+value, and <code class="docutils literal notranslate"><span class="pre">default</span></code> is used instead.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Variable name, without the <code class="docutils literal notranslate"><span class="pre">PCAPKIT_</span></code> prefix.</p></li>
+<li><p><strong>default</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Value used when the variable is unset or invalid.</p></li>
+</ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The value of <span class="target" id="index-28"></span><a class="reference internal" href="#envvar-PCAPKIT_HTTPS_PROXY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_HTTPS_PROXY</span></code></a>, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> if unset.</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The value of the variable, or <code class="docutils literal notranslate"><span class="pre">default</span></code>.</p>
 </dd>
 </dl>
 <div class="versionadded">
@@ -1072,7 +1032,7 @@ fetch fails the run instead of prompting, <span class="target" id="index-24"></s
             <ul>
 <li><a class="reference internal" href="#">Configuration</a><ul>
 <li><a class="reference internal" href="#limits">Limits</a></li>
-<li><a class="reference internal" href="#vendor-crawlers">Vendor Crawlers</a></li>
+<li><a class="reference internal" href="#readers">Readers</a></li>
 </ul>
 </li>
 </ul>

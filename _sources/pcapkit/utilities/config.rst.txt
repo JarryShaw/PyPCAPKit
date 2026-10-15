@@ -3,10 +3,9 @@ Configuration
 
 .. module:: pcapkit.utilities.config
 
-:mod:`pcapkit.utilities.config` holds every tunable limit of :mod:`pcapkit`, and
-the settings of the :mod:`pcapkit.vendor` crawlers (:issue:`1726`). Each limit
-is read from a ``PCAPKIT_*`` environment variable once, when the module is
-imported:
+:mod:`pcapkit.utilities.config` holds every tunable limit of :mod:`pcapkit`
+(:issue:`1726`). Each limit is read from a ``PCAPKIT_*`` environment variable
+once, when the module is imported:
 
 * A value that is not an integer, or is below the variable's minimum, warns with
   a :exc:`~pcapkit.utilities.warnings.ConfigWarning` and falls back to the
@@ -22,9 +21,13 @@ limit; using the default, 10000``. It obeys the warning filters, so under
 ``import pcapkit`` raise :exc:`~pcapkit.utilities.warnings.ConfigWarning`.
 
 Readers look each value up as ``config.<NAME>`` at call time, so patching a name
-here reaches every engine and protocol that reads it. The proxy addresses are
-read on every call of :func:`~pcapkit.utilities.config.http_proxy` and
-:func:`~pcapkit.utilities.config.https_proxy` instead.
+here reaches every engine and protocol that reads it.
+
+The :mod:`pcapkit.vendor` crawlers' :envvar:`PCAPKIT_VENDOR_RETRY`,
+:envvar:`PCAPKIT_CI_MODE`, :envvar:`PCAPKIT_HTTP_PROXY` and
+:envvar:`PCAPKIT_HTTPS_PROXY` are not held here. They are read by
+:mod:`pcapkit.vendor.default`, the first two with the :ref:`readers
+<config-readers>` below, and documented with it under :ref:`vendor-variables`.
 
 :envvar:`PCAPKIT_DEVMODE`, :envvar:`PCAPKIT_VERBOSE` and :envvar:`PCAPKIT_SPHINX`
 are read by :mod:`pcapkit.utilities.logging`, which needs them while it loads
@@ -130,31 +133,13 @@ Limits
 .. autodata:: pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL
 .. autodata:: pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO
 
-Vendor Crawlers
----------------
+.. _config-readers:
 
-.. envvar:: PCAPKIT_VENDOR_RETRY
+Readers
+-------
 
-   Sets :data:`~pcapkit.utilities.config.VENDOR_RETRY`: an integer ``>= 1``,
-   default ``5``.
+The limits above are read with these, and a module that keeps a variable of its
+own reads it with them too, so that a bad value is reported the same way.
 
-.. envvar:: PCAPKIT_CI_MODE
-
-   Sets :data:`~pcapkit.utilities.config.CI_MODE`: ``1``/``yes``/``true``/``on``
-   or ``0``/``no``/``false``/``off``, default off.
-
-.. envvar:: PCAPKIT_HTTP_PROXY
-
-   The HTTP proxy address for the :mod:`pcapkit.vendor` crawlers, read by
-   :func:`~pcapkit.utilities.config.http_proxy` on every call. Unset by default.
-
-.. envvar:: PCAPKIT_HTTPS_PROXY
-
-   The HTTPS proxy address for the :mod:`pcapkit.vendor` crawlers, read by
-   :func:`~pcapkit.utilities.config.https_proxy` on every call. Unset by
-   default.
-
-.. autodata:: pcapkit.utilities.config.VENDOR_RETRY
-.. autodata:: pcapkit.utilities.config.CI_MODE
-.. autofunction:: pcapkit.utilities.config.http_proxy
-.. autofunction:: pcapkit.utilities.config.https_proxy
+.. autofunction:: pcapkit.utilities.config.read_limit
+.. autofunction:: pcapkit.utilities.config.read_flag

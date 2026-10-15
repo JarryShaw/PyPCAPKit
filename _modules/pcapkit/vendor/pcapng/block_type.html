@@ -511,7 +511,7 @@
 <span class="c1"># The dead ``-02`` URL,</span>
 <span class="c1"># https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html, serves a</span>
 <span class="c1"># 77968-byte HTML error page rather than a clean refusal, so ``Vendor._request``</span>
-<span class="c1"># rejects it on ``page.ok`` and retries config.VENDOR_RETRY times against a page that will</span>
+<span class="c1"># rejects it on ``page.ok`` and retries MAX_RETRY times against a page that will</span>
 <span class="c1"># never come back. On ``-02`` the registries are ASCII art inside ``&lt;pre&gt;`` and</span>
 <span class="c1"># the only HTML ``&lt;table&gt;`` is the running-header one, so</span>
 <span class="c1"># ``soup.select('table#table-9')`` below finds nothing and raises ``IndexError``.</span>

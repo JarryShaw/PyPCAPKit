@@ -481,10 +481,9 @@
 
 <span class="sd">.. module:: pcapkit.utilities.config</span>
 
-<span class="sd">:mod:`pcapkit.utilities.config` holds every tunable limit of :mod:`pcapkit`,</span>
-<span class="sd">and the settings of the :mod:`pcapkit.vendor` crawlers (:issue:`1726`). Each</span>
-<span class="sd">limit is read from a ``PCAPKIT_*`` environment variable once, when this module</span>
-<span class="sd">is imported, and validated there:</span>
+<span class="sd">:mod:`pcapkit.utilities.config` holds every tunable limit of :mod:`pcapkit`</span>
+<span class="sd">(:issue:`1726`). Each limit is read from a ``PCAPKIT_*`` environment variable</span>
+<span class="sd">once, when this module is imported, and validated there:</span>
 
 <span class="sd">* A value that is not an integer, or is below the variable's minimum, is</span>
 <span class="sd">  reported with a :exc:`~pcapkit.utilities.warnings.ConfigWarning`, and the</span>
@@ -501,8 +500,12 @@
 
 <span class="sd">Every reader looks the value up here at call time, as ``config.&lt;NAME&gt;``, so</span>
 <span class="sd">patching one name in this module reaches every engine and every protocol that</span>
-<span class="sd">reads it. The proxy addresses are the exception: :func:`http_proxy` and</span>
-<span class="sd">:func:`https_proxy` read their variables on every call.</span>
+<span class="sd">reads it.</span>
+
+<span class="sd">:func:`read_limit` and :func:`read_flag` read and validate the variables, and</span>
+<span class="sd">are public so that a module keeping variables of its own validates them the same</span>
+<span class="sd">way: :mod:`pcapkit.vendor.default` reads the crawlers' variables with them, and</span>
+<span class="sd">documents those variables itself.</span>
 
 <span class="sd">Besides the standard library, this module imports</span>
 <span class="sd">:mod:`pcapkit.utilities.warnings` and nothing else from :mod:`pcapkit`, which is</span>
@@ -527,8 +530,8 @@
     <span class="s1">'FRAME_LAYER_LIMIT'</span><span class="p">,</span> <span class="s1">'EXTENSION_HEADER_LIMIT'</span><span class="p">,</span> <span class="s1">'IPV6_TCP_WARNED_LIMIT'</span><span class="p">,</span>
     <span class="s1">'FALLBACK_LIMIT'</span><span class="p">,</span> <span class="s1">'DETECT_CACHE_SIZE'</span><span class="p">,</span> <span class="s1">'READ_CHUNK'</span><span class="p">,</span>
     <span class="s1">'MAX_ZERO_PAD_LENGTH'</span><span class="p">,</span> <span class="s1">'MAX_ZERO_PAD_SHORTFALL'</span><span class="p">,</span> <span class="s1">'ZERO_PAD_BUDGET_RATIO'</span><span class="p">,</span>
-    <span class="c1"># vendor crawlers</span>
-    <span class="s1">'VENDOR_RETRY'</span><span class="p">,</span> <span class="s1">'CI_MODE'</span><span class="p">,</span> <span class="s1">'http_proxy'</span><span class="p">,</span> <span class="s1">'https_proxy'</span><span class="p">,</span>
+    <span class="c1"># readers</span>
+    <span class="s1">'read_limit'</span><span class="p">,</span> <span class="s1">'read_flag'</span><span class="p">,</span>
 <span class="p">]</span>
 
 <span class="c1">#: Strings a boolean variable may take, case-insensitively.</span>
@@ -542,9 +545,15 @@
                    <span class="s2">"frame may hit Python's recursion limit and raise RecursionError (#1610)"</span><span class="p">)</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_read_limit</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">minimum</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+<div class="viewcode-block" id="read_limit">
+<a class="viewcode-back" href="../../../pcapkit/utilities/config.html#pcapkit.utilities.config.read_limit">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_limit</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">minimum</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                <span class="n">risk</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Read the integer environment variable ``PCAPKIT_&lt;name&gt;``.</span>
+
+<span class="sd">    A value that is not an integer, or is below ``minimum``, is reported with a</span>
+<span class="sd">    :exc:`~pcapkit.utilities.warnings.ConfigWarning` naming the variable and the</span>
+<span class="sd">    value, and ``default`` is used instead.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        name: Variable name, without the ``PCAPKIT_`` prefix.</span>
@@ -556,6 +565,8 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        The value of the variable, or ``default``.</span>
+
+<span class="sd">    .. versionadded:: 1.5.0</span>
 
 <span class="sd">    """</span>
     <span class="n">variable</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'PCAPKIT_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
@@ -577,11 +588,20 @@
         <span class="n">lifted</span> <span class="o">=</span> <span class="s1">'lifts the limit'</span> <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">'is above the default of </span><span class="si">{</span><span class="n">default</span><span class="si">}</span><span class="s1">'</span>
         <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">text</span><span class="si">!r}</span><span class="s1"> </span><span class="si">{</span><span class="n">lifted</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">risk</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">ConfigWarning</span><span class="p">,</span>
              <span class="n">stacklevel</span><span class="o">=</span><span class="n">_importer_stacklevel</span><span class="p">())</span>
-    <span class="k">return</span> <span class="n">value</span>
+    <span class="k">return</span> <span class="n">value</span></div>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_read_flag</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+
+<div class="viewcode-block" id="read_flag">
+<a class="viewcode-back" href="../../../pcapkit/utilities/config.html#pcapkit.utilities.config.read_flag">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_flag</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Read the boolean environment variable ``PCAPKIT_&lt;name&gt;``.</span>
+
+<span class="sd">    The value is read with surrounding whitespace stripped and</span>
+<span class="sd">    case-insensitively, and is one of ``1``, ``yes``, ``true`` or ``on``, or of</span>
+<span class="sd">    ``0``, ``no``, ``false`` or ``off``. Any other value is reported with a</span>
+<span class="sd">    :exc:`~pcapkit.utilities.warnings.ConfigWarning` naming the variable and the</span>
+<span class="sd">    value, and ``default`` is used instead.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        name: Variable name, without the ``PCAPKIT_`` prefix.</span>
@@ -589,6 +609,8 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        The value of the variable, or ``default``.</span>
+
+<span class="sd">    .. versionadded:: 1.5.0</span>
 
 <span class="sd">    """</span>
     <span class="n">variable</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'PCAPKIT_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span>
@@ -600,7 +622,8 @@
     <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
         <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">text</span><span class="si">!r}</span><span class="s1"> is not one of </span><span class="si">{</span><span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_BOOLEAN_STATES</span><span class="p">)</span><span class="si">}</span><span class="s1">; '</span>
              <span class="sa">f</span><span class="s1">'using the default, </span><span class="si">{</span><span class="n">default</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">ConfigWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">_importer_stacklevel</span><span class="p">())</span>
-        <span class="k">return</span> <span class="n">default</span>
+        <span class="k">return</span> <span class="n">default</span></div>
+
 
 
 <span class="c1">###############################################################################</span>
@@ -630,7 +653,7 @@
 <span class="c1">#: .. versionadded:: 1.5.0</span>
 <span class="c1">#:</span>
 <span class="c1">#:    Moved from ``pcapkit.protocols.protocol.FRAME_LAYER_LIMIT`` (:issue:`1726`).</span>
-<span class="n">FRAME_LAYER_LIMIT</span> <span class="o">=</span> <span class="n">_read_limit</span><span class="p">(</span><span class="s1">'FRAME_LAYER_LIMIT'</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="n">risk</span><span class="o">=</span><span class="n">_RECURSION_RISK</span><span class="p">)</span>
+<span class="n">FRAME_LAYER_LIMIT</span> <span class="o">=</span> <span class="n">read_limit</span><span class="p">(</span><span class="s1">'FRAME_LAYER_LIMIT'</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="n">risk</span><span class="o">=</span><span class="n">_RECURSION_RISK</span><span class="p">)</span>
 
 <span class="c1">#: int: Most IPv6 extension headers dissected in one chain, i.e. one after</span>
 <span class="c1">#: another with no other layer between them (:issue:`1604`),</span>
@@ -662,7 +685,7 @@
 <span class="c1">#: .. versionadded:: 1.5.0</span>
 <span class="c1">#:</span>
 <span class="c1">#:    Moved from ``pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT`` (:issue:`1726`).</span>
-<span class="n">EXTENSION_HEADER_LIMIT</span> <span class="o">=</span> <span class="n">_read_limit</span><span class="p">(</span><span class="s1">'EXTENSION_HEADER_LIMIT'</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="n">risk</span><span class="o">=</span><span class="n">_RECURSION_RISK</span><span class="p">)</span>
+<span class="n">EXTENSION_HEADER_LIMIT</span> <span class="o">=</span> <span class="n">read_limit</span><span class="p">(</span><span class="s1">'EXTENSION_HEADER_LIMIT'</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="n">risk</span><span class="o">=</span><span class="n">_RECURSION_RISK</span><span class="p">)</span>
 
 <span class="c1">#: int: How many captures the ``pypcapfile`` engine remembers having warned</span>
 <span class="c1">#: about for TCP over IPv6, :envvar:`PCAPKIT_IPV6_TCP_WARNED_LIMIT`.</span>
@@ -674,7 +697,7 @@
 <span class="c1">#: .. versionadded:: 1.5.0</span>
 <span class="c1">#:</span>
 <span class="c1">#:    Moved from ``pcapkit.toolkit.pypcapfile.IPV6_TCP_WARNED_LIMIT`` (:issue:`1726`).</span>
-<span class="n">IPV6_TCP_WARNED_LIMIT</span> <span class="o">=</span> <span class="n">_read_limit</span><span class="p">(</span><span class="s1">'IPV6_TCP_WARNED_LIMIT'</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="n">risk</span><span class="o">=</span><span class="p">(</span>
+<span class="n">IPV6_TCP_WARNED_LIMIT</span> <span class="o">=</span> <span class="n">read_limit</span><span class="p">(</span><span class="s1">'IPV6_TCP_WARNED_LIMIT'</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="n">risk</span><span class="o">=</span><span class="p">(</span>
     <span class="s1">'each capture remembered pins one of its packets in memory'</span><span class="p">))</span>
 
 <span class="c1">#: int: Most objects :meth:`DictDumper._append_fallback</span>
@@ -689,7 +712,7 @@
 <span class="c1">#: .. versionadded:: 1.5.0</span>
 <span class="c1">#:</span>
 <span class="c1">#:    Moved from ``pcapkit.dumpkit.common.FALLBACK_LIMIT`` (:issue:`1726`).</span>
-<span class="n">FALLBACK_LIMIT</span> <span class="o">=</span> <span class="n">_read_limit</span><span class="p">(</span><span class="s1">'FALLBACK_LIMIT'</span><span class="p">,</span> <span class="mi">10_000</span><span class="p">,</span> <span class="n">risk</span><span class="o">=</span><span class="p">(</span>
+<span class="n">FALLBACK_LIMIT</span> <span class="o">=</span> <span class="n">read_limit</span><span class="p">(</span><span class="s1">'FALLBACK_LIMIT'</span><span class="p">,</span> <span class="mi">10_000</span><span class="p">,</span> <span class="n">risk</span><span class="o">=</span><span class="p">(</span>
     <span class="s1">'an object that expands into a large or endless object graph is written out '</span>
     <span class="s1">'in full, which takes memory and time without bound'</span><span class="p">))</span>
 
@@ -704,7 +727,7 @@
 <span class="c1">#: .. versionadded:: 1.5.0</span>
 <span class="c1">#:</span>
 <span class="c1">#:    Moved from ``pcapkit.utilities.chardet.DETECT_CACHE_SIZE`` (:issue:`1726`).</span>
-<span class="n">DETECT_CACHE_SIZE</span> <span class="o">=</span> <span class="n">_read_limit</span><span class="p">(</span><span class="s1">'DETECT_CACHE_SIZE'</span><span class="p">,</span> <span class="mi">1024</span><span class="p">,</span> <span class="n">risk</span><span class="o">=</span><span class="p">(</span>
+<span class="n">DETECT_CACHE_SIZE</span> <span class="o">=</span> <span class="n">read_limit</span><span class="p">(</span><span class="s1">'DETECT_CACHE_SIZE'</span><span class="p">,</span> <span class="mi">1024</span><span class="p">,</span> <span class="n">risk</span><span class="o">=</span><span class="p">(</span>
     <span class="s1">'the cache keeps every bytestring it was asked about, so a capture full of '</span>
     <span class="s1">'never-repeating text is retained in memory'</span><span class="p">))</span>
 
@@ -718,7 +741,7 @@
 <span class="c1">#: .. versionadded:: 1.5.0</span>
 <span class="c1">#:</span>
 <span class="c1">#:    Moved from ``pcapkit.corekit.io._READ_CHUNK`` (:issue:`1726`).</span>
-<span class="n">READ_CHUNK</span> <span class="o">=</span> <span class="n">_read_limit</span><span class="p">(</span><span class="s1">'READ_CHUNK'</span><span class="p">,</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">20</span><span class="p">,</span> <span class="n">minimum</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">risk</span><span class="o">=</span><span class="p">(</span>
+<span class="n">READ_CHUNK</span> <span class="o">=</span> <span class="n">read_limit</span><span class="p">(</span><span class="s1">'READ_CHUNK'</span><span class="p">,</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">20</span><span class="p">,</span> <span class="n">minimum</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">risk</span><span class="o">=</span><span class="p">(</span>
     <span class="s1">'a bogus record length allocates up to that many octets in one read'</span><span class="p">))</span>
 
 <span class="c1">#: int: Ceiling on the zero-padding :meth:`FieldBase.unpack</span>
@@ -756,7 +779,7 @@
 <span class="c1">#: .. versionadded:: 1.5.0</span>
 <span class="c1">#:</span>
 <span class="c1">#:    Moved from ``pcapkit.corekit.fields.field._MAX_ZERO_PAD_LENGTH`` (:issue:`1726`).</span>
-<span class="n">MAX_ZERO_PAD_LENGTH</span> <span class="o">=</span> <span class="n">_read_limit</span><span class="p">(</span><span class="s1">'MAX_ZERO_PAD_LENGTH'</span><span class="p">,</span> <span class="mh">0x40_000</span><span class="p">,</span> <span class="n">risk</span><span class="o">=</span><span class="p">(</span>
+<span class="n">MAX_ZERO_PAD_LENGTH</span> <span class="o">=</span> <span class="n">read_limit</span><span class="p">(</span><span class="s1">'MAX_ZERO_PAD_LENGTH'</span><span class="p">,</span> <span class="mh">0x40_000</span><span class="p">,</span> <span class="n">risk</span><span class="o">=</span><span class="p">(</span>
     <span class="s1">'a hostile capture can declare a field that long and have it zero-filled in memory'</span><span class="p">))</span>
 
 <span class="c1">#: int: Shortfall :meth:`FieldBase.unpack</span>
@@ -807,7 +830,7 @@
 <span class="c1">#: .. versionadded:: 1.5.0</span>
 <span class="c1">#:</span>
 <span class="c1">#:    Moved from ``pcapkit.corekit.fields.field._MAX_ZERO_PAD_SHORTFALL`` (:issue:`1726`).</span>
-<span class="n">MAX_ZERO_PAD_SHORTFALL</span> <span class="o">=</span> <span class="n">_read_limit</span><span class="p">(</span><span class="s1">'MAX_ZERO_PAD_SHORTFALL'</span><span class="p">,</span> <span class="mh">0x10_000</span><span class="p">,</span> <span class="n">risk</span><span class="o">=</span><span class="p">(</span>
+<span class="n">MAX_ZERO_PAD_SHORTFALL</span> <span class="o">=</span> <span class="n">read_limit</span><span class="p">(</span><span class="s1">'MAX_ZERO_PAD_SHORTFALL'</span><span class="p">,</span> <span class="mh">0x10_000</span><span class="p">,</span> <span class="n">risk</span><span class="o">=</span><span class="p">(</span>
     <span class="s1">'shortfalls up to that size are zero-filled without being charged to the running budget, '</span>
     <span class="s1">'so a capture of many lying lengths can amplify into that much memory each'</span><span class="p">))</span>
 
@@ -837,69 +860,9 @@
 <span class="c1">#: .. versionadded:: 1.5.0</span>
 <span class="c1">#:</span>
 <span class="c1">#:    Moved from ``pcapkit.corekit.fields.field._ZERO_PAD_BUDGET_RATIO`` (:issue:`1726`).</span>
-<span class="n">ZERO_PAD_BUDGET_RATIO</span> <span class="o">=</span> <span class="n">_read_limit</span><span class="p">(</span><span class="s1">'ZERO_PAD_BUDGET_RATIO'</span><span class="p">,</span> <span class="mh">0x10</span><span class="p">,</span> <span class="n">risk</span><span class="o">=</span><span class="p">(</span>
+<span class="n">ZERO_PAD_BUDGET_RATIO</span> <span class="o">=</span> <span class="n">read_limit</span><span class="p">(</span><span class="s1">'ZERO_PAD_BUDGET_RATIO'</span><span class="p">,</span> <span class="mh">0x10</span><span class="p">,</span> <span class="n">risk</span><span class="o">=</span><span class="p">(</span>
     <span class="s1">'a capture whose blocks all lie about their lengths can amplify each octet read '</span>
     <span class="s1">'into that many zero octets in memory'</span><span class="p">))</span>
-
-<span class="c1">###############################################################################</span>
-<span class="c1"># Vendor Crawlers</span>
-<span class="c1">###############################################################################</span>
-
-<span class="c1">#: int: How many times a :mod:`pcapkit.vendor` crawler retries a failed request,</span>
-<span class="c1">#: :envvar:`PCAPKIT_VENDOR_RETRY`.</span>
-<span class="c1">#:</span>
-<span class="c1">#: .. versionadded:: 1.5.0</span>
-<span class="c1">#:</span>
-<span class="c1">#:    Moved from ``pcapkit.vendor.default.MAX_RETRY`` (:issue:`1726`), which</span>
-<span class="c1">#:    crashed the import on a value that was not an integer, and read ``0`` as</span>
-<span class="c1">#:    ``1``.</span>
-<span class="n">VENDOR_RETRY</span> <span class="o">=</span> <span class="n">_read_limit</span><span class="p">(</span><span class="s1">'VENDOR_RETRY'</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">minimum</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
-<span class="c1">#: bool: Whether a :mod:`pcapkit.vendor` crawler runs in CI, where a failed</span>
-<span class="c1">#: fetch fails the run instead of prompting, :envvar:`PCAPKIT_CI_MODE`.</span>
-<span class="c1">#:</span>
-<span class="c1">#: .. versionadded:: 1.5.0</span>
-<span class="c1">#:</span>
-<span class="c1">#:    Moved from ``pcapkit.vendor.default.CI_MODE`` (:issue:`1726`).</span>
-<span class="n">CI_MODE</span> <span class="o">=</span> <span class="n">_read_flag</span><span class="p">(</span><span class="s1">'CI_MODE'</span><span class="p">)</span>
-
-
-<div class="viewcode-block" id="http_proxy">
-<a class="viewcode-back" href="../../../pcapkit/utilities/config.html#pcapkit.utilities.config.http_proxy">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">http_proxy</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s1">'Optional[str]'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""HTTP proxy address for the :mod:`pcapkit.vendor` crawlers.</span>
-
-<span class="sd">    Unlike the limits, :envvar:`PCAPKIT_HTTP_PROXY` is read on every call, as</span>
-<span class="sd">    :func:`~pcapkit.vendor.default.get_proxies` always has, so a proxy set after</span>
-<span class="sd">    :mod:`pcapkit` is imported is still honoured.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        The value of :envvar:`PCAPKIT_HTTP_PROXY`, or :data:`None` if unset.</span>
-
-<span class="sd">    .. versionadded:: 1.5.0</span>
-
-<span class="sd">    """</span>
-    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'PCAPKIT_HTTP_PROXY'</span><span class="p">)</span></div>
-
-
-
-<div class="viewcode-block" id="https_proxy">
-<a class="viewcode-back" href="../../../pcapkit/utilities/config.html#pcapkit.utilities.config.https_proxy">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">https_proxy</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s1">'Optional[str]'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""HTTPS proxy address for the :mod:`pcapkit.vendor` crawlers.</span>
-
-<span class="sd">    Unlike the limits, :envvar:`PCAPKIT_HTTPS_PROXY` is read on every call, as</span>
-<span class="sd">    :func:`~pcapkit.vendor.default.get_proxies` always has, so a proxy set after</span>
-<span class="sd">    :mod:`pcapkit` is imported is still honoured.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        The value of :envvar:`PCAPKIT_HTTPS_PROXY`, or :data:`None` if unset.</span>
-
-<span class="sd">    .. versionadded:: 1.5.0</span>
-
-<span class="sd">    """</span>
-    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'PCAPKIT_HTTPS_PROXY'</span><span class="p">)</span></div>
-
 </pre></div>
         </article>
       </div>
