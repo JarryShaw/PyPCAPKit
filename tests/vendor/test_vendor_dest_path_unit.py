@@ -94,14 +94,12 @@ module scope, only as the string parser name in six crawlers'
 nothing here reaches -- no test in this file calls :meth:`Vendor.__init__` or
 :meth:`~Vendor.context`. ``requests`` and ``beautifulsoup4`` both ship in the
 ``test`` extra precisely so vendor tests can run (:file:`pyproject.toml`,
-around line 321), so both classes below run on ``test``, ``engine-tests``
-and ``gate`` -- the only three pytest jobs of
-:file:`.github/workflows/unit-tests.yml` that collect anything under
-:file:`tests/vendor/` at all, since ``integration`` and ``pypcap-parity``
-never reach it -- unlike :file:`tests/vendor/test_user_agent_unit.py`, whose
-own gate also lists ``html5lib`` and so still skips on ``test`` and ``gate``,
-though it now runs for real on ``engine-tests`` too, which installs the
-``vendor`` extra (#738).
+around line 321), so both classes below run on ``test`` and ``gate`` -- the
+only pytest jobs of :file:`.github/workflows/unit-tests.yml` that collect
+anything under :file:`tests/vendor/` at all, since ``integration`` and
+``pypcap-parity`` never reach it and ``engine-tests`` runs only each engine's
+own test files since #849 -- unlike :file:`tests/vendor/test_user_agent_unit.py`,
+whose own gate also lists ``html5lib`` and so skips on both.
 
 """
 from __future__ import annotations

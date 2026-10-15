@@ -222,7 +222,7 @@ class IPv4UnitTests(unittest.TestCase):
             # defect. Asserting the negative matters because the branch was not
             # uncovered before the fix -- it was covered by the only class in the
             # tree that satisfied it, ``DummyProtocol`` in
-            # tests/protocols/schema/test_schema_unit.py:167, which subclasses
+            # tests/protocols/schema/test_schema_unit.py:168, which subclasses
             # ``Protocol`` and so packed happily while every protocol in the
             # library raised. Without this line the same hole could be reopened
             # by making a protocol subclass ``Protocol`` rather than by fixing
@@ -311,8 +311,9 @@ class IPv4UnitTests(unittest.TestCase):
         defect of its own. Every one of them hands the payload field a
         :class:`~pcapkit.protocols.misc.raw.Raw` or a
         :class:`~pcapkit.protocols.misc.null.NoPayload`, because those are what
-        *parsing* yields, so between them they exercise exactly two of the 43
-        :class:`~pcapkit.protocols.protocol.ProtocolBase` descendants the widened
+        *parsing* yields, so between them they exercise exactly two of the more
+        than forty :class:`~pcapkit.protocols.protocol.ProtocolBase` descendants
+        the widened
         check in :meth:`Schema.pack
         <pcapkit.protocols.schema.schema.Schema.pack>` has to accept. That is
         enough coverage to be defeated by a fix that is not one: replacing the
@@ -324,7 +325,7 @@ class IPv4UnitTests(unittest.TestCase):
 
         -- special-casing precisely the classes the tests use -- passes all four
         of them, measured, while leaving the general defect in place for the
-        other 40 protocols. #536's own reviewer found that by falsification, and
+        other protocols. #536's own reviewer found that by falsification, and
         this test is what makes the shortcut fail.
 
         So the payload here is a ``UDP``, and the assertions are chosen to be

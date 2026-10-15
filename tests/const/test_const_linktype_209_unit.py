@@ -76,13 +76,13 @@ from tests._support import reimport_once_per_class
 #: parse its fixture. Spelled exactly as
 #: :data:`tests.vendor.test_request_prompt_unit.VENDOR_DEPS` so this file reaches
 #: the **existing** ``HAS_VENDOR_DEPS`` dependency gate rather than minting a new
-#: one -- ``tests/_dependency_gates.py:315`` already accounts for that gate, with
-#: ``dark={'test': ('html5lib',), 'gate': ('html5lib',)}``, and ``engine-tests``
-#: closes it by installing the ``vendor`` extra.
+#: one -- its entry in :data:`tests._dependency_gates.DEPENDENCY_GATE_EXCLUSIONS`
+#: already accounts for that gate, with
+#: ``dark={'test': ('html5lib',), 'gate': ('html5lib',)}``.
 #:
 #: ``html5lib`` is the one that is actually missing on ``test``: ``requests`` and
 #: ``bs4`` have shipped in the ``test`` extra since #507, but only
-#: ``beautifulsoup4[html5lib]`` -- the ``vendor`` and ``all`` extras -- provides a
+#: ``beautifulsoup4[html5lib]`` -- the ``vendor`` and ``dev`` extras -- provides a
 #: parser (``pyproject.toml:234``, and the note at ``:313-320`` saying so
 #: deliberately).
 VENDOR_DEPS = ('requests', 'bs4', 'html5lib')
@@ -92,8 +92,9 @@ VENDOR_DEPS = ('requests', 'bs4', 'html5lib')
 #: rather than making the whole unit tier depend on the crawlers'.
 #:
 #: Consequence worth knowing: :class:`LinkTypeGeneratorLegacyOrderingTests` is the
-#: root-cause pin, and it runs only where the ``vendor`` extra is installed --
-#: ``engine-tests`` per-PR, and locally. :class:`LinkType209ConstResolutionTests`
+#: root-cause pin, and it runs only where the ``vendor`` extra is installed,
+#: which no CI job does since #849 -- so locally only.
+#: :class:`LinkType209ConstResolutionTests`
 #: needs no parser and so still guards the reported symptom everywhere.
 HAS_VENDOR_DEPS = all(importlib.util.find_spec(name) is not None for name in VENDOR_DEPS)
 

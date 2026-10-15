@@ -29,10 +29,14 @@ This is a **behaviour change to all 40 public members**: every equality
 comparison of a :class:`~pcapkit.const.http.method.Method` member against its
 own wire string now succeeds where it used to fail silently (no exception --
 just an unexpected :data:`False`). Nothing under :mod:`pcapkit.protocols`
-compared a member this way before the fix (the one caller,
-:meth:`pcapkit.protocols.application.httpv1.HTTP._read_http_header`, only ever
-reads ``.value`` indirectly through :meth:`~pcapkit.const.http.method.Method.
-get`, never ``str()`` or ``==`` against the member itself), so the change is
+compared a member this way before the fix (the one caller of
+:meth:`~pcapkit.const.http.method.Method.get`,
+:meth:`pcapkit.protocols.application.httpv1.HTTP._read_start_line`, reached
+through :meth:`~pcapkit.protocols.application.httpv1.HTTP._read_http_header`
+and :meth:`~pcapkit.protocols.application.httpv1.HTTP.make`, only builds a
+member from the wire string, and
+:meth:`~pcapkit.protocols.application.httpv1.HTTP._make_start_line` reads
+``.value``; neither calls ``str()`` or ``==`` on the member itself), so the change is
 observable only to external callers and to this module's own dunders
 (``__repr__``, which reads ``_value_`` and was already correct).
 
