@@ -24,6 +24,19 @@ Octets      Bits        Name                    Description
   24        192   ``rarp.tpa``              Target Protocol Address
 ====== ========= ========================= =========================
 
+.. versionadded:: 1.5.0
+
+   Moved here from ``pcapkit.protocols.link.rarp``.
+   :class:`~pcapkit.protocols.application.rarp.RARP` and
+   :class:`~pcapkit.protocols.application.rarp.DRARP` derive from
+   :class:`~pcapkit.protocols.application.application.Application` as well as
+   :class:`~pcapkit.protocols.link.arp.ARP`, so their layer is
+   ``'Application'`` (:issue:`719`).
+
+.. versionremoved:: 1.5.0
+
+   ``pcapkit.protocols.link.rarp``, with no alias (:issue:`719`).
+
 .. autoclass:: pcapkit.protocols.application.rarp.RARP
    :no-members:
    :show-inheritance:

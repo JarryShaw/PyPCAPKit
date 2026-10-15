@@ -5,8 +5,28 @@ PCAP-NG File Format
 .. module:: pcapkit.protocols.misc.pcapng
 
 :mod:`pcapkit.protocols.misc.pcapng` contains
-:class:`~pcapkit.protocols.misc.pcapng.PCAPNG` only,
-which implements extractor for PCAP-NG file format [*]_.
+:class:`~pcapkit.protocols.misc.pcapng.PCAPNG`,
+which implements extractor for PCAP-NG file format [*]_, and the
+:class:`~pcapkit.protocols.misc.pcapng.PacketDirection`,
+:class:`~pcapkit.protocols.misc.pcapng.PacketReception` and
+:class:`~pcapkit.protocols.misc.pcapng.WireGuardKeyLabel` enumerations.
+
+.. versionchanged:: 1.5.0
+
+   A block rebuilds as it was parsed, byte for byte: its lengths, padding,
+   byte order, flag bits and repeated options are kept, and so is a block
+   that is unknown, malformed, shorter than its fixed fields or cut short
+   (:issue:`1272`, :issue:`1273`, :issue:`1276`, :issue:`1277`,
+   :issue:`1278`, :issue:`1279`, :issue:`1280`, :issue:`1281`,
+   :issue:`1282`, :issue:`1283`, :issue:`1284`, :issue:`1382`,
+   :issue:`1383`, :issue:`1384`, :issue:`1405`, :issue:`1413`,
+   :issue:`1414`, :issue:`1422`, :issue:`1470`). A packet block keeps the
+   octets it captured (:issue:`646`); an option running past its block's
+   option area leaves the whole area kept as captured in ``options_raw``,
+   with a :exc:`~pcapkit.utilities.warnings.ProtocolWarning`, where it was
+   read as zeros (:issue:`594`, :issue:`1325`); a truncated capture does not
+   raise :exc:`ValueError` (:issue:`678`); and ``timestamp_epoch`` is not
+   shifted by the host's timezone (:issue:`361`).
 
 .. autoclass:: pcapkit.protocols.misc.pcapng.PCAPNG
    :no-members:
@@ -206,7 +226,7 @@ IANA registry.
 .. versionremoved:: 1.5.0
 
    ``pcapkit.protocols.misc.pcapng.TLSKeyLabel``, now
-   :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` (:issue:`890`,
+   :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` (:issue:`886`,
    :issue:`1744`).
 
 .. autoclass:: pcapkit.protocols.misc.pcapng.WireGuardKeyLabel

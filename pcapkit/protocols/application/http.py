@@ -494,7 +494,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
             Two things this deliberately does **not** decide, because one payload
             with no flow context cannot:
 
-            * **An ``Upgrade: h2c`` exchange** (:rfc:`7540#section-3.2`,
+            * **An** ``Upgrade: h2c`` **exchange** (:rfc:`7540#section-3.2`,
               deprecated but not removed by :rfc:`9113#section-3.1`) stays
               HTTP/1.1 here, and is *correctly* HTTP/1.1: on the wire the upgrade
               request and its ``101 Switching Protocols`` response are HTTP/1.1
@@ -508,7 +508,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
               preface ahead of it, or an opaque HTTP/1 message body -- is
               genuinely undecidable from one payload, and the honest answer is
               the ``Raw`` that an escaping ``ProtocolError`` becomes under
-              :func:`~pcapkit.protocols.misc.raw.beholder`. The nine-octet frame
+              :func:`~pcapkit.corekit.decorators.beholder`. The nine-octet frame
               header is therefore never used to *identify* HTTP/2 ahead of
               HTTP/1: as identification it misfires on binary HTTP/1 bodies,
               which is precisely how garbage text was classified HTTP/2 to begin

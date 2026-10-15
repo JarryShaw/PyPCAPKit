@@ -5,10 +5,11 @@ r"""HTTP/1.* - Hypertext Transfer Protocol
 .. module:: pcapkit.protocols.application.httpv1
 
 :mod:`pcapkit.protocols.application.httpv1` contains
-:class:`~pcapkit.protocols.application.httpv1.HTTP`
-only, which implements extractor for Hypertext Transfer
-Protocol (HTTP/1.*) [*]_, whose structure is described
-as below:
+:class:`~pcapkit.protocols.application.httpv1.HTTP`,
+which implements extractor for Hypertext Transfer
+Protocol (HTTP/1.*) [*]_, and its
+:class:`~pcapkit.protocols.application.httpv1.Type` enumeration. The
+structure of an HTTP/1.* message is described as below:
 
 .. code-block:: text
 
@@ -25,6 +26,13 @@ as below:
    <body>                      :==: RESPONSE BODY (optional)
 
 .. [*] https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol
+
+.. versionchanged:: 1.5.0
+
+   A message rebuilds byte for byte: the whitespace of the start line and
+   header lines, and octets in them that are not UTF-8, are kept as captured
+   rather than normalised or re-encoded (:issue:`1241`, :issue:`1302`,
+   :issue:`1333`).
 
 """
 import re
