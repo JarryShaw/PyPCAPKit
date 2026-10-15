@@ -5,6 +5,12 @@ User Defined Warnings
 
 :mod:`pcapkit.utilities.warnings` refined built-in warnings.
 
+.. versionremoved:: 1.5.0
+
+   ``pcapkit.utilities.warnings.DEVMODE``, which 1.4.x imported from
+   :mod:`pcapkit.utilities.logging`; read
+   :data:`pcapkit.utilities.logging.DEVMODE` instead.
+
 How a Warning Is Reported
 -------------------------
 
@@ -79,16 +85,15 @@ configured separately, through the :mod:`logging` module::
 
    logging.getLogger('pcapkit').setLevel(logging.ERROR)   # drop WARNING records
 
-.. attention::
+.. versionchanged:: 1.5.0
 
-   Up to and including v1.4.1, constructing a
+   :mod:`pcapkit` warnings reach the :mod:`warnings` channel by default, and
+   the first snippet above restores the 1.4.x quiet. In 1.4.x, constructing a
    :class:`~pcapkit.utilities.warnings.BaseWarning` installed an ``ignore``
-   filter for its own class, so :mod:`pcapkit` warnings were invisible on the
-   :mod:`warnings` channel by default and a caller could not re-enable them.
-   They are now delivered; the first snippet above restores the old quiet. The
-   filter went at the *front* of the process-global :data:`warnings.filters`, so
-   it also overrode the host application's own configuration for those
-   categories and made unrelated warnings re-fire.
+   filter for its own class, so a caller could not re-enable them. The filter
+   went at the *front* of the process-global :data:`warnings.filters`, so it
+   also overrode the host application's own configuration for those categories
+   and made unrelated warnings re-fire (:issue:`364`).
 
 .. autoexception:: pcapkit.utilities.warnings.BaseWarning
    :no-members:

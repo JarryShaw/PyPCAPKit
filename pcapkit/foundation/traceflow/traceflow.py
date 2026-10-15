@@ -509,6 +509,14 @@ class TraceFlow(TraceFlowBase[_DT, _BT, _IT, _PT], Generic[_DT, _BT, _IT, _PT]):
         bidirectional: trace both halves of a conversation as one flow
         analyse: reassemble each flow's application layer
 
+    .. versionchanged:: 1.5.0
+
+       Registration is opt-in, under the ``protocol`` class keyword; 1.4.x
+       registered every subclass, under its :attr:`name` when the keyword was
+       omitted (:issue:`514`). The ``bidirectional`` and ``analyse`` arguments
+       are added, and a flow covers both directions of a conversation unless
+       ``bidirectional=False`` is passed.
+
     """
 
     def __init_subclass__(cls, /, protocol: 'Optional[str]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':

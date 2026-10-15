@@ -149,6 +149,16 @@ class HoleDescriptor(Info):
     whole; a hole whose ``first`` is ``-sys.maxsize`` stands for whatever
     preceded a capture that missed the handshake, and does not count.
 
+    .. versionadded:: 1.5.0
+
+       Replaces the misspelt ``HoleDiscriptor``.
+
+    .. versionremoved:: 1.5.0
+
+       ``HoleDiscriptor``, and its re-export
+       ``pcapkit.foundation.reassembly.data.TCP_HoleDiscriptor``, with no
+       alias; import ``HoleDescriptor`` and ``TCP_HoleDescriptor`` instead.
+
     """
 
     #: Sequence number of the first missing octet.

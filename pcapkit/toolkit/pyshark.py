@@ -47,8 +47,8 @@ __all__ = ['packet2dict', 'tcp_traceflow', 'ENCAP_TYPE_TO_LINKTYPE', 'FILTER_NAM
 #: Every entry was measured, not transcribed, with ``editcap``/``tshark`` 4.6.9::
 #:
 #:     editcap -F pcap -T <encap> examples/captures/in.pcap out.pcap
-#:     # value := the ``network`` field at offset 20 of out.pcap's pcap file header
-#:     # key   := the ``frame.encap_type`` that ``tshark -r out.pcap -c 1 -T pdml`` then reports
+#:     # value := the network field at offset 20 of out.pcap's pcap file header
+#:     # key   := the frame.encap_type that `tshark -r out.pcap -c 1 -T pdml` then reports
 #:
 #: so each pair is one round trip through Wireshark's own ``wiretap/pcap-common.c``, in the read
 #: direction :mod:`pyshark` actually exercises. The trailing comment on each line names the
@@ -404,7 +404,7 @@ def _frame_layer(packet: 'Packet') -> 'Any':
         PyShark takes the second PDML ``<proto>`` as ``frame_info``. On a packet
         with a comment that is ``pkt_comment``, and the frame layer is
         ``layers[0]`` (measured on ``test.pcapng`` frames 1 and 6 with tshark
-        4.6.9), so the layer is looked up by name, as the engine does (#1531).
+        4.6.9), so the layer is looked up by name, as the engine does (#1515).
 
     """
     for layer in (packet.frame_info, *packet.layers):
@@ -555,6 +555,15 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
 
     See Also:
         :class:`pcapkit.foundation.traceflow.tcp.TCP`
+
+    .. versionchanged:: 1.5.0
+
+       The link type is resolved from ``frame.encap_type`` through
+       :data:`~pcapkit.toolkit.pyshark.ENCAP_TYPE_TO_LINKTYPE`, and one that
+       cannot be resolved raises
+       :exc:`~pcapkit.utilities.exceptions.MissingKeyError`; 1.4.x looked up
+       the root layer's name, which gave the wrong DLT for ``ppp``, ``null``,
+       ``lapd`` and ``raw`` (:issue:`843`).
 
     """
     ip, tcp = _carrier(packet)

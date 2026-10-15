@@ -87,6 +87,13 @@ class IPv6(IP):
         # Fetch result:
         >>> result = ipv6_reassembly.datagram
 
+    .. versionchanged:: 1.5.0
+
+       The reassembled ``header`` leaves out the Fragment header and carries
+       its Next Header, per :rfc:`8200#section-4.5`, whichever engine fed it;
+       1.4.x kept the Fragment header on the ``default`` and ``pcapng``
+       engines (:issue:`415`).
+
     """
 
     ##########################################################################

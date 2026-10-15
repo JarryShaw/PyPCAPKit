@@ -8,6 +8,12 @@ Logging System
 at :data:`~pcapkit.utilities.logging.logger`, and the API through which an
 application decides what, if anything, :mod:`pcapkit` emits.
 
+.. versionchanged:: 1.5.0
+
+   Importing :mod:`pcapkit` attaches only a :class:`logging.NullHandler` and
+   sets no level; 1.4.x attached a :obj:`sys.stderr` handler at
+   :data:`logging.INFO`.
+
 .. autodata:: pcapkit.utilities.logging.logger
    :no-value:
 
@@ -142,9 +148,9 @@ Compatibility Note
    Before 1.5.0, importing :mod:`pcapkit` attached a
    :class:`logging.StreamHandler` on :obj:`sys.stderr` and forced the level to
    :data:`logging.INFO` (or :data:`logging.DEBUG` under
-   :envvar:`PCAPKIT_DEVMODE`). It no longer does, because that hijacked the
-   logging configuration of every application importing :mod:`pcapkit`. Two
-   consequences are visible to existing code:
+   :envvar:`PCAPKIT_DEVMODE`). That hijacked the logging configuration of every
+   application importing :mod:`pcapkit`, so 1.5.0 does it only under
+   :envvar:`PCAPKIT_DEVMODE`. Two consequences are visible to existing code:
 
    1. **Nothing reaches stderr by default.** The ``registered ...`` bookkeeping
       is at :data:`logging.DEBUG`, not :data:`logging.INFO`. To restore the
@@ -156,8 +162,8 @@ Compatibility Note
          from pcapkit.utilities.logging import configure
          configure(logging.INFO, stream=sys.stderr)
 
-      Equivalently, re-attach the module's own handler, which is still built
-      with the historical format:
+      Equivalently, re-attach the module's own handler, which is built with the
+      1.4.x format:
 
       .. code-block:: python
 

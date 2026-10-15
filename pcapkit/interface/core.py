@@ -88,7 +88,7 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
 
     Arguments:
         fin: file name to be read or a binary IO object;
-            if file not exist, raise :exc:`FileNotFound`
+            if file not exist, raise :exc:`~pcapkit.utilities.exceptions.FileNotFound`
         fout: file name to be written
         format: file format of output
 
@@ -156,6 +156,14 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
     Returns:
         An :class:`~pcapkit.foundation.extraction.Extractor` object.
 
+    .. versionchanged:: 1.5.0
+
+       ``reasm_timeout``, ``trace_bidirectional`` and ``trace_analyse`` are
+       inserted among the positional parameters and ``context`` is appended,
+       so a positional argument after ``reasm_store`` has to move to a
+       keyword. Flows are traced bidirectionally by default, and IPv4 and IPv6
+       reassembly buffers expire after 60 seconds of capture time.
+
     """
     if isinstance(layer, type) and issubclass(layer, ProtocolBase):
         layer = (layer.__layer__ or 'none').lower()  # type: ignore[assignment]
@@ -180,15 +188,23 @@ def reassemble(protocol: 'str | Type[ProtocolBase]', strict: 'bool' = False,
 
     Arguments:
         protocol: protocol to be reassembled
-        strict: if return all datagrams (including those not implemented) when submit
+        strict: if :data:`True`, report a datagram that is not completely
+            reassembled as the tuple of its received runs; otherwise as one
+            contiguous payload
         timeout: reassembly timeout in seconds, on the capture's own clock;
             :data:`None` selects the protocol's own default
 
     Returns:
-        A :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` object of corresponding protocol.
+        A :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` object of corresponding protocol.
 
     Raises:
         FormatError: If ``protocol`` is **NOT** any of IPv4, IPv6 or TCP.
+
+    .. versionchanged:: 1.5.0
+
+       ``timeout`` is added. IPv4 and IPv6 buffers expire after 60 seconds of
+       capture time by default, where 1.4.x held them for the life of the
+       object.
 
     """
     if isinstance(protocol, type) and issubclass(protocol, ProtocolBase):
@@ -219,10 +235,16 @@ def trace(protocol: 'str | Type[ProtocolBase]', fout: 'Optional[str]',
             flow, which is the default
 
     Returns:
-        A :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` object.
+        A :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase` object.
 
     Raises:
         FormatError: If ``protocol`` is **NOT** TCP.
+
+    .. versionchanged:: 1.5.0
+
+       ``bidirectional`` is added, and by default both directions of a
+       conversation are traced as one flow; 1.4.x traced each direction as a
+       flow of its own.
 
     """
     if isinstance(protocol, type) and issubclass(protocol, ProtocolBase):

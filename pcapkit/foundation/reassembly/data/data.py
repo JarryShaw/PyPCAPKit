@@ -135,6 +135,8 @@ class Deferred:
         proto: Payload protocol type.
         payload: Reassembled payload to parse.
 
+    .. versionadded:: 1.5.0
+
     """
 
     __slots__ = ('analyze', 'proto', 'payload')
