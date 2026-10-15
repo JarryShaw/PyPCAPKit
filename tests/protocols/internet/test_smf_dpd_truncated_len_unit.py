@@ -37,9 +37,6 @@ PROTOCOLS = (
     ('pcapkit.protocols.internet.ipv6_opts', 'IPv6_Opts'),
 )
 
-#: ``RPL_Option_0x23`` fails here for an unrelated reason, tracked in #1196.
-EXCLUDED = {0x23}
-
 
 class TestSMFDPDTruncatedLength(unittest.TestCase):
     """Pin the error an option in the last two octets of the header raises."""
@@ -65,8 +62,6 @@ class TestSMFDPDTruncatedLength(unittest.TestCase):
 
         for cls in self._protocols():
             for code in range(256):
-                if code in EXCLUDED:
-                    continue
                 with self.subTest(protocol=cls.__name__, type=f'0x{code:02x}'):
                     with warnings.catch_warnings():
                         warnings.simplefilter('ignore')
