@@ -960,7 +960,7 @@ def purge_modules(prefixes: Iterable[str]) -> None:
     change another test can observe: the next one that wants it imports it again and
     gets an *equivalent* thing from the same source. Binding something *else* over
     the name is what cannot be undone by re-importing, so restoration is owed by the
-    helpers that bind, not by this one. Making ~120 call sites pay for a restore none
+    helpers that bind, not by this one. Making every call site pay for a restore none
     of them needs would also cost a re-import each, which
     :func:`tests.conftest.pytest_sessionstart` exists to avoid.
 

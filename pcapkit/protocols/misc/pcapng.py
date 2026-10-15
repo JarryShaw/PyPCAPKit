@@ -1038,11 +1038,11 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         Arguments:
             code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
             protocol: module descriptor or a
-                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
+                :class:`~pcapkit.protocols.protocol.Protocol` subclass
 
         Raises:
             pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a
-                class, or not a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
+                class, or not a :class:`~pcapkit.protocols.protocol.Protocol` subclass.
 
         Warns:
             pcapkit.utilities.warnings.RegistryWarning: If this link type is
@@ -4920,7 +4920,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                 if isinstance(schema, bytes):
                     code = Enum_OptionType.get(int.from_bytes(schema[0:2], self._byte, signed=False),
                                                namespace=namespace)
-                    if code == Enum_OptionType.opt_endofopt:  # ignore opt_endofopt by default
+                    if code == Enum_OptionType.opt_endofopt:  # moved to the end, written once
                         has_endofopt = True
                         continue
 
@@ -4928,7 +4928,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                     data_len = len(data)
                 elif isinstance(schema, Schema):
                     code = schema.type
-                    if code == Enum_OptionType.opt_endofopt:  # ignore opt_endofopt by default
+                    if code == Enum_OptionType.opt_endofopt:  # moved to the end, written once
                         has_endofopt = True
                         continue
 
@@ -4936,7 +4936,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                     data_len = len(schema.pack())
                 else:
                     code, args = cast('tuple[Enum_OptionType, dict[str, Any]]', schema)
-                    if code == Enum_OptionType.opt_endofopt:  # ignore opt_endofopt by default
+                    if code == Enum_OptionType.opt_endofopt:  # moved to the end, written once
                         has_endofopt = True
                         continue
 
@@ -4963,7 +4963,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         options_list = []
         for code, option in options.items(multi=True):
-            if code == Enum_OptionType.opt_endofopt:  # ignore opt_endofopt by default
+            if code == Enum_OptionType.opt_endofopt:  # moved to the end, written once
                 has_endofopt = True
                 continue
 
@@ -6383,7 +6383,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             for schema in records:
                 if isinstance(schema, bytes):
                     code = Enum_RecordType.get(int.from_bytes(schema[0:2], self._byte, signed=False))
-                    if code == Enum_RecordType.nrb_record_end:  # ignore nrb_record_end by default
+                    if code == Enum_RecordType.nrb_record_end:  # moved to the end, written once
                         has_record_end = True
                         continue
 
@@ -6391,7 +6391,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                     data_len = len(data)
                 elif isinstance(schema, Schema):
                     code = schema.type
-                    if code == Enum_RecordType.nrb_record_end:  # ignore nrb_record_end by default
+                    if code == Enum_RecordType.nrb_record_end:  # moved to the end, written once
                         has_record_end = True
                         continue
 
@@ -6399,7 +6399,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                     data_len = len(schema.pack())
                 else:
                     code, args = cast('tuple[Enum_RecordType, dict[str, Any]]', schema)
-                    if code == Enum_RecordType.nrb_record_end:  # ignore nrb_record_end by default
+                    if code == Enum_RecordType.nrb_record_end:  # moved to the end, written once
                         has_record_end = True
                         continue
 
@@ -6425,7 +6425,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         records_list = []
         for code, record in records.items(multi=True):
-            if code == Enum_RecordType.nrb_record_end:  # ignore nrb_record_end by default
+            if code == Enum_RecordType.nrb_record_end:  # moved to the end, written once
                 has_record_end = True
                 continue
 

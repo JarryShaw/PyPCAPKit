@@ -882,7 +882,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -919,7 +919,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -964,7 +964,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -972,7 +972,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         Raises:
-            ProtocolError: If ``schema.len`` is **NOT** ``12`` or the parameter is **NOT** used in HIPv1.
+            ProtocolError: If ``schema.len`` is **NOT** ``12``, or the parameter
+                is the HIPv1-only code ``128`` in a packet of another version.
 
         """
         if schema.len != 12:
@@ -1025,7 +1026,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1117,7 +1118,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1199,7 +1200,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1267,7 +1268,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1310,7 +1311,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1351,7 +1352,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1394,7 +1395,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1431,7 +1432,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1439,7 +1440,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         Raises:
-            ProtocolError: The parameter is **ONLY** supported in HIPv1.
+            ProtocolError: If the parameter is used in a version other than
+                HIPv1, or ``schema.len`` is **NOT** a ``2`` modulo.
 
         """
         if version != 1:
@@ -1474,7 +1476,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1531,7 +1533,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1571,7 +1573,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1619,7 +1621,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1661,7 +1663,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1722,7 +1724,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1765,7 +1767,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1807,7 +1809,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1842,7 +1844,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1879,7 +1881,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1920,7 +1922,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1958,7 +1960,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1996,7 +1998,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2035,7 +2037,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2077,7 +2079,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2112,7 +2114,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2158,7 +2160,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2198,7 +2200,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2238,7 +2240,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2284,7 +2286,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2322,7 +2324,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2357,7 +2359,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2403,7 +2405,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2452,7 +2454,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2496,7 +2498,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2533,7 +2535,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2568,7 +2570,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2604,7 +2606,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2638,7 +2640,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2671,7 +2673,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2709,7 +2711,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2759,7 +2761,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2791,7 +2793,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                                 options: 'Parameter') -> 'Data_OverlayTTLParameter':  # pylint: disable=unused-argument
         """Read HIP ``OVERLAY_TTL`` parameter.
 
-        Structure of HIP ``OVERLAY_TTL`` parameter [:rfc:`6078`]:
+        Structure of HIP ``OVERLAY_TTL`` parameter [:rfc:`6079`]:
 
         .. code-block:: text
 
@@ -2804,7 +2806,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2857,7 +2859,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2905,7 +2907,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2946,7 +2948,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2966,7 +2968,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                             options: 'Parameter') -> 'Data_ViaRVSParameter':  # pylint: disable=unused-argument
         """Read HIP ``VIA_RVS`` parameter.
 
-        Structure of HIP ``VIA_RVS`` parameter [:rfc:`6028`]:
+        Structure of HIP ``VIA_RVS`` parameter [:rfc:`8004`]:
 
         .. code-block:: text
 
@@ -2990,7 +2992,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -3031,7 +3033,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            schema: parsed parameter schama
+            schema: parsed parameter schema
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -3195,6 +3197,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         Returns:
             HIP parameter schema.
+
+        Raises:
+            ProtocolError: If ``code`` is the HIPv1-only ``128`` and ``version``
+                is **NOT** ``1``.
 
         """
         if code == Enum_Parameter.R1_Counter and version != 1:
@@ -3490,8 +3496,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             HIP parameter schema.
 
         Raises:
-            ProtocolError: If ``lifetime_exponent`` does not fit one octet, or
-                ``lifetime`` cannot be encoded; see :meth:`_make_puzzle_lifetime`.
+            ProtocolError: If ``lifetime_exponent`` does not fit one octet,
+                ``lifetime`` cannot be encoded, or the width of ``Random #I`` is
+                invalid; see ``_make_puzzle_lifetime`` and
+                ``_make_puzzle_field_width``.
 
         """
         if param is not None:
@@ -3556,6 +3564,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Returns:
             HIP parameter schema.
 
+        Raises:
+            ProtocolError: If the width of the two fields is invalid; see
+                ``_make_puzzle_field_width``.
+
         """
         if param is not None:
             index = param.index
@@ -3605,6 +3617,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             param: parameter data
             version: HIP protocol version
             update_id: update ID
+            **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
@@ -3630,6 +3643,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             param: parameter data
             version: HIP protocol version
             update_id: list of update ID
+            **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
@@ -3917,9 +3931,14 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             data: encrypted data
             reserved: the four reserved octets, truncated or
                 zero-filled to 4 octets
+            **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
+
+        Raises:
+            ProtocolError: If the cipher is ``AES-128-CBC`` or ``AES-256-CBC``
+                and ``iv`` is missing or **NOT** 16 octets.
 
         """
         if param is not None:
@@ -4093,6 +4112,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             suite_default: default suite
             suite_namespace: suite namespace
             suite_reversed: reverse suite namespace
+            **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
@@ -4368,6 +4388,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             reg_response_default: default registration response
             reg_response_namespace: registration response namespace
             reg_response_reversed: reverse registration response namespace
+            **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
@@ -4413,6 +4434,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             reg_failed_default: default registration failure
             reg_failed_namespace: registration failure namespace
             reg_failed_reversed: reverse registration failure namespace
+            **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
@@ -4641,6 +4663,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             param: parameter data
             version: HIP protocol version
             ack: ACK list
+            **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
@@ -4777,6 +4800,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             hit: list of HITs
             reserved: the two reserved octets, truncated or
                 zero-filled to 2 octets
+            **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
@@ -5014,6 +5038,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             param: parameter data
             version: HIP protocol version
             opaque: opaque data
+            **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
@@ -5052,6 +5077,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             address: relay address
             reserved: the reserved octet, truncated or
                 zero-filled to 1 octet
+            **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
@@ -5176,6 +5202,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             hit: list of HITs
             reserved: the two reserved octets, truncated or
                 zero-filled to 2 octets
+            **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.

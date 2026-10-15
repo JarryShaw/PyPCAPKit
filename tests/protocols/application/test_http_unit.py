@@ -1016,10 +1016,8 @@ class HTTPUnitTests(unittest.TestCase):
 
         Asserted on ``httpv1.HTTP`` directly rather than through the proxy
         because that is the difference between the two candidate fixes: the
-        contract now holds for every caller, including
-        ``Transport._decode_next_layer``, which dispatches TCP ports 80 and 8080
-        straight to this class and never passes through ``_guess_version`` at
-        all.
+        contract now holds for every caller of ``httpv1.HTTP``, not only for
+        ``_guess_version``'s first arm.
 
         ``__cause__`` is asserted because the chain is what keeps the underlying
         unpacking error reportable, and what keeps
@@ -1643,8 +1641,8 @@ class HTTPUnitTests(unittest.TestCase):
         """``Method.get`` used to test the upper-cased key, so a mixed-case
         method resolved to the same registered member regardless of its own
         casing -- #583, item 1, at the time framed the same way as #582's fix
-        in :mod:`pcapkit.const.ftp.command` (`Command.get` stays that way; see
-        its own RFC 959 Section 4.1 rationale). GitHub issue #896 retired that
+        in :mod:`pcapkit.const.ftp.command` (``Command.get`` stays that way, per
+        RFC 959 Section 5.3). GitHub issue #896 retired that
         for ``Method`` specifically: RFC 9110 Section 9.1 makes the HTTP
         method *token* case-sensitive -- "standardized methods are defined in
         all-uppercase US-ASCII letters" by convention, not by requirement --

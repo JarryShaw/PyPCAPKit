@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Every vendor crawler is reachable from the target list that runs them.
 
-:mod:`pcapkit.vendor` defines 117 crawlers and
+Until #531, :mod:`pcapkit.vendor` defined 117 crawlers and
 :file:`pcapkit/vendor/__main__.py` could only ever run 116 of them, because it
 does not discover crawlers -- it reads :attr:`__all__`:
 
@@ -22,9 +22,9 @@ never run: :file:`.github/workflows/cron-vendor.yml` invokes bare
 
 The corroborating evidence was in the generated file the crawler owns.
 :meth:`pcapkit.vendor.default.Vendor.context` emitted a ``:meta private:``
-directive into every enumeration it wrote until #858 replaced the template,
-and 116 of the 117 files under :file:`pcapkit/const/*/` carried it. The one
-that did not was
+directive into every enumeration it wrote until #858 replaced the template.
+When #531 landed, 116 of the 117 files under :file:`pcapkit/const/*/` carried
+it. The one that did not was
 :file:`pcapkit/const/mh/handover_initiate_status.py` -- the output of the one
 crawler that could not be reached. The duplicate dates to commit ``24edd30d2``
 (2023-04-17, "added MH enumerations & vendor cralwers"), so the file has been
@@ -42,16 +42,14 @@ one most likely to be made again, since adding a crawler means editing two
 
 Relationship to :file:`tests/project/test_public_api.py` (GitHub pull request
 #527). That module sweeps :attr:`__all__` across the tree for a related family of
-defects and deliberately excludes :mod:`pcapkit.vendor` via its
-``EXCLUDED_ROOTS``, because it is unit-tier and the ``vendor`` extra is not part
-of ``pip install -e '.[test]'``. Its docstring records the remediation as
-"drop ``'vendor'`` from :data:`EXCLUDED_ROOTS`". This module is a separate file
-rather than that edit, for two reasons: #527 had not merged when this module was
-written, so its file did not exist on that branch; and the assertion here is not
-the one it makes. It needs the ``vendor`` extra, and the property it checks -- defined
-versus reachable -- is about the crawler *registry* rather than about
-:attr:`__all__` hygiene. Dropping the exclusion is still worth doing on top of
-this, and would give the duplicate a second, cheaper detector.
+defects and excludes :mod:`pcapkit.vendor` via its ``EXCLUDED_ROOTS``; its
+docstring records why, and #1772 tracks dropping the exclusion. This module is a
+separate file rather than that edit, for two reasons: #527 had not merged when
+this module was written, so its file did not exist on that branch; and the
+assertion here is not the one it makes. The property it checks -- defined versus
+reachable -- is about the crawler *registry* rather than about :attr:`__all__`
+hygiene. Dropping the exclusion is still worth doing on top of this, and would
+give the duplicate a second, cheaper detector.
 
 The suite is unit-tier (see :mod:`tests._tiers`): it reads no capture, and it
 instantiates nothing. That last part is load-bearing rather than incidental.

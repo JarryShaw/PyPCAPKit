@@ -14,7 +14,14 @@ __all__ = ['IPv6_Frag']
 
 @info_final
 class IPv6_Frag(Protocol):
-    """Data model for IPv6 fragment header."""
+    """Data model for IPv6 fragment header.
+
+    .. versionchanged:: 1.5.0
+
+       New required fields ``reserved_octet`` (:issue:`1223`) and ``reserved``
+       (:issue:`1235`).
+
+    """
 
     #: Next header.
     next: 'TransType'

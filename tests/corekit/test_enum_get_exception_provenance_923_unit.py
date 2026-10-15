@@ -239,10 +239,11 @@ class BaseGetProvenanceTests(unittest.TestCase):
 class BaseGetQuietnessTests(unittest.TestCase):
     """The name miss is raised with ``quiet=True``, and that is load-bearing.
 
-    :meth:`~pcapkit.const.http.method.Method.get` catches it in order to mint,
-    so a loud error there would put one :data:`logging.CRITICAL` record on the
-    logger -- and set :data:`sys.tracebacklimit` to ``0`` process-wide -- for
-    every *successful* ``Method.get`` call that mints. That is the GitHub issue
+    :meth:`~pcapkit.const.http.method.Method.get` catches it in order to build
+    an unregistered member, so a loud error there would put one
+    :data:`logging.CRITICAL` record on the logger -- and, until #983, set
+    :data:`sys.tracebacklimit` to ``0`` process-wide -- for every *successful*
+    ``Method.get`` call that misses. That is the GitHub issue
     #362 defect :class:`~pcapkit.utilities.exceptions.BaseError` documents
     ``quiet`` for, and :mod:`pcapkit.protocols.protocol` states the same rule
     inline: *"A pcapkit exception here would log at CRITICAL for something that
@@ -275,8 +276,8 @@ class BaseGetQuietnessTests(unittest.TestCase):
         self.assertFalse(hasattr(sys, 'tracebacklimit'))
 
     def test_the_minting_override_stays_silent_end_to_end(self) -> 'None':
-        """The call this is actually for: a ``Method.get`` that mints is a
-        successful call and must emit nothing at all."""
+        """The call this is actually for: a ``Method.get`` that misses and builds
+        an unregistered member is a successful call and must emit nothing at all."""
         from pcapkit.const.http.method import Method
 
         with capture(logger) as recorder:

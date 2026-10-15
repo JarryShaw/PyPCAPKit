@@ -192,8 +192,10 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
          name (:issue:`429`).
        * A rebuild keeps the fragment offset in 8-octet units, and a header
          without options rebuilds (:issue:`494`).
-       * A rebuild from :meth:`from_data` keeps the Total Length a truncated
-         capture declares (:issue:`1155`), and the octets past it as
+       * A rebuild from
+         :meth:`~pcapkit.protocols.internet.internet.Internet.from_data`
+         keeps the Total Length a truncated capture declares (:issue:`1155`),
+         and the octets past it as
          :attr:`~pcapkit.protocols.schema.internet.ipv4.IPv4.trailer`
          (:issue:`1209`).
        * A header length declared past the data raises
@@ -1367,7 +1369,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         octets for options.
 
         Args:
-            option: IPv4 options
+            options: IPv4 options
             padding: octets after the End of Option List
 
         Returns:
@@ -1812,8 +1814,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             info: additional security information
             **kwargs: arbitrary keyword arguments
 
-            Returns:
-                Constructed option schema.
+        Returns:
+            Constructed option schema.
 
         """
         if option is not None:

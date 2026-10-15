@@ -20,7 +20,7 @@ class UDP(Protocol):
     srcport: 'AppType'
     #: Destination port.
     dstport: 'AppType'
-    #: Length (header includes).
+    #: Length, header included.
     len: 'int'
     #: Checksum.
     checksum: 'bytes'

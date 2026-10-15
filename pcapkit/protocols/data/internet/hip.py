@@ -252,7 +252,14 @@ class PuzzleParameter(Parameter):
 
 @info_final
 class SolutionParameter(Parameter):
-    """Data model for HIP ``SOLUTION`` parameter."""
+    """Data model for HIP ``SOLUTION`` parameter.
+
+    .. versionremoved:: 1.5.0
+
+       ``lifetime``, now :attr:`reserved`: only ``PUZZLE`` carries a lifetime
+       (:issue:`654`).
+
+    """
 
     #: Numeric index.
     index: 'int'
@@ -431,7 +438,7 @@ class HostIDParameter(Parameter):
 
 @info_final
 class HITSuiteListParameter(Parameter):
-    """Data model for HIP ``HIST_SUITE_LIST`` parameter."""
+    """Data model for HIP ``HIT_SUITE_LIST`` parameter."""
 
     #: Suite IDs.
     suite_id: 'tuple[HITSuite, ...]'
@@ -654,7 +661,7 @@ class TransactionIDParameter(Parameter):
 
 @info_final
 class OverlayIDParameter(Parameter):
-    """Data mode HIP ``OVERLAY_ID`` parameter."""
+    """Data model for HIP ``OVERLAY_ID`` parameter."""
 
     #: Identifier.
     id: 'int'
@@ -665,7 +672,7 @@ class OverlayIDParameter(Parameter):
 
 @info_final
 class Flags(Data):
-    """Data model for flags in HIP ``HIP_PARAMETER_FLAGS`` parameter."""
+    """Data model for the flags in HIP ``ROUTE_DST`` and ``ROUTE_VIA`` parameters."""
 
     #: Symmetric flag.
     symmetric: 'bool'

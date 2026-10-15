@@ -93,7 +93,7 @@ class LinkType(Vendor):
         # a leading sign, PEP 515 underscores -- rather than the narrower
         # ``str.isdigit()``, so it recognises exactly the same values the
         # main loop's own ``int(temp)`` below does. A signed or underscored
-        # value is not reachable in tcpdump's live table today (every
+        # value is not present in tcpdump's live table (every
         # committed member matches a plain unsigned decimal), but a
         # narrower recognition set here than in the main loop would be the
         # same class of silent under-count this pre-scan exists to close

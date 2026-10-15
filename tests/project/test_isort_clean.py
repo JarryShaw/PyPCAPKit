@@ -130,11 +130,12 @@ exists to stop and which #779 fixed the same way for the sibling ``mypy``
 check.
 
 The install line is the other half. ``isort`` is now a ``test`` extra
-requirement, so the three jobs whose selection collects this module --
-``test``, ``engine-tests`` and ``gate`` -- run it for real rather than
-reporting a skip. That is the opposite resolution from ``mypy``'s, whose
-:data:`~tests._dependency_gates.DEPENDENCY_GATE_EXCLUSIONS` entry declines the
-install line, and the difference is not taste: :file:`lint.yml` already runs
+requirement, so the pytest jobs whose selection collects this module --
+``test`` and ``gate``, since #849 took ``engine-tests`` off it -- run it for
+real rather than reporting a skip. That is the opposite resolution from
+``mypy``'s, whose :data:`~tests._dependency_gates.DEPENDENCY_GATE_EXCLUSIONS`
+entry declines the install line, and the difference is not taste:
+:file:`lint.yml` already runs
 ``make mypy`` over the whole package, so a pytest copy would be a *second*
 copy, while that same workflow's header records that ``isort`` is deliberately
 not one of the four linters it installs -- it appears only in
