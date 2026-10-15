@@ -5,8 +5,8 @@
 # and proposes each change, and the ruleset 23497679 edit it needs, as a PR.
 #
 # Tiers: supported (blocking), ktlo (end-of-life, non-blocking), pre-release
-# (non-blocking; none listed today) and experimental (non-blocking, a workflow
-# of their own; see below). `runner` is the image a version needs when
+# (non-blocking; python_versions.py refuses it) and experimental (non-blocking, a
+# workflow of their own; see below). `runner` is the image a version needs when
 # ubuntu-latest cannot provide it. `latest` is the newest supported CPython,
 # which the single-interpreter jobs run on. See docs/source/contributing/workflows.rst.
 
@@ -62,8 +62,8 @@ job = "conda"
 where = "Conda environment creation and activation: with.python-version"
 value = "3.15"
 
-# As for create-release.yml's conda job: conda-forge's conda has no py315 build
-# yet.
+# As for create-release.yml's conda job: conda-forge's conda has no py315
+# build.
 [[exemptions]]
 workflow = "cron-conda.yml"
 job = "conda-dist"

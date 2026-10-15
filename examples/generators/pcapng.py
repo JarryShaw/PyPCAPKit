@@ -50,11 +50,11 @@ the synthesised DHCP payloads come from.
 Block types deliberately left out
 ---------------------------------
 
-Two block types that used to raise on spec-conformant input now parse, so they
-are absent from these fixtures only because the fixtures have not been extended
-to carry them -- not because pcapkit cannot read them:
+Two block types once raised on spec-conformant input and parse since their
+fixes, so they are absent from these fixtures only because the fixtures have not
+been extended to carry them -- not because pcapkit cannot read them:
 
-* **Custom Block** (``0x00000BAD``/``0x40000BAD``) -- **parses now.** Its
+* **Custom Block** (``0x00000BAD``/``0x40000BAD``) -- **parses.** Its
   padding was computed as ``(4 - pkt['data'] % 4) % 4``, i.e. on the
   :class:`bytes` object rather than on its length, so any custom block raised
   ``TypeError: not all arguments converted during bytes formatting``. The
@@ -62,26 +62,26 @@ to carry them -- not because pcapkit cannot read them:
   its custom data, so ``data`` already spans the custom data, its padding *and*
   the block's options, which is as much as a reader that does not own the
   private enterprise number can tell apart (GitHub issue #341).
-* **Packet Block** (obsolete, ``0x00000002``) -- **parses now.** Its
+* **Packet Block** (obsolete, ``0x00000002``) -- **parses.** Its
   ``interface_id`` and ``drop_count`` were declared ``UInt32Field`` although
   Appendix A of draft-ietf-opsawg-pcapng (Figure 19) packs both into one 32-bit
   word -- which is the layout the ``options`` length's 32-octet overhead already
-  assumed. Both are ``UInt16Field`` now, and the reader resolves the link type
+  assumed. Both are ``UInt16Field``, and the reader resolves the link type
   from the block's own ``interface_id`` rather than through the ``linktype``
   property, which needs a ``self._info`` that does not exist yet while the block
   is still being read and so failed with ``AttributeError: 'PCAPNG' object has
   no attribute '_info'`` (GitHub issue #345). The block MUST NOT appear in new
   files, so a fixture carrying one would be documenting the past.
 
-Two further constructs used to be avoided rather than covered, and both are
-**fixed** now, so the fixtures carry them as regression cover:
+Two further constructs were once avoided rather than covered; both are
+**fixed**, so the fixtures carry them as regression cover:
 
 * **``if_IPv6addr``** -- ``IPv6InterfaceField.post_process`` in
   ``pcapkit/corekit/fields/ipaddress.py`` read the trailing prefix-length octet
   as ``int(value[16:])``, i.e. it parsed a raw byte as an ASCII decimal string,
   so a ``/64`` prefix raised ``ValueError`` and only the ten lengths 48-57
   parsed at all -- each of them to the wrong value (GitHub issue #346). Every
-  interface built by :func:`_interface_profile` now carries the option, using
+  interface built by :func:`_interface_profile` carries the option, using
   the ``/64`` address from section 4.2 of the format specification.
 * **Simple Packet Block** in a multi-interface section -- the engine raised
   ``FormatError: PCAP-NG: [SPB] invalid section with 2 interfaces`` for any
@@ -89,7 +89,7 @@ Two further constructs used to be avoided rather than covered, and both are
   format specification (section 4.4 of draft-ietf-opsawg-pcapng) permits: it
   says only that such a block then refers to the interface described by the
   first Interface Description Block, not that it is invalid. The check is for
-  *zero* interfaces now (GitHub issue #347), so ``test.pcapng`` carries its
+  *zero* interfaces (GitHub issue #347), so ``test.pcapng`` carries its
   simple packet block in the two-interface first section, which is the case
   that used to be rejected.
 
@@ -97,7 +97,7 @@ Three further defects were exercised on purpose, because they warned rather than
 raised, and a fixture that covers the code path is what will catch a future
 crash there. All three were option-area sizing errors in
 ``pcapkit/protocols/schema/misc/pcapng.py``, all three were confirmed by
-bisecting one block type at a time, and all three are now **fixed** -- so the
+bisecting one block type at a time, and all three are **fixed** -- so the
 fixtures that reached them are regression cover rather than known-bad input:
 
 * **Interface Statistics Block** -- ``options`` was sized ``length - 20`` though
@@ -106,13 +106,13 @@ fixtures that reached them are regression cover rather than known-bad input:
   save it, because the field still consumed its declared width. Symptom, on
   every capture containing one including the downloaded
   ``many_interfaces.pcapng``: ``packet length < 0: -8`` and ``[Block 5] block
-  length mismatch: N != 0``. Now ``length - 24`` (GitHub issue #342).
+  length mismatch: N != 0``. It is ``length - 24`` (GitHub issue #342).
 * **Name Resolution Block options** -- ``options`` was sized
   ``__option_padding__ - 4``, which over-ran whenever ``ns_*`` options were
   present. Symptom: ``[Block 4] block length mismatch: 60 != 314``. Not a wrong
   constant: ``Schema.unpack`` advances the file by each field's *declared*
   length, so the octets the option field was trying to size had already been
-  consumed by ``records``. An ``OptionField`` now hands the remainder it did not
+  consumed by ``records``. An ``OptionField`` hands the remainder it did not
   parse back to the file -- the rewind ``ForwardMatchField`` already did -- which
   is what makes ``__option_padding__`` mean the same thing to the field that
   reads it as to the field that reported it, and the NRB's ``options`` is sized
@@ -123,10 +123,10 @@ fixtures that reached them are regression cover rather than known-bad input:
   copied from the IPv4 record where the address is four octets wide; an IPv6
   address is sixteen, so the name field over-read by twelve and swallowed the
   record terminator and the block's options. Symptom: ``packet length <
-  0: -29273``, and the block's ``ns_*`` options vanished. Now ``length - 16``
+  0: -29273``, and the block's ``ns_*`` options vanished. It is ``length - 16``
   (GitHub issue #343).
 
-``many_interfaces.pcapng`` and ``profile.pcapng`` now extract with neither a
+``many_interfaces.pcapng`` and ``profile.pcapng`` extract with neither a
 block length mismatch nor a negative packet length; before these fixes each
 reported one of each.
 
@@ -427,7 +427,7 @@ def _journal_entry(message: 'str', realtime_us: 'int') -> 'bytes':
     a binary field name and raised a bare ``struct.error`` (fixed in `#699
     <https://github.com/JarryShaw/PyPCAPKit/pull/699>`__, which made a
     NUL-only line end the entry). Measured on ``ef859f776``: a misaligned
-    entry now parses with no ``SchemaWarning``. The loop stays only because
+    entry parses with no ``SchemaWarning``. The loop stays only because
     removing it regenerates ``test.pcapng`` -- an untracked fixture change,
     not a prose one; see `#791
     <https://github.com/JarryShaw/PyPCAPKit/issues/791>`__.
@@ -484,8 +484,8 @@ def _interface_profile(writer: '_Blocks', name: 'str', description: 'str',
                        resolution: 'int' = 6) -> 'list[tuple[int, bytes]]':
     """The full set of ``if_*`` options pcapkit can parse for one interface.
 
-    ``if_IPv6addr`` used to be the one omission, because pcapkit raised on it
-    rather than because it did not belong here; it is included now that the
+    ``if_IPv6addr`` was once the one omission, because pcapkit raised on it
+    rather than because it did not belong here; it is included since the
     prefix-length octet is read correctly -- see the module docstring.
 
     Args:

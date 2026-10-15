@@ -1003,7 +1003,7 @@ def render_versions_rst(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, An
         lines.append('')
 
     if emulated:
-        # `run.sh` composes this sentence itself today, which makes it safe today. It
+        # `run.sh` composes this sentence itself, which on its own would make it safe. It
         # still arrives through `--emulated` on the command line, so it is outside text by
         # every test that matters, and the one channel of it left unescaped would be the
         # one nobody thought about.

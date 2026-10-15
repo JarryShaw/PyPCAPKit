@@ -3,7 +3,7 @@
 
 :file:`pcapkit/foundation/registry/protocols.py` documents the registries that
 decide *which* :class:`~pcapkit.protocols.protocol.Protocol` subclass parses the
-next layer -- 38 entries across seven tables. Nothing enumerated them: several
+next layer -- 47 entries across eight tables. Nothing enumerated them: several
 test modules reference ``__proto__``, and
 :file:`tests/protocols/test_registry_runtime.py` checks that a table entry
 *resolves* to the right class object, but that is a weaker property than the one
@@ -51,15 +51,12 @@ keeps the registry's own current answer alongside it purely as a diagnostic,
 so a mismatch between the two is reported as what it is rather than folded
 into "dispatch failed".
 
-Four of the 38 entries are known to degrade to :class:`Raw` today, for reasons
+Two of the 47 entries are known to degrade to :class:`Raw`, for reasons
 recorded in :data:`KNOWN_DEGRADED` rather than fixed here -- this module reports
-defects, it does not carry workarounds for them. Two are
-:class:`~pcapkit.protocols.internet.ipx.IPX` (GitHub issue #492: ``Socket(0)``
-is not a valid member, and :class:`IPX() <pcapkit.protocols.internet.ipx.IPX>`
-cannot even be constructed with no arguments, let alone parsed); the other two
-are both :class:`~pcapkit.protocols.transport.sctp.SCTP` payload protocol
-identifiers reaching :class:`~pcapkit.protocols.application.ngap.NGAP`. Neither
-is a defect: building a well-formed PER-encoded ``NGAP-PDU`` is out of scope for
+defects, it does not carry workarounds for them. Both are
+:class:`~pcapkit.protocols.transport.sctp.SCTP` payload protocol identifiers
+reaching :class:`~pcapkit.protocols.application.ngap.NGAP`, and neither is a
+defect: building a well-formed PER-encoded ``NGAP-PDU`` is out of scope for
 a minimal dispatch probe, so both use the same placeholder payload
 :meth:`~tests.protocols.transport.test_sctp_unit.SCTPUnitTests.test_ppid_dispatch_hook`
 already does, and for the same documented reason -- one PPID is DTLS-wrapped,
@@ -666,7 +663,7 @@ PINNED_TARGETS = {
     'internet/SCTP': ('pcapkit.protocols.transport.sctp', 'SCTP'),
     'internet/OSPFIGP': ('pcapkit.protocols.application.ospf', 'OSPF'),
     # #904: Shim6 (140) previously had no entry at all, and the default
-    # factory made it resolve to Raw. It is now registered directly at
+    # factory made it resolve to Raw. It is registered directly at
     # IPv6_Ext, which parses the RFC 6564 §4 generic layout it has
     # never had a dedicated dissector for -- a deliberate addition, not a
     # regression.
@@ -898,7 +895,7 @@ def outcomes(families: 'Optional[tuple[Family, ...]]' = None) -> 'list[Outcome]'
     return [probe(case) for case in cases(families)]
 
 
-#: Codes known to degrade to :class:`~pcapkit.protocols.misc.raw.Raw` today,
+#: Codes known to degrade to :class:`~pcapkit.protocols.misc.raw.Raw`,
 #: with the defect that causes it. Recorded, not fixed -- GitHub issue #496 is
 #: a test-harness change and none of these classes is this module's to touch.
 #:

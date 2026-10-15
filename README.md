@@ -74,8 +74,8 @@ Reassembly, TCP flow tracing and the engine are keyword arguments to the same ca
 >>> scapy = pcapkit.extract('in.pcap', nofile=True, engine='scapy')
 >>> reasm = pcapkit.extract('in.pcap', nofile=True, reassembly=True, ipv6=True)
 >>> flows = pcapkit.extract('in.pcap', nofile=True, trace=True, tcp=True)
->>> len(flows.trace)
-3
+>>> len(flows.trace.tcp)
+2
 ```
 
 More examples, including the command line interface, are in

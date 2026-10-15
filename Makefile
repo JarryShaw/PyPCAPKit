@@ -5,7 +5,7 @@ export PIPENV_CACHE_DIR ?= $(CURDIR)/.pipenv-cache
 export PIP_CACHE_DIR ?= $(CURDIR)/.pip-cache
 export all_proxy=
 
-# No recipe below currently needs a bash-only feature -- the last one, brace
+# No recipe below needs a bash-only feature -- the last one, brace
 # expansion in the `isort:` target, went with #765's `find`-based fix (see
 # that target and tests/project/test_isort_clean.py for why: a later revision
 # of that same fix leaned on brace expansion plus a bash new enough for
@@ -13,7 +13,7 @@ export all_proxy=
 # reliance can go wrong beyond just needing bash at all). The pin stays
 # anyway: one known shell to write recipes against, rather than whatever
 # `/bin/sh` happens to be on a given machine, is worth keeping even with
-# nothing bash-specific relying on it today, and it costs nothing to take
+# nothing bash-specific relying on it, and it costs nothing to take
 # from PATH rather than a fixed prefix, as Homebrew, Linuxbrew and system
 # installs all put it somewhere different.
 SHELL  := $(shell command -v bash 2>/dev/null || echo /bin/bash)
@@ -95,13 +95,14 @@ coverage: samples
 	pipenv run coverage run -m pytest -q
 	pipenv run coverage report
 
-# The engine speed table in docs/source/index.rst -- every supported Python
-# version, one image each, measured in containers so the host does not affect the
+# The engine speed table in docs/source/index.rst -- every Python version
+# examples/benchmark/python-images.txt marks `default`, one image each,
+# measured in containers so the host does not affect the
 # result. Needs docker, and nothing else: deliberately not run through pipenv,
 # since the whole point is that the measuring environments are the pinned ones
 # inside the images rather than whatever is installed here.
 #
-# Expect around two hours at the defaults: five interpreters, seven environments,
+# Expect around two hours at the defaults: five interpreters, seven engines,
 # and almost all of the measuring time is pyshark, which spawns a tshark process
 # per extraction. Cut it with --engines, --pythons, or --quick.
 bench:
@@ -146,8 +147,9 @@ RUN ?= pipenv run
 # Flag sets are variables rather than literals for the same reason -- `vermin`
 # needs two recipes (see below) and would otherwise carry two copies of its
 # flags. Note the `pcapkit` before the flags as well as after: that is how this
-# recipe has always read, and vermin de-duplicates the paths (it reports 496
-# files analyzed either way), so it is preserved verbatim rather than tidied.
+# recipe has always read, and vermin de-duplicates the paths (it reports the
+# same number of files analyzed either way), so it is preserved verbatim rather
+# than tidied.
 VERMIN_FLAGS = --backport argparse --backport enum --backport importlib --backport ipaddress --backport typing --backport typing_extensions --no-parse-comments --eval-annotations -vv
 # `pylint.extensions.emptystring` no longer exists (#767): the check it provided,
 # `compare-to-empty-string`, was folded into the core `refactoring` checker at
@@ -172,9 +174,10 @@ vermin:
 	$(RUN) vermin pcapkit $(VERMIN_FLAGS) pcapkit > temp/vermin.txt
 	command -v code >/dev/null && code temp/vermin.txt || cat temp/vermin.txt
 
-# What CI runs. The `vermin` target above redirects into temp/ and then hands the
-# file to an editor, so its exit status is the editor's (or `cat`'s) and a run
-# that found violations still succeeds -- fine at a desk, useless as a check.
+# What CI runs. The `vermin` target above redirects the report into temp/ and
+# only then hands the file to an editor, so a run that found violations stops
+# Make at the redirect, with the report left unread in the file and the line
+# that would have opened it never reached -- useless as a log.
 # This one writes to stdout and lets vermin's failure propagate, which is what
 # `targets = 3.6` in vermin.ini is for: vermin exits non-zero when the target is
 # not met, and the code's real floor is 3.11.

@@ -12,7 +12,7 @@ instead of the file's produced the right answer anyway.
 
 That is how GitHub issue #605 survived: ``Frame.unpack`` seeded the byte order
 under the key ``bytesorder`` where ``byteorder_callback`` -- then in
-:file:`pcapkit/protocols/schema/misc/pcap/frame.py`, now in
+:file:`pcapkit/protocols/schema/misc/pcap/frame.py`, since moved to
 :file:`pcapkit/corekit/fields/byteorder.py` -- reads ``byteorder``, so the
 lookup always missed and always fell back to :data:`sys.byteorder`. Reading a
 big-endian capture then byte-swapped ``ts_sec``, ``ts_usec``, ``incl_len`` and

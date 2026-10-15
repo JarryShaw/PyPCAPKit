@@ -1,7 +1,7 @@
 # Coverage configuration for the one coverage-measured leg of unit-tests.yml
 # (`test`, Python 3.15), passed with `--rcfile`. Coverage reads a single config
 # file, so this repeats pyproject.toml's [tool.coverage.*] settings and adds the
-# three below on top. tests/project/test_coverage_rcfile.py asserts every
+# four below on top. tests/project/test_coverage_rcfile.py asserts every
 # pyproject setting is repeated here unchanged.
 #
 #   parallel  -- each process writes its own .coverage.* file, merged afterwards

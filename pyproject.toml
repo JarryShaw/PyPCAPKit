@@ -28,7 +28,7 @@ license = { text="BSD 3-Clause License" }
 #   3.7.16           SyntaxError from source, as expected -- this is what the
 #                    ``bpc-*`` conversion exists for
 #
-# **The conversion path has an upstream bug today.** ``bpc-poseur`` 0.4.3.post1
+# **The conversion path has an upstream bug.** ``bpc-poseur`` 0.4.3.post1
 # crashes on any positional-only parameter that is on a *method* rather than a
 # plain function -- ``AttributeError: 'Name' object has no attribute 'name'`` at
 # ``poseur.py:744`` in ``_process_classdef``, which does ``cls_ctx=name.name``
@@ -225,7 +225,7 @@ PyPCAPFile = [ "pypcapfile; python_version < '3.12'" ]
 # pcapkit.vendor.ngap's two crawlers (#880) can run, and ``requests``/
 # ``beautifulsoup4`` for the seven crawlers that import them at module scope
 # (c.f. the ``test`` extra's own comment below for which, and #507). #910
-# narrowed ``all`` to core addons only, so this extra now names all three
+# narrowed ``all`` to core addons only, so this extra names all three
 # itself rather than leaning on ``all`` to also carry them -- ``pycrate``
 # happens to be a core addon in its own right post-#910 (see the ``all``
 # extra's comment below), but ``requests``/``beautifulsoup4`` are not, having
@@ -357,7 +357,7 @@ test = [
 # setuptools specific
 
 [tool.setuptools]
-zip-safe = false  # We use __file__ in pcapkit/__init__.py, therefore Scapy isn't zip safe
+zip-safe = false  # We use __file__ in pcapkit/__init__.py, therefore pcapkit isn't zip safe
 
 [tool.setuptools.packages.find]
 include = [
