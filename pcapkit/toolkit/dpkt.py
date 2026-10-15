@@ -603,6 +603,11 @@ def ipv4_reassembly(packet: 'Packet', timestamp: 'float', *,
     See Also:
         :class:`pcapkit.foundation.reassembly.ipv4.IPv4`
 
+    .. versionchanged:: 1.5.0
+
+       ``timestamp`` is a new second positional parameter, so a 1.4.x call
+       with ``packet`` alone fails.
+
     """
     network = _network(packet)
     # an IPv6 layer is the one with extension headers, as in ``_wire_hdr_len``
@@ -681,6 +686,11 @@ def ipv6_reassembly(packet: 'Packet', timestamp: 'float', *,
 
     See Also:
         :class:`pcapkit.foundation.reassembly.ipv6.IPv6`
+
+    .. versionchanged:: 1.5.0
+
+       ``timestamp`` is a new second positional parameter, so a 1.4.x call
+       with ``packet`` alone fails.
 
     """
     network = _network(packet)
@@ -790,6 +800,11 @@ def tcp_reassembly(packet: 'Packet', timestamp: 'float', *,
 
     See Also:
         :class:`pcapkit.foundation.reassembly.tcp.TCP`
+
+    .. versionchanged:: 1.5.0
+
+       ``timestamp`` is a new second positional parameter, so a 1.4.x call
+       with ``packet`` alone fails.
 
     """
     ip = _network(packet)

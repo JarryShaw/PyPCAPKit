@@ -931,6 +931,11 @@ def register_mh_extension(code: 'MH_CGAExtension', meth: 'str | tuple[MH_Extensi
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the message type.
             It should be a subclass of :class:`pcapkit.protocols.schema.internet.mh.CGAExtension`.
 
+    .. versionchanged:: 1.5.0
+
+       ``schema`` is keyword-only, as in the other ``register_*`` functions
+       that take one (:issue:`516`).
+
     """
     if isinstance(meth, str) and not hasattr(MH, f'_read_ext_{meth}'):
         raise RegistryError('method must be a valid MH CGA extension function')
@@ -1030,6 +1035,11 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
         * :func:`pcapkit.foundation.registry.register_tcp`
         * :func:`pcapkit.foundation.registry.register_udp`
         * :func:`pcapkit.foundation.registry.register_sctp`
+
+    .. versionchanged:: 1.5.0
+
+       The keyword-only ``proto`` is replaced by ``*transport``, one transport
+       protocol per argument, with no alias (:issue:`806`).
 
     """
     # NOTE: ``class_`` sits at the sibling position -- positional, ahead of

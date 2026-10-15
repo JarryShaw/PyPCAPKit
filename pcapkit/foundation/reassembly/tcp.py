@@ -89,6 +89,14 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
         start is the SYN's own sequence number, and a FIN completes the
         stream only when every octet from there up to the FIN has arrived.
 
+    .. versionchanged:: 1.5.0
+
+       Of two overlapping segments that disagree, the octets received first
+       are kept, per :rfc:`9293#section-3.10`, and the contested range is
+       recorded in :attr:`Datagram.conflict
+       <pcapkit.foundation.reassembly.data.tcp.Datagram.conflict>`; 1.4.x
+       kept the later octets without a record (:issue:`443`).
+
     """
     if TYPE_CHECKING:
         protocol: 'Type[TCP_Protocol]'
