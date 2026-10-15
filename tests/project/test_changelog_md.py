@@ -602,8 +602,9 @@ class ComplaintLocationTests(ChangelogTreeMixin, unittest.TestCase):
     read back out of the entry holds the construct it was cited for, which the
     numbers counted against the converted body could not do.
 
-    No ``subTest`` here on purpose: this pytest has no ``pytest-subtests``, so a
-    failing subtest leaves its parent reported as passed.
+    No ``subTest`` here on purpose: under this repository's pytest a failing
+    subtest gets a ``SUBFAILED`` line of its own while its parent's line still
+    reads ``PASSED``.
 
     """
 

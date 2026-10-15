@@ -446,8 +446,8 @@ class ProtocolRegistryTests(unittest.TestCase):
     def test_top_level_link_internet_and_transport_protocol_wrappers(self) -> None:
         # Members live in the per-transport registries GitHub issue #732 split
         # AppType into; the base class itself holds none. 3com-amp3 is registered
-        # on both TCP and UDP, so either copy carries the multi-bit .proto this
-        # exercises -- the TCP one is used, arbitrarily.
+        # on both TCP and UDP, and the TCP copy is used, arbitrarily; since #806
+        # its .proto names TCP alone, which the notes below rely on.
         from pcapkit.const.reg.apptype import TCP as AppType_TCP
         from pcapkit.const.reg.apptype import UDP as AppType_UDP
         from pcapkit.const.reg.apptype import TransportProtocol
@@ -551,8 +551,9 @@ class ProtocolRegistryTests(unittest.TestCase):
         with self.assertRaises(RegistryError):
             registry.register_apptype(65004, UnitProtocol)
 
-        # NOTE: a composite names two registries, and one call registers under
-        # one transport protocol.
+        # NOTE: a composite is refused: one call registers under one transport
+        # protocol, and since #808 dropped the ``IntFlag`` base ``tcp | udp`` is
+        # a bare ``int`` rather than a member.
         with self.assertRaises(RegistryError):
             registry.register_apptype(65005, UnitProtocol,
                                       TransportProtocol.tcp | TransportProtocol.udp)
@@ -594,10 +595,11 @@ class ProtocolRegistryTests(unittest.TestCase):
 
         # NOTE: a composite name such as ``'tcp|udp'`` raises for the same
         # reason the equivalent composite member is refused above: one call
-        # registers under one transport protocol. This is the case that most
-        # needs covering -- aenum's ``Flag`` getitem parses a ``'|'``-joined
-        # name into a composite value on its own, so a resolver built on it
-        # unguarded would accept this silently instead of refusing it.
+        # registers under one transport protocol. This was the case that most
+        # needed covering while ``TransportProtocol`` was an ``IntFlag``, until
+        # #808: aenum's ``Flag`` getitem parsed a ``'|'``-joined name into a
+        # composite value on its own, so a resolver built on it unguarded would
+        # have accepted this silently instead of refusing it.
         with self.assertRaises(RegistryError):
             registry.register_apptype(65010, UnitProtocol, 'tcp|udp')
 
@@ -650,7 +652,7 @@ class ProtocolRegistryTests(unittest.TestCase):
 
         # NOTE: anything that is neither a ``str`` nor a ``TransportProtocol``
         # member raises before the registry loop touches anything.
-        # ``TransportProtocol`` is an ``IntFlag``, so an unguarded fall-through
+        # ``TransportProtocol`` is an ``int`` subclass, so an unguarded fall-through
         # would let ``registries.get(1)`` resolve to ``TCP`` just as
         # ``registries.get(TransportProtocol.tcp)`` does -- registering the
         # port and then exploding on ``proto.name`` before ``register_protocol``

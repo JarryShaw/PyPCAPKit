@@ -1045,9 +1045,9 @@ def is_manufactured(name_arg: 'Optional[ast.expr]') -> 'bool':
         # safe one (a false positive is loud and gets a fixture; a false
         # negative ships quietly), and no real call site under
         # ``pcapkit/const``/``pcapkit/vendor`` is affected either way
-        # (measured: the sweep stays at 1012/0). It genuinely does over-flag:
-        # ``value.upper()`` alone is exempt (it is the receiver case just
-        # above), but the exact same expression as an *argument* --
+        # (measured at round 5: the sweep stayed at 1012/0). It genuinely
+        # does over-flag: ``value.upper()`` alone is exempt (it is the
+        # receiver case just above), but the exact same expression as an *argument* --
         # ``str(value.upper())``, ``helper(value.upper())`` -- flags, so
         # wrapping an already-exempt transform in one more call changes the
         # verdict. ``NAMES.get(value, 'unknown')`` flags while the
@@ -1346,7 +1346,7 @@ class UnregisteredMemberNameIsBareTests(unittest.TestCase):
         # and the one ``super()._unregistered_member(...)`` forward its own
         # override makes -- 768 more, in one file, for 1012 total. #775's
         # final round then added the 52 on EtherType and the 1 on Socket --
-        # 53 more, for 1065 total measured on this tree.
+        # 53 more, for 1065 total when that round landed.
         self.assertGreaterEqual(call_count, 1065,
                                  f'expected at least 1065 _unregistered_member call sites, found {call_count}')
         # And that the exemption is actually earning its keep, rather than a
@@ -1882,16 +1882,15 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
     converted, since the owner's reasoning names ``get`` explicitly and
     leaving it minting while ``_missing_`` did not would have been a
     direct contradiction. ``Command``/``Method``'s ``_unregistered_member``
-    override canonicalises the constructed value to the same upper-case
-    ``name`` used for the lookup (rather than the caller's incidental input
-    casing), which is also what makes ``get('frob')`` and ``get('FROB')``
-    compare *equal* even though, with nothing cached any more, they can
-    never again be *identical* -- see the two production regression tests
-    this forced: ``tests/protocols/application/test_ftp_unit.py::
-    FTPTestCase::test_command_get_is_case_insensitive`` and
-    ``tests/protocols/application/test_http_unit.py::HTTPTestCase::
-    test_method_get_is_case_insensitive``, both updated from ``assertIs`` to
-    ``assertEqual`` + ``assertIsNot`` for exactly this reason.
+    override canonicalises the member's *name* to upper case and keeps the
+    caller's own casing as its value, so ``get('frob')`` and ``get('FROB')``
+    are unequal, and a repeated ``get('frob')`` is equal but, with nothing
+    cached any more, never again *identical* -- see the production
+    regression test this forced,
+    ``tests/protocols/application/test_ftp_unit.py::FTPUnitTests::test_command_get_is_case_insensitive``,
+    which pins exactly that with ``assertEqual``, ``assertIsNot`` and
+    ``assertNotEqual``. Its HTTP twin was replaced under #896 by
+    ``tests/protocols/application/test_http_unit.py::HTTPUnitTests::test_method_get_is_now_case_sensitive``.
 
     """
 
@@ -2250,7 +2249,7 @@ class BespokeGetUnchangedTests(unittest.TestCase):
     :class:`Method` used to resolve case-insensitively the same way (#583),
     but GitHub issue #896 retired that: RFC 9110 Section 9.1 makes the HTTP
     method token case-sensitive, unlike FTP's command codes (RFC 959 Section
-    4.1), so ``Method.get('Get')`` no longer returns :attr:`Method.GET` --
+    5.3), so ``Method.get('Get')`` no longer returns :attr:`Method.GET` --
     see ``test_method_get_is_now_case_sensitive`` below, which replaces the
     case-insensitive pin this class used to carry for it. ``Method`` still
     keeps its own ``get()`` rather than the base's, because it still needs to
@@ -2609,8 +2608,8 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
     def test_apptype_unrecognised_proto_is_still_refused(self) -> None:
         """A ``proto`` naming no registry at all -- not one of the two real
         collision cases ``auto()`` introduced, just an ordinary invalid value
-        -- is still refused by :meth:`AppType._dispatch`, unaffected by this
-        PR. (Deliberately not a composite like ``tcp | udp``: under
+        -- is still refused by :meth:`AppType._dispatch`, unaffected by
+        #874. (Deliberately not a composite like ``tcp | udp``: under
         ``auto()`` that now equals ``sctp`` numerically and dispatches
         there rather than raising, which is the one accepted, explicitly
         untested consequence of the ``auto()`` change -- see
