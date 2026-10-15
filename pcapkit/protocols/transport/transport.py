@@ -110,6 +110,13 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
             ``register_apptype`` reaches this method once per protocol and
             inspects two different registries, so it cannot warn spuriously.
 
+        .. versionchanged:: 1.3.0
+
+           Takes the protocol as one ``protocol`` argument, a
+           :class:`~pcapkit.corekit.module.ModuleDescriptor` or a
+           :class:`~pcapkit.protocols.protocol.Protocol` subclass, in place of
+           the ``module`` and ``class_`` names.
+
         """
         if cls is Transport:
             raise UnsupportedCall(f'{cls.__name__} is an abstract class')

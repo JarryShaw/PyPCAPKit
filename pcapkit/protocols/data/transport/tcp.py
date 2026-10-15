@@ -223,7 +223,14 @@ class EchoReply(Option):
 
 @info_final
 class Timestamps(Option):
-    """Data model for TCP timestamp option."""
+    """Data model for TCP timestamp option.
+
+    .. versionchanged:: 1.1.0
+
+       Renamed from ``Timestamp``, which :mod:`pcapkit.protocols.data`
+       exported as ``TCP_Timestamp``; the export is ``TCP_Timestamps``.
+
+    """
 
     #: Timestamp value.
     timestamp: 'int'
@@ -244,7 +251,16 @@ class PartialOrderConnectionPermitted(Option):
 
 @info_final
 class PartialOrderServiceProfile(Option):
-    """Data model for TCP partial order connection service profile option."""
+    """Data model for TCP partial order connection service profile option.
+
+    .. versionchanged:: 1.1.0
+
+       Renamed from ``PartialOrderConnectionProfile``, which
+       :mod:`pcapkit.protocols.data` exported as
+       ``TCP_PartialOrderConnectionProfile``; the export is
+       ``TCP_PartialOrderServiceProfile``.
+
+    """
 
     #: Start flag.
     start: 'bool'
