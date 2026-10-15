@@ -41,24 +41,25 @@ nested subtype schema. Over-declaring that size does not fail loudly: the
 enclosing :class:`~pcapkit.corekit.fields.collections.OptionField` stops at the
 end-of-option-list marker or at the declared options length whichever comes
 first, so the over-read is absorbed rather than reported. And the construction
-path never evaluates the field at all -- every ``tcp-mptcp/*`` case in
-:data:`tests.protocols.test_option_roundtrip_unit.EXPECTED_FAILURES` fails before
-reaching it, for reasons of its own that #553 does not touch.
+path never evaluated the field at all -- when #553 was fixed, every
+``tcp-mptcp/*`` case in
+:data:`tests.protocols.test_option_roundtrip_unit.EXPECTED_FAILURES` failed before
+reaching it, for reasons of its own that #553 did not touch.
 
 So the assertion here is deliberately on the *decoded namespace* rather than on a
-round trip. A full parse of an MP_CAPABLE option does not complete on ``main``
-either: :class:`MPTCPCapable
-<pcapkit.protocols.schema.transport.tcp.MPTCPCapable>` gates ``rkey`` on
-``pkt['length'] != 32`` while the nested subtype schemas declare no ``length``
-field, so parsing raises ``KeyError: 'length'`` from
+round trip. A full parse of an MP_CAPABLE option did not complete then either:
+:class:`MPTCPCapable
+<pcapkit.protocols.schema.transport.tcp.MPTCPCapable>` gated ``rkey`` on
+``pkt['length'] != 32`` while the nested subtype schemas declared no ``length``
+field, so parsing raised ``KeyError: 'length'`` from
 :file:`pcapkit/protocols/schema/transport/tcp.py` regardless of which bit offset
-the header used. That is the structural defect behind #541 and the eight
+the header used. That was the structural defect behind #541 and the eight
 ``tcp-mptcp/*`` expected failures -- the subtype schemas inherit :class:`MPTCP
-<pcapkit.protocols.schema.transport.tcp.MPTCP>`, which declares ``kind`` and
+<pcapkit.protocols.schema.transport.tcp.MPTCP>`, which declared ``kind`` and
 ``length`` only under :data:`~typing.TYPE_CHECKING` -- and it is not what #553
-is about. Tying this assertion to an end-to-end parse would mean it could not be
-written until that much larger change landed, and the bit offset would stay
-wrong in the meantime.
+is about. Tying this assertion to an end-to-end parse would have meant it could
+not be written until that much larger change landed, and the bit offset would
+have stayed wrong in the meantime.
 
 The field is read off the schema class, ``_MPTCP.__fields__['test']``, rather
 than rebuilt here, so the declaration under test is the one the library ships.

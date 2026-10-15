@@ -213,9 +213,9 @@ class HTTPUnitTests(unittest.TestCase):
         ``protocol.make(**kwargs)`` dispatch this issue is actually about.
 
         The real, supported entry point is construction:
-        :meth:`ProtocolBase.__init__` (``protocol.py:519``, the ``**kwargs``-
-        only overload at ``:517``) calls ``self.pack(**kwargs)`` when built
-        with no ``file``, and :meth:`ProtocolBase.pack` (``protocol.py:284``)
+        :meth:`ProtocolBase.__init__` (``protocol.py:1146``, the ``**kwargs``-
+        only overload at ``:1144``) calls ``self.pack(**kwargs)`` when built
+        with no ``file``, and :meth:`ProtocolBase.pack` (``protocol.py:750``)
         is ``self.__header__ = self.make(**kwargs)`` -- a *bound* call on the
         outer ``HTTP`` instance, which is what actually reaches the inner,
         previously-unbound ``protocol.make(**kwargs)``. So the reachable
@@ -2160,7 +2160,7 @@ class HTTPUnitTests(unittest.TestCase):
         own -- regardless of how far past the real buffer it reached -- still
         passed the guard and reported the declared, attacker-controlled value
         as if the capture actually contained it. Measured pre-fix, identical on
-        base and the first revision of this PR: a nine-octet buffer declaring
+        base and the first revision of #802: a nine-octet buffer declaring
         16777215 parsed and reported ``length=16777215``, overstated by
         16,777,206 octets, at every one of these buffer sizes.
 

@@ -156,7 +156,7 @@ create the backup, and :meth:`Vendor.__init__`'s own ``open(const_file,
 :exc:`PermissionError`, and the previous content survives untouched because
 ``vendor()`` is never even called. This is not new relative to rounds 4-8
 (``os.replace()`` needed directory write too), only relative to `main`, so
-the PR now discloses two traded capabilities rather than one. See
+#873 discloses two traded capabilities rather than one. See
 :func:`~pcapkit.vendor.__main__._snapshot_and_restore`'s own docstring for
 the asymmetry between this and the ``0o444`` case: a ``_dest_path``
 resolution failure *skips* the snapshot and lets the target proceed

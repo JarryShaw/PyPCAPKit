@@ -275,7 +275,7 @@ class PCAPNGEngineTests(unittest.TestCase):
         # and ``read_frame`` is where that happens. The interface *ID* of an EPB,
         # ISB or obsolete Packet Block is instead bounds-checked while the block
         # is parsed -- see
-        # ``PCAPNGSectionShapeTests.test_out_of_range_interface_id_is_a_format_error``
+        # ``PCAPNGSectionRuleTests.test_out_of_range_interface_id_is_a_format_error``
         # for the equivalent end-to-end coverage of those three.
         block = FakeBlock(self._info(BlockType.Simple_Packet_Block))
 

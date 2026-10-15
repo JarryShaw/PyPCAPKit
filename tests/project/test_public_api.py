@@ -45,7 +45,7 @@ exclusion, and what is hidden was measured rather than assumed: the same sweep w
 run by hand over :mod:`pcapkit.vendor` on a machine that *does* have the extra,
 across the package and its 134 public descendants. Every one of them imports,
 every one declares :attr:`__all__`, and every entry of every :attr:`__all__`
-resolves. The single defect it holds is the duplicate described at the end of this
+resolves. The single defect it held was the duplicate described at the end of this
 docstring, in :mod:`pcapkit.vendor` and :mod:`pcapkit.vendor.mh`.
 
 Nothing else is excluded, and no import is wrapped in a skip. That is deliberate
@@ -126,16 +126,16 @@ against the tree this module was written on, and each is fixed in the same commi
 
 One gap remains, and it is recorded rather than closed because it lies outside
 this module's reach. :mod:`pcapkit.vendor` is excluded from the sweep for the
-dependency reason above, and it carries the *same* displaced-duplicate defect in
-``pcapkit/vendor/__init__.py`` and ``pcapkit/vendor/mh/__init__.py``. That one is
+dependency reason above, and it carried the *same* displaced-duplicate defect in
+``pcapkit/vendor/__init__.py`` and ``pcapkit/vendor/mh/__init__.py``. That one was
 worse than its :mod:`pcapkit.const` twin rather than merely parallel:
 ``pcapkit/vendor/__main__.py`` builds its crawler target list out of
-``pcapkit.vendor.__all__``, so the missing ``MH_HandoverInitiateStatus`` means the
-``handover_initiate_status`` crawler is absent from the default target list *and*
-from ``--target mh``, and has therefore never run. Fixing it needs the ``vendor``
-extra installed to be testable here, so it belongs to a separate change; when it
-lands, drop ``'vendor'`` from :data:`EXCLUDED_ROOTS` and this module will cover it
-too.
+``pcapkit.vendor.__all__``, so the missing ``MH_HandoverInitiateStatus`` kept the
+``handover_initiate_status`` crawler out of the default target list *and* out of
+``--target mh``, and it had never run. #531 fixed it, and
+:mod:`tests.vendor.test_crawler_reachability_unit` guards it with the ``vendor``
+extra installed. The remaining step is to drop ``'vendor'`` from
+:data:`EXCLUDED_ROOTS`, so that this module covers it too.
 
 """
 from __future__ import annotations

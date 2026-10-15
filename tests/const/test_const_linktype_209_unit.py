@@ -83,7 +83,7 @@ from tests._support import reimport_once_per_class
 #: ``html5lib`` is the one that is actually missing on ``test``: ``requests`` and
 #: ``bs4`` have shipped in the ``test`` extra since #507, but only
 #: ``beautifulsoup4[html5lib]`` -- the ``vendor`` and ``all`` extras -- provides a
-#: parser (``pyproject.toml:203``, and the note at ``:256-263`` saying so
+#: parser (``pyproject.toml:234``, and the note at ``:313-320`` saying so
 #: deliberately).
 VENDOR_DEPS = ('requests', 'bs4', 'html5lib')
 
@@ -511,7 +511,7 @@ class LinkTypeGeneratorCrossRangeDuplicateTests(unittest.TestCase):
         temp.split('–'))``, which hits the identical unpack error a few
         lines later and still raises, uncaught, out of :meth:`process`.
         That statement predates #852 entirely, so this assertion passes
-        identically on ``main``, on this PR's first commit (before
+        identically on ``main``, on #854's first commit (before
         ``_expand`` existed), and here: nothing about the pre-scan is what
         is being pinned.
         """

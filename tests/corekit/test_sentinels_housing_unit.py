@@ -114,7 +114,7 @@ class NoImportCycleTests(unittest.TestCase):
     :command:`pylint` already reports 39 ``cyclic-import`` findings in this
     package, so a fortieth would be invisible in the noise rather than caught.
     This does not run :command:`pylint` -- that check is done separately and
-    reported alongside this PR -- it instead pins the one fact that actually
+    reported alongside #922 -- it instead pins the one fact that actually
     rules a cycle out for this specific set of modules: that
     :mod:`pcapkit.corekit.sentinels` imports none of them.
 

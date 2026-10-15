@@ -1414,7 +1414,7 @@ class PCAPNGUnitTests(unittest.TestCase):
 
         # Every member's value pinned exactly -- this is a value-matched
         # registry (``TLSKeyLabel(label.upper())`` at
-        # pcapkit/protocols/schema/misc/pcapng.py:2108), so the value, not
+        # pcapkit/protocols/schema/misc/pcapng.py:2243), so the value, not
         # merely the name, is what callers depend on.
         for name in expected:
             with self.subTest(name=name):

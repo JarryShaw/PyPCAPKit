@@ -1785,7 +1785,7 @@ class BespokeUnmintConvertedRegistriesTests(unittest.TestCase):
 
     def test_optiontype_get_int_path_no_longer_mints(self) -> None:
         """:meth:`OptionType.get` used to mint directly on a miss (bypassing
-        ``_missing_`` entirely) -- a second, independent mint site this PR's
+        ``_missing_`` entirely) -- a second, independent mint site #869's
         first pass left alone. Round 2 review measured it live on the
         wire-facing path (:meth:`pcapkit.protocols.misc.pcapng.PCAPNG.
         _make_pcapng_options` calls ``get()`` with raw option-code bytes),
@@ -1980,7 +1980,7 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
         measured regression risk: swapping the value for the canonicalised
         name (as an earlier revision of this conversion did) would make
         ``Command('xyzw') == 'xyzw'`` false, which never held on ``main``
-        and would have been this PR's one real behaviour break."""
+        and would have been #869's one real behaviour break."""
         from pcapkit.const.ftp.command import Command, CommandType, ConformanceRequirement
 
         before = len(Command.__members__)
@@ -2347,13 +2347,13 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
     genuine IANA-registered name or a manufactured placeholder, because
     only ``register()`` may create a new entry and ``get()`` never has
     enough information to build one itself. A lookup resolving
-    ``TCP(6010)`` after this PR therefore returns an *unregistered* ``x11``
+    ``TCP(6010)`` therefore returns an *unregistered* ``x11``
     member -- correct as a service name, but absent from
     ``__members__``/``_value2member_map_`` until someone calls
     ``TCP.register(6010, 'x11')`` explicitly.
 
     Unlike every bespoke class #860 step 2's PR 1 converted,
-    :meth:`AppType.get` already existed before this PR and does genuine
+    :meth:`AppType.get` already existed before #874 and does genuine
     transport-protocol dispatch through :meth:`~AppType._dispatch` -- so,
     unlike :class:`~pcapkit.const.http.status_code.StatusCode`/
     :class:`~pcapkit.const.ftp.return_code.ReturnCode`, it keeps its own
@@ -2367,7 +2367,7 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
     :meth:`__repr__`/:meth:`__str__`/:meth:`__int__`/the comparison
     operators/:attr:`~AppType.aliases` to run on the result without raising.
 
-    :meth:`AppType.register` is new on this PR. ``AppType`` already had a
+    :meth:`AppType.register` arrived with #874. ``AppType`` already had a
     working ``get``/``get_all``/``register_alias`` of its own, but never a
     working ``register`` -- and the base's generic one (which calls
     ``cls.__new__(cls, value)`` with only ``value``) would have built a
@@ -2388,7 +2388,7 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
         """#842's ruling is that ``get``/``get_all``/``register``/
         ``register_alias`` exist on every registry -- #860 step 2 PR 2 is
         what actually delivers that for this family, including ``register``,
-        which none of the five had a working version of before this PR."""
+        which none of the five had a working version of before #874."""
         from pcapkit.const.reg.apptype.apptype import AppType
         from pcapkit.const.reg.apptype.dccp import DCCP
         from pcapkit.const.reg.apptype.sctp import SCTP
@@ -2503,7 +2503,7 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
         self.assertFalse(TCP.__registry__.getlist(54321))
 
     def test_missing_direct_call_still_raises_for_the_same_port(self) -> None:
-        """The asymmetry this PR leaves in place, deliberately: a direct
+        """The asymmetry #874 leaves in place, deliberately: a direct
         ``TCP(54321)`` has no ``get()`` around it to catch ``_missing_``'s
         :obj:`None` answer and build an ``'unknown'`` member from it, so it
         still raises exactly as it did on ``main`` -- only :meth:`AppType.
@@ -2649,7 +2649,7 @@ class TransportProtocolAutoTests(unittest.TestCase):
         self.assertEqual(int(TransportProtocol.dccp), 4)
 
     def test_still_not_a_registry(self) -> None:
-        """Unaffected by this PR: ``TransportProtocol`` never minted through
+        """Unaffected by #874: ``TransportProtocol`` never minted through
         :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`, and
         does not mix in :class:`~pcapkit.corekit.enum.EnumRegistry` now
         either -- only ``AppType`` and its four transport subclasses do."""

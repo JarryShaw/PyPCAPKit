@@ -9,13 +9,13 @@ each resolved a wire value by calling their registry's ``.get()`` directly::
 
     return self._namespace.get(value, proto=...)
 
-which mints a fresh member -- via :func:`aenum.extend_enum` -- for any value
+which minted a fresh member -- via :func:`aenum.extend_enum` -- for any value
 neither an existing row nor one of the registry's own documented spans
 accounts for. On ``examples/captures/http.pcap`` that is 111 calls, all from
 ephemeral TCP ports with no IANA assignment, and measured at 13-17% of
 extraction self time.
 
-Every one of those four subclasses now falls through to
+Each of them now falls through to
 :meth:`EnumField._unregistered_member <pcapkit.corekit.fields.numbers.EnumField._unregistered_member>`
 instead of minting: an actual instance of the registry the field names --
 ``isinstance`` holds, and it renders and dispatches exactly like a declared

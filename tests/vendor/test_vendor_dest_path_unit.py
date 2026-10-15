@@ -19,8 +19,8 @@ filesystem path into exactly two levels:
    os.makedirs(os.path.join(ROOT, '..', 'const', STEM), exist_ok=True)
    with open(os.path.join(ROOT, '..', 'const', STEM, FILE), 'w') as file:
 
-That is correct only because every crawler today sits exactly one level under
-``vendor/``, e.g. :mod:`pcapkit.vendor.reg.apptype` writes
+That was correct only because every crawler then sat exactly one level under
+``vendor/``, e.g. :mod:`pcapkit.vendor.reg.apptype` wrote
 :file:`pcapkit/const/reg/apptype.py`. Traced by hand for a module one level
 deeper -- :file:`pcapkit/vendor/reg/apptype/tcp.py`, the shape #732 needs --
 ``temp`` is :file:`.../vendor/reg/apptype`, so ``ROOT`` becomes
@@ -49,10 +49,11 @@ a path that happens to equal its input.
 Three things are pinned:
 
 * :class:`ExistingCrawlerDestPathTests` -- the regression guard. Every crawler
-  discovered under :mod:`pcapkit.vendor` today is depth-one, and each must still
-  resolve to exactly the :file:`const/` file it writes today; this is the "did
-  not move" half of the contract, checked by enumerating the real crawlers on
-  disk rather than sampling a couple by name.
+  discovered under :mod:`pcapkit.vendor` must resolve to exactly the
+  :file:`const/` file it writes -- the depth-one ones by the pre-fix formula,
+  the five #732 nests under :file:`vendor/reg/apptype/` by the mirrored path;
+  this is the "did not move" half of the contract, checked by enumerating the
+  real crawlers on disk rather than sampling a couple by name.
 * :class:`NestedCrawlerDestPathTests`\\ 's
   :meth:`~NestedCrawlerDestPathTests.test_nested_module_resolves_under_const`
   -- the case that motivated the fix. A stub crawler is built two levels
@@ -93,7 +94,7 @@ module scope, only as the string parser name in six crawlers'
 nothing here reaches -- no test in this file calls :meth:`Vendor.__init__` or
 :meth:`~Vendor.context`. ``requests`` and ``beautifulsoup4`` both ship in the
 ``test`` extra precisely so vendor tests can run (:file:`pyproject.toml`,
-around line 243), so both classes below run on ``test``, ``engine-tests``
+around line 321), so both classes below run on ``test``, ``engine-tests``
 and ``gate`` -- the only three pytest jobs of
 :file:`.github/workflows/unit-tests.yml` that collect anything under
 :file:`tests/vendor/` at all, since ``integration`` and ``pypcap-parity``

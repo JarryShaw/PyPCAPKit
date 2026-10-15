@@ -54,7 +54,7 @@ narrower and machine-checkable without one: feeding it the fixture text this
 issue's own investigation fetched reproduces the committed const file
 byte-for-byte. The owner should still run the crawler for real once, to
 confirm the *live* registry matches the fixture -- IANA could have edited
-the registry between the fetch and this PR landing.
+the registry between the fetch and #926 landing.
 
 """
 from __future__ import annotations

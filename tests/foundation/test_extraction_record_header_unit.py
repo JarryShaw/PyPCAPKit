@@ -8,7 +8,7 @@ Header`` for PCAP, ``Section Header 1`` for PCAP-NG -- and
 :attr:`~pcapkit.foundation.extraction.Extractor.format` is set at header time,
 which is what makes it work on a capture with no frames.
 
-`PyShark`_ cannot run on the 3.14 interpreter these tests use, so it is driven
+`PyShark`_ cannot run on Python 3.14 or later, so it is driven
 through a stand-in ``pyshark`` module.
 
 .. _DPKT: https://dpkt.readthedocs.io
