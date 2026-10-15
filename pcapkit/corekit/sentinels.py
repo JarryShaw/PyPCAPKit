@@ -14,16 +14,22 @@ house rule the four below follow.
 
 The owner's ruling on GitHub issue :issue:`911` chose one shared module over
 one module per sentinel, and this module is the only import path for all
-four. The re-export each one used to keep at the module of the class that
-uses it was dropped under :issue:`1744`, per the ruling on :issue:`1715` that a
-moved name keeps no re-export at its old path. :mod:`pcapkit.corekit.module`,
+four: the module of the class that uses each one does not re-export it
+(:issue:`1744`), per the ruling on :issue:`1715` that a moved name keeps no
+re-export at its old path. :mod:`pcapkit.corekit.module`,
 :mod:`pcapkit.corekit.fields.field`, :mod:`pcapkit.corekit.enum` and
-:mod:`pcapkit.protocols.protocol` still import the object they use from here,
-but none lists it in ``__all__`` or documents it, and none binds the type.
+:mod:`pcapkit.protocols.protocol` import the object they use from here, but
+none lists it in ``__all__`` or documents it, and none binds the type.
 
 ``ABSENT`` is private to :mod:`pcapkit.protocols.protocol` -- nothing outside
 that module ever reads it. It carries no leading underscore;
 :class:`AbsentType`'s docstring says what marks it private instead.
+
+.. versionadded:: 1.5.0
+
+   :class:`NoValueType` moves here from :mod:`pcapkit.corekit.fields.field`
+   (:issue:`911`), and :data:`NO_VALUE` replaces its ``NoValue`` there
+   (:issue:`937`).
 
 """
 from typing import TYPE_CHECKING

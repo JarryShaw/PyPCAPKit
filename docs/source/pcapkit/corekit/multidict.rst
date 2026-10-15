@@ -35,6 +35,8 @@ values per key, based on the `Werkzeug`_ project.
    :no-special-members: __init__
    :show-inheritance:
 
+   .. automethod:: deepcopy
+
 Type Variables
 --------------
 

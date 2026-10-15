@@ -118,8 +118,9 @@ class ProcedureCode(Vendor):
         a ``(module, type)`` pair), a private ``_name`` holding the ASN.1
         identifier verbatim (``'id-AMFConfigurationUpdate'``), and a private
         ``_val`` holding the assigned integer. None of the three has a public
-        accessor that survives this far: :meth:`~pycrate_asn1rt.asnobj.ASN1Obj.
-        get_typeref` resolves to the *referenced type object* rather than its
+        accessor that survives this far:
+        :meth:`~pycrate_asn1rt.asnobj.ASN1Obj.get_typeref`
+        resolves to the *referenced type object* rather than its
         ``(module, name)`` pair, and that object's own :meth:`get_name` reads
         :obj:`None` here despite :func:`repr` showing the name -- measured
         against pycrate 0.8.1. Reading the private attributes directly is
@@ -166,8 +167,9 @@ class ProcedureCode(Vendor):
 
         Unlike a hand-scraped CSV, |pycrate|_'s compiled specification names
         each assignment once -- measured, zero duplicate names and zero
-        duplicate values across all 81 -- so :meth:`~pcapkit.vendor.default.
-        Vendor.rename`'s per-name counter has nothing to disambiguate and this
+        duplicate values across all 81 -- so
+        :meth:`~pcapkit.vendor.default.Vendor.rename`'s
+        per-name counter has nothing to disambiguate and this
         crawler never calls it.
 
         """

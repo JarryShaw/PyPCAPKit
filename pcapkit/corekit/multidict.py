@@ -506,6 +506,11 @@ class OrderedMultiDict(MultiDict[_KT, _VT]):
             ``items(multi=True)`` instead, so the copy keeps the insertion
             order of interleaved keys. :meth:`__deepcopy__` reaches it too.
 
+        .. versionchanged:: 1.5.0
+
+           Keeps the insertion order of interleaved keys, where the copy grouped
+           the values by key (:issue:`1295`).
+
         """
         return self.__class__(copy.deepcopy(list(self.items(multi=True)), memo=memo))
 

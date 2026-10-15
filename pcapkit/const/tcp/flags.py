@@ -17,7 +17,14 @@ from pcapkit.corekit.enum import EnumRegistry
 __all__ = ['Flags']
 
 class Flags(EnumRegistry, IntFlag):
-    """[Flags] TCP Header Flags"""
+    """[Flags] TCP Header Flags
+
+    .. versionchanged:: 1.5.0
+
+       A value outside the 16-bit field raises :exc:`ValueError`, where
+       :mod:`aenum` composed a pseudo-member for any integer.
+
+    """
 
     #: Reserved for future use [:rfc:`9293`]
     Reserved_4 = 1 << 4

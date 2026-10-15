@@ -11,6 +11,12 @@ caller might legitimately pass.
 All four are defined here, and this is their only import path: the modules
 that use them do not re-export them (:issue:`1744`).
 
+.. versionadded:: 1.5.0
+
+   :class:`NoValueType` moves here from :mod:`pcapkit.corekit.fields.field`
+   (:issue:`911`), and :data:`NO_VALUE` replaces its ``NoValue`` there
+   (:issue:`937`).
+
 .. autoclass:: pcapkit.corekit.sentinels.NullType
 .. autodata:: pcapkit.corekit.sentinels.NULL
 

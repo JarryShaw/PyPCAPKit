@@ -148,8 +148,8 @@ class TransportProtocol(EnumLookup, IntEnum):
         Args:
             key: Key to get enum item.
             default: An already-registered value to fall back to when
-                ``key`` resolves to nothing. :data:`~pcapkit.corekit.enum.
-                NO_DEFAULT`, the default, means *no default* -- see
+                ``key`` resolves to nothing.
+                :data:`~pcapkit.corekit.sentinels.NO_DEFAULT`, the default, means *no default* -- see
                 :meth:`~pcapkit.corekit.enum.EnumLookup.get`.
 
         Raises:
@@ -2905,8 +2905,9 @@ class AppType(EnumRegistry, StrEnum):
         caller-named path that still does.
 
         Reconstructs :attr:`svc`, :attr:`port` and :attr:`proto` the same way
-        :meth:`__new__` would: :meth:`~pcapkit.corekit.enum.
-        EnumRegistry._unregistered_member` bypasses :meth:`__new__` entirely
+        :meth:`__new__` would:
+        :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`
+        bypasses :meth:`__new__` entirely
         (it builds through ``cls._member_type_.__new__`` directly), so this
         class's own three attributes would otherwise be missing and every
         method reading them (:meth:`__repr__`, :meth:`__str__`, :meth:`__int__`,

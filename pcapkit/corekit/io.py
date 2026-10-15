@@ -11,12 +11,6 @@ implementation to :class:`io.BufferedReader`, and the stream proxies
 seekable stream, and :class:`~pcapkit.corekit.io.NamedStream`, which gives
 a stream a ``name``.
 
-.. versionremoved:: 1.5.0
-
-   ``pcapkit.corekit.io._READ_CHUNK``, now
-   :data:`pcapkit.utilities.config.READ_CHUNK`, set with
-   :envvar:`PCAPKIT_READ_CHUNK` (:issue:`1726`).
-
 """
 import io
 import tempfile
@@ -55,6 +49,20 @@ class SeekableReader(io.BufferedReader):
         buffer_save: Whether to save buffer to file.
         buffer_path: Path to save buffer.
         stream_closing: Whether the stream should be closed upon exiting.
+
+    .. versionchanged:: 1.5.0
+
+       :meth:`truncate` raises
+       :exc:`~pcapkit.utilities.exceptions.UnsupportedOperation`, as
+       :meth:`writable` returns :data:`False` (:issue:`645`). A refused
+       :meth:`seek` leaves the position where it was, and a position the
+       lookback buffer has dropped raises instead of reading from it
+       (:issue:`643`, :issue:`644`).
+
+    .. versionremoved:: 1.5.0
+
+       ``writeable()``, a misspelling that never overrode
+       :meth:`io.IOBase.writable`; use :meth:`writable` (:issue:`645`).
 
     """
 
@@ -439,10 +447,10 @@ class SeekableReader(io.BufferedReader):
             as far as :meth:`_read_ahead` reads past the position: ``_read_ahead_size``
             octets, a buffer's worth by default, or to the real end if that comes first.
             The frame readers measure what is left this way, and the engines set that size
-            to the next record, so a record is measured whole, however long. The end used to
-            be the buffer's far edge, which once the buffer has filled is just how far the
-            stream has been read, so the first record ending there was taken for the end of
-            the capture (:issue:`1586`). The read slides the buffer, so a position before
+            to the next record, so a record is measured whole, however long. The buffer's far
+            edge will not do as the end: once the buffer has filled it is just how far the
+            stream has been read, so the first record ending there would be taken for the end
+            of the capture (:issue:`1586`). The read slides the buffer, so a position before
             the one :data:`~io.SEEK_END` was sought from may then be refused, as
             :meth:`_read_ahead` says.
 
