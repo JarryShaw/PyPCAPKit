@@ -6,6 +6,11 @@
 
 :mod:`pcapkit.corekit.fields.field` contains the base field classes.
 
+.. versionremoved:: 1.3.0
+
+   ``pcapkit.corekit.fields.field._Field``, renamed
+   :class:`~pcapkit.corekit.fields.field.FieldBase` with no alias left behind.
+
 .. versionremoved:: 1.5.0
 
    ``pcapkit.corekit.fields.field.NoValueType``, now
@@ -141,9 +146,8 @@ _RE_NEGATIVE_LENGTH_TEMPLATE = re.compile(r'^[@=<>!]?-\d+')
 class FieldMeta(abc.ABCMeta, Generic[_T]):
     """Meta class to add dynamic support to :class:`FieldBase`.
 
-    This meta class is used to generate necessary attributes for the
-    :class:`FieldBase` class. It can be useful to reduce unnecessary
-    registry calls and simplify the customisation process.
+    It defines nothing of its own, so a field class is built exactly as by
+    :class:`abc.ABCMeta`.
 
     """
 

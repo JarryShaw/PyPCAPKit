@@ -15,7 +15,7 @@ implementations. Available enumerations include:
      - Ethertype IEEE 802 Numbers [*]_
    * - :class:`TRANSTYPE <pcapkit.const.reg.transtype.TransType>`
      - Transport Layer Protocol Numbers [*]_
-   * - :class:`APPTYPE <pcapkit.const.reg.apptype.AppType>`
+   * - :class:`APPTYPE <pcapkit.const.reg.apptype.apptype.AppType>`
      - Application Layer Protocol Numbers (Service Name and Transport Protocol Port Number Registry) [*]_
 
 Link-Layer Header Type Values

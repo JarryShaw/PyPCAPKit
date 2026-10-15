@@ -36,7 +36,7 @@ CONF = {
     'h': 'ConformanceRequirement.H',
 }  # type: dict[str, str]
 
-#: Default constant template of enumerate registry from IANA CSV.
+#: Default constant template of enumeration registry from IANA CSV.
 LINE = lambda NAME, DOCS, ENUM, FEAT, MODL: f'''\
 # -*- coding: utf-8 -*-
 # mypy: disable-error-code=assignment

@@ -242,7 +242,8 @@ class NumberField(Field[int], Generic[_T]):
                 a bare, uncatchable :exc:`ValueError` (``negative shift
                 count``) when ``bit_length`` was not supplied, before
                 :attr:`~pcapkit.corekit.fields.field.FieldBase.length` (see
-                its own :exc:`ProtocolError` guard, :issue:`805`/:issue:`825`)
+                its own :exc:`~pcapkit.utilities.exceptions.ProtocolError`
+                guard, :issue:`805`/:issue:`825`)
                 or :meth:`build_template` ever sees the value: this method sets
                 ``self._bit_length`` from the resolved length eagerly, as a
                 cache, and shifts by it immediately, so the crash happens on
@@ -252,7 +253,8 @@ class NumberField(Field[int], Generic[_T]):
                 with a fixed ``bit_length`` *and* a callable ``length`` that
                 resolves negative raises the identical message as one with no
                 ``bit_length`` at all, rather than falling through to a
-                ``template='...-1s'`` :exc:`ProtocolError` from
+                ``template='...-1s'``
+                :exc:`~pcapkit.utilities.exceptions.ProtocolError` from
                 :attr:`~pcapkit.corekit.fields.field.FieldBase.length` later --
                 see GitHub issue :issue:`831`. A resolved length of exactly
                 ``0`` is a legitimate empty field (e.g. ``len=4`` above
@@ -349,7 +351,7 @@ class NumberField(Field[int], Generic[_T]):
 
             A field packed without having been resolved -- so with ``_length``
             still negative -- has its width derived from the value instead, and
-            that rebuild can land on a width :func:`struct` has a native
+            that rebuild can land on a width :mod:`struct` has a native
             integer code for. The flag is therefore consulted **after** the
             rebuild rather than before it, since deciding first and rebuilding
             second would let the template and the value being returned
@@ -836,11 +838,13 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
             <pcapkit.protocols.schema.misc.pcapng.OptionEnumField.post_process>`
             need this rather than :meth:`_pseudo_member`:
             the result answers ``isinstance(result, AppType)`` truthfully,
-            which matters to at least seven ``isinstance`` sites elsewhere in
-            :mod:`pcapkit.protocols` (see ``test_a_member_is_still_an_apptype``
-            in ``tests/const/test_const_apptype_split_unit.py``), and a value
-            that fails all of them would be a second defect standing in for
-            the one this fix removes.
+            which :meth:`PortEnumField.pre_process` tests before reading
+            ``.port`` off it, and ``Transport._make_port`` in
+            :mod:`pcapkit.protocols.transport.transport` before passing it
+            through unchanged (see ``test_a_member_is_still_an_apptype`` in
+            ``tests/const/test_const_apptype_split_unit.py``); a value that
+            fails them would be a second defect standing in for the one this
+            fix removes.
 
             The member this returns is absent from ``_value2member_map_``, so
             a *value*-keyed lookup on it -- ``self._namespace(value)`` --
@@ -1033,7 +1037,7 @@ class PortEnumField(EnumField):
 
     Important:
         This class is specifically designed for :class:`~pcapkit.const.reg.apptype.apptype.AppType`
-        as it is actually a :class:`~enum.StrEnum` class.
+        as it is actually a :class:`~aenum.StrEnum` class.
 
     .. versionadded:: 1.5.0
 
@@ -1114,17 +1118,20 @@ class PortEnumField(EnumField):
             off it would raise :exc:`AttributeError` on a miss ``get`` resolves.
 
             A port outside this field's own width is rejected *before* any of
-            that, rather than being let through to :meth:`_missing_` and
-            caught alongside a genuine miss. Both are a bare :exc:`ValueError`
-            with nothing to tell them apart by type, and
+            that, rather than being let through to
+            :meth:`~pcapkit.const.reg.apptype.apptype.AppType._missing_`, which
+            raises a bare :exc:`ValueError` for it. That call sits inside an
+            ``except ValueError`` that absorbs a foreign miss, and
             :meth:`~pcapkit.const.reg.apptype.apptype.AppType.get` rejects the
             out-of-range case deliberately, so that it is never minted over -- a
             catch keyed on exception type alone cannot see the difference
-            between that and :mod:`aenum`'s own "no member has this value",
-            so it would absorb both and quietly turn the rejection into a
-            miss. Checking the width first needs no exception-based
-            distinction at all. ``self.length`` is the field's own declared byte
-            width (``2`` for every caller of this class, hence ``0``-``65535``)
+            between that and a "no member has this value", so it would quietly
+            turn the rejection into a miss. Within the width, ``_missing_``
+            raises for no port of any of the four registries: it returns a
+            member for a documented span and :data:`None` otherwise. Checking
+            the width first needs no exception-based distinction at all.
+            ``self.length`` is the field's own declared byte width (``2`` for
+            every caller of this class, hence ``0``-``65535``)
             rather than a hard-coded ``65535`` borrowed from
             :meth:`~pcapkit.const.reg.apptype.apptype.AppType._missing_`'s own guard,
             so the two stay in lockstep by construction.
@@ -1143,11 +1150,12 @@ class PortEnumField(EnumField):
                 declared = owner._missing_(value)  # pylint: disable=protected-access
             except ValueError as error:
                 # NOTE: value is already known to be in-width here, so this
-                # ValueError is aenum's own "no member has this value" for an
-                # in-range but unassigned port -- a foreign miss, absorbed --
-                # never the out-of-range rejection, which never reaches
-                # this branch. A pcapkit.utilities.exceptions error is still a
-                # deliberate registry decision and propagates unchanged.
+                # ValueError is never the out-of-range rejection, which never
+                # reaches this branch; it could only be a foreign "no member has
+                # this value", absorbed as a miss. AppType._missing_ raises
+                # neither for an in-width port: it answers a miss with None. A
+                # pcapkit.utilities.exceptions error is still a deliberate
+                # registry decision and propagates unchanged.
                 if isinstance(error, BaseError):
                     raise
                 declared = None

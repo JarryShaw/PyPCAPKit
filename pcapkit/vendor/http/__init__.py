@@ -19,7 +19,7 @@ crawlers include:
      - HTTP/1.\* Method [*]_
    * - :class:`HTTP_Setting <pcapkit.vendor.http.setting.Setting>`
      - HTTP/2 Settings [*]_
-   * - :class:`HTTP_Status <pcapkit.vendor.http.status_code.StatusCode>`
+   * - :class:`HTTP_StatusCode <pcapkit.vendor.http.status_code.StatusCode>`
      - HTTP/1.\* Status Code [*]_
 
 .. [*] https://www.iana.org/assignments/http2-parameters/http2-parameters.xhtml#error-code

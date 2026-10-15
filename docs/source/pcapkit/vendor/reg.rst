@@ -15,7 +15,7 @@ implementations. Available vendor crawlers include:
      - Ethertype IEEE 802 Numbers [*]_
    * - :class:`TRANSTYPE <pcapkit.vendor.reg.transtype.TransType>`
      - Transport Layer Protocol Numbers [*]_
-   * - :class:`APPTYPE <pcapkit.vendor.reg.apptype.AppType>`
+   * - :class:`APPTYPE <pcapkit.vendor.reg.apptype.apptype.AppType>`
      - Application Layer Protocol Numbers (Service Name and Transport Protocol Port Number Registry) [*]_
 
 Link-Layer Header Type Values

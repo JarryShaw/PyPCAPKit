@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 __all__ = ['StatusCode']
 
 
-#: Default constant template of enumerate registry from IANA CSV.
+#: Default constant template of enumeration registry from IANA CSV.
 LINE = lambda NAME, DOCS, FLAG, ENUM, MISS, MODL: f'''\
 # -*- coding: utf-8 -*-
 # mypy: disable-error-code=assignment

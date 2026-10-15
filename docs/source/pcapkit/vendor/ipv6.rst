@@ -10,7 +10,7 @@ vendor crawlers include:
 
 .. list-table::
 
-   * - :class:`IPv6_Extension_Header <pcapkit.vendor.ipv6.extension_header.ExtensionHeader>`
+   * - :class:`IPv6_ExtensionHeader <pcapkit.vendor.ipv6.extension_header.ExtensionHeader>`
      - IPv6 Extension Header Types [*]_
    * - :class:`IPv6_Option <pcapkit.vendor.ipv6.option.Option>`
      - Destination Options and Hop-by-Hop Options [*]_

@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 __all__ = ['Method']
 
-#: Default constant template of enumerate registry from IANA CSV.
+#: Default constant template of enumeration registry from IANA CSV.
 LINE = lambda NAME, DOCS, ENUM, MODL: f'''\
 # -*- coding: utf-8 -*-
 # pylint: disable=line-too-long

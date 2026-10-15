@@ -215,6 +215,13 @@ class EnumLookup:
         * :meth:`EnumRegistry.register`, before minting -- the one point at which
           a caller can introduce a value no member carries yet.
 
+        Of the registries that override :meth:`EnumRegistry.register` to mint
+        through a path of their own,
+        :meth:`OptionType.register <pcapkit.const.pcapng.option_type.OptionType.register>`
+        calls it at the same point and
+        :meth:`AppType.register <pcapkit.const.reg.apptype.apptype.AppType.register>`
+        does not.
+
         :meth:`EnumRegistry.register_alias` does not call it, and does not need
         to: it refuses any ``value`` that is not already registered, so the value
         it aliases has necessarily passed validation already.

@@ -317,6 +317,10 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
         accessing such renamed keys, the original key name should always be
         used, i.e., such renaming is totally transparent to the user.
 
+    .. versionchanged:: 1.3.3
+
+       Iterating an instance skips the names listed in :attr:`__excluded__`.
+
     """
 
     if TYPE_CHECKING:
