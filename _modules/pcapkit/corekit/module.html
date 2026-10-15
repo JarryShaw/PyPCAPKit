@@ -491,21 +491,15 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
 
-<span class="c1"># NOTE: ``_get_null`` is re-exported alongside the two public names for</span>
-<span class="c1"># backward compatibility, not for use here. Every pickle written before GitHub</span>
-<span class="c1"># issue #911 moved the definitions names ``pcapkit.corekit.module _get_null``</span>
-<span class="c1"># in its payload -- that is what :meth:`NullType.__reduce__` emitted -- so</span>
-<span class="c1"># dropping the name from this module would make those payloads unloadable with</span>
-<span class="c1"># ``AttributeError: module 'pcapkit.corekit.module' has no attribute</span>
-<span class="c1"># '_get_null'``. Newly written pickles name the new home; both resolve to the</span>
-<span class="c1"># same function and yield the same singleton.</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NULL</span><span class="p">,</span> <span class="n">NullType</span><span class="p">,</span> <span class="n">_get_null</span>  <span class="c1"># pylint: disable=unused-import</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NULL</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'NULL'</span><span class="p">,</span> <span class="s1">'ModuleDescriptor'</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'ModuleDescriptor'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Type</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NullType</span>
 
 <span class="n">_T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_T'</span><span class="p">)</span>
 
@@ -520,8 +514,8 @@
 
     <span class="c1">#: Module name.</span>
     <span class="n">module</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="c1">#: Class name, or :data:`NULL` when whatever built this descriptor never</span>
-    <span class="c1">#: got one -- see :attr:`klass`.</span>
+    <span class="c1">#: Class name, or :data:`~pcapkit.corekit.sentinels.NULL` when whatever</span>
+    <span class="c1">#: built this descriptor never got one -- see :attr:`klass`.</span>
     <span class="n">name</span><span class="p">:</span> <span class="s1">'str | NullType'</span>
 
     <span class="nd">@property</span>
@@ -530,8 +524,9 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            pcapkit.utilities.exceptions.ProtocolError: If :attr:`name` is</span>
-<span class="sd">                :data:`NULL` -- the caller building this descriptor omitted</span>
-<span class="sd">                the class name rather than naming one that turned out wrong --</span>
+<span class="sd">                :data:`~pcapkit.corekit.sentinels.NULL` -- the caller building</span>
+<span class="sd">                this descriptor omitted the class name rather than naming one</span>
+<span class="sd">                that turned out wrong --</span>
 <span class="sd">                or if :attr:`module` has no attribute named :attr:`name`.</span>
 
 <span class="sd">        Important:</span>

@@ -20,9 +20,3 @@ adds the *mutating* half every registry under :mod:`pcapkit.const` inherits.
 
    .. automethod:: _extend
    .. automethod:: _unregistered_member
-
-Auxiliaries
------------
-
-.. autoclass:: pcapkit.corekit.enum.NoDefaultType
-.. autodata:: pcapkit.corekit.enum.NO_DEFAULT

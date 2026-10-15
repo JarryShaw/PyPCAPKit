@@ -8,10 +8,8 @@ singleton sentinel this package defines for itself: a value recognised only by
 identity (``value is SENTINEL``), so it cannot be confused with a value a
 caller might legitimately pass.
 
-All four are defined here. The three public ones are also re-exported by
-:mod:`pcapkit.corekit.module`, :mod:`pcapkit.corekit.fields.field` and
-:mod:`pcapkit.corekit.enum` respectively, so ``from <module> import <name>``
-works from either path.
+All four are defined here, and this is their only import path: the modules
+that use them do not re-export them (:issue:`1744`).
 
 .. autoclass:: pcapkit.corekit.sentinels.NullType
 .. autodata:: pcapkit.corekit.sentinels.NULL

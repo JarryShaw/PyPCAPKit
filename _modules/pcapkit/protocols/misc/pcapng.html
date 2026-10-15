@@ -488,6 +488,12 @@
 
 <span class="sd">.. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html</span>
 
+<span class="sd">.. versionremoved:: 1.5.0</span>
+
+<span class="sd">   ``pcapkit.protocols.misc.pcapng.TLSKeyLabel``, now</span>
+<span class="sd">   :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` (:issue:`890`,</span>
+<span class="sd">   :issue:`1744`).</span>
+
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">base64</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">builtins</span>
@@ -879,18 +885,15 @@
 
 <span class="c1"># NOTE: RFC 9850 :rfc:`9850#section-4.2` makes the TLS key labels an IANA</span>
 <span class="c1"># registry ("TLS SSLKEYLOGFILE Labels", Specification Required) rather than a</span>
-<span class="c1"># closed, hand-picked set, so :class:`TLSKeyLabel` is the generated</span>
+<span class="c1"># closed, hand-picked set, so the TLS key label enumeration is the generated</span>
 <span class="c1"># :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`, imported above as</span>
-<span class="c1"># ``Enum_TLSKeyLabel`` like its seven :mod:`pcapkit.const.pcapng` siblings. The</span>
-<span class="c1"># assignment below re-exports the same object (not a copy) under the unaliased</span>
-<span class="c1"># name, so ``from pcapkit.protocols.misc.pcapng import TLSKeyLabel`` resolves to</span>
-<span class="c1"># the class every internal ``Enum_TLSKeyLabel`` reference uses.</span>
+<span class="c1"># ``Enum_TLSKeyLabel`` like its seven :mod:`pcapkit.const.pcapng` siblings. This</span>
+<span class="c1"># module no longer re-exports it under the unaliased name (:issue:`1744`).</span>
 <span class="c1"># :class:`WireGuardKeyLabel` below stays hand-written: it is a closed set</span>
 <span class="c1"># (draft-ietf-opsawg-pcapng-06 section 4.7's "is one of" four names), not a</span>
 <span class="c1"># registry, so filing it under :mod:`pcapkit.const` would misrepresent it as</span>
 <span class="c1"># one. The ``Enum_*`` alias convention covers imports of const enums, so it does</span>
 <span class="c1"># not apply to a local definition.</span>
-<span class="n">TLSKeyLabel</span> <span class="o">=</span> <span class="n">Enum_TLSKeyLabel</span>
 
 
 <div class="viewcode-block" id="WireGuardKeyLabel">

@@ -490,30 +490,17 @@
 <span class="sd">house rule the four below follow.</span>
 
 <span class="sd">The owner's ruling on GitHub issue :issue:`911` chose one shared module over</span>
-<span class="sd">one module per sentinel. Each sentinel is also re-exported, in a single</span>
-<span class="sd">import line, from the module of the one class that uses it --</span>
-<span class="sd">:class:`NullType` from :mod:`pcapkit.corekit.module`, :class:`NoValueType`</span>
-<span class="sd">from :mod:`pcapkit.corekit.fields.field`, :class:`NoDefaultType` from</span>
-<span class="sd">:mod:`pcapkit.corekit.enum` and :class:`AbsentType` from</span>
-<span class="sd">:mod:`pcapkit.protocols.protocol` -- so that no ``from &lt;module&gt; import &lt;name&gt;``</span>
-<span class="sd">breaks, including the ``if TYPE_CHECKING:``-only imports of the *types* that</span>
-<span class="sd">:mod:`pcapkit.foundation.registry.foundation`,</span>
-<span class="sd">:mod:`pcapkit.foundation.registry.protocols` and</span>
-<span class="sd">:mod:`pcapkit.corekit.fields.ipaddress`, :mod:`~pcapkit.corekit.fields.misc`,</span>
-<span class="sd">:mod:`~pcapkit.corekit.fields.numbers` and :mod:`~pcapkit.corekit.fields.strings`</span>
-<span class="sd">carry.</span>
+<span class="sd">one module per sentinel, and this module is the only import path for all</span>
+<span class="sd">four. The re-export each one used to keep at the module of the class that</span>
+<span class="sd">uses it was dropped under :issue:`1744`, per the ruling on :issue:`1715` that a</span>
+<span class="sd">moved name keeps no re-export at its old path. :mod:`pcapkit.corekit.module`,</span>
+<span class="sd">:mod:`pcapkit.corekit.fields.field`, :mod:`pcapkit.corekit.enum` and</span>
+<span class="sd">:mod:`pcapkit.protocols.protocol` still import the object they use from here,</span>
+<span class="sd">but none lists it in ``__all__`` or documents it, and none binds the type.</span>
 
-<span class="sd">``NO_VALUE`` and ``ABSENT`` differ in how far the ruling reaches. ``NO_VALUE``</span>
-<span class="sd">is documented as the value of</span>
-<span class="sd">:attr:`FieldBase.default &lt;pcapkit.corekit.fields.field.FieldBase.default&gt;`,</span>
-<span class="sd">so it is a published contract and the re-export at</span>
-<span class="sd">:mod:`pcapkit.corekit.fields.field` is load-bearing for callers outside this</span>
-<span class="sd">package. ``ABSENT`` is private to :mod:`pcapkit.protocols.protocol` --</span>
-<span class="sd">nothing outside that module ever imports it, from here or from there -- so</span>
-<span class="sd">its re-export exists only so that module's own code keeps reading</span>
-<span class="sd">``ABSENT`` rather than a fully-qualified name. It carries no leading</span>
-<span class="sd">underscore; :class:`AbsentType`'s docstring says what marks it private</span>
-<span class="sd">instead.</span>
+<span class="sd">``ABSENT`` is private to :mod:`pcapkit.protocols.protocol` -- nothing outside</span>
+<span class="sd">that module ever reads it. It carries no leading underscore;</span>
+<span class="sd">:class:`AbsentType`'s docstring says what marks it private instead.</span>
 
 <span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
@@ -529,7 +516,7 @@
 
 
 <div class="viewcode-block" id="NullType">
-<a class="viewcode-back" href="../../../pcapkit/corekit/sentinels.html#pcapkit.corekit.enum.NullType">[docs]</a>
+<a class="viewcode-back" href="../../../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.NullType">[docs]</a>
 <span class="nd">@final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">NullType</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Type of :data:`NULL`, the omitted-``class_``/``module`` sentinel.</span>
@@ -582,11 +569,10 @@
 <span class="sd">    reloads :mod:`pcapkit.corekit.sentinels` after import.</span>
 
 <span class="sd">    Reloading :mod:`pcapkit.corekit.module` instead has no effect on the</span>
-<span class="sd">    singleton at all. That module only re-imports :data:`NULL` and</span>
-<span class="sd">    :class:`NullType` from here, and re-running an already-satisfied</span>
-<span class="sd">    ``from ... import`` reads the current binding in :mod:`sys.modules`</span>
-<span class="sd">    rather than re-executing anything, so it neither mints a new instance</span>
-<span class="sd">    nor loses the old one.</span>
+<span class="sd">    singleton at all. That module only imports :data:`NULL` from here, and</span>
+<span class="sd">    re-running an already-satisfied ``from ... import`` reads the current</span>
+<span class="sd">    binding in :mod:`sys.modules` rather than re-executing anything, so it</span>
+<span class="sd">    neither mints a new instance nor loses the old one.</span>
 
 <span class="sd">    """</span>
 
@@ -646,9 +632,7 @@
 <span class="c1">#: NullType: Sentinel for an omitted ``class_`` argument to the ``register_*``</span>
 <span class="c1">#: helpers in :mod:`pcapkit.foundation.registry.protocols` and</span>
 <span class="c1">#: :mod:`pcapkit.foundation.registry.foundation`. Housed here with the</span>
-<span class="c1">#: package's other sentinels, per the module docstring above;</span>
-<span class="c1">#: :mod:`pcapkit.corekit.module` keeps a re-export so every</span>
-<span class="c1">#: ``from pcapkit.corekit.module import NULL`` keeps working.</span>
+<span class="c1">#: package's other sentinels, per the module docstring above.</span>
 <span class="n">NULL</span> <span class="o">=</span> <span class="n">NullType</span><span class="p">()</span>
 
 
@@ -664,13 +648,12 @@
 
 
 <div class="viewcode-block" id="NoValueType">
-<a class="viewcode-back" href="../../../pcapkit/corekit/sentinels.html#pcapkit.corekit.enum.NoValueType">[docs]</a>
+<a class="viewcode-back" href="../../../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.NoValueType">[docs]</a>
 <span class="nd">@final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">NoValueType</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Type of :data:`NO_VALUE`, the default value for :mod:`pcapkit.corekit.fields`.</span>
 
-<span class="sd">    Housed here per GitHub issue :issue:`911`, and re-exported from</span>
-<span class="sd">    :mod:`pcapkit.corekit.fields.field`, where</span>
+<span class="sd">    Housed here per GitHub issue :issue:`911`;</span>
 <span class="sd">    :attr:`FieldBase.default &lt;pcapkit.corekit.fields.field.FieldBase.default&gt;`</span>
 <span class="sd">    documents it as the field-default sentinel.</span>
 
@@ -684,13 +667,11 @@
 
 <span class="c1">#: NoValueType: Default value for</span>
 <span class="c1">#: :attr:`FieldBase.default &lt;pcapkit.corekit.fields.field.FieldBase.default&gt;`.</span>
-<span class="c1">#: :mod:`pcapkit.corekit.fields.field` keeps a re-export, since that</span>
-<span class="c1">#: attribute's own documentation is a published contract naming this object.</span>
 <span class="n">NO_VALUE</span> <span class="o">=</span> <span class="n">NoValueType</span><span class="p">()</span>
 
 
 <div class="viewcode-block" id="NoDefaultType">
-<a class="viewcode-back" href="../../../pcapkit/corekit/sentinels.html#pcapkit.corekit.enum.NoDefaultType">[docs]</a>
+<a class="viewcode-back" href="../../../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.NoDefaultType">[docs]</a>
 <span class="nd">@final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">NoDefaultType</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Type of :data:`NO_DEFAULT`, the omitted-``default`` sentinel for</span>
@@ -851,14 +832,12 @@
 <span class="c1">#: back. See :class:`NoDefaultType` for why this is a dedicated class rather</span>
 <span class="c1">#: than a bare :class:`object`, why it is a guarded singleton, and why it</span>
 <span class="c1">#: defines neither the copy/pickle hooks nor the ``__bool__`` that its</span>
-<span class="c1">#: :mod:`pcapkit.corekit` siblings do. :mod:`pcapkit.corekit.enum` keeps a</span>
-<span class="c1">#: re-export, since :meth:`EnumLookup.get &lt;pcapkit.corekit.enum.EnumLookup.get&gt;`</span>
-<span class="c1">#: names this object in its signature and docstring.</span>
+<span class="c1">#: :mod:`pcapkit.corekit` siblings do.</span>
 <span class="n">NO_DEFAULT</span> <span class="o">=</span> <span class="n">NoDefaultType</span><span class="p">()</span>
 
 
 <div class="viewcode-block" id="AbsentType">
-<a class="viewcode-back" href="../../../pcapkit/corekit/sentinels.html#pcapkit.corekit.enum.AbsentType">[docs]</a>
+<a class="viewcode-back" href="../../../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.AbsentType">[docs]</a>
 <span class="nd">@final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">AbsentType</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Type of :data:`ABSENT`, the absent-key sentinel.</span>
@@ -904,8 +883,8 @@
 <span class="c1">#: class cannot enumerate its keywords, c.f.</span>
 <span class="c1">#: :attr:`ProtocolBase.__keywords__</span>
 <span class="c1">#: &lt;pcapkit.protocols.protocol.ProtocolBase.__keywords__&gt;`. Never leaves</span>
-<span class="c1">#: :mod:`pcapkit.protocols.protocol`, which keeps a private re-export of it</span>
-<span class="c1">#: for exactly that one read. Private by documentation rather than by a</span>
+<span class="c1">#: :mod:`pcapkit.protocols.protocol`, which imports it from here for exactly</span>
+<span class="c1">#: that one read. Private by documentation rather than by a</span>
 <span class="c1">#: leading underscore -- see :class:`AbsentType`'s own docstring.</span>
 <span class="n">ABSENT</span> <span class="o">=</span> <span class="n">AbsentType</span><span class="p">()</span>
 </pre></div>

@@ -530,13 +530,13 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.pcapng.option_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">OptionType</span> <span class="k">as</span> <span class="n">Enum_OptionType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.pcapng.record_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">RecordType</span> <span class="k">as</span> <span class="n">Enum_RecordType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.pcapng.secrets_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">SecretsType</span> <span class="k">as</span> <span class="n">Enum_SecretsType</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.pcapng.tls_key_label</span><span class="w"> </span><span class="kn">import</span> <span class="n">TLSKeyLabel</span> <span class="k">as</span> <span class="n">Enum_TLSKeyLabel</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.pcapng.verdict_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">VerdictType</span> <span class="k">as</span> <span class="n">Enum_VerdictType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiInfo</span><span class="p">,</span> <span class="n">OrderedMultiInfo</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.version</span><span class="w"> </span><span class="kn">import</span> <span class="n">VersionInfo</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">PacketDirection</span><span class="p">,</span> <span class="n">PacketReception</span><span class="p">,</span> <span class="n">TLSKeyLabel</span><span class="p">,</span>
-                                               <span class="n">WireGuardKeyLabel</span><span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">PacketDirection</span><span class="p">,</span> <span class="n">PacketReception</span><span class="p">,</span> <span class="n">WireGuardKeyLabel</span>
 
 
 <div class="viewcode-block" id="PCAPNG">
@@ -1468,14 +1468,14 @@
 <span class="w">    </span><span class="sd">"""Data model for TLS key log DSB secrets."""</span>
 
     <span class="c1">#: TLS key log entries.</span>
-    <span class="n">entries</span><span class="p">:</span> <span class="s1">'dict[TLSKeyLabel, OrderedMultiInfo[bytes, bytes]]'</span>
+    <span class="n">entries</span><span class="p">:</span> <span class="s1">'dict[Enum_TLSKeyLabel, OrderedMultiInfo[bytes, bytes]]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: TLS key log text as the block carries it, comments and line order</span>
         <span class="c1">#: included. Set on parsing only, and written back verbatim on rebuild.</span>
         <span class="n">data</span><span class="p">:</span> <span class="s1">'str'</span>
 
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entries</span><span class="p">:</span> <span class="s1">'dict[TLSKeyLabel, OrderedMultiDict[bytes, bytes]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entries</span><span class="p">:</span> <span class="s1">'dict[Enum_TLSKeyLabel, OrderedMultiDict[bytes, bytes]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 

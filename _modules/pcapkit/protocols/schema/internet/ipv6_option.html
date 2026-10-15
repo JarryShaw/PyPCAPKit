@@ -735,10 +735,10 @@
 <span class="sd">        the option's ``len`` field is declared as a</span>
 <span class="sd">        :class:`~pcapkit.corekit.fields.misc.ConditionalField` and is skipped</span>
 <span class="sd">        for it. A skipped conditional field is *recorded* in the packet data as</span>
-<span class="sd">        :data:`~pcapkit.corekit.fields.field.NO_VALUE`, rather than being left</span>
+<span class="sd">        :data:`~pcapkit.corekit.sentinels.NO_VALUE`, rather than being left</span>
 <span class="sd">        out of it, so the test below has to be on the **value** and not on the</span>
 <span class="sd">        presence of the key: ``pkt.get('len', 0)`` on its own hands that</span>
-<span class="sd">        :obj:`~pcapkit.corekit.fields.field.NoValueType` straight to</span>
+<span class="sd">        :obj:`~pcapkit.corekit.sentinels.NoValueType` straight to</span>
 <span class="sd">        :class:`~pcapkit.corekit.fields.strings.PaddingField`, where it becomes</span>
 <span class="sd">        an unusable :mod:`struct` template and surfaces much later as an opaque</span>
 <span class="sd">        :exc:`struct.error`, which is how a ``Pad1`` option would fail to parse.</span>

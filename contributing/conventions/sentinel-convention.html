@@ -538,11 +538,11 @@ derives from it mechanically – title-case each underscore-separated word and a
 </table>
 </div>
 <p>GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/911">#911</a>’s housing ruling – one module for all four – is why the table
-names a single defining module. Each of the four modules that <em>uses</em> a sentinel keeps a
-re-export of it, so <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">&lt;module&gt;</span> <span class="pre">import</span> <span class="pre">&lt;name&gt;</span></code> keeps working for
-<a class="reference internal" href="../../pcapkit/corekit/module.html#module-pcapkit.corekit.module" title="pcapkit.corekit.module"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.module</span></code></a>, <a class="reference internal" href="../../pcapkit/corekit/fields/field.html#module-pcapkit.corekit.fields.field" title="pcapkit.corekit.fields.field"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.field</span></code></a>,
-<a class="reference internal" href="../../pcapkit/corekit/enum.html#module-pcapkit.corekit.enum" title="pcapkit.corekit.enum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.enum</span></code></a> and <a class="reference internal" href="../../pcapkit/protocols/protocol.html#module-pcapkit.protocols.protocol" title="pcapkit.protocols.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol</span></code></a> alike, including a
-caller’s <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">TYPE_CHECKING:</span></code>-only import of the type.</p>
+names a single defining module, and it is the only import path. The modules that <em>use</em> a
+sentinel import it from there but do not re-export it: <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1744">#1744</a> dropped the
+per-module re-exports, under the ruling on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1715">#1715</a> that a moved name keeps no
+re-export at its old path. Import the object, and the type for an annotation, from
+<a class="reference internal" href="../../pcapkit/corekit/sentinels.html#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></a>.</p>
 <p>Where a sentinel name already exists and already follows SCREAMING_SNAKE, keep it;
 renaming a published sentinel again costs every caller for no further gain.</p>
 <p><code class="docutils literal notranslate"><span class="pre">ABSENT</span></code> carries no leading underscore even though it is private – it is read in
@@ -554,12 +554,13 @@ private and not for public use, which is what this page and
 <strong>privacy here is documentation-only</strong>, and nothing in the name marks it out: when
 adding a sentinel, add it to the table above whether or not it is public.</p>
 <p>What reaches users is the <strong>object only</strong>. The owner ruled on GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/911">#911</a>
-that the objects alone – <code class="docutils literal notranslate"><span class="pre">NULL</span></code> and its siblings – are exported to users, so a public
-sentinel names its instance in its module’s <code class="docutils literal notranslate"><span class="pre">__all__</span></code> and leaves the type out of it.
-The type stays importable by its dotted path, for an annotation or an <code class="docutils literal notranslate"><span class="pre">is</span></code> guard; it
-is only <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">*</span></code> that does not offer it. A private sentinel such as <code class="docutils literal notranslate"><span class="pre">ABSENT</span></code> is in
-neither, which is what private means here – dropping its leading underscore did not
-add it to either list, and <a class="reference internal" href="../../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.AbsentType" title="pcapkit.corekit.sentinels.AbsentType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbsentType</span></code></a> and
+that the objects alone – <code class="docutils literal notranslate"><span class="pre">NULL</span></code> and its siblings – are exported to users, so a
+public sentinel names its instance in <a class="reference internal" href="../../pcapkit/corekit/sentinels.html#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">__all__</span></code> and
+leaves the type out of it. The type stays importable by its dotted path there, for an
+annotation or an <code class="docutils literal notranslate"><span class="pre">is</span></code> guard; it is only <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">*</span></code> that does not offer it. A private
+sentinel such as <code class="docutils literal notranslate"><span class="pre">ABSENT</span></code> is in neither, which is what private means here – dropping
+its leading underscore did not add it to either list, and
+<a class="reference internal" href="../../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.AbsentType" title="pcapkit.corekit.sentinels.AbsentType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbsentType</span></code></a> and
 <a class="reference internal" href="../../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.ABSENT" title="pcapkit.corekit.sentinels.ABSENT"><code class="xref py py-data docutils literal notranslate"><span class="pre">ABSENT</span></code></a> are documented on
 <a class="reference internal" href="../../pcapkit/corekit/sentinels.html"><span class="doc">the sentinels API page</span></a> as private and not for
 public use rather than left off it, since the name alone no longer says so.</p>
@@ -613,7 +614,7 @@ importable by its dotted path rather than wherever it is star-exported.
 <strong>reload</strong> re-executes the class statement, so the guard does not survive one, and
 code holding the pre-reload instance will fail <code class="docutils literal notranslate"><span class="pre">is</span></code>. The module that matters there
 is <a class="reference internal" href="../../pcapkit/corekit/sentinels.html#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></a>, where the class statement lives; reloading one
-of the re-exporting modules has no effect on the sentinel.</p>
+of the modules that imports a sentinel from there has no effect on it.</p>
 </dd>
 <dt><code class="docutils literal notranslate"><span class="pre">__bool__</span></code> returning <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a></dt><dd><p><code class="docutils literal notranslate"><span class="pre">NULL</span></code>, <code class="docutils literal notranslate"><span class="pre">NO_VALUE</span></code> and <code class="docutils literal notranslate"><span class="pre">ABSENT</span></code> have it, because each stands for an <em>absent
 value</em> and reads naturally in a boolean test. <code class="docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code> deliberately does

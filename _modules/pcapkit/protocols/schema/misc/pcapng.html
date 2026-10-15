@@ -543,8 +543,9 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Self</span>
 
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.pcapng.tls_key_label</span><span class="w"> </span><span class="kn">import</span> <span class="n">TLSKeyLabel</span> <span class="k">as</span> <span class="n">Enum_TLSKeyLabel</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldBase</span> <span class="k">as</span> <span class="n">Field</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">TLSKeyLabel</span><span class="p">,</span> <span class="n">WireGuardKeyLabel</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">WireGuardKeyLabel</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 
 <span class="k">if</span> <span class="n">SPHINX_TYPE_CHECKING</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
@@ -2953,9 +2954,9 @@
 <span class="sd">            Revised schema.</span>
 
 <span class="sd">        """</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">TLSKeyLabel</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.pcapng.tls_key_label</span><span class="w"> </span><span class="kn">import</span> <span class="n">TLSKeyLabel</span> <span class="k">as</span> <span class="n">Enum_TLSKeyLabel</span>
 
-        <span class="n">entries</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="n">OrderedMultiDict</span><span class="p">)</span>  <span class="c1"># type: dict[TLSKeyLabel, OrderedMultiDict[bytes, bytes]]</span>
+        <span class="n">entries</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="n">OrderedMultiDict</span><span class="p">)</span>  <span class="c1"># type: dict[Enum_TLSKeyLabel, OrderedMultiDict[bytes, bytes]]</span>
         <span class="n">lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span> <span class="ow">or</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'#'</span><span class="p">):</span>
@@ -2963,7 +2964,7 @@
 
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">label</span><span class="p">,</span> <span class="n">random</span><span class="p">,</span> <span class="n">secret</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
-                <span class="n">label_enum</span> <span class="o">=</span> <span class="n">TLSKeyLabel</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+                <span class="n">label_enum</span> <span class="o">=</span> <span class="n">Enum_TLSKeyLabel</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
                 <span class="n">entries</span><span class="p">[</span><span class="n">label_enum</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">random</span><span class="p">),</span>
                                         <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">secret</span><span class="p">))</span>
             <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
@@ -2977,7 +2978,7 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: TLS Key Log entries.</span>
-        <span class="n">entries</span><span class="p">:</span> <span class="s1">'dict[TLSKeyLabel, OrderedMultiDict[bytes, bytes]]'</span>
+        <span class="n">entries</span><span class="p">:</span> <span class="s1">'dict[Enum_TLSKeyLabel, OrderedMultiDict[bytes, bytes]]'</span>
 
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 

@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/corekit/fields/field.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="Auxiliaries: Internal Definitions: Type Variables:" />
-<meta name="description" content="Auxiliaries: Internal Definitions: Type Variables:" />
+<meta property="og:description" content="Internal Definitions: Type Variables:" />
+<meta name="description" content="Internal Definitions: Type Variables:" />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="Numerical Fields" href="numbers.html"><link rel="prev" title="Protocol Fields" href="index.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -507,6 +507,11 @@
 <span class="target" id="index-2"></span><a class="reference internal" href="../../utilities/config.html#envvar-PCAPKIT_ZERO_PAD_BUDGET_RATIO"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_ZERO_PAD_BUDGET_RATIO</span></code></a>.</p></li>
 </ul>
 </div>
+<div class="versionremoved">
+<p><span class="versionmodified removed">Removed in version 1.5.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.field.NoValueType</span></code>, now
+<a class="reference internal" href="../sentinels.html#pcapkit.corekit.sentinels.NoValueType" title="pcapkit.corekit.sentinels.NoValueType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels.NoValueType</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/922">#922</a>,
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1744">#1744</a>).</p>
+</div>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.fields.field.Field">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.field.</span></span><span class="sig-name descname"><span class="pre">Field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;pcapkit.corekit.sentinels.NoValueType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;function</span> <span class="pre">Field.&lt;lambda&gt;&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/field.html#Field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.field.Field" title="Link to this definition">¶</a></dt>
@@ -810,30 +815,6 @@ mapping dictionary.</p>
 
 </dd></dl>
 
-<section id="auxiliaries">
-<h2>Auxiliaries<a class="headerlink" href="#auxiliaries" title="Link to this heading">¶</a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.corekit.fields.field.NoValueType">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.field.</span></span><span class="sig-name descname"><span class="pre">NoValueType</span></span><a class="reference internal" href="../../../_modules/pcapkit/corekit/sentinels.html#NoValueType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.field.NoValueType" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>Type of <a class="reference internal" href="#pcapkit.corekit.fields.field.NO_VALUE" title="pcapkit.corekit.fields.field.NO_VALUE"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_VALUE</span></code></a>, the default value for <a class="reference internal" href="index.html#module-pcapkit.corekit.fields" title="pcapkit.corekit.fields"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields</span></code></a>.</p>
-<p>Housed here per GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/911">#911</a>, and re-exported from
-<a class="reference internal" href="#module-pcapkit.corekit.fields.field" title="pcapkit.corekit.fields.field"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.field</span></code></a>, where
-<a class="reference internal" href="#pcapkit.corekit.fields.field.FieldBase.default" title="pcapkit.corekit.fields.field.FieldBase.default"><code class="xref py py-attr docutils literal notranslate"><span class="pre">FieldBase.default</span></code></a>
-documents it as the field-default sentinel.</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.corekit.fields.field.NO_VALUE">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.field.</span></span><span class="sig-name descname"><span class="pre">NO_VALUE</span></span><a class="headerlink" href="#pcapkit.corekit.fields.field.NO_VALUE" title="Link to this definition">¶</a></dt>
-<dd><p>Type of <a class="reference internal" href="#pcapkit.corekit.fields.field.NO_VALUE" title="pcapkit.corekit.fields.field.NO_VALUE"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_VALUE</span></code></a>, the default value for <a class="reference internal" href="index.html#module-pcapkit.corekit.fields" title="pcapkit.corekit.fields"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields</span></code></a>.</p>
-<p>Housed here per GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/911">#911</a>, and re-exported from
-<a class="reference internal" href="#module-pcapkit.corekit.fields.field" title="pcapkit.corekit.fields.field"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.field</span></code></a>, where
-<a class="reference internal" href="#pcapkit.corekit.fields.field.FieldBase.default" title="pcapkit.corekit.fields.field.FieldBase.default"><code class="xref py py-attr docutils literal notranslate"><span class="pre">FieldBase.default</span></code></a>
-documents it as the field-default sentinel.</p>
-</dd></dl>
-
-</section>
 <section id="internal-definitions">
 <h2>Internal Definitions<a class="headerlink" href="#internal-definitions" title="Link to this heading">¶</a></h2>
 <dl class="py class">
@@ -913,7 +894,6 @@ registry calls and simplify the customisation process.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Base Fields</a><ul>
-<li><a class="reference internal" href="#auxiliaries">Auxiliaries</a></li>
 <li><a class="reference internal" href="#internal-definitions">Internal Definitions</a></li>
 <li><a class="reference internal" href="#type-variables">Type Variables</a></li>
 </ul>

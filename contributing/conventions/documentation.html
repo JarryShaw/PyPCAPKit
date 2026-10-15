@@ -755,9 +755,9 @@ the READMEs included – are Markdown where that applies. <code class="docutils 
 adding coverage drops it from every source distribution.</p></li>
 <li><p><strong>Prose names the real defining module, not a re-export.</strong> One strand of the
 consistency sweep on <a class="reference internal" href="../pep.html"><span class="doc">the roadmap</span></a>. The sentinels are the
-worked example: all four are defined in <a class="reference internal" href="../../pcapkit/corekit/sentinels.html#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></a> and
-re-exported by the modules that use them, and <a class="reference internal" href="sentinel-convention.html#sentinel-convention"><span class="std std-ref">Naming a Sentinel</span></a>’s table
-names the defining module rather than any of the re-exports.</p></li>
+worked example: all four are defined in <a class="reference internal" href="../../pcapkit/corekit/sentinels.html#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></a>, and
+<a class="reference internal" href="sentinel-convention.html#sentinel-convention"><span class="std std-ref">Naming a Sentinel</span></a>’s table names it rather than any of the modules that
+use them, which no longer re-export them (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1744">#1744</a>).</p></li>
 <li><p><strong>A verbatim upstream port is exempt from these conventions.</strong>
 <a class="reference internal" href="sentinel-convention.html#sentinel-convention"><span class="std std-ref">Naming a Sentinel</span></a> already carries the case that settled it, the
 <code class="docutils literal notranslate"><span class="pre">cached_property</span></code> backport in <code class="file docutils literal notranslate"><span class="pre">pcapkit/utilities/compat.py</span></code>: the value of a

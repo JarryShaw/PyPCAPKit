@@ -17,6 +17,12 @@ Base Fields
      :data:`pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO`, set with
      :envvar:`PCAPKIT_ZERO_PAD_BUDGET_RATIO`.
 
+.. versionremoved:: 1.5.0
+
+   ``pcapkit.corekit.fields.field.NoValueType``, now
+   :class:`pcapkit.corekit.sentinels.NoValueType` (:issue:`922`,
+   :issue:`1744`).
+
 .. autoclass:: pcapkit.corekit.fields.field.Field
    :members:
    :show-inheritance:
@@ -32,13 +38,6 @@ Base Fields
    .. autoattribute:: _template
    .. autoattribute:: _default
    .. autoattribute:: _callback
-
-Auxiliaries
------------
-
-.. autoclass:: pcapkit.corekit.fields.field.NoValueType
-.. autodata:: pcapkit.corekit.fields.field.NO_VALUE
-   :no-value:
 
 Internal Definitions
 --------------------

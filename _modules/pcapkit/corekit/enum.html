@@ -568,7 +568,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">extend_enum</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NO_DEFAULT</span><span class="p">,</span> <span class="n">NoDefaultType</span>  <span class="c1"># pylint: disable=unused-import</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NO_DEFAULT</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseError</span><span class="p">,</span> <span class="n">EnumKeyError</span><span class="p">,</span> <span class="n">EnumValueError</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -576,7 +576,7 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Self</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'NO_DEFAULT'</span><span class="p">,</span> <span class="s1">'EnumLookup'</span><span class="p">,</span> <span class="s1">'EnumRegistry'</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'EnumLookup'</span><span class="p">,</span> <span class="s1">'EnumRegistry'</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="EnumLookup">
@@ -846,9 +846,10 @@
 <span class="sd">                ``key`` does not resolve. Resolved through a plain</span>
 <span class="sd">                ``_value2member_map_`` lookup, never through</span>
 <span class="sd">                ``cls(default)``, so it cannot mint -- see :issue:`864`.</span>
-<span class="sd">                :data:`NO_DEFAULT` stands for *no default*; that and a</span>
-<span class="sd">                ``default`` naming no registered member both fall through to</span>
-<span class="sd">                the same lookup error ``key`` itself would have raised.</span>
+<span class="sd">                :data:`~pcapkit.corekit.sentinels.NO_DEFAULT` stands for *no</span>
+<span class="sd">                default*; that and a ``default`` naming no registered member</span>
+<span class="sd">                both fall through to the same lookup error ``key`` itself would</span>
+<span class="sd">                have raised.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            The canonical member for ``key``, or for ``default``.</span>

@@ -501,6 +501,11 @@ rather than rejecting it (see <a class="reference internal" href="../const/index
 number needs no regeneration.</p>
 <section id="module-pcapkit.foundation.registry.foundation">
 <span id="foundation-registries"></span><h2>Foundation Registries<a class="headerlink" href="#module-pcapkit.foundation.registry.foundation" title="Link to this heading">¶</a></h2>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.5.0: </span><code class="docutils literal notranslate"><span class="pre">NULL</span></code>, the default of every <code class="docutils literal notranslate"><span class="pre">class_</span></code> argument here, is now the
+<a class="reference internal" href="../corekit/sentinels.html#pcapkit.corekit.sentinels.NULL" title="pcapkit.corekit.sentinels.NULL"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels.NULL</span></code></a> sentinel; in 1.4.x it was the
+string <code class="docutils literal notranslate"><span class="pre">'(null)'</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/833">#833</a>).</p>
+</div>
 <section id="engine-registries">
 <h3>Engine Registries<a class="headerlink" href="#engine-registries" title="Link to this heading">¶</a></h3>
 <dl class="py function">
@@ -778,6 +783,11 @@ the class <code class="docutils literal notranslate"><span class="pre">protocol<
 </section>
 <section id="module-pcapkit.foundation.registry.protocols">
 <span id="protocol-registries"></span><h2>Protocol Registries<a class="headerlink" href="#module-pcapkit.foundation.registry.protocols" title="Link to this heading">¶</a></h2>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.5.0: </span><code class="docutils literal notranslate"><span class="pre">NULL</span></code>, the default of every <code class="docutils literal notranslate"><span class="pre">class_</span></code> argument here, is now the
+<a class="reference internal" href="../corekit/sentinels.html#pcapkit.corekit.sentinels.NULL" title="pcapkit.corekit.sentinels.NULL"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels.NULL</span></code></a> sentinel; in 1.4.x it was the
+string <code class="docutils literal notranslate"><span class="pre">'(null)'</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/833">#833</a>).</p>
+</div>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.foundation.registry.protocols.register_protocol">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.registry.protocols.</span></span><span class="sig-name descname"><span class="pre">register_protocol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protocol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/foundation/registry/protocols.html#register_protocol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.registry.protocols.register_protocol" title="Link to this definition">¶</a></dt>

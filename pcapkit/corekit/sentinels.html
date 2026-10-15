@@ -497,10 +497,8 @@
 singleton sentinel this package defines for itself: a value recognised only by
 identity (<code class="docutils literal notranslate"><span class="pre">value</span> <span class="pre">is</span> <span class="pre">SENTINEL</span></code>), so it cannot be confused with a value a
 caller might legitimately pass.</p>
-<p>All four are defined here. The three public ones are also re-exported by
-<a class="reference internal" href="module.html#module-pcapkit.corekit.module" title="pcapkit.corekit.module"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.module</span></code></a>, <a class="reference internal" href="fields/field.html#module-pcapkit.corekit.fields.field" title="pcapkit.corekit.fields.field"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.field</span></code></a> and
-<a class="reference internal" href="enum.html#module-pcapkit.corekit.enum" title="pcapkit.corekit.enum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.enum</span></code></a> respectively, so <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">&lt;module&gt;</span> <span class="pre">import</span> <span class="pre">&lt;name&gt;</span></code>
-works from either path.</p>
+<p>All four are defined here, and this is their only import path: the modules
+that use them do not re-export them (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1744">#1744</a>).</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.sentinels.NullType">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.sentinels.</span></span><span class="sig-name descname"><span class="pre">NullType</span></span><a class="reference internal" href="../../_modules/pcapkit/corekit/sentinels.html#NullType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.sentinels.NullType" title="Link to this definition">¶</a></dt>
@@ -548,11 +546,10 @@ sharing one module-level binding across a reload, not something this
 class’s singleton guarantees claim to solve, and nothing in this package
 reloads <a class="reference internal" href="#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></a> after import.</p>
 <p>Reloading <a class="reference internal" href="module.html#module-pcapkit.corekit.module" title="pcapkit.corekit.module"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.module</span></code></a> instead has no effect on the
-singleton at all. That module only re-imports <a class="reference internal" href="#pcapkit.corekit.sentinels.NULL" title="pcapkit.corekit.sentinels.NULL"><code class="xref py py-data docutils literal notranslate"><span class="pre">NULL</span></code></a> and
-<a class="reference internal" href="#pcapkit.corekit.sentinels.NullType" title="pcapkit.corekit.sentinels.NullType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NullType</span></code></a> from here, and re-running an already-satisfied
-<code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">...</span> <span class="pre">import</span></code> reads the current binding in <code class="xref py py-mod docutils literal notranslate"><span class="pre">sys.modules</span></code>
-rather than re-executing anything, so it neither mints a new instance
-nor loses the old one.</p>
+singleton at all. That module only imports <a class="reference internal" href="#pcapkit.corekit.sentinels.NULL" title="pcapkit.corekit.sentinels.NULL"><code class="xref py py-data docutils literal notranslate"><span class="pre">NULL</span></code></a> from here, and
+re-running an already-satisfied <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">...</span> <span class="pre">import</span></code> reads the current
+binding in <code class="xref py py-mod docutils literal notranslate"><span class="pre">sys.modules</span></code> rather than re-executing anything, so it
+neither mints a new instance nor loses the old one.</p>
 </dd></dl>
 
 <dl class="py data">
@@ -561,9 +558,7 @@ nor loses the old one.</p>
 <dd><p>Sentinel for an omitted <code class="docutils literal notranslate"><span class="pre">class_</span></code> argument to the <code class="docutils literal notranslate"><span class="pre">register_*</span></code>
 helpers in <a class="reference internal" href="../foundation/registry.html#module-pcapkit.foundation.registry.protocols" title="pcapkit.foundation.registry.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols</span></code></a> and
 <a class="reference internal" href="../foundation/registry.html#module-pcapkit.foundation.registry.foundation" title="pcapkit.foundation.registry.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.foundation</span></code></a>. Housed here with the
-package’s other sentinels, per the module docstring above;
-<a class="reference internal" href="module.html#module-pcapkit.corekit.module" title="pcapkit.corekit.module"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.module</span></code></a> keeps a re-export so every
-<code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">pcapkit.corekit.module</span> <span class="pre">import</span> <span class="pre">NULL</span></code> keeps working.</p>
+package’s other sentinels, per the module docstring above.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#pcapkit.corekit.sentinels.NullType" title="pcapkit.corekit.sentinels.NullType">NullType</a></p>
@@ -576,8 +571,7 @@ package’s other sentinels, per the module docstring above;
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.sentinels.</span></span><span class="sig-name descname"><span class="pre">NoValueType</span></span><a class="reference internal" href="../../_modules/pcapkit/corekit/sentinels.html#NoValueType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.sentinels.NoValueType" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Type of <a class="reference internal" href="#pcapkit.corekit.sentinels.NO_VALUE" title="pcapkit.corekit.sentinels.NO_VALUE"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_VALUE</span></code></a>, the default value for <a class="reference internal" href="fields/index.html#module-pcapkit.corekit.fields" title="pcapkit.corekit.fields"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields</span></code></a>.</p>
-<p>Housed here per GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/911">#911</a>, and re-exported from
-<a class="reference internal" href="fields/field.html#module-pcapkit.corekit.fields.field" title="pcapkit.corekit.fields.field"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.field</span></code></a>, where
+<p>Housed here per GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/911">#911</a>;
 <a class="reference internal" href="fields/field.html#pcapkit.corekit.fields.field.FieldBase.default" title="pcapkit.corekit.fields.field.FieldBase.default"><code class="xref py py-attr docutils literal notranslate"><span class="pre">FieldBase.default</span></code></a>
 documents it as the field-default sentinel.</p>
 </dd></dl>
@@ -586,9 +580,7 @@ documents it as the field-default sentinel.</p>
 <dt class="sig sig-object py" id="pcapkit.corekit.sentinels.NO_VALUE">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.sentinels.</span></span><span class="sig-name descname"><span class="pre">NO_VALUE</span></span><a class="headerlink" href="#pcapkit.corekit.sentinels.NO_VALUE" title="Link to this definition">¶</a></dt>
 <dd><p>Default value for
-<a class="reference internal" href="fields/field.html#pcapkit.corekit.fields.field.FieldBase.default" title="pcapkit.corekit.fields.field.FieldBase.default"><code class="xref py py-attr docutils literal notranslate"><span class="pre">FieldBase.default</span></code></a>.
-<a class="reference internal" href="fields/field.html#module-pcapkit.corekit.fields.field" title="pcapkit.corekit.fields.field"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.field</span></code></a> keeps a re-export, since that
-attribute’s own documentation is a published contract naming this object.</p>
+<a class="reference internal" href="fields/field.html#pcapkit.corekit.fields.field.FieldBase.default" title="pcapkit.corekit.fields.field.FieldBase.default"><code class="xref py py-attr docutils literal notranslate"><span class="pre">FieldBase.default</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#pcapkit.corekit.sentinels.NoValueType" title="pcapkit.corekit.sentinels.NoValueType">NoValueType</a></p>
@@ -735,9 +727,7 @@ let an unresolvable key propagate its lookup error rather than falling
 back. See <a class="reference internal" href="#pcapkit.corekit.sentinels.NoDefaultType" title="pcapkit.corekit.sentinels.NoDefaultType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoDefaultType</span></code></a> for why this is a dedicated class rather
 than a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a>, why it is a guarded singleton, and why it
 defines neither the copy/pickle hooks nor the <code class="docutils literal notranslate"><span class="pre">__bool__</span></code> that its
-<a class="reference internal" href="index.html#module-pcapkit.corekit" title="pcapkit.corekit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit</span></code></a> siblings do. <a class="reference internal" href="enum.html#module-pcapkit.corekit.enum" title="pcapkit.corekit.enum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.enum</span></code></a> keeps a
-re-export, since <a class="reference internal" href="enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumLookup.get</span></code></a>
-names this object in its signature and docstring.</p>
+<a class="reference internal" href="index.html#module-pcapkit.corekit" title="pcapkit.corekit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit</span></code></a> siblings do.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#pcapkit.corekit.sentinels.NoDefaultType" title="pcapkit.corekit.sentinels.NoDefaultType">NoDefaultType</a></p>
@@ -789,8 +779,8 @@ own <code class="docutils literal notranslate"><span class="pre">__keywords__</s
 <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> is itself a meaningful value – the opt-out that says the
 class cannot enumerate its keywords, c.f.
 <code class="xref py py-attr docutils literal notranslate"><span class="pre">ProtocolBase.__keywords__</span></code>. Never leaves
-<a class="reference internal" href="../protocols/protocol.html#module-pcapkit.protocols.protocol" title="pcapkit.protocols.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol</span></code></a>, which keeps a private re-export of it
-for exactly that one read. Private by documentation rather than by a
+<a class="reference internal" href="../protocols/protocol.html#module-pcapkit.protocols.protocol" title="pcapkit.protocols.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol</span></code></a>, which imports it from here for exactly
+that one read. Private by documentation rather than by a
 leading underscore – see <a class="reference internal" href="#pcapkit.corekit.sentinels.AbsentType" title="pcapkit.corekit.sentinels.AbsentType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbsentType</span></code></a>’s own docstring.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>

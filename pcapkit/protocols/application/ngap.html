@@ -500,8 +500,8 @@ which implements extractor for the NG Application Protocol
 data models report with:
 <a class="reference internal" href="#pcapkit.protocols.application.ngap.PDUKind" title="pcapkit.protocols.application.ngap.PDUKind"><code class="xref py py-class docutils literal notranslate"><span class="pre">PDUKind</span></code></a>,
 <a class="reference internal" href="#pcapkit.protocols.application.ngap.Criticality" title="pcapkit.protocols.application.ngap.Criticality"><code class="xref py py-class docutils literal notranslate"><span class="pre">Criticality</span></code></a>,
-<a class="reference internal" href="#pcapkit.protocols.application.ngap.ProcedureCode" title="pcapkit.protocols.application.ngap.ProcedureCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcedureCode</span></code></a> and
-<a class="reference internal" href="#pcapkit.protocols.application.ngap.ProtocolIE" title="pcapkit.protocols.application.ngap.ProtocolIE"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolIE</span></code></a>.</p>
+<a class="reference internal" href="../../const/ngap.html#pcapkit.const.ngap.procedure_code.ProcedureCode" title="pcapkit.const.ngap.procedure_code.ProcedureCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcedureCode</span></code></a> and
+<a class="reference internal" href="../../const/ngap.html#pcapkit.const.ngap.protocol_ie.ProtocolIE" title="pcapkit.const.ngap.protocol_ie.ProtocolIE"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolIE</span></code></a>.</p>
 <p>NGAP is the control plane between a 5G RAN node (gNB or ng-eNB) and an AMF.
 It runs over SCTP and is named by the DATA chunk’s <em>payload protocol
 identifier</em> rather than by a port, so <a class="reference internal" href="#pcapkit.protocols.application.ngap.NGAP" title="pcapkit.protocols.application.ngap.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a> is registered on
@@ -585,8 +585,8 @@ degrades to <a class="reference internal" href="../misc/raw.html#pcapkit.protoco
 package’s.</strong> The IE and procedure enumerations were generated from
 <code class="docutils literal notranslate"><span class="pre">NGAP_Constants</span></code> of <a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a> 0.8.1 (Release-18-era: 81 procedure codes,
 438 protocol IE IDs, highest 443). A <a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a> that carries a newer NGAP will decode IEs that
-<a class="reference internal" href="#pcapkit.protocols.application.ngap.ProcedureCode" title="pcapkit.protocols.application.ngap.ProcedureCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcedureCode</span></code></a> and
-<a class="reference internal" href="#pcapkit.protocols.application.ngap.ProtocolIE" title="pcapkit.protocols.application.ngap.ProtocolIE"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolIE</span></code></a> do not name. Such a
+<a class="reference internal" href="../../const/ngap.html#pcapkit.const.ngap.procedure_code.ProcedureCode" title="pcapkit.const.ngap.procedure_code.ProcedureCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcedureCode</span></code></a> and
+<a class="reference internal" href="../../const/ngap.html#pcapkit.const.ngap.protocol_ie.ProtocolIE" title="pcapkit.const.ngap.protocol_ie.ProtocolIE"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolIE</span></code></a> do not name. Such a
 value resolves to a non-registering member called <code class="docutils literal notranslate"><span class="pre">Unassigned</span></code> rather than
 failing or adding a member to either enumeration.</p></li>
 <li><p><strong>NGAP over a fragmented SCTP association is not reassembled.</strong> A DATA chunk
@@ -840,45 +840,6 @@ value; see <a class="reference internal" href="#pcapkit.protocols.application.ng
 
 </dd></dl>
 
-<dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.ProcedureCode">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ngap.</span></span><span class="sig-name descname"><span class="pre">ProcedureCode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/const/ngap/procedure_code.html#ProcedureCode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.ProcedureCode" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
-<p>Re-exported from <a class="reference internal" href="../../const/ngap.html#pcapkit.const.ngap.procedure_code.ProcedureCode" title="pcapkit.const.ngap.procedure_code.ProcedureCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ngap.procedure_code.ProcedureCode</span></code></a>
-under its original name – see the <code class="docutils literal notranslate"><span class="pre">Enumerations</span></code> comment above. A plain
-alias, not a subclass: <code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code> refuses to extend an enumeration that
-already has members, and this one carries 81 of them.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.ProtocolIE">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ngap.</span></span><span class="sig-name descname"><span class="pre">ProtocolIE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/const/ngap/protocol_ie.html#ProtocolIE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ngap.ProtocolIE" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
-<p>Re-exported from <a class="reference internal" href="../../const/ngap.html#pcapkit.const.ngap.protocol_ie.ProtocolIE" title="pcapkit.const.ngap.protocol_ie.ProtocolIE"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ngap.protocol_ie.ProtocolIE</span></code></a> under
-its original name – see <a class="reference internal" href="#pcapkit.protocols.application.ngap.ProcedureCode" title="pcapkit.protocols.application.ngap.ProcedureCode"><code class="xref py py-data docutils literal notranslate"><span class="pre">ProcedureCode</span></code></a> above for why
-this is an alias rather than a subclass.</p>
-<p>An IE’s ID name and the name of the open type its value is keyed under
-differ in places – IE 21 is <code class="docutils literal notranslate"><span class="pre">id-DefaultPagingDRX</span></code> but its value arrives
-keyed <code class="docutils literal notranslate"><span class="pre">PagingDRX</span></code> – so
-<a class="reference internal" href="#pcapkit.protocols.data.application.ngap.IE.type" title="pcapkit.protocols.data.application.ngap.IE.type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">IE.type</span></code></a> carries
-the latter alongside this.</p>
-</dd></dl>
-
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p><a class="reference internal" href="#pcapkit.protocols.application.ngap.ProcedureCode" title="pcapkit.protocols.application.ngap.ProcedureCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcedureCode</span></code></a> and
-<a class="reference internal" href="#pcapkit.protocols.application.ngap.ProtocolIE" title="pcapkit.protocols.application.ngap.ProtocolIE"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolIE</span></code></a> are rendered without
-their members on purpose: between them they carry 519 of them, each named for
-the 3GPP identifier it comes from, and a page listing all of them is longer
-than the specification’s own tables and no more useful. Read them from
-<code class="docutils literal notranslate"><span class="pre">pcapkit/protocols/application/ngap.py</span></code>, or from
-<code class="docutils literal notranslate"><span class="pre">pycrate_asn1dir.NGAP.NGAP_Constants</span></code>, which is where they were generated
-from.</p>
-<p>Unlike the enumerations under <a class="reference internal" href="../../const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a>, these are not crawled
-from an IANA registry – 3GPP publishes them in the ASN.1 of TS 38.413 rather
-than in a registry with a stable page – so there is no matching module under
-<a class="reference internal" href="../../vendor/index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a>.</p>
-</div>
 </section>
 <section id="module-pcapkit.protocols.schema.application.ngap">
 <span id="header-schemas"></span><h2>Header Schemas<a class="headerlink" href="#module-pcapkit.protocols.schema.application.ngap" title="Link to this heading">¶</a></h2>

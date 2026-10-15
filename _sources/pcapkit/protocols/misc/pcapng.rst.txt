@@ -201,7 +201,13 @@ Auxiliary Data
 :class:`TLSKeyLabel <pcapkit.const.pcapng.tls_key_label.TLSKeyLabel>` is defined
 in :mod:`pcapkit.const.pcapng.tls_key_label`, generated like its
 :mod:`pcapkit.const.pcapng` siblings because :rfc:`9850#section-4.2` makes it an
-IANA registry. This module re-exports it as ``TLSKeyLabel``.
+IANA registry.
+
+.. versionremoved:: 1.5.0
+
+   ``pcapkit.protocols.misc.pcapng.TLSKeyLabel``, now
+   :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` (:issue:`890`,
+   :issue:`1744`).
 
 .. autoclass:: pcapkit.protocols.misc.pcapng.WireGuardKeyLabel
    :members:

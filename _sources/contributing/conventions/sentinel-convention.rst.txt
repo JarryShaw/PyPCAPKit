@@ -37,11 +37,11 @@ derives from it mechanically -- title-case each underscore-separated word and ap
      - :mod:`pcapkit.corekit.sentinels`
 
 GitHub issue :issue:`911`'s housing ruling -- one module for all four -- is why the table
-names a single defining module. Each of the four modules that *uses* a sentinel keeps a
-re-export of it, so ``from <module> import <name>`` keeps working for
-:mod:`pcapkit.corekit.module`, :mod:`pcapkit.corekit.fields.field`,
-:mod:`pcapkit.corekit.enum` and :mod:`pcapkit.protocols.protocol` alike, including a
-caller's ``if TYPE_CHECKING:``-only import of the type.
+names a single defining module, and it is the only import path. The modules that *use* a
+sentinel import it from there but do not re-export it: :issue:`1744` dropped the
+per-module re-exports, under the ruling on :issue:`1715` that a moved name keeps no
+re-export at its old path. Import the object, and the type for an annotation, from
+:mod:`pcapkit.corekit.sentinels`.
 
 Where a sentinel name already exists and already follows SCREAMING_SNAKE, keep it;
 renaming a published sentinel again costs every caller for no further gain.
@@ -56,12 +56,13 @@ private and not for public use, which is what this page and
 adding a sentinel, add it to the table above whether or not it is public.
 
 What reaches users is the **object only**. The owner ruled on GitHub issue :issue:`911`
-that the objects alone -- ``NULL`` and its siblings -- are exported to users, so a public
-sentinel names its instance in its module's ``__all__`` and leaves the type out of it.
-The type stays importable by its dotted path, for an annotation or an ``is`` guard; it
-is only ``import *`` that does not offer it. A private sentinel such as ``ABSENT`` is in
-neither, which is what private means here -- dropping its leading underscore did not
-add it to either list, and :class:`~pcapkit.corekit.sentinels.AbsentType` and
+that the objects alone -- ``NULL`` and its siblings -- are exported to users, so a
+public sentinel names its instance in :mod:`pcapkit.corekit.sentinels`'s ``__all__`` and
+leaves the type out of it. The type stays importable by its dotted path there, for an
+annotation or an ``is`` guard; it is only ``import *`` that does not offer it. A private
+sentinel such as ``ABSENT`` is in neither, which is what private means here -- dropping
+its leading underscore did not add it to either list, and
+:class:`~pcapkit.corekit.sentinels.AbsentType` and
 :data:`~pcapkit.corekit.sentinels.ABSENT` are documented on
 :doc:`the sentinels API page </pcapkit/corekit/sentinels>` as private and not for
 public use rather than left off it, since the name alone no longer says so.
@@ -121,7 +122,7 @@ inconsistencies**:
    **reload** re-executes the class statement, so the guard does not survive one, and
    code holding the pre-reload instance will fail ``is``. The module that matters there
    is :mod:`pcapkit.corekit.sentinels`, where the class statement lives; reloading one
-   of the re-exporting modules has no effect on the sentinel.
+   of the modules that imports a sentinel from there has no effect on it.
 
 ``__bool__`` returning :obj:`False`
    ``NULL``, ``NO_VALUE`` and ``ABSENT`` have it, because each stands for an *absent
