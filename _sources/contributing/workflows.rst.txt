@@ -799,9 +799,16 @@ so ``Run unit tests`` holds the tests to what leaves the runner alive, and a bre
 fails the step, which ``Containment summary`` and ``Experimental summary`` report as
 warnings:
 
-* GraalPy alone gets ``GRAAL_PYTHON_VM_ARGS=--vm.Xmx2g``, a 2 GiB heap for every
-  GraalPy process, xdist workers included, and ``-n 3``, a CPU of the runner's 4 left
-  to the JIT and the runner; 3.14t keeps ``-n auto``.
+* GraalPy alone gets ``GRAAL_PYTHON_VM_ARGS=--vm.Xmx2g --vm.XX:+ExitOnOutOfMemoryError``,
+  a 2 GiB heap for every GraalPy process, xdist workers included, and ``-n 3``, a CPU
+  of the runner's 4 left to the JIT and the runner; 3.14t keeps ``-n auto``. A
+  worker's live heap grows with the tests it runs (`#1753
+  <https://github.com/JarryShaw/PyPCAPKit/issues/1753>`__): in job 116172356218 all
+  three reached 2.2-2.6 GB RSS in 16 minutes, and a ``MemoryError`` in pytest's own
+  failure report ended the session, exit 3, with 7.9 GB free. So a worker whose heap
+  is spent exits, xdist fails the test it ran as crashed and starts another, and
+  ``--max-worker-restart=30`` allows 30 restarts in all, where three 16-minute heaps need
+  about 21 in 110 minutes; xdist's default is 4 a worker, 12 at ``-n 3``.
 * ``timeout --signal=INT --kill-after=3m 110m`` ends pytest under the step's 120-minute
   cap, so it still writes the junit XML, and exits 124; ``prlimit --fsize=2147483648``
   caps any file at 2 GiB.
@@ -817,10 +824,11 @@ warnings:
 
 The step writes ``$RUNNER_TEMP/tests-status``: the exit status, the scope and the
 probe's error, the seconds the tests took, the OOM kills while they ran
-(``/proc/vmstat``) and the ``MemoryError`` lines in their output. From it and the
-monitor's last sample, ``Containment summary`` warns ``No memory cap``, ``tests lost a
-process to the OOM killer``, ``tests timed out at 110 minutes`` or ``tests raised
-MemoryError``, each a warning of its own. A timeout is exit 124, or 137 with no OOM kill
+(``/proc/vmstat``), the ``MemoryError`` lines in their output and xdist's ``node
+down`` lines. From it and the monitor's last sample, ``Containment summary`` warns
+``No memory cap``, ``tests lost a process to the OOM killer``, ``tests timed out at 110
+minutes``, ``tests raised MemoryError`` or ``tests lost an xdist worker``, each a
+warning of its own. A timeout is exit 124, or 137 with no OOM kill
 after 110 minutes: ``--kill-after``'s SIGKILL to a teardown SIGINT did not end, where an
 OOM kill of pytest exits 137 too. ``Experimental summary``, the job's last step and the
 KTLO summary's script, still warns of every failed step, ``tests`` included. The 2 GiB,

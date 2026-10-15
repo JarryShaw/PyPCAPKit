@@ -1296,9 +1296,15 @@ so <code class="docutils literal notranslate"><span class="pre">Run</span> <span
 fails the step, which <code class="docutils literal notranslate"><span class="pre">Containment</span> <span class="pre">summary</span></code> and <code class="docutils literal notranslate"><span class="pre">Experimental</span> <span class="pre">summary</span></code> report as
 warnings:</p>
 <ul class="simple">
-<li><p>GraalPy alone gets <code class="docutils literal notranslate"><span class="pre">GRAAL_PYTHON_VM_ARGS=--vm.Xmx2g</span></code>, a 2 GiB heap for every
-GraalPy process, xdist workers included, and <code class="docutils literal notranslate"><span class="pre">-n</span> <span class="pre">3</span></code>, a CPU of the runner’s 4 left
-to the JIT and the runner; 3.14t keeps <code class="docutils literal notranslate"><span class="pre">-n</span> <span class="pre">auto</span></code>.</p></li>
+<li><p>GraalPy alone gets <code class="docutils literal notranslate"><span class="pre">GRAAL_PYTHON_VM_ARGS=--vm.Xmx2g</span> <span class="pre">--vm.XX:+ExitOnOutOfMemoryError</span></code>,
+a 2 GiB heap for every GraalPy process, xdist workers included, and <code class="docutils literal notranslate"><span class="pre">-n</span> <span class="pre">3</span></code>, a CPU
+of the runner’s 4 left to the JIT and the runner; 3.14t keeps <code class="docutils literal notranslate"><span class="pre">-n</span> <span class="pre">auto</span></code>. A
+worker’s live heap grows with the tests it runs (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1753">#1753</a>): in job 116172356218 all
+three reached 2.2-2.6 GB RSS in 16 minutes, and a <code class="docutils literal notranslate"><span class="pre">MemoryError</span></code> in pytest’s own
+failure report ended the session, exit 3, with 7.9 GB free. So a worker whose heap
+is spent exits, xdist fails the test it ran as crashed and starts another, and
+<code class="docutils literal notranslate"><span class="pre">--max-worker-restart=30</span></code> allows 30 restarts in all, where three 16-minute heaps need
+about 21 in 110 minutes; xdist’s default is 4 a worker, 12 at <code class="docutils literal notranslate"><span class="pre">-n</span> <span class="pre">3</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">timeout</span> <span class="pre">--signal=INT</span> <span class="pre">--kill-after=3m</span> <span class="pre">110m</span></code> ends pytest under the step’s 120-minute
 cap, so it still writes the junit XML, and exits 124; <code class="docutils literal notranslate"><span class="pre">prlimit</span> <span class="pre">--fsize=2147483648</span></code>
 caps any file at 2 GiB.</p></li>
@@ -1314,10 +1320,11 @@ leaves it running; each sample adds the kernel’s <code class="docutils literal
 </ul>
 <p>The step writes <code class="docutils literal notranslate"><span class="pre">$RUNNER_TEMP/tests-status</span></code>: the exit status, the scope and the
 probe’s error, the seconds the tests took, the OOM kills while they ran
-(<code class="docutils literal notranslate"><span class="pre">/proc/vmstat</span></code>) and the <code class="docutils literal notranslate"><span class="pre">MemoryError</span></code> lines in their output. From it and the
-monitor’s last sample, <code class="docutils literal notranslate"><span class="pre">Containment</span> <span class="pre">summary</span></code> warns <code class="docutils literal notranslate"><span class="pre">No</span> <span class="pre">memory</span> <span class="pre">cap</span></code>, <code class="docutils literal notranslate"><span class="pre">tests</span> <span class="pre">lost</span> <span class="pre">a</span>
-<span class="pre">process</span> <span class="pre">to</span> <span class="pre">the</span> <span class="pre">OOM</span> <span class="pre">killer</span></code>, <code class="docutils literal notranslate"><span class="pre">tests</span> <span class="pre">timed</span> <span class="pre">out</span> <span class="pre">at</span> <span class="pre">110</span> <span class="pre">minutes</span></code> or <code class="docutils literal notranslate"><span class="pre">tests</span> <span class="pre">raised</span>
-<span class="pre">MemoryError</span></code>, each a warning of its own. A timeout is exit 124, or 137 with no OOM kill
+(<code class="docutils literal notranslate"><span class="pre">/proc/vmstat</span></code>), the <code class="docutils literal notranslate"><span class="pre">MemoryError</span></code> lines in their output and xdist’s <code class="docutils literal notranslate"><span class="pre">node</span>
+<span class="pre">down</span></code> lines. From it and the monitor’s last sample, <code class="docutils literal notranslate"><span class="pre">Containment</span> <span class="pre">summary</span></code> warns
+<code class="docutils literal notranslate"><span class="pre">No</span> <span class="pre">memory</span> <span class="pre">cap</span></code>, <code class="docutils literal notranslate"><span class="pre">tests</span> <span class="pre">lost</span> <span class="pre">a</span> <span class="pre">process</span> <span class="pre">to</span> <span class="pre">the</span> <span class="pre">OOM</span> <span class="pre">killer</span></code>, <code class="docutils literal notranslate"><span class="pre">tests</span> <span class="pre">timed</span> <span class="pre">out</span> <span class="pre">at</span> <span class="pre">110</span>
+<span class="pre">minutes</span></code>, <code class="docutils literal notranslate"><span class="pre">tests</span> <span class="pre">raised</span> <span class="pre">MemoryError</span></code> or <code class="docutils literal notranslate"><span class="pre">tests</span> <span class="pre">lost</span> <span class="pre">an</span> <span class="pre">xdist</span> <span class="pre">worker</span></code>, each a
+warning of its own. A timeout is exit 124, or 137 with no OOM kill
 after 110 minutes: <code class="docutils literal notranslate"><span class="pre">--kill-after</span></code>’s SIGKILL to a teardown SIGINT did not end, where an
 OOM kill of pytest exits 137 too. <code class="docutils literal notranslate"><span class="pre">Experimental</span> <span class="pre">summary</span></code>, the job’s last step and the
 KTLO summary’s script, still warns of every failed step, <code class="docutils literal notranslate"><span class="pre">tests</span></code> included. The 2 GiB,
