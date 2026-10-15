@@ -17,7 +17,7 @@ __all__ = ['L2TP']
 
 @info_final
 class Flags(Data):
-    """Data model for L2TP flags and version info."""
+    """Data model for L2TP flags."""
 
     #: Type.
     type: 'Type'
@@ -43,7 +43,7 @@ class Flags(Data):
 class L2TP(Protocol):
     """Data model for L2TP packet."""
 
-    #: Flags and version info.
+    #: Flags; the version nibble is :attr:`version`.
     flags: 'Flags'
     #: Version.
     version: 'int'
