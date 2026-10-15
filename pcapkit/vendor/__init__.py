@@ -55,6 +55,10 @@ from pcapkit.vendor.sctp import *
 from pcapkit.vendor.tcp import *
 from pcapkit.vendor.vlan import *
 
+# Crawlers only. This list is also the default target list of
+# :mod:`pcapkit.vendor.__main__`, which runs every name in it, so the base
+# class ``Vendor`` and the warning machinery imported above stay out of it --
+# see ``DELIBERATE_NON_EXPORTS`` in :file:`tests/project/test_public_api.py`.
 __all__ = [
     # Protocol Registration
     'EtherType', 'LinkType', 'TransType', 'AppType',
