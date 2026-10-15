@@ -371,11 +371,13 @@ Data Models
 Type Variables
 ==============
 
-.. data:: pcapkit.foundation.reassembly.data.tcp._AT
+.. data:: _AT
+   :module: pcapkit.foundation.reassembly.data.tcp
    :type: ipaddress.IPv4Address | ipaddress.IPv6Address
 
-.. data:: pcapkit.foundation.reassembly.data.tcp.BufferID
-   :type: typing.Tuple[_AT, int, _AT, int]
+.. data:: BufferID
+   :module: pcapkit.foundation.reassembly.data.tcp
+   :type: typing.Tuple[~pcapkit.foundation.reassembly.data.tcp._AT, int, ~pcapkit.foundation.reassembly.data.tcp._AT, int]
    :no-index:
 
    Buffer ID data structure.

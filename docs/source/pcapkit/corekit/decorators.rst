@@ -31,11 +31,11 @@ decorators, including :func:`~pcapkit.corekit.decorators.seekset`,
 Type Variables
 --------------
 
-.. data:: pcapkit.corekit.decorators.R_seekset
+.. data:: R_seekset
    :type: typing.Any
 
-.. data:: pcapkit.corekit.decorators.R_beholder
+.. data:: R_beholder
    :type: pcapkit.protocols.protocol.ProtocolBase
 
-.. data:: pcapkit.corekit.decorators.R_prepare
+.. data:: R_prepare
    :type: pcapkit.protocols.schema.schema.Schema

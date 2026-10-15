@@ -20,8 +20,8 @@ Option List Fields
 Type Variables
 ~~~~~~~~~~~~~~
 
-.. data:: pcapkit.corekit.fields.collections._TL
+.. data:: _TL
    :type: pcapkit.protocols.schema.schema.Schema | pcapkit.corekit.fields.field.FieldBase | bytes
 
-.. data:: pcapkit.corekit.fields.collections._TS
+.. data:: _TS
    :type: pcapkit.protocols.schema.schema.Schema

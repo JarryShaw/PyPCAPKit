@@ -50,11 +50,11 @@ Internal Definitions
 Type Variables
 --------------
 
-.. data:: pcapkit.corekit.infoclass.KT
+.. data:: KT
    :type: typing.Any
 
-.. data:: pcapkit.corekit.infoclass.VT
+.. data:: VT
    :type: typing.Any
 
-.. data:: pcapkit.corekit.infoclass.ST
+.. data:: ST
    :type: typing.Type[pcapkit.corekit.infoclass.Info]

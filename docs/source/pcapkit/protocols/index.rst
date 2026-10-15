@@ -234,13 +234,13 @@ Internal Definitions
 Type Variables
 ~~~~~~~~~~~~~~
 
-.. data:: pcapkit.protocols.schema.schema._VT
+.. data:: _VT
    :type: typing.Any
 
-.. data:: pcapkit.protocols.schema.schema._ET
+.. data:: _ET
    :type: enum.Enum
 
-.. data:: pcapkit.protocols.schema.schema._ST
+.. data:: _ST
    :type: typing.Type[pcapkit.protocols.schema.schema.Schema]
 
 Data Model

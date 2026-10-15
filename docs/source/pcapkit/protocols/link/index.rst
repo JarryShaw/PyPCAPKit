@@ -28,6 +28,7 @@ link layer, with detailed implementation and methods.
 Protocol Registry
 -----------------
 
-.. data:: pcapkit.protocols.link.LINKTYPE
+.. data:: LINKTYPE
+   :module: pcapkit.protocols.link
 
    alias of :class:`pcapkit.const.reg.linktype.LinkType`

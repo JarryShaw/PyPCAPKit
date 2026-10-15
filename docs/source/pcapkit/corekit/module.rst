@@ -27,5 +27,5 @@ with a class name.
 Type Variables
 --------------
 
-.. data:: pcapkit.corekit.module._T
+.. data:: _T
    :type: typing.Any

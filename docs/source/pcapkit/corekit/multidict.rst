@@ -40,11 +40,11 @@ values per key, based on the `Werkzeug`_ project.
 Type Variables
 --------------
 
-.. data:: pcapkit.corekit.multidict._T
+.. data:: _T
    :type: typing.Any
 
-.. data:: pcapkit.corekit.multidict._KT
+.. data:: _KT
    :type: typing.Any
 
-.. data:: pcapkit.corekit.multidict._VT
+.. data:: _VT
    :type: typing.Any

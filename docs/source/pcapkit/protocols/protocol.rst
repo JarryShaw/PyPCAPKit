@@ -259,8 +259,8 @@ Internal Definitions
 Type Variables
 --------------
 
-.. data:: pcapkit.protocols.protocol._PT
+.. data:: _PT
    :type: pcapkit.protocols.data.data.Data
 
-.. data:: pcapkit.protocols.protocol._ST
+.. data:: _ST
    :type: pcapkit.protocols.schema.schema.Schema

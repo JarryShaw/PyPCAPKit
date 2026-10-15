@@ -36,5 +36,5 @@ Internal Definitions
 Type Variables
 --------------
 
-.. data:: pcapkit.corekit.fields.field._T
+.. data:: _T
    :type: typing.Any

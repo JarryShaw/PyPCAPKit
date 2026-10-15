@@ -36,14 +36,14 @@ Generic Data Fields
 Type Variables
 ~~~~~~~~~~~~~~
 
-.. data:: pcapkit.corekit.fields.misc._TC
+.. data:: _TC
    :type: typing.Any
 
-.. data:: pcapkit.corekit.fields.misc._TS
+.. data:: _TS
    :type: pcapkit.protocols.schema.schema.Schema
 
-.. data:: pcapkit.corekit.fields.misc._TP
+.. data:: _TP
    :type: pcapkit.protocols.protocol.Protocol
 
-.. data:: pcapkit.corekit.fields.misc._TN
+.. data:: _TN
    :type: pcapkit.corekit.sentinels.NoValueType
