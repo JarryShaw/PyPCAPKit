@@ -223,7 +223,7 @@ PyPCAPFile = [ "pypcapfile; python_version < '3.12'" ]
 # for developers -- installs pcapkit.vendor's crawlers, run via
 # `pcapkit-vendor` to regenerate pcapkit.const. Includes ``pycrate`` so
 # pcapkit.vendor.ngap's two crawlers (#880) can run, and ``requests``/
-# ``beautifulsoup4`` for the seven crawlers that import them at module scope
+# ``beautifulsoup4`` for the six crawlers that import them at module scope
 # (c.f. the ``test`` extra's own comment below for which, and #507). #910
 # narrowed ``all`` to core addons only, so this extra names all three
 # itself rather than leaning on ``all`` to also carry them -- ``pycrate``
@@ -302,11 +302,11 @@ test = [
     # rather than failing, so the byte-for-byte regeneration check that is the
     # only guard on the hand-maintained IPX socket registry never runs on any CI
     # path: every ``unit-tests.yml`` job's install line builds on ``.[test]``,
-    # and ``cron-vendor.yml`` installs ``.[all]`` but never invokes pytest.
+    # and ``cron-vendor.yml`` installs ``.[all,vendor]`` but never invokes pytest.
     #
     # Both are needed, not just ``requests``. ``pcapkit.vendor.default`` imports
     # ``requests`` at module scope, and ``pcapkit.vendor.__init__`` then imports
-    # every crawler unconditionally -- seven of which import ``bs4`` at module
+    # every crawler unconditionally -- six of which import ``bs4`` at module
     # scope. Its ``try: import bs4`` guard suppresses only the warning, not the
     # ``ModuleNotFoundError`` that the crawler imports below it raise anyway.
     #
@@ -346,9 +346,8 @@ test = [
     # said nothing at all.
     "isort",
     # The second opinion on the hand-rolled YAML scanners: the ``yaml.safe_load``
-    # cross-checks in ``tests/project/test_project_status.py``,
-    # ``test_release_gates.py``, ``test_bump_version.py`` and
-    # ``test_workflow_apt_timeouts.py`` skip without it.
+    # cross-checks under ``tests/project/``, and the tests there that parse a
+    # workflow with it outright, skip without it.
     # Test-only, as ``pcapkit`` never imports ``yaml``. Unpinned, since
     # ``safe_load`` is all they use.
     "PyYAML",

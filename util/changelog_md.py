@@ -509,13 +509,12 @@ def convert_traced(rst: str) -> tuple[str, list[tuple[int, int]]]:
         # 1. setext heading -> ATX, one level per underline character: ``=``
         #    for the version heading, ``-`` for a module section, ``~`` for a
         #    kind subsection underneath it. The underline is consumed outright
-        #    on an *exact* length match against the title above it -- the
-        #    same narrow test as before, now applied to three characters
-        #    instead of one. reStructuredText itself only requires the
-        #    underline to be no shorter than the title, so an over-long one
-        #    falls straight through this check and is joined into the prose by
-        #    rule 6 like any other unconverted construct, where the residual
-        #    guard's mid-line pattern catches it. The heading is attributed to
+        #    on an *exact* length match against the title above it, whichever
+        #    of the three characters it uses. reStructuredText itself only
+        #    requires the underline to be no shorter than the title, so an
+        #    over-long one falls straight through this check and is joined into
+        #    the prose by rule 6 like any other unconverted construct, where the
+        #    residual guard's mid-line pattern catches it. The heading is attributed to
         #    the title, not to the underline that followed it, because the
         #    title is what a reader would look for.
         if index + 1 < len(lines) and line and len(lines[index + 1]) == len(line):

@@ -126,8 +126,8 @@ never as a zero.
 ## One flaky engine must not cost the others their rows
 
 This is not hypothetical; it is what the first full run of this harness did.
-`pyshark` spawns a `tshark` process per extraction, so a default run spawns **six
-thousand** of them, and one of them died -- `TSharkCrashException ... retcode: 255`,
+`pyshark` spawns a `tshark` process per extraction, so a default run spawns **three
+thousand** of them per environment, and one of them died -- `TSharkCrashException ... retcode: 255`,
 on the third pass. The exception propagated, `benchmark.py` exited, no JSON was
 written, and the run produced **no table at all**. Six working engines went unreported
 because the seventh hiccupped once.
@@ -397,7 +397,7 @@ self-tests below.
 ## Python 3.15
 
 Opt-in, and allowed to fail -- the benchmark's own choice, not CI's: the repository's CI
-has run 3.15 as a blocking, supported leg since #1633. There is no released
+runs 3.15 as a blocking, supported leg (#1633). There is no released
 `python:3.15-slim-bookworm`; the
 pins file names a `3.15-rc` digest, which freezes one particular release candidate
 and will name an older one as time passes. Measure it with:

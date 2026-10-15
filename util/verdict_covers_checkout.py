@@ -20,7 +20,7 @@ Anything else is not covered, and the job gated on this one skips. Nothing is
 lost by that: ``HEAD``'s own ``Unit Tests`` run raises the workflow again when it
 completes, bot commits included -- since #401 (bb900906b, 2026-09-15) they are
 pushed with a deploy key, not with ``GITHUB_TOKEN``, whose events "will not create
-a new workflow run" (GitHub, "Triggering a workflow from a workflow"). All 17 bot
+a new workflow run" (GitHub, "Triggering a workflow from a workflow"). All 21 bot
 commits on ``main`` since have their own ``push`` run of ``Unit Tests``,
 f4f94bcad's being 38325349953; the three before #401, 5d5d8af4d, 48bc11384 and
 e4d0823db, have none. The second case only saves waiting for that run where it

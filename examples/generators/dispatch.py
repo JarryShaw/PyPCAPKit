@@ -298,7 +298,7 @@ def _link_payload(code: 'int') -> 'bytes':
         from pcapkit.protocols.application.rarp import RARP
 
         # ARP/RARP/InARP/DRARP all report their alias from the wire ``oper``
-        # field rather than from the dispatching EtherType (link/arp.py:176-190
+        # field rather than from the dispatching EtherType (link/arp.py:191-202
         # per #496), so ``oper`` has to land in the RARP range (3, 4) or this
         # would silently probe ARP instead while still "passing".
         return bytes(RARP(oper=3))
@@ -772,7 +772,7 @@ class Outcome(NamedTuple):
     #: renamed-on-the-wire class (RARP reporting itself as ``'ARP'``) from a
     #: wrong one -- but wrong here, because :class:`~pcapkit.protocols.misc.raw.Raw`
     #: itself constructs with ``alias=`` set to the *dispatching* code's own
-    #: name (pcapkit/protocols/misc/raw.py:144), so a mis-pointed registry
+    #: name (pcapkit/protocols/misc/raw.py:152), so a mis-pointed registry
     #: entry still renders its original code's name and would satisfy the
     #: string check while no instance of the pinned class exists anywhere in
     #: the chain.
@@ -879,7 +879,7 @@ def probe(case: 'Case') -> 'Outcome':
     # some ``oper`` values, and is still the RARP class), but it is exactly
     # the loophole that let a mis-pointed registry entry through here: several
     # dissectors -- Raw chief among them, in
-    # pcapkit/protocols/misc/raw.py:144 -- construct with ``alias=`` set to
+    # pcapkit/protocols/misc/raw.py:152 -- construct with ``alias=`` set to
     # the *dispatching* code's own name, so a code named ``AH`` retargeted at
     # Raw still renders as ``'...:AH'`` and still satisfies ``AH in
     # protochain`` on the string alone, even though no AH instance exists

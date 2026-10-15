@@ -84,10 +84,11 @@ that configuration before.
 GitHub issue #1029 -- sharding a leg: ``directory`` may be a deeper path such as
 ``protocols/internet``, and ``--exclude SUBDIR`` (repeatable) drops a
 subdirectory, so ``protocols --exclude protocols/internet`` is "the rest". The
-workflow uses that pair to split :mod:`tests.protocols` into two cells. Every
-leg invoked without ``--exclude`` behaves exactly as before. The price is that
-modules in different shards no longer share a process, so pollution between
-them is invisible; the workflow comment records the measured pair counts.
+workflow uses that pair to split :mod:`tests.protocols` into two cells. A leg
+invoked without ``--exclude`` runs every unit-tier module under its directory.
+The price is that modules in different shards do not share a process, so
+pollution between them is invisible; the workflow comment records the measured
+pair counts.
 
 What this still does not catch: a defect running the *other* direction (a
 root module polluting a directory module), interference between two

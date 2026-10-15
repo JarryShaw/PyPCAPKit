@@ -16,9 +16,9 @@ prune temp
 # file mentions them, so neither line is load-bearing. An earlier version of this
 # comment claimed the opposite -- that ``include README.md`` was "the only thing
 # that puts it in an sdist" and that an sdist without it "cannot be installed at
-# all" -- and both halves are false. Measured by deleting these four lines and the
-# two below them and rebuilding from a clean tree: the ``tar tzf`` listing is
-# identical, 861 entries either way with an empty ``diff``, and the resulting sdist
+# all" -- and both halves are false. Measured by deleting the two ``include``
+# lines below and rebuilding from a clean tree: the ``tar tzf`` listing is
+# identical either way, with an empty ``diff``, and the resulting sdist
 # installs with exit 0. ``README.md``, ``LICENSE``, ``CHANGELOG.md`` and
 # ``CITATION.cff`` are all still in it.
 #

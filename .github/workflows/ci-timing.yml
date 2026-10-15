@@ -1,8 +1,9 @@
 name: CI Timing
 
 # The periodic CI-duration review #1538 asked for. util/ci_timing.py reads the
-# last week of Unit Tests, Compat, Lint, CodeQL and Pages runs through the API,
-# writes a report to the job summary and to an artifact, and fails the run when a
+# last week of Unit Tests, Compat, Lint, CodeQL, Pages and Experimental Tests
+# runs through the API, writes a report to the job summary and to an artifact,
+# and fails the run when a
 # HARD threshold fires (status 1; 2 and 3 are an unreadable API and a crash, each
 # annotated as such). GitHub emails a scheduled workflow's failures to whoever
 # last edited its cron line, so the owner hears about it with no `issues: write`.
@@ -29,7 +30,7 @@ on:
 
 # Read-only: the runs, jobs and artifacts need `actions: read`, the workflow
 # files at each run's sha need `contents: read`. GITHUB_TOKEN allows 1,000 API
-# requests an hour per repository; a default run uses about 600.
+# requests an hour per repository; a default run uses about 690.
 permissions:
   actions: read
   contents: read

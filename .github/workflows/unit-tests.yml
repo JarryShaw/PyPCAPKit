@@ -157,7 +157,7 @@ jobs:
       # 7 of the 10 HAS_PYPCAPFILE-gated methods this comment used to count
       # into failures, against a real bug in pcapkit/toolkit/pypcapfile.py's
       # handling of pypcapfile 0.12.0's `IP.src`/`IP.dst`. #743 and #746 fixed
-      # that bug, and #751 gave the now-safe extra a home: the dedicated
+      # that bug, and #751 gave the extra a home: the dedicated
       # `engine-tests` and `pypcap-parity` jobs below install it (15
       # HAS_PYPCAPFILE-gated methods between them), deliberately apart from
       # this job rather than added to it -- see either job's own comment for
@@ -489,7 +489,7 @@ jobs:
       # PyPCAPFile is NOT added here either, even though this job's selection
       # also reaches test_new_engine_parity_runtime.py's 6 HAS_PYPCAPFILE
       # methods -- see the `test` job's comment above for the bug that used to
-      # make installing it here a regression, now fixed by #743/#746. #751's
+      # make installing it here a regression, fixed by #743/#746. #751's
       # `pypcap-parity` job below covers those 6 methods instead, on the same
       # fixture-tier selection as this job but in a venv of its own.
       #
@@ -1111,7 +1111,7 @@ jobs:
   # instruction was "try to build and if the CI is not a good suit, then we
   # ripe it". This job is that attempt: a C toolchain plus libpcap headers, on
   # the two Python versions its own marker allows
-  # ("pypcap; python_version < '3.12'", pyproject.toml:157). If a clean run of
+  # ("pypcap; python_version < '3.12'", pyproject.toml:168). If a clean run of
   # this job's install step goes red -- not a flake -- the fix is deleting this
   # job and returning HAS_PYPCAP to
   # tests/_dependency_gates.DEPENDENCY_GATE_EXCLUSIONS with that run linked as
@@ -1428,8 +1428,8 @@ jobs:
   # #981's own reproduction needs, since the defect is an earlier module
   # polluting a later one. Running the whole suite in one process is not an
   # option (it OOMs at 29 GB on the machine this was diagnosed on); a matrix
-  # of one leg per top-level directory (protocols, since #1029, being two
-  # cells) is the affordable approximation, and it
+  # of one leg per top-level directory (protocols being two cells, #1029)
+  # is the affordable approximation, and it
   # is sized for wall time rather than for memory. Peak RSS was measured for
   # the three cheapest legs only -- cli 152 MiB, dumpkit 237 MiB, interface
   # 305 MiB (resource.getrusage on RUSAGE_CHILDREN, this venv) -- leaving the
@@ -1439,7 +1439,7 @@ jobs:
   # 70s, protocols 847s (before the #1029 split), toolkit 97s, utilities 42s,
   # vendor 104s, one leg per
   # matrix cell -- see `timeout-minutes` below for why the job-level budget is
-  # no longer 20.
+  # 45 rather than 20.
   #
   # GitHub issue #1029: the protocols cell measured 30.4 minutes on a CI
   # runner against this job's 45-minute cap (#1029 measured the next slowest
@@ -1798,7 +1798,7 @@ jobs:
       # above, which each cover only the subset their own selection reaches.
       # PyPCAPFile is deliberately NOT added here -- see the `test` job's
       # comment above for the bug that used to make installing it a
-      # regression, now fixed by #743/#746. This job runs on `latest` only, where
+      # regression, fixed by #743/#746. This job runs on `latest` only, where
       # PyPCAPFile's marker resolves to nothing regardless, so adding it here
       # would be a no-op that misleadingly suggests the extra is exercised by
       # `gate`; #751's `engine-tests` and `pypcap-parity` jobs cover it for

@@ -481,7 +481,7 @@ def measure(engine: 'str', capture: 'str', rounds: 'int',
 
     A small number of failed extractions is tolerated, and this is not
     fastidiousness. ``pyshark`` spawns a :program:`tshark` process per extraction,
-    so a default run spawns six thousand of them, and measured here: one of them
+    so a default run spawns three thousand of them, and measured here: one of them
     crashed with ``TSharkCrashException ... retcode: 255`` partway through the
     third pass and took the entire run with it -- six working engines went
     unreported because the seventh hiccupped once. A crashed extraction is a
