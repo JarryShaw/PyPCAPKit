@@ -9,12 +9,6 @@ turning the bytes of a text field into a :obj:`str`.
 
 .. _chardet: https://chardet.readthedocs.io
 
-.. versionremoved:: 1.5.0
-
-   ``pcapkit.utilities.chardet.DETECT_CACHE_SIZE``, now
-   :data:`pcapkit.utilities.config.DETECT_CACHE_SIZE`, set with
-   :envvar:`PCAPKIT_DETECT_CACHE_SIZE` (:issue:`1726`).
-
 """
 
 import functools

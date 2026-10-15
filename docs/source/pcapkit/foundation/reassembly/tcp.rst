@@ -236,7 +236,7 @@ Terminology
            |     |--> 'payload' : (tuple) partially reassembled payload
            |     |                 |--> (bytes) payload fragment
            |     |                 |--> ...
-           |     |--> 'packet' : (None) not implemented
+           |     |--> 'packet' : (None) not parsed
            |     |--> 'conflict' : (tuple) sequence ranges on which two segments disagreed
            |     |                  |--> (tuple) (first, last), absolute and inclusive
            |     |                  |--> ...
@@ -341,8 +341,6 @@ Data Models
 
 .. module:: pcapkit.foundation.reassembly.data.tcp
 .. currentmodule:: pcapkit.foundation.reassembly.tcp
-
-.. autodata:: pcapkit.foundation.reassembly.data.tcp.BufferID
 
 .. autoclass:: pcapkit.foundation.reassembly.data.tcp.Packet
    :members:

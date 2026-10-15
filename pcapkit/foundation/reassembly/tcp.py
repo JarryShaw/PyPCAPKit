@@ -702,7 +702,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
                 Completion.TIMEOUT if timeout else Completion.PARTIAL
             )
 
-            # if this buffer is not implemented
+            # if this buffer is incomplete
             # go through every hole and extract received payload
             if completion is not Completion.COMPLETE and self._flag_s:
                 data = []  # type: list[bytes]
@@ -731,7 +731,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
                     )
                     datagram.append(packet)
 
-            # if this buffer is implemented -- or if it is not, and ``strict``
+            # if this buffer is complete -- or if it is not, and ``strict``
             # asked for one contiguous payload rather than the received runs
             #
             # NOTE: ``strict=False`` deliberately keeps reporting the whole

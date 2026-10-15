@@ -244,8 +244,8 @@ class Engine(EngineBase[_T], Generic[_T]):
 
        Registration is opt-in, under the ``engine`` class keyword, which
        replaces 1.4.x's ``name`` with no alias; 1.4.x registered every
-       subclass, under its class name when ``name`` was omitted
-       (:issue:`514`).
+       subclass, under its :attr:`~EngineBase.name` (its ``__engine_name__``,
+       else its class name) when ``name`` was omitted (:issue:`514`).
 
     """
 

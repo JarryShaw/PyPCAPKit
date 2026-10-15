@@ -40,7 +40,7 @@ def ipv4_reassembly(frame: 'PCAPNG') -> 'IP_Packet[IPv4Address] | None':
         frame: PCAP-NG frame.
 
     Returns:
-       Data for IPv4 reassembly.
+        Data for IPv4 reassembly.
 
         * If the ``frame`` can be used for IPv4 reassembly. A frame can be reassembled
           if it contains IPv4 layer (:class:`~pcapkit.protocols.internet.ipv4.IPv4`) and
@@ -87,7 +87,7 @@ def ipv6_reassembly(frame: 'PCAPNG') -> 'IP_Packet[IPv6Address] | None':
         frame: PCAP-NG frame.
 
     Returns:
-        A tuple of data for IPv6 reassembly.
+        Data for IPv6 reassembly.
 
         * If the ``frame`` can be used for IPv6 reassembly. A frame can be reassembled
           if it contains IPv6 layer (:class:`~pcapkit.protocols.internet.ipv6.IPv6`) and
@@ -152,7 +152,7 @@ def tcp_reassembly(frame: 'PCAPNG') -> 'TCP_Packet | None':
         frame: PCAP-NG frame.
 
     Returns:
-        A tuple of data for TCP reassembly.
+        Data for TCP reassembly.
 
         * If the ``frame`` can be used for TCP reassembly. A frame can be reassembled
           if it contains TCP layer (:class:`~pcapkit.protocols.transport.tcp.TCP`),
@@ -201,13 +201,13 @@ def tcp_traceflow(frame: 'PCAPNG', *, nanosecond: 'bool' = False) -> 'TF_TCP_Pac
         nanosecond: Whether to use nanosecond precision.
 
     Returns:
-        Data for TCP reassembly.
+        Data for TCP flow tracing.
 
-        * If the ``packet`` can be used for TCP flow tracing. A frame can be reassembled
+        * If the ``frame`` can be used for TCP flow tracing. A frame can be traced
           if it contains TCP layer (:class:`~pcapkit.protocols.transport.tcp.TCP`),
           or a TCP segment whose header the TCP parser rejected, as it does one the
           snapshot length cut short (:issue:`1518`).
-        * If the ``frame`` can be reassembled, then the :obj:`dict` mapping of data for TCP
+        * If the ``frame`` can be traced, then the :obj:`dict` mapping of data for TCP
           flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:

@@ -68,8 +68,8 @@ class Deferred:
 class FrameRecord(dict):
     """A frame as a third-party engine's flow tracing adapter reports it.
 
-    The mapping is the engine's own dissection of the frame, exactly as before, so
-    every trace format that takes a mapping writes it unchanged. Beside it, as
+    The mapping is the engine's own dissection of the frame, which every trace
+    format that takes a mapping writes unchanged. Beside it, as
     attributes the mapping does not show, it carries what the PCAP trace dumper
     reads of a frame -- :meth:`PCAPIO._append_value
     <pcapkit.dumpkit.pcap.PCAPIO._append_value>` takes ``packet``,

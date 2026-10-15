@@ -59,10 +59,11 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
 
     .. versionchanged:: 1.5.0
 
-       An overlapping fragment that disagrees with octets already received is
-       recorded in :attr:`Datagram.conflict
-       <pcapkit.foundation.reassembly.data.ip.Datagram.conflict>` rather than
-       overwriting them unnoticed (:issue:`477`). An incomplete buffer expires
+       An overlapping fragment that disagrees with octets already received
+       overwrites them, as :rfc:`791` asks, and the disagreement is recorded in
+       :attr:`Datagram.conflict
+       <pcapkit.foundation.reassembly.data.ip.Datagram.conflict>`
+       (:issue:`477`). An incomplete buffer expires
        after ``timeout`` seconds of capture time, 60 by default for both IPv4
        and IPv6.
 
@@ -417,7 +418,7 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
             Completion.TIMEOUT if timeout else Completion.PARTIAL
         )
 
-        # if datagram is not implemented
+        # if datagram is incomplete
         if not flag and self._flag_s:
             data = []  # type: list[bytes]
             byte = bytearray()

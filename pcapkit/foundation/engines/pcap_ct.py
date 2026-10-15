@@ -185,14 +185,14 @@ class PCAP_CT(EngineBase['RawFrame']):
         Consulted by :meth:`pcapkit.foundation.extraction.Extractor.run` *before*
         the import test, and it answers two questions the import test cannot.
 
-        **Which distribution owns :mod:`pcap`.** Upstream `PyPCAP`_ owns that name
+        **Which distribution owns** :mod:`pcap`. Upstream `PyPCAP`_ owns that name
         just as legitimately, and ``import pcap._pcap`` -- what
         :attr:`__engine_module__` names -- separates them only as long as upstream
         keeps shipping a single extension module. Asking
         :func:`~pcapkit.foundation.engines._pcap_backend.probe` states the check
         rather than inferring it from an import that happens to fail.
 
-        **Whether a system :manpage:`libpcap(3)` exists at all.** This is the
+        **Whether a system** :manpage:`libpcap(3)` **exists at all.** This is the
         important one, and it is measured rather than theoretical. `pcap-ct`_ needs
         no compiler because it is :mod:`ctypes`, but at *runtime* it imports the
         `libpcap`_ distribution, whose Linux loader calls
@@ -209,7 +209,7 @@ class PCAP_CT(EngineBase['RawFrame']):
         1.11.0b29 installs and reads :file:`examples/captures/in.pcap` identically
         on both, so this engine covers the whole range the project supports. The
         floor in the ``PCAP_CT`` extra's markers exists only because
-        :file:`pyproject.toml` still advertises ``requires-python >= 3.6``, and on
+        :file:`pyproject.toml` advertises ``requires-python >= 3.6``, and on
         an interpreter below 3.10 the distributions simply will not be installed --
         which the import test then reports correctly on its own.
 
@@ -442,7 +442,7 @@ class PCAP_CT(EngineBase['RawFrame']):
         ext._frnum += 1
         ext._vfunc(ext, frame)
 
-        # write plist
+        # write output
         frnum = f'Frame {ext._frnum}'
         if not ext._flag_q:
             info = packet2dict(packet, timestamp, data_link=self._dlink)

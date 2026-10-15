@@ -168,7 +168,7 @@ class PCAP(EngineBase[Frame]):
         # verbose output
         ext._vfunc(ext, frame)
 
-        # write plist
+        # write output
         frnum = f'Frame {ext._frnum}'
         if not ext._flag_q:
             # NOTE: every writer takes the frame's info: a PCAP writer for its
