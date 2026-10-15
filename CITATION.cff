@@ -11,7 +11,7 @@
 # move with ``pcapkit.__version__`` in ``pcapkit/__init__.py`` and the matching entry
 # under ``docs/source/changelog/`` when a release goes out.
 #
-# No ``doi`` and no ``orcid``: neither exists for this project or its author today,
+# No ``doi`` and no ``orcid``: neither exists for this project or its author,
 # and both fields are checked formats rather than free text, so an invented value
 # would validate and still be wrong. They are omitted rather than guessed.
 cff-version: 1.2.0

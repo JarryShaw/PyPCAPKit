@@ -47,16 +47,15 @@ name: "Lint"
 # 6039/6040/6043/6046/6056. Combined: R 642-662, total 6039-6059
 # [1a852698b]. The floor matches the pre-#767 range's own corrected floor
 # exactly (642 both ways) because it is the same tree state either side of
-# that diff -- the range only looks lower now because three of its messages
-# have been deleted, not because the code changed. Already superseded the
+# that diff -- the range only looks lower because three of its messages were
+# deleted, not because the code changed. Already superseded the
 # same day it was measured, too: a cross-review measured `R0801
 # duplicate-code` alone moving 400 -> 573 on `merge(f31e5114f, 83b58ebda)` --
 # this branch merged onto the `main` it was rebased against before #768
-# landed there -- taking R to 823 and the total to 6220 on that merge. Still
-# true of `main` itself today, since this PR touches no `pcapkit/` file, but
-# named for the tree it was actually measured on rather than asserted of
-# `main` directly. This range is a moving target to re-measure, never a
-# constant to defend.
+# landed there -- taking R to 823 and the total to 6220 on that merge. That
+# figure is named for the tree it was actually measured on rather than
+# asserted of `main` directly. This range is a moving target to re-measure,
+# never a constant to defend.
 #
 # The pin above moved from 932cb48d1 to 1a852698b because `pcapkit/` is not
 # actually unchanged between them, despite what an earlier revision of this
@@ -65,7 +64,7 @@ name: "Lint"
 # `pcapkit/vendor/reg/apptype/apptype.py`; tree 7270ad50 -> 2b9ac808), #758's
 # port-validation logic among them. E, W and C read identically either side of
 # that diff -- 90/4765/542 both times -- but 1a852698b is the tree actually
-# re-measured for this line, so that is what it is pinned to now, rather than
+# re-measured for this line, so that is what it is pinned to, rather than
 # repeating a byte-identity claim that does not hold.
 #
 # Four of `PYLINT_FLAGS`' `--disable=` entries named checks pylint has
@@ -77,8 +76,8 @@ name: "Lint"
 # was as unrecognised as if the check had been removed (-> `W0012
 # unknown-option-value`). Same shape of breakage as `emptystring` below, a
 # different cause. All four are dropped either way -- loading the fifth plugin
-# to enable `eq-without-hash` properly would find nothing today (`W1641` is 0
-# over `pcapkit/`), so there is nothing lost in dropping it instead.
+# to enable `eq-without-hash` properly found nothing when measured (`W1641`
+# was 0 over `pcapkit/`), so there is nothing lost in dropping it instead.
 #
 # `--load-plugins=` also named `pylint.extensions.emptystring`, which no
 # longer exists in the installed pylint (-> `E0013 bad-plugin-value` every
@@ -100,7 +99,7 @@ name: "Lint"
 # the same run -- the figures above are both the raw and the file-scoped
 # count, for E, W and C alike.
 #
-# None of the four is clean, so none can block today: a job that is red the day
+# None of the four is clean, so none can block: a job that is red the day
 # it lands teaches everyone to scroll past red, which costs more than the checks
 # are worth. Advisory steps keep the numbers visible (each writes its count to
 # the run summary) without that damage, and promoting one to blocking is a matter
@@ -109,8 +108,8 @@ name: "Lint"
 # Promotion order, cheapest first:
 #   * bandit -- 8 findings, and 7 are B104 "binding to all interfaces" on
 #     `address: ... = '0.0.0.0'` *default arguments* in MH/MIP option builders,
-#     which bind no socket. This package already uses `# nosec` (16 findings are
-#     suppressed that way today), so triaging 8 comments is the whole job.
+#     which bind no socket. This package already uses `# nosec` (16 findings
+#     were suppressed that way when measured), so triaging 8 is the whole job.
 #   * mypy -- 24 of the 112 are `unused-ignore`, i.e. `# type: ignore` comments
 #     that are no longer needed. Deleting those is risk-free and cuts a fifth.
 #   * vermin -- blocked on a decision, not on cleanup: see the step below.
@@ -126,7 +125,7 @@ name: "Lint"
 on:
   # Deliberately *not* `push: [main]`, which is the trigger the other validation
   # workflows here use. Those gate something: a failing unit-test or CodeQL run
-  # on main is a commit someone must look at. These steps gate nothing yet, so a
+  # on main is a commit someone must look at. These steps gate nothing, so a
   # second advisory run per merge -- on a commit that already got one on its pull
   # request -- would buy no information while competing for runners that are
   # visibly oversubscribed (pull requests on this repository have been sitting at
@@ -246,15 +245,15 @@ jobs:
 
           exit $status
 
-      # `vermin-ci`, not `vermin`: the `vermin` target redirects into temp/ and
-      # hands the file to an editor, so its exit status is the editor's and a run
-      # that found violations still succeeds. Same flags, via $(VERMIN_FLAGS).
+      # `vermin-ci`, not `vermin`: the `vermin` target redirects the report into
+      # temp/, so a run that found violations stops at that line with the report
+      # in a file rather than in this log. Same flags, via $(VERMIN_FLAGS).
       #
       # This one needs a decision rather than a cleanup before it can block, and
       # the decision is not CI's to make. vermin.ini sets `targets = 3.6` while
       # the code's real floor is 3.11 -- `enum.StrEnum` and
-      # `enum.show_flag_values` are 3.11 members, and 86 modules import
-      # `typing_extensions`. pyproject.toml's `requires-python` still claims
+      # `enum.show_flag_values` are 3.11 members, and 93 modules import
+      # `typing_extensions`. pyproject.toml's `requires-python` claims
       # `>=3.6, <4`, so the declared floor and the actual one are five releases
       # apart. Whichever way that is resolved -- raise `requires-python`, or
       # raise `targets` to match it -- belongs in its own change.

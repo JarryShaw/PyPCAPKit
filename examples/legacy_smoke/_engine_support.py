@@ -86,7 +86,7 @@ def unavailable(exc: 'Exception') -> 'str | None':
                 f'which Python {version} no longer provides (pyshark bug, not pcapkit)')
 
     # The prerelease pcap-ct/libpcap wheels are platform-neutral, but their
-    # bundled configuration currently asks macOS to load Linux's libc.so.6.
+    # bundled configuration asks macOS to load Linux's libc.so.6.
     # That makes the optional engine unavailable on this host, not a failure in
     # the extraction being benchmarked.
     if isinstance(exc, OSError) and 'libc.so.6' in str(exc):

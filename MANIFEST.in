@@ -46,9 +46,8 @@ prune test
 # entry from the listing, and nothing else changes.
 #
 # These two are kept anyway, as an explicit statement of intent that does not
-# depend on a setuptools default staying where it is. That is a different and much
-# weaker reason than the one this comment used to give, which is the point of
-# rewriting it rather than deleting it.
+# depend on a setuptools default staying where it is -- a much weaker reason than
+# being load-bearing, and the only one.
 include README.md
 include LICENSE
 
@@ -65,7 +64,8 @@ include LICENSE
 # half of the attribution at the one point nobody can see the repository. It
 # also lets ``RepositoryCitationTests`` in
 # ``tests/project/test_bump_version.py`` run against an unpacked sdist, where
-# today it skips itself with "not shipped in the source distribution".
+# without this line it skips itself with "not shipped in the source
+# distribution".
 include CITATION.cff
 
 # The changelog needs two lines of its own, and neither is redundant.
@@ -79,9 +79,7 @@ include CHANGELOG.md
 # distribution would describe one release and no history. ``prune docs`` above
 # drops the rest, which is where the history lives, so re-add just that one
 # directory afterwards -- the same shape as ``include CHANGELOG.md`` above, and for
-# the same reason. (This used to name ``include README.md`` instead, on the
-# mistaken belief that that line was load-bearing; see the note above it.) Each of
-# those files is a self-contained reStructuredText entry
+# the same reason. Each of those files is a self-contained reStructuredText entry
 # that renders standalone; the Sphinx index beside them is deliberately *not*
 # shipped, because it is a ``toctree`` that only Sphinx can read.
 recursive-include docs/source/changelog *.rst

@@ -5,8 +5,8 @@
 # the web UI for no gain.
 #
 # The security link exists because ``SECURITY.md`` asks reporters not to open a
-# public issue for anything exploitable, and until now the chooser offered no way
-# to comply -- the only visible route was the public bug template.
+# public issue for anything exploitable, and without it the chooser would offer
+# no way to comply -- the only visible route would be the public bug template.
 
 blank_issues_enabled: true
 

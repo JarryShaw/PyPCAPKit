@@ -66,7 +66,7 @@ neither can be worked around from inside ``pcapkit``:
    that will not compile against the 3.12+ C API; ``pypcapfile`` 0.12.0 imports
    ``imp``, removed in 3.12; ``pyshark`` 0.6 calls
    ``asyncio.get_event_loop_policy().get_event_loop()``, which raises from 3.14.
-   **That is now a fact the table reports rather than a constraint on the run**: each
+   **That is a fact the table reports rather than a constraint on the run**: each
    engine's ceiling shows up as ``--`` cells with the reason, in the columns past it.
 
 The ``default`` engine -- ``pcapkit``'s own parser, also spelled ``pcapkit`` -- is
@@ -492,7 +492,7 @@ baseline, that machine drift cancels, that repeats are paired one to one rather 
 averaged first, that the environments stitch together correctly, that an unmeasured
 engine keeps its reason, that the overlap marking neither over- nor under-claims, and
 that the emitted reStructuredText parses under **plain docutils** with no warnings and
-uses no Sphinx-only roles. That last one is now a conservative choice rather than a
+uses no Sphinx-only roles. That last one is a conservative choice rather than a
 hard requirement: the snippets land in ``docs/source/index.rst``, which Sphinx
 renders, so a ``:mod:`` role would survive there. Keeping them docutils-clean is what
 lets a table be pasted into any reStructuredText a plain docutils reader will see --

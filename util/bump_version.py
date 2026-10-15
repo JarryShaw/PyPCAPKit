@@ -70,8 +70,7 @@ since every nested key in the file is indented and ``cff-version`` does not
 begin with ``version``.
 
 Each field keeps whatever quoting it already had. The file as committed spells one
-of each -- ``version: 1.5.0b4`` bare and ``date-released: '2026-09-20'`` quoted,
-the latter deliberately, so that a validator reads a string rather than casting it
+of each -- ``version`` bare and ``date-released`` quoted, the latter deliberately, so that a validator reads a string rather than casting it
 to a YAML date object. Preserving the style rather than normalising it keeps the
 automated commit's diff down to the value that actually moved, and leaves the
 choice of style where it belongs. An unquoted version is safe here because every
@@ -114,12 +113,11 @@ keeps not having one; the absence is reported and no date is invented.
 What is deliberately not changed
 --------------------------------
 
-:file:`conda/build` is still written relative to the working directory, as it
-always was, rather than relative to the repository root the way :data:`CITATION`
-is. The two disagree, and the root-relative form is the better of them -- it is
-what :file:`util/changelog_md.py` documents and does -- but moving
-:file:`conda/build` is a change in behaviour for every existing caller and
-belongs in its own review rather than riding along with this one.
+:file:`conda/build` is written relative to the working directory, rather than
+relative to the repository root the way :data:`CITATION` is. The two disagree,
+and the root-relative form is the better of them -- it is what
+:file:`util/changelog_md.py` documents and does -- but moving :file:`conda/build`
+is a change in behaviour for every existing caller, so it is left as it is.
 
 """
 
