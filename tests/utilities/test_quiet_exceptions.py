@@ -158,8 +158,9 @@ class QuietExceptionTests(unittest.TestCase):
 
         Dropping the ``quiet=True`` would put one ``CRITICAL`` record on
         :data:`sys.stderr` for every capture parsed to completion, which is the
-        #362 defect this module exists for -- and would also set
-        :data:`sys.tracebacklimit` to ``0`` process-wide.
+        #362 defect this module exists for -- and, outside development mode,
+        would also replace :data:`sys.excepthook` and
+        :data:`threading.excepthook` process-wide.
 
         """
         class DemoSchema:

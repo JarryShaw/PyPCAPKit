@@ -1356,8 +1356,8 @@ class DependencyGateSelectionTests(unittest.TestCase):
         """Keyed on running the suite, not on holding an install line.
 
         The ``changelog`` job of this workflow installs nothing and runs a
-        generator, and six of the seven other workflows install ``.[all]``
-        somewhere, several as ``.[all,dev]`` -- which carries ``pypcapfile``,
+        generator, and five other workflows install ``.[all]`` somewhere,
+        three as ``.[all,dev]`` -- which carries ``pypcapfile``,
         ``pyshark`` and ``scapy`` through the ``dev`` extra #910 added when it
         narrowed ``all`` to core addons only -- without ever invoking
         :program:`pytest`. A guard that looked at install lines anywhere in
