@@ -166,9 +166,9 @@ class TransportProtocol(EnumLookup, IntEnum):
     # any other one that happens to equal it. Treating every int as a whole is
     # exactly what that ruling above asks for, and it is also why this
     # renumbering changes what specific ints mean, not only what composed ones
-    # do: ``tcp | udp`` (``3``) used to name no registry and now resolves as
+    # do: ``tcp | udp`` (``3``) used to name no registry and resolves as
     # ``sctp``'s own value, and a bare, uncomposed ``4`` -- previously
-    # ``sctp``'s value -- now resolves as ``dccp``'s, silently, with no
+    # ``sctp``'s value -- resolves as ``dccp``'s, silently, with no
     # exception, since a real member sits at ``4`` either way. A caller holding
     # an integer under the old spacing (composed or not) can therefore land on a
     # different real transport's registry after this change, not merely be
@@ -202,7 +202,7 @@ class TransportProtocol(EnumLookup, IntEnum):
         here is already lower-case, so a lowered ``key`` still hits the base's
         exact ``_member_map_`` lookup.
 
-        Case folding is now the *only* thing this override adds. It used to
+        Case folding is the *only* thing this override adds. It used to
         convert the base's name-miss exception as well -- this class raised
         :exc:`ValueError` where the base raised :exc:`KeyError` -- and the
         ruling given in review of the work for :issue:`877`, implemented in GitHub issue
@@ -218,7 +218,7 @@ class TransportProtocol(EnumLookup, IntEnum):
         four transport registries, and they land there only because their own
         ``get()`` takes an :class:`int` port and never accepts a name at all,
         rather than from any name-miss policy. So there was no policy here to
-        preserve, and a name miss now reaches the caller as
+        preserve, and a name miss reaches the caller as
         :exc:`~pcapkit.utilities.exceptions.EnumKeyError` from the base. The
         maintainer's ruling given in review of the work for :issue:`808`, that
         :class:`TransportProtocol` is not to be extended at all, is untouched by
@@ -272,8 +272,8 @@ class TransportProtocol(EnumLookup, IntEnum):
         # TransportProtocol is not to be extended at all. A name that is not a
         # declared member used to mint a brand-new one here, at ``max_val + 1``
         # (before that, ``max_val * 2``) -- an unbounded, ever-growing set of
-        # transport protocols nothing ever asked for. There is nothing left to walk
-        # now: it is simply refused, exactly like any other unrecognised name --
+        # transport protocols nothing ever asked for. There is nothing left to walk:
+        # it is simply refused, exactly like any other unrecognised name --
         # including one spelling a composite, e.g. ``'tcp|udp'``. ``'|'`` used to be
         # intercepted here on its own, so a composite in disguise never got minted
         # into a member whose own name lied about being a single transport; a
@@ -325,6 +325,11 @@ class {NAME}(EnumRegistry, StrEnum):
     :class:`~pcapkit.const.reg.apptype.dccp.DCCP`. Being memberless is also what
     makes it subclassable at all, since :mod:`aenum` refuses to extend an
     enumeration that already has members.
+
+    .. versionchanged:: 1.1.1
+
+       A member converts with :class:`int` to its port number, and compares,
+       orders and hashes as that port.
 
     .. versionchanged:: 1.5.0
 
@@ -538,7 +543,7 @@ class {NAME}(EnumRegistry, StrEnum):
         # cast is for mypy alone: ``dict.get`` accepts any hashable key at run
         # time regardless of its declared key type, but mypy holds ``.get`` to
         # the dict's own ``TransportProtocol`` keys, and does not know ``proto``
-        # can genuinely be a bare :class:`int` here now that GitHub issue #808
+        # can genuinely be a bare :class:`int` here, since GitHub issue #808
         # dropped the ``IntFlag`` base -- see the annotation on ``proto`` above.
         subclass = cls.__registries__.get(cast('TransportProtocol', proto))
         if subclass is not None:
@@ -555,10 +560,10 @@ class {NAME}(EnumRegistry, StrEnum):
         # here whenever it matches no real member's value, e.g. a stray bit like
         # ``17``. A composite built by hand used to reach here just as reliably,
         # since no combination of the old power-of-two bits ever equalled a
-        # single real member's value; that is no longer true under this class's
-        # current sequential numbering --
+        # single real member's value; that is not true under this class's
+        # sequential numbering --
         # ``TransportProtocol.tcp | TransportProtocol.udp`` (``3``) is
-        # ``sctp``'s own value now, so it resolves at the dict lookup above
+        # ``sctp``'s own value, so it resolves at the dict lookup above
         # instead of reaching this point at all. A composite used to get its own
         # :exc:`~pcapkit.utilities.exceptions.ProtocolError`, decoded through
         # :func:`~pcapkit.utilities.compat.show_flag_values` and naming every

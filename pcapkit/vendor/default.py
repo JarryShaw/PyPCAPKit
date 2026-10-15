@@ -4,8 +4,8 @@
 
 .. module:: pcapkit.vendor.default
 
-:mod:`pcapkit.vendor.default` contains :class:`~pcapkit.vendor.default.Vendor`
-only, which is the base meta class for all vendor crawlers.
+:mod:`pcapkit.vendor.default` exports :class:`~pcapkit.vendor.default.Vendor`
+only, which is the base class for all vendor crawlers.
 
 """
 import abc
@@ -70,7 +70,7 @@ DISTRIBUTION = 'pypcapkit'
 #: under ``[project.urls]`` in :file:`pyproject.toml`.
 PROJECT_URL = 'https://github.com/JarryShaw/PyPCAPKit'
 
-#: Default constant template of enumerate registry from IANA CSV.
+#: Default constant template of enumeration registry from IANA CSV.
 LINE = lambda NAME, DOCS, FLAG, ENUM, MISS, MODL: f'''\
 # -*- coding: utf-8 -*-
 # pylint: disable=line-too-long,consider-using-f-string
@@ -211,9 +211,8 @@ def stdin_is_interactive() -> 'bool':
 class VendorMeta(abc.ABCMeta):
     """Meta class to add dynamic support to :class:`Vendor`.
 
-    This meta class is used to generate necessary attributes for the
-    :class:`Vendor` class. It can be useful to reduce unnecessary
-    registry calls and simplify the customisation process.
+    It defines nothing of its own, so a crawler class is built exactly as by
+    :class:`abc.ABCMeta`.
 
     """
 

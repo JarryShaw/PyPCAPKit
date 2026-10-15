@@ -33,6 +33,8 @@ crawlers include:
      - ToS (DS Field) Reliability
    * - :class:`IPv4_ToSThroughput <pcapkit.vendor.ipv4.tos_thr.ToSThroughput>`
      - ToS (DS Field) Throughput
+   * - :class:`IPv4_TSFlag <pcapkit.vendor.ipv4.ts_flag.TSFlag>`
+     - TS Flag
 
 .. [*] https://www.iana.org/assignments/ip-parameters/ip-parameters.xhtml#ip-parameters-1
 .. [*] https://www.iana.org/assignments/ip-parameters/ip-parameters.xhtml#ipv4-router-alert-option-values

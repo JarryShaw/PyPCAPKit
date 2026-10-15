@@ -23,8 +23,14 @@ IPX Packet Types
 This module contains the vendor crawler for **IPX Packet Types**,
 which is automatically generating :class:`pcapkit.const.ipx.packet.Packet`.
 
+.. note::
+
+   This crawler does not crawl. Its table is gone from the Wikipedia article,
+   so the data is maintained by hand in the ``DATA`` mapping of
+   :mod:`pcapkit.vendor.ipx.packet`, and the class defines no ``LINK``.
+
 .. autoclass:: pcapkit.vendor.ipx.packet.Packet
-   :members: FLAG, LINK
+   :members: FLAG
    :show-inheritance:
 
 Socket Types

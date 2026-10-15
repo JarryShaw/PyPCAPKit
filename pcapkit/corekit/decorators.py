@@ -119,6 +119,10 @@ def beholder(
     See Also:
         :meth:`pcapkit.protocols.protocol.Protocol._decode_next_layer`
 
+    .. versionchanged:: 1.3.0
+
+       Logs the exception it absorbs, and prints its traceback in verbose mode.
+
     :param func: decorated function
     :meta decorator:
     """

@@ -3,6 +3,11 @@ Base Fields
 
 .. module:: pcapkit.corekit.fields.field
 
+.. versionremoved:: 1.3.0
+
+   ``pcapkit.corekit.fields.field._Field``, renamed
+   :class:`~pcapkit.corekit.fields.field.FieldBase` with no alias left behind.
+
 .. versionremoved:: 1.5.0
 
    ``pcapkit.corekit.fields.field.NoValueType``, now

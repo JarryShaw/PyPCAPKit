@@ -132,9 +132,9 @@ def parse_ip_address(value: 'IPv4Address | IPv6Address | bytes | int | str',
         value: Address as the caller gave it -- an :mod:`ipaddress` object,
             which is returned unchanged, or anything :mod:`ipaddress` accepts.
         description: Human-readable description of what ``value`` is, used to
-            build the :exc:`FieldValueError` message. Callers in a protocol
-            should carry their usual context into it, e.g.
-            ``f'{self.alias}: [OptNo {type}] care-of address'``.
+            build the :exc:`~pcapkit.utilities.exceptions.FieldValueError`
+            message. Callers in a protocol should carry their usual context
+            into it, e.g. ``f'{self.alias}: [OptNo {type}] care-of address'``.
         version: IP version to demand, ``4`` or ``6``, or :obj:`None` to take
             whichever family ``value`` describes. Pass it where the wire format
             fixes the family, so that an :class:`int` is widened to the right
@@ -176,7 +176,7 @@ def parse_ip_address(value: 'IPv4Address | IPv6Address | bytes | int | str',
         dispatch on the value's type, for the placement reason :issue:`469`
         gives and :func:`_reject_bool` repeats.
 
-        This raises :exc:`FieldValueError` and not
+        This raises :exc:`~pcapkit.utilities.exceptions.FieldValueError` and not
         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, which is deliberate
         even though two sibling guards for the same mistake --
         :meth:`MH._make_opt_mn_id

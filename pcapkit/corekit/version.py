@@ -15,7 +15,14 @@ __all__ = ['VersionInfo']
 
 
 class VersionInfo(collections.namedtuple('VersionInfo', ['major', 'minor'])):
-    """VersionInfo is alike :class:`sys.version_info`."""
+    """VersionInfo is alike :class:`sys.version_info`.
+
+    .. versionchanged:: 1.3.0
+
+       :class:`str` gives ``'major.minor'`` rather than the tuple's
+       :func:`repr`.
+
+    """
 
     __slots__ = ()
 

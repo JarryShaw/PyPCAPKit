@@ -3,8 +3,8 @@ Base Crawler
 
 .. module:: pcapkit.vendor.default
 
-:mod:`pcapkit.vendor.default` contains :class:`~pcapkit.vendor.default.Vendor`
-only, which is the base meta class for all vendor crawlers.
+:mod:`pcapkit.vendor.default` exports :class:`~pcapkit.vendor.default.Vendor`
+only, which is the base class for all vendor crawlers.
 
 .. autoclass:: pcapkit.vendor.default.Vendor
    :no-members:
