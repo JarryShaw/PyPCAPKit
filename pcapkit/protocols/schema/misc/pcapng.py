@@ -66,8 +66,9 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal, Self
 
+    from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel as Enum_TLSKeyLabel
     from pcapkit.corekit.fields.field import FieldBase as Field
-    from pcapkit.protocols.misc.pcapng import TLSKeyLabel, WireGuardKeyLabel
+    from pcapkit.protocols.misc.pcapng import WireGuardKeyLabel
     from pcapkit.protocols.protocol import ProtocolBase
 
 if SPHINX_TYPE_CHECKING:  # pragma: no cover
@@ -2229,9 +2230,9 @@ class TLSKeyLog(DSBSecrets, code=Enum_SecretsType.TLS_Key_Log):
             Revised schema.
 
         """
-        from pcapkit.protocols.misc.pcapng import TLSKeyLabel
+        from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel as Enum_TLSKeyLabel
 
-        entries = collections.defaultdict(OrderedMultiDict)  # type: dict[TLSKeyLabel, OrderedMultiDict[bytes, bytes]]
+        entries = collections.defaultdict(OrderedMultiDict)  # type: dict[Enum_TLSKeyLabel, OrderedMultiDict[bytes, bytes]]
         lines = self.data.splitlines()
         for index, line in enumerate(lines):
             if not line or line.startswith('#'):
@@ -2239,7 +2240,7 @@ class TLSKeyLog(DSBSecrets, code=Enum_SecretsType.TLS_Key_Log):
 
             try:
                 label, random, secret = line.strip().split()
-                label_enum = TLSKeyLabel(label.upper())
+                label_enum = Enum_TLSKeyLabel(label.upper())
                 entries[label_enum].add(bytes.fromhex(random),
                                         bytes.fromhex(secret))
             except ValueError as error:
@@ -2252,7 +2253,7 @@ class TLSKeyLog(DSBSecrets, code=Enum_SecretsType.TLS_Key_Log):
 
     if TYPE_CHECKING:
         #: TLS Key Log entries.
-        entries: 'dict[TLSKeyLabel, OrderedMultiDict[bytes, bytes]]'
+        entries: 'dict[Enum_TLSKeyLabel, OrderedMultiDict[bytes, bytes]]'
 
         def __init__(self, data: 'str') -> 'None': ...
 

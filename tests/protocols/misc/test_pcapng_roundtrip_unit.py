@@ -182,8 +182,9 @@ class TestPCAPNGRoundTrip(unittest.TestCase):
     def test_key_log_writers_end_lines_with_newlines(self) -> None:
         """#1271: entries built from keywords parse back, with no wall-clock time."""
         from pcapkit.const.pcapng.secrets_type import SecretsType
+        from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel
         from pcapkit.corekit.multidict import OrderedMultiDict
-        from pcapkit.protocols.misc.pcapng import PCAPNG, TLSKeyLabel, WireGuardKeyLabel
+        from pcapkit.protocols.misc.pcapng import PCAPNG, WireGuardKeyLabel
         from pcapkit.protocols.schema.misc.pcapng import TLSKeyLog, WireGuardKeyLog
 
         proto = PCAPNG.__new__(PCAPNG)

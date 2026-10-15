@@ -6,10 +6,17 @@
 
 This module provides the foundation registries for :mod:`pcapkit`.
 
+.. versionchanged:: 1.5.0
+
+   ``NULL``, the default of every ``class_`` argument here, is now the
+   :data:`pcapkit.corekit.sentinels.NULL` sentinel; in 1.4.x it was the
+   string ``'(null)'`` (:issue:`833`).
+
 """
 from typing import TYPE_CHECKING, cast, overload
 
-from pcapkit.corekit.module import NULL, ModuleDescriptor
+from pcapkit.corekit.module import ModuleDescriptor
+from pcapkit.corekit.sentinels import NULL
 from pcapkit.foundation.extraction import Extractor
 from pcapkit.foundation.reassembly.ipv4 import IPv4 as IPv4_Reassembly
 from pcapkit.foundation.reassembly.ipv6 import IPv6 as IPv6_Reassembly
@@ -23,7 +30,7 @@ if TYPE_CHECKING:
 
     from dictdumper import Dumper
 
-    from pcapkit.corekit.module import NullType
+    from pcapkit.corekit.sentinels import NullType
     from pcapkit.foundation.engines import Engine
     from pcapkit.foundation.reassembly.reassembly import CallbackFn as Reasm_CallbackFn
     from pcapkit.foundation.reassembly.reassembly import Reassembly

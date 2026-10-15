@@ -212,11 +212,10 @@ class WiringTests(unittest.TestCase):
                 self.assertIn('packet', cls.__additional__)
                 self.assertIs(cls.__deferred__, importlib.import_module(deferred_module).Deferred)
 
-    def test_the_old_import_paths_resolve_to_the_one_class(self) -> 'None':
-        """The name was public at all three before the move, and still is.
-
-        Each path is the class object itself rather than a copy of it, so the
-        two old definitions really are gone and nothing can diverge again.
+    def test_the_old_import_paths_are_gone(self) -> 'None':
+        """The name was public at all three before the move; GitHub issue #1744
+        dropped those re-exports (#1715: a moved name keeps no re-export at its
+        old path), so :mod:`pcapkit.corekit.packet` is the one home.
 
         """
         from pcapkit.corekit.packet import DeferredPacket
@@ -227,8 +226,8 @@ class WiringTests(unittest.TestCase):
                        'pcapkit.foundation.traceflow.data.data'):
             with self.subTest(module=module):
                 imported = importlib.import_module(module)
-                self.assertIs(imported.DeferredPacket, DeferredPacket)
-                self.assertIn('DeferredPacket', imported.__all__)
+                self.assertFalse(hasattr(imported, 'DeferredPacket'))
+                self.assertNotIn('DeferredPacket', imported.__all__)
 
     def test_each_model_resolves_its_own_placeholder_and_not_the_other(self) -> 'None':
         from pcapkit.corekit.packet import DeferredPacket

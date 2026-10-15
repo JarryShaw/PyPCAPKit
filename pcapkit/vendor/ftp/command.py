@@ -55,7 +55,8 @@ from typing import TYPE_CHECKING
 
 from aenum import IntEnum, IntFlag, StrEnum, auto
 
-from pcapkit.corekit.enum import NO_DEFAULT, EnumLookup, EnumRegistry
+from pcapkit.corekit.enum import EnumLookup, EnumRegistry
+from pcapkit.corekit.sentinels import NO_DEFAULT
 
 if TYPE_CHECKING:
     from typing import Any, Optional, Type

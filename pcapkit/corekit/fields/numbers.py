@@ -8,7 +8,8 @@ from typing import TYPE_CHECKING, Generic, TypeVar, Union, cast
 
 import aenum
 
-from pcapkit.corekit.fields.field import NO_VALUE, Field
+from pcapkit.corekit.fields.field import Field
+from pcapkit.corekit.sentinels import NO_VALUE
 from pcapkit.utilities.exceptions import BaseError, FieldValueError, IntError, ProtocolError
 
 __all__ = [
@@ -28,7 +29,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal, Self
 
     from pcapkit.const.reg.apptype import AppType, TransportProtocol
-    from pcapkit.corekit.fields.field import NoValueType
+    from pcapkit.corekit.sentinels import NoValueType
 
 _T = TypeVar('_T', bound='int')
 

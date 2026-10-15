@@ -11,6 +11,12 @@ which implements extractor for PCAP-NG file format [*]_.
 
 .. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html
 
+.. versionremoved:: 1.5.0
+
+   ``pcapkit.protocols.misc.pcapng.TLSKeyLabel``, now
+   :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` (:issue:`890`,
+   :issue:`1744`).
+
 """
 import base64
 import builtins
@@ -390,18 +396,15 @@ class PacketReception(EnumLookup, enum.IntEnum):
 
 # NOTE: RFC 9850 :rfc:`9850#section-4.2` makes the TLS key labels an IANA
 # registry ("TLS SSLKEYLOGFILE Labels", Specification Required) rather than a
-# closed, hand-picked set, so :class:`TLSKeyLabel` is the generated
+# closed, hand-picked set, so the TLS key label enumeration is the generated
 # :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`, imported above as
-# ``Enum_TLSKeyLabel`` like its seven :mod:`pcapkit.const.pcapng` siblings. The
-# assignment below re-exports the same object (not a copy) under the unaliased
-# name, so ``from pcapkit.protocols.misc.pcapng import TLSKeyLabel`` resolves to
-# the class every internal ``Enum_TLSKeyLabel`` reference uses.
+# ``Enum_TLSKeyLabel`` like its seven :mod:`pcapkit.const.pcapng` siblings. This
+# module no longer re-exports it under the unaliased name (:issue:`1744`).
 # :class:`WireGuardKeyLabel` below stays hand-written: it is a closed set
 # (draft-ietf-opsawg-pcapng-06 section 4.7's "is one of" four names), not a
 # registry, so filing it under :mod:`pcapkit.const` would misrepresent it as
 # one. The ``Enum_*`` alias convention covers imports of const enums, so it does
 # not apply to a local definition.
-TLSKeyLabel = Enum_TLSKeyLabel
 
 
 class WireGuardKeyLabel(EnumLookup, StrEnum):

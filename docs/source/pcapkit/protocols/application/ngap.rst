@@ -10,8 +10,8 @@ which implements extractor for the NG Application Protocol
 data models report with:
 :class:`~pcapkit.protocols.application.ngap.PDUKind`,
 :class:`~pcapkit.protocols.application.ngap.Criticality`,
-:class:`~pcapkit.protocols.application.ngap.ProcedureCode` and
-:class:`~pcapkit.protocols.application.ngap.ProtocolIE`.
+:class:`~pcapkit.const.ngap.procedure_code.ProcedureCode` and
+:class:`~pcapkit.const.ngap.protocol_ie.ProtocolIE`.
 
 NGAP is the control plane between a 5G RAN node (gNB or ng-eNB) and an AMF.
 It runs over SCTP and is named by the DATA chunk's *payload protocol
@@ -84,8 +84,8 @@ Known Limitations
   package's.** The IE and procedure enumerations were generated from
   ``NGAP_Constants`` of |pycrate|_ 0.8.1 (Release-18-era: 81 procedure codes,
   438 protocol IE IDs, highest 443). A |pycrate|_ that carries a newer NGAP will decode IEs that
-  :class:`~pcapkit.protocols.application.ngap.ProcedureCode` and
-  :class:`~pcapkit.protocols.application.ngap.ProtocolIE` do not name. Such a
+  :class:`~pcapkit.const.ngap.procedure_code.ProcedureCode` and
+  :class:`~pcapkit.const.ngap.protocol_ie.ProtocolIE` do not name. Such a
   value resolves to a non-registering member called ``Unassigned`` rather than
   failing or adding a member to either enumeration.
 * **NGAP over a fragmented SCTP association is not reassembled.** A DATA chunk
@@ -123,30 +123,6 @@ Auxiliary Data
 .. autoclass:: pcapkit.protocols.application.ngap.Criticality
    :members:
    :show-inheritance:
-
-.. autoclass:: pcapkit.protocols.application.ngap.ProcedureCode
-   :no-members:
-   :show-inheritance:
-
-.. autoclass:: pcapkit.protocols.application.ngap.ProtocolIE
-   :no-members:
-   :show-inheritance:
-
-.. note::
-
-   :class:`~pcapkit.protocols.application.ngap.ProcedureCode` and
-   :class:`~pcapkit.protocols.application.ngap.ProtocolIE` are rendered without
-   their members on purpose: between them they carry 519 of them, each named for
-   the 3GPP identifier it comes from, and a page listing all of them is longer
-   than the specification's own tables and no more useful. Read them from
-   ``pcapkit/protocols/application/ngap.py``, or from
-   ``pycrate_asn1dir.NGAP.NGAP_Constants``, which is where they were generated
-   from.
-
-   Unlike the enumerations under :mod:`pcapkit.const`, these are not crawled
-   from an IANA registry -- 3GPP publishes them in the ASN.1 of TS 38.413 rather
-   than in a registry with a stable page -- so there is no matching module under
-   :mod:`pcapkit.vendor`.
 
 Header Schemas
 --------------

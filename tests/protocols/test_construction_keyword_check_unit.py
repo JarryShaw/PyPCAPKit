@@ -676,9 +676,9 @@ class SentinelTests(unittest.TestCase):
     ``Optional[frozenset[str]]`` and :class:`~pcapkit.protocols.application.http.HTTP`
     sets it -- so the third needs a marker of its own.
 
-    That marker is :data:`~pcapkit.protocols.protocol.ABSENT`, an instance of
-    :class:`~pcapkit.protocols.protocol.AbsentType` following
-    :class:`~pcapkit.corekit.fields.field.NoValueType`, which is how this library
+    That marker is :data:`~pcapkit.corekit.sentinels.ABSENT`, an instance of
+    :class:`~pcapkit.corekit.sentinels.AbsentType` following
+    :class:`~pcapkit.corekit.sentinels.NoValueType`, which is how this library
     already spells a singleton marker. It was a bare ``object()`` when #640 was
     first raised; a bare ``object()`` has no name in a traceback, no informative
     :func:`repr`, and no type a checker can hold anyone to.
@@ -712,8 +712,7 @@ class SentinelTests(unittest.TestCase):
 
     def test_the_absent_marker_is_an_instance_of_its_own_type(self) -> None:
         """It has a type of its own, and the falsiness the convention carries."""
-        from pcapkit.corekit.fields.field import NO_VALUE, NoValueType
-        from pcapkit.protocols.protocol import ABSENT, AbsentType
+        from pcapkit.corekit.sentinels import ABSENT, NO_VALUE, AbsentType, NoValueType
 
         self.assertIsInstance(ABSENT, AbsentType)
 
@@ -743,7 +742,7 @@ class SentinelTests(unittest.TestCase):
     def test_the_absent_marker_cannot_be_confused_with_another_singleton(self) -> None:
         """No other singleton in the library answers an ``is`` against it.
 
-        :data:`~pcapkit.corekit.fields.field.NO_VALUE` is the near neighbour and
+        :data:`~pcapkit.corekit.sentinels.NO_VALUE` is the near neighbour and
         the one deliberately *not* reused here: it is documented as the default
         value of :attr:`FieldBase.default
         <pcapkit.corekit.fields.field.FieldBase.default>` and means "no value was
@@ -751,8 +750,7 @@ class SentinelTests(unittest.TestCase):
         between the two would make either site's marker satisfy the other's test.
 
         """
-        from pcapkit.corekit.fields.field import NO_VALUE, NoValueType
-        from pcapkit.protocols.protocol import ABSENT, AbsentType
+        from pcapkit.corekit.sentinels import ABSENT, NO_VALUE, AbsentType, NoValueType
 
         self.assertIsNot(ABSENT, NO_VALUE)
         self.assertNotIsInstance(ABSENT, NoValueType)

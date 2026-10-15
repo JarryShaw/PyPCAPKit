@@ -63,5 +63,3 @@ Auxiliary Data
 .. autoclass:: pcapkit.foundation.traceflow.data.data.Deferred
    :members:
    :show-inheritance:
-
-``DeferredPacket`` is re-exported here from :mod:`pcapkit.corekit.packet`; see :doc:`/pcapkit/corekit/packet`.

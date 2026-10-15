@@ -76,8 +76,9 @@ class NGAPUnitTests(unittest.TestCase):
     ##########################################################################
 
     def test_enumerations_are_defined_without_pycrate(self) -> None:
-        from pcapkit.protocols.application.ngap import (Criticality, PDUKind, ProcedureCode,
-                                                        ProtocolIE)
+        from pcapkit.const.ngap.procedure_code import ProcedureCode
+        from pcapkit.const.ngap.protocol_ie import ProtocolIE
+        from pcapkit.protocols.application.ngap import Criticality, PDUKind
 
         # Counts as measured against pycrate 0.8.1's NGAP_Constants. A drift
         # here means the pasted-in block was regenerated against a different
@@ -133,7 +134,8 @@ class NGAPUnitTests(unittest.TestCase):
         value-suffixed member sharing one mutable default with every other
         unrecognised key.
         """
-        from pcapkit.protocols.application.ngap import ProcedureCode, ProtocolIE
+        from pcapkit.const.ngap.procedure_code import ProcedureCode
+        from pcapkit.const.ngap.protocol_ie import ProtocolIE
 
         # A pycrate carrying a newer NGAP than this release names decodes IEs
         # this package does not know; they must report, not explode.
@@ -178,7 +180,8 @@ class NGAPUnitTests(unittest.TestCase):
         never take, which is exactly the path GitHub issue #880 measured the
         aliasing defect on.
         """
-        from pcapkit.protocols.application.ngap import ProcedureCode, ProtocolIE
+        from pcapkit.const.ngap.procedure_code import ProcedureCode
+        from pcapkit.const.ngap.protocol_ie import ProtocolIE
 
         for enum in (ProcedureCode, ProtocolIE):
             with self.subTest(enum=enum.__name__):
@@ -334,8 +337,9 @@ class NGAPUnitTests(unittest.TestCase):
 
     @unittest.skipUnless(HAS_PYCRATE, 'pycrate not installed')
     def test_fixture_decodes_and_surfaces_the_promised_fields(self) -> None:
-        from pcapkit.protocols.application.ngap import (NGAP, Criticality, PDUKind,
-                                                        ProcedureCode, ProtocolIE)
+        from pcapkit.const.ngap.procedure_code import ProcedureCode
+        from pcapkit.const.ngap.protocol_ie import ProtocolIE
+        from pcapkit.protocols.application.ngap import NGAP, Criticality, PDUKind
 
         info = NGAP(NGSETUP_REQUEST).info
 
@@ -415,7 +419,8 @@ class NGAPUnitTests(unittest.TestCase):
 
     @unittest.skipUnless(HAS_PYCRATE, 'pycrate not installed')
     def test_make_accepts_plain_python_values(self) -> None:
-        from pcapkit.protocols.application.ngap import NGAP, Criticality, ProcedureCode
+        from pcapkit.const.ngap.procedure_code import ProcedureCode
+        from pcapkit.protocols.application.ngap import NGAP, Criticality
 
         ngap = self._protocol()
         schema = ngap.make(
@@ -487,7 +492,8 @@ class NGAPUnitTests(unittest.TestCase):
         """PPID 60 dispatches an SCTP DATA chunk to :class:`NGAP`."""
         import io
 
-        from pcapkit.protocols.application.ngap import NGAP, ProcedureCode
+        from pcapkit.const.ngap.procedure_code import ProcedureCode
+        from pcapkit.protocols.application.ngap import NGAP
         from pcapkit.protocols.transport.sctp import SCTP
 
         raw = self._sctp_frame(NGSETUP_REQUEST)

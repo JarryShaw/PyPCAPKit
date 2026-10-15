@@ -108,7 +108,7 @@ class TestIPv6OptionHelpers(unittest.TestCase):
                                  f'{prefix}: invalid SMF DPD mode: {SMFDPDMode.H_DPD}')
 
     def test_shared_length_helpers(self) -> None:
-        from pcapkit.corekit.fields.field import NO_VALUE
+        from pcapkit.corekit.sentinels import NO_VALUE
 
         shared = self._shared()
         self.assertEqual(shared.rpl_opt_sub_tlv_len({'len': 9}), 5)

@@ -231,7 +231,7 @@ class DataFrame(FrameType, code=Enum_Frame.DATA):
     # ``b''`` and nothing would raise or warn. The parentheses also keep
     # ``pkt['pad_len']`` from being read at all when ``PADDED`` is clear, where
     # the :class:`~pcapkit.corekit.fields.misc.ConditionalField` above has left
-    # it as :data:`~pcapkit.corekit.fields.field.NO_VALUE`.
+    # it as :data:`~pcapkit.corekit.sentinels.NO_VALUE`.
     data: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'] - (
         pkt['pad_len'] if pkt['flags']['bit_3'] else 0
     ))

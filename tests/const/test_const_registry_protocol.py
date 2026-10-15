@@ -1301,13 +1301,13 @@ class StrEnumValueFallbackTests(unittest.TestCase):
 
 
 class NoDefaultSentinelTests(unittest.TestCase):
-    """GitHub issue #857: :data:`~pcapkit.corekit.enum.NO_DEFAULT` is now an
-    instance of the dedicated :class:`~pcapkit.corekit.enum.NoDefaultType`
+    """GitHub issue #857: :data:`~pcapkit.corekit.sentinels.NO_DEFAULT` is now an
+    instance of the dedicated :class:`~pcapkit.corekit.sentinels.NoDefaultType`
     compared with ``is``, rather than the magic value ``-1`` compared with
     ``==``. Owner ruling on #859: a bare :class:`object` -- this batch's first
     attempt -- is no less safe under ``is``, but a dedicated class matches the
-    house convention :class:`~pcapkit.corekit.module.NullType` and
-    :class:`~pcapkit.corekit.fields.field.NoValueType` already set, and gives
+    house convention :class:`~pcapkit.corekit.sentinels.NullType` and
+    :class:`~pcapkit.corekit.sentinels.NoValueType` already set, and gives
     a readable :func:`repr` in a signature, in :func:`help`, and in a
     traceback.
 
@@ -1325,12 +1325,12 @@ class NoDefaultSentinelTests(unittest.TestCase):
 
     def test_no_default_is_not_equal_to_any_plausible_caller_value(self) -> None:
         """The sentinel's whole point: unlike ``-1``, a
-        :class:`~pcapkit.corekit.enum.NoDefaultType` instance -- which defines
+        :class:`~pcapkit.corekit.sentinels.NoDefaultType` instance -- which defines
         no ``__eq__`` of its own, so it inherits identity comparison from
         :class:`object` -- cannot compare equal to anything a caller might
         legitimately pass as ``default``, not even ``-1.0``, which the old
         ``-1`` marker could not tell apart from itself."""
-        from pcapkit.corekit.enum import NO_DEFAULT
+        from pcapkit.corekit.sentinels import NO_DEFAULT
 
         for value in (-1, -1.0, 0, '', None, False):
             with self.subTest(value=value):
@@ -1342,7 +1342,7 @@ class NoDefaultSentinelTests(unittest.TestCase):
         ``object()``: the latter prints as ``<object object at 0x...>``
         wherever it turns up -- a signature, :func:`help`, a traceback --
         and this prints as ``<NO_DEFAULT>`` instead."""
-        from pcapkit.corekit.enum import NO_DEFAULT
+        from pcapkit.corekit.sentinels import NO_DEFAULT
 
         rendered = repr(NO_DEFAULT)
         self.assertEqual(rendered, '<NO_DEFAULT>')
@@ -1361,23 +1361,30 @@ class NoDefaultSentinelTests(unittest.TestCase):
         #911 is the issue that ruling's implementing work belongs to. The
         type is out of :attr:`__all__` while staying importable by its
         dotted path, which is what the last assertion here pins.
+
+        GitHub issue #1744 then dropped the re-export from
+        :mod:`pcapkit.corekit.enum` (#1715: a moved name keeps no re-export at
+        its old path), so the export rule is now asserted against
+        :mod:`pcapkit.corekit.sentinels`, the only import path.
         """
         import pcapkit.corekit.enum as enum_module
+        import pcapkit.corekit.sentinels as sentinels
 
-        self.assertIs(type(enum_module.NO_DEFAULT), enum_module.NoDefaultType)
-        self.assertIn('NO_DEFAULT', enum_module.__all__)
-        self.assertNotIn('NoDefaultType', enum_module.__all__)
-        self.assertTrue(hasattr(enum_module, 'NoDefaultType'))
+        self.assertIs(type(sentinels.NO_DEFAULT), sentinels.NoDefaultType)
+        self.assertIn('NO_DEFAULT', sentinels.__all__)
+        self.assertNotIn('NoDefaultType', sentinels.__all__)
+        self.assertNotIn('NO_DEFAULT', enum_module.__all__)
+        self.assertFalse(hasattr(enum_module, 'NoDefaultType'))
 
     def test_constructing_the_type_again_returns_the_same_instance(self) -> None:
         """The ``__new__`` singleton guard: a caller who does not realise
-        :data:`~pcapkit.corekit.enum.NO_DEFAULT` already exists and writes
+        :data:`~pcapkit.corekit.sentinels.NO_DEFAULT` already exists and writes
         ``NoDefaultType()`` themselves still gets back the one canonical
         sentinel, rather than a second, non-identical object that would
         silently fail ``is NO_DEFAULT`` inside
         :meth:`~pcapkit.corekit.enum.EnumRegistry.get` and be treated as a
         real (if useless) default instead of *no default*."""
-        from pcapkit.corekit.enum import NO_DEFAULT, NoDefaultType
+        from pcapkit.corekit.sentinels import NO_DEFAULT, NoDefaultType
 
         self.assertIs(NoDefaultType(), NO_DEFAULT)
         # And repeatedly -- not merely once by coincidence.
@@ -1387,15 +1394,15 @@ class NoDefaultSentinelTests(unittest.TestCase):
         """An already-loaded module is cached in :data:`sys.modules`, so
         importing it again -- by any of the usual spellings -- must not
         construct a second sentinel. Only a genuine :func:`importlib.reload`
-        would do that (see :class:`~pcapkit.corekit.enum.NoDefaultType`'s own
-        docstring caveat, and :class:`~pcapkit.corekit.module.NullType`'s
+        would do that (see :class:`~pcapkit.corekit.sentinels.NoDefaultType`'s own
+        docstring caveat, and :class:`~pcapkit.corekit.sentinels.NullType`'s
         before it), and nothing in this package reloads
         :mod:`pcapkit.corekit.enum` after import."""
         import importlib
 
-        from pcapkit.corekit.enum import NO_DEFAULT as first_import
+        from pcapkit.corekit.sentinels import NO_DEFAULT as first_import
 
-        module_again = importlib.import_module('pcapkit.corekit.enum')
+        module_again = importlib.import_module('pcapkit.corekit.sentinels')
 
         self.assertIs(module_again.NO_DEFAULT, first_import)
 

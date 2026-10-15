@@ -275,7 +275,7 @@ def minimal(field: 'Any', cls: 'type', depth: 'int', ctx: 'dict[str, Any]') -> '
     """The minimal value of ``field``, as the field type implies it."""
     from pcapkit.corekit.fields import ipaddress as fip
     from pcapkit.corekit.fields.collections import ListField
-    from pcapkit.corekit.fields.field import NO_VALUE
+    from pcapkit.corekit.sentinels import NO_VALUE
     from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, NoValueField,
                                              PayloadField, SchemaField, SwitchField)
     from pcapkit.corekit.fields.numbers import EnumField, NumberField

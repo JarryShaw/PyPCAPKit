@@ -45,7 +45,7 @@ from pcapkit.corekit.decorators import beholder, seekset
 from pcapkit.corekit.fields.misc import ConditionalField, SchemaField, SwitchField
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.corekit.sentinels import ABSENT, AbsentType  # pylint: disable=unused-import
+from pcapkit.corekit.sentinels import ABSENT
 from pcapkit.protocols import data as data_module
 from pcapkit.protocols import schema as schema_module
 from pcapkit.protocols.data.data import Data

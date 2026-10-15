@@ -1140,7 +1140,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         from pcapkit.const.ipv6.seed_id import SeedID
         from pcapkit.const.ipv6.smf_dpd_mode import SMFDPDMode
         from pcapkit.const.ipv6.tagger_id import TaggerID
-        from pcapkit.corekit.fields.field import NO_VALUE
+        from pcapkit.corekit.sentinels import NO_VALUE
         from pcapkit.corekit.multidict import OrderedMultiDict
         from pcapkit.protocols.schema.internet import hopopt as hopopt_schema
         from pcapkit.protocols.schema.internet import ipv6_opts as opts_schema
@@ -2239,13 +2239,13 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         :func:`~pcapkit.protocols.schema.internet.hopopt.pad_opt_data_len` is
         the whole of the read-side fix, so it is tested directly as well as
         through a parse: it has to read a skipped conditional field -- which is
-        recorded as :data:`~pcapkit.corekit.fields.field.NO_VALUE`, not omitted --
+        recorded as :data:`~pcapkit.corekit.sentinels.NO_VALUE`, not omitted --
         as zero padding octets rather than passing it on to
         :class:`~pcapkit.corekit.fields.strings.PaddingField`.
 
         """
         from pcapkit.const.ipv6.option import Option
-        from pcapkit.corekit.fields.field import NO_VALUE
+        from pcapkit.corekit.sentinels import NO_VALUE
         from pcapkit.protocols.schema.internet import hopopt as hopopt_schema
         from pcapkit.protocols.schema.internet import ipv6_opts as opts_schema
 

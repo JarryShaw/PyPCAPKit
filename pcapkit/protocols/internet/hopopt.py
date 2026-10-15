@@ -35,8 +35,8 @@ from pcapkit.const.ipv6.seed_id import SeedID as Enum_SeedID
 from pcapkit.const.ipv6.smf_dpd_mode import SMFDPDMode as Enum_SMFDPDMode
 from pcapkit.const.ipv6.tagger_id import TaggerID as Enum_TaggerID
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.fields.field import NO_VALUE
 from pcapkit.corekit.multidict import OrderedMultiDict
+from pcapkit.corekit.sentinels import NO_VALUE
 from pcapkit.protocols.data.internet.hopopt import HOPOPT as Data_HOPOPT
 from pcapkit.protocols.data.internet.hopopt import CALIPSOOption as Data_CALIPSOOption
 from pcapkit.protocols.data.internet.hopopt import DFFFlags as Data_DFFFlags

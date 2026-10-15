@@ -20,6 +20,12 @@
      :data:`pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO`, set with
      :envvar:`PCAPKIT_ZERO_PAD_BUDGET_RATIO`.
 
+.. versionremoved:: 1.5.0
+
+   ``pcapkit.corekit.fields.field.NoValueType``, now
+   :class:`pcapkit.corekit.sentinels.NoValueType` (:issue:`922`,
+   :issue:`1744`).
+
 """
 
 import abc
@@ -29,17 +35,18 @@ import re
 import struct
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
-from pcapkit.corekit.sentinels import NO_VALUE, NoValueType  # pylint: disable=unused-import
+from pcapkit.corekit.sentinels import NO_VALUE
 from pcapkit.utilities import config
 from pcapkit.utilities.exceptions import FieldValueError, NoDefaultValue, ProtocolError
 
-__all__ = ['NO_VALUE', 'Field']
+__all__ = ['Field']
 
 if TYPE_CHECKING:
     from typing import IO, Any, Callable, Iterator, Optional
 
     from typing_extensions import Self
 
+    from pcapkit.corekit.sentinels import NoValueType
     from pcapkit.protocols.schema.schema import Schema
 
 _T = TypeVar('_T')

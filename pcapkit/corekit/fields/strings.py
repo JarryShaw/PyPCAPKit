@@ -4,7 +4,8 @@
 import urllib.parse as urllib_parse
 from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
-from pcapkit.corekit.fields.field import NO_VALUE, Field
+from pcapkit.corekit.fields.field import Field
+from pcapkit.corekit.sentinels import NO_VALUE
 from pcapkit.utilities.chardet import detect
 from pcapkit.utilities.compat import Dict, unquote
 from pcapkit.utilities.exceptions import FieldValueError
@@ -22,7 +23,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal, Self
 
-    from pcapkit.corekit.fields.field import NoValueType
+    from pcapkit.corekit.sentinels import NoValueType
 
     NamespaceEntry = Tuple[int, int]
 

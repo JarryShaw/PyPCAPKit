@@ -323,11 +323,12 @@ class VendorTemplateParityTests(unittest.TestCase):
 
         rendered = LINE('Command', 'FTP Command', '<ENUM>', '<FEAT>',
                         'pcapkit.vendor.ftp.command')
-        self.assertIn('from pcapkit.corekit.enum import NO_DEFAULT, EnumLookup, EnumRegistry',
-                      rendered)
+        self.assertIn('from pcapkit.corekit.enum import EnumLookup, EnumRegistry\n'
+                      'from pcapkit.corekit.sentinels import NO_DEFAULT', rendered)
 
         import pcapkit.const.ftp.command as generated
-        self.assertIn('from pcapkit.corekit.enum import NO_DEFAULT, EnumLookup, EnumRegistry',
+        self.assertIn('from pcapkit.corekit.enum import EnumLookup, EnumRegistry\n'
+                      'from pcapkit.corekit.sentinels import NO_DEFAULT',
                       inspect.getsource(generated))
 
 

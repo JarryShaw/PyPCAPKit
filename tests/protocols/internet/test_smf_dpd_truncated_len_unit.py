@@ -10,7 +10,7 @@ octets wide, which came back one octet short at the end of the stream, yet
 :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>` rewound
 the full three. The option was therefore re-read from the preceding ``PadN``
 padding octet, as a ``Pad1`` option, so ``len`` was skipped and left as
-:data:`~pcapkit.corekit.fields.field.NO_VALUE`.
+:data:`~pcapkit.corekit.sentinels.NO_VALUE`.
 
 Every case builds its own octets in memory and reads no capture. The classes
 are imported inside each test, after

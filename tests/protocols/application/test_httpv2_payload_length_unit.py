@@ -565,7 +565,7 @@ class HTTPv2PayloadLengthCallbackUnitTests(unittest.TestCase):
     def packet(self, *, padded: 'bool') -> 'dict[str, Any]':
         """A synthetic ``packet`` mapping for a length callback.
 
-        ``pad_len`` is :data:`~pcapkit.corekit.fields.field.NO_VALUE` in the
+        ``pad_len`` is :data:`~pcapkit.corekit.sentinels.NO_VALUE` in the
         unpadded mapping because that is what the
         :class:`~pcapkit.corekit.fields.misc.ConditionalField` ahead of the
         payload actually leaves behind when ``PADDED`` is clear -- see
@@ -578,7 +578,7 @@ class HTTPv2PayloadLengthCallbackUnitTests(unittest.TestCase):
             The mapping to hand the callback.
 
         """
-        from pcapkit.corekit.fields.field import NO_VALUE
+        from pcapkit.corekit.sentinels import NO_VALUE
 
         flags = {f'bit_{bit}': 0 for bit in range(8)}
         if padded:
@@ -609,7 +609,7 @@ class HTTPv2PayloadLengthCallbackUnitTests(unittest.TestCase):
     def test_the_unpadded_arm_does_not_consult_pad_len(self) -> None:
         """The unpadded arm must not evaluate ``pad_len``.
 
-        ``pad_len`` is :data:`~pcapkit.corekit.fields.field.NO_VALUE` when
+        ``pad_len`` is :data:`~pcapkit.corekit.sentinels.NO_VALUE` when
         ``PADDED`` is clear, so the conditional has to short-circuit around it.
         It does so in the fixed form because the conditional *is* the right
         operand of the subtraction. This does not discriminate the fix from the
@@ -619,7 +619,7 @@ class HTTPv2PayloadLengthCallbackUnitTests(unittest.TestCase):
         which raises on the value the field machinery actually supplies.
 
         """
-        from pcapkit.corekit.fields.field import NO_VALUE
+        from pcapkit.corekit.sentinels import NO_VALUE
 
         packet = self.packet(padded=False)
         self.assertIs(packet['pad_len'], NO_VALUE)
@@ -658,7 +658,7 @@ class HTTPv2PayloadLengthCallbackUnitTests(unittest.TestCase):
         shows up here and at that boundary.
 
         """
-        from pcapkit.corekit.fields.field import NO_VALUE
+        from pcapkit.corekit.sentinels import NO_VALUE
 
         packet = {
             '__length__': self.PAD_LEN,

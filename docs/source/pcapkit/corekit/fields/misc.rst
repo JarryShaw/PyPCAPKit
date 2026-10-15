@@ -46,4 +46,4 @@ Type Variables
    :type: pcapkit.protocols.protocol.Protocol
 
 .. data:: pcapkit.corekit.fields.misc._TN
-   :type: pcapkit.corekit.fields.field.NoValueType
+   :type: pcapkit.corekit.sentinels.NoValueType

@@ -11,11 +11,13 @@ So :mod:`pcapkit.corekit.sentinels` is now the single defining module for all
 four -- :class:`~pcapkit.corekit.sentinels.NullType`,
 :class:`~pcapkit.corekit.sentinels.NoValueType`,
 :class:`~pcapkit.corekit.sentinels.NoDefaultType` and
-:class:`~pcapkit.corekit.sentinels.AbsentType`, and their four instances -- and
-each of the four original modules (:mod:`pcapkit.corekit.module`,
+:class:`~pcapkit.corekit.sentinels.AbsentType`, and their four instances. The
+four original modules (:mod:`pcapkit.corekit.module`,
 :mod:`pcapkit.corekit.fields.field`, :mod:`pcapkit.corekit.enum` and
-:mod:`pcapkit.protocols.protocol`) keeps a re-export so that no existing
-``from <module> import <name>`` breaks.
+:mod:`pcapkit.protocols.protocol`) kept a re-export of each until GitHub issue
+#1744 dropped them, under the ruling on #1715 that a moved name keeps no
+re-export at its old path; ``tests/project/test_no_moved_name_re_exports_1744_unit.py``
+pins that. Each still imports the *object* it uses from here.
 
 None of this module exists before that move, which is exactly what makes it a
 regression test rather than a description: on ``origin/main`` at ``d31c0aaf6``
@@ -37,14 +39,12 @@ commit, not inferred:
    ImportError while importing test module '.../test_sentinels_housing_unit.py'
    ModuleNotFoundError: No module named 'pcapkit.corekit.sentinels'
 
-:class:`IdentityAcrossShimsTests` is the load-bearing class here. A sentinel's
+:class:`IdentityInConsumersTests` is the load-bearing class here. A sentinel's
 entire reason for existing is identity comparison (``value is SENTINEL``), so the
-one thing worth pinning about a re-export shim is not merely that it resolves --
-an equal-but-distinct object would make every existing ``import`` line "work"
-while quietly breaking every ``is NULL`` (etc.) check downstream -- but that
-``from pcapkit.corekit.module import NULL`` and
-``from pcapkit.corekit.sentinels import NULL`` hand back the *same* object, for
-all four pairs. :meth:`IdentityAcrossShimsTests.test_shim_and_canonical_import_are_the_same_object`
+object each consumer module compares against must be the *same* object as the
+one :mod:`pcapkit.corekit.sentinels` hands out -- an equal-but-distinct object
+would quietly break every ``is NULL`` (etc.) check in that module.
+:meth:`IdentityInConsumersTests.test_consumer_binding_and_canonical_object_are_the_same`
 asserts that with ``is``, never ``==``.
 
 :class:`NoImportCycleTests` pins the other thing the issue asked to be checked
@@ -67,18 +67,14 @@ import pcapkit.corekit.fields.field as field_module
 import pcapkit.corekit.module as module_module
 import pcapkit.corekit.sentinels as sentinels
 import pcapkit.protocols.protocol as protocol_module
-from pcapkit.corekit.enum import NO_DEFAULT, NoDefaultType
-from pcapkit.corekit.fields.field import NO_VALUE, NoValueType
-from pcapkit.corekit.module import NULL, NullType
-from pcapkit.protocols.protocol import ABSENT, AbsentType
+from pcapkit.corekit.sentinels import (ABSENT, NO_DEFAULT, NO_VALUE, NULL, AbsentType,
+                                       NoDefaultType, NoValueType, NullType)
 from tests._support import purge_modules
 
-#: Every sentinel, as ``(instance name, shim module, shim instance, shim type)``.
-#: The shim module is the *original* location -- the one whose re-export this
-#: pins -- and is deliberately not :mod:`pcapkit.corekit.sentinels` itself, which
-#: is what :data:`pcapkit.corekit.sentinels`'s own attributes are compared against
-#: in each test below rather than being folded into this tuple a fifth time.
-SHIMMED_SENTINELS = (
+#: Every sentinel, as ``(instance name, consumer module, instance, type)``. The
+#: consumer module is the one that compares against the object, and so still
+#: imports it from :mod:`pcapkit.corekit.sentinels` -- without re-exporting it.
+CONSUMED_SENTINELS = (
     ('NULL', module_module, NULL, NullType),
     ('NO_VALUE', field_module, NO_VALUE, NoValueType),
     ('NO_DEFAULT', enum_module, NO_DEFAULT, NoDefaultType),
@@ -86,81 +82,29 @@ SHIMMED_SENTINELS = (
 )
 
 
-class IdentityAcrossShimsTests(unittest.TestCase):
-    """A re-export must hand back the *same* object, not an equal one."""
+class IdentityInConsumersTests(unittest.TestCase):
+    """A consumer module must compare against the *same* object, not an equal one."""
 
-    def test_shim_and_canonical_import_are_the_same_object(self) -> 'None':
+    def test_consumer_binding_and_canonical_object_are_the_same(self) -> 'None':
         """``is``, not ``==`` -- the whole point of a sentinel.
 
-        Fails on an implementation that re-*constructs* the sentinel at each
-        shim location (e.g. a shim that says ``NULL = NullType()`` instead of
-        ``from pcapkit.corekit.sentinels import NULL``) even though such a shim
-        would satisfy every ``isinstance`` check and every existing import
-        statement.
+        Fails on an implementation that re-*constructs* the sentinel in a
+        consumer (e.g. ``NULL = NullType()`` in :mod:`pcapkit.corekit.module`
+        instead of ``from pcapkit.corekit.sentinels import NULL``), which would
+        satisfy every ``isinstance`` check while breaking every ``is`` check.
 
         """
-        for name, shim_instance, canonical_name in (
-            ('NULL', NULL, 'NULL'),
-            ('NO_VALUE', NO_VALUE, 'NO_VALUE'),
-            ('NO_DEFAULT', NO_DEFAULT, 'NO_DEFAULT'),
-            ('ABSENT', ABSENT, 'ABSENT'),
-        ):
+        for name, consumer, instance, type_ in CONSUMED_SENTINELS:
             with self.subTest(sentinel=name):
-                self.assertIs(shim_instance, getattr(sentinels, canonical_name))
-
-    def test_shim_and_canonical_type_are_the_same_class_object(self) -> 'None':
-        """The *type*, not only the instance, is one object shared everywhere.
-
-        A shim that rebuilt the type (``class NullType(sentinels.NullType):
-        pass``) would let ``isinstance`` checks against either name keep working
-        while making ``NullType is sentinels.NullType`` false -- exactly the
-        gap an ``is``-only check on the instance above would miss.
-
-        """
-        for name, shim_type, canonical_name in (
-            ('NullType', NullType, 'NullType'),
-            ('NoValueType', NoValueType, 'NoValueType'),
-            ('NoDefaultType', NoDefaultType, 'NoDefaultType'),
-            ('AbsentType', AbsentType, 'AbsentType'),
-        ):
-            with self.subTest(sentinel=name):
-                self.assertIs(shim_type, getattr(sentinels, canonical_name))
-
-    def test_shim_module_attribute_is_the_same_object_too(self) -> 'None':
-        """Reached through the *module*, the way every real caller does it.
-
-        The two tests above import through this module's own ``from ... import``
-        statements at the top of the file, which python's import machinery
-        could in principle special-case. Re-reading the attribute off each
-        shim module object directly rules that out.
-
-        """
-        for name, shim_module, shim_instance, shim_type in SHIMMED_SENTINELS:
-            with self.subTest(sentinel=name):
-                self.assertIs(getattr(shim_module, name), shim_instance)
-                self.assertIs(shim_instance, getattr(sentinels, name))
-                # The type is read off the *instance* (``type(shim_instance)``)
-                # rather than reconstructed from the instance's name, since the
-                # house ``<SENTINEL>Type`` name is not a straight capitalisation
-                # of every instance name (``NULL`` -> ``NullType``, not
-                # ``NULLType``) -- exactly what a caller comparing
-                # ``type(value) is NullType`` would do instead of guessing.
-                self.assertIs(type(shim_instance), shim_type)
+                self.assertIs(getattr(consumer, name), instance)
+                self.assertIs(instance, getattr(sentinels, name))
+                self.assertIs(type(instance), type_)
 
     def test_defining_module_is_the_canonical_one_for_every_type(self) -> 'None':
-        """:attr:`type.__module__` names where the class statement executed.
-
-        Distinct from the identity checks above: two different classes could in
-        principle report the same ``__module__`` by coincidence, but the same
-        *class object* reporting the wrong ``__module__`` would mean something
-        rebuilt it under a different name, which is exactly the failure mode
-        :meth:`test_shim_and_canonical_type_are_the_same_class_object` also
-        guards against from a different angle.
-
-        """
-        for name, _, _, shim_type in SHIMMED_SENTINELS:
+        """:attr:`type.__module__` names where the class statement executed."""
+        for name, _, _, type_ in CONSUMED_SENTINELS:
             with self.subTest(sentinel=name):
-                self.assertEqual(shim_type.__module__, 'pcapkit.corekit.sentinels')
+                self.assertEqual(type_.__module__, 'pcapkit.corekit.sentinels')
 
 
 class NoImportCycleTests(unittest.TestCase):
@@ -275,20 +219,14 @@ class SentinelsModuleExportRuleTests(unittest.TestCase):
                 self.assertNotIn(name, sentinels.__all__)
 
 
-class PreMovePickleStillLoadsTests(unittest.TestCase):
-    """A pickle written before the move still unpickles.
+class PicklePayloadTests(unittest.TestCase):
+    """A ``NULL`` pickle names :mod:`pcapkit.corekit.sentinels` and loads back.
 
-    :meth:`NullType.__reduce__` names its factory by module path, so every
-    payload written before GitHub issue #911 relocated the definitions carries
-    the literal string ``pcapkit.corekit.module _get_null``. Moving the
-    function without leaving the name behind makes those payloads unloadable --
-    measured as ``AttributeError: module 'pcapkit.corekit.module' has no
-    attribute '_get_null'`` -- which is a break in on-disk data rather than in
-    the API, and so invisible to every other test here. :data:`NULL` is public
-    and is what :attr:`ModuleDescriptor.name` holds, so the payloads are real.
-
-    The fix is one re-exported private name in :mod:`pcapkit.corekit.module`;
-    these tests are what stop it being tidied away later as an unused import.
+    :meth:`NullType.__reduce__` names its factory by module path. A pickle
+    written by 1.5.0b5 or b6, before GitHub issue #911 relocated the
+    definitions, named ``pcapkit.corekit.module _get_null`` instead; the
+    re-export that kept those loadable was dropped under GitHub issue #1744,
+    since nothing in the library reads that path.
 
     """
 
@@ -296,64 +234,21 @@ class PreMovePickleStillLoadsTests(unittest.TestCase):
         """Resolve the modules afresh rather than using this file's own imports.
 
         :class:`NoImportCycleTests` purges ``pcapkit*`` from :data:`sys.modules`
-        and does not put it back, and it sorts ahead of this class. The
-        module-level :data:`NULL` above is therefore a stale object by the time
-        these tests run, whose ``_get_null`` is no longer the one a fresh import
-        produces -- which pickle rejects outright with ``Can't pickle …: it's not
-        the same object as pcapkit.corekit.sentinels._get_null``. Re-importing
-        here keeps these tests measuring the re-export rather than that
-        pre-existing ordering hazard.
+        and does not put it back, and it sorts ahead of this class, so the
+        module-level :data:`NULL` above is a stale object by now.
 
         """
         self.sentinels = importlib.import_module('pcapkit.corekit.sentinels')
-        self.module = importlib.import_module('pcapkit.corekit.module')
-        self.null = self.module.NULL
-
-    #: A ``NULL`` payload as the pre-#911 code emitted it.
-    #:
-    #: Built by pointing the factory's ``__module__`` at its old home for the
-    #: duration of the dump, because that attribute is exactly what pickle
-    #: consults to name it. Substituting the module string in the finished bytes
-    #: does not work: protocols 4 and 5 length-prefix it, so shortening
-    #: ``pcapkit.corekit.sentinels`` to ``pcapkit.corekit.module`` leaves a
-    #: stale prefix and the payload fails to load as truncated rather than for
-    #: the reason under test.
-    def _pre_move_payload(self, protocol: 'int') -> 'bytes':
-        factory = self.sentinels._get_null
-        original = factory.__module__
-        factory.__module__ = 'pcapkit.corekit.module'
-        try:
-            blob = pickle.dumps(self.null, protocol=protocol)
-        finally:
-            factory.__module__ = original
-        self.assertIn(b'pcapkit.corekit.module', blob)
-        self.assertNotIn(b'pcapkit.corekit.sentinels', blob)
-        return blob
-
-    def test_the_old_factory_name_is_still_reachable(self) -> 'None':
-        """The re-export, stated as the property rather than as an import line."""
-        self.assertIs(self.module._get_null, self.sentinels._get_null)
-
-    def test_a_pre_move_payload_round_trips_to_the_singleton(self) -> 'None':
-        """Not merely "does not raise": it has to hand back *the* ``NULL``.
-
-        From protocol 0, not 2. :meth:`NullType.__reduce__` says it covers
-        *"every :mod:`pickle` protocol"* and singles out 0 and 1 as the ones
-        that would otherwise reach :func:`copyreg._reconstructor`, so those are
-        the protocols the mechanism most exists for and the last ones to leave
-        unasserted. Measured: all six name the old path and load back to the
-        singleton.
-
-        """
-        for protocol in range(0, pickle.HIGHEST_PROTOCOL + 1):
-            with self.subTest(protocol=protocol):
-                self.assertIs(pickle.loads(self._pre_move_payload(protocol)), self.null)
+        self.null = self.sentinels.NULL
 
     def test_a_freshly_written_payload_names_the_new_home(self) -> 'None':
-        """The re-export is for reading old data, not for writing new."""
-        blob = pickle.dumps(self.null, protocol=2)
-        self.assertIn(b'pcapkit.corekit.sentinels', blob)
-        self.assertNotIn(b'pcapkit.corekit.module', blob)
+        """Every protocol names the new home, never the old one, and loads back."""
+        for protocol in range(0, pickle.HIGHEST_PROTOCOL + 1):
+            with self.subTest(protocol=protocol):
+                blob = pickle.dumps(self.null, protocol=protocol)
+                self.assertIn(b'pcapkit.corekit.sentinels', blob)
+                self.assertNotIn(b'pcapkit.corekit.module', blob)
+                self.assertIs(pickle.loads(blob), self.null)
 
 
 if __name__ == '__main__':

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import importlib
 import pickle
 import sys
 import types
@@ -15,6 +16,9 @@ class ModuleDescriptorTests(unittest.TestCase):
         reimport_once_per_class(self)
 
         self.module = load_module('pcapkit.corekit.module', 'pcapkit/corekit/module.py')
+        # GitHub issue #1744: ``NULL`` and ``NullType`` are read from their one
+        # home, not from :mod:`pcapkit.corekit.module`, which only uses ``NULL``.
+        self.sentinels = importlib.import_module('pcapkit.corekit.sentinels')
 
     def _register(self, name: str, module: types.ModuleType) -> None:
         """Put ``module`` in :data:`sys.modules` for the duration of a test."""
@@ -157,7 +161,7 @@ import_module` or :data:`sys.modules` succeeding -- the omission is caught
         before either is consulted.
 
         """
-        descriptor = self.module.ModuleDescriptor('demo.omitted', self.module.NULL)
+        descriptor = self.module.ModuleDescriptor('demo.omitted', self.sentinels.NULL)
         with mock.patch('importlib.import_module',
                         side_effect=RuntimeError('must not be reached')) as importer:
             with self.assertRaises(self.module.ProtocolError) as caught:
@@ -183,7 +187,7 @@ import_module` or :data:`sys.modules` succeeding -- the omission is caught
         self._register('demo.explicit_null', target_module)
 
         descriptor = self.module.ModuleDescriptor('demo.explicit_null', '(null)')
-        self.assertIsNot(descriptor.name, self.module.NULL)
+        self.assertIsNot(descriptor.name, self.sentinels.NULL)
         with self.assertRaisesRegex(self.module.ProtocolError, r"'\(null\)'"):
             descriptor.klass  # pylint: disable=pointless-statement
 
@@ -194,31 +198,31 @@ import_module` or :data:`sys.modules` succeeding -- the omission is caught
         identity -- so an equal-but-distinct ``'(null)'`` from a caller took a
         different branch than the sentinel itself, purely as a function of
         string interning. :data:`NULL` is now a dedicated
-        :class:`~pcapkit.corekit.module.NullType` singleton, so no string a
+        :class:`~pcapkit.corekit.sentinels.NullType` singleton, so no string a
         caller passes can compare equal to it by ``==`` or by ``is``.
 
         "Singleton" is asserted here, not only claimed: calling
-        :class:`~pcapkit.corekit.module.NullType` a second time must hand
+        :class:`~pcapkit.corekit.sentinels.NullType` a second time must hand
         back :data:`NULL` itself rather than a distinct, equally-valid
         instance -- see :meth:`test_null_sentinel_identity_survives_copy_and_pickle`
         for what a second instance breaks downstream.
 
         """
-        self.assertNotIsInstance(self.module.NULL, str)
-        self.assertIsInstance(self.module.NULL, self.module.NullType)
-        self.assertFalse(self.module.NULL == '(null)')  # pylint: disable=unneeded-not
-        self.assertIsNot(self.module.NULL, '(null)')
-        self.assertFalse(bool(self.module.NULL))
-        self.assertEqual(repr(self.module.NULL), '<NULL>')
-        self.assertIs(self.module.NullType(), self.module.NULL)
+        self.assertNotIsInstance(self.sentinels.NULL, str)
+        self.assertIsInstance(self.sentinels.NULL, self.sentinels.NullType)
+        self.assertFalse(self.sentinels.NULL == '(null)')  # pylint: disable=unneeded-not
+        self.assertIsNot(self.sentinels.NULL, '(null)')
+        self.assertFalse(bool(self.sentinels.NULL))
+        self.assertEqual(repr(self.sentinels.NULL), '<NULL>')
+        self.assertIs(self.sentinels.NullType(), self.sentinels.NULL)
 
     def test_null_sentinel_identity_survives_copy_and_pickle(self) -> None:
         """:data:`NULL` stays the same object through :mod:`copy` and :mod:`pickle`.
 
-        Before this fix, :class:`~pcapkit.corekit.module.NullType` had no
-        :meth:`~pcapkit.corekit.module.NullType.__copy__`,
-        :meth:`~pcapkit.corekit.module.NullType.__deepcopy__` or
-        :meth:`~pcapkit.corekit.module.NullType.__reduce__` of its own, so
+        Before this fix, :class:`~pcapkit.corekit.sentinels.NullType` had no
+        :meth:`~pcapkit.corekit.sentinels.NullType.__copy__`,
+        :meth:`~pcapkit.corekit.sentinels.NullType.__deepcopy__` or
+        :meth:`~pcapkit.corekit.sentinels.NullType.__reduce__` of its own, so
         :func:`copy.copy`, :func:`copy.deepcopy` and every :mod:`pickle`
         protocol fell back to the default behaviour for a plain object and
         each produced a *second*, non-identical :class:`NullType` instance.
@@ -232,7 +236,7 @@ import_module` or :data:`sys.modules` succeeding -- the omission is caught
         default one, because :mod:`pickle` protocols 0 and 1 reconstruct
         through :func:`copyreg._reconstructor` -- which calls
         :func:`object.__new__` directly -- rather than through
-        :meth:`NullType.__new__ <pcapkit.corekit.module.NullType.__new__>`,
+        :meth:`NullType.__new__ <pcapkit.corekit.sentinels.NullType.__new__>`,
         so a fix that only guards ``__new__`` would still fail those two.
 
         Each protocol's assertion also runs a second time, outside
@@ -249,7 +253,7 @@ import_module` or :data:`sys.modules` succeeding -- the omission is caught
         misbehaved.
 
         """
-        NULL = self.module.NULL
+        NULL = self.sentinels.NULL
 
         self.assertIs(copy.copy(NULL), NULL)
         self.assertIs(copy.deepcopy(NULL), NULL)
@@ -273,7 +277,7 @@ import_module` or :data:`sys.modules` succeeding -- the omission is caught
         :meth:`test_klass_raises_protocolerror_when_class_name_was_never_given`.
         Before this fix, :func:`copy.deepcopy` on the descriptor recursed into
         that check's operand and minted a second, non-identical
-        :class:`~pcapkit.corekit.module.NullType`, so the identity check
+        :class:`~pcapkit.corekit.sentinels.NullType`, so the identity check
         failed silently and ``self.name`` -- still that stray sentinel, now
         masquerading as an ordinary class name -- reached :func:`getattr`
         directly. :func:`getattr` on a non-:class:`str` name raises a bare
@@ -297,7 +301,7 @@ import_module` or :data:`sys.modules` succeeding -- the omission is caught
         target_module = types.ModuleType('demo.deepcopy_target')
         self._register('demo.deepcopy_target', target_module)
 
-        descriptor = self.module.ModuleDescriptor('demo.deepcopy_target', self.module.NULL)
+        descriptor = self.module.ModuleDescriptor('demo.deepcopy_target', self.sentinels.NULL)
         copied = copy.deepcopy(descriptor)
 
         with self.assertRaises(self.module.ProtocolError):

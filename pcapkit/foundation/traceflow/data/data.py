@@ -4,9 +4,8 @@
 from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import Info, info_final
-from pcapkit.corekit.packet import DeferredPacket
 
-__all__ = ['TraceFlowData', 'Deferred', 'DeferredPacket', 'FrameRecord']
+__all__ = ['TraceFlowData', 'Deferred', 'FrameRecord']
 
 if TYPE_CHECKING:
     from decimal import Decimal

@@ -114,6 +114,14 @@ the one mechanical rule those two special cases used to carve exceptions around;
 see its own docstring below for what dropped and why the assertion strength survives
 the drop.
 
+GitHub issue #1744 then dropped the per-module re-exports, under the owner's
+ruling on #1715 that a moved name keeps no re-export at its old path. So the
+export rule is now asserted against :data:`CANONICAL_MODULE`, the only import
+path, and the three per-module tests flip: :mod:`pcapkit.corekit.module`,
+:mod:`pcapkit.corekit.fields.field` and :mod:`pcapkit.corekit.enum` export
+neither the object nor the type. The type is importable by its dotted path
+under :data:`CANONICAL_MODULE` only.
+
 """
 from __future__ import annotations
 
@@ -149,10 +157,11 @@ CANONICAL_MODULE = 'pcapkit.corekit.sentinels'
 #: :data:`PUBLIC_SENTINELS` below for the (still distinct) *shim* locations.
 #: Built by :func:`_sentinels` from the live import, not at module load.
 
-#: The public three of :data:`SENTINELS`, as ``(module, object name, type name)``.
-#: ``ABSENT`` is absent from it deliberately: it is private, so it is exported
-#: neither way and the export rule does not reach it -- GitHub issue #937 dropped
-#: its leading underscore, but not its privacy.
+#: The public three of :data:`SENTINELS`, as ``(consumer module, object name, type
+#: name)``. The consumer is the module that used to re-export the sentinel before
+#: GitHub issue #1744. ``ABSENT`` is absent from it deliberately: it is private, so
+#: it is exported neither way and the export rule does not reach it -- GitHub issue
+#: #937 dropped its leading underscore, but not its privacy.
 PUBLIC_SENTINELS = (
     ('pcapkit.corekit.module', 'NULL', 'NullType'),
     ('pcapkit.corekit.fields.field', 'NO_VALUE', 'NoValueType'),
@@ -162,15 +171,12 @@ PUBLIC_SENTINELS = (
 
 def _sentinels() -> 'tuple[tuple[str, object, type], ...]':
     """:data:`SENTINELS`, read from the ``pcapkit`` import that is live now."""
-    enum = importlib.import_module('pcapkit.corekit.enum')
-    field = importlib.import_module('pcapkit.corekit.fields.field')
-    module = importlib.import_module('pcapkit.corekit.module')
-    protocol = importlib.import_module('pcapkit.protocols.protocol')
+    canonical = importlib.import_module(CANONICAL_MODULE)
     return (
-        ('NULL', module.NULL, module.NullType),
-        ('NO_VALUE', field.NO_VALUE, field.NoValueType),
-        ('NO_DEFAULT', enum.NO_DEFAULT, enum.NoDefaultType),
-        ('ABSENT', protocol.ABSENT, protocol.AbsentType),
+        ('NULL', canonical.NULL, canonical.NullType),
+        ('NO_VALUE', canonical.NO_VALUE, canonical.NoValueType),
+        ('NO_DEFAULT', canonical.NO_DEFAULT, canonical.NoDefaultType),
+        ('ABSENT', canonical.ABSENT, canonical.AbsentType),
     )
 
 
@@ -233,10 +239,10 @@ def _sentinel_section() -> 'str':
 
 
 class SentinelExportTests(_ReimportCase):
-    """``__all__`` names the object and not the type, per module."""
+    """``__all__`` names the object and not the type, in the canonical module only."""
 
-    def test_module_exports_the_object_and_not_the_type(self) -> 'None':
-        """``['NULL', 'NullType', 'ModuleDescriptor']`` loses the middle entry.
+    def test_module_exports_neither_the_object_nor_the_type(self) -> 'None':
+        """``['NULL', 'ModuleDescriptor']`` lost ``NULL`` under GitHub issue #1744.
 
         ``ModuleDescriptor`` is not a sentinel and has to survive the edit, which
         is asserted here rather than in a separate test because removing it is the
@@ -245,73 +251,58 @@ class SentinelExportTests(_ReimportCase):
         """
         import pcapkit.corekit.module as module
 
-        self.assertIn('NULL', module.__all__)
+        self.assertNotIn('NULL', module.__all__)
         self.assertNotIn('NullType', module.__all__)
         self.assertIn('ModuleDescriptor', module.__all__)
 
-    def test_enum_exports_the_object_and_not_the_type(self) -> 'None':
+    def test_enum_exports_neither_the_object_nor_the_type(self) -> 'None':
         """``EnumLookup`` and ``EnumRegistry`` are not sentinels and stay.
 
         ``EnumLookup`` in particular: GitHub pull request #906 split it out as a public
         base and
         :file:`docs/source/contributing/conventions/registry-protocol.rst` cites
-        its ``get``, so dropping it while removing the sentinel type next to it
+        its ``get``, so dropping it while removing the sentinel next to it
         would break that reference.
 
         """
         import pcapkit.corekit.enum as enum
 
-        self.assertIn('NO_DEFAULT', enum.__all__)
+        self.assertNotIn('NO_DEFAULT', enum.__all__)
         self.assertNotIn('NoDefaultType', enum.__all__)
         self.assertIn('EnumLookup', enum.__all__)
         self.assertIn('EnumRegistry', enum.__all__)
 
-    def test_field_exports_the_object_and_not_the_type(self) -> 'None':
-        """The direction that is an *addition*: ``NO_VALUE`` was exported by neither.
-
-        :attr:`FieldBase.default <pcapkit.corekit.fields.field.FieldBase.default>`
-        is documented as being this object, so the ruling reaches it: a value a
-        caller is told to compare against is a value ``import *`` should provide.
-        Named ``NoValue`` in :attr:`__all__` until GitHub issue #937 renamed the
-        object to ``NO_VALUE``; the type stayed ``NoValueType`` throughout.
-
-        """
+    def test_field_exports_neither_the_object_nor_the_type(self) -> 'None':
+        """``NO_VALUE`` was added here by #911 and removed again by #1744."""
         import pcapkit.corekit.fields.field as field
 
-        self.assertIn('NO_VALUE', field.__all__)
+        self.assertNotIn('NO_VALUE', field.__all__)
         self.assertNotIn('NoValueType', field.__all__)
         self.assertIn('Field', field.__all__)
 
     def test_star_import_binds_the_objects_and_not_the_types(self) -> 'None':
-        """Through ``import *`` itself, which is the surface the ruling is about."""
-        for module, obj, type_ in PUBLIC_SENTINELS:
-            namespace = _star_import(module)
-            with self.subTest(module=module):
-                self.assertIn(obj, namespace)
-                self.assertNotIn(type_, namespace)
+        """Through ``import *`` itself, which is the surface the ruling is about.
 
-    def test_star_import_hands_back_the_canonical_object(self) -> 'None':
-        """Not merely *a* binding of that name -- the one sentinel instance.
-
-        A star-import that bound a second, non-identical object would satisfy the
-        test above and break every ``is`` check the sentinel exists for.
+        The canonical module binds every public object and no type; each former
+        re-export site binds neither.
 
         """
         canonical = importlib.import_module(CANONICAL_MODULE)
-        for module, obj, _ in PUBLIC_SENTINELS:
-            namespace = _star_import(module)
-            with self.subTest(module=module):
-                # Taken from the defining module, never from the shim being star-imported:
-                # both sides of the comparison would otherwise read the same shim attribute
-                # and the check could not fail if a shim defined its own object.
+        namespace = _star_import(CANONICAL_MODULE)
+        for module, obj, type_ in PUBLIC_SENTINELS:
+            with self.subTest(module=CANONICAL_MODULE, sentinel=obj):
                 self.assertIs(namespace[obj], getattr(canonical, obj))
+                self.assertNotIn(type_, namespace)
+            with self.subTest(module=module, sentinel=obj):
+                consumer = _star_import(module)
+                self.assertNotIn(obj, consumer)
+                self.assertNotIn(type_, consumer)
 
-    def test_every_sentinel_type_is_still_importable_by_name(self) -> 'None':
-        """The exact extent of the breaking change: ``import *`` narrows, nothing else.
+    def test_every_sentinel_type_is_importable_from_the_canonical_module(self) -> 'None':
+        """Leaving :attr:`__all__` is not being made private.
 
-        Leaving :attr:`__all__` is not being made private. An annotation or an
-        ``isinstance`` check that names the type keeps working, and the tree itself
-        relies on that -- this module's own imports are the demonstration.
+        An annotation or an ``isinstance`` check that names the type keeps
+        working, by its dotted path under :data:`CANONICAL_MODULE`.
 
         """
         for name, instance, type_ in _sentinels():
@@ -550,7 +541,7 @@ class NoValueIsTheDocumentedFieldDefaultTests(_ReimportCase):
 
     def test_an_undefaulted_field_reports_the_sentinel(self) -> 'None':
         """``is``, not ``==`` -- the whole point of a sentinel."""
-        from pcapkit.corekit.fields.field import NO_VALUE
+        from pcapkit.corekit.sentinels import NO_VALUE
         from pcapkit.corekit.fields.strings import BytesField
 
         self.assertIs(BytesField(length=4).default, NO_VALUE)
@@ -563,7 +554,7 @@ class NoValueIsTheDocumentedFieldDefaultTests(_ReimportCase):
         exactly the confusion the sentinel exists to prevent.
 
         """
-        from pcapkit.corekit.fields.field import NO_VALUE
+        from pcapkit.corekit.sentinels import NO_VALUE
         from pcapkit.corekit.fields.strings import BytesField
 
         field = BytesField(length=4)
