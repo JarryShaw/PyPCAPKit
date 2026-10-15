@@ -120,6 +120,12 @@ Command Line Tool
                            The name of buffer storage file. If `--buffer-save` is
                            set and this omits, it will be automatically assigned.
 
+.. versionchanged:: 1.5.0
+
+   ``-P`` and ``-L`` stop the extraction where they say, which 1.4.x ignored, and
+   ``-L`` accepts only ``link``, ``internet``, ``transport``, ``application`` or
+   ``none``, in any case (:issue:`356`).
+
 Environment Variables
 =====================
 

@@ -10,9 +10,9 @@ alike those in :mod:`dictdumper`.
 .. toctree::
    :maxdepth: 2
 
+   common
    pcap
    null
-   common
 
 Every dumper class is a :class:`dictdumper.dumper.Dumper` subclass, responsible
 for writing parsed packet data into a formatted output file. The class
