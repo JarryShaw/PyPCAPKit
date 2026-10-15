@@ -7,8 +7,10 @@ The pages before this one rule on the library, the repository and the prose. Thi
 rules on what the test suite has to prove, and what a change has to bring to it. The
 owner set the direction on :issue:`1203`, paraphrased here as on the other pages: every
 round trip the library offers must pass and match exactly, the tests must cover all of
-them, and the rules belong on a page rather than in review threads. :issue:`1202` tracks
-extending round-trip coverage to the paths that do not have it yet.
+them, and the rules belong on a page rather than in review threads. :issue:`1202`
+extended round-trip coverage past the registries, to the :mod:`pcapkit.corekit` fields,
+schemas and ``Info``, the :mod:`pcapkit.foundation` reassembly, flow tracing, engines and
+registries, and the output formats.
 
 Round-Trip Invariants
 ~~~~~~~~~~~~~~~~~~~~~
@@ -42,18 +44,16 @@ The rules those tables carry:
 
 *  **Every registered code has a case.** ``test_every_registered_code_has_a_case``
    fails otherwise. The option suite's ``SKIP`` table is the only exit, and each of its
-   five entries states why a case would assert nothing: TCP's ``End_of_Option_List``
-   and ``No_Operation`` are padding that ``_make_tcp_options`` drops, ``Multipath_TCP``
-   is the envelope of the ``tcp-mptcp`` family and would duplicate one of its subtypes,
-   and ``PadN`` under HOPOPT and IPv6-Opts emits the same option-less header as
-   ``Pad1``. A code that fails is never skipped.
+   three entries states why a case would assert nothing: ``Multipath_TCP`` is the
+   envelope of the ``tcp-mptcp`` family and would duplicate one of its subtypes, and
+   ``PadN`` under HOPOPT and IPv6-Opts emits the same option-less header as ``Pad1``.
+   A code that fails is never skipped.
 *  **A failing case is an entry, never a changed argument.** An ``EXPECTED_FAILURES``
    entry records the status, a failure-detail fragment narrow enough to match one
    site, and the defect: the ``file:line`` that causes it and the issue that tracks it.
    Routing a case around a defect hides it: the generator's ``HIP_COPIES`` once put two
    parameters in every HIP packet, so the unrepresentable length of a lone one
-   (:issue:`651`) was never constructed. Entries older than this page name the
-   ``file:line`` alone, and :issue:`1202` is where they gain their issue.
+   (:issue:`651`) was never constructed.
    ``KNOWN_DEGRADED`` entries have a different shape -- a fragment and a reason -- and
    its two record why the probe's placeholder payload cannot reach the target, not a
    defect to fix, so the ``file:line``-and-issue rule does not apply to them.
@@ -180,5 +180,5 @@ above:
      - Unit tests under :file:`tests/dumpkit/` asserting the output exactly, and a case
        in :file:`tests/integration/test_output_formats.py` for the file that lands on
        disk. That a format :mod:`pcapkit` also reads, such as PCAP, reproduces its
-       input byte for byte is the target :issue:`1202` tracks; nothing asserts it
-       yet.
+       input byte for byte is asserted over every sample capture by
+       :file:`tests/dumpkit/test_capture_dump_runtime.py` (:issue:`1202`).

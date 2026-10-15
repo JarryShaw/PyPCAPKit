@@ -265,11 +265,13 @@ The following code snippet shows how to create a new protocol class:
    subclass of a dispatcher is checked normally. Prefer a declared parameter to
    either: it is also what documents the keyword to your callers.
 
-   Parsing is unaffected, and so is :meth:`ProtocolBase.from_data
-   <pcapkit.protocols.protocol.ProtocolBase.from_data>`, which warns
-   :exc:`~pcapkit.utilities.warnings.UnknownFieldWarning` instead -- its keywords
-   come from your ``_make_data``, so a mismatch there is a disagreement between
-   two of your own mappings rather than a caller's typo.
+   Parsing is unaffected. :meth:`ProtocolBase.from_data
+   <pcapkit.protocols.protocol.ProtocolBase.from_data>` checks the keywords its
+   caller passes just as strictly, raising
+   :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`, but only warns
+   :exc:`~pcapkit.utilities.warnings.UnknownFieldWarning` for a key that comes
+   from your ``_make_data`` -- a mismatch there is a disagreement between two of
+   your own mappings rather than a caller's typo.
 
    .. warning::
 

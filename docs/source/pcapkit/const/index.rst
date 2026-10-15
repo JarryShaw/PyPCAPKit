@@ -62,14 +62,6 @@ Protocol Numbers
 
    reg
 
-Miscellaneous
--------------
-
-.. toctree::
-   :maxdepth: 2
-
-   pcapng
-
 Link Layer
 ----------
 
@@ -78,7 +70,6 @@ Link Layer
 
    arp
    l2tp
-   ospf
    vlan
 
 Internet Layer
@@ -112,3 +103,12 @@ Application Layer
    ftp
    http
    ngap
+   ospf
+
+Miscellaneous
+-------------
+
+.. toctree::
+   :maxdepth: 2
+
+   pcapng
