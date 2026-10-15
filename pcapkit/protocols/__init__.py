@@ -70,7 +70,7 @@ __all__ = [
     'RARP', 'DRARP',
 ]
 
-#: dict[str, ~typing.Type[Protocol]]: Protocol registry.
+#: dict[str, ~typing.Type[~pcapkit.protocols.protocol.ProtocolBase]]: Protocol registry.
 __proto__ = {}  # type: dict[str, Type[ProtocolBase]]
 for name in __all__:
     __proto__[name.upper()] = globals()[name]

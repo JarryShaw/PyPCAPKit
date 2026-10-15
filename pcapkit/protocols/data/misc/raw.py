@@ -14,7 +14,16 @@ __all__ = ['Raw']
 
 @info_final
 class Raw(Protocol):
-    """Raw packet is an unknown protocol."""
+    """Raw packet is an unknown protocol.
+
+    .. versionchanged:: 1.3.3
+
+       ``packet`` is not a field of this class, so its constructor takes
+       ``protocol`` and ``error`` only.
+       :class:`~pcapkit.protocols.protocol.ProtocolBase` sets ``packet`` on
+       the data model of every protocol it constructs.
+
+    """
 
     #: Original enumeration of this protocol.
     protocol: 'Optional[int]'
