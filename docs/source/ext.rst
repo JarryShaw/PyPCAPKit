@@ -44,6 +44,8 @@ The protocol classes :mod:`pcapkit` ships:
 +                                                                  +                +-----------------------+-------------------------------------------------------------+
 |                                                                  |                | :class:`pcapkit.protocols.internet.ipv6.IPv6`                                       |
 +                                                                  +                +-----------------------+-------------------------------------------------------------+
+|                                                                  |                |                       | :class:`pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`       |
++                                                                  +                +                       +-------------------------------------------------------------+
 |                                                                  |                |                       | :class:`pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`     |
 +                                                                  +                +                       +-------------------------------------------------------------+
 |                                                                  |                |                       | :class:`pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`     |

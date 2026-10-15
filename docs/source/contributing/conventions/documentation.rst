@@ -267,6 +267,15 @@ settled this on :issue:`719` found exactly one, and repeating it is cheap:
            [ -f "$path.py" ] || [ -f "$path/__init__.py" ] || echo "dangling: $path"
        done
 
+**Under a** ``.. module::``, **a hand-written** ``.. data::`` **or** ``.. function::``
+**takes the bare name.** The module directive already supplies the prefix, so
+``.. data:: pcapkit.x._T`` under ``.. module:: pcapkit.x`` registers
+``pcapkit.x.pcapkit.x._T``, which no reference resolves to exactly. Where the object
+lives in a module other than the current one, a ``:module:`` option names it, as the
+``LINKTYPE`` entry on :doc:`/pcapkit/protocols/link/index` does. :issue:`1775` found 44
+directives spelled the long way, which left seven TypeVar references ambiguous;
+:file:`tests/project/test_docs_ambiguous_xrefs_1775_unit.py` fails on the next one.
+
 **Every importable shipped module is documented, with one deliberate exception.** The 33
 modules under :file:`pcapkit/protocols/*/NotImplemented/` are the set with no entry:
 placeholder sources for dissectors nobody has written yet, carrying no class a reader

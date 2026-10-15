@@ -257,7 +257,7 @@ Installation
    is intent rather than something that works. ``bpc-poseur`` 0.4.3.post1 crashes
    on positional-only parameters declared on a *method* rather than a plain
    function, and exits 0 so the build does not notice; such methods -- including
-   the 13 on :class:`~pcapkit.corekit.io.SeekableReader`, plus a dozen more across
+   the 14 on :class:`~pcapkit.corekit.io.SeekableReader`, plus a dozen more across
    the protocols, foundation, dumpkit and corekit modules -- then survive into the
    installed package and ``import pcapkit`` fails with :exc:`SyntaxError`.
 
