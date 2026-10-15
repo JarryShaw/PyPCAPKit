@@ -861,9 +861,17 @@ commits it did not make: when the branch holds some and proposes other tiers,
 ``detect`` fails before asking for the approval. Once that pull request is
 merged or closed, the next run with something to propose recreates the branch
 from ``main``, a closed proposal's tiers included. It reports a pre-release
-instead of writing it. The experimental entries are hand-maintained: no source it
-reads rates them, so every run keeps their lines as written, and a hand edit to
-one changes no proposal.
+instead of writing it. Nor does it retire a job (`#1747
+<https://github.com/JarryShaw/PyPCAPKit/issues/1747>`__): when the tiers leave
+a matrix job with no leg, as 3.11 reaching end of life leaves
+``pypcap-parity``, it writes them as computed, warns, and puts the job first in
+the body as a manual step: retire or remove it, and the ``needs:`` that list it,
+such as the one in ``required-checks``, before merging. A proposal is still
+identified by its tiers alone, so retiring the job on ``main`` does not propose
+them again. The
+experimental entries are hand-maintained: no source it reads rates them, so
+every run keeps their lines as written, and a hand edit to one changes no
+proposal.
 
 Deployment ``environment:``
 ----------------------------
