@@ -124,12 +124,19 @@ UPLOAD_ENV = {
 #: ``tag``'s two scripts, in the order the job runs them.
 TAG_STEPS = ('Create Tag', 'Reset Build Number')
 
+#: #1748: ``version_check``'s step resolving the ``v*`` tag as :data:`CHECK_STEP`
+#: does, and ``release_status``'s report, which names this run's commit.
+OWNER_STEP = "Check which commit the version's tag names"
+REPORT_STEP = 'Report why this run did or did not release anything'
+
 #: Steps whose ``env:`` names ``PCAPKIT_RUN_SHA``, so the scan below cannot pass vacuously.
 RUN_SHA_STEPS = {
+    'version_check': [OWNER_STEP],
     'github': [CHECK_STEP, EXPLAIN_STEP],
     'tag': list(TAG_STEPS),
     'pypi': [CHECK_STEP],
     'conda': [CHECK_STEP],
+    'release_status': [REPORT_STEP],
 }
 
 #: Expressions naming another run's commit: ``workflow_run.head_sha`` is the
@@ -1004,6 +1011,93 @@ class TestTheTagCheckScript(ScratchRepository):
             self.push(self.run_sha, f'refs/tags/{tag}')
         result = self.check(self.run_sha)
         self.assertEqual(result.returncode, 0, result.stdout)
+
+
+class TestTheOwnerStep(ScratchRepository):
+    """#1748: ``owner`` reads ``elsewhere`` exactly where :data:`CHECK_STEP` would refuse a tag that exists.
+
+    So the gates that skip on ``PCAPKIT_RELEASED_ELSEWHERE`` skip only runs the
+    check would fail, and a missing tag -- which the check also refuses, but
+    which ``github`` creates -- is not "elsewhere".
+
+    """
+
+    TAG = 'v1.5.0b9'
+
+    def setUp(self) -> None:
+        super().setUp()
+        # #1644: no automatic maintenance to race the scratch directory's removal.
+        self.env.update({'GIT_CONFIG_COUNT': '3', 'GIT_CONFIG_KEY_0': 'maintenance.auto', 'GIT_CONFIG_VALUE_0': 'false',
+                         'GIT_CONFIG_KEY_1': 'gc.auto', 'GIT_CONFIG_VALUE_1': '0',
+                         'GIT_CONFIG_KEY_2': 'gc.autoDetach', 'GIT_CONFIG_VALUE_2': 'false'})
+        self.output = self.tmp / 'github-output'
+        self.env['GITHUB_OUTPUT'] = str(self.output)
+        self.run_sha = self.commit(self.VERSION, '0')
+        self.later = self.commit(self.VERSION, '3')
+        self.push(self.later, 'refs/heads/main')
+
+    def owner(self, run_sha: 'str') -> 'dict[str, str]':
+        self.output.write_text('', encoding='utf-8')
+        result = self.run_steps('version_check', (OWNER_STEP,), {'PCAPKIT_TAG': self.TAG, 'PCAPKIT_RUN_SHA': run_sha})
+        self.assertEqual(result.returncode, 0, result.stdout)
+        return dict(line.split('=', 1) for line in self.output.read_text(encoding='utf-8').splitlines())
+
+    def refused(self, run_sha: 'str') -> 'bool':
+        result = self.run_steps('github', (CHECK_STEP,), {'PCAPKIT_TAGS': self.TAG, 'PCAPKIT_RUN_SHA': run_sha})
+        return result.returncode != 0
+
+    def test_the_step_is_handed_the_tag_and_the_run_sha(self) -> None:
+        step = self.step('version_check', OWNER_STEP)
+        self.assertEqual(step.get('id'), 'owner')
+        self.assertEqual(step.get('env'), {'PCAPKIT_TAG': 'v${{ steps.get_version.outputs.PCAPKIT_VERSION }}',
+                                           'PCAPKIT_RUN_SHA': RUN_SHA})
+        ids = [each.get('id') for each in self.steps['version_check']]
+        self.assertEqual(ids.index('owner'), ids.index('check_conda') + 1)
+
+    def test_a_tag_on_another_commit_is_elsewhere_and_refused(self) -> None:
+        """``v1.5.0b12``'s shape: tagged at ``2025da5e5``, read from a later commit."""
+        self.push(self.run_sha, f'refs/tags/{self.TAG}')
+        self.checkout(self.later)
+        self.assertEqual(self.owner(self.later),
+                         {'PCAPKIT_RELEASED_AT': self.run_sha, 'PCAPKIT_RELEASED_ELSEWHERE': 'true'})
+        self.assertTrue(self.refused(self.later))
+
+    def test_a_tag_on_this_commit_is_not_elsewhere(self) -> None:
+        self.push(self.run_sha, f'refs/tags/{self.TAG}')
+        self.checkout(self.run_sha)
+        self.assertEqual(self.owner(self.run_sha),
+                         {'PCAPKIT_RELEASED_AT': self.run_sha, 'PCAPKIT_RELEASED_ELSEWHERE': 'false'})
+        self.assertFalse(self.refused(self.run_sha))
+
+    def test_no_tag_is_not_elsewhere(self) -> None:
+        """``github`` creates it, so the gates run."""
+        self.checkout(self.later)
+        self.assertEqual(self.owner(self.later), {'PCAPKIT_RELEASED_AT': '', 'PCAPKIT_RELEASED_ELSEWHERE': 'false'})
+
+    def test_a_tag_pushed_after_the_checkout_is_fetched(self) -> None:
+        self.checkout(self.later)
+        self.push(self.run_sha, f'refs/tags/{self.TAG}')
+        self.assertEqual(self.owner(self.later)['PCAPKIT_RELEASED_ELSEWHERE'], 'true')
+
+    def test_it_resolves_the_tag_as_the_check_does(self) -> None:
+        """The same fetch and the same ``rev-parse``, so the two cannot read the tag differently."""
+        owner = self.step('version_check', OWNER_STEP)['run']
+        check = self.step('github', CHECK_STEP)['run']
+        for line in ('run_commit="$(git rev-parse --verify "${PCAPKIT_RUN_SHA}^{commit}")"',):
+            self.assertIn(line, owner)
+            self.assertIn(line, check)
+        for line in ('git fetch --quiet --force origin "refs/tags/${tag}:refs/tags/${tag}" || true',
+                     'tagged="$(git rev-parse -q --verify "refs/tags/${tag}^{commit}" || true)"'):
+            self.assertIn(line, check)
+            self.assertIn(line.replace('${tag}', '${PCAPKIT_TAG}'), owner)
+
+    def test_both_outputs_reach_the_jobs(self) -> None:
+        block = job_blocks(WORKFLOW.read_text(encoding='utf-8'))['version_check']
+        for name in ('PCAPKIT_RELEASED_AT', 'PCAPKIT_RELEASED_ELSEWHERE'):
+            with self.subTest(output=name):
+                self.assertIn(f'{name}: ${{{{ steps.owner.outputs.{name} }}}}', block)
+                self.assertEqual(self.step('release_status', REPORT_STEP)['env'][name],
+                                 f'${{{{ needs.version_check.outputs.{name} }}}}')
 
 
 RELEASED_STEP = 'Read the released Python versions'

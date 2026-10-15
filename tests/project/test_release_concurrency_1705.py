@@ -25,9 +25,9 @@ from __future__ import annotations
 import re
 import unittest
 
-from tests.project.test_release_gates import (HUMAN_ACTOR_ID, NULL, RELEASE_APP_BOT_ID, WORKFLOW,
-                                              declared_if, evaluate_condition, evaluate_expression,
-                                              job_blocks)
+from tests.project.test_release_gates import (HUMAN_ACTOR_ID, NULL, RELEASE_APP_BOT_ID, STATUS,
+                                              WORKFLOW, declared_if, evaluate_condition,
+                                              evaluate_expression, job_blocks)
 
 #: The workflow-level ``concurrency:`` block: a one-line ``group:`` holding one
 #: interpolation after a literal prefix, then ``cancel-in-progress:``.
@@ -48,12 +48,20 @@ TAG = 'refs/tags/v1.5.0'
 
 def run_context(run_id: 'str', event_name: 'str' = 'workflow_run',
                 conclusion: 'object' = 'success', ref: 'str' = MAIN,
-                actor_id: 'str' = HUMAN_ACTOR_ID) -> 'dict[str, object]':
-    """One run's ``github``/``vars`` context; a ``push`` carries no ``workflow_run``."""
+                actor_id: 'str' = HUMAN_ACTOR_ID, updated: 'object' = 'true') -> 'dict[str, object]':
+    """One run's ``github``/``vars`` context; a ``push`` carries no ``workflow_run``.
+
+    #1748: and ``vendor_update``'s ``updated``, which ``version_check`` reads,
+    held at ``'true'`` -- a Vendor Update that ran ``vendor-update`` -- unless a
+    test says otherwise.
+
+    """
     event = {}  # type: dict[str, object]
     if event_name == 'workflow_run':
         event = {'workflow_run': {'conclusion': conclusion}}
     return {
+        'needs': {'vendor_update': {'outputs': {'updated': updated}}},
+        STATUS: {'cancelled': False},
         'github': {
             'event_name': event_name,
             'ref': ref,
@@ -115,6 +123,24 @@ class TestReleaseConcurrency(unittest.TestCase):
                 with self.subTest(actor_id=actor_id, run_id=run_id):
                     context = run_context(run_id, event_name='push', ref=TAG, actor_id=actor_id)
                     self.assertEqual(self.group(context), f'create-release-{TAG}')
+
+    def test_a_vendor_update_that_updated_nothing_still_joins_mains_group(self) -> None:
+        """#1748: the group reads the event only, so it cannot see ``vendor_update``.
+
+        Vendor Update 38650191283 concluded ``success`` with ``vendor-update``
+        skipped. Its run now skips ``version_check`` but still waits in, and can
+        still displace a run pending in, ``main``'s group -- the one case where
+        the two differ, recorded so that a change to either is a decision. The
+        workflow's ``vendor_update`` comment gives what that costs.
+
+        """
+        context = run_context('38650191283', updated='false')
+        self.assertFalse(evaluate_condition(self.version_check, context))
+        self.assertEqual(self.group(context), f'create-release-{MAIN}')
+        for updated in ('true', NULL):
+            with self.subTest(updated=updated):
+                self.assertTrue(evaluate_condition(self.version_check,
+                                                   run_context('1', updated=updated)))
 
     def test_the_scanner_agrees_with_yaml(self) -> None:
         """What :data:`_CONCURRENCY` reads is what a YAML parse reads."""

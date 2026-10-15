@@ -256,7 +256,10 @@ the verdict for 9083163f5 (`#1643 <https://github.com/JarryShaw/PyPCAPKit/issues
 So Vendor Update, Conda Update and GitHub Pages each run a ``verdict`` job first,
 and act only when the tip is the verified commit, or that commit plus bot commits
 to ``conda/build`` and ``conda/requirements.txt`` alone; otherwise they skip, and
-the tip's own Unit Tests run raises them again. The rule and its evidence are in
+the tip's own Unit Tests run raises them again. Vendor Update's run still
+concludes ``success`` then, since ``verdict`` ran, so Create Release reads its
+``vendor-update`` job to tell it from a real one
+(`#1748 <https://github.com/JarryShaw/PyPCAPKit/issues/1748>`__). The rule and its evidence are in
 ``util/verdict_covers_checkout.py``. Conda Update also writes after the
 checkout, so it applies the same rule a second time: its push rebases onto
 ``main``'s tip only when the commits that brings in pass it, and otherwise
@@ -283,7 +286,7 @@ the caller's own workflow run, as one of the caller's own jobs, rather than
 starting an independent run after the caller finishes. All four calls in this
 repository target the same reusable workflow, with the same input:
 
-* ``.github/workflows/create-release.yml:479`` -- job ``unit-tests`` calls
+* ``.github/workflows/create-release.yml:593`` -- job ``unit-tests`` calls
   ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
 * ``.github/workflows/cron-conda.yml:50`` -- job ``unit-tests`` calls
   ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
@@ -323,35 +326,43 @@ The Skip Cascade (`#888 <https://github.com/JarryShaw/PyPCAPKit/issues/888>`__)
 -------------------------------------------------------------------------------
 
 The two relationships above compose into a failure mode worth seeing on its
-own graph. Create Release's first job, ``version_check`` -- ahead of the
-``uses:`` call above -- carries:
+own graph. Create Release's ``version_check`` -- ahead of the ``uses:`` call
+above -- carries:
 
 .. code-block:: yaml
 
    if: >-
-     ${{ (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') &&
-     !(github.event_name == 'push' && github.actor_id == vars.RELEASE_APP_BOT_ID) }}
+     ${{ !cancelled() &&
+     (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') &&
+     !(github.event_name == 'push' && github.actor_id == vars.RELEASE_APP_BOT_ID) &&
+     needs.vendor_update.outputs.updated != 'false' }}
 
-(``create-release.yml:210-212``). Its second half skips the tag-push run that
+(``create-release.yml:290-294``). Its third clause skips the tag-push run that
 the release App's own tag starts (:doc:`releasing`, "The Release App"). On the
 ``workflow_run`` path, this evaluates **false**, and the job is skipped
 outright, whenever the upstream Vendor Update run's own conclusion was
 anything other than ``success`` -- including
 ``skipped``, which is exactly what Vendor Update's *own* jobs report when
 *their* ``workflow_run``-path guards decline (see ``cron-vendor.yml``'s
-``vendor-update`` job). ``unit-tests`` then depends on that job with
-``needs: [ version_check ]`` (``create-release.yml:469``) and an ``if:`` that
+``vendor-update`` job). Since
+`#1748 <https://github.com/JarryShaw/PyPCAPKit/issues/1748>`__ it is also false
+for a Vendor Update that concluded ``success`` with ``vendor-update`` skipped --
+its ``verdict`` job found the Unit Tests verdict was for another commit -- which
+the ``vendor_update`` job reads from that run's jobs first, as run 38650191283
+was. ``!cancelled()`` keeps a skipped ``vendor_update``, on a push, from
+skipping it. ``unit-tests`` then depends on that job with
+``needs: [ version_check ]`` (``create-release.yml:581``) and an ``if:`` that
 calls no status-check function, so a skipped dependency skips it too -- and
 every job past it is gated the same way: ``github`` needs ``[ unit-tests,
-version_check ]`` (``:500``), ``tag`` needs ``[ github, unit-tests,
-version_check ]`` (``:685``), ``pypi`` needs ``[ github, unit-tests,
-version_check ]`` (``:850``), and ``conda`` needs ``[ tag, github,
-unit-tests, version_check ]`` (``:1085``).
+version_check ]`` (``:619``), ``tag`` needs ``[ github, unit-tests,
+version_check ]`` (``:806``), ``pypi`` needs ``[ github, unit-tests,
+version_check ]`` (``:972``), and ``conda`` needs ``[ tag, github,
+unit-tests, version_check ]`` (``:1208``).
 
 .. mermaid::
 
    flowchart TD
-       WR["Vendor Update completed<br/>conclusion != success"]
+       WR["Vendor Update completed<br/>conclusion != success,<br/>or vendor-update skipped"]
        VC["version_check<br/>SKIPPED"]
        UTX["unit-tests (uses: unit-tests.yml)<br/>SKIPPED"]
        GH["github (GitHub Release)<br/>SKIPPED"]
@@ -372,7 +383,7 @@ unit-tests, version_check ]`` (``:1085``).
 
 This is a transitive reduction, as in :doc:`releasing`: ``version_check`` and
 ``unit-tests`` are also direct ``needs:`` of ``tag`` and ``pypi``
-(``create-release.yml:685,850``) and of ``conda`` (``:1085``), but ``github``
+(``create-release.yml:806,972``) and of ``conda`` (``:1208``), but ``github``
 already implies those edges, since it depends on both itself. Drawing them
 would add lines without changing which job can start before which, or which
 job a skip in ``version_check`` reaches.
@@ -400,7 +411,11 @@ Such a run is also kept out of the release's concurrency group
 its own ``github.run_id`` rather than on the ref, so it cannot cancel a run
 waiting there with release work. Keyed on the ref, run 38499295798 joined at
 02:06:32Z on 2026-10-14, and the pending 38499150441, whose Vendor Update had
-succeeded, was cancelled a second later.
+succeeded, was cancelled a second later. A run whose Vendor Update concluded
+``success`` with ``vendor-update`` skipped (#1748) is still keyed on the ref:
+the group reads only the event, which does not say which jobs ran. It can still
+displace a run pending there, and now releases nothing in its place, so that
+release waits for the next Vendor Update on ``main``.
 
 ``pull_request_target``
 -----------------------
@@ -879,10 +894,10 @@ Deployment ``environment:``
 Five jobs declare a deployment ``environment:`` and can therefore pause for an
 approval, four in ``create-release.yml`` and one in ``cron-python-versions.yml``:
 
-* ``github`` -- ``environment: github-release`` (``create-release.yml:497``)
-* ``tag`` -- ``environment: conda-tag`` (``create-release.yml:683``)
-* ``pypi`` -- ``environment: pypi`` (``create-release.yml:845``)
-* ``conda`` -- ``environment: anaconda`` (``create-release.yml:1082``)
+* ``github`` -- ``environment: github-release`` (``create-release.yml:616``)
+* ``tag`` -- ``environment: conda-tag`` (``create-release.yml:804``)
+* ``pypi`` -- ``environment: pypi`` (``create-release.yml:967``)
+* ``conda`` -- ``environment: anaconda`` (``create-release.yml:1205``)
 * ``pr`` -- ``environment: github-release``, for the release App's key (see
   `Python Versions`_)
 

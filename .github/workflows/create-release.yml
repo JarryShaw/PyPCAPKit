@@ -189,8 +189,80 @@ concurrency:
 # ``version_check`` skips the tag-push run that tag starts.
 # ``tests/project/test_release_tags_the_run_sha_1634.py`` asserts all of this
 # and runs ``tag``'s scripts against a scratch repository.
+#
+# #1748: so a version tagged at another commit would fail every later run for
+# it: ``v1.5.0b12`` names ``2025da5e5`` with 1 of its 10 Anaconda files, and
+# each push-raised run spent the test gate and 10 ``conda`` legs on refusals.
+# ``version_check``'s ``owner`` step resolves the ``v*`` tag as the #1634 check
+# does, and on a ref that is not a ``v*`` tag, ``PCAPKIT_RELEASED_ELSEWHERE``
+# reading ``'true'`` skips the gate and all four publishers -- ``github``
+# mostly skips there already, the tag existing. ``release_status`` then posts
+# a notice when that release is complete and a warning naming what it lacks
+# when not, and stays green. A ``v*`` push still meets the #1634 check, and
+# ``!= 'true'`` sends an unset output there too, as #1052's ``!= 'true'`` does.
+# The ``vendor_update`` job below is the issue's other half.
 
 jobs:
+  # #1748: a Vendor Update raised by a Unit Tests verdict for another commit
+  # updates nothing -- its ``verdict`` job finds the verdict does not cover the
+  # tip it checked out, and ``vendor-update`` skips -- yet the run concludes
+  # ``success``, and Create Release took it for a real one (Vendor Update
+  # 38650191283, a second Create Release run for ``0cdd3cdd1``). Measured: that
+  # run's jobs read ``success``/``skipped``/``skipped``, and 38655782606, whose
+  # three jobs all skipped, concluded ``skipped``; ``verdict`` has to run to
+  # decide, so Vendor Update could not conclude otherwise without a failed or
+  # cancelled run. This job reads that run's ``vendor-update`` job instead, with
+  # "List jobs for a workflow run", whose ``filter`` defaults to ``latest``,
+  # "jobs from the most recent execution of the workflow run":
+  # https://docs.github.com/en/rest/actions/workflow-jobs#list-jobs-for-a-workflow-run
+  # It needs the "Actions" repository permission, read:
+  # https://docs.github.com/en/rest/authentication/permissions-required-for-github-apps
+  # ``updated`` is ``'false'`` only for a ``skipped`` job; anything else it cannot
+  # read leaves it unset, and ``version_check`` runs as before.
+  #
+  # The concurrency group above cannot see this: it reads only the event, and
+  # that Vendor Update concluded ``success``, so the run still joins ``main``'s
+  # group and can still displace a run pending there, as before. It used to
+  # evaluate ``main``'s newer tip in its place; it now releases nothing, so the
+  # displaced run's release waits for the next run on ``main`` -- the tip's own
+  # Vendor Update if the tip's Unit Tests run has not completed yet, else the
+  # next push's or Saturday's.
+  vendor_update:
+    name: Triggering Vendor Update
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' }}
+    timeout-minutes: 5
+    permissions:
+      actions: read
+    outputs:
+      updated: ${{ steps.updated.outputs.updated }}
+    steps:
+      - name: Read whether its vendor-update job ran
+        id: updated
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PCAPKIT_VENDOR_RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          set -uo pipefail
+
+          if ! result="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${PCAPKIT_VENDOR_RUN_ID}/jobs" \
+                           --paginate --jq '.jobs[] | select(.name == "vendor-update") | .conclusion')"; then
+            echo "::warning title=Vendor Update not read (#1748)::could not list the jobs of Vendor Update run ${PCAPKIT_VENDOR_RUN_ID}, so this run treats it as one that updated."
+            exit 0
+          fi
+          case "$result" in
+            success)
+              echo "updated=true" >> "$GITHUB_OUTPUT"
+              ;;
+            skipped)
+              echo "updated=false" >> "$GITHUB_OUTPUT"
+              echo "Vendor Update run ${PCAPKIT_VENDOR_RUN_ID} skipped vendor-update: its verdict did not cover the commit it checked out."
+              ;;
+            *)
+              echo "::warning title=Vendor Update not read (#1748)::Vendor Update run ${PCAPKIT_VENDOR_RUN_ID} reports vendor-update as '${result//$'\n'/ }', so this run treats it as one that updated."
+              ;;
+          esac
+
   version_check:
     name: Check Version
     runs-on: ubuntu-latest
@@ -207,9 +279,19 @@ jobs:
     # second approval, and race the first run's uploads from another
     # concurrency group. Whether that push fires, and carries the bot's
     # ``github.actor_id``, is unmeasured; if not, this never matches.
+    #
+    # #1748: and a Vendor Update whose ``vendor-update`` job skipped, as
+    # ``vendor_update`` above reads it. ``!cancelled()`` because that job skips
+    # on a push, and "If a job fails or is skipped, all jobs that need it are
+    # skipped unless the jobs use a conditional expression that causes the job
+    # to continue":
+    # https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-jobs
+    needs: [ vendor_update ]
     if: >-
-      ${{ (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') &&
-      !(github.event_name == 'push' && github.actor_id == vars.RELEASE_APP_BOT_ID) }}
+      ${{ !cancelled() &&
+      (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') &&
+      !(github.event_name == 'push' && github.actor_id == vars.RELEASE_APP_BOT_ID) &&
+      needs.vendor_update.outputs.updated != 'false' }}
     permissions:
       contents: read
     steps:
@@ -444,6 +526,31 @@ jobs:
           echo "http $status, found $count of $expected expected platform/Python combinations for ${PCAPKIT_VERSION} on Anaconda"
           echo "PCAPKIT_CONDA_COMPLETE=$complete" >> "$GITHUB_OUTPUT"
 
+      # #1748: which commit the ``v*`` tag names, resolved as the #1634 check in
+      # ``github``, ``pypi`` and ``conda`` resolves it, so the gates below skip
+      # exactly the runs that check would refuse. ``PCAPKIT_RELEASED_ELSEWHERE``
+      # is ``true`` only for a tag naming another commit; no tag, or this commit,
+      # is ``false``.
+      - name: Check which commit the version's tag names
+        id: owner
+        env:
+          PCAPKIT_TAG: v${{ steps.get_version.outputs.PCAPKIT_VERSION }}
+          PCAPKIT_RUN_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          run_commit="$(git rev-parse --verify "${PCAPKIT_RUN_SHA}^{commit}")"
+          git fetch --quiet --force origin "refs/tags/${PCAPKIT_TAG}:refs/tags/${PCAPKIT_TAG}" || true
+          tagged="$(git rev-parse -q --verify "refs/tags/${PCAPKIT_TAG}^{commit}" || true)"
+          elsewhere=false
+          if [ -n "$tagged" ] && [ "$tagged" != "$run_commit" ]; then
+            elsewhere=true
+          fi
+
+          echo "${PCAPKIT_TAG} -> ${tagged:-no commit}; this run's commit is ${run_commit}; released elsewhere: ${elsewhere}"
+          echo "PCAPKIT_RELEASED_AT=${tagged}" >> "$GITHUB_OUTPUT"
+          echo "PCAPKIT_RELEASED_ELSEWHERE=${elsewhere}" >> "$GITHUB_OUTPUT"
+
     outputs:
       PCAPKIT_VERSION: ${{ steps.get_version.outputs.PCAPKIT_VERSION }}
       PCAPKIT_PRERELEASE: ${{ steps.get_version.outputs.PCAPKIT_PRERELEASE }}
@@ -452,6 +559,9 @@ jobs:
       PCAPKIT_PYPI_COMPLETE: ${{ steps.check_pypi.outputs.PCAPKIT_PYPI_COMPLETE }}
       PCAPKIT_CONDA_COMPLETE: ${{ steps.check_conda.outputs.PCAPKIT_CONDA_COMPLETE }}
       PCAPKIT_CONDA_LABEL: ${{ steps.get_version.outputs.PCAPKIT_CONDA_LABEL }}
+      # #1748: the commit the ``v*`` tag names, and whether it is another one.
+      PCAPKIT_RELEASED_AT: ${{ steps.owner.outputs.PCAPKIT_RELEASED_AT }}
+      PCAPKIT_RELEASED_ELSEWHERE: ${{ steps.owner.outputs.PCAPKIT_RELEASED_ELSEWHERE }}
       # #1660: from .github/python-versions.toml, for ``pypi`` and ``conda``.
       PYTHON_LATEST: ${{ steps.python-versions.outputs.latest }}
       PYTHON_PYPI: ${{ steps.python-versions.outputs.pypi }}
@@ -463,12 +573,16 @@ jobs:
   # #1052: runs only when a release will actually happen -- a ``v*`` tag push,
   # or any of the four targets still incomplete by its own evidence. See the
   # note above ``jobs:`` for why ``!= 'true'`` and why a skip here can never
-  # let a publisher through.
+  # let a publisher through. #1748: nor on a version tagged at another commit,
+  # unless this is a ``v*`` push, on the same clause as ``tag``, ``pypi`` and
+  # ``conda``.
   unit-tests:
     name: Release test gate
     needs: [ version_check ]
     if: >-
       ${{ needs.version_check.result == 'success' &&
+      (startsWith(github.ref_name, 'v') ||
+      needs.version_check.outputs.PCAPKIT_RELEASED_ELSEWHERE != 'true') &&
       (startsWith(github.ref_name, 'v') ||
       needs.version_check.outputs.PCAPKIT_TAG_EXISTS != 'true' ||
       needs.version_check.outputs.PCAPKIT_CONDA_TAG_EXISTS != 'true' ||
@@ -494,11 +608,18 @@ jobs:
     # so the implicit ``success()`` requires the gate to have passed. The
     # release App's private key is a ``github-release`` environment secret, so
     # no job reads it before this approval, and no other job reads it at all.
+    # #1748: a tag naming another commit is a tag that exists, so
+    # ``PCAPKIT_TAG_EXISTS`` already skips this job off a ``v*`` ref -- unless
+    # the tag was pushed between ``check_tag`` and ``owner``, which read it
+    # separately. The same clause as the other three covers that too, so the
+    # gate runs whenever any of the four would.
     environment: github-release
     permissions:
       contents: write
     needs: [ unit-tests, version_check ]
-    if: ${{ startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
+    if: >-
+      ${{ (startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_RELEASED_ELSEWHERE != 'true') &&
+      (startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false') }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
@@ -687,6 +808,7 @@ jobs:
       ${{ !cancelled() && needs.version_check.result == 'success' &&
       needs.unit-tests.result == 'success' &&
       (needs.github.result == 'success' || needs.github.result == 'skipped') &&
+      (startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_RELEASED_ELSEWHERE != 'true') &&
       (startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_CONDA_TAG_EXISTS == 'false') }}
     steps:
       - name: Load maintenance deploy key
@@ -852,6 +974,7 @@ jobs:
       ${{ !cancelled() && needs.version_check.result == 'success' &&
       needs.unit-tests.result == 'success' &&
       (needs.github.result == 'success' || needs.github.result == 'skipped') &&
+      (startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_RELEASED_ELSEWHERE != 'true') &&
       (startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_PYPI_COMPLETE == 'false') }}
     # #1633: each KTLO leg's own outcome, under a name only that leg sets --
     # matrix job outputs are combined across legs -- so ``release_status`` can
@@ -1088,6 +1211,7 @@ jobs:
       needs.unit-tests.result == 'success' &&
       (needs.github.result == 'success' || needs.github.result == 'skipped') &&
       (needs.tag.result == 'success' || needs.tag.result == 'skipped') &&
+      (startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_RELEASED_ELSEWHERE != 'true') &&
       (startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_CONDA_COMPLETE == 'false') }}
     strategy:
       fail-fast: false
@@ -1390,7 +1514,7 @@ jobs:
   release_status:
     name: Release status
     runs-on: ubuntu-latest
-    needs: [ unit-tests, version_check, github, tag, pypi, conda ]
+    needs: [ vendor_update, unit-tests, version_check, github, tag, pypi, conda ]
     if: ${{ !cancelled() }}
     permissions: {}
     steps:
@@ -1398,8 +1522,10 @@ jobs:
         env:
           PCAPKIT_EVENT_NAME: ${{ github.event_name }}
           PCAPKIT_WORKFLOW_RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          PCAPKIT_VENDOR_UPDATED: ${{ needs.vendor_update.outputs.updated }}
           PCAPKIT_ACTOR_ID: ${{ github.actor_id }}
           PCAPKIT_RELEASE_APP_BOT_ID: ${{ vars.RELEASE_APP_BOT_ID }}
+          PCAPKIT_RUN_SHA: ${{ github.sha }}
           PCAPKIT_UNIT_TESTS: ${{ needs.unit-tests.result }}
           PCAPKIT_VERSION_CHECK: ${{ needs.version_check.result }}
           PCAPKIT_GITHUB_JOB: ${{ needs.github.result }}
@@ -1411,6 +1537,8 @@ jobs:
           PCAPKIT_CONDA_TAG_EXISTS: ${{ needs.version_check.outputs.PCAPKIT_CONDA_TAG_EXISTS }}
           PCAPKIT_PYPI_COMPLETE: ${{ needs.version_check.outputs.PCAPKIT_PYPI_COMPLETE }}
           PCAPKIT_CONDA_COMPLETE: ${{ needs.version_check.outputs.PCAPKIT_CONDA_COMPLETE }}
+          PCAPKIT_RELEASED_AT: ${{ needs.version_check.outputs.PCAPKIT_RELEASED_AT }}
+          PCAPKIT_RELEASED_ELSEWHERE: ${{ needs.version_check.outputs.PCAPKIT_RELEASED_ELSEWHERE }}
           PCAPKIT_PYPI_KTLO_310: ${{ needs.pypi.outputs.ktlo_310 }}
           PCAPKIT_PYPI_KTLO_PYPY310: ${{ needs.pypi.outputs.ktlo_pypy310 }}
         run: |
@@ -1435,13 +1563,17 @@ jobs:
           # itself needs attention, even though it is not #888 -- no tag exists
           # here that could be left stranded. On a push it is quiet only for
           # the release App's own tag (#1634), which version_check skips by
-          # design; an unset bot id never matches here.
+          # design; an unset bot id never matches here. #1748: a Vendor Update
+          # that concluded `success` without running vendor-update is quiet too.
           if [ "$PCAPKIT_VERSION_CHECK" = "skipped" ]; then
             if [ "$PCAPKIT_EVENT_NAME" = "push" ] && [ -n "$PCAPKIT_RELEASE_APP_BOT_ID" ] \
                && [ "$PCAPKIT_ACTOR_ID" = "$PCAPKIT_RELEASE_APP_BOT_ID" ]; then
               echo "::notice title=Nothing to release::the release App's bot pushed this tag from the Create Release run that released its commit, so this run correctly released nothing (#1634)."
             elif [ "$PCAPKIT_EVENT_NAME" = "workflow_run" ] && [ "$PCAPKIT_WORKFLOW_RUN_CONCLUSION" = "skipped" ]; then
               echo "::notice title=Nothing to release::the triggering Vendor Update run found nothing to update, so this run correctly released nothing."
+            elif [ "$PCAPKIT_EVENT_NAME" = "workflow_run" ] && [ "$PCAPKIT_WORKFLOW_RUN_CONCLUSION" = "success" ] \
+               && [ "${PCAPKIT_VENDOR_UPDATED:-}" = "false" ]; then
+              echo "::notice title=Nothing to release::the triggering Vendor Update run skipped vendor-update, since its Unit Tests verdict did not cover the commit it checked out, so it updated nothing and this run correctly released nothing (#1748)."
             elif [ "$PCAPKIT_EVENT_NAME" = "workflow_run" ]; then
               echo "::warning title=Release skipped::the triggering Vendor Update run concluded '${PCAPKIT_WORKFLOW_RUN_CONCLUSION}', not 'success', so version_check, the release test gate and every release job were skipped. Not #888 -- no tag was created that could be left stranded -- but Vendor Update likely needs attention."
             else
@@ -1463,6 +1595,27 @@ jobs:
           # this run's checks.
           if [ "$PCAPKIT_UNIT_TESTS" = "failure" ] || [ "$PCAPKIT_UNIT_TESTS" = "cancelled" ]; then
             echo "::warning title=Release blocked by the test gate::the release test gate concluded '${PCAPKIT_UNIT_TESTS}', so no release job ran for ${PCAPKIT_VERSION}. This is a test failure, not #888."
+            exit 0
+          fi
+
+          # #1748: the version is tagged at another commit, and the gate and
+          # every publisher skipped for it -- which they do only off a v* ref.
+          # That release is that commit's (#1634), so this run has nothing to
+          # do: a notice when it is complete, and a warning naming what it
+          # lacks when not, both green. A publisher that ran instead -- on a v*
+          # push -- meets #1634's check and is reported below.
+          if [ "${PCAPKIT_RELEASED_ELSEWHERE:-}" = "true" ] && [ "$PCAPKIT_GITHUB_JOB" = "skipped" ] \
+             && [ "$PCAPKIT_TAG_JOB" = "skipped" ] && [ "$PCAPKIT_PYPI_JOB" = "skipped" ] \
+             && [ "$PCAPKIT_CONDA_JOB" = "skipped" ]; then
+            missing=""
+            [ "$PCAPKIT_CONDA_TAG_EXISTS" = "true" ] || missing="${missing:+${missing}, }the conda-${PCAPKIT_VERSION}+0 tag"
+            [ "$PCAPKIT_PYPI_COMPLETE" = "true" ] || missing="${missing:+${missing}, }some of its PyPI files"
+            [ "$PCAPKIT_CONDA_COMPLETE" = "true" ] || missing="${missing:+${missing}, }some of its Anaconda files"
+            if [ -z "$missing" ]; then
+              echo "::notice title=Nothing to release::v${PCAPKIT_VERSION} names ${PCAPKIT_RELEASED_AT}, not this run's commit ${PCAPKIT_RUN_SHA}, and that release is complete, so this run correctly released nothing (#1748)."
+            else
+              echo "::warning title=v${PCAPKIT_VERSION} is unfinished (#1634)::v${PCAPKIT_VERSION} names ${PCAPKIT_RELEASED_AT}, not this run's commit ${PCAPKIT_RUN_SHA}, and still lacks ${missing}. Only that commit's run may finish it (#1634), so this run released nothing: re-run the Create Release run created for ${PCAPKIT_RELEASED_AT}, or release the next version."
+            fi
             exit 0
           fi
 
