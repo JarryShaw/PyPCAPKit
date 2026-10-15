@@ -57,10 +57,10 @@ which resolves one particular code, and so cannot iterate -- goes through
 :meth:`ProtocolBase._lookup_registry
 <pcapkit.protocols.protocol.ProtocolBase._lookup_registry>` instead.
 
-IPv4 and HIP have no such registry yet -- they dispatch on the attribute name
-``_make_opt_${name}`` / ``_make_param_${name}`` -- so for those two the source
-of truth is the enumeration crossed with the presence of the handler, which is
-what :func:`_named_registry` builds.
+IPv4 and HIP are read through :func:`_named_registry`, which returns the
+protocol's own registry and, for a protocol without one, falls back to the
+enumeration crossed with the presence of the ``_make_opt_${name}`` /
+``_make_param_${name}`` handler.
 
 Determinism
 -----------
@@ -372,8 +372,8 @@ def _named_registry(owner: 'type', enum: 'Any', prefix: 'str',
     enumeration crossed with the presence of the handler, which is what this
     builds when the registry is absent.
 
-    GitHub pull request #434 gave both of them a real registry, so the fallback
-    is no longer taken for either -- it is kept because it costs nothing and is
+    Both of them have a real registry (#429), so the fallback is not taken
+    for either -- it is kept because it costs nothing and is
     the only thing that would notice a protocol added tomorrow without one. Both
     shapes are a :class:`collections.defaultdict`, so :func:`cases` and
     :func:`handler` cannot tell which one they were given -- and in particular
@@ -1284,7 +1284,7 @@ def _pcapng_context() -> 'tuple[Any, Any]':
     # ``Protocol.info`` is annotated as the generic data model for the protocol,
     # so a checker cannot see that a Section Header Block's is the one ``Context``
     # wants. The engine does exactly this, at
-    # pcapkit/foundation/engines/pcapng.py:148.
+    # pcapkit/foundation/engines/pcapng.py:181.
     section_info = section.info  # type: Any
     context = Context(section_info)
     interface = PCAPNG(num=1, sct=1, ctx=context,

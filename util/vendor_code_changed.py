@@ -2,9 +2,9 @@
 """Whether a Vendor Update regeneration changed code, or only comments and docstrings.
 
 :file:`.github/workflows/cron-vendor.yml` runs ``pcapkit-vendor`` and isort, then
-``tj-actions/verify-changed-files``. Until #1674 any changed file bumped the
-version, and every bump starts a release. Of the bumps 1.5.0b5 to b12, all but
-b5 and b8 changed only comments or docstrings by this script's rule: b9 a draft
+``tj-actions/verify-changed-files``. Without this script any changed file would
+bump the version, and every bump starts a release. Of the bumps 1.5.0b5 to b12,
+all but b5 and b8 changed only comments or docstrings by this script's rule: b9 a draft
 becoming RFC 10049, b10 and b11 reference formatting (#1664). The owner's ruling
 on #1674 is that such a regeneration is committed without a bump, and only a
 code change cuts a beta.
@@ -35,8 +35,7 @@ literals decode.
 Paths are the arguments, or else ``$CHANGED_FILES`` split on whitespace, the
 separator ``verify-changed-files`` uses. Writes ``code_changed=true`` or
 ``code_changed=false`` to ``$GITHUB_OUTPUT``. Exits non-zero, writing nothing,
-only when it has no paths to judge. The workflow then bumps, as it did before
-#1674.
+only when it has no paths to judge, and the workflow then bumps.
 
 """
 

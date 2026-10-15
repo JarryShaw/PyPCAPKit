@@ -57,9 +57,9 @@ eleven cases; it is an argument for eventually anchoring both fields to
 actually going out. Until then this is the better of the two available answers, and
 the ``version`` half is guarded by a test that fails when the file drifts from
 ``pcapkit.__version__`` -- which also covers the version changes made by hand,
-which never run this script at all. Those are 40 of the 159 commits that have
-moved ``__version__`` on ``main``, a quarter over the project's life and a rising
-share lately: 11 of the most recent 25.
+which never run this script at all. Those are 40 of the 167 commits that have
+moved ``__version__`` on ``main``: a quarter over the project's life, and 11 of
+the most recent 25.
 
 The rewrite is line-oriented rather than a :mod:`yaml` load-and-dump. A round
 trip through a YAML library would reorder keys, normalise quoting, and drop the

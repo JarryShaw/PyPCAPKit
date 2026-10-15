@@ -85,7 +85,7 @@ jobs:
 
       # The install needs this leg's interpreter, and the check below needs the
       # install, as in unit-tests.yml's `test` job: on a KTLO leg a failed step
-      # no longer stops the job, so each one waits on the `outcome` it needs.
+      # does not stop the job, so each one waits on the `outcome` it needs.
       - name: Install package
         id: install
         if: ${{ steps.python.outcome == 'success' }}

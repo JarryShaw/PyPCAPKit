@@ -69,7 +69,7 @@ concurrency:
 # an unintended publish -- a version number it has accepted cannot be reused, and
 # ``skip-existing: true`` below means a re-upload then *succeeds* having published
 # nothing, so the number the intended release wanted is gone regardless. ``github``
-# and ``tag`` were split on the same principle: since #1634 ``github`` spends a
+# and ``tag`` were split on the same principle (#1634): ``github`` spends a
 # token of the release App, minted in the job from ``github-release``'s secret
 # and revoked when it ends (the run's ``GITHUB_TOKEN`` while no App is set up),
 # whereas ``tag`` spends a long-lived PAT and a deploy key to write to the
@@ -266,7 +266,7 @@ jobs:
   version_check:
     name: Check Version
     runs-on: ubuntu-latest
-    # The outermost gate since #1052, moved here from ``unit-tests``: a
+    # The outermost gate, moved here from ``unit-tests`` by #1052: a
     # ``workflow_run`` trigger proceeds only when the Vendor Update run that
     # triggered it concluded ``success``, and a tag push always proceeds. This
     # job is read-only -- it installs the package and reads three public
@@ -598,13 +598,13 @@ jobs:
     name: GitHub Release
     runs-on: ubuntu-latest
     # Gated: publishes the Release, and creates the ``v*`` tag -- at
-    # ``github.sha`` since #1634 -- that every job below then verifies before
-    # publishing under it. Since #887 this is the release's only approval --
+    # ``github.sha`` (#1634) -- that every job below then verifies before
+    # publishing under it. This is the release's only approval (#887) --
     # see the note above ``jobs:``. Still gated on ``PCAPKIT_TAG_EXISTS``,
     # unlike the three jobs below it: the tag that output answers for is this
     # job's own artefact, not a proxy for someone else's -- see the #888 note
-    # above ``jobs:``. ``unit-tests`` is listed since #1052, when the gate stopped
-    # preceding ``version_check``; this ``if:`` calls no status-check function,
+    # above ``jobs:``. ``unit-tests`` is listed because the gate follows
+    # ``version_check`` (#1052); this ``if:`` calls no status-check function,
     # so the implicit ``success()`` requires the gate to have passed. The
     # release App's private key is a ``github-release`` environment secret, so
     # no job reads it before this approval, and no other job reads it at all.
@@ -1495,8 +1495,8 @@ jobs:
   # why, in one place, regardless of which upstream job or gate is what made it
   # release nothing. ``version_check`` can skip (a ``workflow_run`` whose Vendor
   # Update did not conclude ``success``) before any evidence output the jobs
-  # above rely on even exists, and ``unit-tests`` can fail or -- since #1052 --
-  # skip because that evidence says nothing is left to publish, so this job
+  # above rely on even exists, and ``unit-tests`` can fail, or skip (#1052)
+  # because that evidence says nothing is left to publish, so this job
   # cannot simply read those outputs the way
   # ``tag``/``pypi``/``conda`` do -- it has to run unconditionally and
   # reconstruct what happened from ``needs.*.result`` and the trigger context

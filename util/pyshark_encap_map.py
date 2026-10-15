@@ -122,8 +122,8 @@ that a discrepancy here is a finding, not license to overwrite what was
 measured and committed) -- see :class:`EncapSweepError`. Ubuntu noble's
 packaged Wireshark, what every ``apt``-based CI runner installs, is 4.2.2: its
 ``editcap -T`` accepts 224 encapsulations, not 226, so this script's own
-assertion trips there every time, by design (found the hard way: PR #853's
-first CI run, three legs, ``AssertionError: 224 != 226``).
+assertion trips there every time, by design (found the hard way: the first
+CI run for #851, three legs, ``AssertionError: 224 != 226``).
 
 That is harmless to the *committed* tables at runtime -- an
 ``ENCAP_TYPE_TO_LINKTYPE``/``FILTER_NAME_TO_LINKTYPE`` entry a 4.2.2 install
