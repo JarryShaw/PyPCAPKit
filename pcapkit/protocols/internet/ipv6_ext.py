@@ -227,6 +227,8 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
         so ``tests/protocols/internet/test_ipv6_ext_unit.py`` does, over every
         subclass discovered at runtime.
 
+    .. versionadded:: 1.5.0
+
     """
 
     ##########################################################################

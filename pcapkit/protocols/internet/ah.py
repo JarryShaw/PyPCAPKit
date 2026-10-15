@@ -5,7 +5,7 @@
 .. module:: pcapkit.protocols.internet.ah
 
 :mod:`pcapkit.protocols.internet.ah` contains
-:class:`~pcapkit.protocols.internet.AH` only,
+:class:`~pcapkit.protocols.internet.ah.AH` only,
 which implements extractor for Authentication
 Header (AH) [*]_, whose structure is described
 as below:
@@ -15,7 +15,7 @@ Octets      Bits        Name                    Description
 ======= ========= ======================= ===================================
   0           0   ``ah.next``               Next Header
   1           8   ``ah.length``             Payload Length
-  2          16                             Reserved (must be zero)
+  2          16   ``ah.reserved``           Reserved (must be zero)
   4          32   ``ah.spi``                Security Parameters Index (SPI)
   8          64   ``ah.seq``                Sequence Number Field
   12         96   ``ah.icv``                Integrity Check Value (ICV)
@@ -64,6 +64,11 @@ class AH(IPsec[Data_AH, Schema_AH], IPv6_Ext[Data_AH, Schema_AH],
     :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`.
     :class:`~pcapkit.protocols.internet.ipsec.IPsec` comes first so that its
     :meth:`~pcapkit.protocols.internet.ipsec.IPsec.id` takes precedence.
+
+    .. versionchanged:: 1.5.0
+
+       A rebuild writes the reserved field back as captured rather than as
+       zero (:issue:`1327`).
 
     """
 
