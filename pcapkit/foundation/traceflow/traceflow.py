@@ -242,6 +242,15 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
             dumper: module descriptor or a :class:`dictdumper.dumper.Dumper` subclass
             ext: file extension
 
+        .. versionremoved:: 1.2.0
+
+           ``register``, which this replaces with no alias.
+
+        .. versionchanged:: 1.3.0
+
+           ``dumper``, a module descriptor or a class, replaces the ``module``
+           and ``class_`` name pair, with no alias.
+
         """
         from pcapkit.interface.registry import (  # pylint: disable=import-outside-toplevel
             restore_shipped_dumper, same_entry)
@@ -508,6 +517,15 @@ class TraceFlow(TraceFlowBase[_DT, _BT, _IT, _PT], Generic[_DT, _BT, _IT, _PT]):
         nanosecond: output nanosecond-resolution file flag
         bidirectional: trace both halves of a conversation as one flow
         analyse: reassemble each flow's application layer
+
+    .. versionchanged:: 1.3.0
+
+       :attr:`name` and :attr:`protocol` are read from ``__protocol_name__``
+       and ``__protocol_type__``, where they were abstract properties each
+       flow tracing class implemented, and the built-in name is short:
+       ``'TCP'`` rather than ``'Transmission Control Protocol'``. A subclass
+       registers itself with :class:`~pcapkit.foundation.extraction.Extractor`
+       at class definition.
 
     .. versionchanged:: 1.5.0
 

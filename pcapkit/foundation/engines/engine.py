@@ -240,6 +240,14 @@ class Engine(EngineBase[_T], Generic[_T]):
     Args:
         extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.
 
+    .. versionchanged:: 1.3.0
+
+       :attr:`~EngineBase.name` and :attr:`~EngineBase.module` are properties,
+       read from ``__engine_name__`` and ``__engine_module__`` or else from the
+       class, where they were abstract class methods each engine implemented.
+       A subclass registers itself with
+       :class:`~pcapkit.foundation.extraction.Extractor` at class definition.
+
     .. versionchanged:: 1.5.0
 
        Registration is opt-in, under the ``engine`` class keyword, which

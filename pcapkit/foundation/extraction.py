@@ -108,6 +108,12 @@ class Extractor(Generic[_P]):
         For supported engines, please refer to
         :meth:`~pcapkit.foundation.extraction.Extractor.run`.
 
+    .. versionchanged:: 1.2.0
+
+       ``strict`` is renamed ``reasm_strict``, with no alias, and
+       ``reasm_store`` is inserted after it, so a positional argument from
+       ``trace`` onwards moves one place along.
+
     .. versionchanged:: 1.5.0
 
        ``layer`` and ``protocol`` stop the dissection where they say, which
@@ -365,6 +371,11 @@ class Extractor(Generic[_P]):
             UnsupportedCall: If :attr:`self._flag_r <pcapkit.foundation.extraction.Extractor._flag_r>`
                 is :data:`False`, as reassembly is disabled.
 
+        .. versionchanged:: 1.1.1
+
+           Raises :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` when
+           reassembly is disabled, where 1.1.0 built the record regardless.
+
         """
         if self._flag_r:
             data = ReassemblyData(
@@ -384,6 +395,11 @@ class Extractor(Generic[_P]):
         Raises:
             UnsupportedCall: If :attr:`self._flag_t <pcapkit.foundation.extraction.Extractor._flag_t>`
                 is :data:`False`, as flow tracing is disabled.
+
+        .. versionchanged:: 1.1.1
+
+           Raises :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` when
+           flow tracing is disabled, where 1.1.0 built the record regardless.
 
         """
         if self._flag_t:
@@ -448,6 +464,11 @@ class Extractor(Generic[_P]):
             RegistryWarning: If a different dumper is already registered for
                 ``format``; it is overwritten.
 
+        .. versionchanged:: 1.3.0
+
+           ``dumper``, a module descriptor or a class, replaces the ``module``
+           and ``class_`` name pair, with no alias.
+
         """
         shipped = cls._shipped_output.get(format)
         if isinstance(dumper, ModuleDescriptor) and (shipped is None or dumper != shipped[0]):
@@ -498,6 +519,12 @@ class Extractor(Generic[_P]):
         Warns:
             RegistryWarning: If a different class is already registered under
                 ``name``; it is overwritten.
+
+        .. versionchanged:: 1.3.0
+
+           ``engine``, a module descriptor or a class, replaces the ``module``
+           and ``class_`` name pair, with no alias, and the engine name it
+           took as ``engine`` is ``name``.
 
         """
         # The shipped built-in is matched before the descriptor is resolved, so
@@ -587,6 +614,11 @@ class Extractor(Generic[_P]):
             RegistryWarning: If a different class is already registered under
                 ``protocol``; it is overwritten.
 
+        .. versionchanged:: 1.3.0
+
+           ``reassembly``, a module descriptor or a class, replaces the
+           ``module`` and ``class_`` name pair, with no alias.
+
         """
         shipped = cls._shipped_reassembly.get(protocol)
         if isinstance(reassembly, ModuleDescriptor) and reassembly != shipped:
@@ -667,6 +699,11 @@ class Extractor(Generic[_P]):
         Warns:
             RegistryWarning: If a different class is already registered under
                 ``protocol``; it is overwritten.
+
+        .. versionchanged:: 1.3.0
+
+           ``traceflow``, a module descriptor or a class, replaces the
+           ``module`` and ``class_`` name pair, with no alias.
 
         """
         shipped = cls._shipped_traceflow.get(protocol)

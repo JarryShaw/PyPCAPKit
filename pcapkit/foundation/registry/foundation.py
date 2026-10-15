@@ -85,6 +85,10 @@ def register_extractor_engine(name: 'str', module: 'ModuleDescriptor[Engine] | T
             the engine ``name`` shipped with, which restores it)
         class\_: class name
 
+    .. versionchanged:: 1.3.0
+
+       The engine name, which was ``engine``, is ``name``, with no alias.
+
     """
     if isinstance(module, str):
         module = cast('ModuleDescriptor[Engine]', ModuleDescriptor(module, class_))
@@ -127,6 +131,10 @@ def register_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] | Type[Dump
         * :func:`pcapkit.foundation.registry.foundation.register_extractor_dumper`
         * :func:`pcapkit.foundation.registry.foundation.register_traceflow_dumper`
 
+    .. versionchanged:: 1.3.0
+
+       ``ext`` is keyword-only.
+
     """
     if isinstance(module, str):
         module = cast('ModuleDescriptor[Dumper]', ModuleDescriptor(module, class_))
@@ -161,6 +169,10 @@ def register_extractor_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] |
         class\_: class name
         ext: file extension
 
+    .. versionchanged:: 1.3.0
+
+       ``ext`` is keyword-only.
+
     """
     if isinstance(module, str):
         module = cast('ModuleDescriptor[Dumper]', ModuleDescriptor(module, class_))
@@ -193,6 +205,10 @@ def register_traceflow_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] |
             :class:`~dictdumper.dumper.Dumper` subclass
         class\_: class name
         ext: file extension
+
+    .. versionchanged:: 1.3.0
+
+       ``ext`` is keyword-only.
 
     """
     if isinstance(module, str):

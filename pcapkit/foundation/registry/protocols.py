@@ -200,7 +200,8 @@ def register_protocol(protocol: 'Type[ProtocolBase]') -> 'None':
     :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyMeta` and
     :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowMeta` fall back to
     :class:`~pcapkit.protocols.misc.raw.Raw`. The registry redesign of
-    :issue:`514` kept this key, so the collision is reported here rather than
+    :issue:`514` left this key unchanged and recorded the shared namespace as a
+    risk it did not fix, so the collision is reported here rather than
     resolved.
 
     Args:
@@ -1035,6 +1036,10 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
         * :func:`pcapkit.foundation.registry.register_tcp`
         * :func:`pcapkit.foundation.registry.register_udp`
         * :func:`pcapkit.foundation.registry.register_sctp`
+
+    .. versionremoved:: 1.3.1
+
+       ``register_port``, which this replaces with no alias.
 
     .. versionchanged:: 1.5.0
 
