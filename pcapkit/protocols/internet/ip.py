@@ -29,7 +29,7 @@ class IP(Internet[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-met
     """Base class for the IP protocol family.
 
     - Internet Protocol version 4 (:class:`~pcapkit.protocols.internet.ipv4.IPv4`) [:rfc:`791`]
-    - Internet Protocol version 6 (:class:`~pcapkit.protocols.internet.ipv6.IPv6`) [:rfc:`2460`]
+    - Internet Protocol version 6 (:class:`~pcapkit.protocols.internet.ipv6.IPv6`) [:rfc:`8200`]
 
     The IPsec protocols (:class:`~pcapkit.protocols.internet.ah.AH` and
     :class:`~pcapkit.protocols.internet.esp.ESP`) derive from

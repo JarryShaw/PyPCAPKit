@@ -698,7 +698,14 @@ class PuzzleParameter(Parameter, code=Enum_Parameter.PUZZLE):
 
 @schema_final
 class SolutionParameter(Parameter, code=Enum_Parameter.SOLUTION):
-    """Header schema for HIP ``SOLUTION`` parameters."""
+    """Header schema for HIP ``SOLUTION`` parameters.
+
+    .. versionremoved:: 1.5.0
+
+       ``lifetime``, now :attr:`reserved`: only ``PUZZLE`` carries a lifetime
+       (:issue:`654`).
+
+    """
 
     #: Numeric index.
     index: 'int' = UInt8Field()

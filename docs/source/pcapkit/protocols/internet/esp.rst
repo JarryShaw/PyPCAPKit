@@ -37,6 +37,8 @@ negotiated out of band. Therefore:
   ``Pad Length``, and dispatches the recovered plaintext to the next layer
   using ``Next Header`` -- so an ESP tunnelled TCP segment decodes as TCP.
 
+.. versionadded:: 1.5.0
+
 .. autoclass:: pcapkit.protocols.internet.esp.ESP
    :no-members:
    :show-inheritance:

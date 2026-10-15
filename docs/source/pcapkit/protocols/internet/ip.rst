@@ -7,9 +7,8 @@ IP - Internet Protocol
 :class:`~pcapkit.protocols.internet.ip.IP` only,
 which is a base class for Internet Protocol (IP)
 protocol family [*]_, eg.
-:class:`~pcapkit.protocols.internet.ipv4.IPv4`,
-:class:`~pcapkit.protocols.internet.ipv6.IPv6`, and
-:class:`~pcapkit.protocols.internet.ipsec.IPsec`.
+:class:`~pcapkit.protocols.internet.ipv4.IPv4` and
+:class:`~pcapkit.protocols.internet.ipv6.IPv6`.
 
 .. autoclass:: pcapkit.protocols.internet.ip.IP
    :no-members:
