@@ -320,6 +320,10 @@ Header Schemas
    :members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.protocols.schema.transport.sctp.ChunkListField
+   :members:
+   :show-inheritance:
+
 Type Stubs
 ~~~~~~~~~~
 
@@ -335,7 +339,10 @@ Auxiliary Functions
 ~~~~~~~~~~~~~~~~~~~
 
 .. autofunction:: pcapkit.protocols.schema.transport.sctp.padding_length
+.. autofunction:: pcapkit.protocols.schema.transport.sctp.pre_pack_padding
+.. autofunction:: pcapkit.protocols.schema.transport.sctp.bounded
 .. autofunction:: pcapkit.protocols.schema.transport.sctp.nested_length
+.. autofunction:: pcapkit.protocols.schema.transport.sctp.whole_chunks_length
 
 Data Models
 -----------

@@ -1058,7 +1058,7 @@ class MPTCPFastclose(MPTCP, code=Enum_MPTCPOption.MP_FASTCLOSE):
 
 @schema_final
 class FastOpenCookie(Option, code=Enum_Option.TCP_Fast_Open_Cookie):
-    """"Header schema for TCP Fast Open option."""
+    """Header schema for TCP Fast Open option."""
 
     #: Cookie.
     cookie: 'bytes' = ConditionalField(

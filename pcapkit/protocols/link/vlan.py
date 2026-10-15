@@ -82,14 +82,22 @@ class VLAN(Link[Data_VLAN, Schema_VLAN],  # pylint: disable=abstract-method
     The class implements the whole of the tag -- both parsing and construction --
     since the customer and service tags are byte-for-byte identical. What it
     deliberately leaves to its subclasses is only how the tag *names* itself:
-    :attr:`name`, :attr:`alias` and
+    :attr:`~pcapkit.protocols.protocol.Protocol.name`,
+    :attr:`~pcapkit.protocols.protocol.Protocol.alias` and
     :attr:`~pcapkit.protocols.protocol.Protocol.info_name`.
 
     It is abstract for the same reason :class:`~pcapkit.protocols.internet.ip.IP`
     is: :attr:`~pcapkit.protocols.protocol.Protocol.name` is declared
     abstract by :class:`~pcapkit.protocols.protocol.ProtocolBase` and is not
     defined here, so the class cannot be instantiated. Bind
-    :class:`C_Tag` or :class:`S_Tag`, never this class.
+    :class:`~pcapkit.protocols.link.c_tag.C_Tag` or
+    :class:`~pcapkit.protocols.link.s_tag.S_Tag`, never this class.
+
+    .. versionchanged:: 1.5.0
+
+       Became an abstract base. The 802.1Q customer tag it implemented, with its
+       ``name``, ``alias`` and ``info_name``, moved to
+       :class:`~pcapkit.protocols.link.c_tag.C_Tag`.
 
     """
 

@@ -15,6 +15,9 @@ which is a base class for link layer protocols, e.g. :class:`~pcapkit.protocols.
    .. autoproperty:: layer
 
    .. automethod:: register
+   .. automethod:: from_data
+
+   .. automethod:: __post_init__
 
    .. autoattribute:: __layer__
    .. autoattribute:: __proto__

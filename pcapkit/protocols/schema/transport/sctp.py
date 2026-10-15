@@ -123,8 +123,9 @@ def pre_pack_padding(schema: 'Schema', packet: 'dict[str, Any]') -> 'None':
 
     A schema whose padding was captured short -- only the last chunk of a
     packet can be -- carries the width as captured under ``__padding__`` in its
-    ``__dict__``, set by :func:`~pcapkit.protocols.transport.sctp._restore_padding`
-    from the chunk's ``padding`` as parsed (:issue:`1474`). The key is written to
+    ``__dict__``, set by ``_restore_padding`` in
+    :mod:`pcapkit.protocols.transport.sctp` from the chunk's ``padding`` as
+    parsed (:issue:`1474`). The key is written to
     ``packet`` for *every* schema, ``None`` when there is no record, since
     :meth:`Schema.pack <pcapkit.protocols.schema.schema.Schema.pack>` shares one
     ``packet`` mapping across siblings and a record left behind by one would
