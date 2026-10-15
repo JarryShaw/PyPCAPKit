@@ -15,7 +15,7 @@ so a request whose method token is the lower-case ``get`` is a distinct,
 non-standardised method from the registered ``GET`` -- conflating the two
 was the defect. Contrast :class:`~pcapkit.const.ftp.command.Command`'s own
 equivalent override, which stays case-insensitive deliberately: RFC 959
-Section 4.1 says FTP's four-letter command codes *are* to be treated
+Section 5.3 says FTP's four-letter command codes *are* to be treated
 identically regardless of case, so ``Command.get`` is untouched by this
 issue and is repinned below (:meth:`MethodGetCaseSensitivityTests.
 test_command_get_stays_case_insensitive`) so a future change cannot quietly
@@ -212,7 +212,7 @@ class MethodGetCaseSensitivityTests(unittest.TestCase):
     def test_command_get_stays_case_insensitive(self) -> None:
         """The registry #896 explicitly leaves alone.
 
-        RFC 959 Section 4.1: FTP command codes are to be treated
+        RFC 959 Section 5.3: FTP command codes are to be treated
         identically regardless of case, so
         :meth:`~pcapkit.const.ftp.command.Command.get` keeps folding case --
         pinned here so a future edit to the sibling ``Method`` fix cannot
