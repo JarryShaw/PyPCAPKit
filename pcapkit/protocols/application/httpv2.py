@@ -412,13 +412,17 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         Notes:
             :meth:`make` takes the frame payload as raw octets or as a built
             frame schema as well, and neither carries what the frame readers
-            need, e.g. ``__flags__``. So the header :meth:`make` returns is
-            dropped once packed, and :meth:`unpack` parses the packed octets
-            back with the frame type's own schema.
+            need, e.g. ``__flags__``. So while the instance is being
+            constructed, the header :meth:`make` returns is dropped once packed,
+            and :meth:`unpack` parses the packed octets back with the frame
+            type's own schema. Any other call leaves the instance's header as it
+            was (:issue:`1769`).
 
         """
         data = super().pack(**kwargs)
-        self.__header__ = None  # type: ignore[assignment]
+        # NOTE: Constructing, by the test ``ProtocolBase._packing_target`` makes.
+        if '_info' not in vars(self):
+            self.__header__ = None  # type: ignore[assignment]
         return data
 
     @staticmethod

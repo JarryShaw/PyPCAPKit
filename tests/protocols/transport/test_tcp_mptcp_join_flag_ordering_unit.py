@@ -565,14 +565,16 @@ class TCPMPTCPJoinStaleFlagsUnitTests(unittest.TestCase):
         parsed = self._parsed_join_syn()
         self.assertEqual(parsed._flags, Enum_Flags.SYN)  # type: ignore[attr-defined]  # pylint: disable=protected-access
 
-        parsed.pack(syn=False, ack=True, **TCP_HEADER)  # type: ignore[attr-defined]
+        # NOTE: Through ``make`` itself. ``pack`` makes its header on a copy, so it
+        # leaves the parsed ``_flags`` on the instance (#1769).
+        parsed.make(syn=False, ack=True, **TCP_HEADER)  # type: ignore[attr-defined]
 
         self.assertEqual(parsed._flags, Enum_Flags.ACK)  # type: ignore[attr-defined]  # pylint: disable=protected-access
         self.assertNotIn(Enum_Flags.SYN, parsed._flags)  # type: ignore[attr-defined]  # pylint: disable=protected-access
 
         # And again, to a third combination, so the assertion above cannot be satisfied
         # by a one-off rather than by a per-call derivation.
-        parsed.pack(syn=True, ack=True, **TCP_HEADER)  # type: ignore[attr-defined]
+        parsed.make(syn=True, ack=True, **TCP_HEADER)  # type: ignore[attr-defined]
 
         self.assertEqual(parsed._flags, Enum_Flags.SYN | Enum_Flags.ACK)  # type: ignore[attr-defined]  # pylint: disable=protected-access
 

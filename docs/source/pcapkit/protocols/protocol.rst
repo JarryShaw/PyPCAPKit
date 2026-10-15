@@ -78,6 +78,7 @@ Internal Definitions below.
    .. automethod:: _make_data
    .. automethod:: _make_index
    .. automethod:: _make_payload
+   .. automethod:: _packing_target
 
    .. automethod:: _lookup_registry
    .. automethod:: _lookup_next_layer
