@@ -35,7 +35,7 @@ from that thread: some range-validation logic that inheriting classes can hook
 into, which is :meth:`EnumLookup._validate_value`. Legality is
 every enumeration's concern; mutation is only the open registries'.
 
-Supporting measurement, taken on this tree at the time of the split: **0** of the
+Supporting measurement, taken when :issue:`877` split the tiers: **0** of the
 26 non-registry enumerations define ``register``, ``register_alias``,
 ``register_aliases`` or ``_unregistered_member``, and there are **0**
 :class:`EnumRegistry` subclasses outside :mod:`pcapkit.const`. The mutating half

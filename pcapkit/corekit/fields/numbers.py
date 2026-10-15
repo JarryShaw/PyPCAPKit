@@ -818,8 +818,7 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
         wire value should resolve to a real member of the registry the field
         names -- ``isinstance`` against it and every ancestor holds, and it
         renders and dispatches exactly like a declared one -- provided
-        building it never grows the registry, which is the whole reason the
-        field does not call ``get()`` unconditionally.
+        building it never grows the registry.
         This is what gets there: it calls ``namespace``'s own storage base's
         ``__new__`` directly -- :class:`str` or :class:`int`, whichever
         ``namespace`` derives from -- which skips ``namespace``'s *own*
@@ -850,12 +849,13 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
             this way, which is what keeps this safe to return from
             ``post_process``. A direct call to
             :meth:`~pcapkit.const.reg.apptype.apptype.AppType.get` for the same port
-            is a different matter and deliberately so: asking the
-            registry for a name is an explicit request for a named member, so
-            it still mints one -- measured on this tree,
-            ``AppType.get(54321, proto=tcp)`` returns ``PORT_54321_tcp`` and
-            takes ``TCP.__members__`` from 6147 to 6148, and a second call
-            with the same port returns that member rather than raising. Two
+            does not come through here, and it does not mint either: it
+            builds an unregistered member of its own, through the registry's
+            ``_unregistered_member`` -- measured on this tree,
+            ``AppType.get(54321, proto=tcp)`` returns
+            ``<TCP.unknown: 54321 [tcp]>``, ``TCP.__members__`` stays at
+            6147, and a second call with the same port returns an equal
+            member rather than the same one. Two
             unregistered members for the same value also compare equal
             without being identical, since
             :class:`~pcapkit.const.reg.apptype.apptype.AppType` and

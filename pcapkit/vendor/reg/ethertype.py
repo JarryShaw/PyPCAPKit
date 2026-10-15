@@ -40,7 +40,7 @@ class EtherType(Vendor):
     #: convert to :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_
     #: member`, on the theory that a proprietary protocol's company name IS
     #: the final concrete name for every other row. :issue:`775`'s final round
-    #: converts every row alike, so this set no longer decides *whether* a
+    #: converts every row alike, so this set does not decide *whether* a
     #: row registers -- only *how its name is spelled*: these two keep the
     #: bare label with no hex suffix, since the label itself already says
     #: nothing was assigned, while every other row keeps the hex-suffixed

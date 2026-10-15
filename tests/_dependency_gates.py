@@ -115,10 +115,11 @@ __all__ = [
     'ambiguous_satisfactions', 'describe_ambiguous_satisfaction',
 ]
 
-#: The workflow holding every job that runs :program:`pytest`, and the only one
-#: that runs it at all. Five of the other seven install ``.[all]`` somewhere --
-#: a docs build, a conda recipe, a vendor crawl, the lint pass, and the release
-#: packaging workflow -- and none of them invokes the suite;
+#: The workflow holding every blocking job that runs :program:`pytest`.
+#: :file:`experimental.yml` runs the unit tier as well, on legs nothing waits on
+#: (#1732), and is not read here. Five other workflows install ``.[all]``
+#: somewhere -- a docs build, a conda recipe, a vendor crawl, the lint pass,
+#: and the release packaging workflow -- and none of them invokes the suite;
 #: :file:`python-compatibility.yml` installs a bare ``.`` and only compiles and
 #: imports, and :file:`codeql-analysis.yml` installs nothing explicitly at all
 #: (CodeQL's own autobuild step). That is exactly why this module keys on *jobs that
@@ -200,7 +201,7 @@ MODULE_PROVIDERS = {
     # distribution, so ``beautifulsoup4`` alone does not provide it. That
     # distinction is the whole reason ``HAS_CRAWLER_DEPS`` is satisfied in CI
     # and ``HAS_VENDOR_DEPS`` is not: the ``test`` extra carries plain
-    # ``beautifulsoup4``, and only ``vendor`` and ``all`` carry
+    # ``beautifulsoup4``, and only ``vendor`` and ``dev`` carry
     # ``beautifulsoup4[html5lib]``. The second alternative below is not a
     # second *distribution* -- pyproject.toml never declares bare
     # ``html5lib`` -- so this is one distribution reached two ways, not the
@@ -1156,8 +1157,8 @@ def flag_requirements() -> 'dict[tuple[str, str], frozenset[str]]':
     every module but one, and in
     :file:`tests/foundation/engines/test_runtime_engines.py` it names those four
     plus ``dpkt``, ``scapy`` and ``pyshark``. Keyed on the name alone, that one
-    module's requirements would be demanded of the 130 others, or the 130 would
-    excuse it.
+    module's requirements would be demanded of every other module that gates on
+    it, or they would excuse it.
 
     A module that gates on a flag it imports resolves through the import, so
     ``tests/integration/test_cli_subprocess.py`` gets ``HAS_EMOJI``'s
@@ -1222,10 +1223,11 @@ def gated_scopes() -> 'tuple[Gate, ...]':
     scan: ``python_files`` in :file:`pyproject.toml` is what pytest collects, so
     a gate in a helper module gates nothing. Class-level and method-level
     decorators are both collected, and the class-level ones are the majority --
-    ``HAS_DPKT`` reaches 20 methods through 6 class decorators and 8 through a
-    method decorator -- counted by exact-match AST identifiers the way this
-    function itself matches them, not by a substring search, which would
-    (elsewhere) fold ``HAS_PYPCAP`` together with ``HAS_PYPCAPFILE``.
+    when #745 was fixed, ``HAS_DPKT`` reached 20 methods through 6 class
+    decorators and 8 through a method decorator -- counted by exact-match AST
+    identifiers the way this function itself matches them, not by a substring
+    search, which would (elsewhere) fold ``HAS_PYPCAP`` together with
+    ``HAS_PYPCAPFILE``.
 
     """
     gates = []  # type: list[Gate]
@@ -1406,7 +1408,7 @@ def _engine_matrix_variants(name: 'str', section: 'str') -> 'Optional[tuple[Job,
 def pytest_jobs(workflow: 'Optional[pathlib.Path]' = None) -> 'tuple[Job, ...]':
     """The jobs of ``workflow`` that run :program:`pytest`.
 
-    Keyed on running the suite, not on holding an install line: seven other
+    Keyed on running the suite, not on holding an install line: five other
     workflows install ``.[all]`` somewhere, three of them as ``.[all,dev]`` --
     which does carry ``pypcapfile``, through the ``dev`` extra #910 added when
     it narrowed ``all`` to core addons only -- and never invoke

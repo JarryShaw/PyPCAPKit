@@ -15,7 +15,7 @@ house rule the four below follow.
 The owner's ruling on GitHub issue :issue:`911` chose one shared module over
 one module per sentinel, and this module is the only import path for all
 four: the module of the class that uses each one does not re-export it
-(:issue:`1744`), per the ruling on :issue:`1715` that a moved name keeps no
+(:issue:`1744`), per the ruling recorded on :issue:`1103` that a moved name keeps no
 re-export at its old path. :mod:`pcapkit.corekit.module`,
 :mod:`pcapkit.corekit.fields.field`, :mod:`pcapkit.corekit.enum` and
 :mod:`pcapkit.protocols.protocol` import the object they use from here, but

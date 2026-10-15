@@ -391,6 +391,15 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
         the same signature as specified in class variables' type annotations,
         which is inspired by :pep:`557` (:mod:`dataclasses`).
 
+        Note:
+            Whether ``cls`` still needs finalising is read from its *own*
+            ``__dict__``, never inherited (GitHub issue :issue:`1490`). Each
+            class is finalised on its first construction, whatever its
+            ancestors' state, so a subclass of a :attr:`FinalisedState.BASE` or
+            :attr:`FinalisedState.FINAL` ancestor still gets its own
+            ``__builtin__``, ``__excluded__`` and generated ``__init__``, and a
+            ``@final`` class under a ``BASE`` ancestor is refused like any other.
+
         Args:
             *args: Arbitrary positional arguments.
             **kwargs: Arbitrary keyword arguments.
@@ -400,15 +409,6 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
                 :func:`~pcapkit.utilities.compat.final` but never finalised by
                 :func:`info_final`, i.e. it carries ``__final__`` in its own
                 ``__dict__`` without :attr:`FinalisedState.FINAL`.
-
-        Note:
-            Whether ``cls`` still needs finalising is read from its *own*
-            ``__dict__``, never inherited (GitHub issue :issue:`1490`). Each
-            class is finalised on its first construction, whatever its
-            ancestors' state, so a subclass of a :attr:`FinalisedState.BASE` or
-            :attr:`FinalisedState.FINAL` ancestor still gets its own
-            ``__builtin__``, ``__excluded__`` and generated ``__init__``, and a
-            ``@final`` class under a ``BASE`` ancestor is refused like any other.
 
         """
         # NOTE: ``final`` is applied *after* the class object exists, so

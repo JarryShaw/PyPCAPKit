@@ -32,12 +32,12 @@ sys.path.insert(0, path)
 __all__ = ['Socket']
 
 ###############################################################################
-# NOTE: this crawler no longer crawls, and the registry below is maintained by
-# hand; see #507.
+# NOTE: this crawler does not crawl: the registry below is maintained by hand;
+# see #507.
 #
-# It used to scrape the well-known-socket table out of
+# Its source was the well-known-socket table in
 # https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#Socket_number,
-# and two separate things broke that. Wikipedia now answers ``requests``'
+# and two separate things broke that. Wikipedia answers ``requests``'
 # default ``python-requests/<version>`` User-Agent with HTTP 403 (measured
 # 2026-09-19: 403 and 126 bytes of robot-policy text for the default agent,
 # 200 and 114117 bytes for a descriptive one), so ``Vendor._request`` could not
@@ -55,7 +55,7 @@ __all__ = ['Socket']
 # registry itself is closed, which is what settles it -- IPX socket numbers
 # were Novell's to assign, and Novell's own documentation still ends the list
 # with "software developers writing NetWare applications can contact Novell to
-# reserve well-known sockets". There is no longer a Novell to contact, and IPX
+# reserve well-known sockets". No Novell remains to contact, and IPX
 # will not gain new socket numbers, so there is nothing for a crawler to pick
 # up on its next run.
 #
@@ -257,7 +257,7 @@ RANGES = [
 #: a notation for readers; the ruling on :issue:`775` kept ``Registered by Xerox`` out
 #: of this set on that test, because a proprietary protocol may expose no name
 #: of its own, so the company name serves as its name. :issue:`775`'s final round
-#: converts it too, so this set no longer decides *whether* a range registers --
+#: converts it too, so this set does not decide *whether* a range registers --
 #: only *how its name is spelled*: these four keep the bare label with no hex
 #: suffix, since the label itself already says nothing was assigned, while
 #: ``Registered by Xerox`` keeps the hex-suffixed name it always rendered.
