@@ -522,7 +522,14 @@ class EchoReply(Option, code=Enum_Option.Echo_Reply):
 
 @schema_final
 class Timestamps(Option, code=Enum_Option.Timestamps):
-    """Header schema for TCP timestamps option."""
+    """Header schema for TCP timestamps option.
+
+    .. versionchanged:: 1.1.0
+
+       Renamed from ``Timestamp``, which :mod:`pcapkit.protocols.schema`
+       exported as ``TCP_Timestamp``; the export is ``TCP_Timestamps``.
+
+    """
 
     #: Timestamp value.
     value: 'int' = UInt32Field()
@@ -543,7 +550,16 @@ class PartialOrderConnectionPermitted(Option, code=Enum_Option.Partial_Order_Con
 
 @schema_final
 class PartialOrderServiceProfile(Option, code=Enum_Option.Partial_Order_Service_Profile):
-    """Header schema for TCP partial order connection service profile option."""
+    """Header schema for TCP partial order connection service profile option.
+
+    .. versionchanged:: 1.1.0
+
+       Renamed from ``PartialOrderConnectionProfile``, which
+       :mod:`pcapkit.protocols.schema` exported as
+       ``TCP_PartialOrderConnectionProfile``; the export is
+       ``TCP_PartialOrderServiceProfile``.
+
+    """
 
     #: Profile data.
     profile: 'POCProfile' = BitField(length=1, namespace={
@@ -720,7 +736,17 @@ Option.register(Enum_Option.Multipath_TCP, _MPTCP)
 
 
 class MPTCP(EnumSchema[Enum_MPTCPOption]):
-    """Header schema for Multipath TCP options."""
+    """Header schema for Multipath TCP options.
+
+    .. versionchanged:: 1.1.0
+
+       An :class:`~pcapkit.protocols.schema.schema.EnumSchema` keyed on
+       :class:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption` rather than a
+       subclass of :class:`~pcapkit.protocols.schema.transport.tcp.Option`,
+       which registers :class:`~pcapkit.protocols.schema.transport.tcp._MPTCP`
+       under ``Multipath_TCP`` instead.
+
+    """
 
     __enum__: 'DefaultDict[Enum_MPTCPOption, Type[MPTCP]]' = collections.defaultdict(lambda: MPTCPUnknown)
 
