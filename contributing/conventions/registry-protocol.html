@@ -17,6 +17,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mermaid.css?v=10b7d883" />
     
     
 
@@ -561,6 +562,21 @@ generated registries spell by hand in <code class="docutils literal notranslate"
         <span class="k">raise</span> <span class="n">EnumValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1"> is not a valid </span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 </pre></div>
 </div>
+<p><strong>Every registry overrides it</strong>, so that <code class="docutils literal notranslate"><span class="pre">register</span></code> refuses what <code class="docutils literal notranslate"><span class="pre">get</span></code> refuses
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1816">#1816</a>). Each vendor generator emits the override from the check it already
+writes at the top of <code class="docutils literal notranslate"><span class="pre">_missing_</span></code>, with the same message. That is the <code class="docutils literal notranslate"><span class="pre">FLAG</span></code> of most
+crawlers, but a bespoke template’s own range where its <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> checks something
+else: <code class="docutils literal notranslate"><span class="pre">0</span></code>-<code class="docutils literal notranslate"><span class="pre">999</span></code> for <a class="reference internal" href="../../pcapkit/const/http.html#pcapkit.const.http.status_code.StatusCode" title="pcapkit.const.http.status_code.StatusCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">StatusCode</span></code></a> and
+<a class="reference internal" href="../../pcapkit/const/ftp.html#pcapkit.const.ftp.return_code.ReturnCode" title="pcapkit.const.ftp.return_code.ReturnCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReturnCode</span></code></a>, and <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> for the
+string-valued registries.
+<a class="reference internal" href="../../pcapkit/const/pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel" title="pcapkit.const.pcapng.tls_key_label.TLSKeyLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLSKeyLabel</span></code></a> and
+<a class="reference internal" href="../../pcapkit/const/ipv6.html#pcapkit.const.ipv6.extension_header.ExtensionHeader" title="pcapkit.const.ipv6.extension_header.ExtensionHeader"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExtensionHeader</span></code></a> have no <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> to
+copy from, because their constructor refuses every value no member carries, so the
+first checks its member type and the second the 8-bit Next Header field the type is
+sent in. The <code class="docutils literal notranslate"><span class="pre">AppType</span></code> transports inherit <code class="docutils literal notranslate"><span class="pre">AppType</span></code>’s own.</p>
+<p>The check is the <em>range</em>, not everything <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> decides. A value inside the range
+that matches neither a member nor an unassigned range – <code class="docutils literal notranslate"><span class="pre">CauseCode(0)</span></code>, say – still
+fails to resolve through <code class="docutils literal notranslate"><span class="pre">get</span></code>, and <code class="docutils literal notranslate"><span class="pre">register</span></code> may mint it.</p>
 <p>Three things about it are easy to get wrong:</p>
 <ul>
 <li><p><strong>It guards, it does not convert.</strong> The return type is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> deliberately, so
@@ -591,9 +607,9 @@ legal by construction. <code class="docutils literal notranslate"><span class="p
 <p class="admonition-title">Note</p>
 <p>Re-parenting every non-registry enumeration onto
 <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> was <strong>phase 2</strong> of
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>, and it is <strong>complete</strong>: the phase landed for 24 of the 24
-non-registry enumerations. <strong>Zero enumerations remain outside the hierarchy</strong>,
-measured by a runtime walk over both the <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a> and <code class="docutils literal notranslate"><span class="pre">aenum</span></code> flavours.</p>
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>, and it is <strong>complete</strong>: the phase landed for every non-registry
+enumeration. <strong>No enumeration remains outside the hierarchy</strong>, measured by a
+runtime walk over both the <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a> and <code class="docutils literal notranslate"><span class="pre">aenum</span></code> flavours.</p>
 </div>
 </section>
 <section id="failed-lookup-exceptions">
@@ -624,14 +640,11 @@ caller’s.</p></li>
 <p>Which branch a key takes, and what each miss ends in:</p>
 <pre  class="mermaid">
         flowchart TD
-    GET[&quot;get(key, default)&quot;] --&gt;|&quot;isinstance(key, str)&quot;| NAME[&quot;_member_map_ lookup&quot;]
+    GET[&quot;get(key, default)&quot;] --&gt;|&quot;isinstance(key, str)&quot;| NAME[&quot;\_member\_map\_ lookup&quot;]
     GET --&gt;|&quot;otherwise&quot;| VALUE[&quot;_validate_value(key)&lt;br/&gt;then cls(key)&quot;]
-    NAME --&gt;|&quot;hit&quot;| OK[&quot;canonical member&quot;]
-    NAME --&gt;|&quot;miss, key is a registered value&quot;| OK
-    NAME --&gt;|&quot;miss, default is a registered value&quot;| OK
     NAME --&gt;|&quot;miss, no usable default&quot;| KEYERR[&quot;EnumKeyError&lt;br/&gt;quiet, derives KeyError&quot;]
-    VALUE --&gt;|&quot;resolves, or _missing_ answers&quot;| OK
-    VALUE --&gt;|&quot;ValueError, default is a registered value&quot;| OK
+    NAME --&gt;|&quot;hit,&lt;br/&gt;or miss, key is a registered value,&lt;br/&gt;or miss, default is a registered value&quot;| OK[&quot;canonical member&quot;]
+    VALUE --&gt;|&quot;resolves, or \_missing\_ answers,&lt;br/&gt;or ValueError, default is a registered value&quot;| OK
     VALUE --&gt;|&quot;ValueError, no usable default&quot;| VALERR[&quot;EnumValueError&lt;br/&gt;loud, derives ValueError&quot;]
     </pre><p>Do not “improve” on the shape by making both misses report identically. Converting
 one into the other is exactly what <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a> retired, and it was retired in three
@@ -752,7 +765,7 @@ and it is the trap for whoever writes the next override: the base branches on
 branched on <code class="docutils literal notranslate"><span class="pre">isinstance(key,</span> <span class="pre">int)</span></code> and fell through to the <em>name</em> path for anything
 else. <code class="docutils literal notranslate"><span class="pre">get(None)</span></code> therefore raised a quiet
 <a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.EnumKeyError" title="pcapkit.utilities.exceptions.EnumKeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumKeyError</span></code></a> on those two and a loud
-<a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a> on the other four of the six
+<a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a> on the other
 locally-defined helpers in those two modules, and no prose
 anywhere said so. Re-implementing the dispatch is how an override acquires a
 divergence nobody wrote down; delegating to it is how it does not.</p>
@@ -828,25 +841,23 @@ IANA spells a column is not evidence.</p>
 <p><a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/903">#903</a>’s sweep, so that a
 registry added later has something to check itself against. The owner set its scope:
 audit every registry first, and decide case-sensitivity per registry from that.</p>
-<p>The population it covers, with the counting convention spelled out because the
-figures move: <strong>127</strong> <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a> subclasses, every
-one of them under <a class="reference internal" href="../../pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a>, across 124 files – 117 <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>-valued
-(of which 5 are flag registries) and 10 <code class="docutils literal notranslate"><span class="pre">aenum.StrEnum</span></code>-valued. Plus <strong>24</strong>
-non-registry enumerations counted by a runtime walk over both the <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a> and
-<code class="docutils literal notranslate"><span class="pre">aenum</span></code> flavours and including nested classes: 17 top level (3 of them under
-<a class="reference internal" href="../../pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> itself) and 7 nested, the nested ones being
-<code class="docutils literal notranslate"><span class="pre">FrameType.Flags</span></code> in <a class="reference internal" href="../../pcapkit/protocols/application/httpv2.html#module-pcapkit.protocols.schema.application.httpv2" title="pcapkit.protocols.schema.application.httpv2"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.application.httpv2</span></code></a> plus its
-6 concrete per-frame subclasses. 151 enumerations in total.</p>
-<p><strong>The</strong> <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a><strong>-valued tier, all 117, is case-sensitive, and the criterion is
-vacuous on it rather than merely unmet.</strong> A registry whose values are numbers has
+<p>The population it covers is every <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>
+subclass, every one of them under <a class="reference internal" href="../../pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> and each either
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>-valued (the flag registries among them) or <code class="docutils literal notranslate"><span class="pre">aenum.StrEnum</span></code>-valued,
+plus every non-registry enumeration a runtime walk over both the <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a> and
+<code class="docutils literal notranslate"><span class="pre">aenum</span></code> flavours finds, nested classes included – such as <code class="docutils literal notranslate"><span class="pre">FrameType.Flags</span></code> in
+<a class="reference internal" href="../../pcapkit/protocols/application/httpv2.html#module-pcapkit.protocols.schema.application.httpv2" title="pcapkit.protocols.schema.application.httpv2"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.application.httpv2</span></code></a> and its concrete per-frame
+subclasses.</p>
+<p><strong>The</strong> <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a><strong>-valued tier is case-sensitive throughout, and the criterion
+is vacuous on it rather than merely unmet.</strong> A registry whose values are numbers has
 nothing for case to apply to; the only way a string reaches
 <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> on one is as a member <em>name</em>, and a name
 is the Python identifier <a class="reference internal" href="../../pcapkit/vendor/default.html#pcapkit.vendor.default.Vendor.safe_name" title="pcapkit.vendor.default.Vendor.safe_name"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.vendor.default.Vendor.safe_name()</span></code></a> derives from
 the registry’s own name column – it preserves the registrar’s casing exactly, but it
 is not itself a value any specification states a comparison rule for. Measured across
-all 151 enumerations: exactly <strong>one</strong> would collide if names were folded –
-<a class="reference internal" href="../../pcapkit/const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parameter</span></code></a>, on <code class="docutils literal notranslate"><span class="pre">R1_Counter</span></code> against
-<code class="docutils literal notranslate"><span class="pre">R1_COUNTER</span></code> – and <strong>no</strong> enumeration anywhere has two <code class="docutils literal notranslate"><span class="pre">str</span></code> <em>values</em> that
+every enumeration: <strong>only</strong> <a class="reference internal" href="../../pcapkit/const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parameter</span></code></a> would
+collide if names were folded, on <code class="docutils literal notranslate"><span class="pre">R1_Counter</span></code> against <code class="docutils literal notranslate"><span class="pre">R1_COUNTER</span></code> – and
+<strong>no</strong> enumeration anywhere has two <code class="docutils literal notranslate"><span class="pre">str</span></code> <em>values</em> that
 collide when folded. So folding names is not merely unjustified, it is unsafe in a
 measured case; folding values is safe but unjustified except where the table below
 says otherwise.</p>
@@ -942,16 +953,16 @@ the CSV columns the crawler reads are lower case in every row (<code class="docu
 <code class="docutils literal notranslate"><span class="pre">m</span> <span class="pre">[1]</span></code> 2). Both tallies cover all 64 rows.</p></td>
 <td><p><strong>open</strong> – see below</p></td>
 </tr>
-<tr class="row-odd"><td><p>The 6 <a class="reference internal" href="../../pcapkit/protocols/internet/mh.html#module-pcapkit.protocols.internet.mh" title="pcapkit.protocols.internet.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mh</span></code></a> and
+<tr class="row-odd"><td><p>The <a class="reference internal" href="../../pcapkit/protocols/internet/mh.html#module-pcapkit.protocols.internet.mh" title="pcapkit.protocols.internet.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mh</span></code></a> and
 <a class="reference internal" href="../../pcapkit/protocols/application/ngap.html#module-pcapkit.protocols.application.ngap" title="pcapkit.protocols.application.ngap"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ngap</span></code></a> helper enumerations</p></td>
 <td><p>IANA Mobility Header registries, 3GPP TS 38.413</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">FastBindingAcknowledgmentStatus</span></code>, <code class="docutils literal notranslate"><span class="pre">IPv6AddressPrefixCode</span></code>,
 <code class="docutils literal notranslate"><span class="pre">LMAAddressCode</span></code>, <code class="docutils literal notranslate"><span class="pre">LocalizedRoutingStatus</span></code>, <code class="docutils literal notranslate"><span class="pre">Criticality</span></code> and <code class="docutils literal notranslate"><span class="pre">PDUKind</span></code>.
-<strong>Five</strong> of the six carry numeric codes, so the criterion is vacuous on them
+<strong>All but</strong> <code class="docutils literal notranslate"><span class="pre">PDUKind</span></code> carry numeric codes, so the criterion is vacuous on them
 exactly as for the <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> tier above; <code class="docutils literal notranslate"><span class="pre">PDUKind</span></code>’s are <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> ASN.1
 identifiers from 3GPP TS 38.413, and ASN.1 identifiers are case-significant by
 construction, so it lands the same way for a different reason.
-<strong>None</strong> of the six defines a <code class="docutils literal notranslate"><span class="pre">get</span></code> of its own. Two did when this
+<strong>None</strong> of them defines a <code class="docutils literal notranslate"><span class="pre">get</span></code> of its own. Two did when this
 audit was taken –
 <code class="docutils literal notranslate"><span class="pre">FastBindingAcknowledgmentStatus</span></code> and <code class="docutils literal notranslate"><span class="pre">IPv6AddressPrefixCode</span></code>, for
 signature reasons (no <code class="docutils literal notranslate"><span class="pre">default</span></code>, and an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>/<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> dispatch)
@@ -1161,11 +1172,11 @@ the next regeneration would discard it.</p>
 
 const initStyles = () => {
     const defaultStyle = document.createElement('style');
-    defaultStyle.textContent = "pre.mermaid {\n    /* Same as .mermaid-container > pre */\n    display: block;\n    width: 100%;\n}\n\npre.mermaid > svg {\n    /* Same as .mermaid-container > pre > svg */\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}";
+    defaultStyle.textContent = "pre.mermaid {\n    /* Same as .mermaid-container > pre */\n    display: block;\n    width: fit-content;\n}\n\npre.mermaid > svg {\n    /* Same as .mermaid-container > pre > svg */\n    height: auto;\n    width: 100%;\n    max-width: 100% !important;\n}";
     document.head.appendChild(defaultStyle);
 
     const fullscreenStyle = document.createElement('style');
-    fullscreenStyle.textContent = ".mermaid-container {\n    position: relative;\n    display: flex;\n    flex-direction: row;\n    width: 100%;\n}\n\n.mermaid-container > pre {\n    display: block;\n    width: 100%;\n}\n\n.mermaid-container > pre > svg {\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}\n\n.mermaid-fullscreen-btn {\n    position: absolute;\n    width: 28px;\n    height: 28px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.3);\n    border-radius: 4px;\n    cursor: pointer;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    transition: all 0.2s;\n    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);\n    font-size: 14px;\n    line-height: 1;\n    padding: 0;\n    color: #333;\n}\n\n.mermaid-fullscreen-btn:hover {\n    opacity: 100% !important;\n    background: rgba(255, 255, 255, 1);\n    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-btn.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.3);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-btn.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal {\n    display: none;\n    position: fixed !important;\n    top: 0 !important;\n    left: 0 !important;\n    width: 95vw;\n    height: 100vh;\n    background: rgba(255, 255, 255, 0.98);\n    z-index: 9999;\n    padding: 20px;\n    overflow: auto;\n}\n\n.mermaid-fullscreen-modal.dark-theme {\n    background: rgba(0, 0, 0, 0.98);\n}\n\n.mermaid-fullscreen-modal.active {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen {\n    position: relative;\n    width: 95vw;\n    height: 90vh;\n    max-width: 95vw;\n    max-height: 90vh;\n    background: white;\n    border-radius: 8px;\n    padding: 20px;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);\n    overflow: auto;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen.dark-theme {\n    background: #1a1a1a;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);\n}\n\n.mermaid-container-fullscreen pre.mermaid {\n    width: 100%;\n    height: 100%;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen .mermaid svg {\n    height: 100% !important;\n    width: 100% !important;\n    cursor: grab;\n}\n\n.mermaid-fullscreen-close {\n    position: fixed !important;\n    top: 20px !important;\n    right: 20px !important;\n    width: 40px;\n    height: 40px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.2);\n    border-radius: 50%;\n    cursor: pointer;\n    z-index: 10000;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);\n    transition: all 0.2s;\n    font-size: 24px;\n    line-height: 1;\n    color: #333;\n}\n\n.mermaid-fullscreen-close:hover {\n    background: white;\n    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-close.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.2);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-close.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal .mermaid-fullscreen-btn {\n    display: none !important;\n}";
+    fullscreenStyle.textContent = ".mermaid-container {\n    position: relative;\n    display: flex;\n    flex-direction: row;\n    width: 100%;\n}\n\n.mermaid-container > pre {\n    display: block;\n    width: fit-content;\n}\n\n.mermaid-container > pre > svg {\n    height: auto;\n    width: 100%;\n    max-width: 100% !important;\n}\n\n.mermaid-fullscreen-btn {\n    position: absolute;\n    width: 28px;\n    height: 28px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.3);\n    border-radius: 4px;\n    cursor: pointer;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    transition: all 0.2s;\n    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);\n    font-size: 14px;\n    line-height: 1;\n    padding: 0;\n    color: #333;\n}\n\n.mermaid-fullscreen-btn:hover {\n    opacity: 100% !important;\n    background: rgba(255, 255, 255, 1);\n    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-btn.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.3);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-btn.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal {\n    display: none;\n    position: fixed !important;\n    top: 0 !important;\n    left: 0 !important;\n    width: 95vw;\n    height: 100vh;\n    background: rgba(255, 255, 255, 0.98);\n    z-index: 9999;\n    padding: 20px;\n    overflow: auto;\n}\n\n.mermaid-fullscreen-modal.dark-theme {\n    background: rgba(0, 0, 0, 0.98);\n}\n\n.mermaid-fullscreen-modal.active {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen {\n    position: relative;\n    width: 95vw;\n    height: 90vh;\n    max-width: 95vw;\n    max-height: 90vh;\n    background: white;\n    border-radius: 8px;\n    padding: 20px;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);\n    overflow: auto;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen.dark-theme {\n    background: #1a1a1a;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);\n}\n\n.mermaid-container-fullscreen pre.mermaid {\n    width: 100%;\n    height: 100%;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen .mermaid svg {\n    height: 100% !important;\n    width: 100% !important;\n    cursor: grab;\n}\n\n.mermaid-fullscreen-close {\n    position: fixed !important;\n    top: 20px !important;\n    right: 20px !important;\n    width: 40px;\n    height: 40px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.2);\n    border-radius: 50%;\n    cursor: pointer;\n    z-index: 10000;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);\n    transition: all 0.2s;\n    font-size: 24px;\n    line-height: 1;\n    color: #333;\n}\n\n.mermaid-fullscreen-close:hover {\n    background: white;\n    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-close.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.2);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-close.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal .mermaid-fullscreen-btn {\n    display: none !important;\n}";
     document.head.appendChild(fullscreenStyle);
 }
 
@@ -1478,7 +1489,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -1504,7 +1515,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

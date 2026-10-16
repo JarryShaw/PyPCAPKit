@@ -14,7 +14,7 @@ with no rule naming any of them wrong. GitHub issue :issue:`937` closed that gap
 owner ruled for SCREAMING_SNAKE and accepted the resulting breaking change outright, with
 no backport. So the object is named in SCREAMING_SNAKE and the type-naming rule above
 derives from it mechanically -- title-case each underscore-separated word and append
-``Type``, no per-sentinel exception needed. The four in the tree follow it:
+``Type``, no per-sentinel exception needed. The sentinels in the tree follow it:
 
 .. list-table::
    :header-rows: 1

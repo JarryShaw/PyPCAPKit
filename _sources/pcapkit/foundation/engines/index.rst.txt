@@ -32,7 +32,7 @@ class hierarchy of :mod:`pcapkit.foundation.engines`:
        A{{EngineMeta}} -.->|metaclass| B(EngineBase)
 
        subgraph built-in [Built-in Engines]
-           %% direction TD
+           direction LR
 
            PCAP
            PCAPNG
@@ -40,7 +40,7 @@ class hierarchy of :mod:`pcapkit.foundation.engines`:
        B --> built-in
 
        subgraph third-party [3rd Party Engines]
-           %% direction TD
+           direction LR
 
            Scapy
            DPKT
@@ -54,20 +54,20 @@ class hierarchy of :mod:`pcapkit.foundation.engines`:
        B --> C(Engine)
        C --> D([user customisation ...])
 
-       click A "/pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.EngineMeta"
-       click B "/pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.EngineBase"
-       click C "/pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.Engine"
-       click D "/ext.html#extractor-engines"
+       click A "engine.html#pcapkit.foundation.engines.engine.EngineMeta"
+       click B "engine.html#pcapkit.foundation.engines.engine.EngineBase"
+       click C "engine.html#pcapkit.foundation.engines.engine.Engine"
+       click D "../../../ext.html#extractor-engines"
 
-       click PCAP "/pcapkit/foundation/engines/builtin.html#pcapkit.foundation.engines.pcap.PCAP"
-       click PCAPNG "/pcapkit/foundation/engines/builtin.html#pcapkit.foundation.engines.pcapng.PCAPNG"
+       click PCAP "builtin.html#pcapkit.foundation.engines.pcap.PCAP"
+       click PCAPNG "builtin.html#pcapkit.foundation.engines.pcapng.PCAPNG"
 
-       click Scapy "/pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.scapy.Scapy"
-       click DPKT "/pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT"
-       click PyShark "/pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pyshark.PyShark"
-       click PyPCAP "/pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcap.PyPCAP"
-       click PCAP_CT "/pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pcap_ct.PCAP_CT"
-       click PyPCAPFile "/pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile"
+       click Scapy "3rdparty.html#pcapkit.foundation.engines.scapy.Scapy"
+       click DPKT "3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT"
+       click PyShark "3rdparty.html#pcapkit.foundation.engines.pyshark.PyShark"
+       click PyPCAP "3rdparty.html#pcapkit.foundation.engines.pypcap.PyPCAP"
+       click PCAP_CT "3rdparty.html#pcapkit.foundation.engines.pcap_ct.PCAP_CT"
+       click PyPCAPFile "3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile"
 
 Not every engine can do everything :class:`~pcapkit.foundation.extraction.Extractor`
 offers, and the ones that cannot say so rather than quietly doing less, unless

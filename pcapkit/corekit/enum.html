@@ -17,6 +17,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mermaid.css?v=10b7d883" />
     
     
 
@@ -544,8 +545,10 @@ bare tier carries <strong>instead</strong> of <code class="docutils literal notr
 is something every enumeration has an opinion on, whereas who may <em>add</em>
 one is only an open registry’s concern.</p>
 <p>The base implementation accepts everything, because a base cannot know
-any subclass’s range. Overriding it is how a subclass states one – the
-shape <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> spells by hand across the generated registries:</p>
+any subclass’s range. Overriding it is how a subclass states one, and
+every registry under <a class="reference internal" href="../const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> does, its vendor generator
+emitting the check its <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> makes (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1816">#1816</a>) – in the
+shape:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@classmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">_validate_value</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0xFF</span><span class="p">):</span>
@@ -590,9 +593,9 @@ a caller can introduce a value no member carries yet.</p></li>
 <p>Of the registries that override <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumRegistry.register()</span></code></a> to mint
 through a path of their own,
 <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.register" title="pcapkit.const.pcapng.option_type.OptionType.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">OptionType.register</span></code></a>
-calls it at the same point and
+and
 <a class="reference internal" href="../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType.register" title="pcapkit.const.reg.apptype.apptype.AppType.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">AppType.register</span></code></a>
-does not.</p>
+both call it at the same point.</p>
 <p><a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register_alias" title="pcapkit.corekit.enum.EnumRegistry.register_alias"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumRegistry.register_alias()</span></code></a> does not call it, and does not need
 to: it refuses any <code class="docutils literal notranslate"><span class="pre">value</span></code> that is not already registered, so the value
 it aliases has necessarily passed validation already.

@@ -17,6 +17,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mermaid.css?v=10b7d883" />
     
     
 
@@ -495,7 +496,7 @@
 <h1>GitHub Actions Workflows<a class="headerlink" href="#github-actions-workflows" title="Link to this heading">¶</a></h1>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>The thirteen workflows under <code class="file docutils literal notranslate"><span class="pre">.github/workflows/</span></code> trigger each other, and
+<p>The workflows under <code class="file docutils literal notranslate"><span class="pre">.github/workflows/</span></code> trigger each other, and
 the chain that results is not visible from any single file – reading one
 <code class="docutils literal notranslate"><span class="pre">on:</span></code> block never shows what a <em>different</em> workflow’s completion goes on
 to start. This page is the repository-wide graph. The release <em>pipeline</em>
@@ -637,38 +638,37 @@ chain from.</p>
 <section id="the-graph">
 <h2>The Graph<a class="headerlink" href="#the-graph" title="Link to this heading">¶</a></h2>
 <p>Solid arrows are direct triggers (<code class="docutils literal notranslate"><span class="pre">push</span></code>, <code class="docutils literal notranslate"><span class="pre">pull_request</span></code>, <code class="docutils literal notranslate"><span class="pre">schedule</span></code>,
-<code class="docutils literal notranslate"><span class="pre">workflow_dispatch</span></code>). Thick arrows are <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> edges – a
+<code class="docutils literal notranslate"><span class="pre">workflow_dispatch</span></code>, <code class="docutils literal notranslate"><span class="pre">issues</span></code>, <code class="docutils literal notranslate"><span class="pre">pull_request_target</span></code>), drawn in the first
+graph with a node for each schedule day. The second graph is the edges from one
+workflow to another. Thick arrows are <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> edges – a
 <em>separate</em> run, started only after the upstream workflow’s run has fully
 completed. Dotted arrows are <code class="docutils literal notranslate"><span class="pre">uses:</span></code> edges – a reusable-workflow call that
 runs synchronously <em>inside</em> the caller’s own run, sharing its run id rather
 than starting a new one.</p>
 <pre  class="mermaid">
-        flowchart TD
+        flowchart LR
     PUSH[&quot;push: main&quot;]
     PR[&quot;pull_request: main&quot;]
-    TAG[&quot;push: tags v*&quot;]
-    SCHED[&quot;schedule (Saturday, Monday, or daily)&quot;]
+    SAT[&quot;schedule: Saturday&quot;]
+    MON[&quot;schedule: Monday&quot;]
+    DISPATCH[&quot;workflow_dispatch&quot;]
+    DAILY[&quot;schedule: daily&quot;]
     ISSUES[&quot;issues&quot;]
     PRT[&quot;pull_request_target&quot;]
-    DISPATCH[&quot;workflow_dispatch&quot;]
+    TAG[&quot;push: tags v*&quot;]
 
-    CQ[&quot;CodeQL&lt;br/&gt;codeql-analysis.yml&quot;]
     UT[&quot;Unit Tests&lt;br/&gt;unit-tests.yml&quot;]
     EX[&quot;Experimental Tests&lt;br/&gt;experimental.yml&quot;]
     PC[&quot;Python Compatibility&lt;br/&gt;python-compatibility.yml&quot;]
+    CQ[&quot;CodeQL&lt;br/&gt;codeql-analysis.yml&quot;]
+    GP[&quot;GitHub Pages&lt;br/&gt;deploy-pages.yml&quot;]
+    CU[&quot;Conda Update&lt;br/&gt;cron-conda.yml&quot;]
     LT[&quot;Lint&lt;br/&gt;lint.yml&quot;]
     VU[&quot;Vendor Update&lt;br/&gt;cron-vendor.yml&quot;]
-    CU[&quot;Conda Update&lt;br/&gt;cron-conda.yml&quot;]
-    GP[&quot;GitHub Pages&lt;br/&gt;deploy-pages.yml&quot;]
-    CR[&quot;Create Release&lt;br/&gt;create-release.yml&quot;]
-    PS[&quot;Project Status&lt;br/&gt;project-status.yml&quot;]
-    CC[&quot;Coverage Comment&lt;br/&gt;coverage-comment.yml&quot;]
-    CT[&quot;CI Timing&lt;br/&gt;ci-timing.yml&quot;]
     PV[&quot;Python Versions&lt;br/&gt;cron-python-versions.yml&quot;]
-
-    PUSH --&gt; CQ
-    PR --&gt; CQ
-    SCHED --&gt;|02:00| CQ
+    CT[&quot;CI Timing&lt;br/&gt;ci-timing.yml&quot;]
+    PS[&quot;Project Status&lt;br/&gt;project-status.yml&quot;]
+    CR[&quot;Create Release&lt;br/&gt;create-release.yml&quot;]
 
     PUSH --&gt; UT
     PR --&gt; UT
@@ -678,30 +678,46 @@ than starting a new one.</p>
 
     PUSH --&gt; PC
     PR --&gt; PC
-    SCHED --&gt;|04:00| PC
+    SAT --&gt;|04:00| PC
 
-    PR --&gt; LT
-    SCHED --&gt;|06:00| LT
-    DISPATCH --&gt; LT
+    PUSH --&gt; CQ
+    PR --&gt; CQ
+    SAT --&gt;|02:00| CQ
 
     PR --&gt; GP
-    SCHED --&gt;|02:00| GP
+    SAT --&gt;|02:00| GP
 
-    SCHED --&gt;|10:00| VU
-    SCHED --&gt;|10:00| CU
+    SAT --&gt;|10:00| CU
+
+    PR --&gt; LT
+    SAT --&gt;|06:00| LT
+    DISPATCH --&gt; LT
+
+    SAT --&gt;|10:00| VU
+
+    MON --&gt;|05:41| PV
+    DISPATCH --&gt; PV
+
+    MON --&gt;|07:23| CT
+    DISPATCH --&gt; CT
+
+    DISPATCH --&gt; PS
+    DAILY --&gt;|00:37| PS
+    ISSUES --&gt; PS
+    PRT --&gt; PS
 
     TAG --&gt; CR
 
-    ISSUES --&gt; PS
-    PRT --&gt; PS
-    SCHED --&gt;|daily 00:37| PS
-    DISPATCH --&gt; PS
-
-    SCHED --&gt;|Mon 07:23| CT
-    DISPATCH --&gt; CT
-
-    SCHED --&gt;|Mon 05:41| PV
-    DISPATCH --&gt; PV
+    classDef trig fill:none,stroke-dasharray:2 2
+    class PUSH,PR,SAT,MON,DISPATCH,DAILY,ISSUES,PRT,TAG trig
+    </pre><pre  class="mermaid">
+        flowchart LR
+    UT[&quot;Unit Tests&lt;br/&gt;unit-tests.yml&quot;]
+    VU[&quot;Vendor Update&lt;br/&gt;cron-vendor.yml&quot;]
+    CU[&quot;Conda Update&lt;br/&gt;cron-conda.yml&quot;]
+    GP[&quot;GitHub Pages&lt;br/&gt;deploy-pages.yml&quot;]
+    CC[&quot;Coverage Comment&lt;br/&gt;coverage-comment.yml&quot;]
+    CR[&quot;Create Release&lt;br/&gt;create-release.yml&quot;]
 
     UT ==&gt;|workflow_run: completed| VU
     UT ==&gt;|workflow_run: completed| CU
@@ -709,25 +725,25 @@ than starting a new one.</p>
     VU ==&gt;|workflow_run: completed| CR
     UT ==&gt;|workflow_run: completed| CC
 
-    VU -.-&gt;|uses: gate-only| UT
-    CU -.-&gt;|uses: gate-only| UT
-    GP -.-&gt;|uses: gate-only| UT
-    CR -.-&gt;|uses: gate-only| UT
-
-    classDef trig fill:none,stroke-dasharray:2 2
-    class PUSH,PR,TAG,SCHED,DISPATCH,ISSUES,PRT trig
-    </pre><p>The double relationship between <strong>Unit Tests</strong> and the four dependants that
-also call it is the
-part that reading a single file cannot show, and it is deliberate rather than
-redundant: each of the four calls <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> with <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code>
-itself (dotted, above) <strong>only when its own trigger is not</strong> <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code>
-(their gate jobs’ <code class="docutils literal notranslate"><span class="pre">if:</span></code> guards this explicitly) – i.e. only on the
-Saturday <code class="docutils literal notranslate"><span class="pre">schedule</span></code> path, where no completed Unit Tests run exists yet to
-read a verdict from. On the <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> path (thick arrows), each reads
-the verdict Unit Tests already reached instead of re-running the gate a second
-time. Vendor Update, Conda Update and GitHub Pages act on it only once their
-<code class="docutils literal notranslate"><span class="pre">verdict</span></code> job, described under the edge list below, says it is a verdict on
-the commit they build.</p>
+    VU -.-&gt; UT
+    CU -.-&gt; UT
+    GP -.-&gt; UT
+    CR -.-&gt; UT
+    </pre><p>The double relationship between <strong>Unit Tests</strong> and the dependants that also
+call it is the part that reading a single file cannot show, and it is
+deliberate rather than redundant. Vendor Update, Conda Update and GitHub Pages
+call <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> with <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code> themselves (dotted, above)
+<strong>only when their own trigger is</strong> <code class="docutils literal notranslate"><span class="pre">schedule</span></code> – their gate jobs’ <code class="docutils literal notranslate"><span class="pre">if:</span></code>
+skips <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code>, and GitHub Pages’ skips <code class="docutils literal notranslate"><span class="pre">pull_request</span></code> as well – so
+only on the Saturday path, where no completed Unit Tests run exists yet to read
+a verdict from. On the <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> path (thick arrows), each reads the
+verdict Unit Tests already reached instead of re-running the gate a second
+time, and acts on it only once its <code class="docutils literal notranslate"><span class="pre">verdict</span></code> job, described under the edge
+list below, says it is a verdict on the commit it builds. Create Release has
+no <code class="docutils literal notranslate"><span class="pre">schedule</span></code>, and its gate job’s <code class="docutils literal notranslate"><span class="pre">if:</span></code> reads <code class="docutils literal notranslate"><span class="pre">version_check</span></code>’s evidence
+rather than the event, so its gate runs on both of its triggers: on a <code class="docutils literal notranslate"><span class="pre">v*</span></code>
+tag push, and on a <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> from Vendor Update when some target is not
+yet published (<a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a> gives the conditions).</p>
 </section>
 <section id="workflow-run-edges">
 <h2><code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> Edges<a class="headerlink" href="#workflow-run-edges" title="Link to this heading">¶</a></h2>
@@ -797,15 +813,13 @@ repository target the same reusable workflow, with the same input:</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/deploy-pages.yml:55</span></code> – job <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> calls
 <code class="docutils literal notranslate"><span class="pre">./.github/workflows/unit-tests.yml</span></code> with <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code>.</p></li>
 </ul>
-<p><code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code> selects <strong>three</strong> of <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s <strong>fourteen</strong> jobs,
-not one: <code class="docutils literal notranslate"><span class="pre">gate</span></code> (the full suite, on <code class="docutils literal notranslate"><span class="pre">latest</span></code>), <code class="docutils literal notranslate"><span class="pre">changelog</span></code>
-(checks <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> against its source entry) and <code class="docutils literal notranslate"><span class="pre">python-versions</span></code>,
-which reads <code class="docutils literal notranslate"><span class="pre">gate</span></code>’s version (see <a class="reference internal" href="#python-versions">Python Versions</a> below). It skips the other
-<strong>eleven</strong> – the eight matrix jobs, <code class="docutils literal notranslate"><span class="pre">test</span></code> (five Python legs), <code class="docutils literal notranslate"><span class="pre">test-ktlo</span></code>
-(four), <code class="docutils literal notranslate"><span class="pre">integration</span></code> (five), <code class="docutils literal notranslate"><span class="pre">integration-ktlo</span></code> (four),
-<code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> (one job for each of five engines, each looping over six
-Python versions), <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> (one), <code class="docutils literal notranslate"><span class="pre">pypcap-parity-ktlo</span></code> (one) and
-<code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code> (eleven matrix cells), each of which has already run once for this commit
+<p><code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code> selects not only <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">gate</span></code> (the full
+suite, on <code class="docutils literal notranslate"><span class="pre">latest</span></code>) but also <code class="docutils literal notranslate"><span class="pre">changelog</span></code> (checks <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> against its
+source entry) and <code class="docutils literal notranslate"><span class="pre">python-versions</span></code>, which reads <code class="docutils literal notranslate"><span class="pre">gate</span></code>’s version (see
+<a class="reference internal" href="#python-versions">Python Versions</a> below). It skips the rest – the matrix jobs, <code class="docutils literal notranslate"><span class="pre">test</span></code>,
+<code class="docutils literal notranslate"><span class="pre">test-ktlo</span></code>, <code class="docutils literal notranslate"><span class="pre">integration</span></code>, <code class="docutils literal notranslate"><span class="pre">integration-ktlo</span></code>, <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> (a job per
+engine, each looping over its Python versions), <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code>,
+<code class="docutils literal notranslate"><span class="pre">pypcap-parity-ktlo</span></code> and <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>, each of which has already run once for this commit
 from Unit Tests’ own <code class="docutils literal notranslate"><span class="pre">push</span></code> trigger (and, all but <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>,
 which runs on <code class="docutils literal notranslate"><span class="pre">main</span></code> pushes only, from its <code class="docutils literal notranslate"><span class="pre">pull_request</span></code> trigger), so
 running any of them again per caller would
@@ -1104,7 +1118,7 @@ in the supported tier, so its cells block on every run.</p>
 </section>
 <section id="required-status-checks">
 <h2>Required Status Checks<a class="headerlink" href="#required-status-checks" title="Link to this heading">¶</a></h2>
-<p>Ruleset <code class="docutils literal notranslate"><span class="pre">23497679</span></code> on <code class="docutils literal notranslate"><span class="pre">main</span></code> requires six contexts, with
+<p>Ruleset <code class="docutils literal notranslate"><span class="pre">23497679</span></code> on <code class="docutils literal notranslate"><span class="pre">main</span></code> requires the contexts below, with
 <code class="docutils literal notranslate"><span class="pre">strict_required_status_checks_policy:</span> <span class="pre">true</span></code> (a branch must be up to date
 with <code class="docutils literal notranslate"><span class="pre">main</span></code> before it can merge, not merely green). Each was found by
 grepping every workflow file for its name:</p>
@@ -1150,13 +1164,13 @@ between the tiers below means editing the ruleset in the same change.</p>
 <p><code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code> is defined by exactly one job
 (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1937</span></code>). <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span></code> is defined by one, the
 <code class="docutils literal notranslate"><span class="pre">compatibility</span></code> job in <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code> (<code class="docutils literal notranslate"><span class="pre">:60</span></code>), whose matrix
-(<code class="docutils literal notranslate"><span class="pre">:74</span></code>) comes from <code class="file docutils literal notranslate"><span class="pre">.github/python-versions.toml</span></code>: the five required legs
-are its supported tier (<code class="docutils literal notranslate"><span class="pre">python-versions.toml:20-24</span></code>), and its four KTLO legs
+(<code class="docutils literal notranslate"><span class="pre">:74</span></code>) comes from <code class="file docutils literal notranslate"><span class="pre">.github/python-versions.toml</span></code>: the required legs
+are its supported tier (<code class="docutils literal notranslate"><span class="pre">python-versions.toml:20-24</span></code>), and its KTLO legs
 (<code class="docutils literal notranslate"><span class="pre">python-versions.toml:16-19</span></code>) have names ending in <code class="docutils literal notranslate"><span class="pre">(KTLO)</span></code>, so no required
 context matches one. A comment at
 <code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1849</span></code> mentions the string without defining it.</p>
 <p><code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code> is an aggregate, not a single check run. The ruleset
-requires it and the five <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.11</span></code>-<code class="docutils literal notranslate"><span class="pre">3.15</span></code> legs, nothing else, as
+requires it and the <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.11</span></code>-<code class="docutils literal notranslate"><span class="pre">3.15</span></code> legs, nothing else, as
 <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s own comment (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1848-1858</span></code>) records. It
 <code class="docutils literal notranslate"><span class="pre">needs:</span></code> the gating jobs of <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> – <code class="docutils literal notranslate"><span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">integration</span></code>,
 <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> and <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code>, plus <code class="docutils literal notranslate"><span class="pre">changes</span></code> and <code class="docutils literal notranslate"><span class="pre">project-tests</span></code>
@@ -1225,8 +1239,8 @@ in no matrix: setup-python builds it only for retired Ubuntu images. Nor are
 are they in <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code>, which also runs on <code class="docutils literal notranslate"><span class="pre">ubuntu-latest</span></code>; none of them
 was measured on that job.</p>
 <p>The <strong>experimental</strong> tier is free-threaded CPython and GraalPy, spelt as
-setup-python reads them (<code class="docutils literal notranslate"><span class="pre">3.14t</span></code>, <code class="docutils literal notranslate"><span class="pre">graalpy-25.4</span></code>). Each runs one leg of
-<code class="docutils literal notranslate"><span class="pre">experimental</span></code> (two), the one matrix job of <code class="file docutils literal notranslate"><span class="pre">.github/workflows/experimental.yml</span></code>
+setup-python reads them (<code class="docutils literal notranslate"><span class="pre">3.14t</span></code>, <code class="docutils literal notranslate"><span class="pre">graalpy-25.4</span></code>). Each runs a leg of
+<code class="docutils literal notranslate"><span class="pre">experimental</span></code>, the matrix job of <code class="file docutils literal notranslate"><span class="pre">.github/workflows/experimental.yml</span></code>
 (“Experimental Tests”), named <code class="docutils literal notranslate"><span class="pre">Python</span> <span class="pre">&lt;version&gt;</span> <span class="pre">(experimental)</span></code>, and nothing
 else: no <code class="docutils literal notranslate"><span class="pre">integration</span></code>, <code class="docutils literal notranslate"><span class="pre">Compat</span></code>, wheel or conda leg, so never a required
 context. They were legs of <code class="docutils literal notranslate"><span class="pre">test</span></code> until <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1732">#1732</a>, which moved them to a
@@ -1350,8 +1364,8 @@ through <code class="docutils literal notranslate"><span class="pre">fromJSON</s
 off <code class="docutils literal notranslate"><span class="pre">latest</span></code>, with its reason in the comment above it, such as the conda
 jobs’ <code class="docutils literal notranslate"><span class="pre">!=</span> <span class="pre">'3.15'</span></code>. <code class="docutils literal notranslate"><span class="pre">tests/project/test_python_versions_1660.py</span></code> fails on a
 pin the file does not list, on an exemption with no comment, and on a
-classifier, doc or comment that no longer matches the file – the coverage
-leg’s version, the release checks’ counts. Its tests, and the other tests that
+classifier, doc or comment that no longer matches the file – a tier range,
+the coverage leg’s version. Its tests, and the other tests that
 read the file, skip on the KTLO interpreters, which have no <code class="docutils literal notranslate"><span class="pre">tomllib</span></code>. Two
 edits it names rather than makes: a new <code class="docutils literal notranslate"><span class="pre">pypi</span></code> KTLO leg needs its own
 <code class="docutils literal notranslate"><span class="pre">ktlo_*</span></code> output for <code class="docutils literal notranslate"><span class="pre">release_status</span></code>, and a pre-release leg needs
@@ -1503,11 +1517,11 @@ repeating it here.</p>
 
 const initStyles = () => {
     const defaultStyle = document.createElement('style');
-    defaultStyle.textContent = "pre.mermaid {\n    /* Same as .mermaid-container > pre */\n    display: block;\n    width: 100%;\n}\n\npre.mermaid > svg {\n    /* Same as .mermaid-container > pre > svg */\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}";
+    defaultStyle.textContent = "pre.mermaid {\n    /* Same as .mermaid-container > pre */\n    display: block;\n    width: fit-content;\n}\n\npre.mermaid > svg {\n    /* Same as .mermaid-container > pre > svg */\n    height: auto;\n    width: 100%;\n    max-width: 100% !important;\n}";
     document.head.appendChild(defaultStyle);
 
     const fullscreenStyle = document.createElement('style');
-    fullscreenStyle.textContent = ".mermaid-container {\n    position: relative;\n    display: flex;\n    flex-direction: row;\n    width: 100%;\n}\n\n.mermaid-container > pre {\n    display: block;\n    width: 100%;\n}\n\n.mermaid-container > pre > svg {\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}\n\n.mermaid-fullscreen-btn {\n    position: absolute;\n    width: 28px;\n    height: 28px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.3);\n    border-radius: 4px;\n    cursor: pointer;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    transition: all 0.2s;\n    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);\n    font-size: 14px;\n    line-height: 1;\n    padding: 0;\n    color: #333;\n}\n\n.mermaid-fullscreen-btn:hover {\n    opacity: 100% !important;\n    background: rgba(255, 255, 255, 1);\n    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-btn.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.3);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-btn.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal {\n    display: none;\n    position: fixed !important;\n    top: 0 !important;\n    left: 0 !important;\n    width: 95vw;\n    height: 100vh;\n    background: rgba(255, 255, 255, 0.98);\n    z-index: 9999;\n    padding: 20px;\n    overflow: auto;\n}\n\n.mermaid-fullscreen-modal.dark-theme {\n    background: rgba(0, 0, 0, 0.98);\n}\n\n.mermaid-fullscreen-modal.active {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen {\n    position: relative;\n    width: 95vw;\n    height: 90vh;\n    max-width: 95vw;\n    max-height: 90vh;\n    background: white;\n    border-radius: 8px;\n    padding: 20px;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);\n    overflow: auto;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen.dark-theme {\n    background: #1a1a1a;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);\n}\n\n.mermaid-container-fullscreen pre.mermaid {\n    width: 100%;\n    height: 100%;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen .mermaid svg {\n    height: 100% !important;\n    width: 100% !important;\n    cursor: grab;\n}\n\n.mermaid-fullscreen-close {\n    position: fixed !important;\n    top: 20px !important;\n    right: 20px !important;\n    width: 40px;\n    height: 40px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.2);\n    border-radius: 50%;\n    cursor: pointer;\n    z-index: 10000;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);\n    transition: all 0.2s;\n    font-size: 24px;\n    line-height: 1;\n    color: #333;\n}\n\n.mermaid-fullscreen-close:hover {\n    background: white;\n    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-close.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.2);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-close.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal .mermaid-fullscreen-btn {\n    display: none !important;\n}";
+    fullscreenStyle.textContent = ".mermaid-container {\n    position: relative;\n    display: flex;\n    flex-direction: row;\n    width: 100%;\n}\n\n.mermaid-container > pre {\n    display: block;\n    width: fit-content;\n}\n\n.mermaid-container > pre > svg {\n    height: auto;\n    width: 100%;\n    max-width: 100% !important;\n}\n\n.mermaid-fullscreen-btn {\n    position: absolute;\n    width: 28px;\n    height: 28px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.3);\n    border-radius: 4px;\n    cursor: pointer;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    transition: all 0.2s;\n    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);\n    font-size: 14px;\n    line-height: 1;\n    padding: 0;\n    color: #333;\n}\n\n.mermaid-fullscreen-btn:hover {\n    opacity: 100% !important;\n    background: rgba(255, 255, 255, 1);\n    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-btn.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.3);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-btn.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal {\n    display: none;\n    position: fixed !important;\n    top: 0 !important;\n    left: 0 !important;\n    width: 95vw;\n    height: 100vh;\n    background: rgba(255, 255, 255, 0.98);\n    z-index: 9999;\n    padding: 20px;\n    overflow: auto;\n}\n\n.mermaid-fullscreen-modal.dark-theme {\n    background: rgba(0, 0, 0, 0.98);\n}\n\n.mermaid-fullscreen-modal.active {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen {\n    position: relative;\n    width: 95vw;\n    height: 90vh;\n    max-width: 95vw;\n    max-height: 90vh;\n    background: white;\n    border-radius: 8px;\n    padding: 20px;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);\n    overflow: auto;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen.dark-theme {\n    background: #1a1a1a;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);\n}\n\n.mermaid-container-fullscreen pre.mermaid {\n    width: 100%;\n    height: 100%;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen .mermaid svg {\n    height: 100% !important;\n    width: 100% !important;\n    cursor: grab;\n}\n\n.mermaid-fullscreen-close {\n    position: fixed !important;\n    top: 20px !important;\n    right: 20px !important;\n    width: 40px;\n    height: 40px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.2);\n    border-radius: 50%;\n    cursor: pointer;\n    z-index: 10000;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);\n    transition: all 0.2s;\n    font-size: 24px;\n    line-height: 1;\n    color: #333;\n}\n\n.mermaid-fullscreen-close:hover {\n    background: white;\n    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-close.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.2);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-close.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal .mermaid-fullscreen-btn {\n    display: none !important;\n}";
     document.head.appendChild(fullscreenStyle);
 }
 
@@ -1820,7 +1834,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -1846,7 +1860,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

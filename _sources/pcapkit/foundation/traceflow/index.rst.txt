@@ -38,12 +38,12 @@ diagram of the class hierarchy of :mod:`pcapkit.foundation.traceflow`:
        B --> C(TraceFlow)
        C --> D([user customisation ...])
 
-       click A "/pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlowMeta"
-       click B "/pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlowBase"
-       click C "/pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow"
-       click D "/ext.html#reassembly-and-flow-tracing"
+       click A "traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlowMeta"
+       click B "traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlowBase"
+       click C "traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow"
+       click D "../../../ext.html#reassembly-and-flow-tracing"
 
-       click TCP "/pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.tcp.TCP"
+       click TCP "tcp.html#pcapkit.foundation.traceflow.tcp.TCP"
 
 Auxiliary Data
 --------------

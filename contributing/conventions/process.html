@@ -17,6 +17,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mermaid.css?v=10b7d883" />
     
     
 
@@ -580,13 +581,12 @@ gh<span class="w"> </span>pr<span class="w"> </span>list<span class="w"> </span>
 </div>
 <p>The grouping scheme was settled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/918">#918</a>: <strong>a section per top-level module, with</strong>
 <code class="docutils literal notranslate"><span class="pre">Added</span></code>/<code class="docutils literal notranslate"><span class="pre">Changed</span></code>/<code class="docutils literal notranslate"><span class="pre">Fixed</span></code> <strong>nested inside each</strong> – module granularity, not
-per-file and not per-subpackage. The file carries <strong>10</strong> module-level sections holding
-298 entries, and no entry carries an inline kind label:</p>
+per-file and not per-subpackage. No entry in the file carries an inline kind label:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ grep -cE '^\* \*\*(Added|Changed|Fixed)\*\*' docs/source/changelog/1.5.0.rst
 0
 </pre></div>
 </div>
-<p>Nine of those ten name a module; the tenth, <em>Project infrastructure</em>, is for what
+<p>Each section names a module except <em>Project infrastructure</em>, which is for what
 belongs to none. The map is one-to-one with the package list below – every package,
 <a class="reference internal" href="../../pcapkit/interface/index.html#module-pcapkit.interface" title="pcapkit.interface"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.interface</span></code></a> included, has a section of its own:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>ls<span class="w"> </span>-d<span class="w"> </span>pcapkit/*/<span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">'s|pcapkit/||;s|/||'</span><span class="w">   </span><span class="c1"># const corekit dumpkit foundation</span>

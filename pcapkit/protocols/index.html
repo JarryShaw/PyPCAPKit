@@ -17,6 +17,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mermaid.css?v=10b7d883" />
     
     
 
@@ -572,6 +573,37 @@ from given information. The class hierarchy of <a class="reference internal" hre
         flowchart LR
     A{{ProtocolMeta}} -.-&gt;|metaclass| B(ProtocolBase)
 
+    %% The layers are declared in this order so that ARP --&gt; RARP and
+    %% Raw --&gt; FTP_DATA stay short instead of crossing the other layers.
+
+    subgraph misc [Miscellaneous]
+        subgraph pcap [PCAP Format]
+            Header &amp; Frame
+        end
+
+        subgraph pcapng [PCAP-NG Format]
+            PCAPNG
+        end
+
+        Raw &amp; NoPayload
+    end
+
+    subgraph application [Application Layer]
+        Application --&gt; HTTP &amp; FTP &amp; NGAP &amp; OSPF &amp; RARP
+
+        subgraph http [HTTP Family]
+            HTTP --&gt; h1[&quot;HTTP/1.*&quot;] &amp; h2[&quot;HTTP/2&quot;]
+        end
+
+        subgraph ftp [FTP Family]
+            FTP &amp; FTP_DATA
+        end
+
+        subgraph rarp [RARP Family]
+            RARP --&gt; DRARP
+        end
+    end
+
     subgraph link [Link Layer]
         Link --&gt; Ethernet &amp; L2TP &amp; Loopback &amp; VLAN &amp; ARP
 
@@ -608,34 +640,6 @@ from given information. The class hierarchy of <a class="reference internal" hre
         Transport --&gt; TCP &amp; UDP &amp; SCTP
     end
 
-    subgraph application [Application Layer]
-        Application --&gt; HTTP &amp; FTP &amp; NGAP &amp; OSPF &amp; RARP
-
-        subgraph http [HTTP Family]
-            HTTP --&gt; h1[&quot;HTTP/1.*&quot;] &amp; h2[&quot;HTTP/2&quot;]
-        end
-
-        subgraph ftp [FTP Family]
-            FTP &amp; FTP_DATA
-        end
-
-        subgraph rarp [RARP Family]
-            RARP --&gt; DRARP
-        end
-    end
-
-    subgraph misc [Miscellaneous]
-        subgraph pcap [PCAP Format]
-            Header &amp; Frame
-        end
-
-        subgraph pcapng [PCAP-NG Format]
-            PCAPNG
-        end
-
-        Raw &amp; NoPayload
-    end
-
     B --&gt; Link &amp; Internet &amp; Transport &amp; Application
 
     B --&gt; Header &amp; Frame &amp; PCAPNG &amp; Raw &amp; NoPayload
@@ -646,59 +650,59 @@ from given information. The class hierarchy of <a class="reference internal" hre
     B --&gt; C(Protocol)
     C --&gt; D([user customisation ...])
 
-    click A &quot;/pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolMeta&quot;
-    click B &quot;/pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase&quot;
-    click C &quot;/pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol&quot;
-    click D &quot;/ext.html#what-s-in-for-protocols&quot;
+    click A &quot;protocol.html#pcapkit.protocols.protocol.ProtocolMeta&quot;
+    click B &quot;protocol.html#pcapkit.protocols.protocol.ProtocolBase&quot;
+    click C &quot;protocol.html#pcapkit.protocols.protocol.Protocol&quot;
+    click D &quot;../../ext.html#what-s-in-for-protocols&quot;
 
-    click Link &quot;/pcapkit/protocols/link/link.html#pcapkit.protocols.link.link.Link&quot;
-    click Ethernet &quot;/pcapkit/protocols/link/ethernet.html#pcapkit.protocols.link.ethernet.Ethernet&quot;
-    click L2TP &quot;/pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP&quot;
-    click L2TPv2 &quot;/pcapkit/protocols/link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2&quot;
-    click Loopback &quot;/pcapkit/protocols/link/loopback.html#pcapkit.protocols.link.loopback.Loopback&quot;
-    click VLAN &quot;/pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN&quot;
-    click C_Tag &quot;/pcapkit/protocols/link/c_tag.html#pcapkit.protocols.link.c_tag.C_Tag&quot;
-    click S_Tag &quot;/pcapkit/protocols/link/s_tag.html#pcapkit.protocols.link.s_tag.S_Tag&quot;
-    click ARP &quot;/pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.ARP&quot;
-    click InARP &quot;/pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.InARP&quot;
+    click Link &quot;link/link.html#pcapkit.protocols.link.link.Link&quot;
+    click Ethernet &quot;link/ethernet.html#pcapkit.protocols.link.ethernet.Ethernet&quot;
+    click L2TP &quot;link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP&quot;
+    click L2TPv2 &quot;link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2&quot;
+    click Loopback &quot;link/loopback.html#pcapkit.protocols.link.loopback.Loopback&quot;
+    click VLAN &quot;link/vlan.html#pcapkit.protocols.link.vlan.VLAN&quot;
+    click C_Tag &quot;link/c_tag.html#pcapkit.protocols.link.c_tag.C_Tag&quot;
+    click S_Tag &quot;link/s_tag.html#pcapkit.protocols.link.s_tag.S_Tag&quot;
+    click ARP &quot;link/arp.html#pcapkit.protocols.link.arp.ARP&quot;
+    click InARP &quot;link/arp.html#pcapkit.protocols.link.arp.InARP&quot;
 
-    click Internet &quot;/pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet&quot;
-    click AH &quot;/pcapkit/protocols/internet/ah.html#pcapkit.protocols.internet.ah.AH&quot;
-    click ESP &quot;/pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.ESP&quot;
-    click HIP &quot;/pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP&quot;
-    click HOPOPT &quot;/pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT&quot;
-    click IP &quot;/pcapkit/protocols/internet/ip.html#pcapkit.protocols.internet.ip.IP&quot;
-    click IPsec &quot;/pcapkit/protocols/internet/ipsec.html#pcapkit.protocols.internet.ipsec.IPsec&quot;
-    click IPv4 &quot;/pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4&quot;
-    click IPv6 &quot;/pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6&quot;
-    click IPv6_Ext &quot;/pcapkit/protocols/internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext&quot;
-    click IPv6-Frag &quot;/pcapkit/protocols/internet/ipv6_frag.html#pcapkit.protocols.internet.ipv6_frag.IPv6_Frag&quot;
-    click IPv6-Opts &quot;/pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts&quot;
-    click IPv6-Route &quot;/pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route&quot;
-    click IPX &quot;/pcapkit/protocols/internet/ipx.html#pcapkit.protocols.internet.ipx.IPX&quot;
-    click MH &quot;/pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH&quot;
+    click Internet &quot;internet/internet.html#pcapkit.protocols.internet.internet.Internet&quot;
+    click AH &quot;internet/ah.html#pcapkit.protocols.internet.ah.AH&quot;
+    click ESP &quot;internet/esp.html#pcapkit.protocols.internet.esp.ESP&quot;
+    click HIP &quot;internet/hip.html#pcapkit.protocols.internet.hip.HIP&quot;
+    click HOPOPT &quot;internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT&quot;
+    click IP &quot;internet/ip.html#pcapkit.protocols.internet.ip.IP&quot;
+    click IPsec &quot;internet/ipsec.html#pcapkit.protocols.internet.ipsec.IPsec&quot;
+    click IPv4 &quot;internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4&quot;
+    click IPv6 &quot;internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6&quot;
+    click IPv6_Ext &quot;internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext&quot;
+    click IPv6-Frag &quot;internet/ipv6_frag.html#pcapkit.protocols.internet.ipv6_frag.IPv6_Frag&quot;
+    click IPv6-Opts &quot;internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts&quot;
+    click IPv6-Route &quot;internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route&quot;
+    click IPX &quot;internet/ipx.html#pcapkit.protocols.internet.ipx.IPX&quot;
+    click MH &quot;internet/mh.html#pcapkit.protocols.internet.mh.MH&quot;
 
-    click Transport &quot;/pcapkit/protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport&quot;
-    click TCP &quot;/pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP&quot;
-    click UDP &quot;/pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP&quot;
-    click SCTP &quot;/pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP&quot;
+    click Transport &quot;transport/transport.html#pcapkit.protocols.transport.transport.Transport&quot;
+    click TCP &quot;transport/tcp.html#pcapkit.protocols.transport.tcp.TCP&quot;
+    click UDP &quot;transport/udp.html#pcapkit.protocols.transport.udp.UDP&quot;
+    click SCTP &quot;transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP&quot;
 
-    click Application &quot;/pcapkit/protocols/application/application.html#pcapkit.protocols.application.application.Application&quot;
-    click HTTP &quot;/pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.HTTP&quot;
-    click h1 &quot;/pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP&quot;
-    click h2 &quot;/pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP&quot;
-    click FTP &quot;/pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP&quot;
-    click FTP_DATA &quot;/pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP_DATA&quot;
-    click NGAP &quot;/pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.NGAP&quot;
-    click OSPF &quot;/pcapkit/protocols/application/ospf.html#pcapkit.protocols.application.ospf.OSPF&quot;
-    click RARP &quot;/pcapkit/protocols/application/rarp.html#pcapkit.protocols.application.rarp.RARP&quot;
-    click DRARP &quot;/pcapkit/protocols/application/rarp.html#pcapkit.protocols.application.rarp.DRARP&quot;
+    click Application &quot;application/application.html#pcapkit.protocols.application.application.Application&quot;
+    click HTTP &quot;application/http.html#pcapkit.protocols.application.http.HTTP&quot;
+    click h1 &quot;application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP&quot;
+    click h2 &quot;application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP&quot;
+    click FTP &quot;application/ftp.html#pcapkit.protocols.application.ftp.FTP&quot;
+    click FTP_DATA &quot;application/ftp.html#pcapkit.protocols.application.ftp.FTP_DATA&quot;
+    click NGAP &quot;application/ngap.html#pcapkit.protocols.application.ngap.NGAP&quot;
+    click OSPF &quot;application/ospf.html#pcapkit.protocols.application.ospf.OSPF&quot;
+    click RARP &quot;application/rarp.html#pcapkit.protocols.application.rarp.RARP&quot;
+    click DRARP &quot;application/rarp.html#pcapkit.protocols.application.rarp.DRARP&quot;
 
-    click Raw &quot;/pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw&quot;
-    click NoPayload &quot;/pcapkit/protocols/misc/null.html#pcapkit.protocols.misc.null.NoPayload&quot;
-    click PCAPNG &quot;/pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG&quot;
-    click Header &quot;/pcapkit/protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.header.Header&quot;
-    click Frame &quot;/pcapkit/protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame&quot;
+    click Raw &quot;misc/raw.html#pcapkit.protocols.misc.raw.Raw&quot;
+    click NoPayload &quot;misc/null.html#pcapkit.protocols.misc.null.NoPayload&quot;
+    click PCAPNG &quot;misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG&quot;
+    click Header &quot;misc/pcap.html#pcapkit.protocols.misc.pcap.header.Header&quot;
+    click Frame &quot;misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame&quot;
     </pre><section id="protocol-registry">
 <h2>Protocol Registry<a class="headerlink" href="#protocol-registry" title="Link to this heading">¶</a></h2>
 <dl class="py data">
@@ -1475,11 +1479,11 @@ for more information with the inserted names to be excluded.</p>
 
 const initStyles = () => {
     const defaultStyle = document.createElement('style');
-    defaultStyle.textContent = "pre.mermaid {\n    /* Same as .mermaid-container > pre */\n    display: block;\n    width: 100%;\n}\n\npre.mermaid > svg {\n    /* Same as .mermaid-container > pre > svg */\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}";
+    defaultStyle.textContent = "pre.mermaid {\n    /* Same as .mermaid-container > pre */\n    display: block;\n    width: fit-content;\n}\n\npre.mermaid > svg {\n    /* Same as .mermaid-container > pre > svg */\n    height: auto;\n    width: 100%;\n    max-width: 100% !important;\n}";
     document.head.appendChild(defaultStyle);
 
     const fullscreenStyle = document.createElement('style');
-    fullscreenStyle.textContent = ".mermaid-container {\n    position: relative;\n    display: flex;\n    flex-direction: row;\n    width: 100%;\n}\n\n.mermaid-container > pre {\n    display: block;\n    width: 100%;\n}\n\n.mermaid-container > pre > svg {\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}\n\n.mermaid-fullscreen-btn {\n    position: absolute;\n    width: 28px;\n    height: 28px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.3);\n    border-radius: 4px;\n    cursor: pointer;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    transition: all 0.2s;\n    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);\n    font-size: 14px;\n    line-height: 1;\n    padding: 0;\n    color: #333;\n}\n\n.mermaid-fullscreen-btn:hover {\n    opacity: 100% !important;\n    background: rgba(255, 255, 255, 1);\n    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-btn.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.3);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-btn.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal {\n    display: none;\n    position: fixed !important;\n    top: 0 !important;\n    left: 0 !important;\n    width: 95vw;\n    height: 100vh;\n    background: rgba(255, 255, 255, 0.98);\n    z-index: 9999;\n    padding: 20px;\n    overflow: auto;\n}\n\n.mermaid-fullscreen-modal.dark-theme {\n    background: rgba(0, 0, 0, 0.98);\n}\n\n.mermaid-fullscreen-modal.active {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen {\n    position: relative;\n    width: 95vw;\n    height: 90vh;\n    max-width: 95vw;\n    max-height: 90vh;\n    background: white;\n    border-radius: 8px;\n    padding: 20px;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);\n    overflow: auto;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen.dark-theme {\n    background: #1a1a1a;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);\n}\n\n.mermaid-container-fullscreen pre.mermaid {\n    width: 100%;\n    height: 100%;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen .mermaid svg {\n    height: 100% !important;\n    width: 100% !important;\n    cursor: grab;\n}\n\n.mermaid-fullscreen-close {\n    position: fixed !important;\n    top: 20px !important;\n    right: 20px !important;\n    width: 40px;\n    height: 40px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.2);\n    border-radius: 50%;\n    cursor: pointer;\n    z-index: 10000;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);\n    transition: all 0.2s;\n    font-size: 24px;\n    line-height: 1;\n    color: #333;\n}\n\n.mermaid-fullscreen-close:hover {\n    background: white;\n    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-close.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.2);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-close.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal .mermaid-fullscreen-btn {\n    display: none !important;\n}";
+    fullscreenStyle.textContent = ".mermaid-container {\n    position: relative;\n    display: flex;\n    flex-direction: row;\n    width: 100%;\n}\n\n.mermaid-container > pre {\n    display: block;\n    width: fit-content;\n}\n\n.mermaid-container > pre > svg {\n    height: auto;\n    width: 100%;\n    max-width: 100% !important;\n}\n\n.mermaid-fullscreen-btn {\n    position: absolute;\n    width: 28px;\n    height: 28px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.3);\n    border-radius: 4px;\n    cursor: pointer;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    transition: all 0.2s;\n    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);\n    font-size: 14px;\n    line-height: 1;\n    padding: 0;\n    color: #333;\n}\n\n.mermaid-fullscreen-btn:hover {\n    opacity: 100% !important;\n    background: rgba(255, 255, 255, 1);\n    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-btn.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.3);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-btn.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal {\n    display: none;\n    position: fixed !important;\n    top: 0 !important;\n    left: 0 !important;\n    width: 95vw;\n    height: 100vh;\n    background: rgba(255, 255, 255, 0.98);\n    z-index: 9999;\n    padding: 20px;\n    overflow: auto;\n}\n\n.mermaid-fullscreen-modal.dark-theme {\n    background: rgba(0, 0, 0, 0.98);\n}\n\n.mermaid-fullscreen-modal.active {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen {\n    position: relative;\n    width: 95vw;\n    height: 90vh;\n    max-width: 95vw;\n    max-height: 90vh;\n    background: white;\n    border-radius: 8px;\n    padding: 20px;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);\n    overflow: auto;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen.dark-theme {\n    background: #1a1a1a;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);\n}\n\n.mermaid-container-fullscreen pre.mermaid {\n    width: 100%;\n    height: 100%;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen .mermaid svg {\n    height: 100% !important;\n    width: 100% !important;\n    cursor: grab;\n}\n\n.mermaid-fullscreen-close {\n    position: fixed !important;\n    top: 20px !important;\n    right: 20px !important;\n    width: 40px;\n    height: 40px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.2);\n    border-radius: 50%;\n    cursor: pointer;\n    z-index: 10000;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);\n    transition: all 0.2s;\n    font-size: 24px;\n    line-height: 1;\n    color: #333;\n}\n\n.mermaid-fullscreen-close:hover {\n    background: white;\n    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-close.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.2);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-close.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal .mermaid-fullscreen-btn {\n    display: none !important;\n}";
     document.head.appendChild(fullscreenStyle);
 }
 
@@ -1792,7 +1796,7 @@ const load = async () => {
             darkTheme = newDarkTheme;
             console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
             await mermaid.initialize(
-                {...{"startOnLoad": false},
+                {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
                 ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
                 }
             );
@@ -1818,7 +1822,7 @@ const load = async () => {
 
 console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
 mermaid.initialize(
-    {...{"startOnLoad": false},
+    {...{"startOnLoad": false, "flowchart": {"useMaxWidth": false}},
     ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
     }
 );

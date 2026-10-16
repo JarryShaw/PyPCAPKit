@@ -26,6 +26,37 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
    flowchart LR
        A{{ProtocolMeta}} -.->|metaclass| B(ProtocolBase)
 
+       %% The layers are declared in this order so that ARP --> RARP and
+       %% Raw --> FTP_DATA stay short instead of crossing the other layers.
+
+       subgraph misc [Miscellaneous]
+           subgraph pcap [PCAP Format]
+               Header & Frame
+           end
+
+           subgraph pcapng [PCAP-NG Format]
+               PCAPNG
+           end
+
+           Raw & NoPayload
+       end
+
+       subgraph application [Application Layer]
+           Application --> HTTP & FTP & NGAP & OSPF & RARP
+
+           subgraph http [HTTP Family]
+               HTTP --> h1["HTTP/1.*"] & h2["HTTP/2"]
+           end
+
+           subgraph ftp [FTP Family]
+               FTP & FTP_DATA
+           end
+
+           subgraph rarp [RARP Family]
+               RARP --> DRARP
+           end
+       end
+
        subgraph link [Link Layer]
            Link --> Ethernet & L2TP & Loopback & VLAN & ARP
 
@@ -62,34 +93,6 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
            Transport --> TCP & UDP & SCTP
        end
 
-       subgraph application [Application Layer]
-           Application --> HTTP & FTP & NGAP & OSPF & RARP
-
-           subgraph http [HTTP Family]
-               HTTP --> h1["HTTP/1.*"] & h2["HTTP/2"]
-           end
-
-           subgraph ftp [FTP Family]
-               FTP & FTP_DATA
-           end
-
-           subgraph rarp [RARP Family]
-               RARP --> DRARP
-           end
-       end
-
-       subgraph misc [Miscellaneous]
-           subgraph pcap [PCAP Format]
-               Header & Frame
-           end
-
-           subgraph pcapng [PCAP-NG Format]
-               PCAPNG
-           end
-
-           Raw & NoPayload
-       end
-
        B --> Link & Internet & Transport & Application
 
        B --> Header & Frame & PCAPNG & Raw & NoPayload
@@ -100,59 +103,59 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        B --> C(Protocol)
        C --> D([user customisation ...])
 
-       click A "/pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolMeta"
-       click B "/pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase"
-       click C "/pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol"
-       click D "/ext.html#what-s-in-for-protocols"
+       click A "protocol.html#pcapkit.protocols.protocol.ProtocolMeta"
+       click B "protocol.html#pcapkit.protocols.protocol.ProtocolBase"
+       click C "protocol.html#pcapkit.protocols.protocol.Protocol"
+       click D "../../ext.html#what-s-in-for-protocols"
 
-       click Link "/pcapkit/protocols/link/link.html#pcapkit.protocols.link.link.Link"
-       click Ethernet "/pcapkit/protocols/link/ethernet.html#pcapkit.protocols.link.ethernet.Ethernet"
-       click L2TP "/pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP"
-       click L2TPv2 "/pcapkit/protocols/link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2"
-       click Loopback "/pcapkit/protocols/link/loopback.html#pcapkit.protocols.link.loopback.Loopback"
-       click VLAN "/pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN"
-       click C_Tag "/pcapkit/protocols/link/c_tag.html#pcapkit.protocols.link.c_tag.C_Tag"
-       click S_Tag "/pcapkit/protocols/link/s_tag.html#pcapkit.protocols.link.s_tag.S_Tag"
-       click ARP "/pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.ARP"
-       click InARP "/pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.InARP"
+       click Link "link/link.html#pcapkit.protocols.link.link.Link"
+       click Ethernet "link/ethernet.html#pcapkit.protocols.link.ethernet.Ethernet"
+       click L2TP "link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP"
+       click L2TPv2 "link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2"
+       click Loopback "link/loopback.html#pcapkit.protocols.link.loopback.Loopback"
+       click VLAN "link/vlan.html#pcapkit.protocols.link.vlan.VLAN"
+       click C_Tag "link/c_tag.html#pcapkit.protocols.link.c_tag.C_Tag"
+       click S_Tag "link/s_tag.html#pcapkit.protocols.link.s_tag.S_Tag"
+       click ARP "link/arp.html#pcapkit.protocols.link.arp.ARP"
+       click InARP "link/arp.html#pcapkit.protocols.link.arp.InARP"
 
-       click Internet "/pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet"
-       click AH "/pcapkit/protocols/internet/ah.html#pcapkit.protocols.internet.ah.AH"
-       click ESP "/pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.ESP"
-       click HIP "/pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP"
-       click HOPOPT "/pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT"
-       click IP "/pcapkit/protocols/internet/ip.html#pcapkit.protocols.internet.ip.IP"
-       click IPsec "/pcapkit/protocols/internet/ipsec.html#pcapkit.protocols.internet.ipsec.IPsec"
-       click IPv4 "/pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4"
-       click IPv6 "/pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6"
-       click IPv6_Ext "/pcapkit/protocols/internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"
-       click IPv6-Frag "/pcapkit/protocols/internet/ipv6_frag.html#pcapkit.protocols.internet.ipv6_frag.IPv6_Frag"
-       click IPv6-Opts "/pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts"
-       click IPv6-Route "/pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route"
-       click IPX "/pcapkit/protocols/internet/ipx.html#pcapkit.protocols.internet.ipx.IPX"
-       click MH "/pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH"
+       click Internet "internet/internet.html#pcapkit.protocols.internet.internet.Internet"
+       click AH "internet/ah.html#pcapkit.protocols.internet.ah.AH"
+       click ESP "internet/esp.html#pcapkit.protocols.internet.esp.ESP"
+       click HIP "internet/hip.html#pcapkit.protocols.internet.hip.HIP"
+       click HOPOPT "internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT"
+       click IP "internet/ip.html#pcapkit.protocols.internet.ip.IP"
+       click IPsec "internet/ipsec.html#pcapkit.protocols.internet.ipsec.IPsec"
+       click IPv4 "internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4"
+       click IPv6 "internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6"
+       click IPv6_Ext "internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"
+       click IPv6-Frag "internet/ipv6_frag.html#pcapkit.protocols.internet.ipv6_frag.IPv6_Frag"
+       click IPv6-Opts "internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts"
+       click IPv6-Route "internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route"
+       click IPX "internet/ipx.html#pcapkit.protocols.internet.ipx.IPX"
+       click MH "internet/mh.html#pcapkit.protocols.internet.mh.MH"
 
-       click Transport "/pcapkit/protocols/transport/transport.html#pcapkit.protocols.transport.transport.Transport"
-       click TCP "/pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP"
-       click UDP "/pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP"
-       click SCTP "/pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP"
+       click Transport "transport/transport.html#pcapkit.protocols.transport.transport.Transport"
+       click TCP "transport/tcp.html#pcapkit.protocols.transport.tcp.TCP"
+       click UDP "transport/udp.html#pcapkit.protocols.transport.udp.UDP"
+       click SCTP "transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP"
 
-       click Application "/pcapkit/protocols/application/application.html#pcapkit.protocols.application.application.Application"
-       click HTTP "/pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.HTTP"
-       click h1 "/pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP"
-       click h2 "/pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP"
-       click FTP "/pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP"
-       click FTP_DATA "/pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP_DATA"
-       click NGAP "/pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.NGAP"
-       click OSPF "/pcapkit/protocols/application/ospf.html#pcapkit.protocols.application.ospf.OSPF"
-       click RARP "/pcapkit/protocols/application/rarp.html#pcapkit.protocols.application.rarp.RARP"
-       click DRARP "/pcapkit/protocols/application/rarp.html#pcapkit.protocols.application.rarp.DRARP"
+       click Application "application/application.html#pcapkit.protocols.application.application.Application"
+       click HTTP "application/http.html#pcapkit.protocols.application.http.HTTP"
+       click h1 "application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP"
+       click h2 "application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP"
+       click FTP "application/ftp.html#pcapkit.protocols.application.ftp.FTP"
+       click FTP_DATA "application/ftp.html#pcapkit.protocols.application.ftp.FTP_DATA"
+       click NGAP "application/ngap.html#pcapkit.protocols.application.ngap.NGAP"
+       click OSPF "application/ospf.html#pcapkit.protocols.application.ospf.OSPF"
+       click RARP "application/rarp.html#pcapkit.protocols.application.rarp.RARP"
+       click DRARP "application/rarp.html#pcapkit.protocols.application.rarp.DRARP"
 
-       click Raw "/pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw"
-       click NoPayload "/pcapkit/protocols/misc/null.html#pcapkit.protocols.misc.null.NoPayload"
-       click PCAPNG "/pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG"
-       click Header "/pcapkit/protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.header.Header"
-       click Frame "/pcapkit/protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame"
+       click Raw "misc/raw.html#pcapkit.protocols.misc.raw.Raw"
+       click NoPayload "misc/null.html#pcapkit.protocols.misc.null.NoPayload"
+       click PCAPNG "misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG"
+       click Header "misc/pcap.html#pcapkit.protocols.misc.pcap.header.Header"
+       click Frame "misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame"
 
 Protocol Registry
 -----------------

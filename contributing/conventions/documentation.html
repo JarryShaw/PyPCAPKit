@@ -17,6 +17,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mermaid.css?v=10b7d883" />
     
     
 
@@ -582,26 +583,37 @@ already shown, and a second copy of a flow is exactly that.</p></li>
 excludes this page, which writes the directive name three times in its own prose and
 would otherwise inflate both counts:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>grep<span class="w"> </span>-rn<span class="w"> </span><span class="s1">'mermaid::'</span><span class="w"> </span>docs/source<span class="w"> </span>--include<span class="o">=</span><span class="s1">'*.rst'</span><span class="w"> </span><span class="se">\</span>
-<span class="w">     </span>--exclude<span class="o">=</span><span class="s1">'documentation.rst'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-l<span class="w">   </span><span class="c1"># 12 directives</span>
+<span class="w">     </span>--exclude<span class="o">=</span><span class="s1">'documentation.rst'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-l<span class="w">   </span><span class="c1"># directives</span>
 grep<span class="w"> </span>-rl<span class="w"> </span><span class="s1">'mermaid::'</span><span class="w"> </span>docs/source<span class="w"> </span>--include<span class="o">=</span><span class="s1">'*.rst'</span><span class="w"> </span><span class="se">\</span>
-<span class="w">     </span>--exclude<span class="o">=</span><span class="s1">'documentation.rst'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-l<span class="w">   </span><span class="c1"># on 11 pages</span>
+<span class="w">     </span>--exclude<span class="o">=</span><span class="s1">'documentation.rst'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-l<span class="w">   </span><span class="c1"># pages carrying one</span>
 </pre></div>
 </div>
-<p>All twelve are a bare <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">mermaid::</span></code> carrying no directive options, and all twelve
-are a <code class="docutils literal notranslate"><span class="pre">flowchart</span></code>: <code class="docutils literal notranslate"><span class="pre">TD</span></code> where the subject is a sequence or a decision, <code class="docutils literal notranslate"><span class="pre">LR</span></code> for a
-type hierarchy. <strong>Quote a node label whose text Mermaid would otherwise try to parse</strong>,
-and leave a bare identifier bare. That is what the exemplars do with <em>node</em> labels, and
-it falls close to the <code class="docutils literal notranslate"><span class="pre">TD</span></code>/<code class="docutils literal notranslate"><span class="pre">LR</span></code> line without following it: every node label in the
-six <code class="docutils literal notranslate"><span class="pre">TD</span></code> graphs is quoted, since every one of them is prose; the <code class="docutils literal notranslate"><span class="pre">LR</span></code> graphs quote
-only where the text forces it, which is <code class="docutils literal notranslate"><span class="pre">h1[&quot;HTTP/1.*&quot;]</span></code> and <code class="docutils literal notranslate"><span class="pre">h2[&quot;HTTP/2&quot;]</span></code> in
+<p>Every one is a bare <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">mermaid::</span></code> carrying no directive options, and every one is a
+<code class="docutils literal notranslate"><span class="pre">flowchart</span></code>: <code class="docutils literal notranslate"><span class="pre">LR</span></code> for a type hierarchy, and for a graph whose <code class="docutils literal notranslate"><span class="pre">TD</span></code> layout would run
+wider than the page or pile its edge labels on top of each other – a decision with many
+outcomes, a trigger map – and <code class="docutils literal notranslate"><span class="pre">TD</span></code> for the other sequences and decisions. <strong>Quote a
+node label whose text Mermaid would otherwise try to parse</strong>, and leave a bare identifier
+bare. That is what the exemplars do with <em>node</em> labels, and it follows the subject rather
+than the direction: every node label in the sequence, decision and trigger graphs is
+quoted, since every one of them is prose; the type hierarchies quote only where the text
+forces it, which is <code class="docutils literal notranslate"><span class="pre">h1[&quot;HTTP/1.*&quot;]</span></code> and <code class="docutils literal notranslate"><span class="pre">h2[&quot;HTTP/2&quot;]</span></code> in
 <code class="file docutils literal notranslate"><span class="pre">docs/source/pcapkit/protocols/index.rst</span></code> and nowhere else. Everything else there
 uses the bare <code class="docutils literal notranslate"><span class="pre">A{{Meta}}</span></code>, <code class="docutils literal notranslate"><span class="pre">B(Base)</span></code>, <code class="docutils literal notranslate"><span class="pre">D([user</span> <span class="pre">customisation</span> <span class="pre">...])</span></code> and
 <code class="docutils literal notranslate"><span class="pre">subgraph</span> <span class="pre">name</span> <span class="pre">[Title]</span></code> forms, and spends its quotes on <code class="docutils literal notranslate"><span class="pre">click</span></code> targets instead.
+<strong>Write a</strong> <code class="docutils literal notranslate"><span class="pre">click</span></code> <strong>target relative to the page it is on</strong> – <code class="docutils literal notranslate"><span class="pre">protocol.html#...</span></code>,
+<code class="docutils literal notranslate"><span class="pre">../../ext.html#...</span></code> – never from the site root: the published site is served under
+<code class="docutils literal notranslate"><span class="pre">/PyPCAPKit/</span></code>, so a target starting with <code class="docutils literal notranslate"><span class="pre">/</span></code> resolves outside it and 404s.
 <strong>Edge labels follow no rule at all.</strong> The exemplars quote some and leave others bare,
 including <code class="docutils literal notranslate"><span class="pre">|workflow_run:</span> <span class="pre">completed|</span></code> and <code class="docutils literal notranslate"><span class="pre">|02:00|</span></code>, which the reason above would
 have quoted and which Mermaid accepts anyway – so match the graph being edited rather
 than this paragraph. Inside a quoted label, <code class="docutils literal notranslate"><span class="pre">&lt;br/&gt;</span></code> breaks the text across lines and a
-literal <code class="docutils literal notranslate"><span class="pre">&lt;</span></code> or <code class="docutils literal notranslate"><span class="pre">&gt;</span></code> is written <code class="docutils literal notranslate"><span class="pre">&amp;lt;</span></code> or <code class="docutils literal notranslate"><span class="pre">&amp;gt;</span></code>.
+literal <code class="docutils literal notranslate"><span class="pre">&lt;</span></code> or <code class="docutils literal notranslate"><span class="pre">&gt;</span></code> is written <code class="docutils literal notranslate"><span class="pre">&amp;lt;</span></code> or <code class="docutils literal notranslate"><span class="pre">&amp;gt;</span></code>. Mermaid also reads label text as
+Markdown, so an underscore that opens or closes a name is written <code class="docutils literal notranslate"><span class="pre">\_</span></code> –
+<code class="docutils literal notranslate"><span class="pre">\_missing\_</span></code>, <code class="docutils literal notranslate"><span class="pre">pcapkit.\_\_version\_\_</span></code> – or the name renders as emphasis. Its
+own <code class="docutils literal notranslate"><span class="pre">#95;</span></code> escape is no substitute: in a label that carries a <code class="docutils literal notranslate"><span class="pre">&lt;br/&gt;</span></code> it is decoded
+before the Markdown pass, and the emphasis comes back. Where a steep edge runs under
+a neighbouring edge label, <code class="docutils literal notranslate"><span class="pre">curve:</span> <span class="pre">monotoneX</span></code> in the graph’s front matter keeps it
+clear, as the mint criterion’s decision graph does.
 <a class="reference internal" href="../releasing.html"><span class="doc">The release pipeline</span></a> is the <code class="docutils literal notranslate"><span class="pre">TD</span></code> example and
 <a class="reference internal" href="../../pcapkit/corekit/fields/index.html"><span class="doc">the field hierarchy</span></a> the <code class="docutils literal notranslate"><span class="pre">LR</span></code> one.</p>
 </section>
@@ -757,8 +769,8 @@ Asked and ruled on <a class="extlink-issue reference external" href="https://git
 ruled this on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/719">#719</a>, correcting a blanket <em>always</em> <code class="docutils literal notranslate"><span class="pre">.rst</span></code> that had been in
 circulation: the Sphinx documentation is reST, and the other documents –
 the READMEs included – are Markdown where that applies. <code class="docutils literal notranslate"><span class="pre">CONTRIBUTING.md</span></code>’s own
-<em>Documentation</em> section records the same split. Neither <code class="docutils literal notranslate"><span class="pre">global-include</span></code> in
-<code class="file docutils literal notranslate"><span class="pre">MANIFEST.in</span></code> reaches Markdown, so the two READMEs under <code class="file docutils literal notranslate"><span class="pre">examples/</span></code>
+<em>Documentation</em> section records the same split. The <code class="docutils literal notranslate"><span class="pre">global-include</span></code> in
+<code class="file docutils literal notranslate"><span class="pre">MANIFEST.in</span></code> does not reach Markdown, so the READMEs under <code class="file docutils literal notranslate"><span class="pre">examples/</span></code>
 ship through <code class="docutils literal notranslate"><span class="pre">recursive-include</span> <span class="pre">examples</span> <span class="pre">*.md</span></code>, and any other Markdown file
 ships only if setuptools or an <code class="docutils literal notranslate"><span class="pre">include</span></code> line adds it.</p></li>
 <li><p><strong>Prose names the real defining module, not a re-export.</strong> One strand of the

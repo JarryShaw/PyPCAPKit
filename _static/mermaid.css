@@ -1,0 +1,5 @@
+/* Centre a Mermaid diagram narrower than the page; conf.py sizes each to fit its content. */
+pre.mermaid {
+    margin-left: auto;
+    margin-right: auto;
+}
