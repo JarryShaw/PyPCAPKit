@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """``FEATCode.get`` must be case-insensitive, per RFC 5797 Section 2.
 
-GitHub issue #903, the registry-wide case-sensitivity audit. Of the 127
-registries under :mod:`pcapkit.const` and the 24 non-registry enumerations
+GitHub issue #903, the registry-wide case-sensitivity audit. Of the
+registries under :mod:`pcapkit.const` and the non-registry enumerations
 elsewhere, :class:`~pcapkit.const.ftp.command.FEATCode` is the one the audit
 found on the wrong side of the owner's ruling: it did no case folding at all,
 so it ran the case-sensitive default, while the document defining the very
@@ -174,7 +174,7 @@ class FEATCodeCaseFoldSafetyTests(unittest.TestCase):
         case-insensitive comparison."* If that ever stopped holding in the
         crawled registry, folding would start resolving one of the colliding
         pair arbitrarily -- so it is asserted rather than assumed. Measured
-        across all 151 enumerations in the tree while auditing #903:
+        across every enumeration in the tree while auditing #903:
         :class:`~pcapkit.const.hip.parameter.Parameter` is the *only* one with
         a name-fold collision (``R1_Counter`` against ``R1_COUNTER``, both
         IANA-registered), and **no** enumeration anywhere has a ``str``-value

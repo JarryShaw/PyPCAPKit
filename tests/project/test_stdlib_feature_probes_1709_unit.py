@@ -5,15 +5,15 @@ The owner's ruling on GitHub pull request #1703, applied by issue #1709: where
 :mod:`pcapkit` needs a name or a behaviour that only some supported interpreters
 have, it asks :data:`sys.version_info`, in :mod:`pcapkit.utilities.compat` when
 the answer is a name to re-export, rather than probing with :func:`getattr` or
-:func:`hasattr`. Issue #1709 found six probes, each with a string literal naming
-the attribute. Five ask a module or builtin class:
+:func:`hasattr`. Issue #1709 found these probes, each with a string literal naming
+the attribute. Most ask a module or builtin class:
 
 * ``getattr(inspect, 'get_annotations', None)``, in
   :file:`pcapkit/corekit/infoclass.py` and :file:`pcapkit/protocols/protocol.py`;
 * ``getattr(types, 'UnionType', None)``, in :file:`pcapkit/corekit/infoclass.py`;
 * ``hasattr(dict, '__reversed__')``, twice in :file:`pcapkit/corekit/infoclass.py`.
 
-The sixth asks an instance, so nothing about its receiver marks it: it is a
+One asks an instance, so nothing about its receiver marks it: it is a
 version probe because of the attribute it names.
 
 * ``getattr(node, 'end_lineno', node.lineno)``, in
@@ -24,7 +24,7 @@ probe of a module the file imports by name or of a builtin class, and a literal
 probe of any object for an attribute in :data:`VERSIONED`. A computed attribute
 name, as in ``getattr(hashlib, digest)``, is a lookup rather than a question
 about the interpreter, and is not matched. Run against the tree before issue
-#1709, it reports exactly those six and the two :data:`EXEMPT` entries.
+#1709, it reports exactly those and the :data:`EXEMPT` entries.
 
 This module is unit-tier: it reads source text and never imports the package.
 

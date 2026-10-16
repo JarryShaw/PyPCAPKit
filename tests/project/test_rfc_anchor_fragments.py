@@ -80,10 +80,10 @@ the datatracker mirror). The maintainer ruled on #944 for the enclosing
 top-level section, so those citations became ``:rfc:`959#section-4``` --
 which :data:`ACCEPTED_FRAGMENT` above already accepts as well-formed.
 
-Eleven sites carried it, not the six #944 reported: that issue grepped
-:mod:`pcapkit` only, and a cross-review of the fix found four more rendered
+More sites carried it than #944 reported: that issue grepped
+:mod:`pcapkit` only, and a cross-review of the fix found further rendered
 roles in :file:`docs/source/contributing/conventions/registry-protocol.rst`
-and one in :file:`tests/const/test_const_enum_no_mint.py`. A further two
+and one in :file:`tests/const/test_const_enum_no_mint.py`. Others
 cited ``959#section-5.3``, equally dead, in
 :file:`tests/protocols/application/test_ftp_unit.py` and
 :file:`docs/source/changelog/1.5.0.rst`; #947 ruled ``#section-5`` for those.
@@ -176,7 +176,7 @@ QUOTED_FORMS: 'tuple[tuple[str, str], ...]' = (
 #: Where :func:`_dead_anchor_citations` looks, as ``(directory, glob patterns)``.
 #: Wider than :func:`_malformed_fragments`'s ``pcapkit``-only sweep on purpose:
 #: a dead anchor in a ``.rst`` page renders for readers exactly as one in a
-#: docstring does, and four of the five sites this caught were in ``.rst``.
+#: docstring does, and most of the sites this caught were in ``.rst``.
 DEAD_ANCHOR_SCAN: 'tuple[tuple[str, tuple[str, ...]], ...]' = (
     ('pcapkit', ('*.py',)),
     ('docs/source', ('*.rst', '*.py')),
@@ -285,7 +285,7 @@ def _dead_anchor_citations() -> 'list[DeadAnchorFinding]':
       function answers a narrower question than its predecessor pretended to.
 
     Scans :data:`DEAD_ANCHOR_SCAN` rather than :mod:`pcapkit` alone: scanning one
-    directory is what let five dead-anchor sites sit unnoticed outside it, four of them
+    directory is what let dead-anchor sites sit unnoticed outside it, most of them
     in ``.rst`` where they rendered for readers exactly as a docstring's would.
 
     """
@@ -314,7 +314,7 @@ class RFCAnchorFragmentTests(unittest.TestCase):
     :meth:`test_no_malformed_fragments` sweeps :mod:`pcapkit` only;
     :meth:`test_no_known_dead_anchor_citations` sweeps :data:`DEAD_ANCHOR_SCAN`, which
     also covers :file:`docs/source` and :file:`tests`, because scanning one directory
-    is what let five dead-anchor sites sit unnoticed outside :mod:`pcapkit`.
+    is what let dead-anchor sites sit unnoticed outside :mod:`pcapkit`.
 
     """
 
@@ -338,10 +338,10 @@ class RFCAnchorFragmentTests(unittest.TestCase):
     def test_the_documentation_exemption_holds_on_every_known_mechanism(self) -> 'None':
         """:func:`_is_documentation` on each input that defeated the old masker.
 
-        This is the regression suite for five rounds of review, and it exists because
+        This is the regression suite for several rounds of review, and it exists because
         each of those rounds fixed the mechanism the previous postmortem had named and
         then missed the next one. Pinning the *table* rather than the latest fix is the
-        difference: a sixth mechanism has to be added here to be considered handled, and
+        difference: a new mechanism has to be added here to be considered handled, and
         a redesign has to keep every row passing.
 
         The rows are the real inputs, not paraphrases of them. Four are false negatives
@@ -394,7 +394,7 @@ class RFCAnchorFragmentTests(unittest.TestCase):
             ('a citation opened like the idiom but not closed like it',
              'names ``%s and more', True),
             # Pins **any** whitespace rather than a literal space. Narrowing
-            # ``isspace()`` to ``== ' '`` passed all fifteen earlier rows, because the
+            # ``isspace()`` to ``== ' '`` passed every earlier row, because the
             # only row reaching that branch used a plain space -- so the boundary
             # condition the comment above relies on was asserted for one whitespace
             # character out of the set it names. A reader writing the idiom after a

@@ -27,13 +27,13 @@ later without a gate, and a job renamed or reordered.
 
 Be clear about how far that generalises, though, because it is easy to overstate.
 :data:`PUBLISHING_MARKERS` is what decides "publishing", and it is a finite,
-hand-maintained list of five substrings. So the rule generalises across job
+hand-maintained list of substrings. So the rule generalises across job
 *identity* and not across publishing *mechanism*: a job uploading by some route
-none of those five names -- ``twine upload``, a fork of a pinned action under
+none of those names -- ``twine upload``, a fork of a pinned action under
 another name, a ``curl`` straight at an index -- matches no marker, and would
 pass this test while genuinely ungated.
-:class:`TestMarkersStillMatch` only keeps the existing five from going blind; it
-cannot invent a sixth. Adding a publishing route to this workflow therefore means
+:class:`TestMarkersStillMatch` only keeps the existing markers from going blind;
+it cannot invent another. Adding a publishing route to this workflow therefore means
 adding its marker here, and that is a maintenance obligation rather than something
 the test enforces.
 
@@ -48,8 +48,8 @@ Two things this deliberately does **not** test, because it cannot:
   tier runs on a fresh clone with no network and no token. It is written down in
   the workflow's own comment and in #641 instead.
 * **Whether GitHub requests one approval per environment or one per matrix leg.**
-  ``pypi`` is a 7-leg matrix and ``conda`` a 10-leg one. That is a property of
-  the Actions runner, observable only from a real run -- and now moot for both,
+  ``pypi`` and ``conda`` are both matrix jobs. That is a property of
+  the Actions runner, observable only from a real run -- and moot for both,
   since #887 removed their required reviewers. The question would resurface
   only if a matrix job were gated by its own environment again.
 
@@ -103,7 +103,7 @@ catch, because none of them executed anything the workflow itself executes:
   despite every earlier test in this module passing.
 
 #962: the same argument, one layer up, now against the ``if:`` expressions
-themselves. Four review rounds on #961 produced twenty mutations of a single
+themselves. Review rounds on #961 produced mutation after mutation of a single
 clause, and each strengthening of the text assertions was defeated by one the
 previous round had not anticipated -- because vocabulary is not structure and
 structure is not meaning. :class:`TestGateExpressionsEvaluateCorrectly`
@@ -1906,8 +1906,8 @@ class TestEnvironmentsAreNotShared(WorkflowMixin, unittest.TestCase):
         indexes -- OIDC trusted publishing and ``ANACONDA_TOKEN`` -- and
         ``tag``'s write to ``main`` uses a third, so sharing one environment
         would still merge those blast radii even though, since #887, only
-        ``github-release`` carries a reviewer of its own; the other three are
-        held by depending on it instead. That each *does* depend on it is
+        ``github-release`` carries a reviewer of its own; the other gated jobs
+        are held by depending on it instead. That each *does* depend on it is
         :class:`TestGatedJobsDependOnGithub`'s check, not this one -- this
         test only stops the four gates from being collapsed back into one.
 
@@ -1936,7 +1936,7 @@ class TestEnvironmentsAreNotShared(WorkflowMixin, unittest.TestCase):
 
 class TestGatedJobsDependOnGithub(WorkflowMixin, unittest.TestCase):
     """#887: with only ``github-release`` still holding a required reviewer,
-    the other three gated jobs have to reach it through ``needs:`` instead,
+    the other gated jobs have to reach it through ``needs:`` instead,
     or removing their own reviewer left them ungated in every sense that
     matters.
 
@@ -2102,7 +2102,7 @@ class TestNothingPublishesWithoutTheGate(WorkflowMixin, unittest.TestCase):
                 self.assertFalse(evaluate_condition(declared_if(self.jobs[job]), context))
 
     def test_a_version_tagged_elsewhere_releases_nothing_off_a_v_tag(self) -> None:
-        """#1748: the gate and all four publishers skip for ``v1.5.0b12``'s shape.
+        """#1748: the gate and every publisher skip for ``v1.5.0b12``'s shape.
 
         Its tag names ``2025da5e5`` and Anaconda holds 1 of its 10 files, so
         ``conda`` used to run on every later commit -- after the gate -- and fail
@@ -2389,8 +2389,8 @@ class TestGateExpressionsEvaluateCorrectly(WorkflowMixin, unittest.TestCase):
     rather than matched as text.
 
     :class:`TestEvidenceBasedGating` above asserts over the conditions'
-    spelling, and four review rounds on #961 showed where that ends: twenty
-    mutations of one clause, three successive strengthenings, and each
+    spelling, and the review rounds on #961 showed where that ends: mutation
+    after mutation of one clause, successive strengthenings, and each
     strengthening defeated by a mutation the previous round had not thought
     of. The reason is structural rather than a matter of the assertions not
     being clever enough -- a gate's job is to produce an answer, and no amount
@@ -2722,15 +2722,15 @@ class TestGateMutationsChangeTheTruthTable(WorkflowMixin, unittest.TestCase):
     #: mutations have to be the *small* edits a review round produces -- a
     #: regenerated condition would differ in ways nobody would have typed.
     #:
-    #: The first eight are the mutations #962 names; the next six are this
-    #: module's own, covering the clauses the issue only points at -- the
+    #: The mutations #962 names come first, then this module's own, covering
+    #: the clauses the issue only points at -- the
     #: publishing predecessors' equality pair, the ``startsWith``
     #: short-circuit, and reading somebody else's evidence. The ``!= 'true'``
     #: row is #967's, and is the only row here that the table as #962 left it
     #: did not catch at all: it is rejected by exactly one scenario -- the
     #: ``null`` evidence row :func:`gate_rows` grew for it -- and by no text
-    #: assertion. The three after it are #1052's, for the release test gate
-    #: conjunct that issue added, and the last three are #1748's, for its
+    #: assertion. The rows after it are #1052's, for the release test gate
+    #: conjunct that issue added, and the last rows are #1748's, for its
     #: released-elsewhere conjunct.
     MUTATIONS = [
         ('the && before the version_check clause becomes ||',

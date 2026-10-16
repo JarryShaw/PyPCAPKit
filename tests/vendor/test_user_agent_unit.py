@@ -56,8 +56,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 #: Every distribution importing :mod:`pcapkit.vendor` needs. ``requests`` is the
 #: obvious one -- ``pcapkit.vendor.default`` imports it at module scope -- but it
 #: is not sufficient: importing ``pcapkit.vendor.default`` imports the
-#: ``pcapkit.vendor`` package first, and its :file:`__init__.py` pulls in all
-#: seventeen subpackages, seven of which ``import bs4`` at module scope. So a
+#: ``pcapkit.vendor`` package first, and its :file:`__init__.py` pulls in every
+#: subpackage, several of which ``import bs4`` at module scope. So a
 #: guard on ``requests`` alone lets the suite error instead of skipping on a
 #: machine that happens to have ``requests`` and not ``beautifulsoup4``.
 VENDOR_DEPS = ('requests', 'bs4', 'html5lib')

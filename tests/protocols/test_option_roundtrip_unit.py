@@ -112,11 +112,13 @@ class Gap(NamedTuple):
     #: timestamp and so is not stable between runs.
     #:
     #: Make it as specific as the message allows, because a fragment that matches
-    #: half the tree does not pin anything: ``'invalid format'`` alone occurs 205
-    #: times across 13 modules (31 in :file:`pcapkit/protocols/internet/hip.py`, 26 in
-    #: :file:`pcapkit/protocols/transport/tcp.py`), so it is satisfied by a regression at any of
-    #: them. Prefer the alias and whatever bracketed code the message carries --
-    #: ``'TCP: [OptNo 28] invalid format'`` narrows those 26 sites to the one
+    #: half the tree does not pin anything: ``'invalid format'`` alone occurs at
+    #: sites across many modules (dozens each in
+    #: :file:`pcapkit/protocols/internet/hip.py` and
+    #: :file:`pcapkit/protocols/transport/tcp.py`), so it is satisfied by a
+    #: regression at any of them. Prefer the alias and whatever bracketed code the
+    #: message carries -- ``'TCP: [OptNo 28] invalid format'`` narrows the TCP
+    #: sites to the one
     #: option that can print ``28``. The tuple form is for messages whose stable
     #: parts are not contiguous, so that a fragment does not have to bake in a
     #: rendering that is itself defective.
@@ -393,7 +395,7 @@ EXPECTED_FAILURES = {
 
     # -- PCAP-NG --------------------------------------------------------------
 
-    # Thirty-three PCAP-NG entries used to be recorded here, for four defects
+    # PCAP-NG entries used to be recorded here, for the defects
     # that #1267-#1270 fixed. ``PCAPNG.__post_init__`` carried the make pass's
     # option count into its own re-parse, so every option with an "only one"
     # guard tripped it (27 options). ``if_IPv6addr`` declared 8 octets for 17.

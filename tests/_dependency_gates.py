@@ -22,7 +22,7 @@ rather than remembered:
    every ``test_*.py`` looking at :func:`unittest.skipUnless` decorators on
    classes *and* on methods. A text search finds the method-level ones and
    misses the class-level ones entirely, which is most of them: ``HAS_EMOJI``'s
-   14 methods are gated by two class decorators.
+   methods, for one, are gated by class decorators alone.
 2. **What the flag requires**, from :func:`flag_requirements` -- the module
    names its defining expression probes, read out of the source rather than
    listed here. A flag defined in one module and imported by another
@@ -117,14 +117,14 @@ __all__ = [
 
 #: The workflow holding every blocking job that runs :program:`pytest`.
 #: :file:`experimental.yml` runs the unit tier as well, on legs nothing waits on
-#: (#1732), and is not read here. Five other workflows install ``.[all]``
+#: (#1732), and is not read here. Other workflows install ``.[all]``
 #: somewhere -- a docs build, a conda recipe, a vendor crawl, the lint pass,
 #: and the release packaging workflow -- and none of them invokes the suite;
 #: :file:`python-compatibility.yml` installs a bare ``.`` and only compiles and
 #: imports, and :file:`codeql-analysis.yml` installs nothing explicitly at all
 #: (CodeQL's own autobuild step). That is exactly why this module keys on *jobs that
-#: run pytest* rather than on install lines anywhere in the workflow tree: three
-#: of those five install ``.[all,dev]`` -- carrying ``pypcapfile``, ``pyshark``
+#: run pytest* rather than on install lines anywhere in the workflow tree: some
+#: of those install ``.[all,dev]`` -- carrying ``pypcapfile``, ``pyshark``
 #: and ``scapy`` through the ``dev`` extra #910 added when it narrowed ``all``
 #: to core addons only -- so a guard reading those lines would satisfy nearly
 #: every flag here vacuously.
@@ -1174,9 +1174,9 @@ def flag_requirements() -> 'dict[tuple[str, str], frozenset[str]]':
     """``(module, flag)`` -> the modules that flag needs importable.
 
     Resolved per file rather than per flag name, which matters for exactly one
-    flag and matters a lot: ``HAS_RUNTIME`` names the four core dependencies in
+    flag and matters a lot: ``HAS_RUNTIME`` names the core dependencies in
     every module but one, and in
-    :file:`tests/foundation/engines/test_runtime_engines.py` it names those four
+    :file:`tests/foundation/engines/test_runtime_engines.py` it names those
     plus ``dpkt``, ``scapy`` and ``pyshark``. Keyed on the name alone, that one
     module's requirements would be demanded of every other module that gates on
     it, or they would excuse it.
@@ -1563,8 +1563,8 @@ def dependency_gate_gaps(workflow: 'Optional[pathlib.Path]' = None) -> 'tuple[Ga
 
     Aggregated per ``(flag, job)`` rather than per gate: one missing extra
     darkens every gate on that flag at once, and a reader wants "the ``test``
-    job reaches 14 ``HAS_CRYPTO`` methods and installs no ``cryptography``",
-    not fourteen copies of it.
+    job reaches N ``HAS_CRYPTO`` methods and installs no ``cryptography``",
+    not one copy of it per method.
 
     """
     requirements = flag_requirements()

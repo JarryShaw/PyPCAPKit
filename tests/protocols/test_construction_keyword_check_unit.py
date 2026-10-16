@@ -461,8 +461,8 @@ class ScopeTests(unittest.TestCase):
         :meth:`HTTP.make <pcapkit.protocols.application.http.HTTP.make>` itself to
         reach its versioned implementation.
 
-        Closing it would mean interposing on each of the thirty ``make``
-        implementations rather than on the one place their keywords meet, which is
+        Closing it would mean interposing on every ``make``
+        implementation rather than on the one place their keywords meet, which is
         a larger change than #617. Written down here because the alternative is
         somebody inferring from the docstrings that ``make`` validates, and because
         if the gap is ever closed this test goes red and gets deleted.

@@ -2,10 +2,10 @@
 """#1660: the Python version tiers are declared once, in :file:`.github/python-versions.toml`.
 
 Before #1660 every matrix spelt its versions out, so a tier change -- 3.11
-reaching end-of-life, a new pre-release -- meant editing some 27 files by hand.
-Now :file:`util/python_versions.py` reads the file, and each workflow takes its
-matrices, and each single-interpreter job its ``latest``, from that script's
-step outputs. Four things are pinned here:
+reaching end-of-life, a new pre-release -- meant editing many files by hand.
+:file:`util/python_versions.py` reads the file instead, and each workflow takes
+its matrices, and each single-interpreter job its ``latest``, from that script's
+step outputs. These things are pinned here:
 
 * **The file and the script.** :func:`python_versions.load` rejects a malformed
   file, ``latest`` is the newest supported CPython (the owner's ruling on

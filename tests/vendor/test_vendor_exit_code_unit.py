@@ -69,7 +69,7 @@ from unittest import mock
 #: ``vendor_module`` default-target-list fallback this suite patches), which
 #: pulls in every crawler subpackage unconditionally --
 #: :mod:`pcapkit.vendor.default` imports :mod:`requests` at module scope and
-#: seven crawlers import :mod:`bs4` at module scope.
+#: several crawlers import :mod:`bs4` at module scope.
 VENDOR_DEPS = ('requests', 'bs4')
 
 #: Whether the crawler machinery is importable at all. Both ship in the

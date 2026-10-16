@@ -992,8 +992,8 @@ class DependencyRequirementTests(unittest.TestCase):
         ``beautifulsoup4[html5lib]`` installs ``beautifulsoup4``, so it provides
         it. Plain ``beautifulsoup4`` does not install ``html5lib``, so it does
         not provide ``beautifulsoup4[html5lib]``. A matcher that compared only
-        distribution names would call the ``test`` extra sufficient for the four
-        vendor modules that need :mod:`html5lib`, and the 41 methods they hold
+        distribution names would call the ``test`` extra sufficient for the
+        vendor modules that need :mod:`html5lib`, and the methods they hold
         would read as covered while they went on skipping.
 
         """
@@ -1013,7 +1013,7 @@ class DependencyRequirementTests(unittest.TestCase):
         self.assertFalse(_dependency_gates.provided_by(requirements, 'dpkt'))
 
     def test_the_extras_read_back_what_pyproject_declares(self) -> None:
-        """Spot checks on the four extras the rest of this suite reasons about."""
+        """Spot checks on the extras the rest of this suite reasons about."""
         declared = _dependency_gates.declared_requirements()
 
         self.assertEqual([requirement.text for requirement in declared['crypto']],
@@ -1048,8 +1048,8 @@ class DependencyRequirementTests(unittest.TestCase):
     def test_all_is_narrowed_to_core_addons_by_910(self) -> None:
         """#910: ``all`` means core addons only, not every engine an end user might want.
 
-        The owner's ruling narrowed ``all`` from 8 requirements to 3 -- ``cli``,
-        ``crypto`` and ``pycrate`` (``NGAP``) stay, and the four 3rd-party
+        The owner's ruling narrowed ``all`` to the core addons -- ``cli``,
+        ``crypto`` and ``pycrate`` (``NGAP``) stay, and the third-party
         capture engines that used to be bundled here (``dpkt``, ``scapy``,
         ``pyshark``, ``pypcapfile``) move out to their own on-demand extras,
         covered by :meth:`test_dev_carries_what_all_used_to_for_the_toolchain`.
@@ -1208,7 +1208,7 @@ class DependencyGateScanTests(unittest.TestCase):
 
         Each of these is the only shape some real module uses, so a resolver
         that handled only the obvious ``find_spec('x') is not None`` would
-        silently report four of the five as gating on nothing -- and a flag that
+        silently report most of them as gating on nothing -- and a flag that
         requires nothing can never be a gap, which is failure by silence again.
 
         """
@@ -1319,13 +1319,13 @@ class DependencyGateScanTests(unittest.TestCase):
         )
 
     def test_one_flag_name_may_mean_two_things_and_is_resolved_per_module(self) -> None:
-        """``HAS_RUNTIME`` is the four core dependencies, except in one module.
+        """``HAS_RUNTIME`` is the core dependencies, except in one module.
 
         :file:`tests/foundation/engines/test_runtime_engines.py` reuses the name
-        for those four plus ``dpkt``, ``scapy`` and ``pyshark``. Resolved by
-        name instead of per module, either that module's three extra
-        requirements would be demanded of the hundred-odd others, or the
-        hundred-odd would excuse it -- and it is the one HAS_RUNTIME gate in the
+        for those plus ``dpkt``, ``scapy`` and ``pyshark``. Resolved by
+        name instead of per module, either that module's extra
+        requirements would be demanded of every other module, or the
+        others would excuse it -- and it is the one HAS_RUNTIME gate in the
         suite that really does go dark.
 
         """
@@ -1356,8 +1356,8 @@ class DependencyGateSelectionTests(unittest.TestCase):
         """Keyed on running the suite, not on holding an install line.
 
         The ``changelog`` job of this workflow installs nothing and runs a
-        generator, and five other workflows install ``.[all]`` somewhere,
-        three as ``.[all,dev]`` -- which carries ``pypcapfile``,
+        generator, and other workflows install ``.[all]`` somewhere,
+        some as ``.[all,dev]`` -- which carries ``pypcapfile``,
         ``pyshark`` and ``scapy`` through the ``dev`` extra #910 added when it
         narrowed ``all`` to core addons only -- without ever invoking
         :program:`pytest`. A guard that looked at install lines anywhere in
@@ -1585,9 +1585,9 @@ class DependencyGateCoverageTests(unittest.TestCase):
         """What this guard exists to stop regressing, named one flag at a time.
 
         #737 added ``DPKT`` and #740 added ``crypto``, ``cli`` and ``NGAP`` to
-        the install lines. Nothing held those four in place, which is #745's
+        the install lines. Nothing held those in place, which is #745's
         whole complaint -- deleting ``crypto`` from the ``test`` job would
-        re-dark 14 ESP methods and go green.
+        re-dark the ESP methods and go green.
 
         """
         gaps = {gap.flag for gap in _dependency_gates.dependency_gate_gaps()}
@@ -1618,10 +1618,10 @@ class DependencyGateCoverageTests(unittest.TestCase):
         ``engine-tests`` (#751) already reaches these gates through the same
         ignore-shape selection as ``test`` -- see this guard's own
         ``HAS_VENDOR_DEPS`` exclusion -- and it has never been one of ruleset
-        23497679's 15 required checks, so it already was the "job that exists
+        23497679's required checks, so it already was the "job that exists
         and reports without gating a merge" #738's ruling asked for. Installing
-        ``vendor`` there, rather than opening a sixth job, is what closes the
-        41-method gap on it. It is also the only *per-pull-request* job with
+        ``vendor`` there, rather than opening another job, is what closes the
+        gap on it. It is also the only *per-pull-request* job with
         that property: ``gate`` reaches these gates too but never runs on a
         pull request at all (only via a release's ``gate-only: true`` call),
         and ``integration``'s fixture-tier selection never reaches
@@ -2047,11 +2047,11 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
             'the exclusion list would swallow the gap this test relies on')
 
     def test_removing_dpkt_is_caught_on_every_job_that_installs_it(self) -> None:
-        """#729's defect, restaged. Four jobs install ``DPKT`` via a comma list; all four go dark.
+        """#729's defect, restaged. Every job installing ``DPKT`` via a comma list goes dark.
 
-        #751 added ``engine-tests`` and ``pypcap-parity`` to the three this test
+        #751 added ``engine-tests`` and ``pypcap-parity`` to the jobs this test
         used to name, each carrying its own ``DPKT`` for the same reason as the
-        original three -- ``engine-tests`` for
+        original ones -- ``engine-tests`` for
         :file:`tests/foundation/engines/test_runtime_engines.py`'s reused
         ``HAS_RUNTIME``, ``pypcap-parity`` for
         :file:`examples/generators/make_samples.py`.
@@ -2063,8 +2063,9 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
         -- and, separately, engine-tests no longer reaches
         test_runtime_engines.py regardless (see the HAS_RUNTIME exclusion),
         so there is no longer a DPKT-via-engine-tests gap for this doctoring
-        to reopen. Four jobs, not five. (#1538 later dropped that DPKT cell
-        outright: it ran only test_dpkt_unit.py, which ``test`` runs too.)
+        to reopen, and it is not among the jobs checked here. (#1538 later
+        dropped that DPKT cell outright: it ran only test_dpkt_unit.py, which
+        ``test`` runs too.)
 
         """
         text = _dependency_gates.WORKFLOW.read_text(encoding='utf-8')
@@ -2101,7 +2102,7 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
         """#762, direction one: the wrong half of the ``pcap`` ambiguity, installed.
 
         ``pypcap-parity`` swapped from the ``PyPCAP`` extra to ``PCAP_CT`` still
-        reaches all 4 ``HAS_PYPCAP`` gates, and
+        reaches every ``HAS_PYPCAP`` gate, and
         :func:`~tests._dependency_gates.dependency_gate_gaps` still calls them
         satisfied -- pcap-ct ships the same top-level ``pcap`` module, so this is
         exactly the blind spot :func:`~tests._dependency_gates.dependency_gate_gaps`
@@ -2382,7 +2383,7 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
         Commenting out one engine's ``EXTRA=`` arm -- rather than renaming it, which the
         new matrix-list-vs-case-arms equality check above would catch first, for a
         different reason -- leaves Scapy declared in the ``engine:`` list and still
-        present in ``engine_paths`` (so the equality check sees the same five engines on
+        present in ``engine_paths`` (so the equality check sees the same engines on
         both sides and stays quiet), but with no ``EXTRA=`` arm of its own: exactly the
         shape the per-engine loop's own check exists for.
 

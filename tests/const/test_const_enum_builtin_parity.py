@@ -116,12 +116,12 @@ EXPECTED_TO_REGISTER = frozenset({
 #: Each was rendering a registry that GitHub issue #647 found unguarded.
 #:
 #: Keyed to each template's own guard text rather than one literal shared by
-#: all four, kept as a dict rather than collapsed back to one shared literal:
+#: all of them, kept as a dict rather than collapsed back to one shared literal:
 #: GitHub issue #792 moved ``pcapkit.vendor.reg.apptype.apptype``'s copy to an
-#: f-string first, deliberately leaving the other three on ``%`` so its own
-#: diff over a 12,391-member file stayed reviewable, and GitHub issue #798
-#: swept the remaining three onto the same f-string form. All four now agree,
-#: but the dict stays: a future bespoke guard is not guaranteed to match this
+#: f-string first, deliberately leaving the others on ``%`` so its own diff over
+#: the registry's very large generated file stayed reviewable, and GitHub issue
+#: #798 swept the rest onto the same f-string form. They all agree, but the
+#: dict stays: a future bespoke guard is not guaranteed to match this
 #: one's shape, and what #647 actually needs pinned is that each template
 #: still carries *a* guard rejecting an invalid value, not that every template
 #: shares one literal.

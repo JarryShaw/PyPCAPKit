@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Pins ``make isort`` clean on all four of its lines (#757).
+"""Pins ``make isort`` clean on every one of its lines (#757).
 
 #757 was filed from a reproduction that ran bare ``isort --check-only --diff
 pcapkit/protocols/schema/schema.py``, with none of the flags ``make isort``
@@ -15,7 +15,7 @@ Those flags set the width to 100, exactly as :file:`CONTRIBUTING.md` documents
 ("120 for ``pylint`` and 100 for ``isort``, not PEP 8's 79"): a deliberate,
 written-down split, not a misconfiguration. Under *that* width the ``misc``
 import is not flagged at all (89 < 100). What *was* flagged, on the commit
-this test landed with, were three things the whole-tree line's flags alone
+this test landed with, were things the whole-tree line's flags alone
 would not have caught:
 
 * :file:`pcapkit/protocols/schema/schema.py` -- its ``pcapkit.utilities.warnings``
@@ -31,7 +31,7 @@ would not have caught:
   ``Ether, IPv6, Raw``). Also the util/examples-generators line only; only
   import order changed, since this module is loaded and run at test time,
   not just read at review time.
-  Three test modules load it by path via
+  These test modules load it by path via
   ``importlib.util.spec_from_file_location``:
   :file:`tests/protocols/test_option_generator_tcp_base_unit.py`,
   :file:`tests/protocols/test_option_coverage_runtime.py`, and
@@ -41,7 +41,7 @@ would not have caught:
   directly, too.
 
 So this module does not re-litigate the width. It just pins isort's own
-verdict on each of the four lines -- via real ``isort`` invocations with the
+verdict on each of those lines -- via real ``isort`` invocations with the
 Makefile's exact flags, not a hand-rolled guess about what those flags imply --
 so a future edit that reintroduces an unsorted or mis-wrapped import anywhere
 ``make isort`` reaches fails here instead of surfacing as "clean locally, red
@@ -51,8 +51,8 @@ missed exactly the :file:`examples/generators/` files above and the
 ``__init__.py`` files that sit at least one directory below
 :file:`pcapkit/const/` or :file:`pcapkit/vendor/` -- the const and vendor
 lines have no ``--skip-glob``, so between them they re-cover whichever of
-the 71 files the whole-tree line skips happen to live there, even though
-the whole-tree line skips all 71 package-wide. The const and vendor lines
+the files the whole-tree line skips happen to live there, even though
+the whole-tree line skips them package-wide. The const and vendor lines
 used to be one, :file:`pcapkit/const/*/*.py` and :file:`pcapkit/vendor/*/*.py`
 combined into a single brace-expanded glob that stopped at a fixed two
 levels, which the #754 split outgrew the moment
@@ -138,12 +138,12 @@ entry declines the install line, and the difference is not taste:
 :file:`lint.yml` already runs
 ``make mypy`` over the whole package, so a pytest copy would be a *second*
 copy, while that same workflow's header records that ``isort`` is deliberately
-not one of the four linters it installs -- it appears only in
+not one of the linters it installs -- it appears only in
 :file:`cron-vendor.yml`, as a formatter that rewrites the generated constants
 on a schedule rather than as a check. So declining the install line here would
 have left ``make isort``'s verdict checked nowhere at all, which is what #766
-objected to. It is cheap enough to be uncontroversial, too: all four lines
-below take about 1.5s together, the "costs nothing per leg" category the test
+objected to. It is cheap enough to be uncontroversial, too: the lines below
+take about 1.5s together, the "costs nothing per leg" category the test
 job's own install comment puts ``DPKT`` in rather than the ``Scapy`` one.
 
 ``isort`` is in ``Pipfile``'s ``[dev-packages]`` too, as of #810 -- that being
@@ -322,7 +322,7 @@ def _isort_recipe_line_numbers() -> 'list[int]':
     ``isort:`` or another such line, a blank line, or a comment line at
     column 0 -- make itself treats a blank or a column-0 ``#`` line inside a
     recipe as transparent rather than as ending the rule (measured with
-    ``make -n isort`` as the oracle: it still reports the same four commands
+    ``make -n isort`` as the oracle: it still reports the same commands
     with either dropped in between two recipe lines, which an earlier
     revision of this function got wrong by breaking on the first line that
     was not tab-indented, comment or not). The first following line that is
@@ -334,7 +334,7 @@ def _isort_recipe_line_numbers() -> 'list[int]':
     a dependency rather than declaring it, must not be mistaken for the
     target this function is looking for. The one case this does not defend
     against is a ``define``/``endef`` block whose body contains a bare
-    ``isort:`` at column 0 followed by four or more tab-indented lines --
+    ``isort:`` at column 0 followed by tab-indented lines --
     nothing in this file uses ``define``, so it is undefended rather than
     handled.
 
@@ -388,7 +388,7 @@ MAKEFILE_LINES = [
 
 @unittest.skipUnless(HAS_ISORT, 'isort is not installed')
 class TestIsortIsCleanOnThePackage(unittest.TestCase):
-    """``make isort`` must not be red on a clean checkout, on any of its four
+    """``make isort`` must not be red on a clean checkout, on any of its
     lines (#757).
 
     """

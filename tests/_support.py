@@ -363,7 +363,7 @@ def load_module(module_name: str, relative_path: str,
     Both halves of that write to :data:`sys.modules` -- the stub parents, and
     ``module_name`` itself -- so both are taken back off again when ``test``
     finishes, via :func:`restore_modules_after`. Before issue #674 they were not,
-    and five test modules left a bare ``pcapkit`` bound for whatever ran next.
+    and test modules left a bare ``pcapkit`` bound for whatever ran next.
 
     Args:
         module_name: Dotted name to execute the file under, e.g.
@@ -405,12 +405,12 @@ def load_module(module_name: str, relative_path: str,
 def bootstrap_core_modules(test: 'Optional[unittest.TestCase]' = None) -> dict[str, object]:
     """Execute the core :mod:`pcapkit` modules from source, in dependency order.
 
-    The seven modules the unit tier needs before it can test anything else, each
+    The modules the unit tier needs before it can test anything else, each
     loaded by :func:`load_module` and so each restored when ``test`` finishes.
     The restore is arranged here as well as in :func:`load_module`, and
     deliberately: :func:`restore_modules_after` registers one cleanup per test
     however many times it is called, so the snapshot kept is the one taken here,
-    before the first of the seven loads wrote anything.
+    before the first of those loads wrote anything.
 
     Args:
         test: The running test. Found from the calling frames when omitted, as in
@@ -465,7 +465,7 @@ def install_fake_protocol_module(test: 'unittest.TestCase') -> type:
             which is what puts :data:`sys.modules` back afterwards. Required
             rather than optional so that a future caller cannot install the
             stand-in without arranging for its removal -- the mistake is a
-            :exc:`TypeError` at the call rather than twelve unrelated failures
+            :exc:`TypeError` at the call rather than a run of unrelated failures
             in another directory.
 
     Returns:
@@ -694,7 +694,7 @@ def _running_test_case() -> 'Optional[unittest.TestCase]':
     has to be *handed* the running test is a helper every call site can forget to
     hand it to, and forgetting is silent. Issue #674 is the bill for that --
     :func:`bootstrap_core_modules` and :func:`load_module` left stub ``pcapkit``
-    entries in :data:`sys.modules` at five call sites, not one of which looked
+    entries in :data:`sys.modules` at call sites none of which looked
     wrong, and the resulting failures landed in a different directory.
 
     The *nearest* enclosing ``self`` wins, and that is the right one rather than
@@ -871,7 +871,7 @@ def isolate_modules(test: 'unittest.TestCase',
     difference is the whole of issue #660: purging on the way *in* protects the
     test that does it and nothing else, so a test that replaces
     ``pcapkit.protocols.protocol`` with a stand-in and then finishes leaves that
-    stand-in bound for whatever runs next. Twelve tests in
+    stand-in bound for whatever runs next. Tests in
     :mod:`tests.project.test_public_api` and
     :mod:`tests.project.test_documentation_claims` failed with ``TypeError: type
     'ProtocolBase' is not subscriptable`` on exactly that, and only when the

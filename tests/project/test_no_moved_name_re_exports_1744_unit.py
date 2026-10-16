@@ -8,7 +8,7 @@ alias assignment, a name in a non-home module's ``__all__``, or a name
 documented as importable there. A module that still uses a name it imports from
 the new home keeps the import, so the old path resolving through it is expected.
 
-Six checks pin that:
+These checks pin that:
 
 * :class:`TestNotExported` -- no removed name is in its old module's
   ``__all__``;
@@ -22,7 +22,7 @@ Six checks pin that:
 * :class:`TestNoReExportProse` -- no docstring under :mod:`pcapkit` and no page
   under ``docs/`` says a removed name is importable, re-exported or available
   at its old path;
-* :class:`TestVersionRemoved` -- the two paths that shipped in 1.4.x carry
+* :class:`TestVersionRemoved` -- the paths that shipped in 1.4.x carry
   ``versionremoved:: 1.5.0`` in the module docstring and on the docs page, per
   #1103; the beta-only ones are deleted with no directive.
 

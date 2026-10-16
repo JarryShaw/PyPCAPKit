@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Three mechanical shapes :mod:`pcapkit.vendor.reg.apptype.apptype` must keep.
+"""The mechanical shapes :mod:`pcapkit.vendor.reg.apptype.apptype` must keep.
 
 GitHub issue #744: every one of :class:`~pcapkit.const.reg.apptype.apptype.AppType`'s
-~12,391 members used to be an *annotated* assignment --
+members used to be an *annotated* assignment --
 ``tcpmux: 'TCP' = 1, 'tcpmux', TransportProtocol.get('tcp') | TransportProtocol.get('udp')``
 -- which put one forward-ref string per member into the class's
 ``__annotations__``. Sphinx's default autodoc calls
@@ -33,7 +33,7 @@ literal, so mypy -- which has no :mod:`aenum` plugin and so treats this class
 as a plain one -- infers the class attribute's type as ``int`` while the
 ``auto()``-valued siblings (``tcp``, ``udp``, ``sctp``, ``dccp``) infer as
 ``Any``. That is what made ``TransportProtocol.undefined`` disagree with its
-own ``'TransportProtocol'`` annotation at the four sites that default to it --
+own ``'TransportProtocol'`` annotation at the sites that default to it --
 the class attribute ``__transport__``, and the ``proto`` parameter on
 ``__new__``, ``get`` and ``get_all``. The fix wraps the literal in
 :func:`~typing.cast` so mypy infers ``TransportProtocol`` there too, without
@@ -41,7 +41,7 @@ changing what runs: :func:`~typing.cast` is the identity function at run time,
 so ``TransportProtocol.undefined`` stays the same ``0`` -- ``TransportProtocol(0)
 is undefined`` and ``bool(undefined)`` is ``False`` -- and the same genuine
 ``TransportProtocol`` member it always was: the ``proto`` sentinel default at
-all four sites, and what the base registry's ``_missing_`` extends
+each of those sites, and what the base registry's ``_missing_`` extends
 unassigned/reserved rows from. Two rejected alternatives, measured rather than
 argued: an explicit member annotation (``undefined: 'TransportProtocol' = 0``)
 does not fix this at all, it only *relocates* the error -- mypy still reports
@@ -75,9 +75,9 @@ load-bearing against a mypy error, exactly as it always was -- see
 test_undefined_member_is_cast_rather_than_a_bare_literal`'s own docstring
 for the measurements.)
 
-The first two are pinned two ways: directly against the generator's own
+#744 and #768 are pinned two ways: directly against the generator's own
 :meth:`~pcapkit.vendor.reg.apptype.apptype.AppType.flag`, which needs no
-network access since it is a ``@staticmethod``, and against the five files it
+network access since it is a ``@staticmethod``, and against the files it
 actually produced, committed under :mod:`pcapkit.const.reg.apptype`. #770 is
 pinned against that same base module -- a plain source-text assertion that the
 member stays wrapped in ``cast`` rather than reverting to a bare literal, plus
@@ -161,10 +161,10 @@ class AppTypeGeneratorShapeTests(unittest.TestCase):
                 self.assertNotIn('.get(', AppType.flag(protos))
 
     def test_generated_registries_carry_no_per_member_annotation(self) -> None:
-        """GitHub issue #744, against what the five committed files produced.
+        """GitHub issue #744, against what the committed files produced.
 
-        Before the fix, ``TCP.__annotations__`` alone held 6,150 entries --
-        6,147 members plus its three class-level attributes. Only the
+        Before the fix, ``TCP.__annotations__`` alone held an entry for every
+        member on top of its class-level attributes. Only the
         class-level attributes each registry declares exactly once should
         remain: ``__transport__``, ``__registry__``, ``__canonical__``, and
         -- on the memberless base only -- ``__registries__``.

@@ -5,9 +5,9 @@ GitHub issue #1343. Run as a script, a generator's ``sys.path[0]`` is
 :file:`examples/generators/`, not the tree root, so ``import pcapkit`` fell
 through to whatever was installed. An editable install pins one checkout, so a
 worktree's generators silently built their fixtures from *that* checkout's
-library: 257 captured cases instead of 266, with nothing failing.
+library: fewer captured cases than the tree defines, with nothing failing.
 
-Each generator that imports :mod:`pcapkit` now puts its own tree root first on
+Each generator that imports :mod:`pcapkit` puts its own tree root first on
 :data:`sys.path`. The probe below proves it from a scratch worktree, whose path
 no install points at, and with ``PYTHONPATH`` and ``PYTHONSAFEPATH`` stripped.
 The probe script lives outside the tree, so -- exactly as when a generator is run

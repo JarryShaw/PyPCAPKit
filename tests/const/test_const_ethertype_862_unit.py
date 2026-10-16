@@ -23,7 +23,7 @@ range row's ``(start, stop, body)`` before rendering, and
 :meth:`~pcapkit.vendor.reg.ethertype.EtherType._insert_range` places each new
 range immediately ahead of the first already-placed range that fully contains
 it, leaving every non-overlapping pair in the CSV's own row order. Sweeping
-all 56 range tests in the committed, generated file (measured directly against
+every range test in the committed, generated file (measured directly against
 ``main`` at ``70fa92010``, the #861 merge commit this issue was blocked on)
 found this to be the *only* containment pair among them -- no other subsumed
 range exists in :class:`~pcapkit.const.reg.ethertype.EtherType` today, so

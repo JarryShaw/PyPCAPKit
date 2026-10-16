@@ -8,7 +8,7 @@ PCAP-NG fixture extracts with ``length > 0`` and ``nofile=True``; this module
 pins the exact block inventory *and* dumps a real report file, which is the part
 that was never covered.
 
-The six fixtures and what each is for are documented in the module docstring of
+The fixtures and what each is for are documented in the module docstring of
 :file:`examples/generators/pcapng.py`, which also records the parser defects
 they provoke -- those show up as log noise here and are not assertions.
 

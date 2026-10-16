@@ -8,7 +8,7 @@ checked before:
 #. every name in every public module's :attr:`__all__` actually resolves;
 #. every public package lists everything public it holds, bar an allowlist of
    exclusions that had to be written down one at a time;
-#. the three re-export aggregators list *everything* public they hold, with no
+#. the re-export aggregators list *everything* public they hold, with no
    allowlist at all.
 
 The first two exist because of GitHub issue #515. ``pcapkit/protocols/data``
@@ -41,19 +41,19 @@ skipped through :data:`EXCLUDED_ROOTS` on the grounds that those came only from
 the ``vendor`` extra: this module is unit-tier -- see :mod:`tests._tiers` -- so it
 has to pass on ``pip install -e '.[test]'``. Both were already in the ``test``
 extra, since #507 (:file:`pyproject.toml`), so the skip never bought anything.
-Dropping it (#1772) brought in 144 modules and 19 packages, and found two
+Dropping it (#1772) brought in the vendor modules and packages, and found
 packages holding public attributes their :attr:`__all__` omitted:
 :mod:`pcapkit.vendor.ipx` leaked ``path``, the temporary of its ``sys.path``
-save-and-restore, now named ``_path``; :mod:`pcapkit.vendor`'s five are recorded
+save-and-restore, since renamed ``_path``; :mod:`pcapkit.vendor`'s are recorded
 in :data:`DELIBERATE_NON_EXPORTS`.
 
 No import is wrapped in a skip, either. That is deliberate and also measured: with
 ``dpkt``, ``scapy``, ``emoji``, ``cryptography`` and ``pycrate`` all absent, every
-one of the 325 non-vendor modules there were when this module was written still
+non-vendor module there was when this module was written still
 imported, because each optional dependency is guarded at its import site -- e.g.
 ``pcapkit/toolkit/scapy.py`` catches :exc:`ModuleNotFoundError` and degrades to
 ``scapy = None`` with a warning. The vendor modules need nothing past the ``test``
-extra at import time: the two NGAP crawlers import ``pycrate`` only inside the
+extra at import time: the NGAP crawlers import ``pycrate`` only inside the
 method that reads it. So an import failure in this sweep is a real defect and is
 allowed to fail the test, rather than being softened into a skip that would let
 the next :attr:`__all__` bug through.
@@ -75,32 +75,32 @@ explicit instead of leaving it to be guessed at.
 :data:`DELIBERATE_NON_EXPORTS` is where the decisions are recorded, and it is
 load-bearing rather than an escape hatch: without it the assertion is
 unsatisfiable, and with it every exclusion is something somebody wrote down and a
-reviewer can argue with. Of the 45, 23 were genuine omissions and are exported as
-of the commit that added this assertion -- among them the six
+reviewer can argue with. Of those, about half were genuine omissions and are
+exported as of the commit that added this assertion -- among them the
 ``register_*_callback`` and ``register_extractor_*`` functions that
-:mod:`pcapkit.foundation` withheld while listing the other 27 registry functions,
+:mod:`pcapkit.foundation` withheld while listing the other registry functions,
 ``ReassemblyManager`` and ``TraceFlowManager``, which are defined *below* the
-:attr:`__all__` literal that forgot them and imported by name from six modules, and
-the three decorators :mod:`pcapkit.utilities` then advertised in its own module
+:attr:`__all__` literal that forgot them and imported by name from several modules,
+and the decorators :mod:`pcapkit.utilities` then advertised in its own module
 docstring (since moved to :mod:`pcapkit.corekit.decorators` and dropped from that
-package by #1735). The 22 that remain are listed with their reasons, as are the
-five :mod:`pcapkit.vendor` added once it joined the sweep (#1772), and
+package by #1735). The rest are listed with their reasons, as are the names
+:mod:`pcapkit.vendor` added once it joined the sweep (#1772), and
 :meth:`~PublicAPISurfaceTests.test_the_non_export_allowlist_is_tight` stops the
 list rotting into a silencer: every entry has to name a package that exists, an
 attribute that package really holds, and a name its :attr:`__all__` really omits,
 so an entry stops being true the moment the tree moves under it.
 
 :data:`AGGREGATORS` keeps an assertion of its own even though the package-wide one
-now covers those three, because the guarantee is a stronger one: it admits no
-allowlist at all. Those three packages are pure re-export surfaces -- each
+covers those packages too, because the guarantee is a stronger one: it admits no
+allowlist at all. Those packages are pure re-export surfaces -- each
 wildcard-imports its children and re-lists their names, so every public attribute
 it has came from a child that already chose to export it, and any name missing from
 its :attr:`__all__` is an oversight by construction. That is precisely how #515
 happened, and this is the assertion that makes the next one fail immediately
 instead of in three years.
 
-Three further assertions cover the rest of the family, because a name can fail to
-be exported in more ways than by being misspelled. Each of the three failed
+Further assertions cover the rest of the family, because a name can fail to
+be exported in more ways than by being misspelled. Each of them failed
 against the tree this module was written on, and each is fixed in the same commit:
 
 * :meth:`~PublicAPISurfaceTests.test_no_misspelled_all` --
@@ -108,7 +108,7 @@ against the tree this module was written on, and each is fixed in the same commi
   leading underscores. Nothing reads that name, so the package simply had no
   :attr:`__all__`: ``hasattr(module, '__all__')`` was :data:`False` and
   ``from pcapkit.const.pcapng import *`` fell back to "every public name",
-  leaking its 7 submodules on top of the 7 enums it meant to publish. This is the
+  leaking its submodules on top of the enums it meant to publish. This is the
   quietest member of the family -- a misspelling here does not raise, it silently
   widens the public surface.
 * :meth:`~PublicAPISurfaceTests.test_every_public_package_declares_all` -- the
@@ -153,7 +153,7 @@ EXCLUDED_ROOTS = frozenset()  # type: frozenset[str]
 
 #: The packages whose whole job is to re-export their children, and which
 #: therefore have to list every public name they hold -- with no allowlist, unlike
-#: every other package. See the module docstring for why these three are held to
+#: every other package. See the module docstring for why these are held to
 #: the stricter form.
 AGGREGATORS = (
     'pcapkit.protocols.data',
@@ -170,11 +170,12 @@ AGGREGATORS = (
 #: **The abstract bases** -- ``Field``, ``Engine``, ``Reassembly``,
 #: ``IP_Reassembly``, ``TraceFlow``, ``Protocol``, ``Application``, ``Internet``,
 #: ``Link``, ``Transport``. Each is imported by its package explicitly, under a
-#: "Base Class" comment, and left out of that package's :attr:`__all__`; nine
-#: packages do the same thing the same way. Neither :mod:`pcapkit.all` -- the
-#: library index, whose stated job is to hold "all things from :mod:`pcapkit`" --
-#: nor :mod:`pcapkit.corekit` exports any of them either. Three independent export
-#: surfaces agreeing is a convention rather than nine separate oversights, so they
+#: "Base Class" comment, and left out of that package's :attr:`__all__`; every
+#: package listed below for one does the same thing the same way. Neither
+#: :mod:`pcapkit.all` -- the library index, whose stated job is to hold "all
+#: things from :mod:`pcapkit`" -- nor :mod:`pcapkit.corekit` exports any of them
+#: either. Independent export surfaces agreeing is a convention rather than a
+#: string of separate oversights, so they
 #: stay reachable by their documented dotted path and out of ``import *``.
 #: :mod:`pcapkit.vendor` imports its base ``Vendor`` the same way, and has a
 #: sharper reason: its :attr:`__all__` is also the default target list
@@ -189,7 +190,7 @@ AGGREGATORS = (
 #: **Import-time machinery, and one leaked loop variable.**
 #: :mod:`pcapkit` imports ``BaseError``, ``DEVMODE`` and ``DevModeWarning`` to wire
 #: up the ``tbtrim`` excepthook, not to publish them -- the top-level surface is
-#: interface functions, macros and protocols, and those three are documented under
+#: interface functions, macros and protocols, and those names are documented under
 #: :mod:`pcapkit.utilities`. ``ROOT`` is bound only on the non-``DEVMODE`` branch,
 #: so exporting it would make ``from pcapkit import *`` raise
 #: :exc:`AttributeError` under ``PCAPKIT_DEVMODE=1`` -- a fresh #515 rather than a
@@ -284,10 +285,10 @@ class PublicAPISurfaceTests(unittest.TestCase):
     def test_public_modules_were_actually_found(self) -> None:
         # A bug in the walk above would turn every other test in this class into
         # a silent pass over an empty list, so pin the shape of what it returns.
-        # The floor is deliberately far below the 325 modules / 52 packages found
-        # when this was written: it catches "found nothing", not "the library
-        # gained a module". The two vendor packages are pinned because the subtree
-        # was excluded until #1772, and both held __all__ gaps the exclusion hid.
+        # The floor is deliberately far below the population found when this was
+        # written: it catches "found nothing", not "the library gained a module".
+        # The vendor packages are pinned because the subtree was excluded until
+        # #1772, and each held __all__ gaps the exclusion hid.
         modules = public_modules()
         packages = [name for name, is_package in modules if is_package]
 
@@ -421,7 +422,7 @@ class PublicAPISurfaceTests(unittest.TestCase):
 
     def test_aggregators_export_every_public_attribute(self) -> None:
         # The converse of test_every_all_entry_resolves, and viable only here --
-        # see the module docstring for the measurement behind that. These three
+        # see the module docstring for the measurement behind that. These
         # packages re-export their children wholesale, so a public attribute they
         # hold but do not list is an oversight rather than a judgement call.
         for name in AGGREGATORS:
@@ -435,7 +436,7 @@ class PublicAPISurfaceTests(unittest.TestCase):
 
     def test_every_public_package_exports_every_public_attribute(self) -> None:
         # The same converse as above, over every public package rather than the
-        # three aggregators, against DELIBERATE_NON_EXPORTS: issue #533. This is the
+        # aggregators alone, against DELIBERATE_NON_EXPORTS: issue #533. This is the
         # only assertion in the class that reads __all__ as the *expectation* --
         # every other one reads it as the input, and an attribute that exists while
         # nothing names it satisfies all of them.
@@ -459,7 +460,7 @@ class PublicAPISurfaceTests(unittest.TestCase):
 
     def test_the_non_export_allowlist_is_tight(self) -> None:
         # DELIBERATE_NON_EXPORTS is the whole reason the assertion above can be
-        # satisfied at all, so it gets an assertion of its own. Any of three kinds of
+        # satisfied at all, so it gets an assertion of its own. Any of these kinds of
         # staleness turns an entry into an exclusion nobody decided, silently
         # excusing the next real omission of that name: the package is gone, the
         # attribute is gone, or the name has since been added to __all__ and the

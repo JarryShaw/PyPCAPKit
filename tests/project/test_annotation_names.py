@@ -5,8 +5,8 @@ The package writes its annotations as string literals and imports the names they
 need inside an ``if TYPE_CHECKING:`` block. Nothing at runtime evaluates those
 strings, so a name that is *never imported at all* costs nothing until a type
 checker or a documentation build looks at it -- at which point it is an error in a
-file that has been passing tests for months. Issue #642 found three, and mypy
-2.3.1 agreed the three were the complete set:
+file that has been passing tests for months. Issue #642 found these, and mypy
+2.3.1 agreed they were the complete set:
 
 .. code-block:: text
 
@@ -16,16 +16,16 @@ file that has been passing tests for months. Issue #642 found three, and mypy
 
 This module is the same check without mypy: cheap enough to run on every commit,
 and it does not depend on a type checker being installed or on which version of
-one. Run against the tree that carried those three defects it reports exactly
-those three, name for name and line for line, which is what says it is measuring
+one. Run against the tree that carried those defects it reports exactly
+those, name for name and line for line, which is what says it is measuring
 the right thing.
 
 A deliberate non-goal: this says nothing about whether the annotations resolve at
 *runtime*. They do not, and not because of anything this catches --
 ``TYPE_CHECKING`` is :data:`False` when the interpreter runs, so a
 ``TYPE_CHECKING``-only import is absent from the module namespace either way.
-:func:`typing.get_type_hints` raises :exc:`NameError` on five of the six annotated
-functions in :mod:`pcapkit.utilities.logging`, four of them for ``Optional`` and
+:func:`typing.get_type_hints` raises :exc:`NameError` on most of the annotated
+functions in :mod:`pcapkit.utilities.logging`, mostly for ``Optional`` and
 ``Union``, which *are* imported in its ``TYPE_CHECKING`` block. Making those
 resolve is a repository-wide decision about the idiom, not a missing import, and
 is out of scope here. What this module pins is the narrower and entirely
@@ -56,8 +56,8 @@ PACKAGE = ROOT / 'pcapkit'
 def annotation_strings(tree: 'ast.AST') -> 'Iterator[tuple[str, int]]':
     """Yield every string literal ``tree`` uses as a type, with its line number.
 
-    Four places a string is a type rather than a value, and all four are used in
-    this package: a variable annotation, a parameter annotation, a return
+    These are the places a string is a type rather than a value, and each is used
+    in this package: a variable annotation, a parameter annotation, a return
     annotation, and the first argument of :func:`typing.cast`. The ``cast`` case
     is the one that is easiest to miss and is exactly where
     ``ipv6_route.py:271``'s ``Optional`` hid -- :func:`typing.cast` never

@@ -7,7 +7,7 @@ defined once, in the module that owns the protocol -- or that protocol's schema
 or :mod:`pcapkit.const` module -- and every reader imports it from there. Such a
 constant is never configurable, and the old homes do not re-export it.
 
-Four checks pin that:
+These checks pin that:
 
 * :class:`TestHomes` -- each constant is defined in its home, with the value the
   RFC or the format gives it;
@@ -15,7 +15,7 @@ Four checks pin that:
   name, at module or class level, and none spells the distinctive literals (the
   PCAP and PCAP-NG magic numbers and the PCAP timestamp resolutions) itself;
 * :class:`TestReaders` -- each reader imports the constant from its home and
-  reads it, and :mod:`pcapkit.toolkit.pypcapfile`, which defined four of them,
+  reads it, and :mod:`pcapkit.toolkit.pypcapfile`, which defined several of them,
   no longer binds those names at all;
 * :class:`TestNotReinlined` -- no module in :data:`SWEPT`, the homes included,
   spells a homed value anywhere but in the home's own definition: not as an

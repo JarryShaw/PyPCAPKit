@@ -244,7 +244,7 @@ class PureReparentGetTests(unittest.TestCase):
 
     def test_a_pure_reparent_still_refuses_an_unknown_name(self) -> None:
         """The base's own contract -- raise, never mint -- reaches these nine
-        for free, exactly as it does the 124 registries."""
+        for free, exactly as it does the registries."""
         from pcapkit.corekit.infoclass import FinalisedState
 
         with self.assertRaises(KeyError):
@@ -287,8 +287,8 @@ class TransportProtocolGetTests(unittest.TestCase):
         the refusal now reaches the caller as the base's own
         :exc:`~pcapkit.utilities.exceptions.EnumKeyError`. Updated from the
         pre-#923 tree, which asserted ``assertNotIsInstance(..., KeyError)``:
-        that assertion described the minority shape -- #923's census found 119
-        of the 127 concrete subclasses answering a name miss with a
+        that assertion described the minority shape -- #923's census found
+        most concrete subclasses answering a name miss with a
         :exc:`KeyError` -- and #923's ruling is that a name miss follows stdlib
         ``E['nosuch']`` and stays :exc:`KeyError`-derived. The message is
         unchanged, so the two ``assertIn``\\ s below are the same ones that

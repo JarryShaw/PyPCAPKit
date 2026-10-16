@@ -2,20 +2,20 @@
 """:mod:`pcapkit.__main__`, against stand-ins for everything it imports.
 
 The command line tool is tested without the library behind it: :mod:`pcapkit`,
-:mod:`pcapkit.foundation.extraction`, :mod:`pcapkit.interface`, three
-:mod:`pcapkit.utilities` modules and :mod:`emoji` are all replaced with
+:mod:`pcapkit.foundation.extraction`, :mod:`pcapkit.interface`, the
+:mod:`pcapkit.utilities` modules it imports and :mod:`emoji` are all replaced with
 stand-ins, so what is under test is the argument wiring and nothing else. The
 real thing runs in :mod:`tests.integration.test_cli_subprocess`.
 
 :data:`sys.modules` is process-global, so binding a stand-in over a real module
 name is a write that outlives the test unless something undoes it -- and these
 stand-ins are *emptier* than what they replace, which is the quiet kind. Issue
-#688: this file wrote nine names and put none of them back -- the seven stand-ins
+#688: this file wrote those names and put none of them back -- the stand-ins
 above, the bare ``pcapkit.foundation`` parent they hang from, and
 ``pcapkit.__main__`` itself. Pairing it with :mod:`tests.project.test_public_api`
-gave ten errors: nine ``ImportError: cannot import name 'show_flag_values' from
-'pcapkit.utilities.compat'`` and one for ``SeekError``, because the real library's
-next import found a ``pcapkit.utilities.compat`` carrying exactly one name.
+gave a run of ``ImportError: cannot import name 'show_flag_values' from
+'pcapkit.utilities.compat'`` errors and one for ``SeekError``, because the real
+library's next import found a ``pcapkit.utilities.compat`` carrying exactly one name.
 
 That is the same defect as issues #660 and #674, and it is fixed the same way:
 :func:`tests._support.isolate_modules` in ``setUp``, which purges the region on
@@ -65,7 +65,7 @@ ISOLATED = ISOLATED_PREFIXES + ('emoji',)
 
 #: How many module names :func:`summarise_names` spells out before it starts
 #: counting instead. Bounded because the interesting list is long: on a warm
-#: module table the :mod:`pcapkit` region holds some three hundred names, so an
+#: module table the :mod:`pcapkit` region holds hundreds of names, so an
 #: unbounded report of what a leak did to it is twelve kilobytes of failure
 #: message that nobody reads -- measured, at 12089 characters.
 NAMES_IN_FAILURE_MESSAGE = 8
@@ -107,8 +107,8 @@ class CLIMainTests(unittest.TestCase):
     def assert_module_table_restored(self, before: 'dict[str, types.ModuleType]') -> None:
         """The :data:`ISOLATED` region of :data:`sys.modules` is as it was found.
 
-        The regression assertion for issue #688, and exact in all three
-        directions a restore can be wrong: a name this test added, a name it
+        The regression assertion for issue #688, and exact in every
+        direction a restore can be wrong: a name this test added, a name it
         dropped, and a name it rebound to something else. Absence matters as much
         as presence -- ``pcapkit.utilities.compat`` did not exist before a test
         here ran on a cold table, so it must not exist after one either, and a

@@ -29,11 +29,11 @@ complaint: the aliasing was a *convention* rather than a mechanism, so a sweep
 over it could miss a site and nothing would fail. It missed one twice --
 issue #506 (a runtime import in ``schema/schema.py`` unreachable for three
 years) and issue #513 (the ``extraction.py`` gates rejecting the library's own
-built-ins for three years). These two tests replace the convention with
+built-ins for three years). These tests replace the convention with
 something that fails.
 
-The sweep and the migration are both complete: all 82 sites are renamed, the
-last 54 (all ``ProtocolBase``, across ``pcapkit/protocols/`` and three
+The sweep and the migration are both complete: every site is renamed, the
+last of them (all ``ProtocolBase``, across ``pcapkit/protocols/`` and some
 ``pcapkit/foundation/`` modules) having landed in #514 part (c) once #726 and
 #742 merged. :data:`PENDING_ALIAS_PATHS` is therefore empty -- its intended end
 state -- and :func:`is_pending` is trivially ``False`` for every path; the dict
@@ -133,7 +133,7 @@ NOT_IN_SCOPE = frozenset({'FieldBase'})
 
 #: Paths still carrying the alias because another open pull request owns them,
 #: mapped to that pull request. A prefix rather than a file list, because #726
-#: owns the whole ``pcapkit/protocols/`` subtree and enumerating its ~50 sites
+#: owns the whole ``pcapkit/protocols/`` subtree and enumerating its sites
 #: would turn this into a changelog.
 #:
 #: Each entry is a promise, not an exemption: when the named pull request lands,
@@ -141,7 +141,7 @@ NOT_IN_SCOPE = frozenset({'FieldBase'})
 #: state**, and :meth:`BaseClassAliasTests.test_no_library_module_imports_a_base_under_its_public_name`
 #: fails on an entry that has stopped matching anything, so a stale promise
 #: cannot sit here unnoticed once its pull request merges. #514 part (c) landed
-#: the last 54 sites, so this is now empty and every alias check below runs
+#: the last sites, so this is empty and every alias check below runs
 #: unconditionally.
 PENDING_ALIAS_PATHS = {}  # type: dict[str, int]
 

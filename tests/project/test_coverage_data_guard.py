@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tests for the coverage leg's check that no process's data file went missing.
 
-#1387: PR #1345's coverage leg combined 29 data files where #1341's combined 30,
+#1387: PR #1345's coverage leg combined fewer data files than #1341's did,
 with every test passing in both, and posted 85.85% against about 88.9%. A
 process that dies before coverage's atexit save leaves no ``.coverage.*`` file,
 and ``coverage combine`` reports what is left as the whole. So the ``Run unit
