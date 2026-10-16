@@ -41,7 +41,7 @@ class Completion(EnumLookup, StrEnum):
     so a caller comparing against a boolean has to compare against a member
     instead.
 
-    It derives from :class:`~pcapkit.utilities.compat.StrEnum`, as
+    It derives from :mod:`pcapkit.utilities.compat`'s ``StrEnum``, as
     :class:`~pcapkit.protocols.application.httpv1.Type` does, which buys what a
     plain :class:`enum.Enum` does not: the value survives
     :func:`json.dumps` -- a plain enumeration raises :exc:`TypeError` there, and
@@ -50,11 +50,12 @@ class Completion(EnumLookup, StrEnum):
     state can be tested for without importing this class.
     :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` is the same kind of
     string enumeration, but it is generated like its :mod:`pcapkit.const.pcapng`
-    siblings (:issue:`886`), so it derives from :class:`aenum`'s own
+    siblings (:issue:`886`), so it derives from ``aenum``'s own
     ``StrEnum`` (via :class:`~pcapkit.corekit.enum.EnumRegistry`). The
     properties above hold for it, as ``aenum.StrEnum`` is a :class:`str`
     subclass, but ``isinstance``/``issubclass`` against
-    :class:`pcapkit.utilities.compat.StrEnum` does not.
+    ``pcapkit.utilities.compat.StrEnum`` does not on Python 3.11 and later,
+    where that name is the stdlib ``enum.StrEnum``.
 
     Warning:
         Being a :class:`str` whose :attr:`PARTIAL` and :attr:`TIMEOUT` members are
@@ -77,7 +78,8 @@ class Completion(EnumLookup, StrEnum):
 
     #: Reassembly was **abandoned** under the reassembly timeout, i.e. the
     #: capture clock advanced past the deadline of
-    #: :attr:`Reassembly.timeout <pcapkit.foundation.reassembly.reassembly.ReassemblyBase.timeout>`
+    #: :attr:`Reassembly.timeout
+    #: <pcapkit.foundation.reassembly.reassembly.Reassembly.timeout>`
     #: seconds after the first-arriving fragment while the datagram was still
     #: incomplete. :rfc:`8200#section-4.5` requires the held fragments be
     #: discarded, so no further fragment will ever be added to this datagram.
@@ -92,9 +94,9 @@ class Completion(EnumLookup, StrEnum):
         Note:
             This override is what a :class:`str` base does *not* give -- every
             non-empty string is otherwise truthy, which would make an incomplete
-            datagram read as a complete one. :meth:`__str__` needs no such
-            override: :class:`~pcapkit.utilities.compat.StrEnum` already renders a
-            member as its value.
+            datagram read as a complete one. ``__str__`` needs no such
+            override: :mod:`pcapkit.utilities.compat`'s ``StrEnum`` already
+            renders a member as its value.
 
         """
         return self is Completion.COMPLETE

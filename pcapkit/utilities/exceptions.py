@@ -718,9 +718,9 @@ class EnumKeyError(BaseError, KeyError):
 
     Deriving from :exc:`KeyError` is what makes that ruling cheap to carry out:
     the in-library call sites catch :meth:`~pcapkit.corekit.enum.EnumLookup.get`'s
-    name miss as :exc:`KeyError` -- :meth:`~pcapkit.const.http.method.Method.get`
-    catches it in order to build an unregistered member, so for that one a
-    failed name lookup is part of a successful call -- and every one of them
+    name miss as :exc:`KeyError` -- :class:`~pcapkit.const.http.method.Method`'s
+    ``get`` catches it in order to build an unregistered member, so for that one
+    a failed name lookup is part of a successful call -- and every one of them
     keeps catching.
 
     Note:
