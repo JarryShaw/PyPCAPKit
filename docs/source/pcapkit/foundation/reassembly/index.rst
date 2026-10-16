@@ -36,15 +36,15 @@ diagram of the class hierarchy of :mod:`pcapkit.foundation.reassembly`:
        B --> C(Reassembly)
        C --> D([user customisation ...])
 
-       click A "/pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.ReassemblyMeta"
-       click B "/pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.ReassemblyBase"
-       click C "/pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly"
-       click D "/ext.html#reassembly-and-flow-tracing"
+       click A "reassembly.html#pcapkit.foundation.reassembly.reassembly.ReassemblyMeta"
+       click B "reassembly.html#pcapkit.foundation.reassembly.reassembly.ReassemblyBase"
+       click C "reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly"
+       click D "../../../ext.html#reassembly-and-flow-tracing"
 
-       click IP "/pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.IP"
-       click IPv4 "/pcapkit/foundation/reassembly/ip/ipv4.html#pcapkit.foundation.reassembly.ipv4.IPv4"
-       click IPv6 "/pcapkit/foundation/reassembly/ip/ipv6.html#pcapkit.foundation.reassembly.ipv6.IPv6"
-       click TCP "/pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP"
+       click IP "ip/ip.html#pcapkit.foundation.reassembly.ip.IP"
+       click IPv4 "ip/ipv4.html#pcapkit.foundation.reassembly.ipv4.IPv4"
+       click IPv6 "ip/ipv6.html#pcapkit.foundation.reassembly.ipv6.IPv6"
+       click TCP "tcp.html#pcapkit.foundation.reassembly.tcp.TCP"
 
 Auxiliary Data
 ==============

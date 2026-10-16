@@ -76,11 +76,16 @@ and :file:`pcapkit/vendor/ipx/socket.py`'s ``UNASSIGNED_RANGE_NAMES``.
 
 .. mermaid::
 
-   flowchart TD
-       LOOKUP["cls(value) finds no member"] --> MISSING["_missing_"]
+   ---
+   config:
+     flowchart:
+       curve: monotoneX
+   ---
+   flowchart LR
+       LOOKUP["cls(value) finds no member"] --> MISSING["\_missing\_"]
        MISSING -->|"out of range, or no block covers it"| RAISE["ValueError"]
        MISSING -->|"CGAType only"| MINT["extend_enum<br/>permanent member, registry grows"]
-       MISSING -->|"flag registries"| FLAG["super()._missing_<br/>pseudo-member cached in the value table only"]
+       MISSING -->|"flag registries"| FLAG["super().\_missing\_<br/>pseudo-member cached in the value table only"]
        MISSING -->|"block label names a party"| SUFFIXED["_unregistered_member<br/>label + _0x&lt;code&gt;"]
        MISSING -->|"block label names a procedure"| BARE["_unregistered_member<br/>bare block label"]
 

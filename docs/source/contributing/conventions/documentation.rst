@@ -107,25 +107,36 @@ would otherwise inflate both counts:
 .. code-block:: shell
 
    grep -rn 'mermaid::' docs/source --include='*.rst' \
-        --exclude='documentation.rst' | wc -l   # 12 directives
+        --exclude='documentation.rst' | wc -l   # directives
    grep -rl 'mermaid::' docs/source --include='*.rst' \
-        --exclude='documentation.rst' | wc -l   # on 11 pages
+        --exclude='documentation.rst' | wc -l   # pages carrying one
 
-All twelve are a bare ``.. mermaid::`` carrying no directive options, and all twelve
-are a ``flowchart``: ``TD`` where the subject is a sequence or a decision, ``LR`` for a
-type hierarchy. **Quote a node label whose text Mermaid would otherwise try to parse**,
-and leave a bare identifier bare. That is what the exemplars do with *node* labels, and
-it falls close to the ``TD``/``LR`` line without following it: every node label in the
-six ``TD`` graphs is quoted, since every one of them is prose; the ``LR`` graphs quote
-only where the text forces it, which is ``h1["HTTP/1.*"]`` and ``h2["HTTP/2"]`` in
+Every one is a bare ``.. mermaid::`` carrying no directive options, and every one is a
+``flowchart``: ``LR`` for a type hierarchy, and for a graph whose ``TD`` layout would run
+wider than the page or pile its edge labels on top of each other -- a decision with many
+outcomes, a trigger map -- and ``TD`` for the other sequences and decisions. **Quote a
+node label whose text Mermaid would otherwise try to parse**, and leave a bare identifier
+bare. That is what the exemplars do with *node* labels, and it follows the subject rather
+than the direction: every node label in the sequence, decision and trigger graphs is
+quoted, since every one of them is prose; the type hierarchies quote only where the text
+forces it, which is ``h1["HTTP/1.*"]`` and ``h2["HTTP/2"]`` in
 :file:`docs/source/pcapkit/protocols/index.rst` and nowhere else. Everything else there
 uses the bare ``A{{Meta}}``, ``B(Base)``, ``D([user customisation ...])`` and
 ``subgraph name [Title]`` forms, and spends its quotes on ``click`` targets instead.
+**Write a** ``click`` **target relative to the page it is on** -- ``protocol.html#...``,
+``../../ext.html#...`` -- never from the site root: the published site is served under
+``/PyPCAPKit/``, so a target starting with ``/`` resolves outside it and 404s.
 **Edge labels follow no rule at all.** The exemplars quote some and leave others bare,
 including ``|workflow_run: completed|`` and ``|02:00|``, which the reason above would
 have quoted and which Mermaid accepts anyway -- so match the graph being edited rather
 than this paragraph. Inside a quoted label, ``<br/>`` breaks the text across lines and a
-literal ``<`` or ``>`` is written ``&lt;`` or ``&gt;``.
+literal ``<`` or ``>`` is written ``&lt;`` or ``&gt;``. Mermaid also reads label text as
+Markdown, so an underscore that opens or closes a name is written ``\_`` --
+``\_missing\_``, ``pcapkit.\_\_version\_\_`` -- or the name renders as emphasis. Its
+own ``#95;`` escape is no substitute: in a label that carries a ``<br/>`` it is decoded
+before the Markdown pass, and the emphasis comes back. Where a steep edge runs under
+a neighbouring edge label, ``curve: monotoneX`` in the graph's front matter keeps it
+clear, as the mint criterion's decision graph does.
 :doc:`The release pipeline </contributing/releasing>` is the ``TD`` example and
 :doc:`the field hierarchy </pcapkit/corekit/fields/index>` the ``LR`` one.
 

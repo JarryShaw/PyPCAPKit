@@ -282,6 +282,20 @@ html_title = "PyPCAPKit"
 
 ogp_site_url = "https://pypcapkit.jarryshaw.me/"
 
+# Mermaid diagrams render at their natural size and shrink only to fit the page
+# width. The ``sphinxcontrib-mermaid`` defaults -- ``mermaid_height = '500px'`` with
+# the SVG stretched to the full page width -- fit every diagram into the same fixed
+# box, so a tall class hierarchy shrank until its text could not be read and its
+# edges ran together. ``useMaxWidth`` has to be off as well, or Mermaid writes
+# ``width="100%"`` on the SVG in place of its own size and ``fit-content`` has
+# nothing to size the box from. ``startOnLoad`` repeats the plugin's default, which
+# this setting replaces wholesale. ``_static/mermaid.css`` centres a diagram
+# narrower than the page, as the full-width box did.
+mermaid_width = 'fit-content'
+mermaid_height = 'auto'
+mermaid_init_config = {'startOnLoad': False, 'flowchart': {'useMaxWidth': False}}
+html_css_files = ['mermaid.css']
+
 
 def maybe_skip_member(app: 'Sphinx', what: str, name: str,  # pylint: disable=unused-argument
                       obj: 'Any', skip: bool, options: 'Dict[str, Any]') -> bool:  # pylint: disable=unused-argument
