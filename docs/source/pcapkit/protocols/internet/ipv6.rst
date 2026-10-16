@@ -15,7 +15,7 @@ Octets      Bits        Name                    Description
   0           0   ``ipv6.version``            Version (``6``)
   0           4   ``ipv6.class``              Traffic Class
   1          12   ``ipv6.label``              Flow Label
-  4          32   ``ipv6.payload``            Payload Length (header excludes)
+  4          32   ``ipv6.payload``            Payload Length (header excluded)
   6          48   ``ipv6.next``               Next Header
   7          56   ``ipv6.limit``              Hop Limit
   8          64   ``ipv6.src``                Source Address
@@ -110,8 +110,8 @@ Data Models
 
       .. note::
 
-         This field is conflict with :keyword:`class` keyword. To access this field,
-         directly use :func:`getattr` instead.
+         This field's name conflicts with the :keyword:`class` keyword, so
+         access it with :func:`getattr` instead.
 
 .. rubric:: Footnotes
 

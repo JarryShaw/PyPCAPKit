@@ -129,6 +129,8 @@ def locator_value_selector(pkt: 'dict[str, Any]') -> 'Field':
         pkt: Packet data.
 
     Returns:
+        The field for the locator, chosen by its type and length.
+
         * If ``type`` is ``0`` and ``len`` is ``4``, i.e. a 16-octet locator,
           returns an :class:`~pcapkit.corekit.fields.ipaddress.IPv6AddressField` instance.
         * If ``type`` is ``1`` and ``len`` is ``5``, i.e. a 20-octet locator,
@@ -156,6 +158,8 @@ def host_id_hi_selector(pkt: 'dict[str, Any]') -> 'Field':
         pkt: Packet data.
 
     Returns:
+        The field for the host identity, chosen by its algorithm.
+
         * If ``algorithm`` is ``7`` (ECDSA), returns a
           :class:`~pcapkit.corekit.fields.misc.SchemaField` wrapped
           :class:`~pcapkit.protocols.schema.internet.hip.ECDSACurveHostIdentity` instance.
@@ -238,7 +242,7 @@ def two_octet_prefix_list_len(pkt: 'dict[str, Any]') -> 'int':
     two-octet ``reserved`` or ``port`` field with a list of items sized by
     the remainder of the parameter.
 
-    :class:`TransportFormatListParameter` looks like a fourth call site --
+    :class:`TransportFormatListParameter` looks like another call site --
     same ``pkt['len'] - 2`` expression -- but is not: see
     :func:`transport_format_list_len` for why it has no such prefix to
     subtract.
@@ -265,7 +269,7 @@ def transport_format_list_len(pkt: 'dict[str, Any]') -> 'int':
     """Return ``TRANSPORT_FORMAT_LIST`` transport format list length.
 
     Used by the ``formats`` field of :class:`TransportFormatListParameter`.
-    Unlike :func:`two_octet_prefix_list_len`'s three call sites, this
+    Unlike :func:`two_octet_prefix_list_len`'s call sites, this
     parameter has no ``reserved`` or ``port`` field between ``Length`` and
     the list: :rfc:`7401` Section 5.2.11 defines ``Length`` as literally
     "2x number of TF types" and places the list directly after it --
@@ -277,7 +281,7 @@ def transport_format_list_len(pkt: 'dict[str, Any]') -> 'int':
         |          TF type #1           |           TF type #2          /
 
     -- so the list's byte length *is* ``Length``, with nothing to subtract.
-    Subtracting 2 anyway, as the three genuine two-octet-prefix sites do,
+    Subtracting 2 anyway, as the genuine two-octet-prefix sites do,
     would drop the trailing two octets of *every* non-empty list on parse,
     and reject the parameter's own legitimate empty-list encoding
     (``Length = 0``, ``formats = []``) as malformed.
@@ -286,7 +290,7 @@ def transport_format_list_len(pkt: 'dict[str, Any]') -> 'int':
     two octets -- the same width the base :class:`Parameter` class uses for
     its own ``type`` field, since a TF type *is* a HIP parameter type number
     -- which is why ``formats``' ``item_type`` is
-    ``EnumField(length=2, ...)``, the width of the items at all three of
+    ``EnumField(length=2, ...)``, the width of the items at every one of
     :func:`two_octet_prefix_list_len`'s call sites as well. This function
     only answers how many *bytes* the list occupies; getting that number
     right and the item width wrong -- one octet instead of two -- would still
@@ -440,9 +444,9 @@ def parameter_padding_len(pkt: 'dict[str, Any]') -> 'int':
 #: Packet-context key under which :class:`LocatorSetParameter` keeps its own
 #: ``Length`` for the benefit of :func:`locator_set_padding_len`.
 #:
-#: It exists because ``LOCATOR_SET`` is the one parameter in this module whose
-#: contents are a :class:`~pcapkit.corekit.fields.collections.ListField` of
-#: nested schemas, and a nested schema packed through one **shares the
+#: It exists because the contents of ``LOCATOR_SET`` are a
+#: :class:`~pcapkit.corekit.fields.collections.ListField` of nested schemas,
+#: and a nested schema packed through one **shares the
 #: enclosing packet context**: :meth:`Schema.pack
 #: <pcapkit.protocols.schema.schema.Schema.pack>` opens with
 #: ``packet.update(self.__dict__)``, and :class:`Locator` declares a ``len`` of
@@ -528,7 +532,14 @@ class UnassignedParameter(Parameter):
 
 @schema_final
 class ESPInfoParameter(Parameter, code=Enum_Parameter.ESP_INFO):
-    """Header schema for HIP ``ESP_INFO`` parameters."""
+    """Header schema for HIP ``ESP_INFO`` parameters.
+
+    .. versionchanged:: 1.5.0
+
+       ``reserved`` is read as an :obj:`int` rather than as zero padding
+       :obj:`bytes`, and written back as given (:issue:`1328`).
+
+    """
 
     #: Reserved, "zero when sent, ignored when received" (:rfc:`7402#section-5.1.1`).
     #: Read as a value rather than as padding, so that re-serialising a parsed

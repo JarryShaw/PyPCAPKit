@@ -112,6 +112,8 @@ def smf_dpd_data_selector(pkt: 'dict[str, Any]', *, prefix: 'str',
             DPD mode to the schema that reads the option.
 
     Returns:
+        The field for the option data, chosen by the DPD mode.
+
         * If ``mode`` is ``0``, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`
           wrapped ``SMFIdentificationBasedDPDOption`` instance.
         * If ``mode`` is ``1``, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`
@@ -152,11 +154,13 @@ def smf_i_dpd_tid_selector(pkt: 'dict[str, Any]', *, prefix: 'str') -> 'Field':
         prefix: Name of the extension header, leading the error message.
 
     Returns:
+        The field for the TaggerId, chosen by its type.
+
         * If ``tid_type`` is ``0`` (``NULL``), returns a
           :class:`~pcapkit.corekit.fields.misc.NoValueField` instance.
-        * If ``tid_type`` is ``2`` (``IPv4``), returns a
+        * If ``tid_type`` is ``2`` (``IPv4``), returns an
           :class:`~pcapkit.corekit.fields.ipaddress.IPv4AddressField` instance.
-        * If ``tid_type`` is ``3`` (``IPv6``), returns a
+        * If ``tid_type`` is ``3`` (``IPv6``), returns an
           :class:`~pcapkit.corekit.fields.ipaddress.IPv6AddressField` instance.
         * Otherwise, returns a :class:`~pcapkit.corekit.fields.strings.BytesField` instance.
 
@@ -197,6 +201,8 @@ def quick_start_data_selector(pkt: 'dict[str, Any]', *, base: 'EnumMeta',
         unassigned: The header's ``UnassignedOption`` schema.
 
     Returns:
+        The field for the option data, chosen by the QS function.
+
         * If ``func`` is ``0``, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`
           wrapped ``QuickStartRequestOption`` instance.
         * If ``func`` is ``8``, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`
@@ -238,13 +244,14 @@ def pad_opt_data_len(pkt: 'dict[str, Any]') -> 'int':
         the option's ``len`` field is declared as a
         :class:`~pcapkit.corekit.fields.misc.ConditionalField` and is skipped
         for it. A skipped conditional field is *recorded* in the packet data as
-        :data:`~pcapkit.corekit.sentinels.NO_VALUE`, rather than being left
-        out of it, so the test below has to be on the **value** and not on the
-        presence of the key: ``pkt.get('len', 0)`` on its own hands that
-        :obj:`~pcapkit.corekit.sentinels.NoValueType` straight to
+        :data:`~pcapkit.corekit.sentinels.NO_VALUE`, rather than being left out
+        of it, so the test this function makes has to be on the **value** and
+        not on the presence of the key: ``pkt.get('len', 0)`` on its own hands
+        that :obj:`~pcapkit.corekit.sentinels.NoValueType` straight to
         :class:`~pcapkit.corekit.fields.strings.PaddingField`, where it becomes
         an unusable :mod:`struct` template and surfaces much later as an opaque
-        :exc:`struct.error`, which is how a ``Pad1`` option would fail to parse.
+        :exc:`struct.error`, which is how a ``Pad1`` option would fail to
+        parse.
 
     """
     length = pkt.get('len', 0)

@@ -161,7 +161,6 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
         Raises:
             UnsupportedCall: if the protocol is used as an IPv6 extension header
 
-        :rtype: pcapkit.protocols.protocol.Protocol
         """
         if self._extf:
             raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'payload'")
@@ -248,9 +247,8 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
         fixed part (``next``/``length``/``type``/``seg_left``) is 4 octets, so
         the on-the-wire header is ``4 + data_length`` octets; equating that to
         ``8 + 8 * hdr_ext_len`` gives ``hdr_ext_len = (data_length - 4) / 8``.
-        ``ipv6_route_data_length`` in
-        :mod:`pcapkit.protocols.schema.internet.ipv6_route` is the inverse,
-        used on the read side.
+        :func:`~pcapkit.protocols.schema.internet.ipv6_route.ipv6_route_data_length`
+        is the inverse, used on the read side.
 
         This is the *only* place ``Hdr Ext Len`` is computed on the write side:
         separate per-branch copies in :meth:`make` drift apart, so keep one
@@ -310,6 +308,11 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
         Raises:
             FieldValueError: If ``dst`` is a :obj:`bool` (c.f.
                 :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`).
+
+        .. versionchanged:: 1.5.0
+
+           Takes ``hdr_ext_len`` ahead of ``payload`` (:issue:`1457`), which
+           shifts a positional ``payload``.
 
         """
         next_val = cast('Enum_TransType',

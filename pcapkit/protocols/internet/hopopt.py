@@ -275,7 +275,6 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         Raises:
             UnsupportedCall: if the protocol is used as an IPv6 extension header
 
-        :rtype: pcapkit.protocols.protocol.Protocol
         """
         if self._extf:
             raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'payload'")
@@ -546,8 +545,8 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
     def _read_hopopt_options(self, length: 'int') -> 'Option':
         """Read HOPOPT options.
 
-        Positional arguments:
-            length: length of options
+        Args:
+            length: Length of the options area, in octets.
 
         Returns:
             Extracted HOPOPT options
@@ -648,9 +647,9 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             by :class:`~pcapkit.protocols.schema.internet.hopopt.PadOption`
             itself, which sizes both the length octet and the padding data from
             the option type; ``clen`` is therefore always ``0`` here for a
-            parsed ``Pad1``, and the check below only guards a schema built by
-            hand. A ``PadN`` whose ``Opt Data Len`` is ``0`` is a valid
-            two-octet padding option [:rfc:`8200#section-4.2`].
+            parsed ``Pad1``, and the length check this method makes only guards
+            a schema built by hand. A ``PadN`` whose ``Opt Data Len`` is ``0``
+            is a valid two-octet padding option [:rfc:`8200#section-4.2`].
 
         """
         code, clen = schema.type, schema.len
@@ -1388,12 +1387,12 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             data, are emitted in order with their own padding options kept, and
             padding is added only at the end if the header is not aligned.
 
-            The returned length is that of the options area alone, so it is the
-            value :meth:`make` needs for ``hdr_ext_len``. Since the two octets
-            of the fixed header precede it, an options area is well formed only
-            when it is 6 octets short of a multiple of 8 -- including when it
-            holds no real options at all, in which case it is 6 octets of pure
-            padding rather than empty.
+            The returned length is that of the options area alone, the value
+            :meth:`make` derives the ``Hdr Ext Len`` field from. Since the two
+            octets of the fixed header precede it, an options area is well
+            formed only when it is 6 octets short of a multiple of 8 --
+            including when it holds no real options at all, in which case it is
+            6 octets of pure padding rather than empty.
 
         """
         total_length = 0

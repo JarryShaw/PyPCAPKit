@@ -9,9 +9,9 @@ which implements extractor for Internet Protocol
 version 4 (IPv4) [*]_, whose structure is described
 as below:
 
-======= ========= ====================== =============================================
+======= ========= ======================= ============================================
 Octets      Bits        Name                    Description
-======= ========= ====================== =============================================
+======= ========= ======================= ============================================
   0           0   ``ipv4.version``        Version (``4``)
   0           4   ``ipv4.hdr_len``        Internet Header Length (IHL)
   1           8   ``ipv4.tos.pre``        Precedence
@@ -21,7 +21,7 @@ Octets      Bits        Name                    Description
   1          14   ``ipv4.tos.ecn``        Explicit Congestion Notification (ECN)
   2          16   ``ipv4.len``            Total Length
   4          32   ``ipv4.id``             Identification
-  6          48                           Reserved Bit (must be ``\x00``)
+  6          48   ``ipv4.flags.reserved`` Reserved Bit (must be ``0``)
   6          49   ``ipv4.flags.df``       Don't Fragment (DF)
   6          50   ``ipv4.flags.mf``       More Fragments (MF)
   6          51   ``ipv4.offset``         Fragment Offset
@@ -31,7 +31,7 @@ Octets      Bits        Name                    Description
   12         96   ``ipv4.src``            Source IP Address
   16        128   ``ipv4.dst``            Destination IP Address
   20        160   ``ipv4.options``        IP Options (if IHL > ``5``)
-======= ========= ====================== =============================================
+======= ========= ======================= ============================================
 
 .. autoclass:: pcapkit.protocols.internet.ipv4.IPv4
    :no-members:
@@ -235,8 +235,8 @@ Data Models
 
       .. note::
 
-         This field is conflict with :keyword:`del` keyword. To access this field,
-         directly use :func:`getattr` instead.
+         This field's name conflicts with the :keyword:`del` keyword, so
+         access it with :func:`getattr` instead.
 
 .. autoclass:: pcapkit.protocols.data.internet.ipv4.Flags
    :members:
@@ -257,8 +257,8 @@ Data Models
 
       .. note::
 
-         This field is conflict with :keyword:`class` keyword. To access this field,
-         directly use :func:`getattr` instead.
+         This field's name conflicts with the :keyword:`class` keyword, so
+         access it with :func:`getattr` instead.
 
 .. autoclass:: pcapkit.protocols.data.internet.ipv4.UnassignedOption
    :members:
@@ -319,8 +319,8 @@ Data Models
 
       .. note::
 
-         This field is conflict with :keyword:`return` keyword. To access this field,
-         directly use :func:`getattr` instead.
+         This field's name conflicts with the :keyword:`return` keyword, so
+         access it with :func:`getattr` instead.
 
 .. autoclass:: pcapkit.protocols.data.internet.ipv4.RTRALTOption
    :members:

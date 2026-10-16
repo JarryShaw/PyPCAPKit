@@ -6,10 +6,10 @@
 
 :mod:`pcapkit.protocols.internet.ipv6_ext` contains
 :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
-only, which serves two roles (GitHub issue :issue:`917`): the shared
-**base class** of every IPv6 extension header in this package, and a
-**generic** extractor that stands in for a header whose dedicated parser is
-unavailable or has failed. The class docstring divides the two.
+only, which is both (GitHub issue :issue:`917`) the shared **base class** of
+every IPv6 extension header in this package and a **generic** extractor that
+stands in for a header whose dedicated parser is unavailable or has failed.
+The class docstring separates these roles.
 
 Why this is safe in general
 ----------------------------
@@ -23,7 +23,7 @@ Octets      Bits        Name                    Description
 ======= ========= ===================== =====================================
   0           0   ``next``                    Next Header
   1           8   ``len``                     Hdr Ext Len (8-octet units,
-                                                excluding the first 8 octets)
+                                              excluding the first 8 octets)
   2          16   ``payload``                 Header-specific content
 ======= ========= ===================== =====================================
 
@@ -59,19 +59,19 @@ Header(s)                                                Length rule
                                                           next header field is ever read at all, either
 ======================================================= ===========================================
 
-This table classifies by *wire format* alone, over the eleven codes
+This table classifies by *wire format* alone, over every code
 :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` enumerates,
 which match IANA's *IPv6 Extension Header Types* registry exactly (GitHub
 issue :issue:`925`).
 
 ``Shim6`` conforms to it (:rfc:`5533`) but has no dedicated parser class; see
-"Two entry paths" below for how it reaches this class by direct dispatch.
+"Entry paths" below for how it reaches this class by direct dispatch.
 
 :rfc:`8200#section-4.5` sets Encapsulating Security Payload aside: ESP is not
 an extension header, and the RFC lists it among upper-layer headers.
 :rfc:`4303` puts its Next Header inside the encrypted trailer, with no length
 field in the cleartext part. 253 and 254 are reserved for private
-experimentation (:rfc:`3692`) with no wire format at all. None of the three
+experimentation (:rfc:`3692`) with no wire format at all. None of them
 is reachable through this class, by construction; see
 :meth:`pcapkit.protocols.internet.ipv6.IPv6._import_next_layer`. Each still
 enters :meth:`IPv6._decode_next_layer
@@ -86,10 +86,10 @@ and ``254`` have no dedicated parser and resolve to plain
 implementation, the walk stops on a *structural* check (does the parsed layer
 carry a ``next`` at all?) rather than on a list of codes.
 
-Two entry paths
-----------------
+Entry paths
+-----------
 
-This class is reached two different ways:
+This class is reached in these ways:
 
 1. **An unrecognised protocol number.** :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6`
    is a real IANA extension header (:rfc:`5533`) with no dedicated parser, so
@@ -163,7 +163,7 @@ if TYPE_CHECKING:
         """The one field every IPv6 extension header's data model carries.
 
         :rfc:`8200#section-4.1` puts a Next Header octet first in every
-        extension header, and all eight implemented ones record it under this
+        extension header, and every implemented one records it under this
         name -- which is what lets :attr:`IPv6_Ext.next` be a *shared* member
         rather than a fallback-role-only one. Narrower than
         :class:`~pcapkit.protocols.data.internet.ipv6_ext.IPv6_Ext` on
@@ -185,20 +185,19 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
     """This class implements a generic IPv6 extension header parser, and is
     the shared base of every IPv6 extension header in this package.
 
-    The module docstring has the RFC citations behind the length rules, the two
+    The module docstring has the RFC citations behind the length rules, the
     ways this class is dispatched to, and why an overrun stops the walk rather
     than clipping.
 
-    The two roles
-    --------------
+    .. rubric:: Base and Fallback Roles
 
     One class plays both, on the owner's ruling for GitHub issue :issue:`917`:
 
     1. **The concrete fallback parser** for an :rfc:`6564`-conforming header
        with no dedicated class, or whose dedicated class raised. :meth:`read`,
        :meth:`make`, :attr:`name`, :attr:`alias` and the ``schema=``/``data=``
-       above implement it.
-    2. **The base class** of the eight implemented extension headers
+       class keywords implement it.
+    2. **The base class** of the implemented extension headers
        (:class:`~pcapkit.protocols.internet.hopopt.HOPOPT`,
        :class:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route`,
        :class:`~pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`,
@@ -211,15 +210,15 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
        :attr:`protochain` are for.
 
     It is generic in its data and schema types, like
-    :class:`~pcapkit.protocols.internet.ipsec.IPsec`, the other base in this
+    :class:`~pcapkit.protocols.internet.ipsec.IPsec`, another base in this
     package, so that a subclass keeps its *own* ``_PT``/``_ST`` instead of
     inheriting this class's. ``AH`` and ``ESP`` therefore double-inherit two
     identically-parameterised generic bases, ``IPsec[…]`` and ``IPv6_Ext[…]``.
 
     Warning:
         A subclass **must** define :attr:`name`, :attr:`alias`,
-        :attr:`protocol`, :attr:`length` and :meth:`__index__` itself. All five
-        carry this class's *fallback-role* answers, which are wrong for a
+        :attr:`protocol`, :attr:`length` and :meth:`__index__` itself. Each
+        carries this class's *fallback-role* answer, which is wrong for a
         header with an identity of its own: it would report itself as
         ``IPv6 Extension Header`` / ``IPv6-Ext``, read its length off a data
         model that is not its own, and :meth:`__index__` would raise rather
@@ -275,7 +274,7 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
         Fallback-role member: it reads this module's *own* data model, so a
         subclass whose data model records its length elsewhere, or not at all
         (as :class:`~pcapkit.protocols.data.internet.ipv6_frag.IPv6_Frag`), must
-        override it. All eight implemented headers do, and
+        override it. Every implemented header does, and
         ``tests/protocols/internet/test_ipv6_ext_unit.py`` holds them to it.
 
         """
@@ -304,7 +303,7 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
 
         In the *base* role it falls through to ``super()``, restoring the
         ordinary :class:`~pcapkit.protocols.protocol.ProtocolBase` meaning.
-        That is load-bearing: all eight subclasses implement their own
+        That is load-bearing: every subclass implements its own
         ``_extf``-guarded ``protocol`` as ``return super().protocol``, and this
         class sits between them and
         :class:`~pcapkit.protocols.protocol.ProtocolBase` in the MRO, so without
@@ -374,8 +373,8 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
         Args:
             length: Length of packet data.
             extension: If the protocol is used as an IPv6 extension header.
-            **kwargs: Arbitrary keyword arguments, two of which are this
-                class's own and are supplied by :meth:`IPv6._import_next_layer
+            **kwargs: Arbitrary keyword arguments, including these, which are
+                this class's own and are supplied by :meth:`IPv6._import_next_layer
                 <pcapkit.protocols.internet.ipv6.IPv6._import_next_layer>`
                 rather than typed by a caller:
 
@@ -390,10 +389,10 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
             Parsed packet data.
 
         Note:
-            Those two are read out of ``**kwargs`` rather than declared, and
+            These are read out of ``**kwargs`` rather than declared, and
             ``version`` is not declared either, because this class is *also*
-            the base of eight subclasses whose own ``read`` accepts none of the
-            three. Declaring them would assert of the whole family an interface
+            the base of subclasses whose own ``read`` accepts none of them.
+            Declaring them would assert of the whole family an interface
             only the fallback has, which mypy (``Signature of "read"
             incompatible with supertype``, ``[override]``) and pylint
             (``arguments-differ``) both reject. This method never reads
@@ -483,23 +482,23 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
             Constructed packet data.
 
         Note:
-            **Keyword-only**, for two reasons.
+            **Declared, and keyword-only**, each for its own reason.
 
-            The four stay *declared*, unlike :meth:`read`'s own keywords,
-            because :func:`~pcapkit.protocols.protocol._check_construction_keywords`
+            These keywords stay *declared*, unlike :meth:`read`'s own,
+            because ``_check_construction_keywords()``
             builds its allowlist from :func:`inspect.signature` of ``make``.
             Hiding them in ``**kwargs`` **breaks construction**: a plain
             ``IPv6_Ext(next=..., len=..., data=..., payload=...)`` raises
             ``UnsupportedCall: IPv6_Ext: unexpected keyword(s)``. The
             ``__keywords__`` escape hatch would cover that, but it is unioned
             down the MRO, so it would widen the allowlist, and weaken that
-            misspelling check, for all eight subclasses too.
+            misspelling check, for every subclass too.
 
             They are keyword-*only* because this class is also a base and each
             subclass's ``make`` puts different names in the same positions. As
             positional parameters they draw pylint ``arguments-renamed``
             warnings (``ESP.make`` has ``spi``, ``seq`` and ``next`` where
-            these have ``next``, ``len`` and ``payload``) and mypy
+            these have ``next``, ``len`` and ``data``) and mypy
             ``[override]`` errors. With no positional parameters there is no
             position to disagree about, and the allowlist is unaffected because
             ``_declared_keywords`` collects ``KEYWORD_ONLY`` parameters too.
@@ -551,7 +550,7 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
 
         Raises:
             ProtocolError: If this is the *fallback* parser (see the class
-                docstring's "two roles") and ``version`` is not ``6``.
+                docstring's "Base and Fallback Roles") and ``version`` is not ``6``.
 
         See Also:
             For construction argument, please refer to :meth:`make`.
@@ -559,7 +558,7 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
         Note:
             The version gate is scoped to the fallback role by the same
             ``__data__`` discriminator :attr:`protocol` uses. Applying it to
-            subclasses would break the two that are *not* IPv6-only:
+            subclasses would break those that are *not* IPv6-only:
             :class:`~pcapkit.protocols.internet.ah.AH` and
             :class:`~pcapkit.protocols.internet.esp.ESP` both default to
             ``version=4`` and are valid under IPv4, so an unconditional gate

@@ -179,8 +179,8 @@ def quick_start_option_length(schema: 'Type[QSOption]') -> 'int':
         # a ``PaddingField`` with a length callback, which reports 1024. So the
         # callback's presence is the only reliable signal, and reaching for it is
         # worth one private access. A :class:`~pcapkit.corekit.fields.misc.SwitchField`
-        # is named separately because it is the one field whose width is dynamic
-        # *without* a length callback: it carries a
+        # is named separately because its width is dynamic *without* a length
+        # callback: it carries a
         # :class:`~pcapkit.corekit.fields.misc.NoValueField` until its own selector
         # resolves it, and so reports a width of zero rather than refusing to
         # answer. That is exactly what :class:`_QSOption` -- the outer wrapper,
@@ -202,6 +202,8 @@ def quick_start_data_selector(pkt: 'dict[str, Any]') -> 'Field':
         pkt: Packet data.
 
     Returns:
+        The field for the option data, chosen by the QS function.
+
         * If ``func`` is ``0``, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`
           wrapped :class:`~pcapkit.protocols.schema.internet.ipv4.QuickStartRequestOption`
           instance.
@@ -222,7 +224,7 @@ def quick_start_data_selector(pkt: 'dict[str, Any]') -> 'Field':
     """
     # NOTE: The enumeration admits the whole four-bit range, ``0`` to ``15``,
     # as an ``Unassigned`` member for every code but ``0`` and ``8``, and only
-    # those two have a schema registered. A value past four bits, which only a
+    # those have a schema registered. A value past four bits, which only a
     # caller-built packet can carry, fails the lookup and is just as unassigned.
     try:
         func = Enum_QSFunction.get(pkt['flags']['func'])
@@ -318,7 +320,7 @@ class LSROption(Option, code=Enum_OptionNumber.LSR):
 
     #: Pointer.
     pointer: 'int' = UInt8Field()
-    #: Route: every address slot of the option, those before the pointer and
+    #: Route, i.e. every address slot of the option, those before the pointer and
     #: those at or beyond it alike.
     route: 'list[IPv4Address]' = ListField(
         length=lambda pkt: max(pkt['length'] - 3, 0) // 4 * 4,
@@ -344,7 +346,7 @@ class TSOption(Option, code=Enum_OptionNumber.TS):
         'oflw': (0, 4),
         'flag': (4, 4),
     })
-    #: Timestamps and internet addresses: every 32-bit slot of the option,
+    #: Timestamps and internet addresses, i.e. every 32-bit slot of the option,
     #: those before the pointer and those at or beyond it alike.
     ts_data: 'list[int]' = ListField(
         length=lambda pkt: max(pkt['length'] - 4, 0) // 4 * 4,
@@ -468,7 +470,7 @@ class TSOption(Option, code=Enum_OptionNumber.TS):
 
         # NOTE: The keyword is ``ts_data``, the name of the field above, not
         # ``data``. ``data`` is the *derived* attribute :meth:`post_process`
-        # writes and is declared three lines up; passing it as a constructor
+        # writes and is declared just above; passing it as a constructor
         # argument would drop the timestamps in silence, because
         # :meth:`Schema.__update__
         # <pcapkit.protocols.schema.schema.Schema.__update__>` answers an unknown
@@ -500,7 +502,7 @@ class RROption(Option, code=Enum_OptionNumber.RR):
 
     #: Pointer.
     pointer: 'int' = UInt8Field()
-    #: Route: every address slot of the option, those before the pointer and
+    #: Route, i.e. every address slot of the option, those before the pointer and
     #: those at or beyond it alike.
     route: 'list[IPv4Address]' = ListField(
         length=lambda pkt: max(pkt['length'] - 3, 0) // 4 * 4,
@@ -534,7 +536,7 @@ class SSROption(Option, code=Enum_OptionNumber.SSR):
 
     #: Pointer.
     pointer: 'int' = UInt8Field()
-    #: Route: every address slot of the option, those before the pointer and
+    #: Route, i.e. every address slot of the option, those before the pointer and
     #: those at or beyond it alike.
     route: 'list[IPv4Address]' = ListField(
         length=lambda pkt: max(pkt['length'] - 3, 0) // 4 * 4,
@@ -696,7 +698,14 @@ class QuickStartReportOption(QSOption, code=Enum_QSFunction.Report_of_Approved_R
 
 @schema_final
 class IPv4(Schema):
-    """Header schema for IPv4 packet."""
+    """Header schema for IPv4 packet.
+
+    .. versionchanged:: 1.5.0
+
+       New field :attr:`trailer`, which keeps the octets captured past the
+       Total Length rather than dropping them (:issue:`1209`).
+
+    """
 
     #: Version and header length.
     vihl: 'VerIHLField' = BitField(length=1, namespace={

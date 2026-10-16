@@ -23,8 +23,8 @@ class ESP(Protocol):
     :attr:`plaintext` are recovered from the *decrypted* payload, and are
     therefore :data:`None` whenever the payload could not be decrypted --
     :rfc:`4303` places them inside the ciphertext, so guessing them from an
-    encrypted payload is not possible. :attr:`status` says which of those
-    two cases applies, and :attr:`error` says why.
+    encrypted payload is not possible. :attr:`status` says which case
+    applies, and :attr:`error` says why.
 
     Important:
         No key material is recorded here, by design. This data model is what

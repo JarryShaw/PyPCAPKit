@@ -577,7 +577,7 @@ class FastBindingAcknowledgmentStatus(EnumLookup, IntEnum):
         :rfc:`5568#section-6.2.3` defines these values inline and IANA keeps no
         registry of them, so the enumeration lives here rather than in
         :mod:`pcapkit.const.mh`. It is also **not** interchangeable with the
-        registered :class:`~pcapkit.const.mh.status_code.StatusCode`, since two
+        registered :class:`~pcapkit.const.mh.status_code.StatusCode`, since some
         of its values collide semantically: ``1`` means *NCoA is invalid* here
         but *accepted but prefix discovery necessary* there, and ``131`` means
         *incorrect interface identifier length* here but *home registration not
@@ -599,7 +599,7 @@ class FastBindingAcknowledgmentStatus(EnumLookup, IntEnum):
         :exc:`~pcapkit.utilities.exceptions.EnumValueError`. A ``get`` override
         was rejected (decided on :issue:`935`; the override was deleted, not
         widened to accept ``default``): this class mints no alias
-        (``__members__`` and ``list(cls)`` both hold 6 members), so an override
+        (``__members__`` and ``list(cls)`` hold the same members), so an override
         could only repeat the base's dual :class:`int`/name resolution.
 
     """
@@ -670,7 +670,7 @@ class IPv6AddressPrefixCode(EnumLookup, IntEnum):
         :exc:`~pcapkit.utilities.exceptions.EnumValueError`. A ``get`` override
         was rejected (decided on :issue:`935`; the override was deleted, not
         widened to accept ``default``): this class mints no alias
-        (``__members__`` and ``list(cls)`` both hold 4 members), so an override
+        (``__members__`` and ``list(cls)`` hold the same members), so an override
         could only repeat the base's dual :class:`int`/name resolution.
 
     """
@@ -1168,8 +1168,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[Enum_Packet, str | tuple[PacketParser, PacketConstructor]]:
-    #: Message type to method mapping. A :obj:`str` value names the methods
+    #: DefaultDict[Enum_Packet, str | tuple[PacketParser, PacketConstructor]]: Message
+    #: type to method mapping. A :obj:`str` value names the methods
     #: ``_read_msg_${name}`` and ``_make_msg_${name}``, falling back to
     #: ``_read_msg_unknown`` / ``_make_msg_unknown`` when they do not exist; any
     #: other value is a ``(parser, constructor)`` pair of callables.
@@ -1203,8 +1203,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         },
     )  # type: DefaultDict[Enum_Packet | int, str | tuple[PacketParser, PacketConstructor]]
 
-    #: DefaultDict[Enum_Option, str | tuple[OptionParser, OptionConstructor]]:
-    #: Option type to method mapping. A :obj:`str` value names the methods
+    #: DefaultDict[Enum_Option, str | tuple[OptionParser, OptionConstructor]]: Option
+    #: type to method mapping. A :obj:`str` value names the methods
     #: ``_read_opt_${name}`` and ``_make_opt_${name}``, falling back to
     #: ``_read_opt_none`` / ``_make_opt_none`` when they do not exist; any other
     #: value is a ``(parser, constructor)`` pair of callables.
@@ -1285,8 +1285,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         },
     )  # type: DefaultDict[Enum_Option | int, str | tuple[OptionParser, OptionConstructor]]
 
-    #: DefaultDict[Enum_CGAExtension, str | tuple[ExtensionParser, ExtensionConstructor]]:
-    #: CGA extension type to method mapping. A :obj:`str` value names the
+    #: DefaultDict[Enum_CGAExtension, str | tuple[ExtensionParser, ExtensionConstructor]]: CGA
+    #: extension type to method mapping. A :obj:`str` value names the
     #: methods ``_read_ext_${name}`` and ``_make_ext_${name}``, falling back to
     #: ``_read_ext_none`` / ``_make_ext_none`` when they do not exist; any other
     #: value is a ``(parser, constructor)`` pair of callables.
@@ -1477,6 +1477,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Returns:
             Constructed packet data.
+
+        .. versionchanged:: 1.5.0
+
+           Takes ``reserved`` ahead of ``chksum`` (:issue:`1329`), which shifts
+           every later positional argument.
 
         """
         next_val = self._make_index(next, next_default, namespace=next_namespace,
@@ -1923,7 +1928,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
            |                                                               |
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-        Later RFCs assign eight more of the flag bits, ``M``, ``R``, ``P``,
+        Later RFCs assign more of the flag bits, ``M``, ``R``, ``P``,
         ``F``, ``T``, ``B``, ``S`` and ``D`` in that order (IANA *Binding
         Update Flags*); the low four bits remain reserved.
 
@@ -1980,7 +1985,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
            |                                                               |
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-        Later RFCs assign six more of the flag bits, ``R``, ``P``, ``T``,
+        Later RFCs assign more of the flag bits, ``R``, ``P``, ``T``,
         ``B``, ``S`` and ``D`` in that order (IANA *Binding Acknowledgment
         Flags*); the lowest bit remains reserved.
 
@@ -2279,8 +2284,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Note:
             :rfc:`5568` defines only the ``S`` and ``U`` flags; the ``P`` and
             ``F`` flags, and code values ``2`` and ``3``, are added by
-            :rfc:`5949#section-6.1.1`. All four flags are registered in the IANA
-            *Handover Initiate Flags* registry, hence all four are parsed here.
+            :rfc:`5949#section-6.1.1`. All of these flags are registered in the IANA
+            *Handover Initiate Flags* registry, hence all are parsed here.
 
         Args:
             schema: Parsed message type schema.
@@ -2330,9 +2335,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Note:
             :rfc:`5568` reserves the whole first octet of the message data; the
             ``U``, ``P`` and ``F`` flags carved out of it, and code values ``5``
-            and ``6``, are added by :rfc:`5949#section-6.1.2`. All three flags
+            and ``6``, are added by :rfc:`5949#section-6.1.2`. All of these flags
             are registered in the IANA *Handover Acknowledge Flags* registry,
-            hence all three are parsed here.
+            hence all are parsed here.
 
         Args:
             schema: Parsed message type schema.
@@ -3003,15 +3008,14 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Note:
             A ``Pad1`` option occupies a single octet and carries no
             ``Option Length`` field, so its
-            :attr:`~pcapkit.protocols.data.internet.mh.Option.length` is
-            ``1`` rather than ``length + 2``. That one-octet wire shape is
-            enforced by
-            :class:`~pcapkit.protocols.schema.internet.mh.PadOption` itself,
+            :attr:`~pcapkit.protocols.data.internet.mh.Option.length` is ``1``
+            rather than ``length + 2``. That one-octet wire shape is enforced
+            by :class:`~pcapkit.protocols.schema.internet.mh.PadOption` itself,
             which sizes both the length octet and the padding data from the
             option type [:rfc:`6275#section-6.2.2`]; ``clen`` is therefore
-            always ``0`` here for a parsed ``Pad1``, and the check below only
-            guards a schema built by hand. A ``PadN`` whose ``Option Length``
-            is ``0`` is a valid two-octet padding option
+            always ``0`` here for a parsed ``Pad1``, and the length check this
+            method makes only guards a schema built by hand. A ``PadN`` whose
+            ``Option Length`` is ``0`` is a valid two-octet padding option
             [:rfc:`6275#section-6.2.3`].
 
         """
@@ -4225,7 +4229,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             option of :rfc:`5844` uses: that one has no value ``133``. Nor is it
             the pseudo-home-address registry of :rfc:`5726` that
             :class:`~pcapkit.const.mh.ack_status_code.ACKStatusCode` carries,
-            whose name is the more obvious trap of the three.
+            whose name is the most obvious trap of these.
 
         Args:
             schema: Parsed option schema.
@@ -4838,7 +4842,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             own :class:`abc.ABCMeta` cache (:issue:`439`). The same reasoning
             applies to :meth:`_read_ani_suboptions`,
             :meth:`_read_qos_attributes`, :meth:`_read_lcmp_suboptions` and their
-            four constructor counterparts.
+            constructor counterparts.
 
         Args:
             suboptions_schema: Parsed sub-option schemas.
@@ -4926,7 +4930,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Note:
             The status draws from the *Flow Identification Mobility Option Status
             Codes* registry, which is neither the general mobility status codes nor
-            the flow binding acknowledgement ones -- three similarly named
+            the flow binding acknowledgement ones -- similarly named
             registries that must not be confused.
 
         Args:
@@ -8127,8 +8131,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 :obj:`bool`, which is rejected for every subtype -- see
                 ``Raises`` below. For ``IPv6_Address`` it is converted
                 and validated the same way as any other value
-                :class:`ipaddress.IPv6Address` accepts. For the other six
-                subtypes -- all numeric identifiers (an IMSI, a P-TMSI, an
+                :class:`ipaddress.IPv6Address` accepts. For every other
+                subtype -- each a numeric identifier (an IMSI, a P-TMSI, an
                 EUI-48/64 address, a GUTI, a DUID) -- it is converted to its
                 own minimal big-endian octets, at least one. ``NAI`` is text
                 (RFC 4283's ``user@realm`` form) rather than a numeric
@@ -8143,22 +8147,21 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Raises:
             ProtocolError: If ``identifier`` is a :obj:`bool`, for any subtype
                 -- :obj:`bool` is an :obj:`int` subclass, so ``True`` would
-                otherwise be converted by two different paths below, to
-                ``::1`` for ``IPv6_Address`` and to a one-octet identifier for
-                the other six, neither of which a caller passing a flag can
-                plausibly have meant; pass ``int(...)`` to get the numeric
-                value. If ``identifier`` is a negative :obj:`int`
-                (no subtype has a wire form for one), an :obj:`int` of any value
-                with the ``NAI`` subtype, an :obj:`int` of ``2**128`` or
-                above with the ``IPv6_Address`` subtype (whose wire form is a
-                fixed 16 octets, unlike the other subtypes, which have no
-                ceiling and simply pack into more), or ``identifier`` is of a
-                type its subtype's field cannot hold at all: anything but
-                :obj:`str` for ``NAI``, anything but :obj:`bytes`/
-                :obj:`bytearray`/:obj:`int` for the other six -- an :obj:`int`
-                is converted rather than rejected there -- or anything
-                :class:`ipaddress.IPv6Address` itself does not accept for
-                ``IPv6_Address``.
+                otherwise be converted, to ``::1`` for ``IPv6_Address`` and to
+                a one-octet identifier for the numeric subtypes, neither of
+                which a caller passing a flag can plausibly have meant; pass
+                ``int(...)`` to get the numeric value. If ``identifier`` is a
+                negative :obj:`int` (no subtype has a wire form for one), an
+                :obj:`int` of any value with the ``NAI`` subtype, an :obj:`int`
+                of ``2**128`` or above with the ``IPv6_Address`` subtype (whose
+                wire form is a fixed 16 octets, unlike the other subtypes,
+                which have no ceiling and simply pack into more), or
+                ``identifier`` is of a type its subtype's field cannot hold at
+                all: anything but :obj:`str` for ``NAI``, anything but
+                :obj:`bytes`/:obj:`bytearray`/:obj:`int` for the remaining
+                subtypes -- an :obj:`int` is converted rather than rejected
+                there -- or anything :class:`ipaddress.IPv6Address` itself does
+                not accept for ``IPv6_Address``.
 
         """
         if option is not None:
@@ -8195,9 +8198,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         if isinstance(identifier, bool):
             # NOTE: checked before the subtype dispatch, because ``bool`` is an
-            # ``int`` subclass and so would otherwise be converted by *two*
-            # different paths below -- ``IPv6Address(1)``, that is ``::1``, for
-            # ``IPv6_Address``, and a one-octet identifier for the six
+            # ``int`` subclass and so would otherwise be converted by
+            # *different* paths below -- ``IPv6Address(1)``, that is ``::1``, for
+            # ``IPv6_Address``, and a one-octet identifier for the
             # ``BytesField`` subtypes. An MN-ID of ``True`` is a caller mistake
             # in every case rather than a value anyone means, so it is refused
             # before either path can give it a plausible-looking wire form. A
@@ -8219,7 +8222,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 # NOTE: the upper-bound mirror of the negative-int guard above, and
                 # it belongs here rather than up there because this bound is
                 # subtype-*dependent*: ``2**140`` is a perfectly good identifier for
-                # the six ``BytesField`` subtypes -- it simply packs into more
+                # the ``BytesField`` subtypes -- it simply packs into more
                 # octets -- and only ``IPv6_Address`` caps at 128 bits. Left
                 # unguarded, :class:`ipaddress.IPv6Address` raises
                 # ``AddressValueError``, itself a bare :exc:`ValueError`, so this
@@ -9674,14 +9677,15 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             Constructed sub-option schema.
 
         Note:
-            The data model parameter is named ``option`` rather than ``data`` to
-            match :meth:`_make_opt_fid` and the rest of this module -- and because
-            ``data`` would **shadow a field**. The traffic selector and unassigned
-            sub-options both carry a field of their own called ``data``, so a
-            caller's ``data=`` would bind to the model parameter instead of landing
-            in ``**kwargs``, and the ``kwargs.get('data')`` fallback below would
-            never see it: the payload would be silently dropped and the length
-            written as though it were empty, with no exception.
+            The data model parameter is named ``option`` rather than ``data``
+            to match :meth:`_make_opt_fid` and the rest of this module -- and
+            because ``data`` would **shadow a field**. The traffic selector and
+            unassigned sub-options both carry a field of their own called
+            ``data``, so a caller's ``data=`` would bind to the model parameter
+            instead of landing in ``**kwargs``, and the fallback that reads
+            ``data`` from ``**kwargs`` would never see it: the payload would be
+            silently dropped and the length written as though it were empty,
+            with no exception.
 
             Dispatch is on ``code`` rather than on ``isinstance`` of the schema or
             data class, for the reason given in :meth:`_read_fid_suboptions`.

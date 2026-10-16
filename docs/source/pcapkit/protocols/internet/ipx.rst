@@ -13,7 +13,7 @@ as below:
 Octets      Bits        Name                    Description
 ======= ========= ====================== =====================================
   0           0   ``ipx.chksum``            Checksum
-  2          16   ``ipx.len``               Packet Length (header includes)
+  2          16   ``ipx.len``               Packet Length (header included)
   4          32   ``ipx.count``             Transport Control (hop count)
   5          40   ``ipx.type``              Packet Type
   6          48   ``ipx.dst``               Destination Address

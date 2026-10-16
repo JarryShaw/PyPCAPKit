@@ -21,9 +21,9 @@ if TYPE_CHECKING:
 
     from pcapkit.protocols.protocol import ProtocolBase
 
-#: The most octets a 16-bit IP length field declares: IPv4's Total Length, the
-#: header included (:rfc:`791#section-3.1`), and IPv6's Payload Length, the
-#: fixed header excluded (:rfc:`8200#section-3`) -- so a longer IPv6 payload is
+#: The most octets a 16-bit IP length field declares, for IPv4's Total Length
+#: the header included (:rfc:`791#section-3.1`) and for IPv6's Payload Length
+#: the fixed header excluded (:rfc:`8200#section-3`); a longer IPv6 payload is
 #: a jumbogram, whose Jumbo Payload Length must exceed it (:rfc:`2675#section-2`).
 #: The one home of this value (:issue:`1739`), here so that the schema's
 #: jumbogram check and the protocol modules read the same one; it is fixed by
@@ -48,7 +48,14 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
 
 @schema_final
 class IPv6(Schema):
-    """Header schema for IPv6 packet."""
+    """Header schema for IPv6 packet.
+
+    .. versionchanged:: 1.5.0
+
+       New field :attr:`trailer`, which keeps the octets captured past the
+       Payload Length rather than dropping them (:issue:`1209`).
+
+    """
 
     #: Version, traffic class and flow label.
     #:

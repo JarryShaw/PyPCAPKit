@@ -53,7 +53,15 @@ class Option(Data):
 
 @info_final
 class HOPOPT(Protocol):
-    """Data model for HOPOPT protocol."""
+    """Data model for HOPOPT protocol.
+
+    .. versionchanged:: 1.5.0
+
+       ``options`` is an immutable
+       :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` rather than an
+       :class:`~pcapkit.corekit.multidict.OrderedMultiDict` (:issue:`1484`).
+
+    """
 
     #: Next header.
     next: 'TransType'
@@ -323,7 +331,14 @@ class MPLFlags(Data):
 
 @info_final
 class MPLOption(Option):
-    """Data model for HOPOPT Multicast Protocol for Low-Power and Lossy Networks (MPL) option."""
+    """Data model for HOPOPT Multicast Protocol for Low-Power and Lossy Networks (MPL) option.
+
+    .. versionchanged:: 1.5.0
+
+       ``seed_id`` may be an :class:`~ipaddress.IPv6Address`, the source
+       address, for a seed-id type of ``IPV6_SOURCE_ADDRESS`` (:issue:`1185`).
+
+    """
 
     #: Seed length.
     seed_type: 'SeedID'

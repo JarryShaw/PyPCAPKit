@@ -18,11 +18,18 @@ if TYPE_CHECKING:
 
 @schema_final
 class IPX(Schema):
-    """Header schema for IPX packet."""
+    """Header schema for IPX packet.
+
+    .. versionchanged:: 1.5.0
+
+       New field :attr:`trailer`, which keeps the octets captured past the
+       Packet Length rather than dropping them (:issue:`1433`).
+
+    """
 
     #: Checksum.
     chksum: 'bytes' = BytesField(length=2)
-    #: Packet length (header includes).
+    #: Packet length (header included).
     len: 'int' = UInt16Field()
     #: Transport control (hop count).
     count: 'int' = UInt8Field()

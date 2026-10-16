@@ -199,8 +199,9 @@ if TYPE_CHECKING:
 
 #: Cached :mod:`cryptography` primitives, c.f. :func:`load_cryptography`.
 #: :data:`NotImplemented` means the import has not been attempted yet, and
-#: :data:`None` that it was attempted and |cryptography|_ is not installed --
-#: three states, so a missing dependency is not retried on every frame.
+#: :data:`None` that it was attempted and |cryptography|_ is not installed, and
+#: a tuple holds the loaded primitives, so a missing dependency is not retried
+#: on every frame.
 _CRYPTO = NotImplemented  # type: Any
 
 

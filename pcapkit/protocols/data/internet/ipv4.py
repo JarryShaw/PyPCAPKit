@@ -100,13 +100,21 @@ class Flags(Data):
 
 @info_final
 class IPv4(Protocol):
-    """Data model for IPv4 packet."""
+    """Data model for IPv4 packet.
+
+    .. versionchanged:: 1.5.0
+
+       ``options`` is an immutable
+       :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` rather than an
+       :class:`~pcapkit.corekit.multidict.OrderedMultiDict` (:issue:`1484`).
+
+    """
 
     #: Version.
     version: 'Literal[4]'
     #: Internet header length.
     hdr_len: 'int'
-    #: Type of services.
+    #: Type of service.
     tos: 'ToSField'
     #: Total length.
     len: 'int'
@@ -247,7 +255,10 @@ class TSOption(Option):
     .. versionchanged:: 1.5.0
 
        New required fields ``remaining`` and ``remainder`` (:issue:`1349`,
-       :issue:`1392`).
+       :issue:`1392`), and a ``timestamp`` that carries addresses is an
+       immutable :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` rather
+       than an :class:`~pcapkit.corekit.multidict.OrderedMultiDict`
+       (:issue:`1484`).
 
     """
 

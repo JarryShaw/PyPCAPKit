@@ -7,7 +7,7 @@
 :mod:`pcapkit.protocols.internet.ip` contains
 :class:`~pcapkit.protocols.internet.ip.IP` only,
 which is a base class for Internet Protocol (IP)
-protocol family [*]_, eg.
+protocol family [*]_, e.g.
 :class:`~pcapkit.protocols.internet.ipv4.IPv4` and
 :class:`~pcapkit.protocols.internet.ipv6.IPv6`.
 
