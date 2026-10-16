@@ -177,8 +177,11 @@ class Extractor(Generic[_P]):
         #: the file object after extraction.
         _flag_s: 'bool'
 
+        # NOTE: not ``VerboseHandler``, whose frame parameter is the whole
+        # ``Packet`` union: mypy would then reject the default and the engines'
+        # callbacks, each of which handles only its own packet type (#1839).
         #: Verbose callback function.
-        #_vfunc: 'VerboseHandler'
+        _vfunc: 'Callable[[Extractor, Any], Any]'
 
         #: Frame number.
         _frnum: 'int'
