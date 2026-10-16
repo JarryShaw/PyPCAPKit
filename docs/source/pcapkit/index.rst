@@ -82,43 +82,58 @@ Command Line Tool
    PCAP file extractor and formatted dumper
 
    positional arguments:
-     input-file-name       The name of input pcap file. If ".pcap" omits, it will
-                           be automatically appended. Use "-" to indicate reading
-                           from `stdin'.
+     input-file-name       The name of the input PCAP or PCAP-NG file. With
+                           `--auto-extension`, ".pcap" is appended unless its
+                           extension is already ".pcap", ".cap" or ".pcapng". Use
+                           "-" to read from standard input.
 
    options:
      -h, --help            show this help message and exit
      -V, --version         show program's version number and exit
      -o, --output file-name
-                           The name of input pcap file. If format extension
-                           omits, it will be automatically appended.
-     -f, --format format   Print a extraction report in the specified output
-                           format. Available are all formats supported by
-                           dictdumper, e.g.: json, plist, and tree.
-     -j, --json            Display extraction report as json. This will yield
-                           "raw" output that may be used by external tools. This
-                           option overrides all other options.
-     -p, --plist           Display extraction report as macOS Property List
-                           (plist). This will yield "raw" output that may be used
-                           by external tools. This option overrides all other
-                           options.
-     -t, --tree            Display extraction report as tree view text. This will
-                           yield "raw" output that may be used by external tools.
-                           This option overrides all other options.
-     -a, --auto-extension  If output file extension omits, append automatically.
-     -v, --verbose         Show more information.
-     -F, --files           Split each frame into different files.
-     -E, --engine PKG      Indicate extraction engine. Note that except default
-                           or pcapkit engine, all other engines need support of
-                           corresponding packages.
+                           The name of the output report file. If it is omitted,
+                           "out" is used. With `--auto-extension`, the extension
+                           of the output format (e.g. ".json") is appended if
+                           absent. With `--files`, the directory each frame's
+                           report is written to.
+     -f, --format format   The format of the report: "json", "plist" (or "xml"),
+                           "tree" (or "text", "txt") or "pcap" (or "cap"). Takes
+                           precedence over `--json`, `--plist` and `--tree`. With
+                           no format option, "tree" is used.
+     -j, --json            Write the report as JSON, as `--format json` does.
+                           Ignored if `--format` is given.
+     -p, --plist           Write the report as a macOS property list, as
+                           `--format plist` does. Ignored if `--format` or
+                           `--json` is given.
+     -t, --tree            Write the report as tree view text, as `--format tree`
+                           does; this is the default. Ignored if `--format`,
+                           `--json` or `--plist` is given.
+     -a, --auto-extension  Append missing file extensions: ".pcap" to the input
+                           file name, and the extension of the output format
+                           (e.g. ".json") to the output file name unless
+                           `--files` is set.
+     -v, --verbose         Print the input name, the protocol chain of each
+                           frame, and where the report is stored.
+     -F, --files           Write a report file per frame, in the directory named
+                           by `--output`.
+     -E, --engine PKG      The extraction engine, case-insensitive: "default" (or
+                           "pcapkit"), or a third-party one such as "dpkt" or
+                           "scapy", which needs its package installed. An unknown
+                           or unavailable engine falls back to "default".
      -P, --protocol PROTOCOL
-                           Indicate extraction stops after which protocol.
-     -L, --layer LAYER     Indicate extract frames until which layer.
-     -B, --buffer-save     Indicate if store buffer to file when reading from
-                           stdin.
+                           Stop dissecting each frame after this protocol, e.g.
+                           "IPv4" (case-insensitive); the rest of the frame is
+                           kept as raw data. Third-party engines ignore it.
+     -L, --layer LAYER     Stop dissecting each frame after its protocol in this
+                           layer: "link", "internet", "transport" or
+                           "application" (case-insensitive); "none", the default,
+                           sets no limit. Third-party engines ignore it.
+     -B, --buffer-save     Save a copy of the input to a file as it is read. Only
+                           an input that is not seekable, such as a pipe on
+                           standard input, is saved.
      -O, --buffer-path file-name
-                           The name of buffer storage file. If `--buffer-save` is
-                           set and this omits, it will be automatically assigned.
+                           The name of the file `--buffer-save` writes. If it is
+                           omitted, a temporary file is used and then deleted.
 
 .. versionchanged:: 1.5.0
 

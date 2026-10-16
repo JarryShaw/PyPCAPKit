@@ -40,6 +40,7 @@ from __future__ import annotations
 import importlib.util
 import io
 import pathlib
+import re
 import sys
 import types
 import unittest
@@ -210,6 +211,174 @@ class CLIMainTests(unittest.TestCase):
         self.assertEqual(args.fout, 'out.json')
         self.assertTrue(args.json)
         self.assertTrue(args.files)
+
+    def test_output_help_describes_the_output_file(self) -> None:
+        """``-o``'s help names the output report, not the input capture.
+
+        Issue #1796: the help was copied from the positional ``input-file-name``
+        and read "The name of input pcap file", so ``--help`` said ``-o`` named
+        the file being *read*. It also said the extension is always appended,
+        but :func:`~pcapkit.__main__.main` forwards ``-a``/``--auto-extension``
+        as ``Extractor(extension=...)``, which is off by default.
+
+        """
+        emoji = types.SimpleNamespace(emojize=lambda text: text)
+        module, _, _ = self._load_cli_module(emoji_module=emoji)
+
+        parser = module.get_parser()
+        action = next(action for action in parser._actions  # pylint: disable=protected-access
+                      if action.dest == 'fout')
+        self.assertEqual(action.option_strings, ['-o', '--output'])
+
+        text = action.help.lower()
+        self.assertIn('output', text)
+        self.assertNotIn('input', text)
+        # ``Extractor.__init__`` substitutes "out" for an omitted ``fout``.
+        self.assertIn('"out"', text)
+        # The extension depends on ``-a``, and ``-F`` makes ``fout`` a directory.
+        self.assertIn('--auto-extension', text)
+        self.assertIn('--files', text)
+
+    def test_input_help_ties_the_pcap_extension_to_auto_extension(self) -> None:
+        """``input-file-name``'s help appends ``.pcap`` only under ``-a``.
+
+        Issue #1796: the help said ".pcap" is always appended when omitted, but
+        :meth:`~pcapkit.foundation.extraction.Extractor.make_name` appends it
+        only with ``extension=True`` -- ``-a`` -- and then unless the name
+        already ends in one of ``Extractor.PCAP_EXT``. Without ``-a``,
+        ``pcapkit-cli in`` fails with ``FileNotFound`` for ``in``.
+
+        """
+        emoji = types.SimpleNamespace(emojize=lambda text: text)
+        module, _, _ = self._load_cli_module(emoji_module=emoji)
+
+        parser = module.get_parser()
+        action = next(action for action in parser._actions  # pylint: disable=protected-access
+                      if action.dest == 'fin')
+
+        text = action.help.lower()
+        self.assertIn('--auto-extension', text)
+        self.assertNotIn('automatically appended', text)
+        # ``Extractor.PCAP_EXT``: a name already ending in one is left alone.
+        self.assertIn('".cap"', text)
+        self.assertIn('".pcapng"', text)
+
+    def test_auto_extension_help_covers_input_and_output(self) -> None:
+        """``-a``'s help names the input extension as well as the output one.
+
+        Issue #1796: the help mentioned only the output file, but ``-a`` is
+        forwarded as ``Extractor(extension=...)``, which
+        :meth:`~pcapkit.foundation.extraction.Extractor.make_name` applies to
+        the input name too -- and not to ``fout`` under ``-F``, where it is a
+        directory.
+
+        """
+        emoji = types.SimpleNamespace(emojize=lambda text: text)
+        module, _, _ = self._load_cli_module(emoji_module=emoji)
+
+        parser = module.get_parser()
+        action = next(action for action in parser._actions  # pylint: disable=protected-access
+                      if action.dest == 'auto_extension')
+
+        text = action.help.lower()
+        self.assertIn('input', text)
+        self.assertIn('".pcap"', text)
+        self.assertIn('--files', text)
+
+    @staticmethod
+    def _named_options(pattern: str, text: str) -> 'set[str]':
+        """The backquoted options in the clause of ``text`` that ``pattern`` finds.
+
+        Args:
+            pattern: A regular expression whose first group is the clause.
+            text: A help string.
+
+        Returns:
+            The options named in the clause, such as ``'--json'``, or an empty
+            set when ``text`` has no such clause.
+
+        """
+        match = re.search(pattern, text)
+        return set(re.findall(r'`(--[a-z-]+)`', match.group(1))) if match else set()
+
+    def _forwarded_format(self, module, extractor_cls, *argv: str):
+        """The ``format=`` that :func:`main` hands ``Extractor`` for ``argv``."""
+        with mock.patch.object(sys, 'argv', ['pcapkit-cli', 'capture.pcap', *argv]):
+            self.assertEqual(module.main(), 0)
+        return extractor_cls.created[-1].kwargs['format']
+
+    def test_format_switch_help_names_what_overrides_it(self) -> None:
+        """``-j``, ``-p`` and ``-t`` each name exactly the options that beat them.
+
+        Issue #1796: each of them said "This option overrides all other
+        options", which cannot hold for all of them at once, and holds for none:
+        :func:`~pcapkit.__main__.main` tests ``--format`` first, then
+        ``--json``, then ``--plist``, then ``--tree``. So each help's "Ignored
+        if ... is given" clause is checked against what ``main`` forwards when
+        the switch is given together with each other format option.
+
+        """
+        emoji = types.SimpleNamespace(emojize=lambda text: text)
+        module, extractor_cls, _ = self._load_cli_module(emoji_module=emoji)
+
+        parser = module.get_parser()
+        helps = {action.dest: action.help for action in parser._actions}  # pylint: disable=protected-access
+        # ``pcap`` is no stand-in constant, so a ``--format`` win is visible.
+        options = {'--format': ('--format', 'pcap'), '--json': ('--json',),
+                   '--plist': ('--plist',), '--tree': ('--tree',)}
+
+        for switch in ('--json', '--plist', '--tree'):
+            with self.subTest(switch=switch):
+                text = helps[switch[2:]]
+                alone = self._forwarded_format(module, extractor_cls, switch)
+                winners = {other for other, argv in options.items() if other != switch
+                           and self._forwarded_format(module, extractor_cls, switch, *argv) != alone}
+                self.assertNotIn('overrides all other options', text)
+                self.assertEqual(self._named_options(r'Ignored if (.+?) (?:is|are) given', text),
+                                 winners)
+
+    def test_format_help_names_the_switches_it_overrides(self) -> None:
+        """``-f``'s help lists the real formats and the switches it beats.
+
+        Issue #1796: it said "Available are all formats supported by
+        dictdumper", but the formats are the keys of ``Extractor.__output__``,
+        which include ``pcap``, a :mod:`pcapkit.dumpkit` writer, and it said
+        nothing of ``-j``/``-p``/``-t``, which :func:`~pcapkit.__main__.main`
+        consults only when ``--format`` is not given. With no format option at
+        all ``main`` forwards :data:`None`, and ``Extractor.__init__``
+        substitutes ``tree``.
+
+        """
+        emoji = types.SimpleNamespace(emojize=lambda text: text)
+        module, extractor_cls, _ = self._load_cli_module(emoji_module=emoji)
+
+        parser = module.get_parser()
+        text = next(action.help for action in parser._actions  # pylint: disable=protected-access
+                    if action.dest == 'format')
+        beaten = {switch for switch in ('--json', '--plist', '--tree')
+                  if self._forwarded_format(module, extractor_cls, '--format', 'pcap', switch) == 'pcap'}
+
+        self.assertNotIn('dictdumper', text)
+        self.assertIn('"pcap"', text)
+        self.assertIn('no format option, "tree" is used', text)
+        self.assertEqual(self._named_options(r'precedence over (.+?)\.', text), beaten)
+
+    def test_help_strings_have_no_known_slips(self) -> None:
+        """No help string keeps a slip the rendered-docs proofread found.
+
+        Issue #1796, from the #1103 proofread: "a extraction", "if ... omits"
+        for "is omitted", "Indicate if store buffer", and the unbalanced
+        quotes of ``stdin'``.
+
+        """
+        emoji = types.SimpleNamespace(emojize=lambda text: text)
+        module, _, _ = self._load_cli_module(emoji_module=emoji)
+
+        parser = module.get_parser()
+        slips = ('a extraction', 'omits', 'Indicate if', "`stdin'")
+        found = [(action.dest, slip) for action in parser._actions  # pylint: disable=protected-access
+                 for slip in slips if slip in (action.help or '')]
+        self.assertEqual(found, [])
 
     def test_layer_and_protocol_reach_the_extractor(self) -> None:
         """``-L``/``-P`` are forwarded under the names ``Extractor`` reads.

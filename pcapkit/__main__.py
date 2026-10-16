@@ -46,41 +46,52 @@ def get_parser() -> 'ArgumentParser':
                                      description='PCAP file extractor and formatted dumper')
     parser.add_argument('-V', '--version', action='version', version=__version__)
     parser.add_argument('fin', metavar='input-file-name',
-                        help=('The name of input pcap file. If ".pcap" omits, '
-                              'it will be automatically appended. Use "-" to indicate '
-                              'reading from `stdin\'.'))
+                        help=('The name of the input PCAP or PCAP-NG file. With '
+                              '`--auto-extension`, ".pcap" is appended unless its '
+                              'extension is already ".pcap", ".cap" or ".pcapng". '
+                              'Use "-" to read from standard input.'))
     parser.add_argument('-o', '--output', action='store', metavar='file-name', dest='fout',
-                        help=('The name of input pcap file. If format extension '
-                              'omits, it will be automatically appended.'))
+                        help=('The name of the output report file. If it is omitted, '
+                              '"out" is used. With `--auto-extension`, the extension '
+                              'of the output format (e.g. ".json") is appended if '
+                              'absent. With `--files`, the directory each frame\'s '
+                              'report is written to.'))
     parser.add_argument('-f', '--format', action='store', metavar='format', dest='format',
-                        help=('Print a extraction report in the specified output '
-                              'format. Available are all formats supported by '
-                              'dictdumper, e.g.: json, plist, and tree.'))
+                        help=('The format of the report: "json", "plist" (or "xml"), '
+                              '"tree" (or "text", "txt") or "pcap" (or "cap"). Takes '
+                              'precedence over `--json`, `--plist` and `--tree`. With '
+                              'no format option, "tree" is used.'))
     parser.add_argument('-j', '--json', action='store_true', default=False,
-                        help=('Display extraction report as json. This will yield '
-                              '"raw" output that may be used by external tools. '
-                              'This option overrides all other options.'))
+                        help=('Write the report as JSON, as `--format json` does. '
+                              'Ignored if `--format` is given.'))
     parser.add_argument('-p', '--plist', action='store_true', default=False,
-                        help=('Display extraction report as macOS Property List '
-                              '(plist). This will yield "raw" output that may be '
-                              'used by external tools. This option overrides all '
-                              'other options.'))
+                        help=('Write the report as a macOS property list, as '
+                              '`--format plist` does. Ignored if `--format` or '
+                              '`--json` is given.'))
     parser.add_argument('-t', '--tree', action='store_true', default=False,
-                        help=('Display extraction report as tree view text. This '
-                              'will yield "raw" output that may be used by external '
-                              'tools. This option overrides all other options.'))
+                        help=('Write the report as tree view text, as `--format tree` '
+                              'does; this is the default. Ignored if `--format`, '
+                              '`--json` or `--plist` is given.'))
     parser.add_argument('-a', '--auto-extension', action='store_true', default=False,
-                        help='If output file extension omits, append automatically.')
+                        help=('Append missing file extensions: ".pcap" to the input '
+                              'file name, and the extension of the output format '
+                              '(e.g. ".json") to the output file name unless `--files` '
+                              'is set.'))
     parser.add_argument('-v', '--verbose', action='store_true', default=False,
-                        help='Show more information.')
+                        help=('Print the input name, the protocol chain of each '
+                              'frame, and where the report is stored.'))
     parser.add_argument('-F', '--files', action='store_true', default=False,
-                        help='Split each frame into different files.')
+                        help=('Write a report file per frame, in the directory named '
+                              'by `--output`.'))
     parser.add_argument('-E', '--engine', action='store', dest='engine', default='default', metavar='PKG',
-                        help=('Indicate extraction engine. Note that except '
-                              'default or pcapkit engine, all other engines '
-                              'need support of corresponding packages.'))
+                        help=('The extraction engine, case-insensitive: "default" (or '
+                              '"pcapkit"), or a third-party one such as "dpkt" or '
+                              '"scapy", which needs its package installed. An unknown '
+                              'or unavailable engine falls back to "default".'))
     parser.add_argument('-P', '--protocol', action='store', dest='protocol', default=None, metavar='PROTOCOL',
-                        help='Indicate extraction stops after which protocol.')
+                        help=('Stop dissecting each frame after this protocol, e.g. '
+                              '"IPv4" (case-insensitive); the rest of the frame is '
+                              'kept as raw data. Third-party engines ignore it.'))
     # NOTE: ``choices`` rather than a free-form string, because the layer names
     # are a closed set (``pcapkit.foundation.extraction.Layers``) and a name
     # outside it is not rejected anywhere downstream -- it simply never matches a
@@ -95,12 +106,17 @@ def get_parser() -> 'ArgumentParser':
     # lowercase ``'None'`` into the sentinel it wants.
     parser.add_argument('-L', '--layer', action='store', dest='layer', default=None, metavar='LAYER',
                         type=str.lower, choices=['link', 'internet', 'transport', 'application', 'none'],
-                        help='Indicate extract frames until which layer.')
+                        help=('Stop dissecting each frame after its protocol in this '
+                              'layer: "link", "internet", "transport" or "application" '
+                              '(case-insensitive); "none", the default, sets no limit. '
+                              'Third-party engines ignore it.'))
     parser.add_argument('-B', '--buffer-save', action='store_true', default=False,
-                        help='Indicate if store buffer to file when reading from stdin.')
+                        help=('Save a copy of the input to a file as it is read. Only '
+                              'an input that is not seekable, such as a pipe on '
+                              'standard input, is saved.'))
     parser.add_argument('-O', '--buffer-path', action='store', metavar='file-name', dest='buffer_path',
-                        help=('The name of buffer storage file. If `--buffer-save` is set and this '
-                              'omits, it will be automatically assigned.'))
+                        help=('The name of the file `--buffer-save` writes. If it is '
+                              'omitted, a temporary file is used and then deleted.'))
     return parser
 
 
