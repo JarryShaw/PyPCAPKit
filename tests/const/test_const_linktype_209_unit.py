@@ -582,8 +582,8 @@ class LinkTypeGeneratorSignedOrUnderscoredValueTests(unittest.TestCase):
     same class of under-count the range-expansion fix above closes, just for
     a different reason ``_expand`` can fail to recognise a value.
 
-    Not reachable against tcpdump's live table: every committed member
-    matches a plain unsigned decimal, so this is a latent
+    Not reachable against tcpdump's table as vendored here: every committed
+    member matches a plain unsigned decimal, so this is a latent
     hole rather than a live defect, exactly as #844 and #852's original
     word-only rule was. :meth:`process`'s ``_expand`` now tries ``int(temp)``
     directly, before the en-dash range check, so it recognises the same

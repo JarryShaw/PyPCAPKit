@@ -113,28 +113,29 @@ class Gap(NamedTuple):
     #:
     #: Make it as specific as the message allows, because a fragment that matches
     #: half the tree does not pin anything: ``'invalid format'`` alone occurs at
-    #: sites across many modules (dozens each in
+    #: sites across many modules, and repeatedly within
     #: :file:`pcapkit/protocols/internet/hip.py` and
-    #: :file:`pcapkit/protocols/transport/tcp.py`), so it is satisfied by a
+    #: :file:`pcapkit/protocols/transport/tcp.py`, so it is satisfied by a
     #: regression at any of them. Prefer the alias and whatever bracketed code the
     #: message carries -- ``'TCP: [OptNo 28] invalid format'`` narrows the TCP
-    #: sites to the one
-    #: option that can print ``28``. The tuple form is for messages whose stable
-    #: parts are not contiguous, so that a fragment does not have to bake in a
-    #: rendering that is itself defective.
+    #: sites to the one option that can print ``28``. The tuple form is for
+    #: messages whose stable parts are not contiguous, so that a fragment does
+    #: not have to bake in a rendering that is itself defective.
     fragment: 'str | tuple[str, ...]'
     #: The defect, named with the ``file:line`` that causes it. This is the
     #: field that makes the entry worth keeping rather than just silencing.
     defect: 'str'
 
 
-#: Every case whose cycle does not close today.
+#: Every case whose cycle does not close, and the defect that stops it. It is
+#: empty while every case round-trips; the comments below record the entries
+#: deleted as their defects were fixed.
 #:
 #: Grouped by defect rather than by family, because the failures cluster far more
-#: tightly by cause than by protocol: four lines of ``schema/transport/tcp.py``
-#: account for four Multipath TCP subtypes, and one line of
-#: ``pcapkit/protocols/misc/pcapng.py`` accounts for twenty-seven PCAP-NG
-#: options.
+#: tightly by cause than by protocol: most Multipath TCP subtypes failed on the
+#: same missing ``MPTCP`` schema fields in ``schema/transport/tcp.py``, and
+#: ``PCAPNG.__post_init__`` alone failed every PCAP-NG option with an "only one"
+#: guard.
 EXPECTED_FAILURES = {
 
     # -- TCP ------------------------------------------------------------------
@@ -398,7 +399,7 @@ EXPECTED_FAILURES = {
     # PCAP-NG entries used to be recorded here, for the defects
     # that #1267-#1270 fixed. ``PCAPNG.__post_init__`` carried the make pass's
     # option count into its own re-parse, so every option with an "only one"
-    # guard tripped it (27 options). ``if_IPv6addr`` declared 8 octets for 17.
+    # guard tripped it. ``if_IPv6addr`` declared 8 octets for 17.
     # ``isb_starttime``/``isb_endtime`` read an interface ID that only the parse
     # path set. And an EPB, SPB or PB rebuilt from its data model lost its
     # packet data. All of them round-trip now.

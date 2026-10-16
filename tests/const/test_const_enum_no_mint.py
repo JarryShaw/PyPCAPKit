@@ -2381,7 +2381,7 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
     spans above convert to :meth:`~pcapkit.corekit.enum.
     EnumRegistry._unregistered_member` exactly like the placeholder spans,
     *not* declared as real, individually-listed members the way #860 step 2's
-    PR 1 declared ``FEATCode``'s. ``FEATCode``'s fix addressed a
+    PR 1 declared ``FEATCode``'s members. ``FEATCode``'s fix addressed a
     *different* defect -- a const module minting members as a side effect of
     merely being imported, which does not exist here, since every one of
     these spans mints only on an actual port lookup -- and the owner's

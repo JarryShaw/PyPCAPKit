@@ -14,11 +14,11 @@ The integer path -- the one every numeric lookup takes -- could not.
 
 The sweep below is the one #584 asked for before fixing ("the real scope is
 likely wider since most ``const/`` modules are generated from the same
-skeleton"). Measured: across the :class:`~aenum.IntEnum` and
+skeleton"), and it bore that out: across the :class:`~aenum.IntEnum` and
 :class:`~aenum.IntFlag` registries defined under :mod:`pcapkit.const`, the
-defect was live in all but a handful -- not just the three the issue named. Of
-the rest, some never raise on an out-of-range integer because they auto-extend
-the whole space, and the others carry no ``get(key, default)`` at all.
+defect was live in nearly all of them -- not just the ones the issue named. The
+rest either never raise on an out-of-range integer, because they auto-extend
+the whole space, or carry no ``get(key, default)`` at all.
 
 GitHub issue #647 moved one of the auto-extending registries into the sweep.
 :class:`~pcapkit.const.tcp.flags.Flags` resolved every integer only because it
@@ -38,13 +38,12 @@ plus :data:`EXPECTED_TO_RESOLVE_ANYTHING`, plus
 :data:`EXPECTED_WITHOUT_AN_INTEGER_DEFAULT`, plus ``FilterType`` -- together,
 the population :meth:`test_the_sweep_size_is_pinned` counts.
 
-Some registries are outside this sweep because they are
-:class:`~aenum.StrEnum` rather than integer enums, and were deliberately
-left alone: :class:`~pcapkit.const.pcapng.option_type.OptionType` and
-:class:`~pcapkit.const.reg.apptype.AppType` each carry a bespoke integer
-fallback that already resolves every value, so neither drops a default by
-raising. The string-keyed registries
-:class:`~pcapkit.const.ftp.command.Command` and
+:class:`~pcapkit.const.pcapng.option_type.OptionType` and
+:class:`~pcapkit.const.reg.apptype.AppType` are outside this sweep because
+they are :class:`~aenum.StrEnum` rather than integer enums, and were
+deliberately left alone: each carries a bespoke integer fallback that already
+resolves every value, so neither drops a default by raising. The string-keyed
+registries :class:`~pcapkit.const.ftp.command.Command` and
 :class:`~pcapkit.const.http.method.Method` have no integer path at all; they are
 the subject of #582 and #583 instead.
 

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """The ``*Base``/public split, asserted rather than left to convention.
 
-Five class pairs carry the same contract, and GitHub issue #514 settled what it
-is: **library classes inherit the ``*Base``; users inherit the public class, and
+The class pairs tabled below carry the same contract, and GitHub issue #514
+settled what it is: **library classes inherit the ``*Base``; users inherit the public class, and
 only a subclass of the public class auto-registers.** So
 ``descendants(Protocol) == 0`` is the invariant to enforce, not a defect to fix.
 
@@ -19,7 +19,7 @@ dumpers           :class:`pcapkit.dumpkit.common.DumperBase`      ``Dumper``
 Two different things are checked here, and the split between them is deliberate
 because only one of them is a behaviour claim.
 
-:class:`BaseClassAliasTests` is the part with teeth. Until #514 part (c), 82
+:class:`BaseClassAliasTests` is the part with teeth. Until #514 part (c),
 import statements across the library read ``from ... import ProtocolBase as
 Protocol`` -- binding the *base* to the *public* name -- so a module went on to
 say ``class Application(Protocol)`` while in fact inheriting ``ProtocolBase``.
@@ -33,7 +33,7 @@ built-ins for three years). These tests replace the convention with
 something that fails.
 
 The sweep and the migration are both complete: every site is renamed, the
-last of them (all ``ProtocolBase``, across ``pcapkit/protocols/`` and some
+last batch of them (all ``ProtocolBase``, across ``pcapkit/protocols/`` and some
 ``pcapkit/foundation/`` modules) having landed in #514 part (c) once #726 and
 #742 merged. :data:`PENDING_ALIAS_PATHS` is therefore empty -- its intended end
 state -- and :func:`is_pending` is trivially ``False`` for every path; the dict

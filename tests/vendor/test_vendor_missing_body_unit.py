@@ -22,7 +22,7 @@ deliberately does **not** register -- so ``cls(value)`` missed again, re-entered
 The invariant is deliberately not "every emitted line returns": the base
 crawler itself emits legitimate non-returning lines for a range-guarded body.
 :meth:`pcapkit.vendor.default.Vendor.process` (see
-:file:`pcapkit/vendor/default.py:425-427`) renders such a body as three
+:file:`pcapkit/vendor/default.py:424-426`) renders such a body as three
 lines -- an ``if`` header, a ``#:`` comment, then an indented ``return`` --
 and only the third of the three returns::
 
@@ -30,8 +30,9 @@ and only the third of the three returns::
     miss.append(f'    #: {desc}')
     miss.append(f"    return cls._unregistered_member(value, '{self.safe_name(name)}')")
 
-Measured: many crawlers emit such non-returning lines between them, and
-registries under :mod:`pcapkit.const` carry exactly that shape.
+Such bodies are routine rather than a corner case: crawlers across
+:mod:`pcapkit.vendor` emit these non-returning lines, and registries under
+:mod:`pcapkit.const` carry exactly that shape.
 A crawler hard-coding a range-guarded body as a list literal is writing
 something valid, so the guard below checks only that a hard-coded body
 *ends* in a ``return`` and that no emitted line re-enters ``_missing_`` for

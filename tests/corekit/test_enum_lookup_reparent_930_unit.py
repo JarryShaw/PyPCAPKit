@@ -9,8 +9,8 @@ requests at the time: :mod:`pcapkit.const.ftp.command` (``CommandType``,
 (``ESPStatus``) plus :mod:`pcapkit.protocols.internet.mh`
 (``FastBindingAcknowledgmentStatus``, ``IPv6AddressPrefixCode``, ``LMAAddressCode``,
 ``LocalizedRoutingStatus``) under #904. Both blockers have since merged, and this
-module pins that the remainder actually took the base -- finishing phase 2 at 24 of 24
-non-registry enumerations, with zero still outside the hierarchy.
+module pins that the remainder actually took the base -- finishing phase 2 with every
+non-registry enumeration inside the hierarchy and none still outside it.
 
 Two of the seven, :class:`FastBindingAcknowledgmentStatus` and
 :class:`IPv6AddressPrefixCode`, defined their own ``get`` at #930's own revision -- both as

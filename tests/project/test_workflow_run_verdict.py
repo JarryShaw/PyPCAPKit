@@ -400,7 +400,7 @@ _GROUP = re.compile(r'^concurrency:\n  group: (?P<prefix>[^$\n]*)\$\{\{(?P<body>
 
 
 class TestEachWorkflowGatesOnTheVerdict(unittest.TestCase):
-    """The ``verdict`` job, and the job it gates, in each of those workflows."""
+    """The ``verdict`` job, and the job it gates, in each :data:`ACTING_JOBS` workflow."""
 
     @classmethod
     def setUpClass(cls) -> None:

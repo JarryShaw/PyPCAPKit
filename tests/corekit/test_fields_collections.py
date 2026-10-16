@@ -330,9 +330,9 @@ class ListFieldSchemaItemTests(unittest.TestCase):
     ``field``, discarding whatever the copy carries. C.f. #433.
 
     No declaration in this package passes either argument, so nothing here
-    parses differently; both cases below construct a ``ListField``
-    directly rather than through one of the in-tree declarations, since
-    those are exactly the shape that hides the bug.
+    parses differently while that holds; both cases below construct a
+    ``ListField`` directly rather than through one of the in-tree
+    declarations, since those are exactly the shape that hides the bug.
 
     """
 

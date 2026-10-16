@@ -13,8 +13,8 @@ around :func:`typing.get_type_hints` that catches the ``NameError`` a
 re-resolving the *whole* class, which is what made documenting this one
 registry cost 378.8s on CI -- the single largest stall in the entire docs
 build. The annotation carried no information a lookup needs: member
-construction reads the positional tuple, not ``__annotations__``. Measured on
-this checkout: dropping it removes 86,838 bytes (7/8 bytes per member,
+construction reads the positional tuple, not ``__annotations__``. Measured
+when #769 fixed it: dropping it removed 86,838 bytes (7/8 bytes per member,
 depending on whether its class name is 3 or 4 letters long).
 
 GitHub issue #768: the ``proto`` argument on every one of those members, and
@@ -22,11 +22,12 @@ every ``cls.__transport__ is ...`` test in a range-row ``_missing_`` branch,
 called :meth:`~pcapkit.const.reg.apptype.apptype.TransportProtocol.get`
 (524 ns, an ``isinstance`` check, two ``.lower()`` calls, a membership test
 and a ``__getitem__``) to reach a member plain attribute access returns in
-24 ns -- 23,941 call sites this checkout measured rewritten to the attribute
-form, saving 7 bytes each (``TransportProtocol.get('tcp')`` is 28 characters,
+24 ns -- every such call site rewritten to the attribute form, saving 7 bytes
+each (``TransportProtocol.get('tcp')`` is 28 characters,
 ``TransportProtocol.tcp`` is 21), for 167,587 bytes (163.7 KiB) of generated
-source. The generator only ever emits the five declared names
-(``TRANSPORTS + ('undefined',)``), so the attribute form cannot miss.
+source as measured when #769 fixed it. The generator only ever emits the five
+declared names (``TRANSPORTS + ('undefined',)``), so the attribute form cannot
+miss.
 
 GitHub issue #770: ``undefined = 0`` in the ``BASE`` template is a bare int
 literal, so mypy -- which has no :mod:`aenum` plugin and so treats this class
@@ -184,10 +185,10 @@ class AppTypeGeneratorShapeTests(unittest.TestCase):
     def test_no_transport_protocol_get_calls_survive_in_generated_output(self) -> None:
         """GitHub issue #768, swept over the generated source text itself.
 
-        23,941 *generator-emitted* sites this checkout measured -- one per
-        member's ``proto`` argument plus one per ``cls.__transport__ is ...``
-        range-row test and its own ``extend_enum(...)`` call -- were
-        rewritten and have none. The 23,942nd site is the one legitimate
+        Every *generator-emitted* site -- one per member's ``proto``
+        argument plus one per ``cls.__transport__ is ...`` range-row test and
+        its own ``extend_enum(...)`` call -- was rewritten, so the generated
+        registries have none. The base module keeps the one legitimate
         survivor, ``_dispatch``'s ``TransportProtocol.get(proto.lower())``,
         which resolves a *caller*-supplied string at run time and so cannot
         be a fixed attribute access -- exactly the "other callers" #768 says

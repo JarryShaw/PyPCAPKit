@@ -44,8 +44,8 @@ extra, since #507 (:file:`pyproject.toml`), so the skip never bought anything.
 Dropping it (#1772) brought in the vendor modules and packages, and found
 packages holding public attributes their :attr:`__all__` omitted:
 :mod:`pcapkit.vendor.ipx` leaked ``path``, the temporary of its ``sys.path``
-save-and-restore, since renamed ``_path``; :mod:`pcapkit.vendor`'s are recorded
-in :data:`DELIBERATE_NON_EXPORTS`.
+save-and-restore, since renamed ``_path``; the attributes :mod:`pcapkit.vendor`
+itself left unlisted are recorded in :data:`DELIBERATE_NON_EXPORTS`.
 
 No import is wrapped in a skip, either. That is deliberate and also measured: with
 ``dpkt``, ``scapy``, ``emoji``, ``cryptography`` and ``pycrate`` all absent, every
@@ -65,7 +65,7 @@ issue #533, and scope is what makes it a test rather than noise.
 When #533 was measured, the converse applied to every *module* flagged 2848
 names across 286. That is not a failing test, it is a wall: a module's namespace
 holds whatever it imported in order to do its job, and none of that is its public
-surface. Applied to the 52 public *packages* there were then, it flagged 45
+surface. Applied to the public *packages* there were then, it flagged 45 names
 across 12 -- small enough to read, triage, and write down one at a time. A
 package's namespace is a composed thing: it holds what its :file:`__init__.py`
 chose to pull in, so a public attribute it has and does not export is a decision
@@ -75,9 +75,9 @@ explicit instead of leaving it to be guessed at.
 :data:`DELIBERATE_NON_EXPORTS` is where the decisions are recorded, and it is
 load-bearing rather than an escape hatch: without it the assertion is
 unsatisfiable, and with it every exclusion is something somebody wrote down and a
-reviewer can argue with. Of those, about half were genuine omissions and are
-exported as of the commit that added this assertion -- among them the
-``register_*_callback`` and ``register_extractor_*`` functions that
+reviewer can argue with. Of the names the package sweep flagged, about half were
+genuine omissions and are exported as of the commit that added this assertion --
+among them the ``register_*_callback`` and ``register_extractor_*`` functions that
 :mod:`pcapkit.foundation` withheld while listing the other registry functions,
 ``ReassemblyManager`` and ``TraceFlowManager``, which are defined *below* the
 :attr:`__all__` literal that forgot them and imported by name from several modules,

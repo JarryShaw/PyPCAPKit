@@ -10,9 +10,9 @@ real thing runs in :mod:`tests.integration.test_cli_subprocess`.
 :data:`sys.modules` is process-global, so binding a stand-in over a real module
 name is a write that outlives the test unless something undoes it -- and these
 stand-ins are *emptier* than what they replace, which is the quiet kind. Issue
-#688: this file wrote those names and put none of them back -- the stand-ins
-above, the bare ``pcapkit.foundation`` parent they hang from, and
-``pcapkit.__main__`` itself. Pairing it with :mod:`tests.project.test_public_api`
+#688: this file bound module names there -- the stand-ins above, the bare
+``pcapkit.foundation`` parent they hang from, and ``pcapkit.__main__`` itself
+-- and put none of them back. Pairing it with :mod:`tests.project.test_public_api`
 gave a run of ``ImportError: cannot import name 'show_flag_values' from
 'pcapkit.utilities.compat'`` errors and one for ``SeekError``, because the real
 library's next import found a ``pcapkit.utilities.compat`` carrying exactly one name.
@@ -65,9 +65,9 @@ ISOLATED = ISOLATED_PREFIXES + ('emoji',)
 
 #: How many module names :func:`summarise_names` spells out before it starts
 #: counting instead. Bounded because the interesting list is long: on a warm
-#: module table the :mod:`pcapkit` region holds hundreds of names, so an
-#: unbounded report of what a leak did to it is twelve kilobytes of failure
-#: message that nobody reads -- measured, at 12089 characters.
+#: module table the :mod:`pcapkit` region holds every library module already
+#: imported, so an unbounded report of what a leak did to it is twelve kilobytes
+#: of failure message that nobody reads -- measured, at 12089 characters.
 NAMES_IN_FAILURE_MESSAGE = 8
 
 
