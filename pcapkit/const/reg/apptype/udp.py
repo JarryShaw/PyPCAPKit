@@ -17214,6 +17214,9 @@ class UDP(AppType):
     #: [UDP] Reserved
     reserved_4915 = 4915, 'reserved', TransportProtocol.udp
 
+    #: [UDP] Reserved
+    reserved_4930 = 4930, 'reserved', TransportProtocol.udp
+
     #: [UDP] Signal protocol port for autonomic networking
     an_signaling = 4936, 'an-signaling', TransportProtocol.udp
 

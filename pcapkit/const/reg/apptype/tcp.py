@@ -17765,6 +17765,9 @@ class TCP(AppType):
     #: [TCP] Fibics Remote Control Service
     frcs = 4915, 'frcs', TransportProtocol.tcp
 
+    #: [TCP] Host-to-host messaging
+    fmsg = 4930, 'fmsg', TransportProtocol.tcp
+
     #: [TCP] Reserved
     reserved_4936 = 4936, 'reserved', TransportProtocol.tcp
 

@@ -3178,7 +3178,10 @@ class AppType(EnumRegistry, StrEnum):
         if 4903 <= value <= 4911:
             #: [N/A] Unassigned
             return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
-        if 4916 <= value <= 4935:
+        if 4916 <= value <= 4929:
+            #: [N/A] Unassigned
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
+        if 4931 <= value <= 4935:
             #: [N/A] Unassigned
             return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4938 <= value <= 4939:
