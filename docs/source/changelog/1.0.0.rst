@@ -3,7 +3,7 @@
 
 The 1.0 rewrite: parsing and construction are one declarative definition per
 protocol, and the extraction backend became pluggable. Roughly 55,000 lines
-changed across 617 files, released after 21 beta builds and a release candidate.
+added and 15,000 removed across 617 files, released after 21 beta builds and a release candidate.
 
 * **Added** -- the schema and field layer, ``pcapkit.protocols.schema`` and
   ``pcapkit.corekit.fields``. A protocol declares its wire format once, as
