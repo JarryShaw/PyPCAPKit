@@ -60,7 +60,6 @@ as below:
 
 """
 import ipaddress
-import re
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.ospf.authentication import Authentication as Enum_Authentication
@@ -88,9 +87,6 @@ if TYPE_CHECKING:
     from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['OSPF']
-
-# Ethernet address pattern
-PAT_MAC_ADDR = re.compile(rb'(?i)(?:[0-9a-f]{2}[:-]){5}[0-9a-f]{2}')
 
 
 class OSPF(Application[Data_OSPF, Schema_OSPF],
