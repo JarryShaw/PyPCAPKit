@@ -6,7 +6,8 @@
   a real wheel of a stub package with :file:`setup.py`'s own ``cmdclass``.
 * Each backport's failure message names the feature that tool back-ports.
 * ``make profile`` reaches a Makefile that exists, and every ``prune`` in
-  :file:`MANIFEST.in` names a directory the repository tracks or ignores.
+  :file:`MANIFEST.in` names a directory the repository tracks or ignores. Every
+  other line there changes what the template selects (#1794).
 * No reStructuredText is tracked outside ``docs/`` (the #719 ruling), the
   examples' Markdown READMEs still ship in the sdist, and nothing points at a
   README path that no longer exists.
@@ -212,6 +213,57 @@ class ManifestTests(unittest.TestCase):
                                           f'{directory}/'], cwd=ROOT, check=False)
                 self.assertEqual(ignored.returncode, 0,
                                  f'prune {directory} names a directory git neither tracks nor ignores')
+
+    def test_every_other_directive_changes_the_selection(self) -> None:
+        """Dropping any non-``prune`` line changes which tracked files the template selects.
+
+        An exclusion may instead guard a path git ignores, as ``prune`` may above.
+        The template runs without setuptools' defaults, so ``include README.md``
+        counts as effective here although a real build ships the README anyway
+        (#1794).
+        """
+        files = tracked()
+        directives = [line.strip() for line in
+                      (ROOT / 'MANIFEST.in').read_text(encoding='utf-8').splitlines()
+                      if line.strip() and not line.lstrip().startswith('#')]
+        driver = textwrap.dedent('''
+            import json, os, sys
+            from setuptools.command.egg_info import FileList
+            data = json.loads(sys.stdin.read())
+            tracked = set(data['files'])
+
+            def select(lines):
+                listing = FileList()
+                listing.allfiles = list(data['files'])
+                for line in lines:
+                    listing.process_template_line(line)
+                return sorted({name.replace(os.sep, '/') for name in listing.files} & tracked)
+
+            lines = data['lines']
+            print(json.dumps([select(lines)] + [select(lines[:index] + lines[index + 1:])
+                                                for index in range(len(lines))]))
+        ''')
+        result = subprocess.run([sys.executable, '-c', driver], cwd=ROOT,  # nosec
+                                input=json.dumps({'files': files, 'lines': directives}),
+                                capture_output=True, text=True, check=True, timeout=120)
+        selected, *without = json.loads(result.stdout)
+        for line, rest in zip(directives, without):
+            action, *words = line.split()
+            if action == 'prune':
+                continue
+            with self.subTest(line=line):
+                if rest != selected:
+                    continue
+                if action.endswith('exclude'):
+                    if action.startswith('recursive-'):
+                        targets = [f'{words[0]}/{pattern}' for pattern in words[1:]]
+                    else:
+                        targets = words
+                    if all(subprocess.run(['git', 'check-ignore', '-q', '--no-index',  # nosec
+                                           target], cwd=ROOT, check=False).returncode == 0
+                           for target in targets):
+                        continue
+                self.fail(f'{line!r} changes nothing the template selects from the tracked files')
 
     def test_no_restructuredtext_outside_docs(self) -> None:
         stray = [name for name in tracked()
