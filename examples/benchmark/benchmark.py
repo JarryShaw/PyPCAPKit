@@ -24,7 +24,7 @@ figures stay comparable in kind with what the project has already published:
 milliseconds per packet. The deliberate departures are listed in
 :file:`README.md` under "Departures from the legacy methodology".
 
-Two properties matter more than the numbers themselves.
+Some properties matter more than the numbers themselves.
 
 **The engine that ran is asserted, not assumed.** A missing or unusable engine
 does not raise: :meth:`Extractor.run
@@ -404,7 +404,7 @@ def preflight(engine: 'str', capture: 'str') -> 'tuple[Optional[str], Optional[s
     through a thousand extractions throws the whole repeat away, and an engine
     this environment does not have is not a measurement at all.
 
-    Three sources are consulted, in this order, and the order is the point: what the
+    These sources are consulted, in this order, and the order is the point: what the
     image recorded about not installing the engine at all (:func:`_not_attempted`),
     then the engine's own ``unsupported_reason()``, then an actual attempt. The first
     wins outright where it exists, since an engine the interpreter rules out cannot
@@ -483,8 +483,8 @@ def measure(engine: 'str', capture: 'str', rounds: 'int',
     fastidiousness. ``pyshark`` spawns a :program:`tshark` process per extraction,
     so a default run spawns three thousand of them, and measured here: one of them
     crashed with ``TSharkCrashException ... retcode: 255`` partway through the
-    third pass and took the entire run with it -- six working engines went
-    unreported because the seventh hiccupped once. A crashed extraction is a
+    third pass and took the entire run with it -- every working engine went
+    unreported because one hiccupped once. A crashed extraction is a
     *non-measurement* rather than a slow measurement, so discarding its sample is
     correct; what would not be honest is discarding it silently, which is why the
     count and the reasons are returned and reported.
@@ -629,7 +629,7 @@ def run(capture: 'str', engines: 'tuple[str, ...]', rounds: 'int', repeats: 'int
     facts = _capture_facts(capture)
 
     # Preflight once, up front. An engine ruled out here is ruled out for every
-    # repeat, and reporting the reason once beats reporting it three times.
+    # repeat, and reporting the reason once beats reporting it on every repeat.
     status = {}  # type: dict[str, Optional[str]]
     for engine in engines:
         reason, driver = preflight(engine, capture)
@@ -660,7 +660,7 @@ def run(capture: 'str', engines: 'tuple[str, ...]', rounds: 'int', repeats: 'int
             except Exception as exc:  # pylint: disable=broad-except
                 # A third-party engine gave up partway through this pass. Measured:
                 # `tshark` crashed on the third pass of a real run and, before this
-                # branch existed, took the six working engines down with it. The
+                # branch existed, took the working engines down with it. The
                 # pass is lost; the run is not, and the loss is recorded rather than
                 # quietly rounded away.
                 failures[engine].append(f'pass {repeat + 1}: {type(exc).__name__}: {exc}')

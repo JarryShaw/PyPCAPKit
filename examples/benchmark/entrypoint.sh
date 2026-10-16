@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Inside the image, in one of two modes.
+# Inside the image, in one of the modes below.
 #
 # `BENCH_MODE=measure` (the default) times every environment this image holds and
 # writes one JSON document per environment. Which environments those are is read
@@ -60,8 +60,8 @@ if [ "$MODE" = measure ]; then
         # The locks record the resolved transitive closure, which the pinned
         # requirements files only partly fix. Copied out under the environment's own
         # label rather than the virtualenv's, because the matrix has one lock per
-        # (version, `pcap` provider) pair and `pypcap.txt` from five images would be
-        # four files overwriting each other.
+        # (version, `pcap` provider) pair and `pypcap.txt` from several images would
+        # be files overwriting each other.
         cp -f "$lock" "$OUT/$label.txt" 2>/dev/null || true
     done 3< /opt/environments
     exit 0

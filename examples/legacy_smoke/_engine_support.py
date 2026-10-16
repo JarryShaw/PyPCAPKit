@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """Which extraction engines can actually run on this host.
 
-``pcapkit`` ships four extraction engines and three of them lean on something the
-host may simply not have: ``dpkt``, ``scapy`` and ``pyshark`` are optional
-third-party packages, and ``pyshark`` additionally drives the external ``tshark``
-binary from Wireshark. On top of that, ``pyshark`` 0.6 calls
+Most of ``pcapkit``'s extraction engines lean on something the host may simply
+not have: every engine but ``default`` wraps an optional third-party package, and
+``pyshark`` additionally drives the external ``tshark`` binary from Wireshark.
+On top of that, ``pyshark`` 0.6 calls
 ``asyncio.get_event_loop_policy().get_event_loop()`` on a thread with no running
 loop. Creating one implicitly there was deprecated years ago and Python 3.14 no
 longer does it, raising ``RuntimeError: There is no current event loop in thread

@@ -38,7 +38,7 @@ license = { text="BSD 3-Clause License" }
 # ``poseur.py:744`` in ``_process_classdef``, which does ``cls_ctx=name.name``
 # where ``name`` is already a parso ``Name`` leaf and wants ``.value``. It then
 # **exits 0**, so ``refactor()``'s ``check_call`` cannot see the failure, and the
-# 12 positional-only parameters in ``pcapkit/corekit/io.py`` survive into the
+# positional-only parameters in ``pcapkit/corekit/io.py`` survive into the
 # installed package -- making ``import pcapkit`` fail with ``SyntaxError`` on an
 # interpreter below 3.8.
 #
@@ -48,7 +48,7 @@ license = { text="BSD 3-Clause License" }
 # reason to withdraw the declaration. Until it lands, sub-3.8 support is intent
 # rather than something that works.
 #
-# Independently, CI has two tiers (#1633), declared in .github/python-versions.toml
+# Independently, CI sorts versions into tiers (#1633), declared in .github/python-versions.toml
 # (#1660), which a tier change edits. **3.11 through 3.15** are supported and
 # blocking. **3.7 through 3.10** are KTLO: end-of-life, still built and tested, never
 # blocking, and a failure there is a warning on a green leg (#1672). Each 3.7 leg
@@ -152,7 +152,7 @@ DPKT = [ "dpkt" ]
 # The floor is measured, #1572: on scapy 2.5.0 a PCAP-NG interface's
 # ``if_tsresol`` is lost after a comment option without a newline, so a
 # nanosecond interface reads as microseconds, and ``packet2dict`` reports DNS
-# records and field order differently. 2.6.0, the next release, fixes all three.
+# records and field order differently. 2.6.0, the next release, fixes them all.
 # It needs Python 3.7, hence the marker, as ``PCAP_CT``'s below.
 Scapy = [ "scapy>=2.6.0; python_version >= '3.7'" ]
 PyShark = [ "pyshark" ]
@@ -171,7 +171,7 @@ PyShark = [ "pyshark" ]
 # its own, and is unmaintained.
 PyPCAP = [ "pypcap; python_version < '3.12'" ]
 # ``pcap-ct`` is what covers 3.12+, and it is a *separate extra* rather than a
-# complementary marker on ``PyPCAP`` above. Two reasons, and the first is
+# complementary marker on ``PyPCAP`` above, for the reasons below, the first
 # decisive:
 #
 #   * They are two engines, not one engine with two backends -- ``engine='pypcap'``
@@ -226,10 +226,10 @@ PCAP_CT = [
 PyPCAPFile = [ "pypcapfile; python_version < '3.12'" ]
 # for developers -- installs pcapkit.vendor's crawlers, run via
 # `pcapkit-vendor` to regenerate pcapkit.const. Includes ``pycrate`` so
-# pcapkit.vendor.ngap's two crawlers (#880) can run, and ``requests``/
-# ``beautifulsoup4`` for the six crawlers that import them at module scope
+# pcapkit.vendor.ngap's crawlers (#880) can run, and ``requests``/
+# ``beautifulsoup4`` for the crawlers that import them at module scope
 # (c.f. the ``test`` extra's own comment below for which, and #507). #910
-# narrowed ``all`` to core addons only, so this extra names all three
+# narrowed ``all`` to core addons only, so this extra names each of them
 # itself rather than leaning on ``all`` to also carry them -- ``pycrate``
 # happens to be a core addon in its own right post-#910 (see the ``all``
 # extra's comment below), but ``requests``/``beautifulsoup4`` are not, having
@@ -241,7 +241,7 @@ vendor = [ "requests[socks]", "beautifulsoup4[html5lib]", "pycrate" ]
 # than everything an end user might conceivably want. An earlier ruling on the
 # same issue read the latter and added ``pycrate`` on that basis; the ruling that
 # stuck narrowed it again, this time by kind: ``cli``, ``crypto`` and ``pycrate``
-# (NGAP) are core addons and stay, and the four 3rd-party capture engines that
+# (NGAP) are core addons and stay, and the 3rd-party capture engines that
 # used to be here -- ``dpkt``, ``scapy``, ``pyshark``, ``pypcapfile`` -- are
 # installed one at a time on demand, as ``PyPCAP`` and ``PCAP_CT`` always were,
 # and move out to their own extras below. Install one explicitly: ``pip install pypcapkit[DPKT]`` /
@@ -262,11 +262,11 @@ all = [ "emoji", "cryptography>=3.4", "pycrate" ]
 # ``dpkt``/``scapy``/``pyshark``/``pypcapfile`` newly unresolvable to those
 # tools. This extra is what a workflow installs *alongside* ``all`` --
 # ``.[all,dev]`` -- to see everything ``all`` used to carry, for that purpose
-# only. ``.github/workflows/lint.yml``'s own comment tracks exactly 8
+# only. ``.github/workflows/lint.yml``'s own comment traces pylint's
 # ``import-error`` messages, from ``pypcap``/``pcap-ct`` (via ``PyPCAP`` and
 # ``PCAP_CT`` above, both absent on the Python it lints) and from
 # ``pypcapfile`` being excluded there by the same marker this extra repeats
-# below; this is the extra that keeps that count at 8 rather than growing it,
+# below; this is the extra that keeps those from growing in number,
 # and it is not a place to add ``pypcap``/``pcap-ct`` just to silence a
 # finding CI has already decided to carry as advisory.
 dev = [
@@ -302,32 +302,32 @@ test = [
     "pytest-timeout",
     "typing-extensions",
     # Enough of the ``vendor`` extra for a test to import a vendor crawler.
-    # Without these, ``tests/vendor/test_ipx_socket_unit.py`` reports "9 skipped"
-    # rather than failing, so the byte-for-byte regeneration check that is the
+    # Without these, ``tests/vendor/test_ipx_socket_unit.py`` reports its tests as
+    # skipped rather than failing, so the byte-for-byte regeneration check that is the
     # only guard on the hand-maintained IPX socket registry never runs on any CI
     # path: every ``unit-tests.yml`` job's install line builds on ``.[test]``,
     # and ``cron-vendor.yml`` installs ``.[all,vendor]`` but never invokes pytest.
     #
     # Both are needed, not just ``requests``. ``pcapkit.vendor.default`` imports
     # ``requests`` at module scope, and ``pcapkit.vendor.__init__`` then imports
-    # every crawler unconditionally -- six of which import ``bs4`` at module
+    # every crawler unconditionally -- some of which import ``bs4`` at module
     # scope. Its ``try: import bs4`` guard suppresses only the warning, not the
     # ``ModuleNotFoundError`` that the crawler imports below it raise anyway.
     #
     # Plain, without the ``vendor`` extra's ``[socks]`` and ``[html5lib]``:
-    # nothing in the test suite goes through a proxy, and the one unit-tier
+    # nothing in the test suite goes through a proxy, and the unit-tier
     # test that parses HTML (``tests/vendor/test_ftp_return_code_unit.py``)
     # does so from an inline fixture with the ``vendor`` extra's own
     # ``html5lib``, not through anything this extra provides, so neither
     # parser nor proxy support is reachable from here. Their absence
-    # makes :mod:`pcapkit.vendor` log two ``VendorWarning``s at import, which
+    # makes :mod:`pcapkit.vendor` log ``VendorWarning``s at import, which
     # pytest captures and shows only on failure; they change no result. See #507.
     "requests",
     "beautifulsoup4",
-    # Same reason as the two above, for a different test: without it
+    # Same reason as the entries above, for a different test: without it
     # ``tests/project/test_isort_clean.py`` skipped on every CI leg, so the only
-    # guard on ``make isort``'s four recipe lines -- and on the target-resolving
-    # globs behind them, wrong three times over (#757, #765, #767) -- ran
+    # guard on ``make isort``'s recipe lines -- and on the target-resolving
+    # globs behind them, wrong more than once (#757, #765, #767) -- ran
     # nowhere. #766.
     #
     # A lint tool in the ``test`` extra rather than in a ``lint`` extra of its
@@ -337,11 +337,11 @@ test = [
     # anything, and carrying mypy would silently close the ``HAS_MYPY`` gap that
     # #779 decided to leave open -- reversing a ruling from an unrelated change.
     #
-    # Unlike the other four linters, isort has no CI check of its own to defer
+    # Unlike the other linters, isort has no CI check of its own to defer
     # to: ``.github/workflows/lint.yml`` installs "vermin pylint mypy bandit"
     # and says in its own header that isort appears only in
     # ``cron-vendor.yml``, as a formatter rather than as a check. Cheap, too --
-    # a pure-Python wheel, and all four lines together measure about 1.5s.
+    # a pure-Python wheel, and the recipe lines together measure about 1.5s.
     #
     # Unpinned, matching ``requests`` and ``beautifulsoup4`` above rather than
     # inventing an unmeasured floor (verified against 9.0.1). A future isort

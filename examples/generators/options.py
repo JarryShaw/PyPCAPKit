@@ -27,8 +27,8 @@ Ethernet envelope around octets that :mod:`pcapkit` itself constructed, rather
 than a packet assembled by :mod:`scapy` from its own protocol model. That is the
 point: the octets under test are the library's own output, so a capture is a
 record of what this version of ``pcapkit`` builds, and re-parsing it exercises
-``_read_*`` against ``_make_*``. The one frame with more in it is HOPOPT's Jumbo
-Payload case, a genuine jumbogram -- see :func:`_jumbogram_datagram`.
+``_read_*`` against ``_make_*``. HOPOPT's Jumbo Payload case is the exception,
+carrying a genuine jumbogram -- see :func:`_jumbogram_datagram`.
 
 Only the codes that construct *successfully* can appear in a capture -- there
 are no octets for the ones that do not. A failing case in a captured family
@@ -66,8 +66,8 @@ Determinism
 -----------
 
 The captures have to regenerate byte-identically; a fixture that churns is
-worse than none, because every unrelated change then shows up as a diff. Four
-things would otherwise vary between runs and are pinned:
+worse than none, because every unrelated change then shows up as a diff. These
+would otherwise vary between runs, and are pinned:
 
 1. Frame timestamps, from :data:`EPOCH` rather than the clock.
 2. The order cases are emitted in, from :func:`sort_key` rather than from
@@ -79,13 +79,13 @@ things would otherwise vary between runs and are pinned:
 4. Anything reading the host. No case here uses PCAP-NG's
    ``_make_option_if_os``, which defaults to the live :mod:`platform` string.
 
-Two deliberate deviations from the sibling generators
-----------------------------------------------------
+Deliberate deviations from the sibling generators
+-------------------------------------------------
 
 Every import of :mod:`pcapkit` and of :mod:`scapy` in this module is
 inside the function that needs it, which is why :mod:`pylint`'s
 ``import-outside-toplevel`` is switched off for the file rather than argued with
-forty times. Both are load-bearing. :mod:`scapy` is needed only by
+at every import. Both are load-bearing. :mod:`scapy` is needed only by
 :func:`generate`, while the case table and :func:`roundtrip` are useful without
 it -- the unit-tier test uses both and has to run on a checkout that installed no
 :mod:`scapy`, so a top-level import would make that test skip for a dependency it
@@ -416,7 +416,7 @@ def _named_registry(owner: 'type', enum: 'Any', prefix: 'str',
 #: <pcapkit.protocols.transport.tcp.TCP.make>` declares it, because ``make``
 #: takes ``**kwargs`` and *silently drops* whatever it does not declare -- no
 #: ``UnknownFieldWarning``, no ``TypeError``, nothing. GitHub issue #602 is
-#: three keys that were spelled wrong and therefore ignored:
+#: the keys below, spelled wrong and therefore ignored:
 #:
 #: * ``'seq'`` is ``seq_no``. The mapping read as sequence number 1 and every
 #:   generated frame carried 0, which is what made the defect worth an issue:
@@ -448,7 +448,7 @@ def _tcp_registry() -> 'Any':
 def _tcp_overrides() -> 'dict[Any, dict[str, Any]]':
     from pcapkit.const.tcp.option import Option as Enum_Option
     return {
-        # Each of these four defaults to an empty variable-length field, which
+        # Each of these defaults to an empty variable-length field, which
         # is the one shape that never runs the field's packing loop.
         Enum_Option.SACK: {'sack': [(1, 2), (3, 4)]},
         Enum_Option.TCP_Alternate_Checksum_Data: {'data': b'\x01\x02'},
@@ -804,7 +804,7 @@ def _sctp_cause_overrides() -> 'dict[Any, dict[str, Any]]':
     return {
         Enum_CauseCode.Missing_Mandatory_Parameter: {
             'types': [Enum_Parameter.State_Cookie]},
-        # The four causes below carry an embedded TLV, and each one's default
+        # The causes below carry an embedded TLV, and each one's default
         # is a zero-length value, i.e. not a TLV.
         Enum_CauseCode.Unresolvable_Address: {
             'value': b'\x00\x0b\x00\x0elocalhost\x00'},
@@ -896,7 +896,7 @@ def _mh_option_overrides() -> 'dict[Any, dict[str, Any]]':
         Enum_Option.Permanent_Home_Keygen_Token: {'token': b'\xbb' * 8},
         Enum_Option.Experimental_Mobility_Option: {'data': b'\xcc' * 4},
         Enum_Option.Binding_Authorization_Data_for_FMIPv6: {'data': b'\xb5'},
-        # The four below are not workarounds for defects: each option has a
+        # The entries below are not workarounds for defects: each option has a
         # minimum content its RFC requires, and the no-argument default is not a
         # well-formed instance of it. The constructors refuse it, correctly, so
         # the arguments here are what make the code reachable at all.
@@ -1125,7 +1125,7 @@ def _hip_build(code: 'Any', kwargs: 'dict[str, Any]') -> 'Any':
     # ``extension=True`` is not decoration. ``HIP.alias`` reads ``self._info``,
     # which ``__post_init__`` only assigns after ``read`` returns, and the sole
     # path that returns before touching it is the ``if extension`` early exit.
-    # Without it every one of the 49 codes fails with ``AttributeError: 'HIP'
+    # Without it every HIP code fails with ``AttributeError: 'HIP'
     # object has no attribute '_info'``.
     return HIP(parameters=[(code, kwargs)] * HIP_COPIES,
                extension=True, **_hip_base(code))
@@ -1220,7 +1220,7 @@ def _httpv2_rebuild(frame: 'Any') -> 'Any':
 # PCAP-NG -- blocks, block options, name records and decryption secrets
 ###############################################################################
 #
-# These four families are exercised by :func:`roundtrip` but deliberately write
+# These families are exercised by :func:`roundtrip` but deliberately write
 # no capture, and the reason is not that a PCAP-NG capture would be
 # uninteresting -- it is that the construction API cannot produce a
 # *reproducible* one. ``_make_block_shb`` takes the section's byte order from
@@ -1646,7 +1646,7 @@ FAMILIES = (
     Family('hip-parameter', _hip_registry, _hip_overrides,
            _hip_build, _hip_parse, _hip_extract, _hip_rebuild,
            capture='options-internet.pcap', envelope='ipv6', proto=139),
-    # The four PCAP-NG families write no capture -- see the section comment
+    # The PCAP-NG families write no capture -- see the section comment
     # above ``PCAPNG_TIME`` for why the construction API cannot make a
     # reproducible one, and what already covers that space instead.
     Family('pcapng-block', _pcapng_block_registry, _pcapng_block_overrides,

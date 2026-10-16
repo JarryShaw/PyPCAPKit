@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """Provision the ``.pcapng`` sample fixtures used by the test suite.
 
-The test suite (``tests/protocols/test_pcapng_regression.py``) reads five
+The test suite (``tests/protocols/test_pcapng_regression.py``) reads
 PCAP-NG captures out of ``examples/captures/`` that :file:`.gitignore` deliberately keeps
 out of the repository. This module puts them back on any machine, without a
-checkout of anything private, by two routes:
+checkout of anything private, by one of these routes:
 
 * **Downloaded** -- fetched from a public source, with the source URL and the
   SHA-256 of the exact bytes pinned below. The digest is checked after every
@@ -33,7 +33,7 @@ Fixture                     Provenance    Exercises
 Provenance and licensing of the downloaded captures
 ---------------------------------------------------
 
-Both downloads come from the Wireshark source tree's ``test/captures``
+The downloads come from the Wireshark source tree's ``test/captures``
 directory (https://gitlab.com/wireshark/wireshark, mirrored on GitHub), which
 is distributed under the GNU GPL v2 or later. They are fetched into ``examples/captures/``,
 which :file:`.gitignore` excludes, so this project never redistributes them --
@@ -50,7 +50,7 @@ the synthesised DHCP payloads come from.
 Block types deliberately left out
 ---------------------------------
 
-Two block types once raised on spec-conformant input and parse since their
+Some block types once raised on spec-conformant input and parse since their
 fixes, so they are absent from these fixtures only because the fixtures have not
 been extended to carry them -- not because pcapkit cannot read them:
 
@@ -73,7 +73,7 @@ been extended to carry them -- not because pcapkit cannot read them:
   no attribute '_info'`` (GitHub issue #345). The block MUST NOT appear in new
   files, so a fixture carrying one would be documenting the past.
 
-Two further constructs were once avoided rather than covered; both are
+Further constructs were once avoided rather than covered; they are
 **fixed**, so the fixtures carry them as regression cover:
 
 * **``if_IPv6addr``** -- ``IPv6InterfaceField.post_process`` in
@@ -93,11 +93,11 @@ Two further constructs were once avoided rather than covered; both are
   simple packet block in the two-interface first section, which is the case
   that used to be rejected.
 
-Three further defects were exercised on purpose, because they warned rather than
+Further defects were exercised on purpose, because they warned rather than
 raised, and a fixture that covers the code path is what will catch a future
-crash there. All three were option-area sizing errors in
-``pcapkit/protocols/schema/misc/pcapng.py``, all three were confirmed by
-bisecting one block type at a time, and all three are **fixed** -- so the
+crash there. Each was an option-area sizing error in
+``pcapkit/protocols/schema/misc/pcapng.py``, each was confirmed by
+bisecting one block type at a time, and each is **fixed** -- so the
 fixtures that reached them are regression cover rather than known-bad input:
 
 * **Interface Statistics Block** -- ``options`` was sized ``length - 20`` though
@@ -458,12 +458,12 @@ def _tls_key_log() -> 'bytes':
 
 def _timestamp_options(writer: '_Blocks',
                        resolution: 'int' = 6) -> 'list[tuple[int, bytes]]':
-    """The three timestamp options every synthesised interface carries.
+    """The timestamp options every synthesised interface carries.
 
     pcapkit looks ``if_tsresol``, ``if_tzone`` and ``if_tsoffset`` up on the
     owning interface for each packet block and logs a ``MissingKeyError`` for
     each one that is absent -- harmless, but it buries the interesting output
-    under three lines per packet. Declaring them explicitly keeps the fixtures
+    under a line per missing option per packet. Declaring them explicitly keeps the fixtures
     quiet as well as complete.
 
     Args:
@@ -672,7 +672,7 @@ def build_test() -> 'bytes':
 
 
 def build_many_interfaces() -> 'bytes':
-    """Build a capture with eight interface description blocks.
+    """Build a capture with many interface description blocks.
 
     The offline stand-in for the downloaded Wireshark capture. Packets are dealt
     round-robin across the interfaces so every interface index is referenced by
@@ -795,7 +795,7 @@ class _Fixture(NamedTuple):
     sha256: 'Optional[str]' = None
 
 
-#: The five fixtures ``tests/protocols/test_pcapng_regression.py`` needs.
+#: The fixtures ``tests/protocols/test_pcapng_regression.py`` needs.
 FIXTURES = (
     _Fixture(
         name='dhcp_big_endian.pcapng',
@@ -973,7 +973,7 @@ class _LogCapture(logging.Handler):
     outside the stack, and the record then never reaches a
     :func:`warnings.catch_warnings` recorder. So the logger is what this listens
     to. Duplicates are dropped, because one complaint per block in a capture
-    with sixty-four packets is not sixty-four pieces of information.
+    with many packets is not that many pieces of information.
 
     """
 

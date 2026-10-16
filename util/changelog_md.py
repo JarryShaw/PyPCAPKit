@@ -4,8 +4,8 @@
 ``docs/source/changelog/<version>.rst`` is the single source of every changelog
 entry, and Sphinx renders the lot as the project's history. ``CHANGELOG.md`` is a
 *derivative* of exactly one of them -- the version being released -- because its
-two consumers, the ``Create Release`` workflow's release body and the source
-distribution, both read Markdown rather than reStructuredText.
+consumers, the ``Create Release`` workflow's release body and the source
+distribution, read Markdown rather than reStructuredText.
 
 Nothing edits ``CHANGELOG.md`` by hand. That is the point: there is no "promote
 the latest entry into the history" step to forget, because the entry was written
@@ -14,7 +14,7 @@ generated from the other. It is the same arrangement as ``pcapkit/const/**``,
 which is generated from ``pcapkit/vendor/**``.
 
 Markdown at the repository root is a deliberate exception to the "documentation is
-reStructuredText" rule, justified by those two consumers.
+reStructuredText" rule, justified by those consumers.
 
 Which entry is "newest"
 -----------------------
@@ -37,7 +37,7 @@ The conversion
 --------------
 
 The entries are written in a deliberately small reStructuredText subset, so the
-conversion is six mechanical rules rather than a document converter:
+conversion is the mechanical rules below rather than a document converter:
 
   1. a setext heading becomes an ATX heading, one level per underline
      character: ``=`` (the version heading) is ``##``, ``-`` (a module
@@ -64,7 +64,7 @@ break rather than a space, so a paragraph wrapped at 79 columns renders as a
 column of short ragged lines. A paragraph with no newline inside it renders the
 same either way, which is why unwrapping is the safe direction.
 
-Six regexes cannot recognise everything reStructuredText can express, and a rule
+Rules this simple cannot recognise everything reStructuredText can express, and a rule
 that does not fire copies its construct straight through as literal text. That is
 how a release body ends up with ``.. note::`` printed in it -- published to GitHub
 and PyPI, where it is expensive and irreversible. So :func:`residual` re-reads the
@@ -91,15 +91,15 @@ believed to be broader than it is, is worse than no guard:
     above it by rule 6 -- the second is how a sub-heading would silently
     disappear into a paragraph.
 
-Two things it deliberately does **not** catch. A bare ``name_`` reference on its
+What it deliberately does **not** catch: a bare ``name_`` reference on its
 own, because a pattern loose enough to spot a trailing underscore in prose fires on
 ordinary identifiers; its target line is caught instead, as above. And a construct
 that rule 6 joins into the *middle* of a line rather than the start of one, since
 every line-anchored pattern here then has nothing to anchor to -- a field list
-buried inside a bullet, say. Both would need the guard to run before unwrapping,
-which is a larger change than the insurance is worth.
+buried inside a bullet, say. Catching either would need the guard to run before
+unwrapping, which is a larger change than the insurance is worth.
 
-Every pattern was measured against all 37 committed entries and matches none of
+Every pattern was measured against every committed entry and matches none of
 them, so the guard costs nothing until an entry actually leaves the subset.
 
 Where a complaint points
@@ -111,7 +111,7 @@ reader can act on, and the guard is the message on a gate that blocks merges.
 It is not the frame the guard finds the construct in. Rule 6 joins a wrapped
 bullet onto one line, so the converted body is a fraction of the file's length
 and a number counted in it is not a location at all: measured on the 1.5.0
-entry, the body is 55 lines against the file's 580, and four roles written on
+entry, the body was 55 lines against the file's 580, and the roles written on
 source lines 467 and 468 all reported as ``line 46``. The bound alone settles it
 -- a number that cannot exceed 55 cannot name a line in a 580-line file.
 
@@ -261,7 +261,7 @@ _LITERAL = re.compile(r'``[^\n]*?``|``')
 
 #: reStructuredText that should be gone by the time conversion finishes. Checked
 #: against the masked text, and each one means a rule did not fire. Every pattern
-#: matches none of the 37 committed entries; see the module docstring for what is
+#: matches none of the committed entries; see the module docstring for what is
 #: covered and what is deliberately not.
 _RESIDUAL = (
     (re.compile(r':[a-zA-Z][a-zA-Z0-9_+:.-]*:' + _SPAN),
@@ -301,7 +301,7 @@ _RESIDUAL = (
 class ResidualMarkupError(RuntimeError):
     """Conversion finished with reStructuredText still in the output.
 
-    Deliberately fatal. The six rules cover the subset the entries are written
+    Deliberately fatal. The conversion rules cover the subset the entries are written
     in; anything outside it would otherwise be copied through as literal text and
     render as itself in a release body, which is a silent defect in a published
     artefact. Failing here instead names the construct, and the line of the entry
@@ -468,7 +468,7 @@ def extlink(name: str, text: str,
 
 
 def convert(rst: str) -> str:
-    """Apply the six rules to one per-version entry.
+    """Apply the conversion rules to one per-version entry.
 
     Args:
         rst: The entry's reStructuredText.
@@ -481,7 +481,7 @@ def convert(rst: str) -> str:
 
 
 def convert_traced(rst: str) -> tuple[str, list[tuple[int, int]]]:
-    """Apply the six rules, and record where each piece of the output came from.
+    """Apply the conversion rules, and record where each piece of the output came from.
 
     What :func:`convert` returns, plus the bookkeeping :func:`residual` needs to
     report a location in *rst* rather than in its own much shorter output. Rules 1
@@ -619,9 +619,9 @@ def unwrap(lines: Sequence[str], origin: Sequence[int]) -> tuple[str, list[tuple
 
 def residual(markdown: str,
              sources: Optional[Sequence[tuple[int, int]]] = None) -> list[str]:
-    """Report reStructuredText left in *markdown* that the six rules did not convert.
+    """Report reStructuredText left in *markdown* that the conversion rules did not convert.
 
-    See the module docstring for the guarded set, for the two constructs left
+    See the module docstring for the guarded set, for the constructs left
     deliberately unguarded, and for why a complaint's line number belongs to the
     entry file rather than to *markdown*.
 

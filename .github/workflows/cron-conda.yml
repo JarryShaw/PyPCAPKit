@@ -325,7 +325,7 @@ jobs:
     # with its own `!cancelled()` does not escape it for this job. Run
     # 38325136710 shows it: "Update requirements.txt" succeeded, pushing
     # f4f94bcad, and both this job and `conda-dist` reported `skipped` with
-    # their own conditions true. So the five bumps #1632 lists were committed
+    # their own conditions true. So the bumps #1632 lists were committed
     # and never tagged or uploaded.
     #
     # `needs.conda-update.result == 'success'` is then what the lost implicit
@@ -334,7 +334,7 @@ jobs:
     # update -- which still publishes the outputs of the steps that did run --
     # would have this job tag from a half-finished run, e.g. one whose push
     # landed and whose Get Version then failed, leaving no build. Same shape as
-    # create-release.yml's `tag` job (:494-498).
+    # create-release.yml's `tag` job.
     if: >-
       !cancelled() && needs.conda-update.result == 'success' &&
       needs.conda-update.outputs.CONDA_CHANGED == 'true'

@@ -588,8 +588,8 @@ class TestFlakyEngines:
 
     Not hypothetical. On a real 1,000-round run, ``tshark`` crashed on the third
     pass -- ``TSharkCrashException ... retcode: 255``, after roughly two thousand
-    process spawns -- and the run produced no table at all. Six working engines went
-    unreported because the seventh hiccupped once.
+    process spawns -- and the run produced no table at all. Every working engine went
+    unreported because one hiccupped once.
 
     """
 
@@ -1001,7 +1001,7 @@ class TestVersionsMarkup:
     def test_one_reason_covering_several_versions_is_stated_once(self):
         """Notes are grouped by reason, not one bullet per empty cell.
 
-        With five columns and seven engines the ungrouped form runs to more lines than
+        Over a full matrix the ungrouped form runs to more lines than
         the table it annotates, and reads as though each repetition were a separate
         finding.
 
@@ -1023,14 +1023,14 @@ class TestVersionsMarkup:
         """No engine is marked for a column that never ran.
 
         The column's own note explains every blank in it, and tagging each engine as
-        well would attribute someone else's build failure to seven engines that were
+        well would attribute someone else's build failure to engines that were
         never given the chance to fail.
 
         """
         snippet, _, rows = self._snippet(versions=('3.11',),
                                         missing=[('3.15', 'the image failed to build')])
         assert f'3.15 {report.UNMEASURED_MARK}' in snippet
-        # Every engine, not a sample of two: on 3.11 all seven are measurable, so the
+        # Every engine, not a sample: on 3.11 every engine is measurable, so the
         # only mark in the whole table should be the one on the 3.15 column heading.
         for row in rows:
             assert f'``{row.label}`` {report.UNMEASURED_MARK}' not in snippet
@@ -1130,7 +1130,7 @@ class TestMatrixProvenance:
         assert 'Python 3.11 (partly measured)' in snippet
 
     def test_pooling_across_interpreters_is_declared(self):
-        """A ratio pooled over five interpreters must not read as one interpreter's."""
+        """A ratio pooled over several interpreters must not read as one interpreter's."""
         docs = matrix()
         snippet = report.render_rst(report.collect(docs), docs)
         assert 'pooled across every environment' in snippet

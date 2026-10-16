@@ -9,7 +9,7 @@ name: Python Versions
 # open one, for the owner to merge. Nothing here pushes `main` or edits ruleset
 # 23497679: the pull request body lists the required contexts to change by hand.
 #
-# Only these two triggers. A push to `bot/python-versions` starts the pull
+# Only these triggers. A push to `bot/python-versions` starts the pull
 # request's own checks, which is why `pr` spends the release App's token rather
 # than GITHUB_TOKEN, whose pushes start nothing; nothing it starts runs this
 # workflow again.
@@ -61,7 +61,7 @@ jobs:
       - name: Install PyYAML
         run: python -m pip install PyYAML
 
-      # Fetches the four sources, rewrites the files, and writes the proposal to
+      # Fetches the sources, rewrites the files, and writes the proposal to
       # $RUNNER_TEMP/proposal. `publish` is false when nothing changed, or when
       # `bot/python-versions` has an open pull request and a commit it holds
       # ahead of main proposes these tiers, hand edits or merges of main on top
@@ -79,7 +79,7 @@ jobs:
           python util/update_python_versions.py update --write --out "$RUNNER_TEMP/proposal"
           --proposal-branch bot/python-versions --github-output
 
-      # The three modules that pin the workflows and the prose to the file, on
+      # The modules that pin the workflows and the prose to the file, on
       # the rewritten tree. A failure here does not stop the proposal: a tier
       # move can need hand edits the script names, and the body lists what failed.
       - name: Run the audit tests

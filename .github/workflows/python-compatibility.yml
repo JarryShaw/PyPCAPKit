@@ -50,7 +50,7 @@ jobs:
     # showed two rows reading `Python 3.10`, one a 13-second import smoke test
     # and one a three-minute test run, with nothing to tell them apart.
     #
-    # #1633: two tiers. The supported tier, 3.11-3.15, keeps the plain name,
+    # #1633's tiers. The supported tier, 3.11-3.15, keeps the plain name,
     # which is what ruleset 23497679 requires one context per version of. The
     # KTLO tier, end-of-life 3.7-3.10, is suffixed ` (KTLO)`, so no required
     # context can match one. Its steps carry `continue-on-error`, as in

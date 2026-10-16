@@ -12,34 +12,31 @@
 # the type a pull request announces in its title cannot reach this file.
 #
 # Merged pull requests carry a type label, set by hand, which is what makes a
-# category per label possible -- an earlier survey of 40 pull requests,
-# mostly untyped, supported only a bare Dependencies/catch-all split.
-#
-# Sampling 334 merged pull requests (`gh pr list --state merged --limit 400`)
-# gives the frequency below; zero carry no type label:
-#
-#   fix 124, dependencies 97, breaking 50, ci 41, test 31, docs 28, feat 12,
-#   release 10, chore 9, perf 7, const 2, refactor 2
+# category per label possible -- an earlier survey of pull requests, mostly
+# untyped, supported only a bare Dependencies/catch-all split. The order below
+# was derived from a sample of merged pull requests (`gh pr list --state
+# merged`), every one of which carried a type label, `fix` most often.
 #
 # GitHub files a pull request under the *first* category whose `labels` it
-# matches, so category order is what resolves the 69 pull requests that carry
+# matches, so category order is what resolves the pull requests that carry
 # more than one type label. This order is derived from those overlaps, traced
 # against the actual pull requests, not guessed:
 #
-#   * `breaking` is first, full stop. It co-occurs with `fix` (39x, +5 more with
-#     `test` too), `feat` (3x), `ci`+`release` (2x, +1 more with `fix` too) and
-#     `refactor` (1x) -- e.g. #25 "New distribution [0.14.0]" carries
+#   * `breaking` is first, full stop. It co-occurs with `fix` (most often, at
+#     times with `test` too), `feat`, `ci`+`release` (at times with `fix` too)
+#     and `refactor` -- e.g. #25 "New distribution [0.14.0]" carries
 #     breaking+ci+fix+release. Any other position buries a breaking change
-#     under "Fixed" or "Release", which is the one mistake this file exists to
+#     under "Fixes" or "Release", which is the one mistake this file exists to
 #     avoid.
-#   * `release` is second. Its overlaps with `ci` (3x) and with `ci`+
-#     `dependencies` (1x) are all old "New distribution [x]" pull requests
+#   * `release` is second. Its overlaps with `ci` and with `ci`+
+#     `dependencies` are all old "New distribution [x]" pull requests
 #     (#9, #11, #21, #22) -- a version bump that happens to also touch a
 #     workflow file or a lockfile is still, in substance, a release. `release`
-#     also wins its one overlap with `fix` (#14, "New distribution [0.13.3]").
-#   * `feat` and `fix` follow, in that order by convention: neither overlaps
-#     with anything ranked above, so nothing in the data forces this half.
-#     `refactor` comes next; its only overlap is with `breaking`, above.
+#     also wins its overlap with `fix` (#14, "New distribution [0.13.3]").
+#   * `feat` and `fix` follow, in that order by convention: they never overlap
+#     each other, so nothing in the data forces this half.
+#     `refactor` comes next; in the sample its only overlap was with
+#     `breaking`, above.
 #   * `ci` beats `perf` (#727, subject `ci(unit-tests):`, labelled ci+perf),
 #     `const` (#12 "Update Makefile", labelled ci+const) and `dependencies`
 #     (#41 "Config file for pyup.io", labelled ci+dependencies) -- in each case
@@ -53,9 +50,9 @@
 #     against).
 #   * `dependencies` sits second-to-last rather than first -- see below.
 #
-# `dependencies` used to be the first category, and is 97 of the 334 sampled
-# pull requests, all Dependabot noise. Moving it down is a judgement call, not
-# a data requirement: nothing in the overlaps above forces its position
+# `dependencies` used to be the first category, and its pull requests are
+# almost all bot noise, from pyup and Dependabot. Moving it down is a
+# judgement call, not a data requirement: nothing in the overlaps above forces its position
 # relative to anything except `release` and `ci`, both of which already rank
 # ahead of it regardless of where it sits. The case for moving it here: a
 # future pull request that mixes a real change with a `dependencies` label
@@ -63,12 +60,12 @@
 # instead of being swallowed by bot noise -- which is also, concretely, what
 # keeps #22 ("New distribution [0.13.3.post2]", ci+dependencies+release) filed
 # under Release rather than Dependencies. The case for leaving it first, as
-# before: it keeps the highest-volume, lowest-interest category out of the way
+# before: it keeps a high-volume, low-interest category out of the way
 # of everything else on a first read. This file takes the former; flip its
 # position in the list below if that judgement is wrong.
 #
 # `*` catches whatever matches none of the categories above -- nothing in the
-# sample, since every pull request in it carries a type label, but it stays
+# sample, since every pull request in it carried a type label, but it stays
 # last regardless so an unlabelled future pull request still lands somewhere
 # instead of silently vanishing from the notes.
 #

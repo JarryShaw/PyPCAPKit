@@ -58,8 +58,8 @@ Most of these run with nothing but `pcapkit`. These do not:
 - **test_engine, test_time, test_perf** exercise the `dpkt`, `scapy` and
   `pyshark` engines. Those are optional packages, and `pyshark` additionally
   drives Wireshark's `tshark` binary. An engine that is missing is reported as
-  skipped, with the reason, and the rest still run -- see `_engine_support.py`. Two
-  things worth knowing:
+  skipped, with the reason, and the rest still run -- see `_engine_support.py`.
+  Worth knowing:
 
   - `pyshark` 0.6 does not work on Python 3.14 at all. It asks
     `asyncio.get_event_loop_policy().get_event_loop()` for a loop on a thread that
@@ -85,9 +85,9 @@ Most of these run with nothing but `pcapkit`. These do not:
 
 ## Regenerating the reference reports
 
-Four files in `../captures/` are reports rather than inputs -- `out.json`,
-`out.plist`, `out.txt` and `pcapng.txt` -- and they are produced by two of the
-scripts here. **Git does not track them**, so a fresh clone does not have them. Build
+Some files in `../captures/` are reports rather than inputs -- `out.json`,
+`out.plist`, `out.txt` and `pcapng.txt` -- and they are produced by the scripts
+named below. **Git does not track them**, so a fresh clone does not have them. Build
 them the way you would any other generated capture, and again after a change to how
 `pcapkit` renders one:
 
@@ -106,19 +106,19 @@ Both *inputs* are committed, so this works on a fresh clone with no `make sample
 first. Use `make fixtures PYTHON=../../.venv/bin/python` to pick a specific
 interpreter.
 
-These four were tracked once, and #685 is why they are not any more. Nothing reads a
+These reports were tracked once, and #685 is why they are not any more. Nothing reads a
 report back -- no test asserts on one, and the docs only quote them as prose -- so a
 parser change that alters how a frame renders leaves the committed copy quietly wrong,
 with no failure anywhere to say so. `pcapng.txt` sat recording `packet -> NIL` for
-four blocks that had started carrying their captured octets, and the staleness was
+blocks that had started carrying their captured octets, and the staleness was
 found by reading the file rather than by anything breaking. Generating them on demand
 means the copy on your disk describes the tree you are standing in, which was the only
 thing that made them worth looking at.
 
 `TZ=UTC` **is not decoration.** `pcapkit` renders frame timestamps in the host's
-local zone, so an unpinned run rewrites every timestamp line in all four files with
+local zone, so an unpinned run rewrites every timestamp line in every report with
 wherever it happened to be run -- which is how these reports came to disagree with
-each other while they were still tracked, the PCAP three having been generated at
+each other while they were still tracked, the PCAP reports having been generated at
 UTC-05:00 and `pcapng.txt` at UTC+08:00. Pinning UTC makes the output reproducible on
 any host, so two runs can be diffed against each other. It also happens to be the only
 zone in which PCAP-NG's `timestamp_epoch` is the true UNIX epoch:

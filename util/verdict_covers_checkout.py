@@ -20,9 +20,9 @@ Anything else is not covered, and the job gated on this one skips. Nothing is
 lost by that: ``HEAD``'s own ``Unit Tests`` run raises the workflow again when it
 completes, bot commits included -- since #401 (bb900906b, 2026-09-15) they are
 pushed with a deploy key, not with ``GITHUB_TOKEN``, whose events "will not create
-a new workflow run" (GitHub, "Triggering a workflow from a workflow"). All 21 bot
-commits on ``main`` since have their own ``push`` run of ``Unit Tests``,
-f4f94bcad's being 38325349953; the three before #401, 5d5d8af4d, 48bc11384 and
+a new workflow run" (GitHub, "Triggering a workflow from a workflow"). Every bot
+commit on ``main`` since has its own ``push`` run of ``Unit Tests``,
+f4f94bcad's being 38325349953; the ones before #401, 5d5d8af4d, 48bc11384 and
 e4d0823db, have none. The second case only saves waiting for that run where it
 cannot change the answer.
 
@@ -55,10 +55,10 @@ if TYPE_CHECKING:
 BOT_EMAIL = 'github-actions[bot]@users.noreply.github.com'
 
 #: Files a bot commit may touch and still be built under its parent's verdict.
-#: These are what Conda Update ("Bumped build to N", 137 commits on ``main``) and
-#: Create Release's ``tag`` job ("Reset conda build number", 9) commit, and no
-#: test reads either. Vendor Update's "Bumped version to N" commits are left out
-#: on purpose: all 123 rewrite ``pcapkit/``, and e58618bdf's Unit Tests run
+#: These are what Conda Update ("Bumped build to N") and Create Release's
+#: ``tag`` job ("Reset conda build number") commit, and no test reads either.
+#: Vendor Update's "Bumped version to N" commits are left out on purpose: every
+#: one of them rewrites ``pcapkit/``, and e58618bdf's Unit Tests run
 #: 36355214959 reported "12 failed" on each Python leg, where its parent
 #: 70fa92010's run 36354135989 passed every job.
 BOT_MANAGED_PATHS = frozenset({'conda/build', 'conda/requirements.txt'})

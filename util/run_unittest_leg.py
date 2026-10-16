@@ -5,7 +5,7 @@ GitHub issue #981: two test modules --
 :mod:`tests.protocols.application.test_http_unit` and
 :mod:`tests.test_base_class_contract` -- each pass alone and :program:`pytest`
 reports the whole run green when they are collected together, but plain
-:mod:`unittest` over the same two modules in one process fails -- four
+:mod:`unittest` over the same two modules in one process fails some of their
 ``subTest`` cases. ``pytest-subtests`` is *not* why: that plugin is not
 installed in this project at all (absent from the ``test`` extra in
 ``pyproject.toml``), and plain :program:`pytest` (9.1.1 in this checkout)
@@ -34,7 +34,7 @@ under it.
 A cheaper alternative exists, and is recorded here rather than left
 undocumented: running ``pytest --noconftest`` over just those same two
 modules, in that order, disables the very same autouse fixture directly and
-reproduces the identical four ``subTest`` failures in about 70s on the pre-fix
+reproduces the identical ``subTest`` failures in about 70s on the pre-fix
 tree, under the exact :program:`pytest` version this CI already installs.
 Whether that single invocation would have been sufficient instead of this
 dedicated runner and its per-directory matrix was not evaluated when this
@@ -50,14 +50,12 @@ subdirectory per invocation (its ``directory`` argument), which is what
 :file:`.github/workflows/unit-tests.yml`'s ``unittest-ordering`` job calls
 once per entry of its own matrix -- the leg list lives in that workflow, not
 as a module-level constant here. :mod:`tests.protocols` is the largest leg;
-its timings, on three different bases (a local serial run, and CI before and
+its timings, on different bases (a local serial run, and CI before and
 after it was sharded), are tabulated in that workflow's own comment rather than
 restated here. At the other end sit
-two legs of two unit-tier modules each, with no clean ordering between them --
-:mod:`tests.dumpkit` (199 tests, ~39s) and :mod:`tests.interface` (201 tests,
-~37s), dumpkit carrying two fewer tests but running two seconds slower.
-Neither small leg is :mod:`tests.const` (478 tests, ~268s), which is larger on
-both axes.
+:mod:`tests.dumpkit` and :mod:`tests.interface`, small legs with no clean
+ordering between them by test count or by wall time (~39s and ~37s). Neither
+small leg is :mod:`tests.const` (~268s), which is larger by both measures.
 
 Peak RSS was measured for the three cheapest legs only, via
 :func:`resource.getrusage` on ``RUSAGE_CHILDREN`` in this venv:
@@ -84,11 +82,11 @@ that configuration before.
 GitHub issue #1029 -- sharding a leg: ``directory`` may be a deeper path such as
 ``protocols/internet``, and ``--exclude SUBDIR`` (repeatable) drops a
 subdirectory, so ``protocols --exclude protocols/internet`` is "the rest". The
-workflow uses that pair to split :mod:`tests.protocols` into two cells. A leg
+workflow uses that pair to shard :mod:`tests.protocols`. A leg
 invoked without ``--exclude`` runs every unit-tier module under its directory.
 The price is that modules in different shards do not share a process, so
-pollution between them is invisible; the workflow comment records the measured
-pair counts.
+pollution between them is invisible; the workflow comment records which
+pairs that loses.
 
 What this still does not catch: a defect running the *other* direction (a
 root module polluting a directory module), interference between two
@@ -230,7 +228,7 @@ def leg_modules(directory: 'str', exclude: 'Sequence[str]' = ()) -> 'tuple[str, 
         exclude: subdirectories of ``directory`` (also relative to
             :data:`TESTS_ROOT`) whose modules are left out, so that one shard
             can be "everything in ``directory`` except its sibling shards".
-            Empty by default, which is every leg but one.
+            Empty by default, as for every unsharded leg.
 
     Returns:
         Dotted module names, in path-sorted order.
