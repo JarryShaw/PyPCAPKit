@@ -439,7 +439,7 @@ class TestNoKTLOLegCanFailTheRelease(unittest.TestCase):
         self.assertNotIn('KTLO', clean.stdout)
 
     def test_no_conda_leg_is_ktlo_and_315_leaves_base_python_alone(self) -> None:
-        """A KTLO 3.10 conda leg could only fail (soupsieve 3 needs >=3.11.5); 3.15 needs base left alone."""
+        """No KTLO 3.10 conda leg: the vendored set is derived for the supported tier; 3.15 needs base left alone."""
         for name, job_id in (('create-release.yml', 'conda'), ('cron-conda.yml', 'conda-dist')):
             spec = job(name, job_id)
             with self.subTest(workflow=name, job=job_id):

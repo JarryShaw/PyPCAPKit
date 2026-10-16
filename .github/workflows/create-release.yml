@@ -1221,10 +1221,10 @@ jobs:
           - ubuntu-latest
           # - windows-latest  # skip for now
         # #1633: the supported tier only, from .github/python-versions.toml
-        # through ``version_check`` (#1660). There is no KTLO 3.10 leg because it
-        # can only fail: conda/requirements.txt pins soupsieve==3.0.3
-        # (Requires-Python >=3.11.5), and util/conda-dist.py pins the newest
-        # release of every dependency, so that floor only rises.
+        # through ``version_check`` (#1660). There is no KTLO 3.10 leg: the list
+        # util/conda_vendor.py derives is for the supported tier, so it leaves
+        # out typing-extensions, which pcapkit/utilities/compat.py imports below
+        # 3.11, and pins the newest release of each dependency, a rising floor.
         python-version: ${{ fromJSON(needs.version_check.outputs.PYTHON_CONDA) }}
     steps:
       # #1634: this run's commit, not ``ref: conda-<version>+0``, then the check
