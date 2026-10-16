@@ -14,6 +14,7 @@ when exception raised on user's operation.
 .. _tbtrim: https://github.com/gousaiyang/tbtrim
 
 """
+import contextvars
 import inspect
 import io
 import os
@@ -158,6 +159,64 @@ def stacklevel() -> 'int':
 ##############################################################################
 
 
+#: ContextVar[tuple[Type[BaseException], ...]]: The exception classes the
+#: :mod:`pcapkit` code running in this context has undertaken to catch itself,
+#: as declared by the innermost :class:`_CaughtByCaller` block. A
+#: :class:`BaseError` that is an instance of one of them is constructed quiet,
+#: whatever its own ``quiet`` says.
+#:
+#: A :class:`~contextvars.ContextVar` rather than a module global, so that
+#: entering a block on one thread never changes what another thread reads, and
+#: one thread's lookup cannot silence an unrelated error on another.
+_caught_here = contextvars.ContextVar(
+    'pcapkit.utilities.exceptions._caught_here', default=(),
+)  # type: contextvars.ContextVar[tuple[Type[BaseException], ...]]
+
+
+class _CaughtByCaller:
+    """Construct errors of the given classes quietly for the duration of a block.
+
+    For :mod:`pcapkit` code that is about to call something it does not own --
+    a generated :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value`
+    override, say -- and will catch the named exceptions itself. An error the
+    callee raises is then the quiet control flow it is at that call site,
+    without the callee having to pass ``quiet=True``, which it cannot know to
+    do (:issue:`1845`). Only the named classes are affected: anything else the
+    callee raises escapes the caller and so stays loud.
+
+    Given no classes, it declares that nothing is caught, which makes errors
+    loud again inside an enclosing block -- how
+    :meth:`~pcapkit.corekit.enum.EnumRegistry.register` keeps its rejection
+    loud whoever calls it.
+
+    Re-entrant: on exit a block restores whatever the enclosing block declared.
+    An instance holds the token of the one ``with`` it is entered by, so it is
+    built afresh for each.
+
+    A class rather than :func:`contextlib.contextmanager`, because
+    :meth:`EnumLookup.get <pcapkit.corekit.enum.EnumLookup.get>` enters one on
+    every call that has a usable ``default``, and the generator machinery
+    measured at several times the cost of the lookup it would wrap.
+
+    Args:
+        *types: Exception classes the caller catches.
+
+    """
+
+    __slots__ = ('_types', '_token')
+
+    def __init__(self, *types: 'Type[BaseException]') -> 'None':
+        self._types = types
+
+    def __enter__(self) -> 'None':
+        # NOTE: set here rather than in ``__init__``, since a token exists only
+        # once the variable has been set, which is what entering the block does.
+        self._token = _caught_here.set(self._types)  # pylint: disable=attribute-defined-outside-init
+
+    def __exit__(self, *exc_info: 'object') -> 'None':
+        _caught_here.reset(self._token)
+
+
 class BaseError(Exception):
     """Base error class of all kinds.
 
@@ -178,6 +237,12 @@ class BaseError(Exception):
     :data:`sys.excepthook` nor :data:`threading.excepthook` is touched. It is
     still a perfectly ordinary exception, carrying its message for whoever
     catches it.
+
+    An error is also quiet when it is constructed inside a
+    :class:`_CaughtByCaller` block naming one of its classes, which is how a
+    :mod:`pcapkit` caller marks as control flow an error raised by code that
+    does not pass ``quiet=True`` itself. The effect is exactly that of
+    ``quiet=True``.
 
     Important:
 
@@ -213,8 +278,9 @@ class BaseError(Exception):
     """
 
     def __init__(self, *args: 'Any', quiet: 'bool' = False, **kwargs: 'Any') -> 'None':
-        # log error -- a quiet error emits nothing and mutates nothing
-        if not quiet:
+        # log error -- a quiet error emits nothing and mutates nothing, and so
+        # does one a :class:`_CaughtByCaller` block says its caller catches
+        if not quiet and not isinstance(self, _caught_here.get()):
             if DEVMODE:
                 logger.critical('%s: %s', type(self).__name__, str(self),
                                 exc_info=self if VERBOSE else False,

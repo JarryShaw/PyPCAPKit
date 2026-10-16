@@ -161,7 +161,7 @@ Which branch a key takes, and what each miss ends in:
        GET -->|"otherwise"| VALUE["_validate_value(key)<br/>then cls(key)"]
        NAME -->|"miss, no usable default"| KEYERR["EnumKeyError<br/>quiet, derives KeyError"]
        NAME -->|"hit,<br/>or miss, key is a registered value,<br/>or miss, default is a registered value"| OK["canonical member"]
-       VALUE -->|"resolves, or \_missing\_ answers,<br/>or ValueError, default is a registered value"| OK
+       VALUE -->|"resolves, or \_missing\_ answers,<br/>or ValueError, default is a registered value<br/>(that ValueError quiet)"| OK
        VALUE -->|"ValueError, no usable default"| VALERR["EnumValueError<br/>loud, derives ValueError"]
 
 Do not "improve" on the shape by making both misses report identically. Converting
@@ -172,19 +172,33 @@ base's :exc:`KeyError` into a :exc:`ValueError`, and
 :exc:`~pcapkit.utilities.exceptions.EnumValueError` for a name miss, so that the two
 ways of getting it wrong reported identically.
 
-One asymmetry between the two is deliberate and is **not** visible from the
-exception class: the **name** miss is raised quietly
-(:class:`~pcapkit.utilities.exceptions.BaseError`'s ``quiet=True``, so nothing is
-logged and :data:`sys.tracebacklimit` is left alone) while the **value** miss stays
-loud. A name miss is in-library control flow at several call sites, and at
-``Method.get`` it is part of a *successful* call --
-that override catches it in order to mint. A loud error there would put a
-:data:`logging.CRITICAL` record on every such call and set
-:data:`sys.tracebacklimit` to ``0`` process-wide, which is the
-:issue:`362` defect ``quiet``
-exists for. So a ``get`` override that catches a name miss as control flow is
-following the convention; one that catches a *value* miss that way is silencing a
-logged error, and needs a reason.
+One more thing is not visible from the exception class, and it is deliberate:
+whether a miss is **reported**. A miss that ``get`` answers with ``default`` is
+quiet, and so is every **name** miss, while a **value** miss with no usable
+``default`` is loud. Quiet means what
+:class:`~pcapkit.utilities.exceptions.BaseError`'s ``quiet=True`` means: nothing is
+logged and no exception hook is installed.
+
+* **The name miss** is raised with ``quiet=True``. It is in-library control flow at
+  several call sites, and at ``Method.get`` it is part of a *successful* call --
+  that override catches it in order to mint.
+* **The value miss** is quiet only when ``default`` names a registered value. The
+  owner ruled for that on :issue:`1845`, on the ground that ``get`` is mostly called
+  from protocol parsing: a value ``get`` answers with ``default`` is input it has
+  handled, not a fault to report. In that case ``get`` runs ``_validate_value`` and
+  ``cls(key)`` in a block declaring that it catches :exc:`ValueError` itself, so the
+  loud :exc:`~pcapkit.utilities.exceptions.EnumValueError` a generated override
+  raises is constructed quietly without the override passing ``quiet=True``. With
+  no usable ``default`` the rejection reaches the caller and stays loud, and
+  :meth:`~pcapkit.corekit.enum.EnumRegistry.register` reports the same rejection
+  loudly even when reached from inside such a block.
+
+A loud error on either fallback would put a :data:`logging.CRITICAL` record on every
+such call -- the :issue:`362` defect ``quiet`` exists for -- and, outside development
+mode, install :mod:`pcapkit`'s exception hooks. So a ``get`` override that catches a
+name miss as control flow is following the convention; one that calls ``get``
+without a ``default`` and catches the *value* miss is silencing a logged error, and
+should pass a ``default`` instead.
 
 ``get`` Override Obligations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
