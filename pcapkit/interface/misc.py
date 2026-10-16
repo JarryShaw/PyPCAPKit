@@ -41,8 +41,8 @@ if TYPE_CHECKING:
     #:
     #: The keys are those of :attr:`Extractor.__output__
     #: <pcapkit.foundation.extraction.Extractor.__output__>` and of
-    #: :attr:`TraceFlowBase.__output__
-    #: <pcapkit.foundation.traceflow.traceflow.TraceFlowBase.__output__>` -- both
+    #: :attr:`TraceFlow.__output__
+    #: <pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__>` -- both
     #: registries expose the same keys, the aliases among them resolving to a shared
     #: dumper (``'cap'`` to ``'pcap'``, ``'xml'`` to ``'plist'``, ``'text'`` and ``'txt'``
     #: to ``'tree'``), so the ``Literal`` lists every key for a type checker to accept

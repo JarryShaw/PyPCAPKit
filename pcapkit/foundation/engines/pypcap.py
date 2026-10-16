@@ -214,11 +214,11 @@ class PyPCAP(EngineBase['RawFrame']):
         .. _pcap-ct: https://pypi.org/project/pcap-ct/
 
         """
-        # NOTE: the probe comes *before* ``import pcap`` so that the two engines
-        # behave the same way here. It matters more for
-        # :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT`, whose import can
-        # raise ``OSError`` rather than ``ImportError``, but a shared order is one
-        # fewer difference between them.
+        # NOTE: the probe comes *before* ``import pcap`` so that this engine and
+        # :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` behave the same way
+        # here. It matters more for the latter, whose import can raise
+        # ``OSError`` rather than ``ImportError``, but a shared order is one fewer
+        # difference between them.
         self._backend = _pcap_backend.probe()
 
         collision = _pcap_backend.collision_reason(self._backend)

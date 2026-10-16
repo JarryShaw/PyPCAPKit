@@ -52,7 +52,7 @@ Note that all of the above governs the :mod:`warnings` channel only. The
 ``logging.getLogger('pcapkit').setLevel(logging.ERROR)``.
 
 The one exception is a parse :mod:`pcapkit` runs on trial: :class:`hold_warnings`
-holds back its warnings, on both channels, until the parse is kept, and drops
+holds back its warnings, on each channel, until the parse is kept, and drops
 them if it is discarded (:issue:`1580`).
 
 .. versionremoved:: 1.5.0

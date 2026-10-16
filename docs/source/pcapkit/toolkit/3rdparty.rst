@@ -87,6 +87,7 @@ Auxiliary Data
 --------------
 
 .. autoclass:: pcapkit.toolkit.dpkt.RecordTimestamp
+   :members:
    :show-inheritance:
 
 .. autoclass:: pcapkit.toolkit.dpkt.Timestamp

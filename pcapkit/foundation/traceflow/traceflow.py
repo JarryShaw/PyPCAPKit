@@ -102,7 +102,7 @@ class TraceFlowMeta(abc.ABCMeta):
             so it is available as a class attribute and **not** on an instance.
 
             This is *not* :attr:`TraceFlow.__output__
-            <pcapkit.foundation.traceflow.traceflow.TraceFlowBase.__output__>`,
+            <pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__>`,
             which is the separate output-dumper table this class also owns.
 
         """

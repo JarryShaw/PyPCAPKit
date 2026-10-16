@@ -61,6 +61,10 @@ Auxiliary Data
    :members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.foundation.reassembly.data.data.Completion
+   :members:
+   :show-inheritance:
+
 .. autoclass:: pcapkit.foundation.reassembly.data.data.Deferred
    :members:
    :show-inheritance:

@@ -392,10 +392,11 @@ def _install_excepthook() -> 'None':
     :data:`sys.excepthook` or :data:`threading.excepthook` touched merely for
     having imported the package.
 
-    Idempotent for *this* module instance, independently for each hook: if a given hook slot already holds this instance's own function --
-    checked by identity, ``is``, not by the ``installed_by_pcapkit`` marker --
-    installing it again does nothing, so a loud error later in the same run
-    never wraps either hook in another copy of itself. That distinction matters
+    Idempotent for *this* module instance, independently for each hook: if a
+    given hook slot already holds this instance's own function -- checked by
+    identity, ``is``, not by the ``installed_by_pcapkit`` marker -- installing
+    it again does nothing, so a loud error later in the same run never wraps
+    either hook in another copy of itself. That distinction matters
     because the identical check is wrong one level up: a hook slot already
     holding *some* function of the same name from an *earlier* loaded copy of
     this module -- a genuine :func:`importlib.reload`, or a test harness
@@ -716,8 +717,8 @@ class EnumKeyError(BaseError, KeyError):
     circumstances, and raise it from this module rather than as a builtin.
 
     Deriving from :exc:`KeyError` is what makes that ruling cheap to carry out:
-    the in-library call sites that catch
-    :meth:`~pcapkit.corekit.enum.EnumLookup.get`'s name miss as :exc:`KeyError` -- :meth:`~pcapkit.const.http.method.Method.get`
+    the in-library call sites catch :meth:`~pcapkit.corekit.enum.EnumLookup.get`'s
+    name miss as :exc:`KeyError` -- :meth:`~pcapkit.const.http.method.Method.get`
     catches it in order to build an unregistered member, so for that one a
     failed name lookup is part of a successful call -- and every one of them
     keeps catching.

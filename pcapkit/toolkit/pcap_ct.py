@@ -25,11 +25,11 @@
 
 .. seealso::
 
-   :mod:`pcapkit.toolkit.pypcap` is the same adapter for upstream `PyPCAP`_. The
-   two are kept apart because the engines are: the distributions are independent
-   projects that happen to share the :mod:`pcap` module name, and each engine
-   names its own adapter so that a change made for one cannot quietly alter the
-   other.
+   :mod:`pcapkit.toolkit.pypcap` is the same adapter for upstream `PyPCAP`_,
+   kept apart from this module because the engines are: the distributions are
+   independent projects that happen to share the :mod:`pcap` module name, and
+   each engine names its own adapter so that a change made for one cannot
+   quietly alter the other.
 
 .. _PyPCAP: https://github.com/pynetwork/pypcap
 

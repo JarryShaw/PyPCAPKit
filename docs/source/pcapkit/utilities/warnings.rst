@@ -37,7 +37,7 @@ A next layer captured shorter than its length hint is parsed on trial, and
 replaced with :class:`~pcapkit.protocols.misc.raw.Raw` when its header was not
 captured. The trial's warnings are held back by
 :class:`~pcapkit.utilities.warnings.hold_warnings`: a replaced layer's are dropped
-on both channels, since they describe a layer the result does not have, and a kept
+on each channel, since they describe a layer the result does not have, and a kept
 layer's are reported as above when the trial ends (:issue:`1580`).
 
 .. autofunction:: pcapkit.utilities.warnings.warn

@@ -30,9 +30,9 @@ class Completion(EnumLookup, StrEnum):
     which widens a plain :obj:`bool` rather than adding a second channel beside
     it: reassembly has more outcomes to report than a :obj:`bool` can hold, since
     a buffer abandoned under the :rfc:`1122` / :rfc:`8200` reassembly timeout is
-    a different event from one that simply had not finished when the capture did. An expired
-    datagram says "these fragments are gone", a partial one says "these fragments
-    had not arrived yet".
+    a different event from one that simply had not finished when the capture
+    did. An expired datagram says "these fragments are gone", a partial one says
+    "these fragments had not arrived yet".
 
     Truthiness is that of a :obj:`bool`: :attr:`COMPLETE` is the only truthy
     member, so ``if datagram.completed:`` reads as it would for a boolean.

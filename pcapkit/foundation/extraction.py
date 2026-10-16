@@ -65,8 +65,8 @@ if TYPE_CHECKING:
     from pcapkit.protocols.protocol import ProtocolBase
 
     #: Every key registered in :attr:`Extractor.__output__` and in
-    #: :attr:`TraceFlowBase.__output__
-    #: <pcapkit.foundation.traceflow.traceflow.TraceFlowBase.__output__>` -- both
+    #: :attr:`TraceFlow.__output__
+    #: <pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__>` -- both
     #: registries expose the same keys, so ``'cap'`` and the ``'txt'``/``'xml'``
     #: aliases are spellable for a type checker as they are accepted at runtime.
     Formats = Literal['pcap', 'cap', 'json', 'tree', 'text', 'txt', 'plist', 'xml']

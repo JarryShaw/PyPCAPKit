@@ -202,7 +202,11 @@ def packet2timestamp(packet: 'Packet') -> 'float':
             :class:`~pcapkit.foundation.engines.dpkt.DPKT`.
 
     Returns:
-        Capture timestamp of the packet, in seconds since the epoch.
+        Capture timestamp of the packet, in seconds since the epoch. As
+        :class:`~pcapkit.foundation.engines.dpkt.DPKT` attaches it, that is a
+        :class:`Timestamp`, or for a nanosecond PCAP file a
+        :class:`DecimalTimestamp`, which is a :class:`~decimal.Decimal`
+        subclass rather than a :obj:`float`.
 
     Raises:
         UnsupportedCall: If the packet carries no timestamp, i.e. it did not come
