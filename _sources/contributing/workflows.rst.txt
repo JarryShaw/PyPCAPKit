@@ -303,7 +303,7 @@ the caller's own workflow run, as one of the caller's own jobs, rather than
 starting an independent run after the caller finishes. All four calls in this
 repository target the same reusable workflow, with the same input:
 
-* ``.github/workflows/create-release.yml:593`` -- job ``unit-tests`` calls
+* ``.github/workflows/create-release.yml:595`` -- job ``unit-tests`` calls
   ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
 * ``.github/workflows/cron-conda.yml:50`` -- job ``unit-tests`` calls
   ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
@@ -366,13 +366,13 @@ its ``verdict`` job found the Unit Tests verdict was for another commit -- which
 the ``vendor_update`` job reads from that run's jobs first, as run 38650191283
 was. ``!cancelled()`` keeps a skipped ``vendor_update``, on a push, from
 skipping it. ``unit-tests`` then depends on that job with
-``needs: [ version_check ]`` (``create-release.yml:581``) and an ``if:`` that
+``needs: [ version_check ]`` (``create-release.yml:583``) and an ``if:`` that
 calls no status-check function, so a skipped dependency skips it too -- and
 every job past it is gated the same way: ``github`` needs ``[ unit-tests,
-version_check ]`` (``:619``), ``tag`` needs ``[ github, unit-tests,
-version_check ]`` (``:806``), ``pypi`` needs ``[ github, unit-tests,
-version_check ]`` (``:972``), and ``conda`` needs ``[ tag, github,
-unit-tests, version_check ]`` (``:1208``).
+version_check ]`` (``:621``), ``tag`` needs ``[ github, unit-tests,
+version_check ]`` (``:808``), ``pypi`` needs ``[ github, unit-tests,
+version_check ]`` (``:974``), and ``conda`` needs ``[ tag, github,
+unit-tests, version_check ]`` (``:1210``).
 
 .. mermaid::
 
@@ -398,7 +398,7 @@ unit-tests, version_check ]`` (``:1208``).
 
 This is a transitive reduction, as in :doc:`releasing`: ``version_check`` and
 ``unit-tests`` are also direct ``needs:`` of ``tag`` and ``pypi``
-(``create-release.yml:806,972``) and of ``conda`` (``:1208``), but ``github``
+(``create-release.yml:808,974``) and of ``conda`` (``:1210``), but ``github``
 already implies those edges, since it depends on both itself. Drawing them
 would add lines without changing which job can start before which, or which
 job a skip in ``version_check`` reaches.
@@ -916,10 +916,10 @@ Deployment ``environment:``
 Five jobs declare a deployment ``environment:`` and can therefore pause for an
 approval, four in ``create-release.yml`` and one in ``cron-python-versions.yml``:
 
-* ``github`` -- ``environment: github-release`` (``create-release.yml:616``)
-* ``tag`` -- ``environment: conda-tag`` (``create-release.yml:804``)
-* ``pypi`` -- ``environment: pypi`` (``create-release.yml:967``)
-* ``conda`` -- ``environment: anaconda`` (``create-release.yml:1205``)
+* ``github`` -- ``environment: github-release`` (``create-release.yml:618``)
+* ``tag`` -- ``environment: conda-tag`` (``create-release.yml:806``)
+* ``pypi`` -- ``environment: pypi`` (``create-release.yml:969``)
+* ``conda`` -- ``environment: anaconda`` (``create-release.yml:1207``)
 * ``pr`` -- ``environment: github-release``, for the release App's key (see
   `Python Versions`_)
 

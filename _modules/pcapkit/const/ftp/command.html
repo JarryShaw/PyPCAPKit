@@ -1071,19 +1071,58 @@
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">register_alias</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span></div>
 
 
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Command'</span><span class="p">:</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Command'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Backport support for original codes.</span>
 
+<span class="sd">        A non-:class:`str` ``key`` is delegated to</span>
+<span class="sd">        :meth:`~pcapkit.corekit.enum.EnumLookup.get`, as</span>
+<span class="sd">        :meth:`Method.get &lt;pcapkit.const.http.method.Method.get&gt;` delegates</span>
+<span class="sd">        every key, so :meth:`_validate_value` refuses it there rather than</span>
+<span class="sd">        ``key.upper()`` being called on it (GitHub issue :issue:`1824`). It is</span>
+<span class="sd">        a :class:`classmethod`, as the base is, because a zero-argument</span>
+<span class="sd">        ``super()`` needs a first argument to bind. ``Command.get('X')`` binds</span>
+<span class="sd">        the same as it would on a :class:`staticmethod`.</span>
+
+<span class="sd">        ``default`` is not forwarded on that path, as ``Method.get`` does not</span>
+<span class="sd">        forward its own: here it supplies the *value* of the unregistered</span>
+<span class="sd">        member built on a name miss, while the base's ``default`` must name a</span>
+<span class="sd">        *registered* value. A refused ``key`` therefore raises whatever</span>
+<span class="sd">        ``default`` is.</span>
+
+<span class="sd">        .. versionchanged:: 1.5.0</span>
+
+<span class="sd">           A non-:class:`str` ``key`` raises</span>
+<span class="sd">           :exc:`~pcapkit.utilities.exceptions.EnumValueError`, with or</span>
+<span class="sd">           without ``default`` (:issue:`1824`). ``get(42)`` and ``get(None)``</span>
+<span class="sd">           raised :exc:`AttributeError` from ``key.upper()``, and</span>
+<span class="sd">           ``get(b'ABOR')`` returned an unregistered member whose name and</span>
+<span class="sd">           value were both the :class:`bytes` object.</span>
+
 <span class="sd">        Args:</span>
-<span class="sd">            key: Key to get enum item. Looked up case-insensitively, since</span>
-<span class="sd">                member names are canonicalised to upper case on registration.</span>
-<span class="sd">            default: Default value if not found.</span>
+<span class="sd">            key: Key to get enum item. Looked up case-insensitively, as</span>
+<span class="sd">                :rfc:`959#section-5` treats FTP command codes, against member</span>
+<span class="sd">                names canonicalised to upper case on registration.</span>
+<span class="sd">            default: Value for the unregistered member built when ``key``</span>
+<span class="sd">                matches no member name. ``None``, the default, uses ``key``</span>
+<span class="sd">                itself.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            EnumValueError: If ``key`` is not a :class:`str`. This reaches the</span>
+<span class="sd">                caller from the base's non-``str`` branch, where</span>
+<span class="sd">                :meth:`_validate_value` refuses it before ``cls(key)`` could</span>
+<span class="sd">                reach :meth:`_missing_`. A :exc:`ValueError`, so an</span>
+<span class="sd">                ``except ValueError`` caller is unaffected.</span>
 
 <span class="sd">        :meta private:</span>
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="c1"># NOTE: unreachable only by the ``str`` annotation, which a caller</span>
+            <span class="c1"># at run time need not honour -- this is the path GitHub issue</span>
+            <span class="c1"># #1824 fixed.</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>  <span class="c1"># type: ignore[unreachable]</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Command</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># type: ignore[misc]  # pylint: disable=no-member</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
             <span class="c1"># NOTE: the value is ``default`` if the caller supplied one, or</span>
             <span class="c1"># else ``key`` exactly as given -- never ``name`` -- so an</span>
             <span class="c1"># unregistered member's value is the caller's own casing, the</span>
@@ -1096,8 +1135,8 @@
             <span class="c1"># ``_member_map_`` cache, the *first* casing seen for every later</span>
             <span class="c1"># call regardless of case; that is the one observable behaviour</span>
             <span class="c1"># change in GitHub issue #860's conversion.</span>
-            <span class="k">return</span> <span class="n">Command</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">default</span> <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">key</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Command</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">default</span> <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">key</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>  <span class="c1"># pylint: disable=no-member</span>
 
 <div class="viewcode-block" id="Command._validate_value">
 <a class="viewcode-back" href="../../../../pcapkit/const/ftp.html#pcapkit.const.ftp.command.Command._validate_value">[docs]</a>
@@ -1108,11 +1147,13 @@
 <span class="sd">        Overrides :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value`</span>
 <span class="sd">        with the check :meth:`_missing_` makes, and the message it raises, so</span>
 <span class="sd">        :meth:`register` refuses a value the constructor refuses, in the same</span>
-<span class="sd">        words (:issue:`1816`). Any :class:`str` passes, since</span>
-<span class="sd">        :meth:`_missing_` resolves every one.</span>
+<span class="sd">        words (:issue:`1816`). :meth:`get` reaches it as well, through the</span>
+<span class="sd">        base, for every non-:class:`str` key (:issue:`1824`), so it refuses</span>
+<span class="sd">        the same values. Any :class:`str` passes, since :meth:`_missing_`</span>
+<span class="sd">        resolves every one.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            value: Value about to be minted.</span>
+<span class="sd">            value: Value about to be looked up or minted.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            EnumValueError: If ``value`` is not a :class:`str`. A</span>

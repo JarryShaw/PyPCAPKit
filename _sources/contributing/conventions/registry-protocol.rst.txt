@@ -231,11 +231,13 @@ precedent is :issue:`903`, which made
 what turned ``Method.get`` into a classmethod.
 
 Callers cannot see the switch -- ``Method.get('X')`` binds identically either way --
-so there is no compatibility argument for keeping the ``@staticmethod``. Two
-``@staticmethod`` overrides do survive and are still correct:
-:class:`~pcapkit.const.ftp.command.Command`'s and
-:class:`~pcapkit.const.pcapng.option_type.OptionType`'s never call ``super()`` at
-all, so neither meets the condition.
+so there is no compatibility argument for keeping the ``@staticmethod``.
+:class:`~pcapkit.const.ftp.command.Command`'s override made the same switch on
+:issue:`1824`, once it delegated a non-``str`` key to the base instead of calling
+``key.upper()`` on it.
+:class:`~pcapkit.const.pcapng.option_type.OptionType`'s ``@staticmethod`` override
+does survive and is still correct: it never calls ``super()`` at all, so it does not
+meet the condition.
 
 **Raise the way the base raises, which means** ``quiet=True``.
 :issue:`933` asked whether two

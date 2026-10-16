@@ -708,11 +708,13 @@ precedent is <a class="extlink-issue reference external" href="https://github.co
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/908">#908</a> followed it, which is
 what turned <code class="docutils literal notranslate"><span class="pre">Method.get</span></code> into a classmethod.</p>
 <p>Callers cannot see the switch – <code class="docutils literal notranslate"><span class="pre">Method.get('X')</span></code> binds identically either way –
-so there is no compatibility argument for keeping the <code class="docutils literal notranslate"><span class="pre">&#64;staticmethod</span></code>. Two
-<code class="docutils literal notranslate"><span class="pre">&#64;staticmethod</span></code> overrides do survive and are still correct:
-<a class="reference internal" href="../../pcapkit/const/ftp.html#pcapkit.const.ftp.command.Command" title="pcapkit.const.ftp.command.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a>’s and
-<a class="reference internal" href="../../pcapkit/const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a>’s never call <code class="docutils literal notranslate"><span class="pre">super()</span></code> at
-all, so neither meets the condition.</p>
+so there is no compatibility argument for keeping the <code class="docutils literal notranslate"><span class="pre">&#64;staticmethod</span></code>.
+<a class="reference internal" href="../../pcapkit/const/ftp.html#pcapkit.const.ftp.command.Command" title="pcapkit.const.ftp.command.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a>’s override made the same switch on
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1824">#1824</a>, once it delegated a non-<code class="docutils literal notranslate"><span class="pre">str</span></code> key to the base instead of calling
+<code class="docutils literal notranslate"><span class="pre">key.upper()</span></code> on it.
+<a class="reference internal" href="../../pcapkit/const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">&#64;staticmethod</span></code> override
+does survive and is still correct: it never calls <code class="docutils literal notranslate"><span class="pre">super()</span></code> at all, so it does not
+meet the condition.</p>
 <p><strong>Raise the way the base raises, which means</strong> <code class="docutils literal notranslate"><span class="pre">quiet=True</span></code>.
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/933">#933</a> asked whether two
 overrides raising <a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.EnumKeyError" title="pcapkit.utilities.exceptions.EnumKeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumKeyError</span></code></a> <strong>without</strong>

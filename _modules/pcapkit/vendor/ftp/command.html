@@ -882,19 +882,58 @@
 <span class="s1">        """</span>
 <span class="s1">        return super().register_alias(value, name.upper())</span>
 
-<span class="s1">    @staticmethod</span>
-<span class="s1">    def get(key: 'str', default: 'Optional[str]' = None) -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
+<span class="s1">    @classmethod</span>
+<span class="s1">    def get(cls, key: 'str', default: 'Optional[str]' = None) -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
 <span class="s1">        """Backport support for original codes.</span>
 
+<span class="s1">        A non-:class:`str` ``key`` is delegated to</span>
+<span class="s1">        :meth:`~pcapkit.corekit.enum.EnumLookup.get`, as</span>
+<span class="s1">        :meth:`Method.get &lt;pcapkit.const.http.method.Method.get&gt;` delegates</span>
+<span class="s1">        every key, so :meth:`_validate_value` refuses it there rather than</span>
+<span class="s1">        ``key.upper()`` being called on it (GitHub issue :issue:`1824`). It is</span>
+<span class="s1">        a :class:`classmethod`, as the base is, because a zero-argument</span>
+<span class="s1">        ``super()`` needs a first argument to bind. ``</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">.get('X')`` binds</span>
+<span class="s1">        the same as it would on a :class:`staticmethod`.</span>
+
+<span class="s1">        ``default`` is not forwarded on that path, as ``Method.get`` does not</span>
+<span class="s1">        forward its own: here it supplies the *value* of the unregistered</span>
+<span class="s1">        member built on a name miss, while the base's ``default`` must name a</span>
+<span class="s1">        *registered* value. A refused ``key`` therefore raises whatever</span>
+<span class="s1">        ``default`` is.</span>
+
+<span class="s1">        .. versionchanged:: 1.5.0</span>
+
+<span class="s1">           A non-:class:`str` ``key`` raises</span>
+<span class="s1">           :exc:`~pcapkit.utilities.exceptions.EnumValueError`, with or</span>
+<span class="s1">           without ``default`` (:issue:`1824`). ``get(42)`` and ``get(None)``</span>
+<span class="s1">           raised :exc:`AttributeError` from ``key.upper()``, and</span>
+<span class="s1">           ``get(b'ABOR')`` returned an unregistered member whose name and</span>
+<span class="s1">           value were both the :class:`bytes` object.</span>
+
 <span class="s1">        Args:</span>
-<span class="s1">            key: Key to get enum item. Looked up case-insensitively, since</span>
-<span class="s1">                member names are canonicalised to upper case on registration.</span>
-<span class="s1">            default: Default value if not found.</span>
+<span class="s1">            key: Key to get enum item. Looked up case-insensitively, as</span>
+<span class="s1">                :rfc:`959#section-5` treats FTP command codes, against member</span>
+<span class="s1">                names canonicalised to upper case on registration.</span>
+<span class="s1">            default: Value for the unregistered member built when ``key``</span>
+<span class="s1">                matches no member name. ``None``, the default, uses ``key``</span>
+<span class="s1">                itself.</span>
+
+<span class="s1">        Raises:</span>
+<span class="s1">            EnumValueError: If ``key`` is not a :class:`str`. This reaches the</span>
+<span class="s1">                caller from the base's non-``str`` branch, where</span>
+<span class="s1">                :meth:`_validate_value` refuses it before ``cls(key)`` could</span>
+<span class="s1">                reach :meth:`_missing_`. A :exc:`ValueError`, so an</span>
+<span class="s1">                ``except ValueError`` caller is unaffected.</span>
 
 <span class="s1">        :meta private:</span>
 <span class="s1">        """</span>
+<span class="s1">        if not isinstance(key, str):</span>
+<span class="s1">            # NOTE: unreachable only by the ``str`` annotation, which a caller</span>
+<span class="s1">            # at run time need not honour -- this is the path GitHub issue</span>
+<span class="s1">            # #1824 fixed.</span>
+<span class="s1">            return super().get(key)  # type: ignore[unreachable]</span>
 <span class="s1">        name = key.upper()</span>
-<span class="s1">        if name not in </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">._member_map_:  # type: ignore[misc]  # pylint: disable=no-member</span>
+<span class="s1">        if name not in cls._member_map_:  # pylint: disable=no-member</span>
 <span class="s1">            # NOTE: the value is ``default`` if the caller supplied one, or</span>
 <span class="s1">            # else ``key`` exactly as given -- never ``name`` -- so an</span>
 <span class="s1">            # unregistered member's value is the caller's own casing, the</span>
@@ -907,8 +946,8 @@
 <span class="s1">            # ``_member_map_`` cache, the *first* casing seen for every later</span>
 <span class="s1">            # call regardless of case; that is the one observable behaviour</span>
 <span class="s1">            # change in GitHub issue #860's conversion.</span>
-<span class="s1">            return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">._unregistered_member(default if default is not None else key, name)</span>
-<span class="s1">        return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">[name]  # type: ignore[misc]</span>
+<span class="s1">            return cls._unregistered_member(default if default is not None else key, name)</span>
+<span class="s1">        return cls._member_map_[name]  # pylint: disable=no-member</span>
 
 <span class="s1">    @classmethod</span>
 <span class="s1">    def _validate_value(cls, value: 'Any') -&gt; 'None':</span>
@@ -917,11 +956,13 @@
 <span class="s1">        Overrides :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value`</span>
 <span class="s1">        with the check :meth:`_missing_` makes, and the message it raises, so</span>
 <span class="s1">        :meth:`register` refuses a value the constructor refuses, in the same</span>
-<span class="s1">        words (:issue:`1816`). Any :class:`str` passes, since</span>
-<span class="s1">        :meth:`_missing_` resolves every one.</span>
+<span class="s1">        words (:issue:`1816`). :meth:`get` reaches it as well, through the</span>
+<span class="s1">        base, for every non-:class:`str` key (:issue:`1824`), so it refuses</span>
+<span class="s1">        the same values. Any :class:`str` passes, since :meth:`_missing_`</span>
+<span class="s1">        resolves every one.</span>
 
 <span class="s1">        Args:</span>
-<span class="s1">            value: Value about to be minted.</span>
+<span class="s1">            value: Value about to be looked up or minted.</span>
 
 <span class="s1">        Raises:</span>
 <span class="s1">            EnumValueError: If ``value`` is not a :class:`str`. A</span>
