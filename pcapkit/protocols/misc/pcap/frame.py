@@ -23,7 +23,7 @@ whose structure is described as below:
 
 .. versionchanged:: 1.5.0
 
-   ``bytes(frame)`` and :attr:`~pcapkit.protocols.misc.pcap.frame.Frame.packet`
+   ``bytes(frame)`` and :attr:`~pcapkit.protocols.protocol.Protocol.packet`
    hold this frame's own octets, where they held the next frame's
    (:issue:`357`), and the parsed ``time`` is timezone-aware UTC. The parsed
    ``len`` is the on-wire length and ``cap_len`` the captured one, where the
@@ -100,7 +100,7 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[Enum_LinkType, ModuleDescriptor[ProtocolBase] | ~typing.Type[ProtocolBase]]: Protocol index mapping for
+    #: Protocol index mapping for
     #: decoding next layer, c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     #: Each value is a :class:`~pcapkit.corekit.module.ModuleDescriptor` naming the
@@ -144,8 +144,8 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
         r"""Register a new protocol class.
 
         Notes:
-            The full qualified class name of the new protocol class
-            should be as ``{protocol.module}.{protocol.name}``.
+            The fully qualified class name of the new protocol class
+            should be ``{protocol.module}.{protocol.name}``.
 
         Arguments:
             code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
@@ -255,8 +255,8 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             \_read: If the class is called in a parsing scenario.
             \_seek_set: File offset of the record's own first octet, i.e. where
                 the stream stood before :meth:`self.unpack <unpack>` consumed
-                the record; see the note in the parsing branch below for why it
-                cannot be recovered from the stream once we get here.
+                the record. It cannot be recovered from the stream here, since
+                that unpack has consumed the whole record, packet data included.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -450,7 +450,7 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             **kwargs: Arbitrary keyword arguments.
 
         See Also:
-            For construction argument, please refer to :meth:`make`.
+            For construction arguments, please refer to :meth:`make`.
 
         """
         #: int: frame index number
@@ -502,7 +502,7 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
         end of the stream instead lets :meth:`Extractor.record_frames
         <pcapkit.foundation.extraction.Extractor.record_frames>` stop with the
         frames read so far, as the PCAP-NG reader does for a truncated block
-        (:issue:`678`). See GitHub issue :issue:`1265`.
+        (:issue:`678`). See :issue:`1265`.
 
         """
         if length is None:
@@ -524,11 +524,12 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             self: :class:`Frame` object or :obj:`None`.
 
         Returns:
-            If the object is initiated, i.e. ``self._fnum`` exists, returns the
-            frame index number of itself; else raises :exc:`UnsupportedCall`.
+            If the object is initialised, i.e. ``self._fnum`` exists, returns the
+            frame index number of itself; else raises
+            :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`.
 
         Raises:
-            UnsupportedCall: This protocol has no registry entry.
+            UnsupportedCall: If called on the class rather than on a frame.
 
         """
         if self is None:
@@ -613,7 +614,7 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
         Notes:
             We added a new key ``__next_type__`` to ``dict_`` to store the
             next layer protocol type, and a new key ``__next_name__`` to
-            store the next layer protocol name. These two keys will **NOT**
+            store the next layer protocol name. These keys will **NOT**
             be included when :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` is called.
 
             We also added a new key ``protocols`` to ``dict_`` to store the

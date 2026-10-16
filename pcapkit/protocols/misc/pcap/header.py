@@ -131,7 +131,7 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
             * ``d4 c3 b2 a1`` -- Little-endian microsecond-timestamp PCAP file.
             * ``a1 b2 c3 d4`` -- Big-endian microsecond-timestamp PCAP file.
             * ``4d 3c b2 a1`` -- Little-endian nanosecond-timestamp PCAP file.
-            * ``a1 b2 3c 4d`` -- Big-endian nano-timestamp PCAP file.
+            * ``a1 b2 3c 4d`` -- Big-endian nanosecond-timestamp PCAP file.
 
         Args:
             length: Length of data to be read.
@@ -248,11 +248,12 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
             **kwargs: Arbitrary keyword arguments.
 
         See Also:
-            For construction argument, please refer to :meth:`make`.
+            For construction arguments, please refer to :meth:`make`.
 
         Notes:
-            A header the data ends inside keeps that in its :attr:`info`, so
-            that :meth:`from_data` rebuilds only what was captured
+            A header the data ends inside keeps that in its
+            :attr:`~pcapkit.protocols.protocol.Protocol.info`, so that
+            :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data` rebuilds only what was captured
             (:issue:`1470`).
 
         """

@@ -543,7 +543,7 @@ class SimplePacketBlock(PCAPNG):
         #: Protocol chain.
         protocols: 'str'
 
-        #: Interface ID, always 0: the block refers to the section's first
+        #: Interface ID, always 0, since the block refers to the section's first
         #: interface.
         interface_id: 'int'
         #: Timestamp, always the UNIX epoch, as the block carries none.

@@ -84,7 +84,7 @@ class DataFrame(HTTP):
 
     #: Flags.
     flags: 'DataFrameFlags'
-    #: Padded length.
+    #: Padding length.
     pad_len: 'int'
     #: Frame payload.
     data: 'bytes'
@@ -118,7 +118,7 @@ class HeadersFrame(HTTP):
 
     #: Flags.
     flags: 'HeadersFrameFlags'
-    #: Padded length.
+    #: Padding length.
     pad_len: 'int'
     #: Exclusive dependency.
     excl_dependency: 'bool'
@@ -237,7 +237,7 @@ class PushPromiseFrame(HTTP):
 
     #: Flags.
     flags: 'PushPromiseFrameFlags'
-    #: Padded length.
+    #: Padding length.
     pad_len: 'int'
     #: Reserved bit of the promised stream ID.
     promised_reserved: 'int'

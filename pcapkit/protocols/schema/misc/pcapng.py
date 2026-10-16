@@ -75,9 +75,9 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict
 
     class ByteorderTest(TypedDict):
-        """Test for byteorder."""
+        """Test for byte order."""
 
-        #: Byteorder magic number.
+        #: Byte-order magic number.
         byteorder: int
 
     class ResolutionData(TypedDict):
@@ -179,8 +179,8 @@ BYTE_ORDER_MAGIC = 0x1A2B3C4D
 #: reader sees a little-endian section's.
 _SWAPPED_BYTE_ORDER_MAGIC = int.from_bytes(BYTE_ORDER_MAGIC.to_bytes(4, 'little'), 'big')
 
-#: The octets every block's fixed fields span: Block Type and both copies of
-#: Block Total Length, and so the shortest Block Total Length of any block, and
+#: The octets every block's fixed fields span -- Block Type and both copies of
+#: Block Total Length -- and so the shortest Block Total Length of any block, and
 #: the whole of it for a block not in :data:`BLOCK_MINIMUM`. The one home of
 #: this value (:issue:`1739`); the format fixes it, so it is never configurable.
 #:
@@ -302,7 +302,7 @@ def nonnegative(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[st
         ``calcsize`` does -- where checking against the remainder would have
         refused a perfectly good option.
 
-        That distinction is what keeps the three decryption-secrets payloads --
+        That distinction is what keeps the decryption-secrets payloads --
         :attr:`UnknownSecrets.data`, :attr:`TLSKeyLog.data` and
         :attr:`WireGuardKeyLog.data` -- out of this. They read ``__length__``
         *whole* rather than subtracting from it, and ``Schema.pack`` leaves it at
@@ -438,7 +438,7 @@ def bounded_area(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[s
     octets of payload on a block that holds none.
 
     Note:
-        The five non-packet blocks' option areas -- Section Header, Interface
+        The non-packet blocks' option areas -- Section Header, Interface
         Description, Name Resolution, Interface Statistics and Decryption
         Secrets -- are deliberately left unclamped *against the block* here,
         since each computes its span with a different offset and the equality
@@ -511,9 +511,9 @@ def pcapng_block_selector(packet: 'dict[str, Any]') -> 'Field':
         packet: Packet data.
 
     Returns:
-        Returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`
-        wrapped :class:`~pcapkit.protocols.schema.misc.pcapng.BlockType`
-        subclass instance.
+        A :class:`~pcapkit.corekit.fields.misc.SchemaField` wrapped
+        :class:`~pcapkit.protocols.schema.misc.pcapng.BlockType` subclass
+        instance.
 
     See Also:
         * :class:`pcapkit.const.pcapng.block_type.BlockType`
@@ -567,14 +567,10 @@ def dsb_secrets_selector(packet: 'dict[str, Any]') -> 'Field':
         packet: Packet data.
 
     Returns:
-        * If ``secrets_type`` is unknown, returns a
-          :class:`~pcapkit.corekit.fields.strings.BytesField` instance.
-        * If ``secret_type`` is :attr:`~pcapkit.const.pcapng.secrets_type.SecretsType.TLS_Key_Log`
-          and/or :attr:`~pcapkit.const.pcapng.secrets_type.SecretsType.WireGuard_Key_Log`,
-          returns a :class:`~pcapkit.corekit.fields.strings.StringField` instance.
-        * Otherwise, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`
-          wrapped :class:`~pcapkit.protocols.schema.misc.pcapng.DSBSecrets`
-          subclass instance.
+        A :class:`~pcapkit.corekit.fields.misc.SchemaField` wrapped instance of
+        the :class:`~pcapkit.protocols.schema.misc.pcapng.DSBSecrets` subclass
+        registered for ``secrets_type``, or of
+        :class:`~pcapkit.protocols.schema.misc.pcapng.UnknownSecrets` if none is.
 
     See Also:
         * :class:`pcapkit.const.pcapng.secrets_type.SecretsType`
@@ -753,7 +749,7 @@ class OptionEnumField(EnumField):
             :attr:`~pcapkit.const.pcapng.option_type.OptionType.opt_value` are
             never set -- which is *why* the override exists, choosing to render
             correctly over round-tripping correctly.
-            :meth:`EnumField._unregistered_member` is the only one of the three
+            :meth:`EnumField._unregistered_member` is the only one of these
             that gets both right. :func:`copy.deepcopy` is not the difference: it
             succeeds on both kinds, since the standard library's
             :class:`enum.Enum` (which :class:`aenum.Enum` subclasses) defines
@@ -785,7 +781,7 @@ class OptionEnumField(EnumField):
 
 @schema_final
 class PCAPNG(Schema):
-    """Header schema for PCAP-NG file blocks."""
+    """Header schema for a PCAP-NG file block: its type, then its body."""
 
     #: Block type.
     type: 'Enum_BlockType' = EnumField(length=4, namespace=Enum_BlockType, callback=byteorder_callback)
@@ -799,7 +795,7 @@ class PCAPNG(Schema):
 
 
 class BlockType(EnumSchema[Enum_BlockType]):
-    """Header schema for PCAP-NG file blocks."""
+    """Base header schema for the body of each PCAP-NG block type."""
 
     __default__ = lambda: UnknownBlock
 
@@ -874,7 +870,7 @@ class Option(EnumSchema[Enum_OptionType]):
                 or a list of option type enumerations.
             ns: Namespace of option type enumeration. If not given, the value
                 will be inferred from the option type code. Spelled ``ns`` rather
-                than ``namespace`` because :meth:`abc.ABCMeta.__new__` names its
+                than ``namespace`` because ``abc.ABCMeta.__new__()`` names its
                 own fourth parameter ``namespace``, and before Python 3.11 that
                 parameter is positional-or-keyword rather than positional-only --
                 so a class keyword literally called ``namespace`` binds it twice.
@@ -1063,7 +1059,7 @@ class CustomOption(_OPT_Option, code=[Enum_OptionType.opt_custom_2988,
 class SectionHeaderBlock(BlockType, code=Enum_BlockType.Section_Header_Block):
     """Header schema for PCAP-NG Section Header Block (SHB)."""
 
-    #: Fast forward field to test the byteorder.
+    #: Fast-forward field to test the byte order.
     match: 'ByteorderTest' = ForwardMatchField(BitField(length=8, namespace={
         'byteorder': (32, 32),
     }))
@@ -1118,7 +1114,7 @@ class SectionHeaderBlock(BlockType, code=Enum_BlockType.Section_Header_Block):
     def post_process(self, packet: 'dict[str, Any]') -> 'SectionHeaderBlock':
         """Revise ``schema`` data after unpacking process.
 
-        This method calculates the byteorder value based on
+        This method calculates the byte order value based on
         the parsed schema.
 
         Args:
@@ -1152,7 +1148,7 @@ class SectionHeaderBlock(BlockType, code=Enum_BlockType.Section_Header_Block):
         return self
 
     if TYPE_CHECKING:
-        #: Byteorder.
+        #: Byte order.
         byteorder: Literal['big', 'little']
 
         def __init__(self, length: 'int', magic: 'Literal[0x1A2B3C4D]', major: 'int',
@@ -2047,8 +2043,8 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
             A line of nothing but NUL octets at the end of the entry is the
             block's own 32-bit padding and ends it.
 
-            The walk is strict (:issue:`1406`, :issue:`1413`, the #1325 ruling
-            that :class:`OptionAreaField` applies to option areas). Any of the
+            The walk is strict (:issue:`1406`, :issue:`1413`, and :issue:`1325`,
+            under which :class:`OptionAreaField` applies to option areas). Any of the
             following raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`,
             and the whole entry is then kept as the octets captured, as the one
             :obj:`bytes` item of :attr:`data`, which the block's ``make`` writes
@@ -2058,7 +2054,7 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
               newline, e.g. a bare ``KEY`` at the end of the entry;
             * a binary field whose 64-bit length prefix is cut short, or declares
               more octets than the entry has left -- at ``2**63`` and above
-              :meth:`io.BytesIO.read` would refuse it with a bare
+              ``io.BytesIO.read()`` would refuse it with a bare
               :exc:`OverflowError`;
             * a binary field's value not followed by the newline that
               terminates it, including one that ends the entry;
@@ -2416,9 +2412,9 @@ class CustomBlock(BlockType, code=[Enum_BlockType.Custom_Block_that_rewriters_ca
     length: 'int' = UInt32Field(callback=byteorder_callback)
     #: Private enterprise number.
     pen: 'int' = UInt32Field(callback=byteorder_callback)
-    #: Custom data (incl. padding and options).
     # NOTE: both custom block types span the same fixed fields, so the one
     # entry stands for both.
+    #: Custom data (incl. padding and options).
     data: 'bytes' = BytesField(length=nonnegative(
         lambda pkt: pkt['length'] - BLOCK_MINIMUM[Enum_BlockType.Custom_Block_that_rewriters_can_copy_into_new_files]))
     #: Block total length.

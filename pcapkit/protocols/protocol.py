@@ -306,7 +306,7 @@ def _declared_keywords(cls: 'type') -> 'Optional[frozenset[str]]':
             # its keywords because it forwards them to whichever of
             # :class:`HTTPv1 <pcapkit.protocols.application.httpv1.HTTP>` and
             # :class:`HTTPv2 <pcapkit.protocols.application.httpv2.HTTP>` the
-            # ``version`` names, but those two declare theirs in full, and
+            # ``version`` names, but each of those declares its own in full, and
             # inheriting the opt-out would exempt the very classes that can be
             # checked. A subclass that dispatches in turn says so itself.
             if klass is cls:
@@ -529,7 +529,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     #: of declaring as a parameter, e.g. with ``kwargs.get('spam')`` in
     #: :meth:`read` -- as :meth:`ESP.read <pcapkit.protocols.internet.esp.ESP.read>`
     #: does with ``packet``.
-    #: :func:`~pcapkit.protocols.protocol._declared_keywords` finds keywords by
+    #: ``_declared_keywords()`` finds keywords by
     #: reading signatures, which cannot see such a name, so a protocol that
     #: consumes one names it here and the construction check of :meth:`__init__`
     #: accepts it. The union over the MRO is used, so a subclass need not repeat
@@ -553,8 +553,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     #: unknown keyword. Unlike a set, the :obj:`None` is **not** inherited: a
     #: subclass of a dispatcher is checked normally unless it dispatches too and
     #: says so, because ``HTTPv1`` and ``HTTPv2`` declare their keywords in full
-    #: and exempting them along with their base would forgo the check on the only
-    #: two classes here that can have it.
+    #: and exempting them along with their base would forgo the check on the very
+    #: classes that can have it.
     __keywords__: 'Optional[frozenset[str]]' = frozenset()
 
     #: Whether this instance is being rebuilt by :meth:`from_data` from a parsed
@@ -642,7 +642,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     # packet data
     @cached_property
     def packet(self) -> 'Data_Packet':
-        """Data_Packet data of the protocol.
+        """Packet data of the protocol.
 
         Note:
             The split relies on :attr:`self.length <length>` being the length of
@@ -877,7 +877,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                errors: 'Literal["strict", "ignore", "replace"]' = 'strict') -> 'str':
         """Decode :obj:`bytes` into :obj:`str`.
 
-        Should decoding failed using ``encoding``, the method will try again decoding
+        Should decoding fail using ``encoding``, the method will try again decoding
         the :obj:`bytes` as ``'unicode_escape'`` with ``'replace'`` for error handling.
 
         See Also:
@@ -909,7 +909,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                 errors: 'Literal["strict", "ignore", "replace"]' = 'replace') -> 'str':
         """Unquote URLs into readable format.
 
-        Should decoding failed , the method will try again replacing ``'%'`` with ``'\\x'`` then
+        Should decoding fail, the method will try again replacing ``'%'`` with ``'\\x'`` then
         decoding the ``url`` as ``'unicode_escape'`` with ``'replace'`` for error handling.
 
         See Also:
@@ -942,7 +942,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
            protocol class, and the protocol names in upper case obtained from
            :meth:`Protocol.id <pcapkit.protocols.protocol.Protocol.id>`.
         2. If ``value`` is a protocol class, the method will return the
-           protocol class itself, and the protocols names in upper case
+           protocol class itself, and the protocol names in upper case
            obtained from :meth:`Protocol.id <pcapkit.protocols.protocol.Protocol.id>`.
         3. If ``value`` is :obj:`str`, the method will attempt to search for
            the existing registered protocol class from
@@ -1003,8 +1003,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         r"""Register a new protocol class.
 
         Notes:
-            The full qualified class name of the new protocol class
-            should be as ``{protocol.module}.{protocol.name}``.
+            The fully qualified class name of the new protocol class
+            should be ``{protocol.module}.{protocol.name}``.
 
         Arguments:
             code: protocol code
@@ -1039,7 +1039,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
             A descriptor equal to the one ``code`` shipped with restores that
             shipped object, unresolved, so undoing an override leaves the entry
-            as shipped (:issue:`1504`); see :meth:`_next_layer_entry`, which
+            as shipped (:issue:`1504`); see ``_next_layer_entry()``, which
             every layer's ``register`` shares.
 
         """
@@ -1211,19 +1211,25 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                 (:attr:`self._exlayer <pcapkit.protocols.protocol.Protocol._exlayer>`).
                 While parsing, the un-prefixed ``layer`` is accepted as well --
                 see the note below.
-            _protocol (Union[str, Protocol, Type[Protocol]]): Parse packet until ``_protocol``
-                (:attr:`self._exproto <pcapkit.protocols.protocol.Protocol._exproto>`).
+            _protocol: Parse packet until ``_protocol``
+                (:attr:`self._exproto <pcapkit.protocols.protocol.Protocol._exproto>`),
+                given as a protocol name (:obj:`str`), a protocol class or a
+                protocol instance.
                 While parsing, the un-prefixed ``protocol`` is accepted as well --
                 see the note below.
-            packet (dict[str, Any]): Packet context of the enclosing layer, as
+            packet: Packet context of the enclosing layer, a :obj:`dict` as
                 handed over by
                 :meth:`self._import_next_layer <ProtocolBase._import_next_layer>`.
                 While parsing, it is republished as ``__packet__`` so that
                 :meth:`self.unpack <Protocol.unpack>` -- and through it the
                 schema -- can see it; see the note below.
-            __context__ (Union[ContextRegistry, ProtocolContext, Mapping[str, ProtocolContext], Iterable[ProtocolContext]]):
-                Caller supplied parsing context (:attr:`self._exctx <pcapkit.protocols.protocol.Protocol._exctx>`),
-                c.f. :mod:`pcapkit.corekit.context`. It is consumed here rather
+            __context__: Caller supplied parsing context (:attr:`self._exctx <pcapkit.protocols.protocol.Protocol._exctx>`),
+                c.f. :mod:`pcapkit.corekit.context`: a
+                :class:`~pcapkit.corekit.context.ContextRegistry`, a
+                :class:`~pcapkit.corekit.context.ProtocolContext`, a mapping of
+                names to :class:`~pcapkit.corekit.context.ProtocolContext`, or an
+                iterable of :class:`~pcapkit.corekit.context.ProtocolContext`.
+                It is consumed here rather
                 than being forwarded to :meth:`self.read <Protocol.read>`, and is
                 propagated to nested layers by
                 :meth:`self._import_next_layer <ProtocolBase._import_next_layer>`.
@@ -1238,14 +1244,19 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                 given) is unaffected.
 
         Note:
-            Three of the keywords above are *out-of-band*: they configure the
-            parse rather than describing the packet, and every one of them is
-            consumed here, at the one point each of a protocol's producers passes
-            through. That is deliberate, and the normalisation below relies on it: fixing
-            a spelling here fixes it for the engines, for all four
+            The ``_layer``, ``_protocol`` and ``__context__`` keywords are
+            *out-of-band*: they configure the parse rather than describing the
+            packet, and every one of them is consumed here, at the one point
+            each of a protocol's producers passes through. That is deliberate,
+            and the normalisation below relies on it: fixing a spelling here
+            fixes it for the engines, for every
             :meth:`_import_next_layer <ProtocolBase._import_next_layer>`
-            implementations, and for any third party protocol that copied their
+            implementation, and for any third party protocol that copied their
             shape, rather than one call site at a time.
+
+            ``packet`` is read but not consumed: it stays in the keywords
+            forwarded to :meth:`__post_init__`, and while parsing a copy is
+            republished beside it as ``__packet__``.
 
         """
         #logger.debug('%s(file, %s, **%s)', type(self).__name__, length, kwargs)
@@ -1260,9 +1271,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         #: int: File pointer.
         self._seekset = io.SEEK_SET  # type: int
-        #: str: Parse packet until such layer.
+        #: Parse packet until such layer.
         self._exlayer = kwargs.pop('_layer', None)  # type: Optional[str]
-        #: str: Parse packet until such protocol.
+        #: Parse packet until such protocol.
         self._exproto = kwargs.pop('_protocol', None)  # type: Optional[str | ProtocolBase | Type[ProtocolBase]]
 
         # NOTE: The parse limits are documented as ``_layer`` and ``_protocol``,
@@ -1304,7 +1315,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         __context__ = kwargs.pop('__context__', None)
         self._exctx = (__context__ if isinstance(__context__, ContextRegistry)
                        else ContextRegistry.make(__context__))  # type: ContextRegistry
-        #: bool: If terminate parsing next layer of protocol.
+        #: bool: Whether to stop parsing the next layer of protocol.
         self._sigterm = self._check_term_threshold()
 
         # NOTE: The enclosing layer's packet context arrives as ``packet=`` -- the
@@ -1340,7 +1351,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         # does not know, and this closes the asymmetry from the other end.
         #
         # Parsing is left alone. There, the keywords are not field values but
-        # whatever the engines and the four ``_import_next_layer``
+        # whatever the engines and the ``_import_next_layer``
         # implementations forward -- ``alias``, ``packet``, and the limits
         # normalised above -- and a protocol has no way to know which of its
         # ancestors' keywords its parent chose to pass on. Nothing is lost that
@@ -1816,7 +1827,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             payload: length of the packet payload
             discard: flag if discard header data
 
-        * If ``header`` omits, returns the whole packet data in :obj:`bytes`.
+        * If ``header`` is omitted, returns the whole packet data in :obj:`bytes`.
         * If ``discard`` is set as :data:`True`, returns the packet body (in
           :obj:`bytes`) only.
         * Otherwise, returns the header and payload data as
@@ -1950,7 +1961,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             the namespace is inferred from the calling ``make`` method: it
             is the enumeration class of the default value of the argument
             that ``name`` was passed as, found from the call in the
-            caller's source (see :meth:`_make_index_namespace`).
+            caller's source (see ``_make_index_namespace()``).
 
         """
         if isinstance(name, (enum.Enum, aenum.Enum)):
@@ -2105,7 +2116,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` leaves
         both keys out, so ``data`` rebuilt from such a :obj:`dict` carries
         neither. The payload is then found from the structure of ``data``
-        instead, by :meth:`_lookup_payload`.
+        instead, by ``_lookup_payload()``.
 
         The payload is built one layer further into the frame than this
         protocol, as :meth:`_parse_next_layer` counts it, since each layer built
@@ -2118,7 +2129,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         Args:
             data: protocol data
             exclude: keys of ``data`` that are not the payload, though they may
-                look like it, passed on to :meth:`_lookup_payload`
+                look like it, passed on to ``_lookup_payload()``
 
         Returns:
             Payload for protocol construction.
@@ -2321,9 +2332,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         Notes:
             We added a new key ``__next_type__`` to ``dict_`` to store the
             next layer protocol type, and a new key ``__next_name__`` to
-            store the next layer protocol name. These two keys will **NOT**
+            store the next layer protocol name. These keys will **NOT**
             be included when :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` is called;
-            :meth:`_lookup_payload` finds the payload of such a :obj:`dict` instead.
+            ``_lookup_payload()`` finds the payload of such a :obj:`dict` instead.
 
         """
         next_ = cast('ProtocolBase', self._import_next_layer(proto, length, packet=packet))  # type: ignore[misc,call-arg,redundant-cast]

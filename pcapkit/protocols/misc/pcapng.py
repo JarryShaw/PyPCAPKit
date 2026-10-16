@@ -16,9 +16,9 @@ which implements extractor for PCAP-NG file format [*]_, and the
 
 .. versionremoved:: 1.5.0
 
-   ``pcapkit.protocols.misc.pcapng.TLSKeyLabel``, now
-   :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` (:issue:`886`,
-   :issue:`1744`).
+   ``pcapkit.protocols.misc.pcapng.TLSKeyLabel``, with no alias; use
+   :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` instead
+   (:issue:`886`, :issue:`1744`).
 
 .. versionchanged:: 1.5.0
 
@@ -340,7 +340,7 @@ class PacketDirection(EnumLookup, enum.IntEnum):
     """Packet direction for ``epb_flags`` options.
 
     Shares the :class:`~pcapkit.corekit.enum.EnumLookup` lookup contract that
-    every non-registry enumeration follows (GitHub issue :issue:`877`). Its
+    every non-registry enumeration follows (:issue:`877`). Its
     ``_missing_`` resolves the one value the specification leaves undefined,
     ``0b11``, to an unassigned member, so a capture carrying it still parses
     and rebuilds (:issue:`1382`).
@@ -377,7 +377,7 @@ class PacketReception(EnumLookup, enum.IntEnum):
     """Reception type for ``epb_flags`` options.
 
     Shares the :class:`~pcapkit.corekit.enum.EnumLookup` lookup contract that
-    every non-registry enumeration follows (GitHub issue :issue:`877`). Its
+    every non-registry enumeration follows (:issue:`877`). Its
     ``_missing_`` resolves the values the specification leaves undefined,
     ``0b101`` to ``0b111``, to an unassigned member, so a capture carrying one
     still parses and rebuilds (:issue:`1382`).
@@ -418,7 +418,7 @@ class PacketReception(EnumLookup, enum.IntEnum):
 # registry ("TLS SSLKEYLOGFILE Labels", Specification Required) rather than a
 # closed, hand-picked set, so the TLS key label enumeration is the generated
 # :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`, imported above as
-# ``Enum_TLSKeyLabel`` like its seven :mod:`pcapkit.const.pcapng` siblings. This
+# ``Enum_TLSKeyLabel`` like its :mod:`pcapkit.const.pcapng` siblings. This
 # module does not re-export it under the unaliased name (:issue:`1744`).
 # :class:`WireGuardKeyLabel` below stays hand-written: it is a closed set
 # (draft-ietf-opsawg-pcapng-06 section 4.7's "is one of" four names), not a
@@ -431,7 +431,7 @@ class WireGuardKeyLabel(EnumLookup, StrEnum):
     """WireGuard key log label.
 
     Shares the :class:`~pcapkit.corekit.enum.EnumLookup` lookup contract that
-    every non-registry enumeration follows (GitHub issue :issue:`877`); it
+    every non-registry enumeration follows (:issue:`877`); it
     defines neither ``get`` nor ``_missing_`` of its own.
 
     """
@@ -690,7 +690,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         #: PCAP-NG block type.
         _type: Enum_BlockType
-        #: PCAP-NG block byteorder.
+        #: PCAP-NG block byte order.
         _byte: 'Literal["little", "big"]'
 
     PACKET_TYPES = (Enum_BlockType.Enhanced_Packet_Block,
@@ -727,7 +727,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[Enum_LinkType, ModuleDescriptor[ProtocolBase] | ~typing.Type[ProtocolBase]]: Protocol index mapping for
+    #: Protocol index mapping for
     #: decoding next layer, c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     #: Each value is a :class:`~pcapkit.corekit.module.ModuleDescriptor` naming the
@@ -743,8 +743,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         },
     )  # type: DefaultDict[Enum_LinkType | int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
 
-    #: DefaultDict[Enum_BlockType, str | tuple[BlockParser, BlockConstructor]]: Block
-    #: type to method mapping. Method names are expected to be referred
+    #: Block type to method mapping. Method names are expected to be referred
     #: to the class by ``_read_block_${name}`` and/or ``_make_block_${name}``,
     #: and if such name not found, the value should then be a method that can
     #: parse the block by itself.
@@ -765,8 +764,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         },
     )  # type: DefaultDict[Enum_BlockType | int, str | tuple[BlockParser, BlockConstructor]]
 
-    #: DefaultDict[Enum_OptionType, str | tuple[OptionParser, OptionConstructor]]: Block
-    #: option type to method mapping. Method names are expected to be
+    #: Block option type to method mapping. Method names are expected to be
     #: referred to the class by ``_read_option_${name}`` and/or ``_make_option_${name}``,
     #: and if such name not found, the value should then be a method that can
     #: parse the option by itself.
@@ -816,8 +814,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         },
     )  # type: DefaultDict[Union[Enum_OptionType, Tuple[str, int]], str | tuple[OptionParser, OptionConstructor]]
 
-    #: DefaultDict[Enum_RecordType, str | tuple[RecordParser, RecordConstructor]]: Name
-    #: Resolution Block record type to method mapping. Method names are expected
+    #: Name Resolution Block record type to method mapping. Method names are expected
     #: to be referred to the class by ``_read_record_${name}`` and/or ``_make_record_${name}``,
     #: and if such name not found, the value should then be a method that can
     #: parse the record by itself.
@@ -830,8 +827,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         },
     )  # type: DefaultDict[Enum_RecordType | int, str | tuple[RecordParser, RecordConstructor]]
 
-    #: DefaultDict[Enum_SecretsType, str | tuple[SecretsParser, SecretsConstructor]]: Decryption
-    #: secrets type to method mapping. Method names are expected to
+    #: Decryption secrets type to method mapping. Method names are expected to
     #: be referred to the class by ``_read_secrets_${name}`` and/or ``_make_secrets_${name}``,
     #: and if such name not found, the value should then be a method that can
     #: parse the decryption secrets by itself.
@@ -905,8 +901,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         The payload is therefore the block schema's
         :attr:`~pcapkit.protocols.schema.schema.Schema.__payload__` field, which
         is where the schema layer put the captured octets, and the header is the
-        block octets ahead of it. The three block types that carry captured
-        octets -- :attr:`PACKET_TYPES <PCAPNG.PACKET_TYPES>`, i.e. the Enhanced
+        block octets ahead of it. The block types that carry captured
+        octets -- ``PACKET_TYPES``, i.e. the Enhanced
         Packet Block, the Simple Packet Block and the obsolete Packet Block --
         each place the payload at a different offset, so the offset is summed
         from the octets the schema actually unpacked rather than hard-coded per
@@ -954,12 +950,12 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
     @property
     def byteorder(self) -> 'Literal["big", "little"]':
-        """Byteorder of the current block."""
+        """Byte order of the current block."""
         return self._byte
 
     @property
     def nanosecond(self) -> 'bool':
-        """Whether the timestamp is in nanosecond."""
+        """Whether the timestamp is in nanoseconds."""
         return self.ts_resolution > RESOLUTION[False]
 
     @property
@@ -1032,8 +1028,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         r"""Register a new protocol class.
 
         Notes:
-            The full qualified class name of the new protocol class
-            should be as ``{protocol.module}.{protocol.name}``.
+            The fully qualified class name of the new protocol class
+            should be ``{protocol.module}.{protocol.name}``.
 
         Arguments:
             code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
@@ -1093,7 +1089,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
     @classmethod
     def register_option(cls, code: 'Enum_OptionType', meth: 'str | tuple[OptionParser, OptionConstructor]') -> 'None':
-        """Register a option parser.
+        """Register an option parser.
 
         Args:
             code: PCAP-NG option type code.
@@ -1469,7 +1465,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             such that we can be sure that the first block is the section header block.
 
         See Also:
-            For construction argument, please refer to :meth:`make`.
+            For construction arguments, please refer to :meth:`make`.
 
         """
         #: int: Section index number.
@@ -1522,12 +1518,14 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             self: :class:`PCAPNG` object or :obj:`None`.
 
         Returns:
-            If the object is initiated, i.e. ``self._fnum`` exists, and is of a
+            If the object is initialised, i.e. ``self._fnum`` exists, and is of a
             packet block (EPB, SPB or Packet), returns the block index number of
-            itself; else raises :exc:`UnsupportedCall`.
+            itself; else raises
+            :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`.
 
         Raises:
-            UnsupportedCall: This protocol has no registry entry.
+            UnsupportedCall: If called on the class, or on a block that is not a
+                packet block.
 
         """
         if self is None or self._info.type not in self.PACKET_TYPES:
@@ -1848,7 +1846,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         timestamp_raw = (timestamp_high << 32) | timestamp_low
         with localcontext(prec=64):
             # NOTE: This is the UTC epoch the docstring above promises, with no
-            # ``tzone.utcoffset(None)`` added, for two reasons. The block
+            # ``tzone.utcoffset(None)`` added. The block
             # timestamp is an offset from the UNIX epoch, so it is
             # timezone-independent by definition (draft-ietf-opsawg-pcapng-02
             # §4.3 spells out the arithmetic and has no timezone term), and the
@@ -1867,7 +1865,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             # datetime. It never moves the instant itself.
             ts_datetime = datetime.datetime.fromtimestamp(ts_ratio[0] / ts_ratio[1], tzone)
         # an epoch past what ``datetime`` or the platform's ``time_t`` holds,
-        # e.g. from an extreme ``if_tsoffset``, raises any of these three
+        # e.g. from an extreme ``if_tsoffset``, raises one of these
         except (ValueError, OverflowError, OSError):
             warn(f'PCAP-NG: [Block {self._type}] invalid timestamp: {timestamp_epoch}',
                  ProtocolWarning, stacklevel=stacklevel())
@@ -2124,7 +2122,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         Notes:
             We added a new key ``__next_type__`` to ``dict_`` to store the
             next layer protocol type, and a new key ``__next_name__`` to
-            store the next layer protocol name. These two keys will **NOT**
+            store the next layer protocol name. These keys will **NOT**
             be included when :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` is called.
 
             We also added a new key ``protocols`` to ``dict_`` to store the
@@ -2988,7 +2986,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         option = Data_UnknownOption(
@@ -3007,7 +3005,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._opt[schema.type] > 0:
@@ -3031,7 +3029,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         option = Data_CommentOption(
@@ -3065,7 +3063,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         Raises:
             ProtocolError: If the option is shorter than its 4-octet private
@@ -3092,7 +3090,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
@@ -3118,7 +3116,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
@@ -3144,7 +3142,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
@@ -3169,7 +3167,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
@@ -3194,7 +3192,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
@@ -3222,7 +3220,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
@@ -3250,7 +3248,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
@@ -3278,7 +3276,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
@@ -3306,7 +3304,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
@@ -3344,7 +3342,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
@@ -3373,7 +3371,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
@@ -3399,7 +3397,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
@@ -3427,7 +3425,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
@@ -3455,7 +3453,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
@@ -3481,7 +3479,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
@@ -3509,7 +3507,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Interface_Description_Block:
@@ -3537,7 +3535,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Enhanced_Packet_Block:
@@ -3579,7 +3577,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Enhanced_Packet_Block:
@@ -3603,7 +3601,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Enhanced_Packet_Block:
@@ -3631,7 +3629,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Enhanced_Packet_Block:
@@ -3659,7 +3657,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Enhanced_Packet_Block:
@@ -3687,7 +3685,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Enhanced_Packet_Block:
@@ -3713,7 +3711,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Name_Resolution_Block:
@@ -3739,7 +3737,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Name_Resolution_Block:
@@ -3767,7 +3765,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Name_Resolution_Block:
@@ -3795,7 +3793,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Interface_Statistics_Block:
@@ -3827,7 +3825,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Interface_Statistics_Block:
@@ -3859,7 +3857,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Interface_Statistics_Block:
@@ -3887,7 +3885,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Interface_Statistics_Block:
@@ -3915,7 +3913,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Interface_Statistics_Block:
@@ -3943,7 +3941,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Interface_Statistics_Block:
@@ -3971,7 +3969,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Interface_Statistics_Block:
@@ -3999,7 +3997,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Packet_Block:
@@ -4041,7 +4039,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options: Parsed PCAP-NG options.
 
         Returns:
-            Constructed option data.
+            Parsed option data.
 
         """
         if self._type != Enum_BlockType.Packet_Block:
@@ -4104,7 +4102,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             records: Parsed PCAP-NG records.
 
         Returns:
-            Constructed name resolution record data.
+            Parsed name resolution record data.
 
         """
         record = Data_UnknownRecord(
@@ -4123,7 +4121,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             records: Parsed PCAP-NG records.
 
         Returns:
-            Constructed name resolution record data.
+            Parsed name resolution record data.
 
         """
         if schema.length != 0:
@@ -4144,7 +4142,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             records: Parsed PCAP-NG records.
 
         Returns:
-            Constructed name resolution record data.
+            Parsed name resolution record data.
 
         """
         record = Data_IPv4Record(
@@ -4164,7 +4162,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             records: Parsed PCAP-NG records.
 
         Returns:
-            Constructed name resolution record data.
+            Parsed name resolution record data.
 
         """
         record = Data_IPv6Record(
@@ -4218,7 +4216,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             block: Parsed PCAP-NG decryption secrets block.
 
         Returns:
-            Constructed decryption secrets data.
+            Parsed decryption secrets data.
 
         """
         secrets = Data_WireGuardKeyLog(
@@ -4268,7 +4266,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             block: Parsed PCAP-NG decryption secrets block.
 
         Returns:
-            Constructed decryption secrets data.
+            Parsed decryption secrets data.
 
         """
         secrets = Data_ZigBeeNWKKey(
@@ -4317,7 +4315,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             block: Parsed PCAP-NG decryption secrets block.
 
         Returns:
-            Constructed decryption secrets data.
+            Parsed decryption secrets data.
 
         """
         secrets = Data_ZigBeeAPSKey(

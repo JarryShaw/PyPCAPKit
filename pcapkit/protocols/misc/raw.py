@@ -120,12 +120,14 @@ class Raw(ProtocolBase[Data_Raw, Schema_Raw],
         Args:
             file: Source packet stream.
             length: Length of packet data.
-            error (Optional[Exception]): Parsing errors if any (for parsing).
-            alias (Optional[int]): Original enumeration of the unknown protocol.
+            error: Parsing error if any (for parsing), an :class:`Exception`
+                instance or :obj:`None`.
+            alias: Original enumeration of the unknown protocol, an :obj:`int`
+                or :obj:`None`.
             **kwargs: Arbitrary keyword arguments.
 
         See Also:
-            For construction argument, please refer to :meth:`make`.
+            For construction arguments, please refer to :meth:`make`.
 
         """
         if file is None:

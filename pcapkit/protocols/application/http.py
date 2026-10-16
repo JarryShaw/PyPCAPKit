@@ -7,7 +7,7 @@
 :mod:`pcapkit.protocols.application.http` contains
 :class:`~pcapkit.protocols.application.http.HTTP`,
 which is a base class for Hypertext Transfer
-Protocol (HTTP) [*]_ family, eg.
+Protocol (HTTP) [*]_ family, e.g.
 :class:`HTTP/1.* <pcapkit.protocols.application.httpv1.HTTP>`
 and :class:`HTTP/2 <pcapkit.protocols.application.httpv2.HTTP>`,
 and :func:`~pcapkit.protocols.application.http.test_start_line`,
@@ -84,7 +84,7 @@ def _test_http2_frame(data: 'bytes') -> 'bool':
         sending" (:rfc:`9113#section-4.1`), and each stream rule is one a
         receiver "MUST treat as a connection error" when broken (e.g. ``DATA``
         on stream 0, :rfc:`9113#section-6.1`), so no frame a conforming peer
-        sends fails here. Frame types outside the ten that :rfc:`9113` defines
+        sends fails here. Frame types :rfc:`9113` does not define
         are legal and ignored by a receiver (:rfc:`9113#section-5.5`), but on a
         payload with no other evidence they are what arbitrary binary looks
         like most of the time, so they are not guessed.
@@ -153,7 +153,7 @@ def test_start_line(data: 'bytes') -> 'bool':
         :meth:`HTTP._read_http_header
         <pcapkit.protocols.application.httpv1.HTTP._read_http_header>` applies
         -- ``_RE_METHOD`` with ``_RE_VERSION`` for a request, ``_RE_VERSION``
-        with ``_RE_STATUS`` for a response -- which is why those three patterns
+        with ``_RE_STATUS`` for a response -- which is why those patterns
         are defined beside this predicate and
         :mod:`~pcapkit.protocols.application.httpv1` imports them from here. The
         two must accept the same start lines: a predicate looser than the parser
@@ -228,7 +228,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
     #: according to that value, so the correct set of names depends on an
     #: argument. :obj:`None` therefore opts out of the construction keyword check
     #: that :meth:`ProtocolBase.__init__
-    #: <pcapkit.protocols.protocol.ProtocolBase.__init__>` performs; the two
+    #: <pcapkit.protocols.protocol.ProtocolBase.__init__>` performs; the
     #: versioned classes are checked normally when constructed directly.
     __keywords__ = None
 
@@ -338,7 +338,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         Args:
             version: Version of HTTP.
             preface: Whether the HTTP/2 connection preface goes ahead of the
-                frame; :meth:`pack` writes it.
+                frame; :meth:`~pcapkit.protocols.protocol.Protocol.pack` writes it.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -491,8 +491,8 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
                 arm, or from that HTTP/2 trial, propagates unconverted.
 
         Note:
-            Two things this deliberately does **not** decide, because one payload
-            with no flow context cannot:
+            This deliberately does **not** decide the following, because one
+            payload with no flow context cannot:
 
             * **An** ``Upgrade: h2c`` **exchange** (:rfc:`7540#section-3.2`,
               deprecated but not removed by :rfc:`9113#section-3.1`) stays
@@ -514,7 +514,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
               which is precisely how garbage text was classified HTTP/2 to begin
               with. A bare frame is parsed as HTTP/2 only by the fall-through
               below, and only if its header is one a conforming sender could
-              write (see :func:`_test_http2_frame`): a frame type :rfc:`9113`
+              write (see ``_test_http2_frame()``): a frame type :rfc:`9113`
               defines, no undefined flag, and a stream that type may be sent on.
               Nine zero octets -- a ``DATA`` frame on stream 0, a protocol error
               under :rfc:`9113#section-6.1` -- are not guessed as HTTP/2.
@@ -596,7 +596,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         # and no preface, and a self-consistent HTTP/2 frame is still the best
         # answer available for one. It is the last resort, not the whole method.
         #
-        # The two arms suppress different sets, deliberately. Only the *last*
+        # The arms of this trial suppress different sets, deliberately. Only the *last*
         # arm also suppresses :exc:`struct.error`, as defence in depth: a payload
         # too short for HTTP/2's nine-octet frame header, or whose frame-specific
         # fields exceed what the buffer holds, must not escape as a stdlib

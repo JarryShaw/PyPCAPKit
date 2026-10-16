@@ -6,7 +6,7 @@ NGAP - NG Application Protocol
 :mod:`pcapkit.protocols.application.ngap` contains
 :class:`~pcapkit.protocols.application.ngap.NGAP`,
 which implements extractor for the NG Application Protocol
-(NGAP) [*]_, as specified in 3GPP TS 38.413, and the four enumerations its
+(NGAP) [*]_, as specified in 3GPP TS 38.413, and the enumerations its
 data models report with:
 :class:`~pcapkit.protocols.application.ngap.PDUKind`,
 :class:`~pcapkit.protocols.application.ngap.Criticality`,
@@ -35,10 +35,23 @@ unregistered PPID would, because
 :func:`~pcapkit.corekit.decorators.beholder` and falls back to
 :class:`~pcapkit.protocols.misc.raw.Raw`.
 
+.. autoclass:: pcapkit.protocols.application.ngap.NGAP
+   :no-members:
+   :show-inheritance:
+
+   .. autoproperty:: name
+   .. autoproperty:: length
+
+   .. automethod:: read
+   .. automethod:: make
+
+   .. automethod:: __length_hint__
+   .. automethod:: _make_data
+
 Decoder Dependency
 ------------------
 
-|pycrate|_ is used rather than a PER codec of our own, for two reasons. It
+|pycrate|_ is used rather than a PER codec of our own. It
 **ships NGAP already compiled**, at ``pycrate_asn1dir/NGAP.py``, so the 3GPP
 ASN.1 source does not have to be vendored here and tracked across releases; and
 it is **pure Python**, with no compiled extension to build on any platform.
@@ -52,19 +65,18 @@ Generic Conversion
 The decoded value tree is mapped into :class:`~pcapkit.corekit.infoclass.Info`
 objects **structurally**, by ASN.1 shape rather than by procedure:
 
-===============================  ==========================================================
-ASN.1 / |pycrate|_ shape          :mod:`pcapkit` model
-===============================  ==========================================================
-``SEQUENCE`` / ``SET`` (a dict)   :class:`~pcapkit.protocols.data.application.ngap.Sequence`
-``SEQUENCE OF`` (a list)          :obj:`list`
-``CHOICE`` / open type            :class:`~pcapkit.protocols.data.application.ngap.Choice`
-``BIT STRING``                    :class:`~pcapkit.protocols.data.application.ngap.BitString`
-``INTEGER``, ``OCTET STRING``,    kept as :obj:`int`, :obj:`bytes`, :obj:`str`
-``ENUMERATED``, ``BOOLEAN``
-===============================  ==========================================================
+==========================================================  ==========================================================
+ASN.1 / |pycrate|_ shape                                    :mod:`pcapkit` model
+==========================================================  ==========================================================
+``SEQUENCE`` / ``SET`` (a dict)                             :class:`~pcapkit.protocols.data.application.ngap.Sequence`
+``SEQUENCE OF`` (a list)                                    :obj:`list`
+``CHOICE`` / open type                                      :class:`~pcapkit.protocols.data.application.ngap.Choice`
+``BIT STRING``                                              :class:`~pcapkit.protocols.data.application.ngap.BitString`
+``INTEGER``, ``OCTET STRING``, ``ENUMERATED``, ``BOOLEAN``  kept as :obj:`int`, :obj:`bytes`, :obj:`str`, :obj:`bool`
+==========================================================  ==========================================================
 
-That is a deliberate trade. Every one of the 81 elementary procedures and 438
-protocol IEs works on the day it is decoded, and a new 3GPP release needs no
+That is a deliberate trade. Every elementary procedure and protocol IE
+works on the day it is decoded, and a new 3GPP release needs no
 code change here; what is given up is per-IE typing, so an IE's value is
 reported in the specification's own shape rather than as a
 :mod:`pcapkit`-specific model. The fields worth reading at a glance -- the PDU
@@ -82,8 +94,8 @@ Known Limitations
   degrades to :class:`~pcapkit.protocols.misc.raw.Raw`.
 * **The specification version is that of the installed decoder, not this
   package's.** The IE and procedure enumerations were generated from
-  ``NGAP_Constants`` of |pycrate|_ 0.8.1 (Release-18-era: 81 procedure codes,
-  438 protocol IE IDs, highest 443). A |pycrate|_ that carries a newer NGAP will decode IEs that
+  ``NGAP_Constants`` of |pycrate|_ 0.8.1 (Release-18-era). A |pycrate|_ that
+  carries a newer NGAP will decode IEs that
   :class:`~pcapkit.const.ngap.procedure_code.ProcedureCode` and
   :class:`~pcapkit.const.ngap.protocol_ie.ProtocolIE` do not name. Such a
   value resolves to a non-registering member called ``Unassigned`` rather than
@@ -94,19 +106,6 @@ Known Limitations
 * **Private IEs** (``PrivateMessage``) **carry no schema.** Their contents are
   vendor defined, so the generic conversion reports whatever ASN.1 shape the
   encoding declares and cannot name the fields.
-
-.. autoclass:: pcapkit.protocols.application.ngap.NGAP
-   :no-members:
-   :show-inheritance:
-
-   .. autoproperty:: name
-   .. autoproperty:: length
-
-   .. automethod:: read
-   .. automethod:: make
-
-   .. automethod:: __length_hint__
-   .. automethod:: _make_data
 
 Auxiliary Functions
 -------------------

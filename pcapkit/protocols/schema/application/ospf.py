@@ -29,9 +29,10 @@ def ospf_auth_data_selector(pkt: 'dict[str, Any]') -> 'Field':
         pkt: Packet data.
 
     Returns:
-        * If :attr:`OSPF.auth_type` is 2, a :class:`~pcapkit.corekit.fields.misc.SchemaField`
-          wrapped :class:`~pcapkit.protocols.schema.application.ospf.CryptographicAuthentication` instance.
-        * Otherwise, a :class:`~pcapkit.corekit.fields.strings.BytesField` instance.
+        A :class:`~pcapkit.corekit.fields.misc.SchemaField` wrapped
+        :class:`~pcapkit.protocols.schema.application.ospf.CryptographicAuthentication`
+        instance if :attr:`OSPF.auth_type` is 2, and a
+        :class:`~pcapkit.corekit.fields.strings.BytesField` instance otherwise.
 
     """
     if pkt['auth_type'] == Enum_Authentication.Cryptographic_authentication:

@@ -88,7 +88,7 @@ def schema_final(cls: '_ST', *, _finalised: 'bool' = True) -> '_ST':
     """
     # NOTE: keyed on ``__finalised__`` rather than on ``final``'s ``__final__``,
     # and read out of ``cls.__dict__`` rather than through ``getattr``, for the
-    # two reasons given in :func:`pcapkit.corekit.infoclass.info_final`, which
+    # reasons given in :func:`pcapkit.corekit.infoclass.info_final`, which
     # makes both choices: only ``__finalised__`` records *this function* having
     # run, so a ``__final__`` test would make ``@schema_final`` over ``@final``
     # skip the generation while the opposite order did the work; and
@@ -210,7 +210,7 @@ class SchemaMeta(abc.ABCMeta):
 
       .. seealso::
 
-         This is implemented thru setting up the initial field dictionary
+         This is implemented through setting up the initial field dictionary
          in the |prepare|_ method, and then inherit the field
          dictionaries from the base classes.
 
@@ -230,7 +230,7 @@ class SchemaMeta(abc.ABCMeta):
 
       .. note::
 
-         This is implemented thru the :meth:`~object.__new__` method, which
+         This is implemented through the :meth:`~object.__new__` method, which
          will inherit the additional and excluded field names from the base
          classes, as well as populating the additional and excluded field
          from the subclass attributes.
@@ -274,12 +274,12 @@ class SchemaMeta(abc.ABCMeta):
     #: Class keywords that collide with a parameter this class does not
     #: control, so a schema class declared with one fails with an opaque
     #: ``TypeError`` from several frames away instead of a clear message here.
-    #: Two different collisions, both reserved:
+    #: Collisions of different kinds, all reserved:
     #:
     #: ``mcls``, ``name``, ``bases``, ``namespace`` collide with
     #: :meth:`abc.ABCMeta.__new__` -- a *different* function from this one, one
     #: level up the ``super().__new__(...)`` call below. Before Python 3.11
-    #: those four are positional-or-keyword there (from 3.11 they are
+    #: those are positional-or-keyword there (from 3.11 they are
     #: positional-only, ``def __new__(mcls, name, bases, namespace, /,
     #: **kwargs)``), so a class keyword spelled the same as any of them binds
     #: that parameter twice: ``TypeError: ABCMeta.__new__() got multiple
@@ -303,7 +303,7 @@ class SchemaMeta(abc.ABCMeta):
     #: :func:`inspect.signature(abc.ABCMeta.__new__) <inspect.signature>` at
     #: import time: the signature's positional-only marker differs across
     #: Python versions, introspecting a CPython internal's exact shape to
-    #: guard against a CPython internal's exact shape is circular, and five
+    #: guard against a CPython internal's exact shape is circular, and
     #: names that will not change are cheaper to read than the machinery to
     #: recompute them.
     #:
@@ -426,7 +426,7 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
         # NOTE: the whole ancestry rather than ``cls.__bases__``, and
         # ``base.__dict__`` rather than ``getattr`` -- see
         # :meth:`pcapkit.corekit.infoclass.Info.__init_subclass__`, which makes
-        # the same two choices for the same two reasons.
+        # the same choices for the same reasons.
         for base in cls.__mro__[1:]:
             if base.__dict__.get('__final__'):
                 raise SchemaError(f'{cls.__name__}: cannot subclass {base.__name__}, '
@@ -449,7 +449,7 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
 
         Note:
             Whether ``cls`` still needs finalising is read from its *own*
-            ``__dict__``, never inherited (GitHub issue :issue:`1498`). Each
+            ``__dict__``, never inherited (:issue:`1498`). Each
             class is finalised on its first construction, whatever its
             ancestors' state, so a subclass of a
             :attr:`~pcapkit.corekit.infoclass.FinalisedState.BASE` ancestor
@@ -726,7 +726,7 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             they are the direct value of the :class:`Schema` object's attribute.
             Should such :class:`Schema` objects be nested within other data,
             types, such as :obj:`list`, :obj:`tuple`, :obj:`set`, etc., we
-            shall not convert them into :obj:`dict` and remain them intact.
+            leave them intact rather than converting them into :obj:`dict`.
 
         Note:
             A schema unpacked as the value of a
@@ -1032,7 +1032,7 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             key. See that function for the exact lookup, write and iteration
             semantics.
 
-            And an ``__option_padding__`` key in the ``packet`` to record how
+            We also use an ``__option_padding__`` key in ``packet`` to record how
             much of an
             :class:`~pcapkit.corekit.fields.collections.OptionField`'s declared
             area it did not consume. What follows that area decides what the

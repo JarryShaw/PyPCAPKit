@@ -144,13 +144,13 @@ class Application(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable
             proto: next layer protocol index; only the ``-1`` sentinel
                 (the rest, undissected) is accepted
             length: valid (*non-padding*) length
-            packet: packet info (passed from :meth:`self.unpack <Protocol.unpack>`)
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
 
         Returns:
             Current protocol with the undissected remainder as payload.
 
         Raises:
-            UnsupportedCall: ``proto`` is anything but ``-1``, i.e. a real
+            UnsupportedCall: If ``proto`` is anything but ``-1``, i.e. a real
                 protocol dispatch, which this protocol doesn't support.
 
         """
@@ -167,14 +167,14 @@ class Application(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable
             proto: next layer protocol index; only the ``-1`` sentinel
                 (the rest, undissected) is accepted
             length: valid (*non-padding*) length
-            packet: packet info (passed from :meth:`self.unpack <Protocol.unpack>`)
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
 
         Returns:
             Instance of :class:`~pcapkit.protocols.misc.raw.Raw`, or of
             :class:`~pcapkit.protocols.misc.null.NoPayload` when nothing remains.
 
         Raises:
-            UnsupportedCall: ``proto`` is anything but ``-1``, i.e. a real
+            UnsupportedCall: If ``proto`` is anything but ``-1``, i.e. a real
                 protocol dispatch, which this protocol doesn't support.
 
         """

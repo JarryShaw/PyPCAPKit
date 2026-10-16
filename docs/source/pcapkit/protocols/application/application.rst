@@ -5,10 +5,9 @@ Application Layer Base Protocol
 
 :mod:`pcapkit.protocols.application.application` contains only
 :class:`~pcapkit.protocols.application.application.Application`,
-which is a base class for application layer protocols, eg.
-:class:`HTTP/1.* <pcapkit.protocols.application.httpv1.HTTP>`,
-:class:`HTTP/2 <pcapkit.protocols.application.httpv2.HTTP>`
-and etc.
+which is a base class for application layer protocols, e.g.
+:class:`HTTP/1.* <pcapkit.protocols.application.httpv1.HTTP>` and
+:class:`HTTP/2 <pcapkit.protocols.application.httpv2.HTTP>`.
 
 .. versionchanged:: 1.5.0
 

@@ -6,7 +6,7 @@ HTTP - Hypertext Transfer Protocol
 :mod:`pcapkit.protocols.application.http` contains
 :class:`~pcapkit.protocols.application.http.HTTP`,
 which is a base class for Hypertext Transfer
-Protocol (HTTP) [*]_ family, eg.
+Protocol (HTTP) [*]_ family, e.g.
 :class:`HTTP/1.* <pcapkit.protocols.application.httpv1.HTTP>`
 and :class:`HTTP/2 <pcapkit.protocols.application.httpv2.HTTP>`,
 and :func:`~pcapkit.protocols.application.http.test_start_line`,
