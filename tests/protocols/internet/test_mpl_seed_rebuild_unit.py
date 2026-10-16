@@ -76,7 +76,9 @@ class TestMPLSeedRebuild(unittest.TestCase):
             with self.subTest(proto=name):
                 built = cls(options=[(Option.MPL_Option, {'seed': SRC, 'seq': 7, 'max': True})],
                             next=TransType.IPv6_NoNxt, payload=b'')
-                self.assertEqual(built.data, HEADERS[0])
+                # HEADERS[0] ends in two Pad1, which a parsed header keeps; two
+                # octets of fresh padding are one PadN of length 0 (#1793)
+                self.assertEqual(built.data, HEADERS[0][:-2] + b'\x01\x00')
 
     def test_seed_that_does_not_fit_its_kind_is_rejected(self) -> None:
         from pcapkit.const.ipv6.option import Option
