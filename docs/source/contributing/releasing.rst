@@ -84,7 +84,7 @@ a workaround for another:
    of *that* tree (``:327``). Every downstream tag and release name is built
    from that output -- ``v${{ needs.version_check.outputs.PCAPKIT_VERSION }}``
    is ``github``'s ``tag_name`` at ``:719`` and the release ``pypi`` and
-   ``conda`` upload to at ``:1117`` and ``:1479``, always from
+   ``conda`` upload to at ``:1117`` and ``:1493``, always from
    ``PCAPKIT_VERSION``, never from ``github.ref_name`` -- so the version
    actually released is whatever ``__version__`` says on the tagged commit,
    not the name of the tag that was pushed. The two agree only if the tag
@@ -162,12 +162,12 @@ the default branch, and ``tag`` pulled ``main`` before tagging.
   naming another commit skips the gate and every publisher
   (`#1748 <https://github.com/JarryShaw/PyPCAPKit/issues/1748>`__):
   ``Release status`` posts a ``::notice`` if that release is complete, or a
-  ``::warning`` naming both commits and what is missing (``:1624-1634``), and
+  ``::warning`` naming both commits and what is missing (``:1638-1648``), and
   the run stays green. A ``v*`` push of such a version still fails with the
   check's ``::error``. A partial release is finished by re-running the run that
   tagged it.
 * ``pypi`` and ``conda`` attach their files with ``gh release upload``
-  (``:1110-1147``, ``:1474-1509``), not ``action-gh-release``, which calls Update
+  (``:1110-1147``, ``:1488-1523``), not ``action-gh-release``, which calls Update
   a release before every upload (3.0.2's ``src/github.ts:631-683``). A file
   the release already has is left alone
   (`#1640 <https://github.com/JarryShaw/PyPCAPKit/issues/1640>`__): the action
@@ -296,7 +296,7 @@ the release test gate, ask for a second approval and race the first run's
 uploads from another concurrency group, so ``version_check`` skips a ``push``
 whose ``github.actor_id`` is ``vars.RELEASE_APP_BOT_ID`` (``:290-294``), and
 ``release_status`` reports it with ``::notice title=Nothing to release``
-(``:1586-1588``). A tag pushed by a person runs as before. Whether a tag made
+(``:1600-1602``). A tag pushed by a person runs as before. Whether a tag made
 through the Releases API fires ``push``, and with the bot as actor, is
 unmeasured; if not, the guard never matches and the cost is one approval to
 reject.

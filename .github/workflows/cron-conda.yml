@@ -445,19 +445,19 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      # #1854: pcapkit is not installed here; see create-release.yml's step of
+      # the same name.
       - name: Install and Setup
         if: ${{ matrix.os != 'windows-latest' }}
         run: |
           set -x
 
           python -m pip install -U pip setuptools wheel
-          python -m pip install -e .[all]
 
       - name: Install and Setup (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
           python -m pip install -U pip setuptools wheel
-          python -m pip install -e .[all]
 
       # #1827: pip evaluates conda/requirements.txt's platform markers here,
       # on this leg's own runner, so Intel macOS fetches its own cryptography
