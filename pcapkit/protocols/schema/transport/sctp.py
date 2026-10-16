@@ -181,8 +181,8 @@ def nested_length(base: 'int') -> 'Callable[[dict[str, Any]], int]':
     The chunks that carry a nested list -- INIT, INIT ACK, HEARTBEAT,
     HEARTBEAT ACK, ABORT and ERROR -- deliberately have no separate
     :class:`~pcapkit.corekit.fields.strings.PaddingField`, and fold the chunk's
-    trailing padding into the nested list's own span instead. There are two
-    reasons, and both matter:
+    trailing padding into the nested list's own span instead, which parsing and
+    construction each need for a reason of their own:
 
     * On parsing, a sender is allowed by :rfc:`9260#section-3.2` to leave the
       final parameter's padding out of the chunk length, so the padding has to

@@ -68,15 +68,16 @@ callers take element zero as canonical.
 Selecting a Version
 -------------------
 
-Nothing *dispatches* on the version nibble, because only one version exists
--- but :meth:`L2TPv2.read <pcapkit.protocols.link.l2tpv2.L2TPv2.read>` does
-**check** it, and refuses anything other than ``2``. That is the half of the
-mechanism which is useful with one version implemented: it keeps v3 traffic on
-port 1701 (:rfc:`3931` §4.1.2 shares the port, so this is ordinary capture
+Nothing *dispatches* on the version nibble, because L2TPv2 is the only version
+implemented -- but
+:meth:`L2TPv2.read <pcapkit.protocols.link.l2tpv2.L2TPv2.read>` does **check**
+it, and refuses anything other than ``2``. That is the half of the mechanism
+which is useful with no other version implemented: it keeps v3 traffic on port
+1701 (:rfc:`3931` §4.1.2 shares the port, so this is ordinary capture
 traffic rather than a corner case) from being reported as v2 with a tunnel and
 session ID read out of v3's Control Connection ID.
 
-When a second version lands, the remaining half -- delegation rather than refusal
+When another version lands, the remaining half -- delegation rather than refusal
 -- already has a precedent in
 :class:`~pcapkit.protocols.application.http.HTTP`, which reads a version and
 delegates to a per-version class. L2TP is the easier case: HTTP has to

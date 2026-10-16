@@ -23,15 +23,15 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
     class FlagsType(TypedDict):
         """Flags of L2TP packet."""
 
-        #: Type of L2TP packet.
+        #: Type flag (``T``).
         type: int
-        #: Length of L2TP packet.
+        #: Length flag (``L``).
         len: int
-        #: Sequence number of L2TP packet.
+        #: Sequence flag (``S``).
         seq: int
-        #: Offset size of L2TP packet.
+        #: Offset flag (``O``).
         offset: int
-        #: Priority of L2TP packet.
+        #: Priority flag (``P``).
         prio: int
         #: Reserved bits 2 and 3 of L2TP packet.
         reserved_1: int

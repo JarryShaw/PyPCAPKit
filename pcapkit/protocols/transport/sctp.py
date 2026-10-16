@@ -321,13 +321,14 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
     therefore keyed by PPID rather than by port number, and is populated through
     :meth:`SCTP.register`::
 
-       >>> SCTP.register(Enum_PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NG_Application_Protocol, NGAP)
+       >>> from pcapkit.const.sctp.payload_protocol_identifier import PayloadProtocolIdentifier
+       >>> SCTP.register(PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NG_Application_Protocol, NGAP)
        >>> SCTP.register(60, NGAP)  # equivalent, PPID given as a plain integer
 
-    Two PPIDs are registered by default, both to
-    :class:`~pcapkit.protocols.application.ngap.NGAP`: 60
-    (``NG_Application_Protocol``) and 66 (``NGAP_over_DTLS_over_SCTP``). Every
-    other PPID resolves to :class:`~pcapkit.protocols.misc.raw.Raw`.
+    By default, PPIDs 60 (``NG_Application_Protocol``) and 66
+    (``NGAP_over_DTLS_over_SCTP``) are registered to
+    :class:`~pcapkit.protocols.application.ngap.NGAP`, and every other PPID
+    resolves to :class:`~pcapkit.protocols.misc.raw.Raw`.
 
     Only PPID 60 actually decodes. A PPID 66 payload is an NGAP PDU wrapped in
     a DTLS record, and :mod:`pcapkit` has no DTLS implementation, so the bytes
@@ -425,7 +426,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
          - :meth:`~pcapkit.protocols.transport.sctp.SCTP._read_param_addrtypes`
          - :meth:`~pcapkit.protocols.transport.sctp.SCTP._make_param_addrtypes`
 
-    This class supports parsing of all thirteen error causes defined
+    This class supports parsing of every error cause defined
     by :rfc:`9260#section-3.3.10`, which are directly mapped to the
     :class:`pcapkit.const.sctp.cause_code.CauseCode` enumeration; see
     :attr:`self.__cause__ <SCTP.__cause__>` for the mapping. Unknown cause
@@ -493,8 +494,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         },
     )  # type: DefaultDict[int, str | tuple[ChunkParser, ChunkConstructor]]
 
-    #: DefaultDict[Enum_Parameter, str | tuple[ParameterParser, ParameterConstructor]]:
-    #: Chunk parameter type to method mapping, c.f. :meth:`_read_sctp_parameters`
+    #: DefaultDict[Enum_Parameter, str | tuple[ParameterParser, ParameterConstructor]]: Chunk
+    #: parameter type to method mapping, c.f. :meth:`_read_sctp_parameters`
     #: and :meth:`_make_sctp_parameters`. Method names are expected to be
     #: referred to the class by ``_read_param_${name}`` and
     #: ``_make_param_${name}``, and if such name not found, the value should then
@@ -709,8 +710,8 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         r"""Register a new protocol class for a payload protocol identifier.
 
         Notes:
-            The full qualified class name of the new protocol class
-            should be as ``{protocol.module}.{protocol.name}``.
+            The fully qualified class name of the new protocol class
+            should be ``{protocol.module}.{protocol.name}``.
 
         Arguments:
             code: payload protocol identifier (PPID), as in
@@ -762,9 +763,9 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Warns:
             RegistryWarning: If a different entry is already registered for
                 ``code``; it is overwritten. Handing back the entry already
-                stored, or one equal to it, is a silent no-op. The entry
-                ``code`` shipped with is accepted like any other, so an
-                override can be undone (:issue:`1362`, :issue:`1363`).
+                stored, or one equal to it, is a silent no-op. Re-registering
+                the entry ``code`` shipped with is accepted like any other,
+                so an override can be undone (:issue:`1362`, :issue:`1363`).
 
         """
         incumbent = cls.__chunk__.get(code)
@@ -785,9 +786,9 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Warns:
             RegistryWarning: If a different entry is already registered for
                 ``code``; it is overwritten. Handing back the entry already
-                stored, or one equal to it, is a silent no-op. The entry
-                ``code`` shipped with is accepted like any other, so an
-                override can be undone (:issue:`1362`, :issue:`1363`).
+                stored, or one equal to it, is a silent no-op. Re-registering
+                the entry ``code`` shipped with is accepted like any other,
+                so an override can be undone (:issue:`1362`, :issue:`1363`).
 
         """
         incumbent = cls.__parameter__.get(code)
@@ -808,9 +809,9 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Warns:
             RegistryWarning: If a different entry is already registered for
                 ``code``; it is overwritten. Handing back the entry already
-                stored, or one equal to it, is a silent no-op. The entry
-                ``code`` shipped with is accepted like any other, so an
-                override can be undone (:issue:`1362`, :issue:`1363`).
+                stored, or one equal to it, is a silent no-op. Re-registering
+                the entry ``code`` shipped with is accepted like any other,
+                so an override can be undone (:issue:`1362`, :issue:`1363`).
 
         """
         incumbent = cls.__cause__.get(code)

@@ -5,8 +5,8 @@ Base Protocol
 
 :mod:`pcapkit.protocols.link.link` contains :class:`~pcapkit.protocols.link.link.Link`,
 which is a base class for link layer protocols, e.g. :class:`~pcapkit.protocols.link.arp.ARP`/InARP,
-:class:`~pcapkit.protocols.link.ethernet.Ethernet`, :class:`~pcapkit.protocols.link.l2tp.L2TP`,
-:class:`~pcapkit.protocols.link.vlan.VLAN` and etc.
+:class:`~pcapkit.protocols.link.ethernet.Ethernet`, :class:`~pcapkit.protocols.link.l2tp.L2TP`
+and :class:`~pcapkit.protocols.link.vlan.VLAN`.
 
 .. autoclass:: pcapkit.protocols.link.link.Link
    :no-members:

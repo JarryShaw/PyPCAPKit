@@ -310,7 +310,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
          :obj:`int` (:issue:`616`).
        * A constructed MPTCP option sets its ``subtype`` (:issue:`566`), and
          MP_CAPABLE is written at the :rfc:`8684` lengths (:issue:`567`) and
-         read at all five of them (:issue:`1042`).
+         read at each of them (:issue:`1042`).
        * A rebuild keeps what was parsed: the option order and padding
          (:issue:`1151`), the reserved bits of the header and of the POCSP,
          Quick-Start and MPTCP options (:issue:`1211`, :issue:`1212`), the
@@ -352,7 +352,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             # rather than as an HTTP alternate, and traffic there is TLS-wrapped,
             # which pcapkit does not parse.
             #
-            # Both HTTP ports bind the version-dispatching
+            # The HTTP ports bind the version-dispatching
             # :class:`pcapkit.protocols.application.http.HTTP` rather than
             # ``httpv1.HTTP``, because HTTP/1 and HTTP/2 share these ports on the
             # wire -- RFC 9113 calls the cleartext form ``http`` and keeps it on
@@ -609,6 +609,11 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Returns:
             Constructed packet data.
 
+        .. versionchanged:: 1.5.0
+
+           An out-of-range ``srcport`` or ``dstport`` raises
+           :exc:`ValueError` rather than being accepted (:issue:`758`).
+
         """
         # NOTE: the connection control flags are resolved *before* the options are
         # built, because option makers reached from ``_make_tcp_options`` read
@@ -686,9 +691,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Warns:
             RegistryWarning: If a different entry is already registered for
                 ``code``; it is overwritten. Handing back the entry already
-                stored, or one equal to it, is a silent no-op. The entry
-                ``code`` shipped with is accepted like any other, so an
-                override can be undone (:issue:`1362`, :issue:`1363`).
+                stored, or one equal to it, is a silent no-op. Re-registering
+                the entry ``code`` shipped with is accepted like any other,
+                so an override can be undone (:issue:`1362`, :issue:`1363`).
 
         """
         incumbent = cls.__option__.get(code)
@@ -709,9 +714,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Warns:
             RegistryWarning: If a different entry is already registered for
                 ``code``; it is overwritten. Handing back the entry already
-                stored, or one equal to it, is a silent no-op. The entry
-                ``code`` shipped with is accepted like any other, so an
-                override can be undone (:issue:`1362`, :issue:`1363`).
+                stored, or one equal to it, is a silent no-op. Re-registering
+                the entry ``code`` shipped with is accepted like any other,
+                so an override can be undone (:issue:`1362`, :issue:`1363`).
 
         """
         incumbent = cls.__mp_option__.get(code)
@@ -789,7 +794,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             Extracted TCP options.
 
         Raises:
-            ProtocolError: If the threshold is **NOT** matching.
+            ProtocolError: If the options run past ``size``.
 
         """
         counter = 0                   # length of read option list
@@ -821,7 +826,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         return options
 
     def _read_mode_donone(self, schema: 'Schema_UnassignedOption', *, options: 'Option') -> 'Data_UnassignedOption':  # pylint: disable=unused-argument
-        """Read options request no process.
+        """Read TCP unassigned option.
 
         Arguments:
             schema: parsed option schema
@@ -922,7 +927,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         return data
 
     def _read_mode_ws(self, schema: 'Schema_WindowScale', *, options: 'Option') -> 'Data_WindowScale':  # pylint: disable=unused-argument
-        """Read TCP windows scale option.
+        """Read TCP window scale option.
 
         Structure of TCP window scale option [:rfc:`7323`]:
 

@@ -22,15 +22,25 @@ if TYPE_CHECKING:
 class ARP(Schema):
     """Header schema for ARP packet."""
 
+    #: Hardware type.
     htype: 'Enum_Hardware' = EnumField(length=2, namespace=Enum_Hardware)
+    #: Protocol type.
     ptype: 'Enum_EtherType' = EnumField(length=2, namespace=Enum_EtherType)
+    #: Hardware address length.
     hlen: 'int' = UInt8Field()
+    #: Protocol address length.
     plen: 'int' = UInt8Field()
+    #: Operation code.
     oper: 'Enum_Operation' = EnumField(length=2, namespace=Enum_Operation)
+    #: Sender hardware address.
     sha: 'bytes' = BytesField(length=lambda pkt: pkt['hlen'])
+    #: Sender protocol address.
     spa: 'bytes' = BytesField(length=lambda pkt: pkt['plen'])
+    #: Target hardware address.
     tha: 'bytes' = BytesField(length=lambda pkt: pkt['hlen'])
+    #: Target protocol address.
     tpa: 'bytes' = BytesField(length=lambda pkt: pkt['plen'])
+    #: Payload.
     payload: 'bytes' = PayloadField()
 
     if TYPE_CHECKING:

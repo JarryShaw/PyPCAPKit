@@ -22,17 +22,17 @@ reading ``2``. It is dispatched from
    ------- ----- --------------------- ------------------------------------------
     0          1 ``l2tp.flags.len``    Length
    ------- ----- --------------------- ------------------------------------------
-    0          2                       Reserved (must be zero ``x00``)
+    0          2                       Reserved (must be zero)
    ------- ----- --------------------- ------------------------------------------
     0          4 ``l2tp.flags.seq``    Sequence
    ------- ----- --------------------- ------------------------------------------
-    0          5                       Reserved (must be zero ``x00``)
+    0          5                       Reserved (must be zero)
    ------- ----- --------------------- ------------------------------------------
     0          6 ``l2tp.flags.offset`` Offset
    ------- ----- --------------------- ------------------------------------------
     0          7 ``l2tp.flags.prio``   Priority
    ------- ----- --------------------- ------------------------------------------
-    1          8                       Reserved (must be zero ``x00``)
+    1          8                       Reserved (must be zero)
    ------- ----- --------------------- ------------------------------------------
     1         12 ``l2tp.version``      Version (``2``)
    ------- ----- --------------------- ------------------------------------------
@@ -56,11 +56,6 @@ reading ``2``. It is dispatched from
    version-agnostic base so that a consumer finds the data at the same key
    whichever version was on the wire. The version is reported by
    :attr:`~pcapkit.protocols.link.l2tpv2.L2TPv2.alias` instead.
-
-   IANA protocol number 115 (``L2TP``) is deliberately left unbound: it
-   references :rfc:`3931`, i.e. **L2TPv3**, whose headers have a different shape,
-   so the binding waits on an ``L2TPv3`` class rather than this one. See
-   :mod:`pcapkit.protocols.link.l2tp`.
 
 .. autoclass:: pcapkit.protocols.link.l2tpv2.L2TPv2
    :no-members:
@@ -95,6 +90,11 @@ Type Stubs
 .. autoclass:: pcapkit.protocols.schema.link.l2tp.FlagsType
    :members:
    :show-inheritance:
+
+Auxiliary Functions
+~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: pcapkit.protocols.schema.link.l2tp.l2tp_payload_length
 
 Data Models
 -----------
