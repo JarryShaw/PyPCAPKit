@@ -9,6 +9,14 @@ which implements extractor for File Transfer Protocol
 (FTP) [*]_, and :class:`~pcapkit.protocols.application.ftp.FTP_DATA`
 for its data channel.
 
+.. versionchanged:: 1.5.0
+
+   A command or reply rebuilds byte for byte, its CRLF included, and keeps
+   the command's case and any octets that are not UTF-8 as captured. A line
+   with no argument and a multi-line reply, whole in one segment or not,
+   parse and rebuild as captured (:issue:`1238`, :issue:`1239`,
+   :issue:`1240`, :issue:`1241`, :issue:`1303`, :issue:`1333`).
+
 .. autoclass:: pcapkit.protocols.application.ftp.FTP
    :no-members:
    :show-inheritance:

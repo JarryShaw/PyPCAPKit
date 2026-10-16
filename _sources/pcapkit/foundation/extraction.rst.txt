@@ -104,7 +104,7 @@ extracts parameters from a PCAP file.
 Type Variables
 --------------
 
-.. data:: pcapkit.foundation.extraction._P
+.. data:: _P
    :type: typing.Any
 
 .. |pypcap| replace:: ``pypcap``

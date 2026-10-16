@@ -43,18 +43,18 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        end
 
        subgraph internet [Internet Layer]
-           Internet --> HIP & IPX & IP & ipv6ext
+           Internet --> IPX & IP & IPsec & IPv6_Ext
 
            subgraph ip [IP Family]
-               IP --> IPv4 & IPv6 & IPsec
+               IP --> IPv4 & IPv6
+           end
 
-               subgraph ipsec [IPsec Family]
-                   IPsec --> AH & ESP
-               end
+           subgraph ipsec [IPsec Family]
+               IPsec --> AH & ESP
            end
 
            subgraph ipv6ext [IPv6 Extension Header]
-               IPv6-Frag & IPv6-Opts & IPv6-Route & HOPOPT & MH
+               IPv6_Ext --> IPv6-Frag & IPv6-Opts & IPv6-Route & HOPOPT & MH & HIP
            end
        end
 
@@ -95,6 +95,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        B --> Header & Frame & PCAPNG & Raw & NoPayload
        Raw --> FTP_DATA
        ARP --> RARP
+       IPv6_Ext --> AH & ESP
 
        B --> C(Protocol)
        C --> D([user customisation ...])
@@ -124,6 +125,7 @@ from given information. The class hierarchy of :mod:`pcapkit.protocols`:
        click IPsec "/pcapkit/protocols/internet/ipsec.html#pcapkit.protocols.internet.ipsec.IPsec"
        click IPv4 "/pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4"
        click IPv6 "/pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6"
+       click IPv6_Ext "/pcapkit/protocols/internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"
        click IPv6-Frag "/pcapkit/protocols/internet/ipv6_frag.html#pcapkit.protocols.internet.ipv6_frag.IPv6_Frag"
        click IPv6-Opts "/pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts"
        click IPv6-Route "/pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route"
@@ -234,13 +236,13 @@ Internal Definitions
 Type Variables
 ~~~~~~~~~~~~~~
 
-.. data:: pcapkit.protocols.schema.schema._VT
+.. data:: _VT
    :type: typing.Any
 
-.. data:: pcapkit.protocols.schema.schema._ET
+.. data:: _ET
    :type: enum.Enum
 
-.. data:: pcapkit.protocols.schema.schema._ST
+.. data:: _ST
    :type: typing.Type[pcapkit.protocols.schema.schema.Schema]
 
 Data Model

@@ -199,8 +199,8 @@ instance nor the type::
    TypeError: super(type, obj): obj must be an instance or subtype of type
 
 Both forms share ``instance or subtype of type``, which is the only part of the
-message anything here relies on -- pinning either full sentence would pass on two of
-the five supported versions and fail on the other three.
+message anything here relies on -- pinning either full sentence would fail on two or
+three of the five supported versions.
 
 Two corollaries worth stating, because the obvious summary of this is wrong in both
 directions. ``RuntimeError: super(): no arguments`` is a *different* failure, raised

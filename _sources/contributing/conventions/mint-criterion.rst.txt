@@ -10,7 +10,7 @@ a ``_missing_`` override, which decides what happens when a value has no member.
 MRO, so they carry no declared-but-unassigned range to resolve. 121 define one
 themselves; the other four are the transport subclasses of
 :class:`~pcapkit.const.reg.apptype.apptype.AppType`, which inherit
-``AppType._missing_`` (:file:`pcapkit/const/reg/apptype/apptype.py:2936`). Three
+``AppType._missing_`` (:file:`pcapkit/const/reg/apptype/apptype.py:2958`). Three
 behaviours follow from it, and which one a given range gets is a **design decision, not
 a style preference**:
 

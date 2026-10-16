@@ -267,6 +267,15 @@ settled this on :issue:`719` found exactly one, and repeating it is cheap:
            [ -f "$path.py" ] || [ -f "$path/__init__.py" ] || echo "dangling: $path"
        done
 
+**Under a** ``.. module::``, **a hand-written** ``.. data::`` **or** ``.. function::``
+**takes the bare name.** The module directive already supplies the prefix, so
+``.. data:: pcapkit.x._T`` under ``.. module:: pcapkit.x`` registers
+``pcapkit.x.pcapkit.x._T``, which no reference resolves to exactly. Where the object
+lives in a module other than the current one, a ``:module:`` option names it, as the
+``LINKTYPE`` entry on :doc:`/pcapkit/protocols/link/index` does. :issue:`1775` found 44
+directives spelled the long way, which left seven TypeVar references ambiguous;
+:file:`tests/project/test_docs_ambiguous_xrefs_1775_unit.py` fails on the next one.
+
 **Every importable shipped module is documented, with one deliberate exception.** The 33
 modules under :file:`pcapkit/protocols/*/NotImplemented/` are the set with no entry:
 placeholder sources for dissectors nobody has written yet, carrying no class a reader
@@ -289,10 +298,10 @@ Format and Mechanics
    ruled this on :issue:`719`, correcting a blanket *always* ``.rst`` that had been in
    circulation: the Sphinx documentation is reST, and the other documents --
    the READMEs included -- are Markdown where that applies. ``CONTRIBUTING.md``'s own
-   *Documentation* section records the same split. One trap arrived with the ruling:
-   :file:`MANIFEST.in` reaches the two READMEs under :file:`examples/` through
-   ``global-include *.rst`` and has no ``*.md`` equivalent, so renaming one without
-   adding coverage drops it from every source distribution.
+   *Documentation* section records the same split. Neither ``global-include`` in
+   :file:`MANIFEST.in` reaches Markdown, so the two READMEs under :file:`examples/`
+   ship through ``recursive-include examples *.md``, and any other Markdown file
+   ships only if setuptools or an ``include`` line adds it.
 *  **Prose names the real defining module, not a re-export.** One strand of the
    consistency sweep on :doc:`the roadmap </contributing/pep>`. The sentinels are the
    worked example: all four are defined in :mod:`pcapkit.corekit.sentinels`, and

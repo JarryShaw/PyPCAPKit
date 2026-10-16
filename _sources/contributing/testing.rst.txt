@@ -29,8 +29,10 @@ the whole suite:
 The same fixtures back the demonstration scripts in
 :file:`examples/legacy_smoke/`, which read them as ``../captures/…``.
 
-Continuous integration runs the ``make test`` selection, since the fixtures are
-not in the repository. Wireshark's ``tshark`` is only required to exercise the
+Continuous integration runs both: :file:`.github/workflows/unit-tests.yml` runs
+the ``make test`` selection in its ``test`` job, and the fixture-dependent tests
+in its ``integration`` job, which runs :file:`examples/generators/make_samples.py`
+first. Wireshark's ``tshark`` is only required to exercise the
 :class:`PyShark <pcapkit.foundation.engines.pyshark.PyShark>` engine, and is not
 needed by the test suite.
 
@@ -47,5 +49,5 @@ they record what this version of :mod:`pcapkit` builds rather than what a
 third-party tool builds.
 
 :file:`tests/protocols/test_option_roundtrip_unit.py` runs the same cases without
-needing a fixture at all, and carries a table of the ones that do not close the
-cycle, each named against the defect that stops it.
+needing a fixture at all, and fails on any case that does not close the cycle
+unless its ``EXPECTED_FAILURES`` table names the defect that stops it.

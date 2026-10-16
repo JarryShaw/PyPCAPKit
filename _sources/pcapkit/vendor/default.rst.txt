@@ -3,8 +3,8 @@ Base Crawler
 
 .. module:: pcapkit.vendor.default
 
-:mod:`pcapkit.vendor.default` contains :class:`~pcapkit.vendor.default.Vendor`
-only, which is the base meta class for all vendor crawlers.
+:mod:`pcapkit.vendor.default` exports :class:`~pcapkit.vendor.default.Vendor`
+only, which is the base class for all vendor crawlers.
 
 .. autoclass:: pcapkit.vendor.default.Vendor
    :no-members:
@@ -74,7 +74,7 @@ Internal Definitions
    :no-members:
    :show-inheritance:
 
-.. function:: pcapkit.vendor.default.LINE(NAME, DOCS, FLAG, ENUM, MISS, MODL)
+.. function:: LINE(NAME, DOCS, FLAG, ENUM, MISS, MODL)
 
    Default constant template of enumeration registry from IANA CSV.
 

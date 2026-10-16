@@ -9,7 +9,7 @@
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="pcapkit.dumpkit.common holds the utilities shared by pcapkit.dumpkit, chiefly customised hooks for dictdumper.Dumper classes. Internal Definitions:" />
 <meta name="description" content="pcapkit.dumpkit.common holds the utilities shared by pcapkit.dumpkit, chiefly customised hooks for dictdumper.Dumper classes. Internal Definitions:" />
-<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Module Utilities" href="../utilities/index.html"><link rel="prev" title="Null Dumper" href="null.html">
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="PCAP Dumper" href="pcap.html"><link rel="prev" title="Dump Utilities" href="index.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
         <title>Common Utilities - PyPCAPKit</title>
@@ -264,11 +264,11 @@
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_option.html">IPv6 Options - Shared Option Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/mh.html">MH - Mobility Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ah.html">AH - Authentication Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/hip.html">HIP - Host Identity Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/mh.html">MH - Mobility Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
@@ -299,8 +299,16 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../corekit/fields/index.html">Protocol Fields</a><input aria-label="Toggle navigation of Protocol Fields" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../utilities/index.html">Module Utilities</a><input aria-label="Toggle navigation of Module Utilities" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/exceptions.html">User Defined Exceptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/warnings.html">User Defined Warnings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/logging.html">Logging System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/config.html">Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/chardet.html">Character Set Detection</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../corekit/fields/index.html">Protocol Fields</a><input aria-label="Toggle navigation of Protocol Fields" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/fields/field.html">Base Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/fields/numbers.html">Numerical Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/fields/strings.html">Text Fields</a></li>
@@ -323,31 +331,21 @@
 <li class="toctree-l3"><a class="reference internal" href="../corekit/version.html">Version Info</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../toolkit/index.html">Compatibility Tools</a><input aria-label="Toggle navigation of Compatibility Tools" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../toolkit/index.html">Compatibility Tools</a><input aria-label="Toggle navigation of Compatibility Tools" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../toolkit/builtin.html">Built-in Support</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../toolkit/3rdparty.html">3rd-Party Support</a></li>
 </ul>
 </li>
-<li class="toctree-l2 current has-children"><a class="reference internal" href="index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" checked="" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2 current has-children"><a class="reference internal" href="index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" checked="" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcap.html">PCAP Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="null.html">Null Dumper</a></li>
-<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Common Utilities</a></li>
-</ul>
-</li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../utilities/index.html">Module Utilities</a><input aria-label="Toggle navigation of Module Utilities" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../utilities/exceptions.html">User Defined Exceptions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../utilities/warnings.html">User Defined Warnings</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../utilities/logging.html">Logging System</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../utilities/config.html">Configuration</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../utilities/chardet.html">Character Set Detection</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../const/index.html">Constant Enumerations</a><input aria-label="Toggle navigation of Constant Enumerations" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../const/reg.html">Protocol Type Registry Constant Enumerations</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
@@ -360,15 +358,15 @@
 <li class="toctree-l3"><a class="reference internal" href="../const/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../const/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../vendor/index.html">Vendor Crawlers</a><input aria-label="Toggle navigation of Vendor Crawlers" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/default.html">Base Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/reg.html">Protocol Type Registry Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Vendor Crawler</a></li>
@@ -381,6 +379,8 @@
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
 </ul>
 </li>
 </ul>
@@ -496,11 +496,6 @@
 <p><a class="reference internal" href="#module-pcapkit.dumpkit.common" title="pcapkit.dumpkit.common"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit.common</span></code></a> holds the utilities shared by
 <a class="reference internal" href="index.html#module-pcapkit.dumpkit" title="pcapkit.dumpkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit</span></code></a>, chiefly customised hooks for <code class="xref py py-class docutils literal notranslate"><span class="pre">dictdumper.Dumper</span></code>
 classes.</p>
-<div class="versionremoved">
-<p><span class="versionmodified removed">Removed in version 1.5.0: </span><code class="docutils literal notranslate"><span class="pre">pcapkit.dumpkit.common.FALLBACK_LIMIT</span></code>, now
-<a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.FALLBACK_LIMIT" title="pcapkit.utilities.config.FALLBACK_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.utilities.config.FALLBACK_LIMIT</span></code></a>, set with
-<span class="target" id="index-0"></span><a class="reference internal" href="../utilities/config.html#envvar-PCAPKIT_FALLBACK_LIMIT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_FALLBACK_LIMIT</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1726">#1726</a>).</p>
-</div>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.dumpkit.common.make_dumper">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.dumpkit.common.</span></span><span class="sig-name descname"><span class="pre">make_dumper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/dumpkit/common.html#make_dumper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.dumpkit.common.make_dumper" title="Link to this definition">¶</a></dt>
@@ -516,6 +511,19 @@ classes.</p>
 <dd class="field-odd"><p>Customised <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dumper</span></code></a> object.</p>
 </dd>
 </dl>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.5.0: </span>Several dumped shapes change. A nameless flag value renders its value
+as the name, <code class="docutils literal notranslate"><span class="pre">Flags::0</span> <span class="pre">[0]</span></code> rather than <code class="docutils literal notranslate"><span class="pre">Flags::None</span> <span class="pre">[0]</span></code>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/648">#648</a>). An <a class="reference internal" href="../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>
+dumps as a list of one-key mappings in wire order, not grouped by key
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1263">#1263</a>). An <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Network" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Network</span></code></a> or
+<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Network" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6Network</span></code></a> dumps as its string, a timezone as its
+offset in seconds, and <a class="reference internal" href="../corekit/sentinels.html#pcapkit.corekit.sentinels.NULL" title="pcapkit.corekit.sentinels.NULL"><code class="xref py py-data docutils literal notranslate"><span class="pre">NULL</span></code></a> and
+<a class="reference internal" href="../corekit/sentinels.html#pcapkit.corekit.sentinels.NO_VALUE" title="pcapkit.corekit.sentinels.NO_VALUE"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_VALUE</span></code></a> as <code class="docutils literal notranslate"><span class="pre">'&lt;NULL&gt;'</span></code> and
+<code class="docutils literal notranslate"><span class="pre">'&lt;NO_VALUE&gt;'</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1258">#1258</a>). In <code class="docutils literal notranslate"><span class="pre">plist</span></code> output, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> is
+kept (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1257">#1257</a>), and a string carrying a character XML forbids
+is written as <code class="docutils literal notranslate"><span class="pre">&lt;data&gt;</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1262">#1262</a>).</p>
+</div>
 </dd></dl>
 
 <dl class="py class">
@@ -550,6 +558,12 @@ module-level one that does the same, not either class’ own method:</p>
 <span class="n">register_dumper</span><span class="p">(</span><span class="s1">'my_mixin'</span><span class="p">,</span> <span class="n">MyMixin</span><span class="p">,</span> <span class="s1">'.mine'</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.5.0: </span>Registration is opt-in, under the <code class="docutils literal notranslate"><span class="pre">fmt</span></code> class keyword; 1.4.x
+registered every subclass, under its
+<a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper.kind" title="(in DictDumper)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">kind</span></code></a> when the keyword was omitted
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/514">#514</a>).</p>
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.dumpkit.common.Dumper.__init_subclass__">
@@ -675,23 +689,23 @@ library.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../utilities/index.html">
+          <a class="next-page" href="pcap.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Module Utilities</div>
+                <div class="title">PCAP Dumper</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="null.html">
+          <a class="prev-page" href="index.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Null Dumper</div>
+                <div class="title">Dump Utilities</div>
                 
               </div>
             </a>

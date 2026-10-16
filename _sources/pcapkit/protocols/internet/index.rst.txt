@@ -21,11 +21,11 @@ internet layer, with detailed implementation and methods.
    ipv6_route
    hopopt
    ipv6_option
+   mh
    ipsec
    ah
    esp
    hip
-   mh
    ipx
 
 .. todo::
@@ -35,6 +35,7 @@ internet layer, with detailed implementation and methods.
 Protocol Registry
 -----------------
 
-.. data:: pcapkit.protocols.internet.ETHERTYPE
+.. data:: ETHERTYPE
+   :module: pcapkit.protocols.internet
 
    alias of :class:`pcapkit.const.reg.ethertype.EtherType`

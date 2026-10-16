@@ -13,7 +13,7 @@ described as below:
 Octets      Bits        Name                    Description
 ======= ========= =================== =================================
   0           0   ``hopopt.next``             Next Header
-  1           8   ``hopopt.length``           Header Extensive Length
+  1           8   ``hopopt.length``           Header Extension Length
   2          16   ``hopopt.options``          Options
 ======= ========= =================== =================================
 
@@ -22,6 +22,7 @@ Octets      Bits        Name                    Description
    :show-inheritance:
 
    .. autoproperty:: name
+   .. autoproperty:: alias
    .. autoproperty:: length
    .. autoproperty:: payload
    .. autoproperty:: protocol
@@ -104,6 +105,10 @@ Header Schemas
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.schema.internet.hopopt.CALIPSOOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.schema.internet.hopopt._SMFDPDOption
    :members:
    :show-inheritance:
 
@@ -287,6 +292,14 @@ Data Models
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.data.internet.hopopt.QuickStartOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.internet.hopopt.QuickStartRequestOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.internet.hopopt.QuickStartReportOption
    :members:
    :show-inheritance:
 

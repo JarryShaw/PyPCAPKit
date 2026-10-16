@@ -30,6 +30,7 @@ function rather than encapsulation, see
 Protocol Registry
 -----------------
 
-.. data:: pcapkit.protocols.application.APPTYPE
+.. data:: APPTYPE
+   :module: pcapkit.protocols.application
 
    alias of :class:`pcapkit.const.reg.apptype.apptype.AppType`

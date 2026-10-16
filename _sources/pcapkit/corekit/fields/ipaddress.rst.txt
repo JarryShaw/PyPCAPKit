@@ -3,6 +3,13 @@ IP Address Fields
 
 .. module:: pcapkit.corekit.fields.ipaddress
 
+.. versionchanged:: 1.5.0
+
+   Every field here rejects a :obj:`bool` with
+   :exc:`~pcapkit.utilities.exceptions.FieldValueError`, where an IPv4 field
+   packed :obj:`True` and :obj:`False` as ``0.0.0.1`` and ``0.0.0.0``
+   (:issue:`491`).
+
 IP Addresses
 ~~~~~~~~~~~~
 
@@ -48,11 +55,11 @@ Internal Definitions
 Type Variables
 ~~~~~~~~~~~~~~
 
-.. data:: pcapkit.corekit.fields.ipaddress._T
+.. data:: _T
    :type: ipaddress.IPv4Address | ipaddress.IPv6Address | ipaddress.IPv4Interface | ipaddress.IPv6Interface
 
-.. data:: pcapkit.corekit.fields.ipaddress._AT
+.. data:: _AT
    :type: ipaddress.IPv4Address | ipaddress.IPv6Address
 
-.. data:: pcapkit.corekit.fields.ipaddress._IT
+.. data:: _IT
    :type: ipaddress.IPv4Interface | ipaddress.IPv6Interface

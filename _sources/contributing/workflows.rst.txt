@@ -412,9 +412,9 @@ its own ``github.run_id`` rather than on the ref, so it cannot cancel a run
 waiting there with release work. Keyed on the ref, run 38499295798 joined at
 02:06:32Z on 2026-10-14, and the pending 38499150441, whose Vendor Update had
 succeeded, was cancelled a second later. A run whose Vendor Update concluded
-``success`` with ``vendor-update`` skipped (#1748) is still keyed on the ref:
+``success`` with ``vendor-update`` skipped (`#1748 <https://github.com/JarryShaw/PyPCAPKit/issues/1748>`__) is still keyed on the ref:
 the group reads only the event, which does not say which jobs ran. It can still
-displace a run pending there, and now releases nothing in its place, so that
+displace a run pending there, and releases nothing in its place, so that
 release waits for the next Vendor Update on ``main``.
 
 ``pull_request_target``
@@ -470,7 +470,7 @@ CI Timing Review (`#1538 <https://github.com/JarryShaw/PyPCAPKit/issues/1538>`__
 **CI Timing** (:file:`ci-timing.yml`) runs :file:`util/ci_timing.py` every Monday,
 or on dispatch with a ``days`` window and an optional ``concurrency_hours`` runner-pool
 measurement. Through the API it lists every completed run in the window of Unit Tests,
-Python Compatibility, Lint, CodeQL, GitHub Pages and Experimental Tests (#1732, so
+Python Compatibility, Lint, CodeQL, GitHub Pages and Experimental Tests (`#1732 <https://github.com/JarryShaw/PyPCAPKit/issues/1732>`__, so
 its two-hour legs stay measured), a day per query because a filtered listing stops
 at 1,000 runs (Pages completed 1,154 in the week to 2026-10-09). It then reads the
 jobs of an evenly spaced sample -- 150 push and 150 pull-request runs of Unit Tests,
@@ -560,21 +560,20 @@ The cap line sits at 50% because at the fastest growth measured, +1.27 min/day o
 fixing pull request. Time to ``Required checks passed`` is HARD only as a regression
 because its p90 measures runner-queue load as much as test time: it was 19.6 min when
 the line was set and 36.7 min in the two days to 2026-10-10 with the pool saturated,
-so an absolute HARD line would email about the queue every week. The 25% rise is an
-initial value, to tune once weekly reports exist. ``W9`` is therefore expected to fire
-while the pool stays saturated, and the first runs with JUnit will show whether
+so an absolute HARD line would email about the queue every week. The 25% rise is a
+starting value, to be tuned against the weekly reports. ``W9`` is therefore expected to
+fire while the pool stays saturated, and the JUnit timings are what show whether
 ``W7``'s 10-second test line needs raising. What to do when one fires is on
 :doc:`conventions/process`.
 
 ``H1``, ``H2`` and ``H4`` on a non-blocking job are warnings, not HARD, so they do
-not fail the run (#1732): on every job of :file:`experimental.yml`, which no
+not fail the run (`#1732 <https://github.com/JarryShaw/PyPCAPKit/issues/1732>`__): on every job of :file:`experimental.yml`, which no
 required context names, on every KTLO leg, a job whose name ends in ``(KTLO)``
-(#1633), and on a job whose name ends in ``(experimental)`` in any workflow. That
+(`#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__), and on a job whose name ends in ``(experimental)`` in any workflow. That
 last covers the experimental legs that ran in :file:`unit-tests.yml` under
-``test``'s 45-minute cap before the split, whose runs stay in the 7-day window for a
-week after it. The finding keeps its ``H`` id and says it is non-blocking. A
+``test``'s 45-minute cap before the split. The finding keeps its ``H`` id and says it is non-blocking. A
 KTLO leg past its job's ``timeout-minutes`` is still cancelled, and its check run
-reads red, though since #1738 nothing gating waits on it, so that warning is worth
+reads red, though since `#1738 <https://github.com/JarryShaw/PyPCAPKit/issues/1738>`__ nothing gating waits on it, so that warning is worth
 acting on before the cap.
 
 Work Kept Off the Pull-Request Queue (`#1538 <https://github.com/JarryShaw/PyPCAPKit/issues/1538>`__)
@@ -599,7 +598,7 @@ permission to the reusable workflow.
 
 A third cut, running the then-prerelease 3.15 engine cell on ``main`` pushes only,
 ended with `#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__: 3.15 is
-supported now, so its cells block on every run.
+in the supported tier, so its cells block on every run.
 
 Required Status Checks
 ----------------------
@@ -665,12 +664,12 @@ triggers; the ``gate-only: true`` reusable calls documented above skip it via
 ``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:1939``),
 so it is never produced -- and never expected -- on those paths.
 
-Python versions come in two tiers (#1633), and an experimental one (#1660,
+Python versions come in two tiers (`#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__), and an experimental one (`#1660 <https://github.com/JarryShaw/PyPCAPKit/issues/1660>`__,
 below), declared in :file:`.github/python-versions.toml` (see `Python Versions`_).
 The **supported** tier, 3.11-3.15, blocks: a failed leg fails ``Required checks passed`` or its own
 required ``Compat`` context. The **KTLO** tier -- end-of-life 3.7-3.10, still built and
 tested -- never blocks, is never a required context, and never shows a commit or a
-pull request red (#1672). In ``unit-tests.yml`` the KTLO legs are jobs of their own
+pull request red (`#1672 <https://github.com/JarryShaw/PyPCAPKit/issues/1672>`__). In ``unit-tests.yml`` the KTLO legs are jobs of their own
 since `#1738 <https://github.com/JarryShaw/PyPCAPKit/issues/1738>`__: ``test-ktlo``,
 ``integration-ktlo`` and ``pypcap-parity-ktlo``, which neither ``required-checks``
 nor ``unittest-ordering`` ``needs:``, so not even a failure no step can contain, such
@@ -704,7 +703,7 @@ with supported legs. Every job holding KTLO legs works the same way:
 
 Two errors remain on a failed KTLO step, neither changing a conclusion: the
 runner's ``Process completed with exit code N.`` for a ``run:`` step, and an
-action's own. And #1634's tag check still blocks the ``pypi`` KTLO legs: it fails
+action's own. And `#1634 <https://github.com/JarryShaw/PyPCAPKit/issues/1634>`__'s tag check still blocks the ``pypi`` KTLO legs: it fails
 every leg alike, and masked, the leg would go on to publish.
 
 3.7 can neither install the ``test`` extra nor import the package, so each 3.7 leg
@@ -713,8 +712,8 @@ install step, the ``Compat`` leg at ``Verify package`` -- and concludes
 ``success``. They run on ``ubuntu-22.04``, which retires on 2027-04-17 after
 brownouts from 2027-03-23 (actions/runner-images#14254). A brownout fails a
 ``test-ktlo`` or ``integration-ktlo`` leg before any step runs, where no step-level
-``continue-on-error`` reaches; since #1738 that fails nothing gating, but the leg's
-check run reads red, so they must still go before then (#1660). 3.6 is
+``continue-on-error`` reaches; since `#1738 <https://github.com/JarryShaw/PyPCAPKit/issues/1738>`__ that fails nothing gating, but the leg's
+check run reads red, so they must still go before then (`#1660 <https://github.com/JarryShaw/PyPCAPKit/issues/1660>`__). 3.6 is
 in no matrix: setup-python builds it only for retired Ubuntu images. Nor are
 3.7-3.9 in ``engine-tests``, which installs every interpreter on
 ``ubuntu-latest``, where setup-python has no Ubuntu 26.04 build of any of them. Nor
@@ -843,7 +842,7 @@ Python Versions
 Since `#1660 <https://github.com/JarryShaw/PyPCAPKit/issues/1660>`__,
 :file:`.github/python-versions.toml` declares every Python version CI runs: one
 line per version, with its tier -- ``supported``, ``ktlo``, ``experimental``, or
-``pre-release``, which none is today -- and, where ``ubuntu-latest`` cannot
+``pre-release``, which no version carries -- and, where ``ubuntu-latest`` cannot
 provide it, the ``runner`` it needs. ``latest`` names the newest supported CPython, which every
 job on one interpreter runs. :file:`util/python_versions.py` reads the file with
 the runner's own ``python3`` -- its ``tomllib`` needs 3.11, and every image that
@@ -853,7 +852,7 @@ job in ``unit-tests.yml`` and ``python-compatibility.yml``, ``version_check`` in
 through ``fromJSON``, and each single-interpreter job reads ``latest``.
 
 **A tier change is a one-line edit to that file, plus the matching edit to ruleset
-23497679's ``Compat`` contexts.** The file's ``exemptions`` list each pin kept
+23497679's** ``Compat`` **contexts.** The file's ``exemptions`` list each pin kept
 off ``latest``, with its reason in the comment above it, such as the conda
 jobs' ``!= '3.15'``. ``tests/project/test_python_versions_1660.py`` fails on a
 pin the file does not list, on an exemption with no comment, and on a

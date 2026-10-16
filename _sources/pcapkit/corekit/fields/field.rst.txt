@@ -3,25 +3,17 @@ Base Fields
 
 .. module:: pcapkit.corekit.fields.field
 
-.. versionremoved:: 1.5.0
+.. versionremoved:: 1.3.0
 
-   Moved to :mod:`pcapkit.utilities.config` (:issue:`1726`):
-
-   * ``pcapkit.corekit.fields.field._MAX_ZERO_PAD_LENGTH``, now
-     :data:`pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH`, set with
-     :envvar:`PCAPKIT_MAX_ZERO_PAD_LENGTH`;
-   * ``pcapkit.corekit.fields.field._MAX_ZERO_PAD_SHORTFALL``, now
-     :data:`pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL`, set with
-     :envvar:`PCAPKIT_MAX_ZERO_PAD_SHORTFALL`;
-   * ``pcapkit.corekit.fields.field._ZERO_PAD_BUDGET_RATIO``, now
-     :data:`pcapkit.utilities.config.ZERO_PAD_BUDGET_RATIO`, set with
-     :envvar:`PCAPKIT_ZERO_PAD_BUDGET_RATIO`.
+   ``pcapkit.corekit.fields.field._Field``, renamed
+   :class:`~pcapkit.corekit.fields.field.FieldBase` with no alias left behind.
 
 .. versionremoved:: 1.5.0
 
    ``pcapkit.corekit.fields.field.NoValueType``, now
-   :class:`pcapkit.corekit.sentinels.NoValueType` (:issue:`922`,
-   :issue:`1744`).
+   :class:`pcapkit.corekit.sentinels.NoValueType` (:issue:`911`,
+   :issue:`1744`), and ``pcapkit.corekit.fields.field.NoValue``, now
+   :data:`pcapkit.corekit.sentinels.NO_VALUE` (:issue:`937`).
 
 .. autoclass:: pcapkit.corekit.fields.field.Field
    :members:
@@ -49,5 +41,5 @@ Internal Definitions
 Type Variables
 --------------
 
-.. data:: pcapkit.corekit.fields.field._T
+.. data:: _T
    :type: typing.Any

@@ -9,7 +9,7 @@
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="This module contains all constant enumerations of protocol type registry implementations. Available enumerations include:,, LINKTYPE, Link-Layer Header Type Values*,, ETHERTYPE, Ethertype IEEE 802 ..." />
 <meta name="description" content="This module contains all constant enumerations of protocol type registry implementations. Available enumerations include:,, LINKTYPE, Link-Layer Header Type Values*,, ETHERTYPE, Ethertype IEEE 802 ..." />
-<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="PCAPNG Constant Enumerations" href="pcapng.html"><link rel="prev" title="Constant Enumerations" href="index.html">
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="ARP Constant Enumerations" href="arp.html"><link rel="prev" title="Constant Enumerations" href="index.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
         <title>Protocol Type Registry Constant Enumerations - PyPCAPKit</title>
@@ -264,11 +264,11 @@
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_option.html">IPv6 Options - Shared Option Helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/mh.html">MH - Mobility Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ah.html">AH - Authentication Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/esp.html">ESP - Encapsulating Security Payload</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/hip.html">HIP - Host Identity Protocol</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/mh.html">MH - Mobility Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
 </ul>
 </li>
@@ -299,8 +299,16 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../corekit/fields/index.html">Protocol Fields</a><input aria-label="Toggle navigation of Protocol Fields" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../utilities/index.html">Module Utilities</a><input aria-label="Toggle navigation of Module Utilities" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/exceptions.html">User Defined Exceptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/warnings.html">User Defined Warnings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/logging.html">Logging System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/config.html">Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/chardet.html">Character Set Detection</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../corekit/fields/index.html">Protocol Fields</a><input aria-label="Toggle navigation of Protocol Fields" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/fields/field.html">Base Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/fields/numbers.html">Numerical Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../corekit/fields/strings.html">Text Fields</a></li>
@@ -323,31 +331,21 @@
 <li class="toctree-l3"><a class="reference internal" href="../corekit/version.html">Version Info</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../toolkit/index.html">Compatibility Tools</a><input aria-label="Toggle navigation of Compatibility Tools" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../toolkit/index.html">Compatibility Tools</a><input aria-label="Toggle navigation of Compatibility Tools" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../toolkit/builtin.html">Built-in Support</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../toolkit/3rdparty.html">3rd-Party Support</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a><input aria-label="Toggle navigation of Dump Utilities" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../dumpkit/common.html">Common Utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/pcap.html">PCAP Dumper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../dumpkit/null.html">Null Dumper</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../dumpkit/common.html">Common Utilities</a></li>
-</ul>
-</li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../utilities/index.html">Module Utilities</a><input aria-label="Toggle navigation of Module Utilities" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../utilities/exceptions.html">User Defined Exceptions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../utilities/warnings.html">User Defined Warnings</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../utilities/logging.html">Logging System</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../utilities/config.html">Configuration</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../utilities/chardet.html">Character Set Detection</a></li>
 </ul>
 </li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="index.html">Constant Enumerations</a><input aria-label="Toggle navigation of Constant Enumerations" checked="" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Protocol Type Registry Constant Enumerations</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
@@ -360,15 +358,15 @@
 <li class="toctree-l3"><a class="reference internal" href="ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../vendor/index.html">Vendor Crawlers</a><input aria-label="Toggle navigation of Vendor Crawlers" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/default.html">Base Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/reg.html">Protocol Type Registry Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/esp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Vendor Crawler</a></li>
@@ -381,6 +379,8 @@
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
 </ul>
 </li>
 </ul>
@@ -507,7 +507,7 @@ implementations. Available enumerations include:</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TRANSTYPE</span></code></a></p></td>
 <td><p>Transport Layer Protocol Numbers <a class="footnote-reference brackets" href="#id7" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>‡<span class="fn-bracket">]</span></a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">APPTYPE</span></code></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">APPTYPE</span></code></a></p></td>
 <td><p>Application Layer Protocol Numbers (Service Name and Transport Protocol Port Number Registry) <a class="footnote-reference brackets" href="#id8" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>§<span class="fn-bracket">]</span></a></p></td>
 </tr>
 </tbody>
@@ -1747,13 +1747,8 @@ header giving metadata about the packet.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.VPP_DISPATCH">
 <span class="sig-name descname"><span class="pre">VPP_DISPATCH</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">280</span></span><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.VPP_DISPATCH" title="Link to this definition">¶</a></dt>
-<dd><p>//fd.io VPP graph
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_VPP_DISPATCH</span></code>] Records in traces from the <a class="reference external" href="http://fd.io">http://fd.io</a> VPP graph
 dispatch tracer, in the the graph dispatcher trace format.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>[<code class="docutils literal notranslate"><span class="pre">DLT_VPP_DISPATCH</span></code>] Records in traces from the http</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1968,7 +1963,7 @@ Sembower]</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.ethertype.EtherType.XEROX_NS_IDP">
 <span class="sig-name descname"><span class="pre">XEROX_NS_IDP</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1536</span></span><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.XEROX_NS_IDP" title="Link to this definition">¶</a></dt>
-<dd><p>Data Link Layer and
+<dd><p>XEROX NS IDP [“The Ethernet, A Local Area Network: Data Link Layer and
 Physical Layer Specification”, AA-K759B-TK, Digital Equipment Corporation,
 Maynard, MA. Also as: “The Ethernet - A Local Area Network”, Version 1.0,
 Digital Equipment Corporation, Intel Corporation, Xerox Corporation,
@@ -1977,11 +1972,6 @@ and Physical Layer Specifications”, Digital, Intel and Xerox, November 1982.
 And: XEROX, “The Ethernet, A Local Area Network: Data Link Layer and
 Physical Layer Specification”, X3T51/80-50, Xerox Corporation, Stamford,
 CT., October 1980.][Neil Sembower]</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>XEROX NS IDP [“The Ethernet, A Local Area Network</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2816,12 +2806,7 @@ Wellfleet) [<span class="target" id="index-12"></span><a class="rfc reference ex
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.ethertype.EtherType.Precision_Time_Protocol">
 <span class="sig-name descname"><span class="pre">Precision_Time_Protocol</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">35063</span></span><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Precision_Time_Protocol" title="Link to this definition">¶</a></dt>
-<dd><p>IEEE Std 1588][Kang Lee]</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Precision Time Protocol [NIST</p>
-</dd>
-</dl>
+<dd><p>Precision Time Protocol [NIST: IEEE Std 1588][Kang Lee]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -3031,15 +3016,10 @@ Assigned Numbers Authority]</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.PUP">
 <span class="sig-name descname"><span class="pre">PUP</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></span><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.PUP" title="Link to this definition">¶</a></dt>
-<dd><p>An Internetwork
+<dd><p>PUP [Boggs, D., J. Shoch, E. Taft, and R. Metcalfe, “PUP: An Internetwork
 Architecture”, XEROX Palo Alto Research Center, CSL-79-10, July 1979; also
 in IEEE Transactions on Communication, Volume COM-28, Number 4, April
 1980.][XEROX]</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#pcapkit.const.reg.transtype.TransType.PUP" title="pcapkit.const.reg.transtype.TransType.PUP">PUP</a> [Boggs, D., J. Shoch, E. Taft, and R. Metcalfe, “PUP</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -3101,7 +3081,7 @@ USC/Information Sciences Institute, May 1979.][Jon Postel]</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.XNS_IDP">
 <span class="sig-name descname"><span class="pre">XNS_IDP</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">22</span></span><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.XNS_IDP" title="Link to this definition">¶</a></dt>
-<dd><p>Data Link Layer and
+<dd><p>XEROX NS IDP [“The Ethernet, A Local Area Network: Data Link Layer and
 Physical Layer Specification”, AA-K759B-TK, Digital Equipment Corporation,
 Maynard, MA. Also as: “The Ethernet - A Local Area Network”, Version 1.0,
 Digital Equipment Corporation, Intel Corporation, Xerox Corporation,
@@ -3110,11 +3090,6 @@ and Physical Layer Specifications”, Digital, Intel and Xerox, November 1982.
 And: XEROX, “The Ethernet, A Local Area Network: Data Link Layer and
 Physical Layer Specification”, X3T51/80-50, Xerox Corporation, Stamford,
 CT., October 1980.][XEROX]</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>XEROX NS IDP [“The Ethernet, A Local Area Network</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -3922,6 +3897,14 @@ registry is one enumeration per transport protocol sharing a memberless base.</p
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.reg.apptype.apptype.</span></span><span class="sig-name descname"><span class="pre">TransportProtocol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/reg/apptype/apptype.html#TransportProtocol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.TransportProtocol" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
 <p>Transport layer protocol.</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.5.0: </span>An <code class="docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code> rather than an <code class="docutils literal notranslate"><span class="pre">aenum.IntFlag</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/808">#808</a>),
+numbered sequentially: <code class="docutils literal notranslate"><span class="pre">sctp</span></code> is <code class="docutils literal notranslate"><span class="pre">3</span></code> and <code class="docutils literal notranslate"><span class="pre">dccp</span></code> is <code class="docutils literal notranslate"><span class="pre">4</span></code>, where
+they were <code class="docutils literal notranslate"><span class="pre">4</span></code> and <code class="docutils literal notranslate"><span class="pre">8</span></code>, and no <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> is decoded as a <code class="docutils literal notranslate"><span class="pre">|</span></code>
+composite (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a>). <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> refuses a name no member
+declares, with <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumKeyError" title="pcapkit.utilities.exceptions.EnumKeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumKeyError</span></code></a>,
+rather than minting a member for it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/808">#808</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a>).</p>
+</div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.apptype.TransportProtocol.undefined">
 <span class="sig-name descname"><span class="pre">undefined</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.TransportProtocol.undefined" title="Link to this definition">¶</a></dt>
@@ -3972,6 +3955,18 @@ service belongs to the registry of the transport protocol that carries it –
 <a class="reference internal" href="#pcapkit.const.reg.apptype.dccp.DCCP" title="pcapkit.const.reg.apptype.dccp.DCCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code></a>. Being memberless is also what
 makes it subclassable at all, since <code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code> refuses to extend an
 enumeration that already has members.</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.1.1: </span>A member converts with <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> to its port number, and compares,
+orders and hashes as that port.</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.5.0: </span>Split by transport protocol (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/732">#732</a>): <a class="reference internal" href="#module-pcapkit.const.reg.apptype" title="pcapkit.const.reg.apptype"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.reg.apptype</span></code></a>
+is a package, and every assignment is a member of one of the four
+registries above rather than of this class. <code class="docutils literal notranslate"><span class="pre">get()</span></code> raises
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> for a port outside <code class="docutils literal notranslate"><span class="pre">0</span></code>-<code class="docutils literal notranslate"><span class="pre">65535</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/758">#758</a>), and
+returns an unregistered member rather than minting one for a port the
+registry does not assign (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a>).</p>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The rows below are the registry entries whose <strong>transport protocol column
@@ -6898,9 +6893,9 @@ transports its bits would each name – a ruling given in review
 of the work for <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/808">#808</a> – so it is looked up as the one whole
 value it already is, exactly like any other bare int: refused
 when that whole value names no registry, resolved when it
-happens to equal one instead. Since GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a> moved
-this class off power-of-two spacing, a hand-built composite
-is no longer guaranteed to be the former – see
+happens to equal one instead. With the sequential values of
+GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a>, a hand-built composite
+is not guaranteed to be the former – see
 <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType._dispatch" title="pcapkit.const.reg.apptype.apptype.AppType._dispatch"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_dispatch()</span></code></a>’s own body for a value that resolves.</p></li>
 </ul>
 </dd>
@@ -6985,10 +6980,10 @@ appropriate to their own call.</p>
 <p>The counterpart of <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.register_alias" title="pcapkit.const.reg.apptype.apptype.AppType.register_alias"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_alias()</span></code></a>: that method requires
 <code class="docutils literal notranslate"><span class="pre">port</span></code> to already carry a member and adds a further name for it;
 this requires the opposite – <code class="docutils literal notranslate"><span class="pre">port</span></code> unclaimed in this registry –
-and mints the first. <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> can no longer do this itself as of
+and mints the first. <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> does not do this itself, per
 GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a> (the owner’s ruling there: only IANA-registered values
 are legitimate, a new entry is properly created through <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.register" title="pcapkit.const.reg.apptype.apptype.AppType.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>,
-and <code class="docutils literal notranslate"><span class="pre">get</span></code> lacks the information to create one), so this is now the only
+and <code class="docutils literal notranslate"><span class="pre">get</span></code> lacks the information to create one), so this is the only
 way to add a service this registry does not already carry.</p>
 <p>Deliberately scoped like <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.register_alias" title="pcapkit.const.reg.apptype.apptype.AppType.register_alias"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_alias()</span></code></a> to <strong>this</strong>
 per-transport registry rather than dispatched through
@@ -7085,11 +7080,13 @@ on <code class="docutils literal notranslate"><span class="pre">port</span></cod
 <dd><p>Build a member absent from this registry’s own lookup tables and
 its <code class="xref py py-data docutils literal notranslate"><span class="pre">__registry__</span></code> side table alike.</p>
 <p>Used by <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType._missing_" title="pcapkit.const.reg.apptype.apptype.AppType._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> for a port neither resolves
-to a real, IANA-registered service, so that such a lookup no longer
-grows either table – contrast <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.register" title="pcapkit.const.reg.apptype.apptype.AppType.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, the explicit,
-caller-named path that still does.</p>
+to a real, IANA-registered service, so that such a lookup grows
+neither table – contrast <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.register" title="pcapkit.const.reg.apptype.apptype.AppType.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, the explicit,
+caller-named path that does.</p>
 <p>Reconstructs <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.svc" title="pcapkit.const.reg.apptype.apptype.AppType.svc"><code class="xref py py-attr docutils literal notranslate"><span class="pre">svc</span></code></a>, <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.port" title="pcapkit.const.reg.apptype.apptype.AppType.port"><code class="xref py py-attr docutils literal notranslate"><span class="pre">port</span></code></a> and <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.proto" title="pcapkit.const.reg.apptype.apptype.AppType.proto"><code class="xref py py-attr docutils literal notranslate"><span class="pre">proto</span></code></a> the same way
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> would: <code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code> bypasses <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> entirely
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> would:
+<a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry._unregistered_member" title="pcapkit.corekit.enum.EnumRegistry._unregistered_member"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code></a>
+bypasses <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> entirely
 (it builds through <code class="docutils literal notranslate"><span class="pre">cls._member_type_.__new__</span></code> directly), so this
 class’s own three attributes would otherwise be missing and every
 method reading them (<code class="xref py py-meth docutils literal notranslate"><span class="pre">__repr__()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">__str__()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">__int__()</span></code>,
@@ -34630,15 +34627,10 @@ functionality outside of the Linux cluster into remote nodes.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.tcp.TCP.vidigo">
 <span class="sig-name descname"><span class="pre">vidigo</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'vidigo</span> <span class="pre">[3231</span> <span class="pre">-</span> <span class="pre">tcp]'</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.tcp.TCP.vidigo" title="Link to this definition">¶</a></dt>
-<dd><p>Delta Solutions Direct)
-- [UDP] VidiGo communication (previous was: Delta Solutions Direct)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p>[TCP] VidiGo communication (previous was</p></li>
+<dd><ul class="simple">
+<li><p>[TCP] VidiGo communication (previous was: Delta Solutions Direct)</p></li>
+<li><p>[UDP] VidiGo communication (previous was: Delta Solutions Direct)</p></li>
 </ul>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -34932,15 +34924,10 @@ functionality outside of the Linux cluster into remote nodes.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.tcp.TCP.ccmail">
 <span class="sig-name descname"><span class="pre">ccmail</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ccmail</span> <span class="pre">[3264</span> <span class="pre">-</span> <span class="pre">tcp]'</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.tcp.TCP.ccmail" title="Link to this definition">¶</a></dt>
-<dd><p>mail/lotus
-- [UDP] cc:mail/lotus</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p>[TCP] cc</p></li>
+<dd><ul class="simple">
+<li><p>[TCP] cc:mail/lotus</p></li>
+<li><p>[UDP] cc:mail/lotus</p></li>
 </ul>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -52398,15 +52385,10 @@ information and to coordinate the operation of tunable optical network units
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.tcp.TCP.rise">
 <span class="sig-name descname"><span class="pre">rise</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'rise</span> <span class="pre">[7473</span> <span class="pre">-</span> <span class="pre">tcp]'</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.tcp.TCP.rise" title="Link to this definition">¶</a></dt>
-<dd><p>The Vieneo Province
-- [UDP] Rise: The Vieneo Province</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p>[TCP] Rise</p></li>
+<dd><ul class="simple">
+<li><p>[TCP] Rise: The Vieneo Province</p></li>
+<li><p>[UDP] Rise: The Vieneo Province</p></li>
 </ul>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -54887,45 +54869,25 @@ Protocol</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.tcp.TCP.ddi_tcp_4">
 <span class="sig-name descname"><span class="pre">ddi_tcp_4</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ddi-tcp-4</span> <span class="pre">[8891</span> <span class="pre">-</span> <span class="pre">tcp]'</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.tcp.TCP.ddi_tcp_4" title="Link to this definition">¶</a></dt>
-<dd><p>NESS application</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>[<a class="reference internal" href="#pcapkit.const.reg.apptype.tcp.TCP" title="pcapkit.const.reg.apptype.tcp.TCP">TCP</a>] Desktop Data TCP 3</p>
-</dd>
-</dl>
+<dd><p>[TCP] Desktop Data TCP 3: NESS application</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.tcp.TCP.ddi_tcp_5">
 <span class="sig-name descname"><span class="pre">ddi_tcp_5</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ddi-tcp-5</span> <span class="pre">[8892</span> <span class="pre">-</span> <span class="pre">tcp]'</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.tcp.TCP.ddi_tcp_5" title="Link to this definition">¶</a></dt>
-<dd><p>FARM product</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>[<a class="reference internal" href="#pcapkit.const.reg.apptype.tcp.TCP" title="pcapkit.const.reg.apptype.tcp.TCP">TCP</a>] Desktop Data TCP 4</p>
-</dd>
-</dl>
+<dd><p>[TCP] Desktop Data TCP 4: FARM product</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.tcp.TCP.ddi_tcp_6">
 <span class="sig-name descname"><span class="pre">ddi_tcp_6</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ddi-tcp-6</span> <span class="pre">[8893</span> <span class="pre">-</span> <span class="pre">tcp]'</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.tcp.TCP.ddi_tcp_6" title="Link to this definition">¶</a></dt>
-<dd><p>NewsEDGE/Web application</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>[<a class="reference internal" href="#pcapkit.const.reg.apptype.tcp.TCP" title="pcapkit.const.reg.apptype.tcp.TCP">TCP</a>] Desktop Data TCP 5</p>
-</dd>
-</dl>
+<dd><p>[TCP] Desktop Data TCP 5: NewsEDGE/Web application</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.tcp.TCP.ddi_tcp_7">
 <span class="sig-name descname"><span class="pre">ddi_tcp_7</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ddi-tcp-7</span> <span class="pre">[8894</span> <span class="pre">-</span> <span class="pre">tcp]'</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.tcp.TCP.ddi_tcp_7" title="Link to this definition">¶</a></dt>
-<dd><p>COAL application</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>[<a class="reference internal" href="#pcapkit.const.reg.apptype.tcp.TCP" title="pcapkit.const.reg.apptype.tcp.TCP">TCP</a>] Desktop Data TCP 6</p>
-</dd>
-</dl>
+<dd><p>[TCP] Desktop Data TCP 6: COAL application</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -59081,12 +59043,7 @@ replacement for “nburn_id”.</p></li>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.tcp.TCP.xahaud">
 <span class="sig-name descname"><span class="pre">xahaud</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'xahaud</span> <span class="pre">[21337</span> <span class="pre">-</span> <span class="pre">tcp]'</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.tcp.TCP.xahaud" title="Link to this definition">¶</a></dt>
-<dd><p>//xahau.network]</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>[<a class="reference internal" href="#pcapkit.const.reg.apptype.tcp.TCP" title="pcapkit.const.reg.apptype.tcp.TCP">TCP</a>] Xahau P2P network protocol [https</p>
-</dd>
-</dl>
+<dd><p>[TCP] Xahau P2P network protocol [<a class="reference external" href="https://xahau.network">https://xahau.network</a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -88386,15 +88343,10 @@ for “stm_pproc”.</p></li>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.udp.UDP.vidigo">
 <span class="sig-name descname"><span class="pre">vidigo</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'vidigo</span> <span class="pre">[3231</span> <span class="pre">-</span> <span class="pre">udp]'</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.udp.UDP.vidigo" title="Link to this definition">¶</a></dt>
-<dd><p>Delta Solutions Direct)
-- [UDP] VidiGo communication (previous was: Delta Solutions Direct)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p>[TCP] VidiGo communication (previous was</p></li>
+<dd><ul class="simple">
+<li><p>[TCP] VidiGo communication (previous was: Delta Solutions Direct)</p></li>
+<li><p>[UDP] VidiGo communication (previous was: Delta Solutions Direct)</p></li>
 </ul>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -88688,15 +88640,10 @@ for “stm_pproc”.</p></li>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.udp.UDP.ccmail">
 <span class="sig-name descname"><span class="pre">ccmail</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ccmail</span> <span class="pre">[3264</span> <span class="pre">-</span> <span class="pre">udp]'</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.udp.UDP.ccmail" title="Link to this definition">¶</a></dt>
-<dd><p>mail/lotus
-- [UDP] cc:mail/lotus</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p>[TCP] cc</p></li>
+<dd><ul class="simple">
+<li><p>[TCP] cc:mail/lotus</p></li>
+<li><p>[UDP] cc:mail/lotus</p></li>
 </ul>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -106107,15 +106054,10 @@ Section 4.3]</p></li>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.udp.UDP.rise">
 <span class="sig-name descname"><span class="pre">rise</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'rise</span> <span class="pre">[7473</span> <span class="pre">-</span> <span class="pre">udp]'</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.udp.UDP.rise" title="Link to this definition">¶</a></dt>
-<dd><p>The Vieneo Province
-- [UDP] Rise: The Vieneo Province</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p>[TCP] Rise</p></li>
+<dd><ul class="simple">
+<li><p>[TCP] Rise: The Vieneo Province</p></li>
+<li><p>[UDP] Rise: The Vieneo Province</p></li>
 </ul>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -108595,45 +108537,25 @@ Discovery</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.udp.UDP.ddi_udp_4">
 <span class="sig-name descname"><span class="pre">ddi_udp_4</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ddi-udp-4</span> <span class="pre">[8891</span> <span class="pre">-</span> <span class="pre">udp]'</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.udp.UDP.ddi_udp_4" title="Link to this definition">¶</a></dt>
-<dd><p>NESS application</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>[<a class="reference internal" href="#pcapkit.const.reg.apptype.udp.UDP" title="pcapkit.const.reg.apptype.udp.UDP">UDP</a>] Desktop Data UDP 3</p>
-</dd>
-</dl>
+<dd><p>[UDP] Desktop Data UDP 3: NESS application</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.udp.UDP.ddi_udp_5">
 <span class="sig-name descname"><span class="pre">ddi_udp_5</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ddi-udp-5</span> <span class="pre">[8892</span> <span class="pre">-</span> <span class="pre">udp]'</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.udp.UDP.ddi_udp_5" title="Link to this definition">¶</a></dt>
-<dd><p>FARM product</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>[<a class="reference internal" href="#pcapkit.const.reg.apptype.udp.UDP" title="pcapkit.const.reg.apptype.udp.UDP">UDP</a>] Desktop Data UDP 4</p>
-</dd>
-</dl>
+<dd><p>[UDP] Desktop Data UDP 4: FARM product</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.udp.UDP.ddi_udp_6">
 <span class="sig-name descname"><span class="pre">ddi_udp_6</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ddi-udp-6</span> <span class="pre">[8893</span> <span class="pre">-</span> <span class="pre">udp]'</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.udp.UDP.ddi_udp_6" title="Link to this definition">¶</a></dt>
-<dd><p>NewsEDGE/Web application</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>[<a class="reference internal" href="#pcapkit.const.reg.apptype.udp.UDP" title="pcapkit.const.reg.apptype.udp.UDP">UDP</a>] Desktop Data UDP 5</p>
-</dd>
-</dl>
+<dd><p>[UDP] Desktop Data UDP 5: NewsEDGE/Web application</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.udp.UDP.ddi_udp_7">
 <span class="sig-name descname"><span class="pre">ddi_udp_7</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ddi-udp-7</span> <span class="pre">[8894</span> <span class="pre">-</span> <span class="pre">udp]'</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.udp.UDP.ddi_udp_7" title="Link to this definition">¶</a></dt>
-<dd><p>COAL application</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>[<a class="reference internal" href="#pcapkit.const.reg.apptype.udp.UDP" title="pcapkit.const.reg.apptype.udp.UDP">UDP</a>] Desktop Data UDP 6</p>
-</dd>
-</dl>
+<dd><p>[UDP] Desktop Data UDP 6: COAL application</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -116299,12 +116221,12 @@ be valued on and they are documented here instead.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="pcapng.html">
+          <a class="next-page" href="arp.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</div>
+                <div class="title"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Constant Enumerations</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>

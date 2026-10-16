@@ -225,7 +225,7 @@ DTLS
 
 **Not started**, and it has no stub in the tree -- of the TLS/SSL and DTLS pair,
 only TLS/SSL does. It earns its own entry because the registries
-have moved ahead of it, and a growing part of SCTP's surface now names a protocol
+have moved ahead of it, and a growing part of SCTP's surface names a protocol
 that does not exist:
 
 * the DTLS chunk, type 65 of :class:`~pcapkit.const.sctp.chunk.Chunk`, and the
@@ -262,10 +262,11 @@ small part of each is bound to a dissector; everything else resolves to
 :class:`~pcapkit.protocols.misc.raw.Raw`, so the capture parses without
 complaint and yields nothing useful.
 
-* **3 of the 219** :class:`~pcapkit.const.reg.linktype.LinkType` values --
-  ``ETHERNET``, ``IPV4`` and ``IPV6``, declared identically in
-  :class:`~pcapkit.protocols.misc.pcap.frame.Frame` and
-  :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`.
+* **5 of the 219** :class:`~pcapkit.const.reg.linktype.LinkType` values --
+  ``NULL``, ``ETHERNET``, ``LOOP``, ``IPV4`` and ``IPV6``, declared identically
+  in :class:`~pcapkit.protocols.misc.pcap.frame.Frame` and
+  :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`, which also read ``RAW`` as
+  ``IPV4`` or ``IPV6`` by its version nibble.
 * **17 of the 151** :class:`~pcapkit.const.reg.transtype.TransType` values, in
   :attr:`Internet.__proto__
   <pcapkit.protocols.internet.internet.Internet.__proto__>`.
@@ -318,9 +319,11 @@ A handful wanted only a table entry, because the dissector was already there:
   :class:`~pcapkit.protocols.link.vlan.VLAN`, which carries the shared tag
   layout; the split exists so that a Q-in-Q frame's two tags stay distinct in
   the parsed output.
-* ``LinkType`` ``NULL``, ``LOOP`` and ``RAW`` carry bare IPv4 or IPv6, both of
-  which pcapkit dissects. ``NULL`` and ``LOOP`` need their four-octet address
-  family word skipped first, and ``RAW`` needs a version sniff.
+* **Done.** ``LinkType`` ``NULL`` and ``LOOP`` are bound to
+  :class:`~pcapkit.protocols.link.loopback.Loopback`, which reads the four-octet
+  address family word and hands 2 to IPv4 and 24, 28 or 30 to IPv6
+  (:issue:`1574`). ``RAW`` has no binding of its own: its bare IPv4 or IPv6 is
+  dispatched by the version nibble of the first octet (:issue:`1502`).
 
 Three follow-ups the above deliberately left alone:
 
@@ -634,8 +637,7 @@ Anyone wanting to run the tests wants the repository, which is where they are.
    exact value stays in the sibling field every timestamp already has, such as
    ``time_epoch``.
    ``PlistRoundTripTests.test_plist_report_round_trips_through_plistlib``, in
-   ``tests/integration/test_output_formats.py``, now runs rather than being
-   skipped.
+   ``tests/integration/test_output_formats.py``, checks the round trip.
 
 Reassembly Beyond IP and TCP
 ----------------------------
@@ -734,8 +736,9 @@ Two smaller items in the same subsystem:
   the tracer hands each traced segment straight to it.
 
   :attr:`Index.packet <pcapkit.foundation.traceflow.data.tcp.Index.packet>` then
-  holds one reassembled datagram per direction, and postpones twice: reading it is
-  what flushes the flow's reassembler, and each datagram's own
+  holds the reassembled datagrams, one per direction and acknowledgement number
+  (:class:`~pcapkit.foundation.traceflow.tcp.TCP` says why), and postpones twice:
+  reading it is what flushes the flow's reassembler, and each datagram's own
   :attr:`~pcapkit.foundation.reassembly.data.tcp.Datagram.packet` is parsed later
   still, through the same
   :class:`~pcapkit.foundation.reassembly.data.data.Deferred` arrangement the
@@ -786,7 +789,7 @@ Two smaller items in the same subsystem:
   the offset-zero fragment has been received; a parser sends nothing, so the
   condition is only reported in the log record. And the memory motive is
   narrowed rather than removed -- an in-flight IP datagram identifier still
-  holds a fixed 72 KiB of preallocated space, but now for at most the timeout's
+  holds a fixed 72 KiB of preallocated space, but for at most the timeout's
   worth of capture time rather than for the life of the
   :class:`~pcapkit.foundation.extraction.Extractor`.
 
@@ -888,13 +891,13 @@ Release Plan — 1.5.0 in Two Steps
 :data:`pcapkit.__version__` is the current version, and the release is sequenced
 against the waves above in two deliberate steps:
 
-#. **A beta — ``1.5.0b1`` — when wave 1's remaining issues are closed.**
+#. **A beta —** ``1.5.0b1`` **— when wave 1's remaining issues are closed.**
    *Done.* Wave 1's feature work had landed already; what remained was the
    defect tail in `the issue tracker
    <https://github.com/JarryShaw/PyPCAPKit/issues>`__, and closing it earned a
    beta rather than a final release, because the consistency sweep below had not
    run yet and was expected to find things.
-#. **The official ``1.5.0`` when the post-wave-1 consistency sweep is done.** The
+#. **The official** ``1.5.0`` **when the post-wave-1 consistency sweep is done.** The
    sweep is described under `Delivery Sequence`_ below — prose against code,
    missing tests, unaligned changes, and packet formats against the
    specifications. Its whole point is to find what one-at-a-time defect work
@@ -973,7 +976,7 @@ the next push then tags and publishes. So:
      - marked prerelease
    * - ``1.5.0`` (step 2)
      - **no**
-     - **``main``**
+     - ``main``
      - full release
 
 Both steps publish to PyPI — the ``pypi`` job carries no prerelease gate — but a
@@ -1014,21 +1017,17 @@ pair alone would answer it twice. ``LINUX_SLL`` matters out of proportion to its
 size: every ``tcpdump -i any`` capture uses it, and neither variant has even a
 stub.
 
-**Wave 2 or 3 — handlers for the** ``DLT_NULL`` **and** ``DLT_RAW`` **link
-types.** Both are genuine DLTs that a capture can legitimately be rooted in —
-``DLT_NULL`` (0) is BSD's loopback encapsulation, ``DLT_RAW`` (101) an IP packet
-with no link header at all — and neither has a handler protocol class. The frame
-dispatcher registers exactly three link types
-(:file:`pcapkit/protocols/misc/pcap/frame.py`, ``__proto__``):
-:attr:`~pcapkit.const.reg.linktype.LinkType.ETHERNET`,
-:attr:`~pcapkit.const.reg.linktype.LinkType.IPV4` and
-:attr:`~pcapkit.const.reg.linktype.LinkType.IPV6`, so a ``DLT_NULL`` or
-``DLT_RAW`` capture reaches no dissector. This is a sibling of the ``LINUX_SLL``
-work above rather than a separate concern — all four are link types the library
-enumerates but cannot parse. It surfaced while deciding what an unresolvable
-link-layer name should do: neither value is an honest stand-in for "unknown link
-type", which is why the toolkit raises instead of defaulting to
-``LinkType.NULL``.
+**Done ahead of wave 2 — handlers for the** ``DLT_NULL`` **and** ``DLT_RAW``
+**link types.** Both are genuine DLTs that a capture can legitimately be rooted
+in — ``DLT_NULL`` (0) is BSD's loopback encapsulation, ``DLT_RAW`` (101) an IP
+packet with no link header at all.
+:class:`~pcapkit.protocols.link.loopback.Loopback` dissects ``DLT_NULL`` and
+``DLT_LOOP`` (:issue:`1574`), and the frame dispatcher reads ``DLT_RAW`` as IPv4
+or IPv6 by its version nibble (:issue:`1502`), so of the link types this
+section names only ``LINUX_SLL`` and ``LINUX_SLL2`` remain enumerated but
+unparsed. Neither ``NULL`` nor ``RAW`` is an honest stand-in for "unknown link
+type", which is why the toolkit raises for an unresolvable link-layer name
+instead of defaulting to ``LinkType.NULL``.
 
 **Wave 3 — the remaining protocols** from the same list, taken three or four at a
 time. QUIC, DSL, FDDI and ISDN come last: QUIC because it is really HTTP/3 over a
@@ -1080,14 +1079,14 @@ written down instead of a pair of figures that will be stale by the next merge:
               spec.loader.exec_module(m); \
               print(collections.Counter(k.split('/')[0] for k in m.EXPECTED_FAILURES))"
 
-Two things to be precise about before anyone starts. First, **"does not
-round-trip" is not the same as "unimplemented"** — the entries are a mix, and
-some are an implemented case carrying a tracked defect rather than a missing
-implementation. Each entry names the defect behind it, so the list can be split
-into *missing*, *defective* and *deliberately deferred*, which is the first task,
-because the three want different work. Second, ``pcapng-option`` is the largest
-family by a wide margin, so it is the item that decides whether
-this is one wave's work or several; it deserves sizing before the rest.
+Two things to be precise about before anyone starts. First, the round-trip half
+is closed: ``EXPECTED_FAILURES`` is empty, so every case the harness enumerates
+round-trips, and a new entry there would record a defect rather than a
+deferral. Second, **round-tripping is not the same as being implemented** — the
+harness walks the codes each protocol registers a handler for, not every code
+its enumeration names, so what remains is the codes with no per-entry handler,
+such as the 17 SCTP chunk types under `SCTP`_ above, which fall through to the
+generic handlers and parse as opaque.
 
 This is deliberately **not** the same request as the ``__proto__`` dispatch
 registries. Those name whole protocols, so closing a gap there means

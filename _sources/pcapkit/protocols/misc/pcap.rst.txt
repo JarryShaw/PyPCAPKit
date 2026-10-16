@@ -33,6 +33,11 @@ of PCAP, whose structure is described as below:
        guint32 network;        /* data link type */
    } pcap_hdr_t;
 
+.. versionchanged:: 1.5.0
+
+   A global header cut short rebuilds as captured, where it rebuilt at full
+   width (:issue:`1470`).
+
 .. autoclass:: pcapkit.protocols.misc.pcap.header.Header
    :no-members:
    :show-inheritance:
@@ -53,8 +58,6 @@ of PCAP, whose structure is described as below:
    .. automethod:: make
 
    .. automethod:: _make_data
-
-   .. automethod:: __post_init__
 
 Header Schemas
 --------------
@@ -108,6 +111,14 @@ whose structure is described as below:
        guint32 orig_len;   /* actual length of packet */
    } pcaprec_hdr_t;
 
+.. versionchanged:: 1.5.0
+
+   ``bytes(frame)`` and :attr:`~pcapkit.protocols.misc.pcap.frame.Frame.packet`
+   hold this frame's own octets, where they held the next frame's
+   (:issue:`357`), and the parsed ``time`` is timezone-aware UTC. The parsed
+   ``len`` is the on-wire length and ``cap_len`` the captured one, where the
+   two were swapped (:issue:`618`).
+
 .. autoclass:: pcapkit.protocols.misc.pcap.frame.Frame
    :no-members:
    :show-inheritance:
@@ -120,6 +131,7 @@ whose structure is described as below:
    .. automethod:: index
 
    .. automethod:: unpack
+   .. automethod:: pack
 
    .. automethod:: read
    .. automethod:: make

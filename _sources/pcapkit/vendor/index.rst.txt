@@ -24,14 +24,6 @@ Protocol Numbers
 
    reg
 
-Miscellaneous
--------------
-
-.. toctree::
-   :maxdepth: 2
-
-   pcapng
-
 Link Layer
 ----------
 
@@ -40,7 +32,6 @@ Link Layer
 
    arp
    l2tp
-   ospf
    vlan
 
 Internet Layer
@@ -74,6 +65,15 @@ Application Layer
    ftp
    http
    ngap
+   ospf
+
+Miscellaneous
+-------------
+
+.. toctree::
+   :maxdepth: 2
+
+   pcapng
 
 Command Line Tool
 =================
@@ -92,6 +92,6 @@ constant enumerations.
    positional arguments:
      target         update targets, supply none to update all
 
-   optional arguments:
+   options:
      -h, --help     show this help message and exit
      -V, --version  show program's version number and exit
