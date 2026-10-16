@@ -807,12 +807,13 @@ class GetOverrideContractTests(unittest.TestCase):
         first positional parameter, so in ``get(key, ...)`` it binds the lookup key
         and raises :exc:`TypeError` -- ``RuntimeError: super(): no arguments`` needs a
         function with no parameters at all, which no real override has.
-        #913 set the shape and #908 followed it, producing ``Method.get``. The two
-        surviving ``@staticmethod`` overrides are the stated exception -- neither
-        calls ``super()``, so neither meets the condition. Read through :func:`vars`
-        rather than by attribute access, since both descriptor kinds answer
-        ``Cls.get('X')`` identically, which is the page's own point about callers not
-        seeing the switch.
+        #913 set the shape and #908 followed it, producing ``Method.get``; #1824
+        followed it again for ``Command.get``, which delegates a non-``str`` key.
+        ``OptionType.get``, the surviving ``@staticmethod`` override, is the stated
+        exception -- it never calls ``super()``, so it does not meet the condition.
+        Read through :func:`vars` rather than by attribute access, since both
+        descriptor kinds answer ``Cls.get('X')`` identically, which is the page's own
+        point about callers not seeing the switch.
 
         """
         from pcapkit.const.ftp.command import Command
@@ -838,17 +839,22 @@ class GetOverrideContractTests(unittest.TestCase):
                           'override folded into the inherited base is what #940 did '
                           'to the mh/ngap helpers')
 
-        self.assertIsInstance(vars(Method)['get'], classmethod,
-                              'a delegating override has to be a classmethod -- '
-                              'zero-argument super() in a staticmethod binds the '
-                              'first positional parameter, so get(key) raises '
-                              'TypeError; #913 set the shape, #908 followed it')
-        for klass in (Command, OptionType):
+        for klass in (Method, Command):
             with self.subTest(klass=klass.__name__):
-                self.assertIsInstance(vars(klass)['get'], staticmethod)
-                self.assertNotIn('super()', inspect.getsource(vars(klass)['get'].__func__),
-                                 f'{klass.__name__}.get now delegates, so the page is '
-                                 'wrong to list it as a surviving staticmethod')
+                self.assertIsInstance(vars(klass)['get'], classmethod,
+                                      'a delegating override has to be a classmethod -- '
+                                      'zero-argument super() in a staticmethod binds the '
+                                      'first positional parameter, so get(key) raises '
+                                      'TypeError; #913 set the shape, #908 and #1824 '
+                                      'followed it')
+                self.assertIn('return super().get(key)',
+                              inspect.getsource(vars(klass)['get'].__func__),
+                              f'{klass.__name__}.get no longer delegates, so the page is '
+                              'wrong to give it as a delegating override')
+        self.assertIsInstance(vars(OptionType)['get'], staticmethod)
+        self.assertNotIn('super()', inspect.getsource(vars(OptionType)['get'].__func__),
+                         'OptionType.get now delegates, so the page is wrong to list it '
+                         'as the surviving staticmethod')
 
         # Execute the three outcomes rather than assert the page names them. The
         # first draft of this test only grepped for the error string, and the
@@ -919,6 +925,10 @@ class GetOverrideContractTests(unittest.TestCase):
         self.assertIn('forced by Python rather than decided', flat,
                       'the page no longer says the classmethod requirement is a '
                       'language constraint rather than a ruling')
+        self.assertIn("Command`'s override made the same switch on :issue:`1824`", flat,
+                      'the page no longer records that Command.get became a '
+                      'classmethod once it delegated, so it reads as a surviving '
+                      'staticmethod again')
 
     def test_the_base_raises_a_name_miss_quietly(self) -> 'None':
         """#933: the owner ruled that overrides follow the base and stay quiet.
