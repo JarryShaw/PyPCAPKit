@@ -50,9 +50,15 @@ which is automatically generated from :class:`{MODL}.{NAME}`.
 
 """
 
+from typing import TYPE_CHECKING
+
 from aenum import StrEnum
 
 from pcapkit.corekit.enum import EnumRegistry
+from pcapkit.utilities.exceptions import EnumValueError
+
+if TYPE_CHECKING:
+    from typing import Any
 
 __all__ = ['{NAME}']
 
@@ -67,6 +73,30 @@ class {NAME}(EnumRegistry, StrEnum):
     """
 
     {ENUM}
+
+    @classmethod
+    def _validate_value(cls, value: 'Any') -> 'None':
+        """Reject ``value`` unless it is a :class:`str`, this registry's member type.
+
+        Overrides :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value` so
+        that :meth:`~pcapkit.corekit.enum.EnumRegistry.register` refuses a
+        value :meth:`~pcapkit.corekit.enum.EnumLookup.get` refuses, in the
+        same words (:issue:`1816`). There is no ``_missing_`` here to take a
+        range from -- the constructor refuses every value no member carries --
+        so the member type is the whole check, and any :class:`str` label may
+        still be minted.
+
+        Args:
+            value: Value about to be looked up or minted.
+
+        Raises:
+            EnumValueError: If ``value`` is not a :class:`str`. A
+                :exc:`ValueError`, so an ``except ValueError`` caller is
+                unaffected.
+
+        """
+        if not isinstance(value, str):
+            raise EnumValueError('%r is not a valid %s' % (value, cls.__name__))
 '''  # type: Callable[[str, str, str, str], str]
 
 

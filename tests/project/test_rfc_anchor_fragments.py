@@ -26,8 +26,8 @@ silently link to a dead anchor exactly as ``secion-3`` did.
 The sweep this test is built on also turned up a **second** instance of the
 same defect: ``:rfc:`5797#secion-2.2``` in the ``feat`` attribute docstring of
 the ``Command`` class (not ``FEATCode``), at
-:file:`pcapkit/vendor/ftp/command.py:273` and its generated copy
-:file:`pcapkit/const/ftp/command.py:261`. Same missing ``t``, same two files,
+:file:`pcapkit/vendor/ftp/command.py:296` and its generated copy
+:file:`pcapkit/const/ftp/command.py:284`. Same missing ``t``, same two files,
 same one-character fix -- fixed alongside #942's rather than carried as a
 documented exception.
 

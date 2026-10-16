@@ -16,9 +16,10 @@ from typing import TYPE_CHECKING
 from aenum import IntEnum
 
 from pcapkit.corekit.enum import EnumRegistry
+from pcapkit.utilities.exceptions import EnumValueError
 
 if TYPE_CHECKING:
-    from typing import Optional, Type
+    from typing import Any, Optional, Type
 
 __all__ = ['ReturnCode']
 
@@ -44,6 +45,29 @@ class ResponseKind(EnumRegistry, IntEnum):
     Protected = 6
 
     @classmethod
+    def _validate_value(cls, value: 'Any') -> 'None':
+        """Reject ``value`` unless it is a digit, which :meth:`_missing_` accepts.
+
+        Overrides :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value`
+        with the range :meth:`_missing_` resolves, and the message the
+        constructor raises outside it, so
+        :meth:`~pcapkit.corekit.enum.EnumRegistry.register` refuses exactly the
+        values :meth:`~pcapkit.corekit.enum.EnumLookup.get` refuses, in the
+        same words (:issue:`1816`).
+
+        Args:
+            value: Value about to be looked up or minted.
+
+        Raises:
+            EnumValueError: If ``value`` is not an :class:`int` in ``0``-``9``.
+                A :exc:`ValueError`, so an ``except ValueError`` caller is
+                unaffected.
+
+        """
+        if not (isinstance(value, int) and 0 <= value <= 9):
+            raise EnumValueError('%r is not a valid %s' % (value, cls.__name__))
+
+    @classmethod
     def _missing_(cls, value: 'int') -> 'ResponseKind':
         """Lookup function used when value is not found.
 
@@ -66,6 +90,29 @@ class GroupingInformation(EnumRegistry, IntEnum):
     AuthenticationAccounting = 3
     Unspecified = 4
     FileSystem = 5
+
+    @classmethod
+    def _validate_value(cls, value: 'Any') -> 'None':
+        """Reject ``value`` unless it is a digit, which :meth:`_missing_` accepts.
+
+        Overrides :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value`
+        with the range :meth:`_missing_` resolves, and the message the
+        constructor raises outside it, so
+        :meth:`~pcapkit.corekit.enum.EnumRegistry.register` refuses exactly the
+        values :meth:`~pcapkit.corekit.enum.EnumLookup.get` refuses, in the
+        same words (:issue:`1816`).
+
+        Args:
+            value: Value about to be looked up or minted.
+
+        Raises:
+            EnumValueError: If ``value`` is not an :class:`int` in ``0``-``9``.
+                A :exc:`ValueError`, so an ``except ValueError`` caller is
+                unaffected.
+
+        """
+        if not (isinstance(value, int) and 0 <= value <= 9):
+            raise EnumValueError('%r is not a valid %s' % (value, cls.__name__))
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'GroupingInformation':
@@ -307,6 +354,30 @@ class ReturnCode(EnumRegistry, IntEnum):
         obj.kind = ResponseKind(int(code[0]))
         obj.group = GroupingInformation(int(code[1]))
         return obj
+
+    @classmethod
+    def _validate_value(cls, value: 'Any') -> 'None':
+        """Reject ``value`` unless it is a three-digit reply code.
+
+        Overrides :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value`
+        with the range check :meth:`_missing_` makes, and the message it
+        raises, so :meth:`~pcapkit.corekit.enum.EnumRegistry.register` refuses
+        exactly the values :meth:`~pcapkit.corekit.enum.EnumLookup.get`
+        refuses, in the same words (:issue:`1816`). That range is ``0``-``999``
+        rather than the registry's own, since :meth:`_missing_` resolves a code
+        outside the registry to ``Unknown`` rather than refusing it.
+
+        Args:
+            value: Value about to be looked up or minted.
+
+        Raises:
+            EnumValueError: If ``value`` is not an :class:`int` in
+                ``0``-``999``. A :exc:`ValueError`, so an ``except ValueError``
+                caller is unaffected.
+
+        """
+        if not (isinstance(value, int) and 0 <= value <= 999):
+            raise EnumValueError('%r is not a valid %s' % (value, cls.__name__))
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'ReturnCode':

@@ -379,7 +379,7 @@ class GeneratorRuntimeCoverageTests(unittest.TestCase):
             instance.process(rows)  # type: ignore[attr-defined]
 
     def test_default_process_no_deprecation(self) -> None:
-        # pcapkit/vendor/default.py:348 -- the shared base implementation,
+        # pcapkit/vendor/default.py:376 -- the shared base implementation,
         # inherited by every crawler that does not override process(), e.g.
         # pcapkit.vendor.arp.hardware.Hardware.
         self._assert_no_deprecation(

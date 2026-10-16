@@ -57,6 +57,7 @@ from aenum import IntEnum, IntFlag, StrEnum, auto
 
 from pcapkit.corekit.enum import EnumLookup, EnumRegistry
 from pcapkit.corekit.sentinels import NO_DEFAULT
+from pcapkit.utilities.exceptions import EnumValueError
 
 if TYPE_CHECKING:
     from typing import Any, Optional, Type
@@ -186,6 +187,28 @@ class FEATCode(EnumRegistry, StrEnum):
                 if member.value.casefold() == folded:
                     return member
         return super().get(key, default)
+
+    @classmethod
+    def _validate_value(cls, value: 'Any') -> 'None':
+        """Reject ``value`` unless it is a :class:`str`, as :meth:`_missing_` does.
+
+        Overrides :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value`
+        with the check :meth:`_missing_` makes, and the message it raises, so
+        :meth:`~pcapkit.corekit.enum.EnumRegistry.register` refuses exactly the
+        values :meth:`get` refuses, in the same words (:issue:`1816`). Any
+        :class:`str` passes, since :meth:`_missing_` resolves every one.
+
+        Args:
+            value: Value about to be looked up or minted.
+
+        Raises:
+            EnumValueError: If ``value`` is not a :class:`str`. A
+                :exc:`ValueError`, so an ``except ValueError`` caller is
+                unaffected.
+
+        """
+        if not isinstance(value, str):
+            raise EnumValueError(f'{{value!r}} is not a valid {{cls.__name__}}')
 
     @classmethod
     def _missing_(cls, value: 'str') -> 'FEATCode':
@@ -408,6 +431,28 @@ class {NAME}(EnumRegistry, StrEnum):
             # change in GitHub issue #860's conversion.
             return {NAME}._unregistered_member(default if default is not None else key, name)
         return {NAME}[name]  # type: ignore[misc]
+
+    @classmethod
+    def _validate_value(cls, value: 'Any') -> 'None':
+        """Reject ``value`` unless it is a :class:`str`, as :meth:`_missing_` does.
+
+        Overrides :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value`
+        with the check :meth:`_missing_` makes, and the message it raises, so
+        :meth:`register` refuses a value the constructor refuses, in the same
+        words (:issue:`1816`). Any :class:`str` passes, since
+        :meth:`_missing_` resolves every one.
+
+        Args:
+            value: Value about to be minted.
+
+        Raises:
+            EnumValueError: If ``value`` is not a :class:`str`. A
+                :exc:`ValueError`, so an ``except ValueError`` caller is
+                unaffected.
+
+        """
+        if not isinstance(value, str):
+            raise EnumValueError(f'{{value!r}} is not a valid {{cls.__name__}}')
 
     @classmethod
     def _missing_(cls, value: 'str') -> '{NAME}':

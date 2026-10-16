@@ -74,6 +74,23 @@ generated registries spell by hand in ``_missing_``:
        if not (isinstance(value, int) and 0 <= value <= 0xFF):
            raise EnumValueError(f'{value!r} is not a valid {cls.__name__}')
 
+**Every registry overrides it**, so that ``register`` refuses what ``get`` refuses
+(:issue:`1816`). Each vendor generator emits the override from the check it already
+writes at the top of ``_missing_``, with the same message. That is the ``FLAG`` of most
+crawlers, but a bespoke template's own range where its ``_missing_`` checks something
+else: ``0``-``999`` for :class:`~pcapkit.const.http.status_code.StatusCode` and
+:class:`~pcapkit.const.ftp.return_code.ReturnCode`, and :class:`str` for the
+string-valued registries.
+:class:`~pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` and
+:class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` have no ``_missing_`` to
+copy from, because their constructor refuses every value no member carries, so the
+first checks its member type and the second the 8-bit Next Header field the type is
+sent in. The ``AppType`` transports inherit ``AppType``'s own.
+
+The check is the *range*, not everything ``_missing_`` decides. A value inside the range
+that matches neither a member nor an unassigned range -- ``CauseCode(0)``, say -- still
+fails to resolve through ``get``, and ``register`` may mint it.
+
 Three things about it are easy to get wrong:
 
 * **It guards, it does not convert.** The return type is :obj:`None` deliberately, so
