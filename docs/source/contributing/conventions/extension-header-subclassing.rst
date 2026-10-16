@@ -115,7 +115,7 @@ Explicit Base Declarations
 
 Name the second base **explicitly**, even though it is already in the MRO.
 :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` derives
-:class:`~pcapkit.protocols.internet.internet.Internet`, so every one of them
+:class:`~pcapkit.protocols.internet.internet.Internet`, so every extension header
 reaches ``Internet`` transitively and an ``__mro__`` check cannot tell the two groups
 apart. The declaration is the only place the classification exists, which is why
 ``tests/protocols/internet/test_ipv6_ext_unit.py`` pins it against ``__bases__``:

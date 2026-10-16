@@ -220,10 +220,10 @@ Engine              3.10    3.11    3.12    3.13    3.14
 ``pypcapfile`` [1]_ 0.0133  0.0093      --      --      --
 ``dpkt``             0.0163  0.0113  0.0118  0.0117  0.0125
 ``pypcap`` [2]_      0.0289  0.0212      --      --      --
-``pcap_ct`` [3]_     0.0364  0.0320  0.0366  0.0322  0.0396
+``pcap_ct``          0.0364  0.0320  0.0366  0.0322  0.0396
 ``scapy``            0.1082  0.0822  0.0877  0.0832  0.0967
 ``pcapkit``          0.2342  0.1906  0.1985  0.1920  0.2392
-``pyshark`` [4]_    18.8158 18.7852 19.2694 20.3751      --
+``pyshark`` [3]_    18.8158 18.7852 19.2694 20.3751      --
 =================== ======= ======= ======= ======= =======
 
 The unavailable cells were attempted. They are not zeroes and must not be
@@ -231,12 +231,9 @@ compared with a measured row.
 
 .. [1] `PyPCAPFile`_ 0.12.0 imports :mod:`imp`, which Python removed in 3.12.
 
-.. [2] `PyPCAP`_ 1.3.0 is unsupported on Python 3.12+, and its build does not
-   search Homebrew's libpcap library prefix.
+.. [2] `PyPCAP`_ 1.3.0 is unsupported on Python 3.12+.
 
-.. [3] `pcap-ct`_ and `libpcap`_ are published only as pre-releases.
-
-.. [4] `PyShark`_ 0.6 cannot create the implicit event loop it expects on Python
+.. [3] `PyShark`_ 0.6 cannot create the implicit event loop it expects on Python
    3.14; it ran on 3.10--3.13.
 
 Installation
@@ -376,7 +373,7 @@ below is also enforced in code, by the
 preflight described under `Engine Comparison`_.
 
 :class:`~pcapkit.foundation.engines.pyshark.PyShark`
-   Requirements, none of them visible to an import: the package imports
+   None of its requirements is visible to an import: the package imports
    cleanly and then fails when used.
 
    - Drives Wireshark's :program:`tshark` binary. It need not be on ``PATH``:

@@ -244,8 +244,8 @@ rather than the event, so its gate can run whichever way the run was raised, onc
 ``workflow_run`` Edges
 ----------------------
 
-Found by grepping every ``on:`` block rather than trusting a hand-maintained
-list:
+These edges come from grepping every ``on:`` block rather than from a
+hand-maintained list:
 
 * ``.github/workflows/cron-vendor.yml:14-16`` -- **Vendor Update** fires on
   completion of **Unit Tests**.
@@ -671,7 +671,7 @@ for the docs-only path -- and checks each result explicitly
 (``unit-tests.yml:1936-1990``). Rulesets match check names literally, with no
 wildcard, so requiring the matrix cells one by one would mean editing the
 ruleset whenever a matrix changes; the aggregate keeps the required list fixed.
-It accepts those legs as ``skipped`` only on a docs-only pull request, where
+It accepts the gating jobs as ``skipped`` only on a docs-only pull request, where
 ``project-tests`` -- every test that reads ``docs/`` or Markdown -- must pass
 instead. The ``Compat`` legs stay required separately because they come from
 ``python-compatibility.yml``, and a job cannot ``needs:`` a job in another

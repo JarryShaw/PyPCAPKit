@@ -119,8 +119,8 @@ either, and are the one item on this list that is not simply a table entry: the
 high-order 32 bits are never transmitted, so recovering them is stateful, and
 they widen both the ICV coverage and the AEAD associated data.
 
-Some structural notes for anyone starting. Adding an integrity algorithm that is
-not an HMAC needs more than a row --
+Some structural notes matter to anyone starting. Adding an integrity algorithm
+that is not an HMAC needs more than a row --
 :class:`~pcapkit.protocols.internet.esp.IntegritySuite` records the digest as
 the name of a :mod:`hashlib` constructor, which AES-XCBC and AES-CMAC are not.
 And :func:`~pcapkit.protocols.internet.esp.load_cryptography` imports only the
@@ -271,9 +271,11 @@ complaint and yields nothing useful.
 * :class:`~pcapkit.const.reg.ethertype.EtherType` -- the values in
   :attr:`Link.__proto__ <pcapkit.protocols.link.link.Link.__proto__>`: ARP,
   RARP, IPv4, IPv6, IPX and both VLAN tags.
-* :class:`~pcapkit.const.reg.apptype.apptype.AppType`, a registry carrying every
-  IANA service name -- TCP 20 to FTP-DATA and 21 to FTP, port 80 and 8080 to HTTP
-  on both TCP and UDP, and UDP 1701 to L2TP.
+* :class:`~pcapkit.const.reg.apptype.apptype.AppType` -- the ports bound in
+  :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.TCP.__proto__>` and
+  :attr:`UDP.__proto__ <pcapkit.protocols.transport.udp.UDP.__proto__>`, out of
+  a registry carrying every IANA service name: TCP 20 to FTP-DATA and 21 to FTP,
+  ports 80 and 8080 to HTTP on both TCP and UDP, and UDP 1701 to L2TP.
 * :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`
   -- the values in :attr:`SCTP.__proto__
   <pcapkit.protocols.transport.sctp.SCTP.__proto__>`: PPIDs 60 and 66, each to

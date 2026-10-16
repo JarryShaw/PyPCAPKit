@@ -180,12 +180,13 @@ the default branch, and ``tag`` pulled ``main`` before tagging.
   again (``--clobber``). ``conda``'s upload is not gated on ``check_leg``, so a
   leg whose Anaconda upload landed but whose GitHub upload failed still gets
   its asset on a re-run.
-* Where it fails, it differs from the action deliberately. With no release for the tag, the
-  upload fails with ``gh``'s "release not found", where the action made one,
-  with no notes and ``target_commitish`` unset (``src/github.ts:617-628,1026``),
-  which Create a release defaults to "the repository's default branch"; the
-  release is ``github``'s to make, at the run's commit. A file pattern matching
-  nothing exits 1 with ``::error title=Nothing to upload``, where the action,
+* ``gh release upload`` also fails, deliberately, where the action did not.
+  With no release for the tag, the upload fails with ``gh``'s
+  "release not found", where the action made one, with no notes and
+  ``target_commitish`` unset (``src/github.ts:617-628,1026``), which Create a
+  release defaults to "the repository's default branch"; the release is
+  ``github``'s to make, at the run's commit. A file pattern matching nothing
+  exits 1 with ``::error title=Nothing to upload``, where the action,
   ``fail_on_unmatched_files`` unset, only warned (``src/run.ts:15-20``) and
   published the release without that file.
 
@@ -391,23 +392,23 @@ this run, it *skipped*.
 ``cron-vendor.yml``, ``deploy-pages.yml`` and ``cron-conda.yml`` each open
 with ``!cancelled() && needs.unit-tests.result != 'failure'`` so that a
 skipped gate does not cascade-skip them, while an outright failure or a
-genuine run cancellation still does. The publishing jobs here are stricter about
-their *publishing* predecessors -- ``github``, and for ``conda`` also ``tag``:
-``!cancelled() && (needs.<job>.result == 'success' || needs.<job>.result ==
-'skipped')``, not ``!= 'failure'``. The two spellings differ only when a
-predecessor's own result is ``cancelled``, which ``!= 'failure'`` still admits
-and the equality pair does not. Concretely: if ``tag`` is cancelled while the
-run itself is not, ``!= 'failure'`` would let ``conda`` proceed into its
-check that ``conda-<version>+0`` names this run's commit, a tag ``tag`` never
-pushed, trading a clean skip for a failed step; the equality pair skips
-``conda`` outright instead.
+genuine run cancellation still does. ``tag``, ``pypi`` and ``conda`` are
+stricter about their *publishing* predecessors -- ``github``, and for
+``conda`` also ``tag``: ``!cancelled() && (needs.<job>.result == 'success' ||
+needs.<job>.result == 'skipped')``, not ``!= 'failure'``. The two spellings
+differ only when a predecessor's own result is ``cancelled``, which
+``!= 'failure'`` still admits and the equality pair does not. Concretely: if
+``tag`` is cancelled while the run itself is not, ``!= 'failure'`` would let
+``conda`` proceed into its check that ``conda-<version>+0`` names this run's
+commit, a tag ``tag`` never pushed, trading a clean skip for a failed step; the
+equality pair skips ``conda`` outright instead.
 
-``version_check`` is the exception, and deliberately so: each of them requires
-``needs.version_check.result == 'success'`` with no ``|| 'skipped'``. It
-produces the evidence the gates read, so a skipped or cancelled
-``version_check`` leaves them nothing to decide on. ``unit-tests`` is held to
-the same bar for a different reason: it is the release test gate, and it skips
-when nothing is publishable
+``version_check`` is the exception, and deliberately so: ``tag``, ``pypi`` and
+``conda`` each require ``needs.version_check.result == 'success'`` with no
+``|| 'skipped'``. It produces the evidence the gates read, so a skipped or
+cancelled ``version_check`` leaves them nothing to decide on. ``unit-tests`` is
+held to the same bar for a different reason: it is the release test gate, and
+it skips when nothing is publishable
 (`#1052 <https://github.com/JarryShaw/PyPCAPKit/issues/1052>`__), so accepting
 ``skipped`` there would publish untested. ``github`` names it in ``needs:`` instead and relies on the implicit
 ``success()``. The gate's own ``if:`` is the union of the publishers'
