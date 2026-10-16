@@ -32,7 +32,7 @@ Terminology
    trace.tcp.packet
        Data structure for **TCP flow tracing**
        (:meth:`TraceFlow.dump <pcapkit.foundation.traceflow.traceflow.TraceFlow.dump>`)
-       is as following:
+       is as follows:
 
        .. code-block:: python
 
@@ -60,7 +60,7 @@ Terminology
    trace.tcp.buffer
        Data structure for internal buffering when performing flow tracing algorithms
        (:attr:`TraceFlow._buffer <pcapkit.foundation.traceflow.traceflow.TraceFlow._buffer>`)
-       is as following:
+       is as follows:
 
        .. code-block:: text
 
@@ -110,7 +110,7 @@ Terminology
    trace.tcp.index
        Data structure for **TCP flow tracing** (element from
        :attr:`TraceFlow.index <pcapkit.foundation.traceflow.traceflow.TraceFlow.index>`
-       *tuple*) is as following:
+       *tuple*) is as follows:
 
        .. code-block:: text
 
@@ -126,8 +126,9 @@ Terminology
            |     |                       opened the flow
            |     |--> 'reverse': (tuple) frame index the other way; empty when
            |     |                      tracing unidirectionally
-           |     |--> 'packet': (Optional[tuple]) one reassembled datagram per
-           |                    direction, or None when analyse is off
+           |     |--> 'packet': (Optional[tuple]) reassembled datagrams, one per
+           |                    direction and acknowledgement number, or None
+           |                    when analyse is off
            |--> (Info) data ...
 
        ``forward`` and ``reverse`` partition ``index``, so
@@ -135,12 +136,13 @@ Terminology
        taking the label apart. ``forward`` is the direction of the packet that
        opened the flow, whose endpoints the label names first.
 
-       ``packet`` is the conversation's application layer: one reassembled datagram
-       per direction, present only when the tracer was constructed with
-       ``analyse=True``. It is reassembled on the *first read*, and each datagram's
+       ``packet`` is the conversation's application layer: its reassembled
+       datagrams, one per direction and acknowledgement number, present only when
+       the tracer was constructed with ``analyse=True``. It is reassembled on the
+       *first read*, and each datagram's
        own :attr:`~pcapkit.foundation.reassembly.data.tcp.Datagram.packet` is
        parsed later still, so a caller that wanted only frame numbers pays for
-       neither. The tracer does not reassemble the stream itself -- it feeds
+       none of it. The tracer does not reassemble the stream itself -- it feeds
        :class:`~pcapkit.foundation.reassembly.tcp.TCP`, whose :rfc:`815` algorithm
        handles the reordering and retransmission that concatenating payloads in
        capture order would corrupt.
@@ -173,3 +175,5 @@ Type Variables
 .. data:: _AT
    :module: pcapkit.foundation.traceflow.data.tcp
    :type: ipaddress.IPv4Address | ipaddress.IPv6Address
+
+   IP address type.

@@ -243,7 +243,7 @@ def _pcap_reader() -> 'Type[PCAPReader]':
     resolution are lost by the time a PCAP frame record of the packet is built
     (:issue:`1507`). This subclass yields the same timestamp, as a
     :class:`~pcapkit.toolkit.dpkt.Timestamp` or, for a nanosecond file, a
-    :class:`~pcapkit.toolkit.dpkt.DecimalTimestamp`, which carries the two.
+    :class:`~pcapkit.toolkit.dpkt.DecimalTimestamp`, which carries them.
 
     Built when called, so that importing this module does not import `DPKT`_,
     and so that it always subclasses the :class:`dpkt.pcap.Reader` of the moment.

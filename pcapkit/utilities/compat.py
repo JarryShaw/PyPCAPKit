@@ -154,7 +154,7 @@ else:
 # that only exists on the newer interpreter, so it never executes on the older
 # one the guard is there to support. Vermin's analysis is static and cannot see
 # that, so it counts these imports anyway and reports the whole library as
-# requiring 3.11 on the strength of three lines that never run below it.
+# requiring 3.11 on the strength of lines that never run below it.
 # ``# novermin`` is Vermin's documented escape hatch for precisely this shape.
 # It is applied per line rather than by turning on ``lax`` mode, so that an
 # *unguarded* use of a new feature anywhere else is still caught.

@@ -51,7 +51,7 @@ if TYPE_CHECKING:
 
 @info_final
 class Context(Info):
-    """Context manager for PCAP-NG file format."""
+    """Per-section context of a PCAP-NG file: its section header and the blocks read under it."""
 
     #: Section header.
     section: 'Data_SectionHeaderBlock'
@@ -194,7 +194,7 @@ class PCAPNG(EngineBase[P_PCAPNG]):
     def read_frame(self) -> 'P_PCAPNG':
         """Read frames.
 
-        This method performs following tasks:
+        This method performs the following tasks:
 
         - read the next block from input file;
         - check if the block is a packet block;
@@ -426,7 +426,7 @@ class PCAPNG(EngineBase[P_PCAPNG]):
         which is as far as a file read goes too.
 
         How far is enough is the block's Total Length, in the section's byte order
-        or, for a section header block, the one its Byte-Order Magic declares. Two
+        or, for a section header block, the one its Byte-Order Magic declares. Some
         kinds of block are parsed past it, and so are read as far as from a file:
         one shorter than its own fixed fields, or not a whole number of words,
         keeps the buffer's worth; a Decryption Secrets Block reads as far as its

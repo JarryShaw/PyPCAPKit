@@ -100,8 +100,8 @@ class Dumper(DumperBase):
                ...
 
         Such a class can still be registered later, on demand. Note this hook
-        writes *both* output registries, so the equivalent manual call is the
-        module-level one that does the same, not either class' own method:
+        writes every output registry, so the equivalent manual call is the
+        module-level one that does the same, not any one class' own method:
 
         .. code-block:: python
 
@@ -161,7 +161,7 @@ class Dumper(DumperBase):
             - :meth:`pcapkit.foundation.traceflow.traceflow.TraceFlow.register_dumper`
 
         """
-        # NOTE: as in the four sibling hooks, an unrecognised class keyword would
+        # NOTE: as in the sibling hooks, an unrecognised class keyword would
         # otherwise land in ``**kwargs`` and be dropped by the bare
         # ``super().__init_subclass__()`` below, silently skipping registration.
         if args or kwargs:
@@ -199,7 +199,7 @@ def render_enum(o: 'enum.Enum | aenum.Enum') -> 'str':
     ``tree``, ``text``, ``txt``, ``plist`` and ``xml`` output of both
     :class:`~pcapkit.foundation.extraction.Extractor` and
     :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow`, so it lives in
-    one function rather than being spelled out at each of the three places
+    one function rather than being spelled out at each place
     :func:`make_dumper`'s hook needs it.
 
     Args:
@@ -216,7 +216,7 @@ def render_enum(o: 'enum.Enum | aenum.Enum') -> 'str':
         :class:`~pcapkit.const.tcp.flags.Flags` ``(0)`` as ``'Flags::None [0]'``
         (GitHub issue :issue:`648`).
 
-        Two things make that worth a guard rather than a shrug. ``'None'`` is a
+        That is worth a guard rather than a shrug. ``'None'`` is a
         plausible member name, so a consumer splitting the rendering on ``::``
         cannot tell it from a member genuinely so named -- and ``NONE`` *is* a
         declared name elsewhere in the library. And the defect is not confined to
@@ -300,13 +300,13 @@ def _object_name(value: 'Any') -> 'str':
 
 
 def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
-    """Create a customised :class:`~dictdumper.dumper.Dumper` object.
+    """Create a customised :class:`~dictdumper.dumper.Dumper` class.
 
     Args:
         output: Output class to customise.
 
     Returns:
-        Customised :class:`~dictdumper.dumper.Dumper` object.
+        Customised :class:`~dictdumper.dumper.Dumper` subclass of ``output``.
 
     .. versionchanged:: 1.5.0
 
@@ -378,7 +378,7 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
             into ``'<key>{item}</key>'``, and
             :meth:`~dictdumper.json.JSON._append_object` into ``'"{item}": '``;
             both call :meth:`~dictdumper.dumper.Dumper._encode_value` on the
-            *value* two lines later, never on the key -- so
+            *value* that follows, never on the key -- so
             :meth:`DictDumper.object_hook` is handed every value the writer will
             interpolate but no key at all, and cannot escape one on the way out
             the way it does a value. Each branch below that builds a mapping
@@ -639,7 +639,7 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                     that carries it exactly -- a :class:`~decimal.Decimal`
                     ``*_epoch`` for frames and PCAP-NG blocks and options, e.g.
                     ``time_epoch``, and the raw ``ntp_timestamp`` or
-                    ``pmip_timestamp`` for the two MH options.
+                    ``pmip_timestamp`` for the MH options that carry one.
 
                 """
                 if isinstance(value, datetime.datetime) and value.tzinfo is not None:

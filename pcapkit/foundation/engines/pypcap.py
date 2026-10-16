@@ -177,7 +177,7 @@ class PyPCAP(EngineBase['RawFrame']):
     def backend(self) -> 'str':
         """The distribution, version and location this engine is driving.
 
-        Two distributions provide :mod:`pcap`, so "the PyPCAP engine failed" is
+        More than one distribution provides :mod:`pcap`, so "the PyPCAP engine failed" is
         not a complete statement of what ran. This says which one it was, e.g.
         ``pypcap 1.3.0 (/.../pcap.cpython-310-x86_64-linux-gnu.so)``.
 
@@ -214,11 +214,11 @@ class PyPCAP(EngineBase['RawFrame']):
         .. _pcap-ct: https://pypi.org/project/pcap-ct/
 
         """
-        # NOTE: the probe comes *before* ``import pcap`` so that the two engines
-        # behave the same way here. It matters more for
-        # :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT`, whose import can
-        # raise ``OSError`` rather than ``ImportError``, but a shared order is one
-        # fewer difference between them.
+        # NOTE: the probe comes *before* ``import pcap`` so that this engine and
+        # :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` behave the same way
+        # here. It matters more for the latter, whose import can raise
+        # ``OSError`` rather than ``ImportError``, but a shared order is one fewer
+        # difference between them.
         self._backend = _pcap_backend.probe()
 
         collision = _pcap_backend.collision_reason(self._backend)
@@ -255,7 +255,7 @@ class PyPCAP(EngineBase['RawFrame']):
         as an iterator from :class:`pcap.pcap`.
 
         Warns:
-            AttributeWarning: Warns under following circumstances:
+            AttributeWarning: Warns under the following circumstances:
 
                 * if :attr:`self.extractor._exlyr <pcapkit.foundation.extraction.Extractor._exlyr>`
                   and/or :attr:`self.extractor._exptl <pcapkit.foundation.extraction.Extractor._exptl>`

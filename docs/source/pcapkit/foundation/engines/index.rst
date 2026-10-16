@@ -236,8 +236,8 @@ actually got, via
 * declines to run on the other one, through ``unsupported_reason()``, with a
   message naming the ``engine=`` string that does want it; and
 * warns with an :class:`~pcapkit.utilities.warnings.EngineWarning` when it finds
-  both installed, since that state makes one of the two engines permanently
-  unselectable and nothing else would explain why.
+  both installed, since that state leaves one engine permanently unselectable
+  and nothing else would explain why.
 
 .. _PCAP-NG: https://wiki.wireshark.org/Development/PcapNg
 .. _libpcap: https://pypi.org/project/libpcap/

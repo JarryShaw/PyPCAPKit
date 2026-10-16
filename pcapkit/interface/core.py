@@ -98,7 +98,8 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
 
         files: if split each frame into different files
         nofile: if no output file is to be dumped
-        verbose: a :obj:`bool` value or a function takes the :class:`Extractor`
+        verbose: a :obj:`bool` value or a function takes the
+            :class:`~pcapkit.foundation.extraction.Extractor`
             instance and current parsed frame (depends on engine selected) as
             parameters to print verbose output information
 
@@ -232,7 +233,7 @@ def trace(protocol: 'str | Type[ProtocolBase]', fout: 'Optional[str]',
     """Trace flows.
 
     Arguments:
-        protocol: protocol to be reassembled
+        protocol: protocol whose flows are to be traced
         fout: output path
         format: output format
         byteorder: output file byte order

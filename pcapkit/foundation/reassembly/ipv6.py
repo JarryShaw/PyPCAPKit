@@ -120,7 +120,7 @@ class IPv6(IP):
     #: is set once and never revised. The offset-zero fragment matters only to
     #: the second half of the rule, the ICMP Time Exceeded that a live stack
     #: "should" send and that an offline parser cannot -- see
-    #: :meth:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase.expire`,
+    #: :meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.expire`,
     #: which reports the condition in its log record instead.
     __timeout__ = 60.0
 
@@ -135,7 +135,7 @@ class IPv6(IP):
         the reassembled packet, and that the Next Header field of the last header
         of the unfragmentable part comes from the Fragment header's. Left alone,
         the reassembled datagram would advertise a Fragment header on a datagram
-        that is by definition no longer a fragment. The four toolkit adapters
+        that is by definition no longer a fragment. The toolkit adapters
         that build IPv6 reassembly data, :mod:`~pcapkit.toolkit.pcap`,
         :mod:`~pcapkit.toolkit.pcapng`, :mod:`~pcapkit.toolkit.dpkt` and
         :mod:`~pcapkit.toolkit.scapy`, leave the Fragment header's *octets* out

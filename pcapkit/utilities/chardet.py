@@ -45,7 +45,7 @@ def detect(value: 'bytes') -> 'str':
         <functools.lru_cache.cache_clear>` to release it in a long-running
         process.
 
-        Two alternatives were tried and rejected. Keying on a *prefix* is
+        Alternatives were tried and rejected. Keying on a *prefix* is
         unsound, since :func:`chardet.detect` is statistical over the whole
         sequence: an ASCII header followed by a UTF-8, Latin-1 or CP1251 body is
         detected as ``ascii`` from its first 256 octets and correctly otherwise,
@@ -53,7 +53,7 @@ def detect(value: 'bytes') -> 'str':
         footprint exactly and was measured retaining 0.0 MB for the same 19 MB of
         input, but it cannot be expressed with :func:`~functools.lru_cache` --
         which keys on what it is passed -- and hand-rolling the eviction was
-        judged not worth the six lines.
+        judged not worth the extra code.
 
     Args:
         value: Bytestring whose encoding is to be detected.

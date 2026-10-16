@@ -41,10 +41,10 @@ BufferID: 'TypeAlias' = Tuple[_AT, int, _AT, int]
 
 @info_final
 class Packet(Info, Generic[_AT]):
-    """Data structure for **TCP flow tracing**.
+    """Data structure for a packet submitted to **TCP flow tracing**.
 
     See Also:
-        * :meth:`pcapkit.foundation.traceflow.TraceFlow.dump`
+        * :meth:`pcapkit.foundation.traceflow.traceflow.TraceFlow.dump`
         * :term:`trace.tcp.packet`
 
     """
@@ -95,10 +95,10 @@ class Packet(Info, Generic[_AT]):
 
 @info_final
 class Buffer(Info, Generic[_AT]):
-    """Data structure for **TCP flow tracing**.
+    """Data structure for a **TCP flow tracing** buffer.
 
     See Also:
-        * :attr:`pcapkit.foundation.traceflow.TraceFlow.index`
+        * :attr:`pcapkit.foundation.traceflow.traceflow.TraceFlow.index`
         * :term:`trace.tcp.buffer`
 
     """
@@ -149,10 +149,10 @@ class Buffer(Info, Generic[_AT]):
 
 @info_final
 class Index(DeferredPacket, Info):
-    """Data structure for **TCP flow tracing**.
+    """Data structure for a traced **TCP flow**, as an index entry.
 
     See Also:
-        * element from :attr:`pcapkit.foundation.traceflow.TraceFlow.index`
+        * element from :attr:`pcapkit.foundation.traceflow.traceflow.TraceFlow.index`
           *tuple*
         * :term:`trace.tcp.index`
 
@@ -180,15 +180,15 @@ class Index(DeferredPacket, Info):
     #: Empty when tracing unidirectionally, in which case
     #: :attr:`forward` ``==`` :attr:`index`.
     reverse: 'tuple[int, ...]'
-    #: The conversation's **application layer**: its reassembled datagrams, one
+    #: Reassembled datagrams of the conversation's **application layer**, one
     #: per direction and acknowledgement number, or :data:`None` when the tracer
     #: was not asked for it (``analyse=False``, the default).
     #:
     #: Reassembled on the first read, not when the flow is finalised, and each
     #: datagram's own
     #: :attr:`~pcapkit.foundation.reassembly.data.tcp.Datagram.packet` is parsed
-    #: later still -- two layers of the same postponement, so a caller that only
-    #: wanted frame numbers pays for neither.
+    #: later still -- the same postponement at each layer, so a caller that only
+    #: wanted frame numbers pays for none of it.
     packet: 'Optional[tuple[TCP_Datagram, ...]]'
 
     if TYPE_CHECKING:

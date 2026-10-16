@@ -5,7 +5,7 @@
 .. module:: pcapkit.dumpkit.pcap
 
 :mod:`pcapkit.dumpkit.pcap` is the dumper for :mod:`pcapkit` implementation,
-specifically for PCAP format, which is alike those described in
+specifically for PCAP format, like those described in
 :mod:`dictdumper`.
 
 """

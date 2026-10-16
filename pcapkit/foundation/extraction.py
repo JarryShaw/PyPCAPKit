@@ -10,7 +10,7 @@
 :class:`~pcapkit.foundation.extraction.Extractor` only,
 which synthesises file I/O and protocol analysis,
 coordinates information exchange in all network layers,
-extracts parameters from a PCAP file.
+and extracts parameters from a PCAP file.
 
 """
 import collections
@@ -65,13 +65,13 @@ if TYPE_CHECKING:
     from pcapkit.protocols.protocol import ProtocolBase
 
     #: Every key registered in :attr:`Extractor.__output__` and in
-    #: :attr:`TraceFlowBase.__output__
-    #: <pcapkit.foundation.traceflow.traceflow.TraceFlowBase.__output__>` -- the two
-    #: registries expose the same eight keys, so ``'cap'`` and the ``'txt'``/``'xml'``
+    #: :attr:`TraceFlow.__output__
+    #: <pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__>` -- both
+    #: registries expose the same keys, so ``'cap'`` and the ``'txt'``/``'xml'``
     #: aliases are spellable for a type checker as they are accepted at runtime.
     Formats = Literal['pcap', 'cap', 'json', 'tree', 'text', 'txt', 'plist', 'xml']
-    # NOTE: this alias is duplicated verbatim in ``pcapkit.interface.misc``; both
-    # copies need updating when a new engine lands. The duplication is left
+    # NOTE: this alias is duplicated verbatim in ``pcapkit.interface.misc``; each
+    # copy needs updating when a new engine lands. The duplication is left
     # as-is on purpose.
     Engines = Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark', 'pypcap', 'pcap_ct',
                       'pypcapfile']
@@ -229,16 +229,16 @@ class Extractor(Generic[_P]):
         #: Output format.
         _offmt: 'Formats'
 
-    #: List of potential PCAP file extentions.
+    #: List of potential PCAP file extensions.
     PCAP_EXT = ['.pcap', '.cap', '.pcapng']
 
     ##########################################################################
     # Defaults.
     ##########################################################################
 
-    #: Format dumper mapping for writing output files. The values should be a
-    #: tuple representing the module name and class name, or a
-    #: :class:`dictdumper.dumper.Dumper` subclass, and corresponding file extension.
+    #: Format dumper mapping for writing output files. Each value pairs the dumper,
+    #: as a module descriptor or a :class:`dictdumper.dumper.Dumper` subclass, with
+    #: the file extension of its format.
     __output__ = collections.defaultdict(
         lambda: (ModuleDescriptor('pcapkit.dumpkit', 'NotImplementedIO'), None),
         {
@@ -293,7 +293,7 @@ class Extractor(Generic[_P]):
         'tcp': ModuleDescriptor('pcapkit.foundation.traceflow.tcp', 'TCP'),
     }  # type: dict[str, ModuleDescriptor[TraceFlowBase] | Type[TraceFlowBase]]
 
-    # Read-only copies of the four registries as shipped. A public registrar
+    # Read-only copies of the registries as shipped. A public registrar
     # handed the built-in a name shipped with restores this entry, so an
     # override can be undone (:issue:`1363`).
     _shipped_output = types.MappingProxyType(dict(__output__))
@@ -428,8 +428,8 @@ class Extractor(Generic[_P]):
         r"""Register a new dumper class.
 
         Notes:
-            The full qualified class name of the new dumper class
-            should be as ``{dumper.module}.{dumper.name}``.
+            The fully qualified class name of the new dumper class
+            should be ``{dumper.module}.{dumper.name}``.
 
             The overwrite guard fires only when the incumbent dumper differs
             from the replacement, so re-registering the exact same object is
@@ -491,8 +491,8 @@ class Extractor(Generic[_P]):
         r"""Register a new extraction engine.
 
         Notes:
-            The full qualified class name of the new extraction engine
-            should be as ``{engine.module}.{engine.name}``.
+            The fully qualified class name of the new extraction engine
+            should be ``{engine.module}.{engine.name}``.
 
             The overwrite guard fires only when the incumbent differs from
             the replacement, so re-registering the exact same object is a
@@ -585,8 +585,8 @@ class Extractor(Generic[_P]):
         r"""Register a new reassembly engine.
 
         Notes:
-            The full qualified class name of the new reassembly engine
-            should be as ``{reassembly.module}.{reassembly.name}``.
+            The fully qualified class name of the new reassembly engine
+            should be ``{reassembly.module}.{reassembly.name}``.
 
             The overwrite guard fires only when the incumbent differs from
             the replacement, so re-registering the exact same object is a
@@ -671,8 +671,8 @@ class Extractor(Generic[_P]):
         r"""Register a new flow tracing engine.
 
         Notes:
-            The full qualified class name of the new flow tracing engine
-            should be as ``{traceflow.module}.{traceflow.name}``.
+            The fully qualified class name of the new flow tracing engine
+            should be ``{traceflow.module}.{traceflow.name}``.
 
             The overwrite guard fires only when the incumbent differs from
             the replacement, so re-registering the exact same object is a
@@ -938,7 +938,7 @@ class Extractor(Generic[_P]):
             Generated input and output filenames.
 
         Raises:
-            FileNotFound: If input file does not exists.
+            FileNotFound: If input file does not exist.
             FormatError: If no file extension is registered for ``fmt``.
 
         """
@@ -978,7 +978,8 @@ class Extractor(Generic[_P]):
             # bare -- ``Extractor._fext`` reaches the engines, which each
             # compose a per-frame name as ``f'{name}.{ext._fext}'``. Leaving the
             # dot on is what produced ``Frame 1..json`` (see #358), so
-            # normalise it away once, here, rather than at six call sites.
+            # normalise it away once, here, rather than in every engine that
+            # composes a per-frame name.
             ext = registered[1:] if registered.startswith('.') else registered
 
             if (parent := os.path.split(fout)[0]):
@@ -1196,7 +1197,7 @@ class Extractor(Generic[_P]):
                 engines ignore it.
 
         Warns:
-            pcapkit.utilities.warnings.FormatWarning: Warns under following circumstances:
+            pcapkit.utilities.warnings.FormatWarning: Warns under the following circumstances:
 
                 * If using PCAP output for TCP flow tracing while the extraction engine is
                   PyShark or PyPCAPFile.
@@ -1583,7 +1584,7 @@ class Extractor(Generic[_P]):
             all.
 
         Note:
-            The two :data:`True` cases are written as separate tests rather than
+            The :data:`True` cases are written as separate tests rather than
             folded together because they *can* in principle coincide -- a path
             naming something non-seekable would be opened here and then wrapped --
             and the answer has to be :data:`True` for both halves of it. That
@@ -1652,7 +1653,7 @@ class Extractor(Generic[_P]):
             **Not idempotent.** Each call consumes one end-of-stream observation
             by overwriting :attr:`_eof_mark`, so calling it twice for one end of
             stream spends the retry it would have granted. Call it exactly once
-            per handler, which is what the three call sites do.
+            per handler, which is what each call site does.
 
         Returns:
             :data:`True` when retrying may yet produce a frame -- this is the first
@@ -1684,7 +1685,7 @@ class Extractor(Generic[_P]):
         when it is done with it.
 
         It also tells the flow tracer the capture has ended, via
-        :meth:`TraceFlow.finish <pcapkit.foundation.traceflow.traceflow.TraceFlowBase.finish>`.
+        :meth:`TraceFlow.finish <pcapkit.foundation.traceflow.traceflow.TraceFlow.finish>`.
         That is the point at which a traced flow nothing has superseded can be
         said to be over, so it is where such a flow is finalised and its callbacks
         run. This method can run more than once for one extraction -- each call to

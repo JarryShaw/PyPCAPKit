@@ -5,7 +5,7 @@
 .. module:: pcapkit.dumpkit
 
 :mod:`pcapkit.dumpkit` is the collection of dumpers for
-:mod:`pcapkit` implementation, which is alike those described
+:mod:`pcapkit` implementation, like those described
 in :mod:`dictdumper`.
 
 """

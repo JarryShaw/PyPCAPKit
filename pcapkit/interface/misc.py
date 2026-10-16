@@ -37,16 +37,19 @@ if TYPE_CHECKING:
     ReassemblyAdapter = Callable[..., 'Optional[TCP_Data]']
 
     ByteOrder = Literal['little', 'big']
-    #: Every key registered in :attr:`Extractor.__output__
-    #: <pcapkit.foundation.extraction.Extractor.__output__>` and in
-    #: :attr:`TraceFlowBase.__output__
-    #: <pcapkit.foundation.traceflow.traceflow.TraceFlowBase.__output__>` -- the two
-    #: registries expose the same eight keys, which resolve to four dumpers (``'cap'`` to
-    #: ``'pcap'``, ``'xml'`` to ``'plist'``, ``'text'`` and ``'txt'`` to ``'tree'``), so the
-    #: ``Literal`` lists all eight for a type checker to accept every spelling the runtime does.
+    #: Every output format key the dumper registries ship with.
+    #:
+    #: The keys are those of :attr:`Extractor.__output__
+    #: <pcapkit.foundation.extraction.Extractor.__output__>` and of
+    #: :attr:`TraceFlow.__output__
+    #: <pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__>` -- both
+    #: registries expose the same keys, the aliases among them resolving to a shared
+    #: dumper (``'cap'`` to ``'pcap'``, ``'xml'`` to ``'plist'``, ``'text'`` and ``'txt'``
+    #: to ``'tree'``), so the ``Literal`` lists every key for a type checker to accept
+    #: every spelling the runtime does.
     Formats = Literal['pcap', 'cap', 'json', 'tree', 'text', 'txt', 'plist', 'xml']
     # NOTE: this alias duplicates the one in ``pcapkit.foundation.extraction``;
-    # both copies need updating when a new engine lands.
+    # each copy needs updating when a new engine lands.
     Engines = Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark', 'pypcap', 'pcap_ct',
                       'pypcapfile']
 
@@ -100,8 +103,8 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
             layer, so that ``Index.packet`` can be read off
             :attr:`Extractor.trace <pcapkit.foundation.extraction.Extractor.trace>`.
             Off by default, and independent of the ``conversations`` this
-            function returns -- those come from the reassembly below, which runs
-            either way.
+            function returns -- those come from the TCP reassembly this function
+            always runs.
 
     Returns:
         Tuple of extracted TCP streams.
@@ -148,7 +151,7 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
     exeng = extraction.engine
     tcp_reassembly = None  # type: Optional[ReassemblyAdapter]
     pass_count = True
-    #: Reads a frame's capture timestamp back off the frame, for the one adapter
+    #: Reads a frame's capture timestamp back off the frame, for an adapter
     #: whose signature takes it. :data:`None` for the adapters that find it
     #: themselves.
     timestamp_of = None  # type: Optional[Callable[[Any], float]]

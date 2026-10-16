@@ -454,22 +454,21 @@ def _tcp_carrier(packet: 'Packet') -> 'tuple[IP | IPv6, TCP, bytes, bytes] | Non
 def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Address] | None':
     """Make data for IPv4 reassembly.
 
+    A packet can be reassembled if it contains an IPv4 layer
+    (:class:`scapy.layers.inet.IP`) whose header -- as many octets as its IHL counts,
+    and at least 20 -- lies inside the frame and every IP datagram carrying it (see
+    :func:`_within_datagrams`), and the **DF** (:attr:`scapy.layers.inet.IP.flags.DF`)
+    flag is :data:`False`. A zero-length frame has none, though `Scapy`_ hands it back
+    as an IPv4 layer of defaults at the ``RAW`` and ``IPV4`` link types (see
+    :func:`_frame`).
+
     Args:
         packet: Scapy packet.
-        count: Packet index. If not provided, default to ``-1``.
+        count: Packet index. If not provided, defaults to ``-1``.
 
     Returns:
-        Data for IPv4 reassembly.
-
-        * If the ``packet`` can be used for IPv4 reassembly. A packet can be reassembled
-          if it contains IPv4 layer (:class:`scapy.layers.inet.IP`) whose header -- as
-          many octets as its IHL counts, and at least 20 -- lies inside the frame and
-          every IP datagram carrying it (see :func:`_within_datagrams`), and the **DF**
-          (:attr:`scapy.layers.inet.IP.flags.DF`) flag is :data:`False`. A zero-length
-          frame has none, though `Scapy`_ hands it back as an IPv4 layer of defaults at
-          the ``RAW`` and ``IPV4`` link types (see :func:`_frame`).
-        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv4
-          reassembly (:term:`reasm.ipv4.packet`) will be returned; otherwise, returns :data:`None`.
+        Data for IPv4 reassembly (:term:`reasm.ipv4.packet`) if the ``packet`` can be
+        reassembled; otherwise :data:`None`.
 
     See Also:
         :class:`pcapkit.foundation.reassembly.ipv4.IPv4`
@@ -526,20 +525,19 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
 def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Address] | None':
     """Make data for IPv6 reassembly.
 
+    A packet can be reassembled if it contains an IPv6 layer
+    (:class:`scapy.layers.inet6.IPv6`), in no later IPv4 fragment, and an IPv6 Fragment
+    header (:rfc:`2460#section-4.5`, i.e.,
+    :class:`scapy.layers.inet6.IPv6ExtHdrFragment`) among the extension headers `Scapy`_
+    dissects in that layer's own chain.
+
     Args:
         packet: Scapy packet.
-        count: Packet index. If not provided, default to ``-1``.
+        count: Packet index. If not provided, defaults to ``-1``.
 
     Returns:
-        Data for IPv6 reassembly.
-
-        * If the ``packet`` can be used for IPv6 reassembly. A packet can be reassembled
-          if it contains IPv6 layer (:class:`scapy.layers.inet6.IPv6`), in no later IPv4
-          fragment, and IPv6 Fragment header (:rfc:`2460#section-4.5`, i.e.,
-          :class:`scapy.layers.inet6.IPv6ExtHdrFragment`) among the extension headers
-          `Scapy`_ dissects in that layer's own chain.
-        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv6
-          reassembly (:term:`reasm.ipv6.packet`) will be returned; otherwise, returns :data:`None`.
+        Data for IPv6 reassembly (:term:`reasm.ipv6.packet`) if the ``packet`` can be
+        reassembled; otherwise :data:`None`.
 
     Raises:
         ModuleNotFound: If `Scapy`_ is not installed.
@@ -613,23 +611,22 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
 
 
 def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None':
-    """Store data for TCP reassembly.
+    """Make data for TCP reassembly.
+
+    A packet can be reassembled if it contains a TCP layer
+    (:class:`scapy.layers.inet.TCP`) whose fixed header lies inside its datagram, and
+    whose Data Offset counts at least that header, in no later IPv4 fragment; or a TCP
+    segment behind an AH or IPv6 extension header in IPv4, read off the octets. It is
+    keyed by the IP layer that carries it -- in an IP-in-IP tunnel, the innermost (see
+    :func:`_tcp_carrier`).
 
     Args:
         packet: Scapy packet.
-        count: Packet index. If not provided, default to ``-1``.
+        count: Packet index. If not provided, defaults to ``-1``.
 
     Returns:
-        Data for TCP reassembly.
-
-        * If the ``packet`` can be used for TCP reassembly. A packet can be reassembled
-          if it contains TCP layer (:class:`scapy.layers.inet.TCP`) whose fixed header
-          lies inside its datagram, and whose Data Offset counts at least that header,
-          in no later IPv4 fragment; or a TCP segment behind an AH or IPv6 extension
-          header in IPv4, read off the octets. It is keyed by the IP layer that carries
-          it -- in an IP-in-IP tunnel, the innermost (see :func:`_tcp_carrier`).
-        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
-          reassembly (:term:`reasm.tcp.packet`) will be returned; otherwise, returns :data:`None`.
+        Data for TCP reassembly (:term:`reasm.tcp.packet`) if the ``packet`` can be
+        reassembled; otherwise :data:`None`.
 
     See Also:
         :class:`pcapkit.foundation.reassembly.tcp.TCP`
@@ -666,18 +663,16 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
 def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | None':
     """Trace packet flow for TCP.
 
+    A packet can be traced if it contains a TCP layer (:class:`scapy.layers.inet.TCP`),
+    on the terms :func:`tcp_reassembly` sets.
+
     Args:
         packet: Scapy packet.
-        count: Packet index. If not provided, default to ``-1``.
+        count: Packet index. If not provided, defaults to ``-1``.
 
     Returns:
-        Data for TCP flow tracing.
-
-        * If the ``packet`` can be used for TCP flow tracing. A packet can be traced
-          if it contains TCP layer (:class:`scapy.layers.inet.TCP`), on the terms
-          :func:`tcp_reassembly` sets.
-        * If the ``packet`` can be traced, then the :obj:`dict` mapping of data for TCP
-          flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.
+        Data for TCP flow tracing (:term:`trace.tcp.packet`) if the ``packet`` can be
+        traced; otherwise :data:`None`.
 
     See Also:
         :class:`pcapkit.foundation.traceflow.tcp.TCP`

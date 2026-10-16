@@ -25,11 +25,11 @@
 
 .. seealso::
 
-   :mod:`pcapkit.toolkit.pypcap` is the same adapter for upstream `PyPCAP`_. The
-   two are kept apart because the engines are: the distributions are independent
-   projects that happen to share the :mod:`pcap` module name, and each engine
-   names its own adapter so that a change made for one cannot quietly alter the
-   other.
+   :mod:`pcapkit.toolkit.pypcap` is the same adapter for upstream `PyPCAP`_,
+   kept apart from this module because the engines are: the distributions are
+   independent projects that happen to share the :mod:`pcap` module name, and
+   each engine names its own adapter so that a change made for one cannot
+   quietly alter the other.
 
 .. _PyPCAP: https://github.com/pynetwork/pypcap
 
@@ -87,7 +87,7 @@ def packet2dict(packet: 'bytes', timestamp: 'float', *,
         data_link: Data link type, from the capture handle.
 
     Returns:
-        Dict[str, Any]: A :obj:`dict` mapping of packet data.
+        A :obj:`dict` mapping of packet data.
 
     Note:
         The mapping carries the captured bytes verbatim rather than a decoded
@@ -111,7 +111,7 @@ def ipv4_reassembly(packet: 'bytes', *, count: 'int' = -1) -> 'IP_Packet[IPv4Add
 
     Args:
         packet: Raw packet bytes.
-        count: Packet index. If not provided, default to ``-1``.
+        count: Packet index. If not provided, defaults to ``-1``.
 
     Raises:
         UnsupportedCall: Always, as `pcap-ct`_ provides no IPv4 layer to read.
@@ -127,7 +127,7 @@ def ipv6_reassembly(packet: 'bytes', *, count: 'int' = -1) -> 'IP_Packet[IPv6Add
 
     Args:
         packet: Raw packet bytes.
-        count: Packet index. If not provided, default to ``-1``.
+        count: Packet index. If not provided, defaults to ``-1``.
 
     Raises:
         UnsupportedCall: Always, as `pcap-ct`_ provides no IPv6 layer to read.
@@ -143,7 +143,7 @@ def tcp_reassembly(packet: 'bytes', *, count: 'int' = -1) -> 'TCP_Packet | None'
 
     Args:
         packet: Raw packet bytes.
-        count: Packet index. If not provided, default to ``-1``.
+        count: Packet index. If not provided, defaults to ``-1``.
 
     Raises:
         UnsupportedCall: Always, as `pcap-ct`_ provides no TCP layer to read.
@@ -162,7 +162,7 @@ def tcp_traceflow(packet: 'bytes', timestamp: 'float', *, data_link: 'Enum_LinkT
         packet: Raw packet bytes.
         timestamp: Timestamp of the packet.
         data_link: Data link layer protocol (from the capture handle).
-        count: Packet index. If not provided, default to ``-1``.
+        count: Packet index. If not provided, defaults to ``-1``.
 
     Raises:
         UnsupportedCall: Always, as `pcap-ct`_ provides no TCP layer to read.

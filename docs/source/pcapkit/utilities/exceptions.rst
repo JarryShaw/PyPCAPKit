@@ -12,7 +12,7 @@ Loud and Quiet Errors
 
 Raising a :class:`~pcapkit.utilities.exceptions.BaseError` is, by default, a
 **loud** act: the error is logged once at :data:`logging.CRITICAL` on the
-:data:`~pcapkit.utilities.logging.logger` logger, and outside development mode
+``pcapkit`` logger (:data:`~pcapkit.utilities.logging.logger`), and outside development mode
 an exception hook is installed on :data:`sys.excepthook` and
 :data:`threading.excepthook`, the first time a loud error needs it, so the user
 sees the exception line rather than a walk through :mod:`pcapkit`'s internals.

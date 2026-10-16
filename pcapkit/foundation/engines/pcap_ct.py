@@ -61,16 +61,16 @@ class PCAP_CT(EngineBase['RawFrame']):
 
        It does still need a **system** :manpage:`libpcap(3)` at *run* time, and
        this is easy to get wrong: `libpcap`_ ships a vendored
-       :file:`libpcap.so` under :file:`_platform/{linux,macos,windows}/` but does
+       :file:`libpcap.so` under ``_platform/{linux,macos,windows}/`` but does
        **not** use it by default. Its :file:`libpcap.cfg` reads ``LIBPCAP = None``
        as published, which sends its loader to
        :func:`ctypes.util.find_library`, so the library actually mapped is the
-       host's ``libpcap.so.1``. Measured on this host: the same
+       host's ``libpcap.so.1``. Measured on one Linux host: the same
        ``libpcap`` 1.11.0b29 wheel loaded ``/usr/lib64/libpcap.so.1.5.3`` under one
        interpreter and linuxbrew's 1.11.0 under another, purely because their
        loader search paths differ.
 
-       Two consequences. With no system :manpage:`libpcap(3)` at all,
+       This has consequences. With no system :manpage:`libpcap(3)` at all,
        ``import pcap`` raises :exc:`OSError` -- not :exc:`ImportError` -- which
        :meth:`unsupported_reason` exists partly to catch. And the
        :manpage:`libpcap(3)` *version* in play is a property of the host rather
@@ -183,7 +183,7 @@ class PCAP_CT(EngineBase['RawFrame']):
         """Why this engine cannot run here, or :data:`None` when it can.
 
         Consulted by :meth:`pcapkit.foundation.extraction.Extractor.run` *before*
-        the import test, and it answers two questions the import test cannot.
+        the import test, and it answers questions the import test cannot.
 
         **Which distribution owns** :mod:`pcap`. Upstream `PyPCAP`_ owns that name
         just as legitimately, and ``import pcap._pcap`` -- what
@@ -214,7 +214,7 @@ class PCAP_CT(EngineBase['RawFrame']):
         which the import test then reports correctly on its own.
 
         Returns:
-            A phrase naming the real cause, or :data:`None`. An :mod:`pcap` that is
+            A phrase naming the real cause, or :data:`None`. A :mod:`pcap` that is
             merely absent returns :data:`None`, since the import test reports that
             case in its own words.
 
@@ -238,7 +238,7 @@ class PCAP_CT(EngineBase['RawFrame']):
     def backend(self) -> 'str':
         """The distribution, version and location this engine is driving.
 
-        Two distributions provide :mod:`pcap`, so "the pcap-ct engine failed" is
+        More than one distribution provides :mod:`pcap`, so "the pcap-ct engine failed" is
         not a complete statement of what ran. This says which one it was, e.g.
         ``pcap-ct 1.3.0b3 (/.../pcap/__init__.py)``.
 
@@ -314,7 +314,7 @@ class PCAP_CT(EngineBase['RawFrame']):
         <PCAP_CT._extmp>` as an iterator over it.
 
         Warns:
-            AttributeWarning: Warns under following circumstances:
+            AttributeWarning: Warns under the following circumstances:
 
                 * if :attr:`self.extractor._exlyr <pcapkit.foundation.extraction.Extractor._exlyr>`
                   and/or :attr:`self.extractor._exptl <pcapkit.foundation.extraction.Extractor._exptl>`
@@ -341,9 +341,9 @@ class PCAP_CT(EngineBase['RawFrame']):
             :file:`examples/captures/dhcp.pcapng`:
 
             * against libpcap **1.11.0** it reads correctly, yielding the same
-              four frames and the same sub-second timestamps as
+              frames and the same sub-second timestamps as
               :class:`~pcapkit.foundation.engines.pcapng.PCAPNG`;
-            * against libpcap **1.5.3** it yields the four frames but with
+            * against libpcap **1.5.3** it yields the same frames but with
               nonsense sub-second timestamps -- ``1102274184.0000002`` and the
               like -- silently, with no error.
 

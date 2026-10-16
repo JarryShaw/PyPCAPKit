@@ -83,13 +83,14 @@ class RecordTimestamp:
     :func:`packet2frame`. The engine's readers yield a :class:`Timestamp` or a
     :class:`DecimalTimestamp` instead, which *is* the value `DPKT`_ yields --
     so a stored frame's timestamp is exactly what it was before -- and also
-    carries those three. Reassembly and flow tracing are handed a plain
+    carries what would otherwise be lost. Reassembly and flow tracing are handed a plain
     :obj:`float` of it (:issue:`1501`): of its exact value, since `DPKT`_'s
     own for a microsecond PCAP rounds twice (:issue:`1668`; see
     :func:`_capture_time`).
 
     A copy, a deep copy and a pickle at any protocol all rebuild a timestamp
-    from what its :meth:`~object.__reduce__` returns, so all keep the three.
+    from what its :meth:`~object.__reduce__` returns, so each keeps the exact
+    timestamp, the resolution and the original length.
     This class answers each of those protocols itself, ahead of the numeric base
     class: the pure-Python :class:`~decimal.Decimal` copies a subclass as
     ``type(self)(str(self))``, with the constructor's defaults for the rest
@@ -201,7 +202,11 @@ def packet2timestamp(packet: 'Packet') -> 'float':
             :class:`~pcapkit.foundation.engines.dpkt.DPKT`.
 
     Returns:
-        Capture timestamp of the packet, in seconds since the epoch.
+        Capture timestamp of the packet, in seconds since the epoch. As
+        :class:`~pcapkit.foundation.engines.dpkt.DPKT` attaches it, that is a
+        :class:`Timestamp`, or for a nanosecond PCAP file a
+        :class:`DecimalTimestamp`, which is a :class:`~decimal.Decimal`
+        subclass rather than a :obj:`float`.
 
     Raises:
         UnsupportedCall: If the packet carries no timestamp, i.e. it did not come
@@ -486,7 +491,7 @@ def ipv6_hdr_len(ipv6: 'IP6') -> 'int':
     Routing header :class:`dpkt.ip6.IP6RoutingHeader` (:rfc:`2460#section-4.4`). An
     Authentication header (:rfc:`4302`) reaches here as well, though, so the headers are
     walked in the order they were parsed rather than looked up by a fixed list of types.
-    Walking them is also what counts a header type occurring twice twice, and what leaves
+    Walking them is also what counts a repeated header type once per occurrence, and what leaves
     out one that sits *after* the Fragment header rather than before it.
 
     """
@@ -528,9 +533,9 @@ def packet2dict(packet: 'Packet', timestamp: 'float', *,
         data_link: Data link type.
 
     Returns:
-        Dict[str, Any]: A :obj:`dict` mapping of packet data. A layer's payload
-        is mapped as a layer of its own only where it is one, i.e. has the
-        header fields a :class:`dpkt.dpkt.Packet` has; any other is leaf data.
+        A :obj:`dict` mapping of packet data. A layer's payload is mapped as a
+        layer of its own only where it is one, i.e. has the header fields a
+        :class:`dpkt.dpkt.Packet` has; any other is leaf data.
         `DPKT`_ leaves some undecoded payloads as a :obj:`str` rather than as
         :obj:`bytes`, e.g. ``''`` for VRRP's. A frame the engine keeps as raw
         data, as it keeps one `DPKT`_ cannot decode, has no header fields, so
@@ -559,6 +564,10 @@ def ipv4_reassembly(packet: 'Packet', timestamp: 'float', *,
                     count: 'int' = -1) -> 'IP_Packet[IPv4Address] | None':
     """Make data for IPv4 reassembly.
 
+    A packet can be reassembled if its network layer is IPv4 (:class:`dpkt.ip.IP`) --
+    one carried in IPv6 is not read -- whose header was captured whole, and the **DF**
+    (:attr:`dpkt.ip.IP.df`) flag is :data:`False`.
+
     Args:
         packet: DPKT packet.
         timestamp: Capture timestamp of the packet, which drives the reassembly
@@ -572,17 +581,11 @@ def ipv4_reassembly(packet: 'Packet', timestamp: 'float', *,
             and as the one nearest the exact value it carries, if any, where
             `DPKT`_'s own may be an ulp off (:issue:`1668`; see
             :func:`_capture_time`).
-        count: Packet index. If not provided, default to ``-1``.
+        count: Packet index. If not provided, defaults to ``-1``.
 
     Returns:
-        Data for IPv4 reassembly.
-
-        * If the ``packet`` can be used for IPv4 reassembly. A packet can be reassembled
-          if its network layer is IPv4 (:class:`dpkt.ip.IP`) -- one carried in IPv6 is not
-          read -- whose header was captured whole, and the **DF** (:attr:`dpkt.ip.IP.df`)
-          flag is :data:`False`.
-        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv4
-          reassembly (:term:`reasm.ipv4.packet`) will be returned; otherwise, returns :data:`None`.
+        Data for IPv4 reassembly (:term:`reasm.ipv4.packet`) if the ``packet`` can be
+        reassembled; otherwise :data:`None`.
 
     Note:
         The header and payload are sliced out of the record octets
@@ -656,22 +659,20 @@ def ipv6_reassembly(packet: 'Packet', timestamp: 'float', *,
                     count: 'int' = -1) -> 'IP_Packet[IPv6Address] | None':
     """Make data for IPv6 reassembly.
 
+    A packet can be reassembled if its network layer is IPv6 (:class:`dpkt.ip6.IP6`) --
+    one carried in IPv4 is not read -- and has an IPv6 Fragment header
+    (:rfc:`2460#section-4.5`, i.e., :class:`dpkt.ip6.IP6FragmentHeader`).
+
     Args:
         packet: DPKT packet.
         timestamp: Capture timestamp of the packet, which drives the reassembly
             timeout; :func:`packet2timestamp` reads it back off a stored frame.
             Handed on as a :obj:`float`, as for :func:`ipv4_reassembly`.
-        count: Packet index. If not provided, default to ``-1``.
+        count: Packet index. If not provided, defaults to ``-1``.
 
     Returns:
-        Data for IPv6 reassembly.
-
-        * If the ``packet`` can be used for IPv6 reassembly. A packet can be reassembled
-          if its network layer is IPv6 (:class:`dpkt.ip6.IP6`) -- one carried in IPv4 is not
-          read -- and has IPv6 Fragment header (:rfc:`2460#section-4.5`, i.e.,
-          :class:`dpkt.ip6.IP6FragmentHeader`).
-        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv6
-          reassembly (:term:`reasm.ipv6.packet`) will be returned; otherwise, returns :data:`None`.
+        Data for IPv6 reassembly (:term:`reasm.ipv6.packet`) if the ``packet`` can be
+        reassembled; otherwise :data:`None`.
 
     Note:
         The header and payload are sliced out of the record octets
@@ -770,22 +771,21 @@ def tcp_reassembly(packet: 'Packet', timestamp: 'float', *,
                    count: 'int' = -1) -> 'TCP_Packet | None':
     """Make data for TCP reassembly.
 
+    A packet can be reassembled if its network layer carries a TCP layer
+    (:class:`dpkt.tcp.TCP`), behind any IPv6 extension headers :mod:`dpkt` decodes. TCP
+    in an IP-in-IP tunnel, or behind an AH or IPv6 extension header carried in IPv4, is
+    not read.
+
     Args:
         packet: DPKT packet.
         timestamp: Capture timestamp of the packet, which drives the reassembly
             timeout; :func:`packet2timestamp` reads it back off a stored frame.
             Handed on as a :obj:`float`, as for :func:`ipv4_reassembly`.
-        count: Packet index. If not provided, default to ``-1``.
+        count: Packet index. If not provided, defaults to ``-1``.
 
     Returns:
-        Data for TCP reassembly.
-
-        * If the ``packet`` can be used for TCP reassembly. A packet can be reassembled
-          if its network layer carries TCP layer (:class:`dpkt.tcp.TCP`), behind any IPv6
-          extension headers :mod:`dpkt` decodes. TCP in an IP-in-IP tunnel, or behind an AH or
-          IPv6 extension header carried in IPv4, is not read.
-        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
-          reassembly (:term:`reasm.tcp.packet`) will be returned; otherwise, returns :data:`None`.
+        Data for TCP reassembly (:term:`reasm.tcp.packet`) if the ``packet`` can be
+        reassembled; otherwise :data:`None`.
 
     Note:
         The header and payload are sliced out of the record octets
@@ -847,6 +847,11 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
                   data_link: 'Enum_LinkType', count: 'int' = -1) -> 'TF_TCP_Packet | None':
     """Trace packet flow for TCP.
 
+    A packet can be traced if its network layer carries a TCP layer
+    (:class:`dpkt.tcp.TCP`), behind any IPv6 extension headers :mod:`dpkt` decodes. TCP
+    in an IP-in-IP tunnel, or behind an AH or IPv6 extension header carried in IPv4, is
+    not read.
+
     Args:
         packet: DPKT packet.
         timestamp: Timestamp of the packet, handed on as a :obj:`float`, as for
@@ -854,17 +859,11 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
             exact timestamp attached by :func:`attach_timestamp`, if any; see
             :func:`packet2frame`.
         data_link: Data link layer protocol (from global header).
-        count: Packet index. If not provided, default to ``-1``.
+        count: Packet index. If not provided, defaults to ``-1``.
 
     Returns:
-        Data for TCP flow tracing.
-
-        * If the ``packet`` can be used for TCP flow tracing. A packet can be traced
-          if its network layer carries TCP layer (:class:`dpkt.tcp.TCP`), behind any IPv6
-          extension headers :mod:`dpkt` decodes. TCP in an IP-in-IP tunnel, or behind an AH or
-          IPv6 extension header carried in IPv4, is not read.
-        * If the ``packet`` can be traced, then the :obj:`dict` mapping of data for TCP
-          flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.
+        Data for TCP flow tracing (:term:`trace.tcp.packet`) if the ``packet`` can be
+        traced; otherwise :data:`None`.
 
     Note:
         The header and payload are sliced out of the record octets

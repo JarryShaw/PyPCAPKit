@@ -141,7 +141,7 @@ class PCAP(EngineBase[Frame]):
     def read_frame(self) -> 'Frame':
         """Read frames.
 
-        This method performs following operations:
+        This method performs the following operations:
 
         - extract frames and each layer of packets;
         - make :class:`~pcapkit.corekit.infoclass.Info` object out of frame properties;

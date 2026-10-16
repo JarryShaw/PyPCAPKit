@@ -16,6 +16,7 @@ origin. Please refer to :doc:`ip` for more information.
    .. autoattribute:: __protocol_type__
    .. autoattribute:: __callback_fn__
       :no-value:
+   .. autoattribute:: __timeout__
 
 Terminology
 -----------
@@ -25,7 +26,7 @@ Terminology
    reasm.ipv6.packet
        Data structure for **IPv6 datagram reassembly**
        (:meth:`IPv6.reassembly <pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly>`)
-       is as following, with ``ipv6_info`` the IPv6
+       is as follows, with ``ipv6_info`` the IPv6
        :attr:`~pcapkit.protocols.protocol.Protocol.info` and
        ``ipv6_frag_info`` the Fragment header's:
 
@@ -61,7 +62,7 @@ Terminology
           does count it -- it is a header length, and the Fragment header is one
           of the extension headers it has walked -- so the ``pcap`` and
           ``pcapng`` adapters subtract it back off. The ``dpkt`` and ``scapy``
-          adapters leave it out of the three fields too, but as best effort,
+          adapters leave it out of those fields too, but as best effort,
           not as a contract (:issue:`1687`).
 
        .. note::
@@ -86,7 +87,7 @@ Terminology
    reasm.ipv6.datagram
        Data structure for **reassembled IPv6 datagram** (element from
        :attr:`IPv6.datagram <pcapkit.foundation.reassembly.reassembly.Reassembly.datagram>`
-       *tuple*) is as following:
+       *tuple*) is as follows:
 
        .. code-block:: text
 
@@ -151,18 +152,20 @@ Terminology
 
           ``completed`` and ``conflict`` are independent signals: a datagram
           can be :attr:`~pcapkit.foundation.reassembly.data.data.Completion.COMPLETE`
-          and still carry a non-empty ``conflict``. :rfc:`791` resolves an
-          overlapping fragment's disagreement itself -- "this procedure will
-          use the more recently arrived copy in the data buffer" -- the
-          opposite resolution from TCP's first-write-wins
-          (:rfc:`9293#section-3.10`) -- so a contested
-          range never leaves a hole on its own, and ``conflict`` is what lets
-          a caller tell a clean datagram from a contested one.
+          and still carry a non-empty ``conflict``. IPv6 reassembly shares
+          IPv4's resolution of an overlapping fragment's disagreement, the one
+          :rfc:`791` gives -- "this procedure will use the more recently
+          arrived copy in the data buffer" -- the opposite resolution from
+          TCP's first-write-wins (:rfc:`9293#section-3.10`), rather than
+          abandoning the datagram as :rfc:`8200#section-4.5` has a receiving
+          node do. So a contested range never leaves a hole on its own, and
+          ``conflict`` is what lets a caller tell a clean datagram from a
+          contested one.
 
    reasm.ipv6.buffer
        Data structure for internal buffering when performing reassembly algorithms
        (:attr:`IPv6._buffer <pcapkit.foundation.reassembly.reassembly.Reassembly._buffer>`)
-       is as following:
+       is as follows:
 
        .. code-block:: text
 
