@@ -19,11 +19,6 @@ It has a module of its own, apart from
 *different* registry indices, ``0x88A8`` against ``0x8100``; see
 :mod:`pcapkit.protocols.link.vlan` for the rule.
 
-.. note::
-
-   802.1ad is part of IEEE 802.1Q-2011. The ``802.1ad`` name is kept because it
-   is what the provider-bridging tag is universally called.
-
 .. autoclass:: pcapkit.protocols.link.s_tag.S_Tag
    :no-members:
    :show-inheritance:

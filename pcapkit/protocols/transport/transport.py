@@ -6,7 +6,7 @@
 
 :mod:`pcapkit.protocols.transport.transport` contains
 :class:`~pcapkit.protocols.transport.transport.Transport`,
-which is a base class for transport layer protocols, eg.
+which is a base class for transport layer protocols, e.g.
 :class:`~pcapkit.protocols.transport.tcp.TCP`,
 :class:`~pcapkit.protocols.transport.udp.UDP` and
 :class:`~pcapkit.protocols.transport.sctp.SCTP`.
@@ -73,8 +73,8 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
         """Register a new protocol class.
 
         Notes:
-            The full qualified class name of the new protocol class
-            should be as ``{protocol.module}.{protocol.name}``.
+            The fully qualified class name of the new protocol class
+            should be ``{protocol.module}.{protocol.name}``.
 
         Arguments:
             code: port number
@@ -101,14 +101,15 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
                 :meth:`ProtocolBase.register
                 <pcapkit.protocols.protocol.Protocol.register>` for the
                 guard this shares with ``register_protocol``, and for the
-                shipped descriptor a restore puts back (:issue:`1504`).
+                shipped descriptor that a restore puts back (:issue:`1504`).
 
         Note:
             :class:`~pcapkit.protocols.transport.tcp.TCP` and
             :class:`~pcapkit.protocols.transport.udp.UDP` each define their own
             ``__proto__`` rather than sharing one on :class:`Transport`.
-            ``register_apptype`` reaches this method once per protocol and
-            inspects two different registries, so it cannot warn spuriously.
+            ``register_apptype`` reaches this method once per transport
+            protocol, each time on that protocol's own registry, so it cannot
+            warn spuriously.
 
         .. versionchanged:: 1.3.0
 

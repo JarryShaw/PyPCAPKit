@@ -318,11 +318,6 @@ Type Stubs
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.transport.tcp.Flags
-   :no-index:
-   :members:
-   :show-inheritance:
-
 .. autoclass:: pcapkit.protocols.schema.transport.tcp.POCProfile
    :members:
    :show-inheritance:

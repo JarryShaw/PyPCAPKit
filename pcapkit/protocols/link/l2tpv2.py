@@ -21,17 +21,17 @@ nibble reading ``2``. Its structure is described as below:
    ------- ----- --------------------- ------------------------------------------
     0          1 ``l2tp.flags.len``    Length
    ------- ----- --------------------- ------------------------------------------
-    0          2                       Reserved (must be zero ``x00``)
+    0          2                       Reserved (must be zero)
    ------- ----- --------------------- ------------------------------------------
     0          4 ``l2tp.flags.seq``    Sequence
    ------- ----- --------------------- ------------------------------------------
-    0          5                       Reserved (must be zero ``x00``)
+    0          5                       Reserved (must be zero)
    ------- ----- --------------------- ------------------------------------------
     0          6 ``l2tp.flags.offset`` Offset
    ------- ----- --------------------- ------------------------------------------
     0          7 ``l2tp.flags.prio``   Priority
    ------- ----- --------------------- ------------------------------------------
-    1          8                       Reserved (must be zero ``x00``)
+    1          8                       Reserved (must be zero)
    ------- ----- --------------------- ------------------------------------------
     1         12 ``l2tp.version``      Version (``2``)
    ------- ----- --------------------- ------------------------------------------
@@ -106,8 +106,8 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
         ``L2TPv3`` class rather than on this one. Binding *this* class there does
         not work (:issue:`548`): over IP the v3 session header carries no
         version nibble at all, so this class cannot recognise that the datagram
-        is not its own. See
-        :class:`~pcapkit.protocols.link.l2tp.L2TP` for the measurement.
+        is not its own. See :mod:`pcapkit.protocols.link.l2tp` for the
+        versions not implemented.
 
         The class subclasses :class:`~pcapkit.protocols.link.link.Link` and so
         reports ``layer == 'Link'`` even though it is carried inside UDP: a

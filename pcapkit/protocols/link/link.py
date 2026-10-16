@@ -11,9 +11,8 @@ which is a base class for link layer protocols, e.g.
 :class:`~pcapkit.protocols.link.arp.ARP`/:class:`~pcapkit.protocols.link.arp.InARP`,
 :class:`~pcapkit.protocols.link.ethernet.Ethernet`,
 :class:`~pcapkit.protocols.link.l2tp.L2TP`,
-:class:`~pcapkit.protocols.link.loopback.Loopback`,
-:class:`~pcapkit.protocols.link.vlan.VLAN`
-and etc.
+:class:`~pcapkit.protocols.link.loopback.Loopback` and
+:class:`~pcapkit.protocols.link.vlan.VLAN`.
 
 """
 import collections
@@ -117,8 +116,8 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
         r"""Register a new protocol class.
 
         Notes:
-            The full qualified class name of the new protocol class
-            should be as ``{protocol.module}.{protocol.name}``.
+            The fully qualified class name of the new protocol class
+            should be ``{protocol.module}.{protocol.name}``.
 
         Arguments:
             code: protocol code as in :class:`~pcapkit.const.reg.ethertype.EtherType`
@@ -137,7 +136,7 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
                 :meth:`ProtocolBase.register
                 <pcapkit.protocols.protocol.Protocol.register>` for the
                 guard this shares with ``register_protocol``, and for the
-                shipped descriptor a restore puts back (:issue:`1504`).
+                shipped descriptor that a restore puts back (:issue:`1504`).
 
         .. versionchanged:: 1.3.0
 

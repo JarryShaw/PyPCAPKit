@@ -82,7 +82,7 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         cwr: int
         #: ECN-Echo.
         ece: int
-        #: Urgent pointer.
+        #: Urgent.
         urg: int
         #: Acknowledgment.
         ack: int
@@ -234,6 +234,10 @@ def mptcp_data_selector(pkt: 'dict[str, Any]') -> 'Field':
         :class:`~pcapkit.protocols.schema.transport.tcp.MPTCP` subclass
         instance.
 
+    Raises:
+        FieldError: If an MP_JOIN option is carried by a segment with
+            neither SYN nor ACK set.
+
     """
     subtype = Enum_MPTCPOption.get(pkt['test']['subtype'])
     pkt['test']['subtype'] = subtype
@@ -258,10 +262,13 @@ def mptcp_add_address_selector(pkt: 'dict[str, Any]') -> 'Field':
         pkt: Packet data.
 
     Returns:
-        * If the option length is one of the IPv4 lengths, a
-          :class:`~pcapkit.corekit.fields.ipaddress.IPv4AddressField` instance.
-        * If the option length is one of the IPv6 lengths, a
-          :class:`~pcapkit.corekit.fields.ipaddress.IPv6AddressField` instance.
+        An :class:`~pcapkit.corekit.fields.ipaddress.IPv4AddressField` instance
+        if the option length is one of the IPv4 lengths, or an
+        :class:`~pcapkit.corekit.fields.ipaddress.IPv6AddressField` instance if
+        it is one of the IPv6 lengths.
+
+    Raises:
+        FieldError: If the option length is neither.
 
     Note:
         :rfc:`8684` section 3.4.1 figure 12 has no IP version field: the
@@ -313,12 +320,11 @@ def mptcp_dss_ack_selector(pkt: 'dict[str, Any]') -> 'Field':
         pkt: Packet data.
 
     Returns:
-        * If ``A`` is clear, a :class:`~pcapkit.corekit.fields.misc.NoValueField`
-          instance -- the field is absent from the wire.
-        * If ``A`` is set and ``a`` is set, a
-          :class:`~pcapkit.corekit.fields.numbers.UInt64Field` instance.
-        * If ``A`` is set and ``a`` is clear, a
-          :class:`~pcapkit.corekit.fields.numbers.UInt32Field` instance.
+        A :class:`~pcapkit.corekit.fields.misc.NoValueField` instance if ``A``
+        is clear, since the field is then absent from the wire; otherwise a
+        :class:`~pcapkit.corekit.fields.numbers.UInt64Field` instance if ``a``
+        is set, or a :class:`~pcapkit.corekit.fields.numbers.UInt32Field`
+        instance if it is clear.
 
     Note:
         This is a :class:`~pcapkit.corekit.fields.misc.SwitchField` selector
@@ -367,12 +373,11 @@ def mptcp_dss_dsn_selector(pkt: 'dict[str, Any]') -> 'Field':
         pkt: Packet data.
 
     Returns:
-        * If ``M`` is clear, a :class:`~pcapkit.corekit.fields.misc.NoValueField`
-          instance -- the field is absent from the wire.
-        * If ``M`` is set and ``m`` is set, a
-          :class:`~pcapkit.corekit.fields.numbers.UInt64Field` instance.
-        * If ``M`` is set and ``m`` is clear, a
-          :class:`~pcapkit.corekit.fields.numbers.UInt32Field` instance.
+        A :class:`~pcapkit.corekit.fields.misc.NoValueField` instance if ``M``
+        is clear, since the field is then absent from the wire; otherwise a
+        :class:`~pcapkit.corekit.fields.numbers.UInt64Field` instance if ``m``
+        is set, or a :class:`~pcapkit.corekit.fields.numbers.UInt32Field`
+        instance if it is clear.
 
     Note:
         Identical in shape to :func:`mptcp_dss_ack_selector`; see that function's
@@ -774,9 +779,9 @@ class MPTCP(EnumSchema[Enum_MPTCPOption]):
     #: MPTCP length.
     length: 'int' = UInt8Field()
 
-    # NOTE: ``subtype`` stays an annotation rather than becoming a third real
-    # field alongside ``kind``/``length`` above -- deliberately, and the
-    # difference from those two is why. ``kind`` and ``length`` are each the
+    # NOTE: ``subtype`` stays an annotation rather than becoming a real field
+    # alongside ``kind``/``length`` above -- deliberately, and the difference
+    # from those fields is why. ``kind`` and ``length`` are each the
     # *sole* source of their own octet: nothing else in the schema packs them,
     # so declaring them as real fields was the only way to get them onto the
     # wire at all. ``subtype`` is not like that: every concrete subclass

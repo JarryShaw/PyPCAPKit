@@ -5,8 +5,8 @@
 
 .. module:: pcapkit.protocols.link
 
-:mod:`pcapkit.protocols.link` is collection of all protocols in
-link layer, with detailed implementation and methods.
+:mod:`pcapkit.protocols.link` is a collection of all protocols in
+the link layer, with detailed implementation and methods.
 
 """
 # TODO: Implements DSL, EAPOL, FDDI, ISDN, NDP, PPP.

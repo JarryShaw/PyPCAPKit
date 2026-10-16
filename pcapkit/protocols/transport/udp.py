@@ -65,7 +65,7 @@ class UDP(Transport[Data_UDP, Schema_UDP],
          - :class:`pcapkit.protocols.application.http.HTTP`
 
     Note:
-        Both HTTP ports resolve to
+        The HTTP ports resolve to
         :class:`pcapkit.protocols.application.http.HTTP`, which identifies the
         version from the payload and delegates.
         :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.TCP.__proto__>`
@@ -99,7 +99,7 @@ class UDP(Transport[Data_UDP, Schema_UDP],
             #   1701  l2tp       l2tp
             #   8080  http-alt   HTTP Alternate (see port 80)
             #
-            # Both HTTP entries bind the version-dispatching
+            # The HTTP entries bind the version-dispatching
             # :class:`pcapkit.protocols.application.http.HTTP`, as TCP's table
             # does. c.f. the note in the class docstring.
             80: ModuleDescriptor('pcapkit.protocols.application.http', 'HTTP'),
@@ -214,6 +214,14 @@ class UDP(Transport[Data_UDP, Schema_UDP],
 
         Returns:
             Constructed packet data.
+
+        .. versionchanged:: 1.5.0
+
+           An out-of-range ``srcport`` or ``dstport`` raises
+           :exc:`ValueError` rather than being accepted (:issue:`758`).
+           ``total_length`` sits before ``payload`` (:issue:`1155`), so a
+           caller passing ``payload`` positionally sets ``total_length``
+           instead.
 
         """
         # NOTE: An explicit ``total_length`` is written as given, so that a

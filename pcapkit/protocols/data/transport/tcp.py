@@ -364,7 +364,7 @@ class UserTimeout(Option):
 
     #: User timeout.
     timeout: 'timedelta'
-    #: Granularity (``G``): the timeout is in minutes if set, in seconds if not.
+    #: Granularity (``G``). The timeout is in minutes if set, in seconds if not.
     granularity: 'bool'
 
     if TYPE_CHECKING:
@@ -427,8 +427,8 @@ class MPTCPCapableFlag(Data):
     deny_join: 'bool'
     #: Reserved flags (``D`` to ``G``).
     reserved: 'int'
-    #: HMAC algorithm flag (``H``): HMAC-SHA1 under version 0 (:rfc:`6824`),
-    #: HMAC-SHA256 under version 1 (:rfc:`8684`).
+    #: HMAC algorithm flag (``H``), selecting HMAC-SHA1 under version 0
+    #: (:rfc:`6824`) and HMAC-SHA256 under version 1 (:rfc:`8684`).
     hsa: 'bool'
 
     if TYPE_CHECKING:
