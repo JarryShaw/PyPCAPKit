@@ -3,10 +3,10 @@
 
 **Fixed** -- ``AppType`` enumeration lookups; ``typing.TypeAlias`` compatibility
 on older interpreters; the output file name chosen by flow tracing; dumping of
-``Schema`` objects through a custom dumper; reassembly, broken since 0.16.3
-(:issue:`155`). ``Extractor`` now raises an explicit unsupported-call error, and
-logs a notice, when reassembly or flow tracing is requested where it cannot be
-provided.
+``Schema`` objects through a custom dumper; reassembly, broken since 1.0.0
+(:issue:`155`). ``Extractor`` now raises an explicit unsupported-call error when
+its reassembly or flow-tracing record is read with that feature disabled, and
+logs a notice when it enables IPv4, IPv6 or TCP reassembly, or TCP flow tracing.
 
 *Also released:* ``1.1.1.post1``, ``1.1.1.post2`` (through 2023-08-23);
 ``post2`` renamed the ``strict`` argument of ``Extractor`` and ``extract()`` to

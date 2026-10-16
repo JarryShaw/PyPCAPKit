@@ -79,7 +79,7 @@ carries only the version being released; this page is the whole recorded history
 * **1.2.0** (2023-08-26) -- Added streaming input through
   ``SeekableReader``, so a capture can be read from ``stdin`` or a pipe
   (:issue:`156`). :doc:`Full changelog <changelog/1.2.0>`.
-* **1.1.1** (2023-08-15) -- Fixed reassembly, broken since 0.16.3 (:issue:`155`),
+* **1.1.1** (2023-08-15) -- Fixed reassembly, broken since 1.0.0 (:issue:`155`),
   ``AppType`` enumeration lookups, ``typing.TypeAlias`` compatibility on older
   interpreters, the flow-tracing output file name, and ``Schema`` dumping through
   a custom dumper. :doc:`Full changelog <changelog/1.1.1>`.

@@ -8,12 +8,12 @@ and a defect programme run through the issue tracker, citing issues and pull
 requests from :pr:`340` to :pr:`1828`.
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` to ``1.5.0b3`` (all 2026-09-19)
-and ``1.5.0b4`` to ``1.5.0b12`` (2026-09-20 to 2026-10-13), dated in UTC and all
-published as prereleases and so
-resolved only by ``pip install --pre``. ``1.5.0b1`` half-shipped: the tag, the
-GitHub release and the Conda deployments landed, but PyPI rejected the wheel
-because ``twine check`` found a Sphinx-only ``:mod:`` role in ``README.rst``,
-which ``pyproject.toml`` declares as the dynamic long description. ``1.5.0b2``
+and ``1.5.0b4`` to ``1.5.0b13`` (2026-09-20 to 2026-10-16), dated in UTC and all
+published as prereleases and so resolved only by ``pip install --pre``.
+``1.5.0b1`` half-shipped: the tag, the GitHub release and the Conda deployments
+landed, but PyPI rejected the wheel because ``twine check`` found a Sphinx-only
+``:mod:`` role in ``README.rst``, which ``pyproject.toml`` declares as the
+dynamic long description. ``1.5.0b2``
 reshipped it -- an existing version cannot republish -- and ``1.5.0b3`` followed
 the CI change that stops a TestPyPI outage from costing a release its wheels
 (:pr:`497`, :pr:`498`).
@@ -38,8 +38,8 @@ Changed
   aliases (:pr:`754`).
 * the ``%``-formatted ``raise ValueError(...)`` calls in the generated
   ``pcapkit.const.reg.apptype.apptype``, left by :issue:`759`, are f-strings
-  (:issue:`792`). The remainder followed: three ``_missing_`` guards
-  (``pcapkit.vendor.tcp.flags``, ``.ftp.command``, ``.http.method``), ``AppType``'s
+  (:issue:`792`). The remainder followed: the ``_missing_`` guards in
+  ``pcapkit.vendor.tcp.flags``, ``.ftp.command`` and ``.http.method``, ``AppType``'s
   ``__new__``/``__repr__``/``__str__``, and the ``extend_enum`` fallbacks in ``get()``
   and in the span-handling tail. The ``consider-using-f-string`` disable drops from
   ``tcp.flags`` and ``reg.apptype.apptype`` and stays on ``ftp.command`` and
@@ -137,8 +137,8 @@ Fixed
   ``extend_enum`` was rejected for a flag type: naming ``0x06`` ``Unassigned_0x06``
   would hide the composite and add a member per bit pattern. The range guard is
   untouched (:issue:`623`).
-* constant registries that rejected an invalid value differently from
-  the built-in ``enum``, or did not reject it at all. ``Flags``,
+* constant registries rejected an invalid value differently from the built-in
+  ``enum``, or did not reject it at all. ``Flags``,
   ``ftp.command.CommandType`` and ``reg.apptype.TransportProtocol`` are ``IntFlag``
   types with no ``_missing_``, so ``aenum`` composed a pseudo-member for any integer:
   ``Flags(-1)`` returned ``65520`` (every TCP flag set, from a value no 16-bit field
@@ -197,7 +197,7 @@ Fixed
   ``pcapkit/vendor/default.py``, plus a new ``register(value, name)`` base classmethod
   for the caller-named path that still mints. Every generated registry is
   updated; the non-minting ``get()`` miss applies to all of them, but the
-  ``_missing_`` fix changes behaviour only for **those** with a bounded-range
+  ``_missing_`` fix changes behaviour only for those with a bounded-range
   ``extend_enum`` branch. ``pcapkit/toolkit/scapy.py`` and
   ``pcapkit/toolkit/pyshark.py`` fed
   ``get()`` a string key with no default and now raise ``MissingKeyError`` instead of
@@ -246,10 +246,11 @@ Fixed
   are not company names. ``Socket`` (ipx)'s allocation-policy names (``Experimental``,
   ``Dynamically Assigned Socket Numbers``, ``Statically Assigned Socket Numbers``,
   ``Dynamically Assigned``) convert, while ``Registered by Xerox`` keeps minting, a
-  real ownership fact. 7 of the 89 are left alone: ``CGAType``'s ``Tag_<hex>`` mint is
-  not an IANA-style range, and the other 6 files sit on the 9 classes :issue:`860`
-  moves onto ``EnumRegistry`` (``AppType``, ``StatusCode``, ``ftp.return_code``,
-  ``ftp.command``, ``Method``, ``OptionType``; :pr:`869` and :pr:`874`, below).
+  real ownership fact. Left alone are ``CGAType``, whose ``Tag_<hex>`` mint is not an
+  IANA-style range, and the files holding the classes :issue:`860` moves onto
+  ``EnumRegistry`` (the ``AppType``, ``StatusCode``, ``ftp.return_code``,
+  ``ftp.command``, ``Method`` and ``OptionType`` modules; :pr:`869` and :pr:`874`,
+  below).
   Each conversion changes both the vendor crawler and the generated file, per
   :pr:`838`'s and :pr:`858`'s precedent. The worked examples in
   ``docs/source/contributing/conventions/mint-criterion.rst`` keep
@@ -263,7 +264,7 @@ Fixed
   ``pcapkit/vendor/reg/ethertype.py``'s ``process()`` collects range rows and a new
   ``EtherType._insert_range`` places each ahead of the first already-placed range that
   fully contains it, leaving non-overlapping pairs in CSV order; this pair is the only
-  containment among the 56 ranges. Closes :issue:`862` (:pr:`865`).
+  containment among the CSV's ranges. Closes :issue:`862` (:pr:`865`).
 * **a breaking change to** ``Method``: ``__new__`` called ``str.__new__(cls)`` with no
   argument, so every registered member's ``str`` payload was empty regardless of
   value -- ``str(Method.GET) == ''`` and ``Method.GET == 'GET'`` was ``False``;
@@ -282,7 +283,7 @@ Fixed
 * **a breaking change to** ``TransportProtocol`` and ``AppType``: step 2
   of :issue:`860`, the ``AppType`` half (the other bespoke registries were :pr:`869`,
   above). ``AppType`` and its transport subclasses move onto ``EnumRegistry`` and
-  both mint sites -- ``_missing_``'s range branches and ``get()``'s second mint
+  both mint sites -- ``_missing_``'s range branches and ``get()``'s own mint
   (``PORT_{port}_{transport}`` -> ``'unknown'``) -- now build through a new
   ``_unregistered_member`` override that reconstructs ``svc``/``port``/``proto``, per
   the owner's ruling that only IANA-registered values are legitimate and that
@@ -407,7 +408,7 @@ Changed
   subclasses ``io.UnsupportedOperation``. The old resizing is kept as the private
   ``_truncate_buffer``: it resizes a private lookback window, not the stream, and it is
   the only route to the "position sits before the window" state that ``seek`` and the
-  four buffered read paths must refuse, for which :issue:`643` and :issue:`644` landed
+  buffered read paths must refuse, for which :issue:`643` and :issue:`644` landed
   tests. ``writeable()`` was never an override of anything, so ``io``, ``shutil`` and
   third parties never saw it, and the value reported is unchanged (:issue:`645`).
 * **a breaking change to** ``@final``, now enforced at runtime on ``Info`` and
@@ -499,11 +500,11 @@ Fixed
   (``struct.error: required argument is not an integer``), and parsing failed in
   mirror by calling ``int.from_bytes`` on an integer ``struct.unpack`` had produced.
   The flag is now recomputed from the width in force, which also keeps a callable
-  resolving to a width with no native code (3 octets) byte-packed. **All four native
-  widths were affected, not only the 8 reported**, on ``NumberField`` and
-  ``EnumField`` alike. This made every extended 8-octet MPTCP DSS form unbuildable,
-  those widths being chosen at runtime from the DSS flags; :pr:`585` worked around it
-  in the TCP schema alone (:issue:`591`).
+  resolving to a width with no native code (3 octets) byte-packed. **Every native
+  width (1, 2, 4 and 8 octets) was affected, not only the 8 reported**, on
+  ``NumberField`` and ``EnumField`` alike. This made every extended 8-octet MPTCP
+  DSS form unbuildable, those widths being chosen at runtime from the DSS flags;
+  :pr:`585` worked around it in the TCP schema alone (:issue:`591`).
 * ``NumberField.pre_process`` sized a value with floor division dressed as a ceiling.
   When a field is packed while ``length`` is still the ``-1`` placeholder, the width
   came from ``math.ceil(value.bit_length() // 8)``; the ``//`` had already floored, so
@@ -569,7 +570,7 @@ Fixed
   the octets the area has left and warns with ``SchemaWarning``; it is applied to
   every variable-width option and record payload in the PCAP-NG schema, and
   deliberately not to the block-level payload fields, the 32-bit band the running
-  ledger already budgets. A second, ``bounded_area``, clamps a packet block's option
+  ledger already budgets. A companion ``bounded_area`` clamps a packet block's option
   area to the octets the block itself holds less the trailing Block Total Length: the
   area was otherwise sized from a declared length nothing checks against the file, so a
   block declaring 1,000,000 octets while holding 36 synthesised 65,535 zeros with no
@@ -602,8 +603,8 @@ Fixed
   ``pcapkit.corekit.enum.EnumRegistry`` is a new mixin implementing ``get``,
   ``get_all``, ``register``, ``register_alias``, ``register_aliases`` and
   ``_unregistered_member`` once, per the maintainer's ruling on :issue:`842`; it
-  converts the first six registries with no bespoke ``__new__``
-  (``ipv6.extension_header.ExtensionHeader``, ``tcp.flags.Flags`` and four
+  first converts registries with no bespoke ``__new__``
+  (``ipv6.extension_header.ExtensionHeader``, ``tcp.flags.Flags`` and the
   ``mh.*_flag`` modules), and serves ``IntEnum``, ``IntFlag`` and ``StrEnum`` alike.
   The guard reaches only those: the other const registries still carry the old
   generator's bare ``extend_enum(cls, name, value)``, so ``pcapkit.const`` ships
@@ -763,9 +764,9 @@ Fixed
   ``MultiDict``, where :issue:`575` escaped an enum-derived key inline and nothing
   else, and a plain dict, where nothing was escaped. The json, tree and text writers
   are untouched. A non-``str`` key is escaped too: a PCAP-NG decryption secrets block
-  keys TLS key log entries by a raw bytes client random whose repr can carry all three
-  characters. The upstream half is ``JarryShaw/DictDumper#125``; this does not wait on
-  it. The json writer's quoting defect stands, upstream as
+  keys TLS key log entries by a raw bytes client random whose repr can carry any of
+  those characters. The upstream half is ``JarryShaw/DictDumper#125``; this does not
+  wait on it. The json writer's quoting defect stands, upstream as
   ``JarryShaw/DictDumper#121`` (:issue:`772`).
 * the JSON writer emitted mapping keys unescaped, so the report of ``test.pcapng`` did
   not parse (``Expecting ':' delimiter``): its TLS key log is keyed by a ``bytes`` client
@@ -805,7 +806,7 @@ Added
   both present ``pcap-ct`` wins the import and the other becomes unselectable. The
   missing interface constants ``PyPCAP``, ``PCAP_CT`` and ``PyPCAPFile`` are now
   exported alongside ``DPKT``, ``Scapy``, ``PyShark`` and ``PCAPKit`` (:pr:`412`).
-  3.11 is the last interpreter on which every built-in engine can run, and
+  Python 3.11 is the last interpreter on which every built-in engine can run, and
   even there ``pypcap`` and ``pcap-ct`` cannot coexist.
 * ``EngineBase.unsupported_reason``, a preflight every engine answers and
   ``Extractor.run`` consults before anything is imported. An engine that cannot
@@ -901,7 +902,7 @@ Changed
   are now declared to return ``EngineBase[_P]`` rather than ``Engine``, and the private
   ``_exeng`` attribute follows. The built-in engines subclass ``EngineBase`` directly,
   so none was ever an ``Engine``, which adds only the ``__init_subclass__``
-  registration hook. A type checker sees the change: Code passing the
+  registration hook. A type checker sees the change: code passing the
   result to an ``Engine``-typed
   parameter must now accept ``EngineBase``; and because the old declarations were
   *unparameterised*, ``engine.read_frame()`` and ``record_header().read_frame()``
@@ -1071,7 +1072,7 @@ Fixed
   JSON with a ``FormatWarning``, as their flow tracing already does, and a PCAP-NG
   input raises ``FormatError`` (:issue:`1127`). The written global header also
   dropped the input's ``thiszone``, ``sigfigs`` and ``snaplen``, so most sample
-  PCAP files did not come back byte for byte; the PCAP engine now passes all three
+  PCAP files did not come back byte for byte; the PCAP engine now passes those fields
   through ``_open_output`` to ``PCAPIO``, and every one does (:issue:`1165`).
 * IP reassembly reports only the octets it holds: a truncated fragment, a strict run
   and a zero-length datagram no longer report octets from the declared Total Length
@@ -1084,8 +1085,10 @@ Fixed
   the last block (:pr:`1564`).
 * a second TCP flow with the same label truncated the first flow's file; a reused
   label now gets the next free suffix (:issue:`1360`, :pr:`1371`).
-* the engine, reassembly, traceflow and dumper registrars accept the built-in each name
-  shipped with, which restores it (:issue:`1363`, :pr:`1376`).
+* the engine, reassembly, traceflow and dumper registrars accept a built-in back under
+  the name it shipped with, restoring the shipped entry after an override; the engine,
+  reassembly and traceflow registrars still refuse any other built-in
+  (:issue:`1363`, :pr:`1376`).
 * PCAP-NG blocks are numbered across the whole file, not per section
   (:issue:`1256`, :pr:`1426`).
 * ``format='pcap'`` is kept when an unavailable engine falls back to the default one
@@ -1202,15 +1205,16 @@ Added
   ``inspect.signature``) and that the built segment carries the stated header in both
   data model and packed octets (:issue:`602`).
 * ILNP nonce sizing coverage in
-  ``tests/protocols/internet/test_ipv6_extension_unit.py``, one test per protocol,
+  ``tests/protocols/internet/test_ipv6_extension_unit.py``, a test per protocol,
   asserting the declared length, the exact packed octets and the construct-pack-parse
   cycle over a spread of nonces, most with a bit length that is *not* a multiple of
   eight,
   where floor division and the ceiling disagree (:issue:`601`).
 * ``SOLUTION`` parameter width coverage in
-  ``tests/protocols/internet/test_hip_unit.py``: widths asserting the declared
-  length, the reader's acceptance and the construct-pack-parse cycle, plus a 57-bit
-  case pinning the 20-octet length :rfc:`5201#section-5.2.5` requires of HIPv1.
+  ``tests/protocols/internet/test_hip_unit.py``: a spread of widths, each asserting
+  the declared length, the reader's acceptance and the construct-pack-parse cycle,
+  plus a 57-bit case pinning the 20-octet length :rfc:`5201#section-5.2.5` requires
+  of HIPv1.
   Some widths are deliberately *not* multiples of eight, where the defective
   ``ceil(bits / 4)`` differs from the correct width (:issue:`608`).
 * the BSD loopback layer for ``LINKTYPE_NULL`` and ``LINKTYPE_LOOP``, and dissection of
@@ -1242,8 +1246,9 @@ Changed
   and the deep paths above break. RARP has no ``data`` or ``schema`` module of its own, as
   it reuses ARP's.
 
-  ``layer`` changes from ``'Link'`` to ``'Application'`` for all three. ``OSPF`` now takes
-  ``Application`` as its only base, and ``RARP`` becomes ``class RARP(Application, ARP)``
+  ``layer`` changes from ``'Link'`` to ``'Application'`` for OSPF, RARP and DRARP.
+  ``OSPF`` now takes ``Application`` as its only base, and ``RARP`` becomes
+  ``class RARP(Application, ARP)``
   -- layer base first, because ``ARP``'s chain reaches ``Link``, which owns
   ``__layer__``. ``ARP`` and ``InARP`` stay ``'Link'``. Dispatch keys are unchanged:
   OSPF is still reached from ``Internet.__proto__`` at ``TransType.OSPFIGP`` and RARP
@@ -1285,11 +1290,12 @@ Changed
   ``HTTP.make``). The message names the near neighbour (``seq`` reports *did you mean
   'seq_no'?*). ``from_data`` warns ``UnknownFieldWarning`` rather than raising for a key
   its own ``_make_data`` returned, which the caller cannot fix; a keyword passed to
-  ``from_data`` itself raises, as for a direct construction (:pr:`1147`). Four leftover copies
-  of :issue:`602`'s misspelt TCP base, in ``examples/generators/dispatch.py`` and
-  ``tests/protocols/transport/``, are fixed. Three such ``_make_data`` keys are
-  reported, not fixed: ``Frame._make_data`` returns ``ts_src`` where ``make`` declares
-  ``ts_sec``, ``L2TPv2._make_data`` returns ``prio`` where it declares ``priority``, and
+  ``from_data`` itself raises, as for a direct construction (:pr:`1147`). The leftover
+  copies of :issue:`602`'s misspelt TCP base, in ``examples/generators/dispatch.py`` and
+  ``tests/protocols/transport/``, are fixed. Some ``_make_data`` keys that ``make`` does
+  not declare are reported, not fixed: ``Frame._make_data`` returns ``ts_src`` where
+  ``make`` declares ``ts_sec``, ``L2TPv2._make_data`` returns ``prio`` where it declares
+  ``priority``, and
   ``Header._make_data`` returns a ``magic_number`` that ``Header.make`` does not take.
   A *direct* ``SomeProtocol.make(...)`` call is not checked and still discards
   silently (:issue:`617`).
@@ -1350,7 +1356,7 @@ Fixed
   the code was already registered. Every read now goes through a lookup that does
   not grow the table, and ``IPv4.__option__`` and ``HIP.__parameter__`` became
   inspectable class attributes rather than names assembled at call time
-  (:pr:`426`, :pr:`428`, :issue:`429`, :pr:`434`). One break: a tuple-registered
+  (:pr:`426`, :pr:`428`, :issue:`429`, :pr:`434`). What breaks: a tuple-registered
   handler pair written to the documented ``OptionParser``/``OptionConstructor``
   signature now works where it could never be called, and a pair written with an
   explicit leading ``self`` -- the only shape that used to work -- now does not.
@@ -1406,7 +1412,7 @@ Fixed
   now goes through ``parse_ip_address``, the helper :pr:`539` and :issue:`552`
   route their own sites through, completing the programme :pr:`481` and
   :issue:`508` started. Pinning ``version=6`` on the ``IPv6_Route`` sites is a
-  second, smaller behaviour change: both converted a plain integer through the
+  further, smaller behaviour change: both converted a plain integer through the
   family-inferring ``ipaddress.ip_address``, so ``ip=[258]`` packed a 4-octet IPv4
   address (``0.0.1.2``) inside an IPv6-only header; it now packs the 16-octet
   ``::102`` (:issue:`540`).
@@ -1447,8 +1453,8 @@ Fixed
   ``MP_JOIN``: the convenience constructor reads the schema straight back through
   ``_read_mptcp_*`` with no byte round trip, so ``_MPTCP.post_process``, the only code
   that set ``subtype``, never ran. Fixed on the construction path
-  (``TCP._make_mode_mp``) rather than by adding a third real field the way
-  ``kind``/``length`` got in :issue:`541`: ``subtype`` is already packed as 4 bits of
+  (``TCP._make_mode_mp``) rather than by making ``subtype`` a real field too, the way
+  ``kind``/``length`` became in :issue:`541`: ``subtype`` is already packed as 4 bits of
   each subtype's own ``test`` bitfield, and a second field for the same bits would
   double-encode them or need a "derive, don't pack" field kind this library lacks
   (:issue:`566`). Separately, ``_make_mptcp_capable`` wrote
@@ -1536,7 +1542,7 @@ Fixed
   *read*. A parsed MP_JOIN-SYN instance asked to pack an MP_JOIN-ACK segment emitted
   an ACK header carrying figure 5's 12-octet SYN option, with the caller's 20-octet
   HMAC replaced by an all-zero token and nonce, and nothing raised. Hoisting also made
-  one branch reachable for the first time, an MP_JOIN on a segment with neither SYN
+  a branch reachable for the first time, an MP_JOIN on a segment with neither SYN
   nor ACK: the accumulator was seeded with ``cast('Enum_Flags', 0)``, and
   ``typing.cast`` being a runtime no-op, ``self._flags`` stayed a plain ``int`` and
   the first membership test raised ``TypeError`` rather than the documented
@@ -1620,7 +1626,7 @@ Fixed
   for the narrower reason the note now gives: ``ConditionalField``'s ``length``
   forwards to the wrapped field without consulting the condition, whereas a
   ``SwitchField`` always resolves to a concrete field (:issue:`603`).
-* the one assertion :issue:`604` left pinning the old padding side, red on ``main``
+* the assertion :issue:`604` left pinning the old padding side, red on ``main``
   since :pr:`621` merged.
   ``TCPUDPUnitTests.test_a_truncated_option_still_parses_its_declared_length``
   expected a truncated TCP option's ``data`` as the synthesised zero octets *followed
@@ -1662,7 +1668,7 @@ Fixed
   ``aenum.IntFlag`` pseudo-member and does not meet the ``RecursionError`` the same
   construction hits on the ``pcapkit.const.mh`` flag enumerations (:issue:`623`).
   The MP_JOIN path was latent: ``mptcp_data_selector`` rejects a flagless MP_JOIN
-  before :rfc:`8684` section 3.2's three layouts are chosen. One dump-format change is
+  before :rfc:`8684` section 3.2's three layouts are chosen. A dump-format change is
   observable: a flagless segment's ``connection`` renders as a string where it
   rendered as the number ``0``, so it no longer switches JSON type with the flags. That
   string read ``Flags::None [0]`` until the ``pcapkit.dumpkit`` fix above
@@ -1797,14 +1803,14 @@ Fixed
   length callbacks are mis-parenthesised, so an unpadded ``DATA``, ``HEADERS``
   or ``PUSH_PROMISE`` frame parses with its whole payload dropped (:issue:`668`).
   (:issue:`652`, :issue:`650`).
-* four MPTCP error messages carried a doubled separator, rendering as
+* MPTCP error messages carried a doubled separator, rendering as
   ``TCP: : [OptNo 30] 1: invalid flags combination``. Cosmetic: the exception type,
   option number and subtype were right and nothing parses these strings, but an empty
-  field reads as a value that failed to interpolate. Four sites (``_read_mptcp_join``
-  and ``_make_mptcp_join`` for the invalid flag combination, both guards of
-  ``_make_mptcp_dss`` for missing required fields), against 28 messages in the same
-  file spelled correctly; now 32 correct against 0 doubled. Pre-existing since
-  2023-04-10. The new test asserts each message in full, since the existing
+  field reads as a value that failed to interpolate. The sites were
+  ``_read_mptcp_join`` and ``_make_mptcp_join`` for the invalid flag combination, and
+  both guards of ``_make_mptcp_dss`` for missing required fields; every other message
+  in the file was already spelled correctly, and none is doubled now. Pre-existing
+  since 2023-04-10. The new test asserts each message in full, since the existing
   ``assertIn`` on the body passes either side of the change (:issue:`649`).
 * names appeared in string annotations their own module never imported, so a
   type checker or documentation build could not resolve them while every test passed:
@@ -1826,11 +1832,11 @@ Fixed
   putting the README in a source distribution and that an sdist without it could not
   be installed; both halves are false, and the :pr:`619` entry above carried the same
   claim and is corrected with it (:issue:`642`).
-* every PCAP-NG packet block now carries the captured octets it declares. All four
-  Enhanced Packet Blocks of the committed ``examples/captures/dhcp.pcapng`` reported
+* every PCAP-NG packet block now carries the captured octets it declares. Every
+  Enhanced Packet Block of the committed ``examples/captures/dhcp.pcapng`` reported
   ``len(packet) == 0`` against a ``captured_len`` of 314, 342, 314 and 342, as did the
   Simple Packet Block and obsolete Packet Block (synthesised; no committed fixture has
-  either). Those three, exactly ``PCAPNG.PACKET_TYPES``, are the whole blast radius.
+  either). Those block types, exactly ``PCAPNG.PACKET_TYPES``, are the whole blast radius.
   The octets were read correctly and thrown away: ``PCAPNG.unpack`` extracted them
   from the block schema, and ``ProtocolBase.__init__`` overwrote the result with
   ``self.packet.payload``. The inherited ``packet`` splits a protocol at
@@ -1875,7 +1881,7 @@ Fixed
   same lambda also governs **packing**: an unpadded ``DATA`` frame carrying twelve
   octets packed to a nine-octet header whose length field declared **21**, body
   absent, so pcapkit was *emitting* malformed HTTP/2; a ``make`` -> parse -> ``make``
-  cycle of a non-empty unpadded payload now closes byte-for-byte. The one other
+  cycle of a non-empty unpadded payload now closes byte-for-byte. The only other
   conditional of this shape, ``TSOption.remainder`` in
   ``pcapkit/protocols/schema/internet/ipv4.py``, is correct: its ``else 0`` is
   intentional because ``ts_data`` consumes the whole option data area in that arm. The
@@ -1920,7 +1926,7 @@ Fixed
   ``_read_fileng`` returned, with a ``ProtocolWarning`` naming the overrun, and a tail
   under the twelve octets a block needs is the quiet ``StreamEOFError`` that
   ``Extractor.record_frames`` already catches (deliberately not a clamp, which would
-  fabricate a frame out of zero padding). A second route to the same shape is closed
+  fabricate a frame out of zero padding). Another route to the same shape is closed
   by a new ``nonnegative()`` helper, composed into ``bounded_option`` and
   ``bounded_area`` and applied to the unwrapped ``length - N`` spans and the
   ``__option_padding__`` fields: ``_TextField.__call__`` builds ``f'{length}s'``
@@ -1928,7 +1934,7 @@ Fixed
   exception caught nowhere a frame loop looks. Both of :issue:`678`'s failure
   families are gone; others remain:
   ``ValueError: N is not a valid BlockType`` (filed as :issue:`701`) and
-  ``MemoryError`` from :pr:`593`'s 32-bit band. Three bare exceptions
+  ``MemoryError`` from :pr:`593`'s 32-bit band. Bare exceptions
   in ``SystemdJournalExportBlock.post_process``, reachable from valid input, are fixed
   with it: the body's NUL alignment padding was read as a field *name*
   (``struct.error``; a NUL-only line now ends the entry); a binary field's declared
@@ -1965,7 +1971,7 @@ Fixed
   declared ``4n`` octets against ``24n`` present, and ``Schema.unpack`` handed the
   nested ``ListField`` only the declared octets, so ``n = 2`` and ``n = 5`` parsed one
   truncated locator and left the rest unconsumed. ``HIP._make_param_locator_set`` now
-  sums ``8 + Locator.len * 4`` per locator (:issue:`679`). A second defect in the same
+  sums ``8 + Locator.len * 4`` per locator (:issue:`679`). Another defect in the same
   parameter's padding, which :issue:`651` left alone because it cancelled this one, is
   fixed alongside: the nested ``Locator`` schemas share the parameter's packet context
   and pack their own ``len`` over it, so ``padding``, evaluated after the list, saw 4
@@ -1980,17 +1986,17 @@ Fixed
   registry defect was fixed as :issue:`690`. ``HIP_COPIES`` dropped to one
   as :issue:`689`, once :issue:`672` and :issue:`679` left it routing around nothing.
 * ``httpv1.HTTP`` raised a bare exception for any payload that is not an HTTP/1
-  message, at four sites: the header/body split in ``read``, the header's CRLF split
+  message, at these sites: the header/body split in ``read``, the header's CRLF split
   and the start-line split in ``_read_http_header``, and ``item[1]`` on a field line
   with no colon. ``HTTP._guess_version`` falls through on ``ProtocolError`` alone, so
-  the HTTP/1 attempt aborted the guess and the HTTP/2 arm below was dead code for all
-  four input classes. All four now raise ``ProtocolError``, which each method's
+  the HTTP/1 attempt aborted the guess and the HTTP/2 arm below was dead code for each
+  of those inputs. Each site now raises ``ProtocolError``, which each method's
   ``Raises:`` section documented, and a test pins the invariant (nothing escapes
-  ``httpv1.HTTP`` that is not a ``ProtocolError``), so a fifth bare-raising site would
-  fail there. An obs-fold continuation line [:rfc:`9112#section-5.2`] is legal HTTP/1
-  and is now unfolded, the RFC's remedy, rather than read as a field of its own (with
-  no colon it raised that ``IndexError``; with one it parsed into a spurious extra
-  field). Reaching the HTTP/2 arm exposed a payload under nine octets to
+  ``httpv1.HTTP`` that is not a ``ProtocolError``), so any further bare-raising site
+  would fail there. An obs-fold continuation line [:rfc:`9112#section-5.2`] is legal
+  HTTP/1 and is now unfolded, the RFC's remedy, rather than read as a field of its own
+  (with no colon it raised that ``IndexError``; with one it parsed into a spurious
+  extra field). Reaching the HTTP/2 arm exposed a payload under nine octets to
   ``httpv2.HTTP``, where it usually fails inside the schema with a bare
   ``struct.error`` (not a ``ValueError``, ``ProtocolError`` or pcapkit ``StructError``,
   so uncatchable); ``read`` converts it and ``_guess_version`` suppresses it on the
@@ -2046,13 +2052,13 @@ Fixed
   introduced a regression on first review: a ``malformed`` flag broke the *outer*
   per-block loop on a bad terminator, ending the whole block and dropping every
   well-formed entry behind it. Fixed by dropping ``malformed``, leaving the per-entry
-  ``break`` as the only effect. A second gap closed in the same change: a trailing
+  ``break`` as the only effect. Another gap closed in the same change: a trailing
   separator on the block's last octet was indistinguishable from EOF and swallowed, so
   a rebuild wrote ``length`` one octet short (:issue:`723`).
-* **a breaking change to** four ``.get()``-backed enum fields: TCP/UDP/SCTP's
-  ``PortEnumField`` and PCAP-NG's ``OptionEnumField`` minted a member through
+* **a breaking change to** ``.get()``-backed enum fields: TCP/UDP/SCTP's
+  ``PortEnumField`` and PCAP-NG's ``OptionEnumField`` each minted a member through
   ``aenum.extend_enum`` for every value no row or documented span covers (111 calls on
-  ``http.pcap``, all ephemeral ports). All four now peek at what ``.get()`` would
+  ``http.pcap``, all ephemeral ports). Each now peeks at what ``.get()`` would
   consult and call it only once the value resolves; a genuine miss gets
   ``EnumField._unregistered_member``, a real member of the same registry built through
   its storage base's ``__new__``, so ``isinstance`` holds and the lookup table stops
@@ -2077,10 +2083,10 @@ Fixed
   24, reported preface remnants as payload). A preface with no frame behind it raises
   ``ProtocolError: HTTP/2: connection preface with no frame``; a bare mid-stream
   ``SETTINGS`` frame, an ``Upgrade: h2c`` request and non-HTTP input are unchanged, the
-  first two left undecidable on purpose (``Upgrade: h2c`` needs per-connection state a
-  single payload cannot carry, and a mid-stream frame has no safe heuristic, since a
-  ``type <= 9`` guess misfires on binary HTTP/1 bodies). Protochain over the sample
-  captures is unchanged (:issue:`800`).
+  frame and the request left undecidable on purpose (``Upgrade: h2c`` needs
+  per-connection state a single payload cannot carry, and a mid-stream frame has no
+  safe heuristic, since a ``type <= 9`` guess misfires on binary HTTP/1 bodies).
+  Protochain over the sample captures is unchanged (:issue:`800`).
 * ``TCP.__proto__`` bound ``httpv1.HTTP`` directly for ports 80 and 8080, so a segment
   on either port was HTTP/1 by assertion of the port alone; both versions share those
   ports, so the payload has to decide. Repointed to the generic
@@ -2098,14 +2104,15 @@ Fixed
   ahead of ``AppType`` (:pr:`874`, below), bringing ``StatusCode``, ``ReturnCode``,
   ``ResponseKind``, ``GroupingInformation``, ``OptionType``, ``FEATCode``, ``Command``
   and ``Method`` onto ``EnumRegistry`` and applying :issue:`775`'s mint/unmint ruling
-  to their ``get()`` as well as ``_missing_``. The first five convert 12 unambiguous
+  to their ``get()`` as well as ``_missing_``. ``StatusCode``, ``ReturnCode``,
+  ``ResponseKind``, ``GroupingInformation`` and ``OptionType`` convert their unambiguous
   placeholder branches (``Unassigned``, ``Unknown``, ``opt_unknown``) to
-  ``_unregistered_member``; the three with a custom ``__new__`` (``StatusCode``,
+  ``_unregistered_member``; those with a custom ``__new__`` (``StatusCode``,
   ``ReturnCode``, ``OptionType``) get an override reconstructing the attributes the
   base's generic helper would leave unset, and ``StatusCode``/``ReturnCode``'s
   hand-written ``get()``, still on the retired ``default == -1`` convention, is
   replaced by the base's (no caller relied on the old form). ``OptionType`` keeps its
-  own ``get()`` for its multi-namespace dispatch, but a round-2 review found it still
+  own ``get()`` for its multi-namespace dispatch, but a later review found it still
   minted on both its int/namespace and ``str`` paths, and the live pcapng parse path
   (``PCAPNG._make_pcapng_options``) calls it with wire bytes, so parsing an undeclared
   option code still registered a permanent member; both paths now build an unregistered
@@ -2114,7 +2121,7 @@ Fixed
   the information to create new members (``Command`` needs
   ``feat``/``desc``/``type``/``conf`` and ``Method`` needs ``safe``/``idempotent``,
   which a bare wire string lacks), both ``_missing_`` and each class's own ``get()``
-  (a second, independent mint site) now build an unregistered member. ``FEATCode``'s
+  (an independent mint site of its own) now build an unregistered member. ``FEATCode``'s
   crawler now declares every real FEAT-code value from the live IANA table instead of
   minting some of them as a side effect of evaluating ``Command``'s rows at import time,
   the import-time-mutation shape :pr:`861` removed from ``FilterType``; pinned
@@ -2250,8 +2257,9 @@ Fixed
   ``00000e`` for a 5-octet PRIORITY frame and ``read`` rejected RFC-conformant frames
   -- and, since ``_read_http_priority`` checked for 9, pcapkit's own PRIORITY frame.
   The length and every per-type check now exclude the header. Captures written to the
-  old convention no longer parse; frames packed by Scapy's ``contrib.http2`` now
-  parse and rebuild byte for byte (:issue:`1121`).
+  old convention no longer parse; the PRIORITY, RST_STREAM, SETTINGS (with and without
+  ACK), PING, WINDOW_UPDATE, DATA, PUSH_PROMISE and GOAWAY frames that Scapy's
+  ``contrib.http2`` packs now parse and rebuild byte for byte (:issue:`1121`).
 * **a breaking change to** ``ARP.make()``: ``hlen`` and ``plen`` are derived from the
   packed ``sha`` and ``spa`` when omitted, and an address that disagrees with its length
   field raises ``ProtocolError`` where it used to be truncated silently --
@@ -2273,8 +2281,9 @@ Fixed
   separately, so ``from_data`` rebuilt none of the segments in ``http.pcap``
   with their original header octets. Options are now emitted as given and padded once at
   the end -- zero octets after a trailing ``EOOL``, otherwise ``NOP`` options and an
-  ``EOOL`` -- so a built header can be shorter than before; every segment in the
-  sample captures measured rebuilds, and ``options-*.pcap`` regenerate unchanged
+  ``EOOL`` -- so a built header can be shorter than before; every TCP segment of the
+  measured sample captures rebuilds its header octets, and ``options-*.pcap``
+  regenerate unchanged
   (:issue:`1151`).
 * **a breaking change to** ``from_data`` on a capture truncated by snaplen: ``IPv4``,
   ``IPv6`` and ``UDP`` rebuilt their length field from the payload at hand, writing
@@ -2386,7 +2395,7 @@ Fixed
     zero (:pr:`1338`).
   * HIP: Header Length, an empty parameter list, the PUZZLE lifetime and reserved bits
     (:pr:`1342`); Locator flags (:issue:`1365`, :pr:`1367`); ``BitField``
-namespaces' reserved bits (:issue:`1417`, :pr:`1419`); and the two fixed header
+    namespaces' reserved bits (:issue:`1417`, :pr:`1419`); and the two fixed header
     bits (:issue:`1459`, :pr:`1462`).
   * MH: zero-length PadN, reserved fields and BU/BA flag bits (:issue:`1324`,
     :pr:`1345`); the reserved bits of the ``BitField`` flag namespaces
@@ -2469,7 +2478,7 @@ Added
 
 * ``util/pyshark_encap_map.py``, a generator that regenerates
   ``ENCAP_TYPE_TO_LINKTYPE`` and ``FILTER_NAME_TO_LINKTYPE`` in
-  place inside ``pcapkit/toolkit/pyshark.py``, so the two tables :pr:`850` hand-built
+  place inside ``pcapkit/toolkit/pyshark.py``, so the tables :pr:`850` hand-built
   stop being hand-maintained. It lives under ``util/`` rather than ``pcapkit/vendor/``
   because ``Vendor``'s base class is hardwired to an HTTP fetch and a generated
   enum-class file, where this generator's source of truth is the local
@@ -2482,10 +2491,10 @@ Added
   for things pip cannot install. The sweep arithmetic is version-pinned
   (``editcap -T`` accepts 226 encapsulations on Wireshark 4.6.9, 224 on 4.2.2, CI's
   Ubuntu noble), so count assertions run only under exactly the measured version, with
-  a separate ``VersionIndependentInvariantTests`` class for what holds regardless. One
-  line of ``pcapkit/toolkit/pyshark.py`` changes: the ``IPMB_LINUX`` entry becomes
-  ``I2C_LINUX``, the canonical name :pr:`848` gave value 209 -- the same member either
-  way (:pr:`853`).
+  a separate ``VersionIndependentInvariantTests`` class for what holds regardless. The
+  only change to ``pcapkit/toolkit/pyshark.py`` itself is the ``IPMB_LINUX`` entry
+  becoming ``I2C_LINUX``, the canonical name :pr:`848` gave value 209 -- the same
+  member either way (:pr:`853`).
 * ``tcp_segment`` and its result type are public in ``pcapkit.toolkit.pcap``
   (:issue:`1570`, :pr:`1579`).
 
@@ -2531,14 +2540,16 @@ Fixed
   encapsulations, so that fallback returned *wrong DLTs silently* (``null`` for a
   ``DLT_LOOP`` capture, ``101`` (``RAW``) for ``rawip6``). Re-keyed onto
   ``frame.encap_type``, which is distinct per encapsulation, and the fallback is gone.
-  The two tables were measured rather than transcribed (Wireshark's source is not on the
+  Both tables were measured rather than transcribed (Wireshark's source is not on the
   build host): each entry round-tripped through ``editcap -F pcap -T <encap>`` and read
   back with ``tshark``. ``ENCAP_TYPE_TO_LINKTYPE`` grows to cover every measured
-  encapsulation with no DLT serving two keys, and ``FILTER_NAME_TO_LINKTYPE`` grows
-  from :pr:`838`'s hand-built entries, every root filter name single-DLT across the
-  encapsulations this host's Wireshark can write.
+  encapsulation whose DLT has a ``LinkType`` member, and ``FILTER_NAME_TO_LINKTYPE``
+  grows from :pr:`838`'s hand-built entries to every root filter name, pseudo-protocol
+  roots aside, that resolved to a single ``LinkType`` member across the encapsulations
+  this host's Wireshark can write.
   ``pcapkit/toolkit/pyshark.py`` reaches full coverage under new tests that fail
-  against the unfixed tree; live pyshark parsing stays unexercised, since ``pyshark.FileCapture`` does not run on Python 3.14 (:pr:`850`).
+  against the unfixed tree; live pyshark parsing stays unexercised, since
+  ``pyshark.FileCapture`` does not run on Python 3.14 (:pr:`850`).
 * ``pypcapfile``'s ``tcp_reassembly`` set ``last`` one past the segment.
   ``TCP_Packet.last`` is inclusive, and the other adapters set
   ``seqnum + len(payload) - 1``, as this one now does too (:issue:`1100`).
@@ -2569,8 +2580,8 @@ Added
 
 * ``pcapkit.utilities.logging`` as a real interface: ``get_logger()`` for per-module
   children, ``configure()`` to set level, handler, stream, format or propagation at
-  runtime, ``reset()`` to return to library-neutral, and ``ensure_output()``. Modules
-  now log under their own ``__name__``, so a consumer can silence
+  runtime, ``reset()`` to return to library-neutral, and ``ensure_output()``. Each
+  module that logs now does so under its own ``__name__``, so a consumer can silence
   ``pcapkit.foundation.registry`` while keeping ``pcapkit.foundation.extraction``
   (:pr:`384`).
 * ``pcapkit.utilities.config``, one module for every tunable limit, each read once
@@ -2638,34 +2649,32 @@ Fixed
   fourth *positional* argument, which is ``count``, not ``flags``: substitution capped
   at 8 matches, and a ``DeprecationWarning`` on Python 3.13+ (a future ``TypeError``).
   Found by an AST sweep rather than grep, since most put the flag on a continuation
-  line. The flag moves to ``flags=`` at every site (``default.py`` plus
-  one each in ``hip/eddsa_curve.py``, ``http/frame.py``, ``http/method.py``,
+  line. The flag moves to ``flags=`` at every site, in ``default.py``,
+  ``hip/eddsa_curve.py``, ``http/frame.py``, ``http/method.py``,
   ``http/status_code.py``, ``ipv4/router_alert.py``, ``ipv6/option.py``,
   ``ipv6/router_alert.py``, ``ipv6/tagger_id.py``, ``reg/ethertype.py``,
-  ``tcp/flags.py``, ``tcp/mp_tcp_option.py`` and ``tcp/option.py``). Behaviour
+  ``tcp/flags.py``, ``tcp/mp_tcp_option.py`` and ``tcp/option.py``. Behaviour
   preserving: the shared pattern (``r'\r*\n'``) has no MULTILINE-sensitive anchor, so
   no ``const/`` regeneration was needed (:issue:`796`).
-* ``main`` was red (:issue:`866`): 12 tests across three files, all ``RecursionError``
-  (``tests/const/test_const_enum_lookup.py``; two ``test_const_enum_no_mint.py``
-  methods, two registries each; 7 of the 12 in
-  ``tests/protocols/misc/test_pcapng_unit.py``).
-  ``pcapkit/vendor/pcapng/record_type.py`` and ``secrets_type.py`` rendered a two-line
+* ``main`` was red (:issue:`866`) with ``RecursionError`` in
+  ``tests/const/test_const_enum_lookup.py``, ``tests/const/test_const_enum_no_mint.py``
+  and ``tests/protocols/misc/test_pcapng_unit.py``.
+  ``pcapkit/vendor/pcapng/record_type.py`` and ``secrets_type.py`` rendered a
   ``_missing_`` body whose first line did not return:
   ``cls._unregistered_member(value, 'Unassigned')`` followed by ``return cls(value)``.
   That was harmless while the first line was ``extend_enum(...)``, which registers the
   member so ``cls(value)`` found it; :pr:`861` (above) replaced it with
   ``_unregistered_member``, which deliberately does not register, so ``cls(value)``
   missed and re-entered ``_missing_``. :pr:`861` fixed the *generated* modules but
-  not the two *crawlers*, so :pr:`861`'s CI stayed green until a live regeneration
-  reintroduced the defect; :pr:`861`'s review had sampled only some
-  regenerations, missing these two. Both crawlers now collapse to the single returning
-  line the other registries use, and the two const files are regenerated. A new guard
-  at the
-  crawler-emission layer requires a hard-coded ``_missing_`` body to end in a return
-  and no emitted line to re-enter ``_missing_`` for the same value -- deliberately
-  narrower than "every emitted line must return", which ``Vendor.process``'s shape
-  legitimately breaks. The guard sees only some crawlers; the rest are covered
-  behaviourally. Closes :issue:`866` (:pr:`867`).
+  not these *crawlers*, so :pr:`861`'s CI stayed green until a live regeneration
+  reintroduced the defect; :pr:`861`'s review had sampled only some regenerations,
+  and neither crawler's was among them. Both crawlers now collapse to the single
+  returning line the other registries use, and their const files are regenerated. A
+  new guard at the crawler-emission layer requires a hard-coded ``_missing_`` body to
+  end in a return and no emitted line to re-enter ``_missing_`` for the same value --
+  deliberately narrower than "every emitted line must return", which
+  ``Vendor.process``'s shape legitimately breaks. The guard sees only some crawlers;
+  the rest are covered behaviourally. Closes :issue:`866` (:pr:`867`).
 * ``python -m pcapkit.vendor <target>`` could not fail: ``run()`` swallowed
   every crawler exception as a filterable ``VendorRuntimeWarning`` and
   ``main()`` always returned ``0``, so a broken crawler regenerating nothing
@@ -2737,13 +2746,14 @@ Fixed
   which Wikipedia requires, and the PCAP-NG crawlers read draft ``-03``, the one
   revision that reproduces their constant files (:issue:`518`, :pr:`524`).
 * ``pcapkit.vendor`` and ``pcapkit.vendor.mh`` list ``MH_HandoverInitiateStatus``
-  in ``__all__``, where both named ``MH_HandoverACKStatus`` twice, so a bare
+  in ``__all__``, where each repeated ``MH_HandoverACKStatus`` in its place, so a bare
   ``pcapkit-vendor`` run reaches its crawler (:pr:`531`).
 * with no terminal on stdin, a failed fetch re-raises rather than waiting for an
   operator to save the page, a wait that printed without end under a closed or
   piped stdin (:issue:`522`, :pr:`542`).
 * each crawler derives its ``const/`` path from the ``pcapkit.vendor`` root, so a
-  crawler nested two levels down writes to the right file (:pr:`741`).
+  crawler at any depth, such as ``vendor/reg/apptype/tcp.py``, writes to the right file
+  (:pr:`741`).
 * ``pcapkit.vendor.ipx`` names its ``sys.path`` temporary ``_path`` rather than
   ``path``, which read as a public name of the package, and the public-API test
   covers ``pcapkit.vendor``, which it used to skip (:issue:`1772`, :pr:`1779`).
@@ -2761,7 +2771,7 @@ Added
   :pr:`504`).
 * coverage for the untested half of the :issue:`431` accommodation: a TCP or IPv4
   option whose declared length asks for more data than the capture holds, pinning that
-  it still parses with the short read zero-padded rather than rejected. The one test
+  it still parses with the short read zero-padded rather than rejected. The test
   :issue:`431` left covers only an option area with no data behind it; a candidate fix
   for :issue:`554` turned the untested half into an unwrapped ``FieldValueError`` while
   the rest of the suite stayed green (:pr:`571`, :issue:`572`).
@@ -2779,18 +2789,19 @@ Added
   canonical BSD-3-Clause (:pr:`615`).
 * ``examples/generators/endian.py``, and the byte-order tests that read what it
   writes. There was no big-endian ``.pcap`` in the repository, which is why
-  :issue:`605` survived its own code review: the one-character fix left the corrected
-  path as untested as the broken one. The generator writes ``big_endian.pcap`` (magic
-  ``a1 b2 c3 d4``), ``big_endian_nanosecond.pcap`` (``a1 b2 3c 4d``, the first fixture
-  to take that branch of the magic-number table) and ``little_endian.pcap``
-  (``d4 c3 b2 a1``), carrying the *same records* in each, so tests can assert
+  :issue:`605` survived its own code review: the fix to a misspelt key left the
+  corrected path as untested as the broken one. The generator writes
+  ``big_endian.pcap`` (magic ``a1 b2 c3 d4``), ``big_endian_nanosecond.pcap``
+  (``a1 b2 3c 4d``, the first fixture to take that branch of the magic-number table)
+  and ``little_endian.pcap`` (``d4 c3 b2 a1``), carrying the *same records* in each,
+  so tests can assert
   that byte order makes no difference to what is read rather than only matching
   numbers written in a test. Frame 3 is captured short (1200 octets on the wire,
   96-octet ``snaplen``), so ``incl_len`` and ``orig_len`` differ and cannot both be
-  satisfied by one byte-swapped value. ``test_frame_endian_runtime.py`` drives all
-  three through ``extract()`` and derives expectations by walking each file's record
+  satisfied by one byte-swapped value. ``test_frame_endian_runtime.py`` drives each
+  file through ``extract()`` and derives expectations by walking its record
   chain with ``struct``; a unit-tier case in ``test_header_frame_unit.py`` builds a
-  two-record big-endian capture in memory, so the fixture-free selection CI runs on
+  big-endian capture in memory, so the fixture-free selection CI runs on
   every push catches it too. Each fails on the unfixed tree (the
   fixture-backed ones by that ``ValueError``, the in-memory one by
   ``AssertionError: 3106905 != 1500000000``) while the little-endian twin passes on
@@ -2901,45 +2912,44 @@ Changed
 * ``engine='pyshark'`` had no CI job driving it through a real ``tshark``-parsed
   capture. ``pypcap-parity`` installs ``pyshark`` but its ``apt-get install`` named no
   ``tshark`` package, so ``PyShark.unsupported_reason()`` declined the engine, the
-  extractor fell back to the built-in parser, and the one real-extraction assertion,
+  extractor fell back to the built-in parser, and the only real-extraction assertion,
   ``assertGreater(extractor.length, 0)``, passed against the fallback's output: a vacuous
   pass invisible in every skip count. ``pypcap-parity`` now installs ``tshark`` with the
   debconf pre-seed ``engine-tests`` carries, and the test proves which engine ran (no
   ``EngineWarning``, ``extractor._exnam == 'pyshark'``, a ``PyShark`` instance), as the
   PyPCAP parity test does. Only ``tests/integration/test_engine_runtime.py`` and
   ``test_engine_parity.py`` change; the length assertion is kept (:pr:`846`).
-* ``engine-tests`` ran one Python-version leg per interpreter regardless of which
+* ``engine-tests`` ran a Python-version leg per interpreter regardless of which
   engines that interpreter could install, so ``pyproject.toml``'s
   ``PyPCAPFile = ["pypcapfile; python_version < '3.12'"]`` marker resolved to
   *nothing* on 3.12--3.14, yet the ``Engines Python 3.12/3.13/3.14`` legs passed and,
   once required, gated merges while exercising an engine that was never installed.
-  Rebuilt as a Python x engine matrix (6 interpreters x 6 engines, 36 cells after 10
-  ``include`` overrides) with three outcomes: **26** ``supported`` cells that install
-  through the real extra and must pass; **6** ``unsupported`` cells (``PyPCAPFile`` on
-  3.12--3.15, ``PyShark`` on 3.14/3.15) installed by raw ``pip install`` to bypass the
-  marker and assert the engine's own ``PYTHON_CEILING`` decline; and **4**
-  ``not-installable`` cells (``PyPCAP`` on 3.12--3.15) where a genuine C-extension
-  build failure is logged and the test step skipped. The install step never passes
-  silently in either direction. 3.15 is ``continue-on-error`` throughout. Job names
+  Rebuilt as a Python x engine matrix in which every cell has an expected outcome:
+  ``supported`` cells install through the real extra and must pass; ``unsupported``
+  cells (``PyPCAPFile`` on 3.12--3.15, ``PyShark`` on 3.14/3.15) install by raw
+  ``pip install`` to bypass the marker and assert the engine's own
+  ``PYTHON_CEILING`` decline; and ``not-installable`` cells (``PyPCAP`` on
+  3.12--3.15) log a genuine C-extension build failure and skip the test step. The
+  install step never passes silently in either direction. Python 3.15 is
+  ``continue-on-error`` throughout. Job names
   change shape (``Engines Python X`` becomes ``Engines Python X (engine)``), so the
   branch-protection ruleset's required-check list was updated in the same window, lest
   a required check that stopped existing block every merge (:pr:`849`).
-* Ruleset ``23497679``'s ``required_status_checks`` names 22 exact check contexts, and
+* Ruleset ``23497679``'s ``required_status_checks`` names exact check contexts, and
   GitHub rulesets match literally with no wildcard, so the list needs hand-editing on
-  every matrix change. Five of the 22, the old ``Engines Python <version>`` names, are
-  dead since :pr:`849`; the five ``Compat Python 3.10``-``3.14`` names stay live,
-  emitted by ``python-compatibility.yml``, and are untouched. Adds one job,
+  every matrix change. The old ``Engines Python <version>`` names in it are dead since
+  :pr:`849`; the ``Compat Python 3.10``-``3.14`` names stay live, emitted by
+  ``python-compatibility.yml``, and are untouched. Adds a job,
   ``required-checks`` (context ``Required checks passed``), depending on
   ``[test, integration, engine-tests, pypcap-parity]`` with
   ``if: always() && inputs.gate-only != true`` and an explicit per-dependency check
   that fails loudly, naming the job, on anything but ``success``: a bare ``needs:``
   list would leave it *skipped* rather than failed when a dependency failed, and
-  GitHub's docs list a skipped required check as passing. That one context is meant to
-  replace 17 of the ruleset's 22 entries (``test``, ``integration``, ``Engines``,
-  ``pypcap-parity``) once the ruleset is updated separately, as a repository setting
-  outside the change; the five ``Compat`` names are excluded from the replacement. One
-  file, ``.github/workflows/unit-tests.yml``, 167 lines added; no library or test code
-  (:pr:`856`).
+  GitHub's docs list a skipped required check as passing. That context is meant to
+  replace the ruleset's ``test``, ``integration``, ``Engines`` and ``pypcap-parity``
+  entries once the ruleset is updated separately, as a repository setting outside the
+  change; the ``Compat`` names are excluded from the replacement. Only
+  ``.github/workflows/unit-tests.yml`` changes; no library or test code (:pr:`856`).
 * the prose the post-:issue:`719` defect wave added or touched, checked against the
   code; no code changes. ``MesgIDOption.seconds`` in the Mobility Header schema said
   seconds since 1970 where it holds an :rfc:`1305` NTP count from 1900;
@@ -3058,9 +3068,8 @@ Fixed
   nothing, and automation was considered and rejected, since automating a value that
   need not be current is worse than not carrying it. ``conf.py`` is untouched (a
   self-maintaining footer showing a range is conventional and correct). The licence
-  body is unaltered: one hunk, on the copyright line, and the ``DAMAGE.`` that
-  :pr:`615` repaired
-  from ``DAMAGE.s`` is still clean (:pr:`630`).
+  body is unaltered: the change is confined to the copyright line, and the ``DAMAGE.``
+  that :pr:`615` repaired from ``DAMAGE.s`` is still clean (:pr:`630`).
 * ``CITATION.cff`` shipped in no source distribution. ``MANIFEST.in`` has an ``include``
   each for ``README.md``, ``LICENSE`` and ``CHANGELOG.md`` but none for the citation
   file,
@@ -3080,11 +3089,9 @@ Fixed
   ``tests/project/test_bump_version.py`` (the gate :pr:`625` added for hand-authored
   bumps) run against an unpacked sdist, where it skipped itself with "CITATION.cff is
   not
-  shipped in the source distribution". ``python -m build --sdist`` gives
-  one more archive entry after (``pypcapkit-1.5.0b4/CITATION.cff`` the only
-  difference), the
-  shipped copy is byte-identical, and ``twine check --strict`` passes on both
-  (:pr:`631`).
+  shipped in the source distribution". ``python -m build --sdist`` now differs from
+  before only by the archive entry ``pypcapkit-1.5.0b4/CITATION.cff``, the shipped copy
+  is byte-identical, and ``twine check --strict`` passes on both (:pr:`631`).
 * inaccurate claims in the :pr:`630` entry above, caught in review after :pr:`630`
   had merged; both concern the history of ``LICENSE``, which is untouched here. 2017 was
   and remains the right answer, so this is a changelog-prose correction. The entry said
@@ -3104,8 +3111,8 @@ Fixed
   from
   opensource.org's template to choosealicense.com's, whose first line is that title and
   which carries the ``Copyright (c) [year], [fullname]`` comma this file uses. The error
-  came from generalising the pre-BSD era off two blobs that were the same file
-  (``bc836cfa2^:LICENSE`` and ``1c69341dc:LICENSE``); enumerating every commit that
+  came from generalising the pre-BSD era off the blobs ``bc836cfa2^:LICENSE`` and
+  ``1c69341dc:LICENSE``, which were the same file; enumerating every commit that
   touched ``LICENSE`` caught it (:pr:`638`).
 * the release workflow published to PyPI and to Anaconda with nothing a human had to
   approve. ``create-release.yml``'s ``pypi`` job had ``environment: release`` commented
@@ -3114,7 +3121,7 @@ Fixed
   ``conda`` job had no ``environment:`` at all. Neither needed a tag: the workflow also
   fires on completion of ``Vendor Update``, so a scheduled registry crawl that bumped
   the
-  version was enough to publish to two public indexes, a median three minutes from
+  version was enough to publish to both public indexes, a median three minutes from
   bump to
   upload. Every job that reaches outside the run is now gated: ``github`` on
   ``github-release`` (the GitHub Release and the ``v*`` tag), ``tag`` on ``conda-tag``
@@ -3135,12 +3142,11 @@ Fixed
   ``git push`` may omit an ``environment:``, so a publishing job added later without a
   gate
   fails rather than ships (:issue:`641`).
-* test comments stated an exact count of committed captures under
-  ``examples/captures/``, a number that drifts whenever the tracked set changes and in
-  one case was wrong when written: ``tests/_tiers.py`` said "six,"
-  ``tests/test_tier_guard.py`` "the moment a seventh capture is committed," and
-  ``tests/integration/_helpers.py`` "four," which undercounted on the day it was
-  written. Each now describes the invariant (``_tiers.py``: "the moment somebody
+* test comments in ``tests/_tiers.py``, ``tests/test_tier_guard.py`` and
+  ``tests/integration/_helpers.py`` stated an exact count of committed captures under
+  ``examples/captures/``, a number that drifts whenever the tracked set changes, and
+  ``_helpers.py``'s undercounted on the day it was written. Each now describes the
+  invariant (``_tiers.py``: "the moment somebody
   commits another capture... or stops
   committing one"; ``_helpers.py``: "...are fixtures -- some of them committed --...";
   ``test_tier_guard.py`` drops its ordinal). Prose-only, verified with
@@ -3165,11 +3171,12 @@ Fixed
   unlisted deliberately, so generic helpers such as ``warn`` do not arrive through
   ``import *`` (:issue:`1136`).
 * ``examples/generators/options.py`` wrote every HTTP/2 sample frame on stream 0, which
-  :rfc:`9113` forbids for ``DATA``, ``HEADERS`` and the other stream-level types, so six
-  of the ten frames in ``options-transport.pcap`` decoded as ``TCP:Raw``.
+  :rfc:`9113` forbids for ``DATA``, ``HEADERS`` and the other stream-level types, so
+  those frames in ``options-transport.pcap`` decoded as ``TCP:Raw``.
   ``_httpv2_build`` now puts ``SETTINGS``, ``PING`` and ``GOAWAY`` on stream 0 and every
-  other type on stream 1, with ``PUSH_PROMISE`` promising stream 2, and all ten decode
-  as ``TCP:HTTP/2``; no other generated capture changes (:issue:`1156`).
+  other type on stream 1, with ``PUSH_PROMISE`` promising stream 2, and every HTTP/2
+  sample frame decodes as ``TCP:HTTP/2``; no other generated capture changes
+  (:issue:`1156`).
 * ``make_samples.py`` builds fixtures from the tree it runs in, not the shared
   checkout (:issue:`1343`, :pr:`1388`), and retries the Wireshark sample downloads on
   429, 5xx and timeouts (:issue:`1658`, :pr:`1659`).
