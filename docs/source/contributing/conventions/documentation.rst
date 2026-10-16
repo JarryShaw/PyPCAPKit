@@ -298,8 +298,8 @@ Format and Mechanics
    ruled this on :issue:`719`, correcting a blanket *always* ``.rst`` that had been in
    circulation: the Sphinx documentation is reST, and the other documents --
    the READMEs included -- are Markdown where that applies. ``CONTRIBUTING.md``'s own
-   *Documentation* section records the same split. Neither ``global-include`` in
-   :file:`MANIFEST.in` reaches Markdown, so the two READMEs under :file:`examples/`
+   *Documentation* section records the same split. The ``global-include`` in
+   :file:`MANIFEST.in` does not reach Markdown, so the READMEs under :file:`examples/`
    ship through ``recursive-include examples *.md``, and any other Markdown file
    ships only if setuptools or an ``include`` line adds it.
 *  **Prose names the real defining module, not a re-export.** One strand of the
