@@ -14,7 +14,9 @@ classes :class:`~pcapkit.corekit.infoclass.MultiInfo` and
    :members:
    :show-inheritance:
 
-   :param dict_: Source data, read as by :meth:`~pcapkit.corekit.infoclass.Info.from_dict`.
+   :param dict\_: Source data, read as by :meth:`~pcapkit.corekit.infoclass.Info.from_dict`,
+      except that no value is rebuilt into the :class:`~pcapkit.corekit.infoclass.Info`
+      subclass its key's annotation names.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
    .. autoattribute:: __additional__

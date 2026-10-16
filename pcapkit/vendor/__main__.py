@@ -85,8 +85,8 @@ def _snapshot_and_restore(vendor: 'Type[Vendor]') -> 'Iterator[None]':
     returns :data:`True`, the file is replaced, and nothing warns that no
     snapshot was ever taken.
 
-    That is one way this function can decline to protect a target, and it
-    is not symmetric with the other: :func:`tempfile.mkstemp`
+    That is one way this function can decline to protect a target. The
+    other, which does not mirror it, is :func:`tempfile.mkstemp`
     failing to create the backup file -- most commonly a destination
     directory with no write permission, which needs a *directory*-level
     operation this function performs (creating a new entry) that

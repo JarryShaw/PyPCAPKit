@@ -17,8 +17,9 @@ compiled ASN.1, at ``pycrate_asn1dir/NGAP.py``'s ``NGAP_Constants`` class (one
 or ``ProtocolIE-ID`` open type it belongs to) -- and it is the very same
 dependency :mod:`pcapkit.protocols.application.ngap` already needs installed to
 decode NGAP at all. So this crawler reads that already-installed package
-directly instead of fetching anything over the network: :attr:`~ProcedureCode.LINK`
-is :obj:`None` and :meth:`ProcedureCode._request` imports ``pycrate_asn1dir.NGAP``
+directly instead of fetching anything over the network: it leaves
+:attr:`~pcapkit.vendor.default.Vendor.LINK` at its :obj:`None` default, and
+:meth:`ProcedureCode._request` imports ``pycrate_asn1dir.NGAP``
 in place of :meth:`~pcapkit.vendor.default.Vendor._request`'s HTTP round trip.
 No network access happens at generation time -- only, if at all, whenever
 ``pip install pypcapkit[NGAP]`` last ran.
