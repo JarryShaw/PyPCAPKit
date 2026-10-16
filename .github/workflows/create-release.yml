@@ -129,12 +129,12 @@ concurrency:
 # pair does not. A cancelled ``tag`` would otherwise send ``conda`` into its
 # check that ``conda-<version>+0`` names this run's commit, for a tag ``tag``
 # never pushed, trading a clean skip for a failed step. ``version_check`` is held
-# to a stricter bar still: all of them require ``needs.version_check.result ==
-# 'success'`` with no ``|| 'skipped'``, since it produces the evidence the gates
-# below read, and a skipped or cancelled ``version_check`` leaves them nothing
-# to decide on. Either spelling bypasses the default ``success()`` GitHub
-# Actions would otherwise prepend to an ``if:`` that does not itself call a
-# status-check function.
+# to a stricter bar still: ``tag``, ``pypi`` and ``conda`` all require
+# ``needs.version_check.result == 'success'`` with no ``|| 'skipped'``,
+# since it produces the evidence the gates below read, and a skipped or
+# cancelled ``version_check`` leaves them nothing to decide on. Either
+# spelling bypasses the default ``success()`` GitHub Actions would otherwise
+# prepend to an ``if:`` that does not itself call a status-check function.
 #
 # See ``release_status`` at the bottom of this file for the other half: a job
 # that runs whenever the run itself was not cancelled (``if: !cancelled()``,
@@ -148,9 +148,9 @@ concurrency:
 # that the gate -- a ~20-minute full-suite run -- is spent only when something
 # is going to be published. Every successful Vendor Update triggers this
 # workflow, and most of them leave ``__version__`` alone, so the gate used to
-# run on commits Unit Tests had already passed only for every job below to
-# skip (eight times on 2026-10-05 alone). ``unit-tests`` runs when the ref
-# is a ``v*`` tag or *any* of the evidence outputs is not ``'true'``,
+# run on commits Unit Tests had already passed only for every publisher
+# below to skip (eight times on 2026-10-05 alone). ``unit-tests`` runs when
+# the ref is a ``v*`` tag or *any* of the evidence outputs is not ``'true'``,
 # which covers every case in which ``github``, ``tag``, ``pypi`` or ``conda``
 # could run: each of them runs only on a ``v*`` ref or on its own evidence
 # reading ``'false'``. ``!= 'true'`` rather than ``== 'false'`` is deliberate --

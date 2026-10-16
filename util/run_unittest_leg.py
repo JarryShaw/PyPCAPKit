@@ -53,9 +53,9 @@ as a module-level constant here. :mod:`tests.protocols` is the largest leg;
 its timings, on different bases (a local serial run, and CI before and
 after it was sharded), are tabulated in that workflow's own comment rather than
 restated here. At the other end sit
-:mod:`tests.dumpkit` and :mod:`tests.interface`, small legs with no clean
-ordering between them by test count or by wall time (~39s and ~37s). Neither
-small leg is :mod:`tests.const` (~268s), which is larger by both measures.
+:mod:`tests.dumpkit` and :mod:`tests.interface`, small legs within a few
+seconds of each other in wall time (~39s and ~37s). Neither small leg is
+:mod:`tests.const` (~268s), which is larger by test count as well.
 
 Peak RSS was measured for the three cheapest legs only, via
 :func:`resource.getrusage` on ``RUSAGE_CHILDREN`` in this venv:
