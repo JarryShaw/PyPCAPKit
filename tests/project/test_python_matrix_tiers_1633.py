@@ -176,10 +176,6 @@ PROSE_SCAN = (
     ('util', ('*.py',)),
 )
 PROSE_FILES = ('pyproject.toml', 'README.md', 'SECURITY.md', 'CONTRIBUTING.md', 'Makefile')
-#: Spelled-out counts, as the workflows page writes them.
-WORDS = {'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
-         'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
-         'eleven': 11, 'twelve': 12, 'thirteen': 13, 'fourteen': 14, 'fifteen': 15}
 
 
 def job(name: 'str', job_id: 'str') -> 'dict[str, Any]':
@@ -764,27 +760,28 @@ class TestTheProseFollowsTheTiers(unittest.TestCase):
     """What the docs and comments say about the matrices, read against the matrices.
 
     Nothing executes these, so a tier change leaves them stale without failing
-    anything else: round one of #1633 left the workflows page counting five
-    ``test`` legs where there are eight, and six comments naming 3.10 as CI's floor
-    or 3.15 as allowed to fail.
+    anything else: round one of #1633 left the workflows page miscounting the
+    ``test`` legs, and comments naming 3.10 as CI's floor or 3.15 as allowed to fail.
 
     """
 
-    def test_the_workflows_page_counts_each_matrix_jobs_legs(self) -> None:
+    def test_the_workflows_page_names_each_matrix_job_gate_only_skips(self) -> None:
+        """The ``gate-only`` paragraph's matrix jobs, against ``unit-tests.yml``'s.
+
+        The paragraph counted each job's legs until #1811 (#1103's ruling: a count
+        drifts, and the tiers moved these). What it still claims is which matrix jobs
+        a ``gate-only`` caller skips, so a matrix job added, dropped or no longer
+        gated out fails here.
+        """
         page = prose(ROOT / 'docs' / 'source' / 'contributing' / 'workflows.rst')
-        engines = {version for _, versions in engine_inputs() for version in versions.split()}
-        claims = {
-            r'``test`` \((\w+) Python legs': len(legs('unit-tests.yml', 'test')),
-            r'``test-ktlo`` \((\w+)\)': len(legs('unit-tests.yml', 'test-ktlo')),
-            r'``integration`` \((\w+)\)': len(legs('unit-tests.yml', 'integration')),
-            r'``integration-ktlo`` \((\w+)\)': len(legs('unit-tests.yml', 'integration-ktlo')),
-            r'``pypcap-parity`` \((\w+)\)': len(legs('unit-tests.yml', 'pypcap-parity')),
-            r'``pypcap-parity-ktlo`` \((\w+)\)': len(legs('unit-tests.yml', 'pypcap-parity-ktlo')),
-            r'each looping over (\w+) Python versions': len(engines),
-        }
-        for pattern, count in claims.items():
-            with self.subTest(claim=pattern):
-                self.assertEqual([WORDS.get(word) for word in re.findall(pattern, page)], [count])
+        listed = re.findall(r'It skips the rest -- the matrix jobs, (.*?), each of which has already run', page)
+        self.assertEqual(len(listed), 1, 'the page no longer lists the matrix jobs gate-only skips')
+        named = re.findall(r'``([\w-]+)``', listed[0])
+        skipped = [job_id for job_id, spec in workflow('unit-tests.yml')['jobs'].items()
+                   if 'matrix' in (spec.get('strategy') or {})
+                   and 'inputs.gate-only != true' in str(spec.get('if', ''))]
+        self.assertTrue(skipped, 'no matrix job of unit-tests.yml is gated out; the check below would be vacuous')
+        self.assertEqual(sorted(named), sorted(skipped))
 
     def test_no_retired_tier_claim_is_left_in_the_tree(self) -> None:
         paths = [ROOT / name for name in PROSE_FILES if (ROOT / name).is_file()]

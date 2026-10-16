@@ -376,14 +376,17 @@ class SentinelPopulationTests(_ReimportCase):
                 self.assertRegex(name, pattern)
 
     def test_conventions_doc_lists_every_sentinel_in_the_tree(self) -> 'None':
-        """The doc said "three" and listed three; ``_Absent`` was the fourth.
+        """The doc once stated a count and listed that many; ``_Absent`` was missing.
 
-        Asserting the names rather than only the count, because a count corrected
-        without the row -- or a row added without the count -- is the same defect
-        in a different place. The "Defined in" column now names
-        :data:`CANONICAL_MODULE` for every row, since GitHub issue #911's housing
-        move gave all four the same defining module -- checked once, outside the
-        loop, rather than once per row against a value that no longer varies.
+        Asserting the names, because a row missing from the table is the defect, and
+        the page now states no count for a row to disagree with (#1103's ruling,
+        #1811). The table's instance column is read back against every singleton
+        :data:`CANONICAL_MODULE` defines, both ways, so a sentinel added there without
+        a row, or a row left for one removed, fails here. The "Defined in" column
+        names :data:`CANONICAL_MODULE` for every row, since GitHub issue #911's
+        housing move gave every sentinel the same defining module -- checked once,
+        outside the loop, rather than once per row against a value that no longer
+        varies.
 
         """
         section = _sentinel_section()
@@ -394,8 +397,13 @@ class SentinelPopulationTests(_ReimportCase):
                 self.assertIn(f'``{type_.__name__}``', section)
         self.assertIn(CANONICAL_MODULE, section)
 
-        self.assertIn('four in the tree follow it', section)
-        self.assertNotIn('three in the tree follow it', section)
+        canonical = importlib.import_module(CANONICAL_MODULE)
+        defined = {name for name, value in vars(canonical).items()
+                   if not isinstance(value, type) and type(value).__module__ == CANONICAL_MODULE}
+        # The list-table's body: the block after its options, up to the next blank line.
+        table = section.split('.. list-table::', 1)[1].split('\n\n')[1]
+        rows = set(re.findall(r'(?m)^   \* - ``(\w+)``$', table))
+        self.assertEqual(rows, defined)
         self.assertNotIn('The three sentinels deliberately differ', section)
 
     def test_conventions_doc_records_that_only_the_object_is_exported(self) -> 'None':

@@ -3,7 +3,7 @@ GitHub Actions Workflows
 
 .. important::
 
-   The thirteen workflows under :file:`.github/workflows/` trigger each other, and
+   The workflows under :file:`.github/workflows/` trigger each other, and
    the chain that results is not visible from any single file -- reading one
    ``on:`` block never shows what a *different* workflow's completion goes on
    to start. This page is the repository-wide graph. The release *pipeline*
@@ -295,15 +295,13 @@ repository target the same reusable workflow, with the same input:
 * ``.github/workflows/deploy-pages.yml:55`` -- job ``unit-tests`` calls
   ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
 
-``gate-only: true`` selects **three** of ``unit-tests.yml``'s **fourteen** jobs,
-not one: ``gate`` (the full suite, on ``latest``), ``changelog``
-(checks ``CHANGELOG.md`` against its source entry) and ``python-versions``,
-which reads ``gate``'s version (see `Python Versions`_ below). It skips the other
-**eleven** -- the eight matrix jobs, ``test`` (five Python legs), ``test-ktlo``
-(four), ``integration`` (five), ``integration-ktlo`` (four),
-``engine-tests`` (one job for each of five engines, each looping over six
-Python versions), ``pypcap-parity`` (one), ``pypcap-parity-ktlo`` (one) and
-``unittest-ordering`` (eleven matrix cells), each of which has already run once for this commit
+``gate-only: true`` selects not only ``unit-tests.yml``'s ``gate`` (the full
+suite, on ``latest``) but also ``changelog`` (checks ``CHANGELOG.md`` against its
+source entry) and ``python-versions``, which reads ``gate``'s version (see
+`Python Versions`_ below). It skips the rest -- the matrix jobs, ``test``,
+``test-ktlo``, ``integration``, ``integration-ktlo``, ``engine-tests`` (a job per
+engine, each looping over its Python versions), ``pypcap-parity``,
+``pypcap-parity-ktlo`` and ``unittest-ordering``, each of which has already run once for this commit
 from Unit Tests' own ``push`` trigger (and, all but ``unittest-ordering``,
 which runs on ``main`` pushes only, from its ``pull_request`` trigger), so
 running any of them again per caller would
@@ -603,7 +601,7 @@ in the supported tier, so its cells block on every run.
 Required Status Checks
 ----------------------
 
-Ruleset ``23497679`` on ``main`` requires six contexts, with
+Ruleset ``23497679`` on ``main`` requires the contexts below, with
 ``strict_required_status_checks_policy: true`` (a branch must be up to date
 with ``main`` before it can merge, not merely green). Each was found by
 grepping every workflow file for its name:
@@ -640,14 +638,14 @@ between the tiers below means editing the ruleset in the same change.
 ``Required checks passed`` is defined by exactly one job
 (``unit-tests.yml:1937``). ``Compat Python`` is defined by one, the
 ``compatibility`` job in ``python-compatibility.yml`` (``:60``), whose matrix
-(``:74``) comes from :file:`.github/python-versions.toml`: the five required legs
-are its supported tier (``python-versions.toml:20-24``), and its four KTLO legs
+(``:74``) comes from :file:`.github/python-versions.toml`: the required legs
+are its supported tier (``python-versions.toml:20-24``), and its KTLO legs
 (``python-versions.toml:16-19``) have names ending in ``(KTLO)``, so no required
 context matches one. A comment at
 ``unit-tests.yml:1849`` mentions the string without defining it.
 
 ``Required checks passed`` is an aggregate, not a single check run. The ruleset
-requires it and the five ``Compat Python 3.11``-``3.15`` legs, nothing else, as
+requires it and the ``Compat Python 3.11``-``3.15`` legs, nothing else, as
 ``unit-tests.yml``'s own comment (``unit-tests.yml:1848-1858``) records. It
 ``needs:`` the gating jobs of ``unit-tests.yml`` -- ``test``, ``integration``,
 ``engine-tests`` and ``pypcap-parity``, plus ``changes`` and ``project-tests``
@@ -721,8 +719,8 @@ are they in ``pypcap-parity``, which also runs on ``ubuntu-latest``; none of the
 was measured on that job.
 
 The **experimental** tier is free-threaded CPython and GraalPy, spelt as
-setup-python reads them (``3.14t``, ``graalpy-25.4``). Each runs one leg of
-``experimental`` (two), the one matrix job of :file:`.github/workflows/experimental.yml`
+setup-python reads them (``3.14t``, ``graalpy-25.4``). Each runs a leg of
+``experimental``, the matrix job of :file:`.github/workflows/experimental.yml`
 ("Experimental Tests"), named ``Python <version> (experimental)``, and nothing
 else: no ``integration``, ``Compat``, wheel or conda leg, so never a required
 context. They were legs of ``test`` until `#1732
@@ -856,8 +854,8 @@ through ``fromJSON``, and each single-interpreter job reads ``latest``.
 off ``latest``, with its reason in the comment above it, such as the conda
 jobs' ``!= '3.15'``. ``tests/project/test_python_versions_1660.py`` fails on a
 pin the file does not list, on an exemption with no comment, and on a
-classifier, doc or comment that no longer matches the file -- the coverage
-leg's version, the release checks' counts. Its tests, and the other tests that
+classifier, doc or comment that no longer matches the file -- a tier range,
+the coverage leg's version. Its tests, and the other tests that
 read the file, skip on the KTLO interpreters, which have no ``tomllib``. Two
 edits it names rather than makes: a new ``pypi`` KTLO leg needs its own
 ``ktlo_*`` output for ``release_status``, and a pre-release leg needs

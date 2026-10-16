@@ -27,7 +27,7 @@ step outputs. Four things are pinned here:
   script are facts about the engines, not pins, and are not read.)
 * **The prose follows the file.** The classifiers, README, SECURITY.md, the
   docs' version lists, the bug-report template, and the comments and docs
-  naming the coverage leg's version or the release checks' counts. None of
+  naming the coverage leg's or the sdist leg's version. None of
   them is a workflow: the weekly job that regenerates them
   (:file:`util/update_python_versions.py`) cannot push one, so workflow
   comments name the tiers instead, as
@@ -871,9 +871,6 @@ class TestTheProseFollowsTheFile(unittest.TestCase):
         cls.latest = data['latest']
         cls.supported = script().tier(data, 'cpython', 'supported')
         cls.ktlo = script().tier(data, 'cpython', 'ktlo')
-        values = script().outputs(data)
-        cls.wheels = len(values['pypi-wheels'].split())
-        cls.conda = len(json.loads(values['conda']))
 
     def test_the_classifiers_name_the_supported_tier_and_both_implementations(self) -> None:
         text = (ROOT / 'pyproject.toml').read_text(encoding='utf-8')
@@ -926,7 +923,7 @@ class TestTheProseFollowsTheFile(unittest.TestCase):
             with self.subTest(version=version):
                 self.assertTrue(lines[int(line) - 1].startswith(f'"{version}" = '), lines[int(line) - 1])
         for label, versions in (('supported tier', self.supported), ('KTLO legs', self.ktlo)):
-            spans = re.findall(rf'its (?:\w+ )?{label} \(``python-versions\.toml:(\d+)-(\d+)``\)', page)
+            spans = re.findall(rf'its {label} \(``python-versions\.toml:(\d+)-(\d+)``\)', page)
             with self.subTest(tier=label):
                 self.assertEqual(len(spans), 1, spans)
                 first, last = map(int, spans[0])
@@ -954,19 +951,6 @@ class TestTheProseFollowsTheFile(unittest.TestCase):
         for path, pattern in self.LATEST:
             with self.subTest(path=path, claim=pattern):
                 self.assertEqual(re.findall(pattern, prose(ROOT / path)), [self.latest])
-
-    def test_the_release_checks_counts_follow_the_matrices(self) -> None:
-        """version_check's own counts come from the file; the prose stating them must too."""
-        page = prose(ROOT / 'docs' / 'source' / 'contributing' / 'releasing.rst')
-        claims = (
-            (page, r'against the (\d+) expected -- the (\d+) supported legs',
-             [(str(self.wheels + 1), str(self.wheels))]),
-            (page, r'against the (\d+) expected \(2 OS x (\d+) Python versions\)',
-             [(str(2 * self.conda), str(self.conda))]),
-        )
-        for text, pattern, expected in claims:
-            with self.subTest(claim=pattern):
-                self.assertEqual(re.findall(pattern, text), expected)
 
 
 #: The two builds as setup-python spells them, at actions/setup-python 3892123fb: a
