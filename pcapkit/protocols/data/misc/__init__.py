@@ -5,7 +5,6 @@
 from pcapkit.protocols.data.misc.pcap import *
 
 # PCAP-NG file format
-from pcapkit.protocols.data.misc.pcapng import UnknownSecrets as PCAPNG_UnknownSecrets
 from pcapkit.protocols.data.misc.pcapng import PCAPNG
 from pcapkit.protocols.data.misc.pcapng import CommentOption as PCAPNG_CommentOption
 from pcapkit.protocols.data.misc.pcapng import CustomBlock as PCAPNG_CustomBlock
@@ -58,6 +57,9 @@ from pcapkit.protocols.data.misc.pcapng import NS_DNSIP4AddrOption as PCAPNG_NS_
 from pcapkit.protocols.data.misc.pcapng import NS_DNSIP6AddrOption as PCAPNG_NS_DNSIP6AddrOption
 from pcapkit.protocols.data.misc.pcapng import NS_DNSNameOption as PCAPNG_NS_DNSNameOption
 from pcapkit.protocols.data.misc.pcapng import Option as PCAPNG_Option
+from pcapkit.protocols.data.misc.pcapng import PACK_FlagsOption as PCAPNG_PACK_FlagsOption
+from pcapkit.protocols.data.misc.pcapng import PACK_HashOption as PCAPNG_PACK_HashOption
+from pcapkit.protocols.data.misc.pcapng import PacketBlock as PCAPNG_PacketBlock
 from pcapkit.protocols.data.misc.pcapng import SectionHeaderBlock as PCAPNG_SectionHeaderBlock
 from pcapkit.protocols.data.misc.pcapng import SimplePacketBlock as PCAPNG_SimplePacketBlock
 from pcapkit.protocols.data.misc.pcapng import \
@@ -93,13 +95,14 @@ __all__ = [
     'PCAPNG_NS_DNSNameOption', 'PCAPNG_NS_DNSIP4AddrOption', 'PCAPNG_NS_DNSIP6AddrOption',
     'PCAPNG_ISB_StartTimeOption', 'PCAPNG_ISB_EndTimeOption', 'PCAPNG_ISB_IFRecvOption', 'PCAPNG_ISB_IFDropOption',
     'PCAPNG_ISB_FilterAcceptOption', 'PCAPNG_ISB_OSDropOption', 'PCAPNG_ISB_UsrDelivOption',
+    'PCAPNG_PACK_FlagsOption', 'PCAPNG_PACK_HashOption',
     'PCAPNG_NameResolutionRecord', 'PCAPNG_UnknownRecord', 'PCAPNG_EndRecord', 'PCAPNG_IPv4Record', 'PCAPNG_IPv6Record',
     'PCAPNG_DSBSecrets', 'PCAPNG_UnknownSecrets', 'PCAPNG_TLSKeyLog', 'PCAPNG_WireGuardKeyLog', 'PCAPNG_ZigBeeNWKKey',
     'PCAPNG_ZigBeeAPSKey',
     'PCAPNG_UnknownBlock', 'PCAPNG_SectionHeaderBlock', 'PCAPNG_InterfaceDescriptionBlock',
     'PCAPNG_EnhancedPacketBlock', 'PCAPNG_SimplePacketBlock', 'PCAPNG_NameResolutionBlock',
     'PCAPNG_InterfaceStatisticsBlock', 'PCAPNG_SystemdJournalExportBlock', 'PCAPNG_DecryptionSecretsBlock',
-    'PCAPNG_CustomBlock',
+    'PCAPNG_CustomBlock', 'PCAPNG_PacketBlock',
 
     # No Payload
     'NoPayload',
