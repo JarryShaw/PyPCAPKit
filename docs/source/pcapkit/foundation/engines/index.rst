@@ -129,7 +129,7 @@ their row says otherwise:
 Availability
 ------------
 
-A third-party engine is usable only where its backing package is, and three are
+A third-party engine is usable only where its backing package is, and some are
 harder to obtain than a plain :program:`pip install` suggests. A missing package
 is not fatal -- :mod:`pcapkit` emits an
 :class:`~pcapkit.utilities.warnings.EngineWarning` and falls back to its own
@@ -144,7 +144,7 @@ parser -- but the extraction then does not use the engine requested.
 | :class:`~pcapkit.foundation.engines.dpkt.DPKT`,                 | nothing -- both are pure Python, and neither                  |
 | :class:`~pcapkit.foundation.engines.scapy.Scapy`                | overrides ``unsupported_reason()``                            |
 +-----------------------------------------------------------------+---------------------------------------------------------------+
-| :class:`~pcapkit.foundation.engines.pyshark.PyShark`            | Wireshark's :program:`tshark` binary -- on :envvar:`PATH`, or |
+| :class:`~pcapkit.foundation.engines.pyshark.PyShark`            | Wireshark's :program:`tshark` binary -- on ``PATH``, or       |
 |                                                                 | wherever ``pyshark``'s :file:`config.ini` points -- **and**   |
 |                                                                 | Python **3.13 or older**: ``pyshark`` 0.6 builds its event    |
 |                                                                 | loop with :func:`asyncio.get_event_loop`, which raises from   |
@@ -188,7 +188,7 @@ Choosing Between PyPCAP and PCAP_CT
 :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` and
 :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` read the same
 :manpage:`libpcap(3)` interface from two independent distributions, both of which
-install a top-level :mod:`pcap` module. They are separate engines because they
+install a top-level ``pcap`` module. They are separate engines because they
 are separate projects, with different authors, different install requirements
 and different interpreter coverage:
 
@@ -222,7 +222,7 @@ installed.** Pick on availability, not on features.
    hard error it would otherwise be.
 
 **The two distributions collide, so install exactly one.** Both own the top-level
-:mod:`pcap` module, and pip will happily install both -- on Python 3.10,
+``pcap`` module, and pip will happily install both -- on Python 3.10,
 the ``pcap-ct`` package then wins the import and upstream's extension module is
 shadowed and unreachable. Each engine therefore detects which distribution it
 actually got, via

@@ -8,17 +8,20 @@ House Conventions
    automated contributor would otherwise have to rediscover by reading a closed
    issue thread. Each ruling names where it was settled.
 
-   :ref:`mint-criterion` governs :mod:`pcapkit.const`, which is where the
-   settled questions have mostly arisen, :ref:`sentinel-convention`
-   :mod:`pcapkit.corekit`, and :ref:`registry-protocol` :mod:`pcapkit.const`
-   again. :ref:`extension-header-subclassing` governs a protocol class
-   hierarchy, :ref:`protocol-layer-placement` which subpackage a dissector
-   belongs in, :ref:`process` the repository rather than any of its code,
-   :ref:`documentation` the prose itself -- on these pages and in the API
-   reference -- rather than any code at all, :ref:`test-coverage` what the
-   test suite has to prove, and :ref:`utilities-or-corekit` which of
-   :mod:`pcapkit.utilities` and :mod:`pcapkit.corekit` a support module belongs
-   in.
+   What each page governs:
+
+   * :ref:`mint-criterion` -- :mod:`pcapkit.const`, which is where the settled
+     questions have mostly arisen;
+   * :ref:`sentinel-convention` -- :mod:`pcapkit.corekit`;
+   * :ref:`registry-protocol` -- :mod:`pcapkit.const` again;
+   * :ref:`extension-header-subclassing` -- a protocol class hierarchy;
+   * :ref:`protocol-layer-placement` -- which subpackage a dissector belongs in;
+   * :ref:`process` -- the repository rather than any of its code;
+   * :ref:`documentation` -- the prose itself, on these pages and in the API
+     reference, rather than any code at all;
+   * :ref:`test-coverage` -- what the test suite has to prove;
+   * :ref:`utilities-or-corekit` -- which of :mod:`pcapkit.utilities` and
+     :mod:`pcapkit.corekit` a support module belongs in.
 
    **A ruling that stays in its thread is a ruling that gets rediscovered.** So
    when a question is answered in a way the code cannot express on its own -- a

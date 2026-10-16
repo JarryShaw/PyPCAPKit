@@ -4,7 +4,9 @@ How to ...
 Basic Samples
 -------------
 
-:mod:`pcapkit` is built around three verbs. A few common scenarios:
+:mod:`pcapkit` is built around the :func:`~pcapkit.interface.core.extract`,
+:func:`~pcapkit.interface.core.reassemble` and :func:`~pcapkit.interface.core.trace`
+verbs. Some common scenarios:
 
 1. extract a PCAP file and dump the result to a specific file
    (with no reassembly)
@@ -28,10 +30,9 @@ Basic Samples
       extraction = extract(fin='in.pcap', nofile=True)
       frame0 = extraction.frame[0]
       # check if IP (IPv4 or IPv6) in this frame
-      flag = IP in frame0
       if IP in frame0:
-         # fetch the IP packet from this frame
-         ip = frame0[IP]
+          # fetch the IP packet from this frame
+          ip = frame0[IP]
 
 3. extract a PCAP file and reassemble TCP payload
    (with no output file nor frame storage)
@@ -50,7 +51,7 @@ Basic Samples
 CLI Samples
 -----------
 
-:mod:`pcapkit`'s CLI (command line interface) can be reached two ways.
+:mod:`pcapkit`'s CLI (command line interface) can be reached in these ways.
 
 * through console scripts
 

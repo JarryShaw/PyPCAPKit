@@ -1,5 +1,5 @@
-Base Class
-==========
+IP Reassembly Base Class
+========================
 
 .. module:: pcapkit.foundation.reassembly.ip
 

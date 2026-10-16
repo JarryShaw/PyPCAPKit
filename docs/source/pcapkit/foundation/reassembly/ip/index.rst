@@ -94,7 +94,7 @@ Because completion frees the buffer (:rfc:`791#section-3.2`), a fragment that
 arrives after its datagram has completed opens a new buffer, which is later
 reported as a separate incomplete datagram; this is intended (:issue:`1507`).
 
-Three departures from the procedure above:
+Departures from the procedure above:
 
 * Only the final fragment's partial last ``RCVBT`` block is set. A non-final
   fragment carries a multiple of 8 octets, so one ending mid-block was cut or

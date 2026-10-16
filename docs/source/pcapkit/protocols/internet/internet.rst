@@ -1,5 +1,5 @@
-Base Protocol
-=============
+Internet Layer Base Protocol
+============================
 
 .. module:: pcapkit.protocols.internet.internet
 

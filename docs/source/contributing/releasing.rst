@@ -60,21 +60,21 @@ citation left behind fails the gate well before any approval is requested.
 Either run the script, or move both fields by hand in the same commit.
 
 This is the **only** edit a person makes to get a release started -- the tag,
-the Release, and every upload are the workflow's job from here. Two other
-checks run unconditionally on the same path, though neither is a step in *this*
+the Release, and every upload are the workflow's job from here. Other
+checks run unconditionally on the same path, though none is a step in *this*
 process: the ``changelog`` job (``unit-tests.yml:1624-1643``) fails outright if
 ``CHANGELOG.md`` has drifted from its source entry under
 :file:`docs/source/changelog/`, and the release-body step warns, without
 failing, if that entry's heading still reads "unreleased"
-(``create-release.yml:677-678``). Both enforce what the changelog convention
+(``create-release.yml:677-678``). Each enforces what the changelog convention
 already asks for.
 
-Two Ways to Start a Release
----------------------------
+Ways to Start a Release
+-----------------------
 
-``create-release.yml`` has two triggers
-(``.github/workflows/create-release.yml:2-9``), and both are first-class --
-neither is a workaround for the other:
+``create-release.yml``'s triggers
+(``.github/workflows/create-release.yml:2-9``) are all first-class -- none is
+a workaround for another:
 
 ``push: tags: ['v*']``
    Pushing a tag matching ``v*`` yourself. This chooses **which commit** to
@@ -108,10 +108,14 @@ neither is a workaround for the other:
    while ``github.event.workflow_run.head_sha`` -- the commit Vendor Update
    ran *on* -- was the bump's parent, ``945c3c3d8``.
 
-Both paths converge on the same job graph from ``version_check`` onward; only
+The paths converge on the same job graph from ``version_check`` onward; only
 the trigger and ``github.ref_name`` differ, which is what the guards below
-read. A ``v*`` ref always runs the release test gate; on ``main`` it runs only
-when some target's evidence is not yet ``'true'``
+read. The release test gate runs only once ``version_check`` has passed, and
+``version_check`` itself skips the release App's own tag push and a Vendor
+Update that did not conclude ``success`` or skipped ``vendor-update`` (below).
+Past it, a ``v*`` ref always runs the gate; on ``main`` it
+runs only when the version is not tagged at another commit and some target's
+evidence is not yet ``'true'``
 (`#1052 <https://github.com/JarryShaw/PyPCAPKit/issues/1052>`__), so the
 common Vendor Update run that bumped nothing costs a minute, not a full-suite
 run.
@@ -155,7 +159,7 @@ the default branch, and ``tag`` pulled ``main`` before tagging.
   tag. A run created for a *later* commit of the same version therefore never
   publishes a second tree under that version. ``version_check`` resolves the
   ``v*`` tag the same way first (``:536-554``), and off a ``v*`` ref a tag
-  naming another commit skips the gate and all four publishers
+  naming another commit skips the gate and every publisher
   (`#1748 <https://github.com/JarryShaw/PyPCAPKit/issues/1748>`__):
   ``Release status`` posts a ``::notice`` if that release is complete, or a
   ``::warning`` naming both commits and what is missing (``:1624-1634``), and
@@ -176,7 +180,7 @@ the default branch, and ``tag`` pulled ``main`` before tagging.
   again (``--clobber``). ``conda``'s upload is not gated on ``check_leg``, so a
   leg whose Anaconda upload landed but whose GitHub upload failed still gets
   its asset on a re-run.
-* Two failures differ from the action, deliberately. With no release for the tag, the
+* Where it fails, it differs from the action deliberately. With no release for the tag, the
   upload fails with ``gh``'s "release not found", where the action made one,
   with no notes and ``target_commitish`` unset (``src/github.ts:617-628,1026``),
   which Create a release defaults to "the repository's default branch"; the
@@ -210,7 +214,7 @@ The two readings disagree on run 38008819343. Against the default branch,
 its ``github`` would have failed at Create Release. As the commit's own
 change, ``b6b95bc8e`` touches no workflow file -- its diff against its parent
 is :file:`CITATION.cff`, :file:`conda/build`, :file:`pcapkit/__init__.py` and
-two ``apptype`` modules -- so it would not. Which reading GitHub enforces is
+``apptype`` modules -- so it would not. Which reading GitHub enforces is
 not measured here. `softprops/action-gh-release#411
 <https://github.com/softprops/action-gh-release/issues/411>`__ was closed with
 "The latest repro still hits ``403 Resource not accessible by integration``
@@ -226,7 +230,7 @@ re-checks the target (unmeasured).
 ``cron-conda.yml``'s ``conda-dist`` does: it attaches packages with
 ``ncipollo/release-action@v1.21.0`` and ``allowUpdates: true``, which updates
 the release before uploading (``src/Action.ts:53-66,107-120``). It therefore
-names the default branch -- ``github.ref_name`` on both its triggers -- as
+names the default branch -- ``github.ref_name`` whichever trigger raised it -- as
 ``commit``, which that update sends as ``target_commitish``
 (``src/Releases.ts:150-174``), so the rule checks ``main`` itself; the tag
 stays put, as Update a release calls the target "Unused if the Git tag already
@@ -245,7 +249,7 @@ against retargeting a release Create Release owns.
 Either way the build goes to anaconda.org only, with a ``::notice``. The
 update also sends the release's name, notes and ``prerelease`` and ``draft``
 flags, which unset inputs make the tag, ``""`` and ``false``
-(``src/Inputs.ts:70-92,128-135,210-240``), so the step sets the four
+(``src/Inputs.ts:70-92,128-135,210-240``), so the step sets the
 ``omit*DuringUpdate`` inputs that leave them out (`#1657
 <https://github.com/JarryShaw/PyPCAPKit/issues/1657>`__).
 
@@ -334,7 +338,7 @@ checks *is* the one it is about to create:
 * ``pypi`` compares PyPI's file count for the version against the expected one
   -- a wheel per supported leg plus the sdist kept only on the 3.15 leg; the
   KTLO legs' wheels (`#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__) are not counted. This job is
-  already idempotent (``skip-existing: true`` on both upload steps), so the
+  already idempotent (``skip-existing: true`` on every upload step), so the
   check exists only to save the cost of the build matrix, not for correctness.
 * ``conda`` compares Anaconda's aggregate count against the expected one (the
   ``linux-64`` and ``osx-64`` files for each Python version of its matrix; the
@@ -347,7 +351,7 @@ checks *is* the one it is about to create:
   ``force:`` (never set), so re-uploading a file it already has fails outright
   rather than being absorbed.
 
-All three evidence checks run inside ``version_check``, curling PyPI's and
+These evidence checks all run inside ``version_check``, curling PyPI's and
 Anaconda's public, unauthenticated JSON APIs; the per-leg check runs inside
 ``conda`` itself, once per matrix leg, against the same Anaconda endpoint.
 
@@ -387,7 +391,7 @@ this run, it *skipped*.
 ``cron-vendor.yml``, ``deploy-pages.yml`` and ``cron-conda.yml`` each open
 with ``!cancelled() && needs.unit-tests.result != 'failure'`` so that a
 skipped gate does not cascade-skip them, while an outright failure or a
-genuine run cancellation still does. The three jobs here are stricter about
+genuine run cancellation still does. The publishing jobs here are stricter about
 their *publishing* predecessors -- ``github``, and for ``conda`` also ``tag``:
 ``!cancelled() && (needs.<job>.result == 'success' || needs.<job>.result ==
 'skipped')``, not ``!= 'failure'``. The two spellings differ only when a
@@ -398,7 +402,7 @@ check that ``conda-<version>+0`` names this run's commit, a tag ``tag`` never
 pushed, trading a clean skip for a failed step; the equality pair skips
 ``conda`` outright instead.
 
-``version_check`` is the exception, and deliberately so: all three require
+``version_check`` is the exception, and deliberately so: each of them requires
 ``needs.version_check.result == 'success'`` with no ``|| 'skipped'``. It
 produces the evidence the gates read, so a skipped or cancelled
 ``version_check`` leaves them nothing to decide on. ``unit-tests`` is held to
@@ -406,7 +410,7 @@ the same bar for a different reason: it is the release test gate, and it skips
 when nothing is publishable
 (`#1052 <https://github.com/JarryShaw/PyPCAPKit/issues/1052>`__), so accepting
 ``skipped`` there would publish untested. ``github`` names it in ``needs:`` instead and relies on the implicit
-``success()``. The gate's own ``if:`` is the union of the four publishers'
+``success()``. The gate's own ``if:`` is the union of the publishers'
 conditions, with ``!= 'true'`` so unknown evidence runs it; should the two
 ever drift apart, the failure is a release that did not happen, which
 ``release_status`` reports loudly, never one that went out untested.
@@ -440,7 +444,7 @@ The Release Pipeline
 A transitive reduction: ``version_check`` and ``unit-tests`` are also direct
 ``needs:`` of ``tag``, ``pypi`` and ``conda`` in the file, but ``github``
 already implies them (``github`` itself depends on both), so drawing them would
-add six lines without changing which job can start before which. ``release_status``'s
+add edges without changing which job can start before which. ``release_status``'s
 edges are drawn in full, since it depends directly on *every* job precisely so
 that it can run regardless of which of them skipped.
 
@@ -484,7 +488,7 @@ Precautions
 
 **Do not hand-make a tag to route around a stuck release.** This is narrower
 than "never tag by hand": pushing a *fresh* ``v<version>`` tag to start a
-release, as in `Two Ways to Start a Release`_, is fine. What is not sanctioned
+release, as in `Ways to Start a Release`_, is fine. What is not sanctioned
 is deleting and re-pushing a tag that a stuck run already created, to force a
 retry. A ``git push`` of a tag ref that already points at the same commit
 produces no new event (documented GitHub Actions behaviour, not measured
@@ -544,7 +548,7 @@ already has (`#1640 <https://github.com/JarryShaw/PyPCAPKit/issues/1640>`__).
 listings, because** ``release_status`` **does it.** That job runs on every
 ``Create Release`` attempt regardless of what else skipped, and reconciles
 each of ``github``/``tag``/``pypi``/``conda`` *against its own evidence*
-rather than demanding the same outcome from all four -- a target counts as
+rather than demanding the same outcome from all of them -- a target counts as
 reconciled if it succeeded, or if it skipped *because* its own evidence
 already said it was done. That is what makes a self-heal reportable: a retry
 after a partial release legitimately produces a **mixed** result
@@ -552,18 +556,24 @@ after a partial release legitimately produces a **mixed** result
 ``pypi``/``conda`` finish the rest), and a check demanding uniformity would
 read that mix as the failure it exists to detect.
 
-With that reconciliation, ``release_status`` reports exactly one of: nothing
-to release because the trigger had nothing to do (quiet ``::notice``),
-nothing to release because every target was already reconciled by skipping,
-i.e. the version was already fully out before this run started (quiet
-``::notice``), the release is now fully out because every target reconciled
--- whether by a fresh full run, or by the mixed self-heal above (quiet
-``::notice`` either way), a release job failed or was cancelled outright
-(``::warning``, already visible as a red job elsewhere), or -- the shape
-`#888 <https://github.com/JarryShaw/PyPCAPKit/issues/888>`__ was actually
-about -- at least one target skipped despite its own evidence saying it is
-still incomplete, and nothing else failed to explain that (``::error``, and
-the job itself fails). That last case should be unreachable given the
+With that reconciliation, ``release_status`` reports exactly one of:
+
+* nothing to release, because the trigger had nothing to do (quiet
+  ``::notice``);
+* nothing to release, because every target was already reconciled by skipping,
+  i.e. the version was already fully out before this run started (quiet
+  ``::notice``);
+* the release is fully out, because every target reconciled, whether by a fresh
+  full run or by the mixed self-heal above (quiet ``::notice`` either way);
+* a release job failed or was cancelled outright (``::warning``, already
+  visible as a red job elsewhere);
+* at least one target skipped despite its own evidence saying it is still
+  incomplete, and nothing else failed to explain that (``::error``, and the job
+  itself fails) -- the shape
+  `#888 <https://github.com/JarryShaw/PyPCAPKit/issues/888>`__ was actually
+  about.
+
+That last case should be unreachable given the
 evidence-based guards above, since a target's own incomplete evidence is
 what makes its job run rather than skip; reaching it anyway is a signal that
 those checks themselves need attention, not that the release needs a

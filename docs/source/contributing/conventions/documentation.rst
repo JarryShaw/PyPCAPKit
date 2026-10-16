@@ -30,9 +30,7 @@ and ``to`` stay lowercase unless they lead, which was the reading put to the own
 
 **The casing is the easy half.** A heading can be in Title Case already and still
 break the rule by being a clause rather than a title: *What a Failed Lookup Raises* was
-correctly cased and is now *Failed-Lookup Exceptions*. Of the 62 headings under
-:file:`docs/source/contributing/` when this was ruled, 22 needed rewriting and 16 only
-re-casing.
+correctly cased and was renamed *Failed-Lookup Exceptions*.
 
 The line to draw: a **finite verb** makes a heading a sentence and earns a rewrite,
 while a gerund or infinitive phrase is a noun phrase and needs only re-casing -- so
@@ -49,18 +47,17 @@ while a gerund or infinitive phrase is a noun phrase and needs only re-casing --
 Renaming a Heading
 ~~~~~~~~~~~~~~~~~~
 
-Two mechanical traps, both of which have bitten rather than being hypothetical.
+Mechanical traps, each of which has bitten rather than being hypothetical.
 
 **Re-measure the underline against the new text.** A case flip usually keeps the
 length; a rewrite almost never does, and docutils reports an underline shorter than
-its heading in a build that does not fail on warnings. Re-check every heading; none
-of the 62 was short.
+its heading in a build that does not fail on warnings. Re-check every heading.
 
 **A heading is a link target, so a rename is a repository-wide sweep** rather than a
 :file:`docs/source/` one. In scope: ``.rst`` prose, ``:ref:`` and ``:doc:`` link text,
 toctree entries, implicit ``` `Text`_ ``` references, **and** :mod:`pcapkit` docstrings
-and the files under :file:`tests/`. A heading rename once left **five** stale
-references, spread across :file:`pcapkit/corekit/sentinels.py`,
+and the files under :file:`tests/`. A heading rename once left stale
+references spread across :file:`pcapkit/corekit/sentinels.py`,
 :file:`tests/corekit/test_sentinel_exports_unit.py` and
 :file:`tests/project/test_conventions_doc_claims.py`. The first of those is a shipped
 module docstring that renders into the API reference, so a reader following it searches
@@ -76,7 +73,7 @@ the page for a string no longer on it.
 Nothing in CI catches a reference a rename left behind. :file:`docs/source/conf.py`
 sets no ``nitpicky`` and :file:`docs/Makefile` leaves ``SPHINXOPTS`` empty, so the
 build runs with neither ``-n`` nor ``-W``: a dead reference renders as the plain text
-it used to be, and the build still succeeds. :issue:`934` found sixteen of them at once
+it used to be, and the build still succeeds. :issue:`934` found a batch of them at once
 that way.
 
 One thing a rename breaks that no tool checks at all is the prose around it. Turning a
@@ -89,7 +86,7 @@ Mermaid for Flows
 Where the subject is a flow, prefer a Mermaid graph to the paragraph or the ASCII
 diagram that would otherwise carry it -- a graph is read faster than its own
 description. The owner ruled this on :issue:`719`, asking for it where it is necessary and
-helpful, which bounds it in three directions:
+helpful, which bounds it:
 
 *  **A short sequence does not earn a graph.** Two steps read perfectly well as a
    sentence, and a diagram of them costs a reader a context switch for nothing.
@@ -101,8 +98,8 @@ helpful, which bounds it in three directions:
    already shown, and a second copy of a flow is exactly that.
 
 The style model is the set already in the tree, every one of which builds. The sweep
-excludes this page, which writes the directive name three times in its own prose and
-would otherwise inflate both counts:
+excludes this page, which names the directive in its own prose and would otherwise
+count itself:
 
 .. code-block:: shell
 
@@ -155,10 +152,10 @@ every toctree.** Measured against a built tree rather than assumed:
    the caption renders nowhere.
 
 That is why most of the per-package toctrees are deliberately bare -- a caption on a
-package index would be invisible on every page but one. The three in
+package index would be invisible on every page but one. The root ones in
 :file:`docs/source/index.rst` carry captions, and ``Subpackages`` in
-:file:`docs/source/pcapkit/index.rst` is the single nested one. A built tree says so --
-excluding this page, which names both captions in its own prose and would otherwise
+:file:`docs/source/pcapkit/index.rst` is the only nested one. A built tree says so --
+excluding this page, which names these captions in its own prose and would otherwise
 count itself:
 
 .. code-block:: shell
@@ -166,9 +163,9 @@ count itself:
    grep -rl 'API Reference' --include='*.html' --exclude='documentation.html' \
         docs/build/html | wc -l   # every other page
    grep -rl 'Subpackages'   --include='*.html' --exclude='documentation.html' \
-        docs/build/html | wc -l   # exactly one
+        docs/build/html | wc -l   # the pcapkit index page alone
 
-Those root toctrees are ``:hidden:`` because, without it, each of the three captions
+Those root toctrees are ``:hidden:`` because, without it, each of their captions
 rendered twice on the root page -- once inline in the body, once in the sidebar -- which
 is the duplication the owner ruled out on :issue:`719`.
 
@@ -182,7 +179,7 @@ is the duplication the owner ruled out on :issue:`719`.
    One setting there was decided by measurement rather than by preference:
    ``toc_object_entries`` carries, in a comment beside it, the figures that settled it,
    so that nobody reopens the question blind. That is worth copying the next time a
-   setting is chosen that way, but it is a single precedent and not yet a rule the owner
+   setting is chosen that way, but it is a single precedent and not a rule the owner
    has ruled on.
 
 Paraphrasing a Ruling
@@ -190,7 +187,7 @@ Paraphrasing a Ruling
 
 Write a ruling down in your own words. **Do not quote the owner verbatim** -- a
 standing instruction on :issue:`719`, and the one every page in this directory follows.
-:issue:`949` went back over the five pages that then existed and replaced their quoted
+:issue:`949` went back over the pages that then existed and replaced their quoted
 rulings with paraphrase.
 
 What a quotation costs is not style. A quoted sentence is pinned to the moment it was
@@ -228,9 +225,15 @@ prose and code disagree the code wins and the prose is what gets fixed -- :issue
 own charter -- and a docstring outliving the thing it described is a demonstrated failure
 mode here rather than a hypothetical one.
 
-**Re-derive a count; do not copy one.** Better still, write down the command that
-produces it, as :ref:`process` does, so the figure can be rechecked rather than
-trusted. A keyword search is not a sweep: the reliable method takes every cited
+**State no count.** A count of things in the codebase or the documentation drifts as
+soon as what it counts changes, and keeping it in step by hand does not scale, so
+living prose words the claim without one -- *every registered option*, *the remaining
+entries* -- and drops a count that was the only content. Protocol and specification
+quantities, code constants, versions and issue numbers are not counts, and a
+measurement that justifies a design choice stays, stated as a measurement. Ruled on
+:issue:`1103`; the released changelogs are a frozen record and keep theirs.
+
+A keyword search is not a sweep: the reliable method takes every cited
 repository path in each of the forms it gets written in -- slash path, dotted module,
 bare filename, and the elided spellings -- intersects them with the diff since the
 merge base, and re-measures the intersection. A tense-keyword grep misses a claim
@@ -244,22 +247,21 @@ shape:
    One did not: the RARP page declared ``pcapkit.protocols.data.link.rarp``, which has
    never existed, because RARP and DRARP reuse ARP's data class. Fixed in ``68fbccd90``.
 *  :issue:`911`'s ruling -- export the sentinel objects and leave their types out -- was
-   read as describing all three modules that then held a sentinel. One ran the other
+   read as describing every module that then held a sentinel. One ran the other
    way: :mod:`pcapkit.corekit.fields.field` exported neither, so applying the rule
    there meant *adding* a name rather than removing one.
 
-**Some numbers on these pages are pinned, and knowing which is part of writing one.**
-:file:`tests/project/test_conventions_doc_claims.py` re-derives figures for the three
-pages that have a figure test of their own -- ``extension-header-subclassing``,
-``process`` and ``registry-protocol``, the last most heavily of all, down to both halves
-of an *N of M* -- so a stale count there goes red instead of quiet. Every other figure,
-this page's included, is pinned by nothing: the entry it adds to that module's
-``ANCHORS`` fixes the page's existence, anchor and toctree position, not its arithmetic.
-Re-derive before trusting, and do not read a number as load-bearing just because it is
-written down. The same module checks something a reader cannot see and Sphinx cannot
+**Some claims on these pages are pinned, and knowing which is part of writing one.**
+:file:`tests/project/test_conventions_doc_claims.py` checks what several pages assert
+against the tree by name rather than by figure -- the extension-header table against
+the classes it classifies, :ref:`process`'s changelog grouping against the entries,
+:ref:`registry-protocol`'s helpers against the code -- so a stale claim there goes red
+instead of quiet. A page's entry in that module's ``ANCHORS`` fixes only its existence,
+anchor and toctree position; what the page goes on to say is pinned by nothing unless a
+test reads it. The same module checks something a reader cannot see and Sphinx cannot
 warn about: in a ``` `#NNN <.../NNN>`__ ``` link the displayed number has to match the
-number in its own URL. A review round once corrupted roughly thirty of them across two
-pages and nothing caught it, because both halves were well-formed.
+number in its own URL. A review round once corrupted a run of them and nothing caught
+it, because both halves were well-formed.
 
 Resolvable Targets
 ~~~~~~~~~~~~~~~~~~
@@ -283,19 +285,18 @@ settled this on :issue:`719` found exactly one, and repeating it is cheap:
 ``.. data:: pcapkit.x._T`` under ``.. module:: pcapkit.x`` registers
 ``pcapkit.x.pcapkit.x._T``, which no reference resolves to exactly. Where the object
 lives in a module other than the current one, a ``:module:`` option names it, as the
-``LINKTYPE`` entry on :doc:`/pcapkit/protocols/link/index` does. :issue:`1775` found 44
-directives spelled the long way, which left seven TypeVar references ambiguous;
+``LINKTYPE`` entry on :doc:`/pcapkit/protocols/link/index` does. :issue:`1775` found
+directives spelled the long way, which left TypeVar references ambiguous;
 :file:`tests/project/test_docs_ambiguous_xrefs_1775_unit.py` fails on the next one.
 
-**Every importable shipped module is documented, with one deliberate exception.** The 33
+**Every importable shipped module is documented, with one deliberate exception.** The
 modules under :file:`pcapkit/protocols/*/NotImplemented/` are the set with no entry:
 placeholder sources for dissectors nobody has written yet, carrying no class a reader
 could use. The exception is a choice rather than a consequence of packaging, which is
-worth stating because the opposite is easy to assume -- measured on ``1.5.0b8``, all 33
-are in the source distribution *and* in the wheel, and each imports as a
-namespace-package submodule. What they are not is a *package*: none of the four
-directories carries an :file:`__init__.py`, so ``find_packages`` returns 73 here and
-omits all of them.
+worth stating because the opposite is easy to assume -- measured on ``1.5.0b8``, every one
+is in the source distribution *and* in the wheel, and each imports as a
+namespace-package submodule. What they are not is a *package*: none of those
+directories carries an :file:`__init__.py`, so ``find_packages`` omits all of them.
 
 When something is removed, its documentation entry goes with it -- carrying a
 deprecation note where a user could have depended on the thing, and deleted outright
@@ -315,9 +316,9 @@ Format and Mechanics
    ships only if setuptools or an ``include`` line adds it.
 *  **Prose names the real defining module, not a re-export.** One strand of the
    consistency sweep on :doc:`the roadmap </contributing/pep>`. The sentinels are the
-   worked example: all four are defined in :mod:`pcapkit.corekit.sentinels`, and
+   worked example: every one is defined in :mod:`pcapkit.corekit.sentinels`, and
    :ref:`sentinel-convention`'s table names it rather than any of the modules that
-   use them, which no longer re-export them (:issue:`1744`).
+   use them, which do not re-export them (:issue:`1744`).
 *  **A verbatim upstream port is exempt from these conventions.**
    :ref:`sentinel-convention` already carries the case that settled it, the
    ``cached_property`` backport in :file:`pcapkit/utilities/compat.py`: the value of a

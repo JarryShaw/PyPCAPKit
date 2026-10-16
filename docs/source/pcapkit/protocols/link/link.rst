@@ -1,5 +1,5 @@
-Base Protocol
-=============
+Link Layer Base Protocol
+========================
 
 .. module:: pcapkit.protocols.link.link
 

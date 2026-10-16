@@ -93,10 +93,10 @@ extensions = [
 #
 # These are deliberately opt-in per site rather than an automatic ``#NNN`` rule,
 # because no digit-keyed pattern can tell a citation from a packet-diagram label:
-# ``#\d{3}`` misses every two- and four-digit number, while ``#\d+`` catches the 45
-# one-digit RFC diagram labels across ``pcapkit/protocols/internet/hip.py`` (36),
-# ``pcapkit/protocols/transport/sctp.py`` (7) and
-# ``pcapkit/protocols/schema/internet/hip.py`` (2) -- ``DH GROUP ID #1``,
+# ``#\d{3}`` misses every two- and four-digit number, while ``#\d+`` catches the
+# one-digit RFC diagram labels in ``pcapkit/protocols/internet/hip.py``,
+# ``pcapkit/protocols/transport/sctp.py`` and
+# ``pcapkit/protocols/schema/internet/hip.py`` -- ``DH GROUP ID #1``,
 # ``Gap Ack Block #1`` and the like -- which are not references to anything. A role
 # nobody writes cannot corrupt them.
 #
@@ -109,7 +109,7 @@ extensions = [
 # in the source even though GitHub redirects between ``/issues/NNN`` and ``/pull/NNN``
 # either way.
 #
-# ``:discussion:`` is needed because a handful of cited numbers are GitHub
+# ``:discussion:`` is needed because some cited numbers are GitHub
 # Discussions rather than issues -- the issues API returns 404 for them, so
 # ``:issue:`` would link to a page that does not exist.
 #
@@ -344,8 +344,8 @@ def bind_type_checking_names(app: 'Sphinx') -> None:
     :exc:`NameError`, which :func:`sphinx.util.typing.get_type_hints` catches.
     Once it resolves, Python 3.14's :mod:`annotationlib` rejects the leading space
     with a :exc:`SyntaxError` that :func:`~sphinx.util.typing.get_type_hints` does
-    *not* catch, so it aborts the whole build. Two such annotations existed and both are
-    fixed at source; a third would stop the build rather than be worked around
+    *not* catch, so it aborts the whole build. Such annotations existed and are
+    fixed at source; another would stop the build rather than be worked around
     here, which is the right way round for a typo.
 
     Args:
@@ -530,17 +530,17 @@ def restore_enum_member_docstring(app: 'Sphinx', what: str, name: str,  # pylint
         lines[:] = original
 
 
-# NB: four handlers used to sit here -- ``remove_module_docstring``,
+# NB: handlers used to sit here -- ``remove_module_docstring``,
 # ``process_docstring``, ``process_fields`` and ``source_read`` -- each with its
 # ``app.connect`` call commented out in ``setup`` below, so none of them had run
 # for as long as they had been in the file. They are deleted rather than restored,
-# because restoring them would either duplicate work now done properly or make the
+# because restoring them would either duplicate work done properly elsewhere or make the
 # build unusable:
 #
-#   ``remove_module_docstring`` and ``process_docstring`` were two attempts at the
+#   ``remove_module_docstring`` and ``process_docstring`` were both attempts at the
 #   same thing -- flipping :data:`typing.TYPE_CHECKING` and reloading each module
 #   so autodoc could see the ``if TYPE_CHECKING:`` names. ``bind_type_checking_names``
-#   above now solves that, per module and without mutating a global mid-build.
+#   above solves that, per module and without mutating a global mid-build.
 #
 #   ``process_fields`` only ever printed; the ``lines.append`` that was its point
 #   was itself commented out.

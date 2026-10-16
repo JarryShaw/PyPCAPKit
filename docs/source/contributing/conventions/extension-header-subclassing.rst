@@ -62,10 +62,10 @@ is reachable as an IPv4 payload in this library --
 :class:`~pcapkit.protocols.internet.hopopt.HOPOPT` and
 :class:`~pcapkit.protocols.internet.ipv6_frag.IPv6_Frag` included. Registry
 membership therefore says nothing at all about standalone-ness, and a classification
-derived from it would make all eight headers standalone.
+derived from it would make every one of them standalone.
 
-Nor does IANA's *IPv6 Extension Header Types* registry discriminate: it lists all
-eight of the implemented headers, plus ``Shim6`` (140) and 253/254. Being *in* that
+Nor does IANA's *IPv6 Extension Header Types* registry discriminate: it lists every
+one of the implemented headers, plus ``Shim6`` (140) and 253/254. Being *in* that
 registry is what makes something an extension header; it is not evidence about
 whether the same header is also a protocol in its own right.
 
@@ -115,7 +115,7 @@ Explicit Base Declarations
 
 Name the second base **explicitly**, even though it is already in the MRO.
 :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` derives
-:class:`~pcapkit.protocols.internet.internet.Internet`, so every one of the eight
+:class:`~pcapkit.protocols.internet.internet.Internet`, so every one of them
 reaches ``Internet`` transitively and an ``__mro__`` check cannot tell the two groups
 apart. The declaration is the only place the classification exists, which is why
 ``tests/protocols/internet/test_ipv6_ext_unit.py`` pins it against ``__bases__``:
@@ -126,7 +126,7 @@ apart. The declaration is the only place the classification exists, which is why
 
 Add a header to that set in the same change that adds its second base, and keep the
 RFC ground in the ``#:`` comment beside it. The test walks
-``IPv6_Ext.__subclasses__()`` rather than a hard-coded list, so a ninth header is
+``IPv6_Ext.__subclasses__()`` rather than a hard-coded list, so any further header is
 held to the convention whether or not anyone remembers this page.
 
 The Retired ``IPv6_GenericExt`` Name

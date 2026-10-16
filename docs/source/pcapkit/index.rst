@@ -9,8 +9,8 @@ Module Documentation
 
 .. _DictDumper: https://dictdumper.jarryshaw.me
 
-Unlike popular PCAP file extractors, such as `Scapy`_, `DPKT`_,
-`PyShark`_, and etc, :mod:`pcapkit` tends to provide comprehensive
+Unlike popular PCAP file extractors, such as `Scapy`_, `DPKT`_ and
+`PyShark`_, :mod:`pcapkit` tends to provide comprehensive
 support to all protocols, including but not limited to their
 parameters and/or options, etc. Therefore, :mod:`pcapkit` contains
 enumeration registries used by protocols, independent protocol
@@ -169,7 +169,9 @@ Environment Variables
 
       :data:`pcapkit.utilities.logging.SPHINX_TYPE_CHECKING`
 
-The tunable limits are read by :mod:`pcapkit.utilities.config`, which lists each
+The ``PCAPKIT_*`` tunable limits, such as
+:data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`, are read by
+:mod:`pcapkit.utilities.config`, which lists each
 with its default, its accepted range and its risks. The :mod:`pcapkit.vendor`
 crawlers' :envvar:`PCAPKIT_VENDOR_RETRY`, :envvar:`PCAPKIT_CI_MODE`,
 :envvar:`PCAPKIT_HTTP_PROXY` and :envvar:`PCAPKIT_HTTPS_PROXY` are read by

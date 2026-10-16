@@ -64,7 +64,7 @@ defines every layer by its purpose rather than by what encapsulates it.
 IANA Assignments Carry No Layer Claim
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-All three registries this package dispatches on -- *Protocol Numbers*, *Ether Types*,
+Every registry this package dispatches on -- *Protocol Numbers*, *Ether Types*,
 and *Service Name and Transport Protocol Port Number* -- have **no layer field**.
 *Protocol Numbers* frames itself as identifying *"the next level protocol"*, i.e. the
 **encapsulated** one. A registry assignment is evidence of encapsulation and of
@@ -72,11 +72,11 @@ nothing else.
 
 .. caution::
 
-   This **retires the registration grid at** :file:`docs/source/ext.rst` (the
+   This **retires the registration grid on** :doc:`/ext` (the
    Protocol Type → Registry Function table) **as a placement rule.** It is a guide to
    which registrar to call when extending the library, and it was never a layer
    taxonomy. Read literally as one it makes ARP, RARP and both VLAN tags
-   internet-layer and all eight IPv6 extension headers transport-layer. A
+   internet-layer and every IPv6 extension header transport-layer. A
    contributor looking for a placement rule will find that grid first, which is why
    this page says so explicitly.
 
@@ -146,10 +146,10 @@ either base order. :class:`~pcapkit.protocols.link.arp.ARP`'s chain reaches
 Ordering layer-first is correct in both cases, which is the point: a contributor does
 not have to work out which case they are in.
 
-Two Things That Will Look Like Mistakes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Things That Will Look Like Mistakes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Both are deliberate. Do not "fix" either.
+Each is deliberate. Do not "fix" any of them.
 
 **A parsing base may live in another subpackage.**
 :mod:`pcapkit.protocols.application.rarp` imports
@@ -187,14 +187,14 @@ protocol number is refused.
 Counting the names in each class's own namespace, whether new or overriding
 :class:`~pcapkit.protocols.protocol.ProtocolBase`'s, and including those
 ``ProtocolBase.__init_subclass__`` sets there, ``Link`` has
-ten -- ``__data__``, ``__layer__``, ``__post_init__``, ``__proto__``,
+``__data__``, ``__layer__``, ``__post_init__``, ``__proto__``,
 ``__schema__``, ``_read_protos``, ``_shipped_proto``, ``from_data``, ``register`` and
-``layer`` -- and ``Application`` nine: the six they share (``__data__``, ``__layer__``,
+``layer``, and ``Application`` has what they share (``__data__``, ``__layer__``,
 ``__post_init__``, ``__schema__``, ``from_data``, ``layer``) plus ``__index__``,
 ``_decode_next_layer`` and ``_import_next_layer``.
-``Link`` overrides four of those that ``Application`` does not -- ``__proto__``,
+``Link`` overrides names that ``Application`` does not -- ``__proto__``,
 ``register``, ``_read_protos`` and ``_shipped_proto``, the last set because ``Link``
-defines its own ``__proto__`` -- but all four also exist on ``ProtocolBase``, so
+defines its own ``__proto__`` -- but each also exists on ``ProtocolBase``, so
 the strict difference ``Link`` minus ``Application`` minus ``ProtocolBase`` is **empty**
 and every one of them still resolves on ``OSPF``. What changes is which registry it
 resolves *to*: ``OSPF.__proto__`` is ``ProtocolBase.__proto__`` rather than

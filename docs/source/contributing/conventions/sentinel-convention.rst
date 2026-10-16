@@ -9,7 +9,7 @@ caller might legitimately pass. The house rule, from the maintainer, covers the 
 the sentinel object's type class is named ``<SENTINEL>Type``.
 
 That is, the class takes the instance's name in CamelCase with ``Type`` appended. It
-says nothing about the **object**'s own name, which is what let three casings diverge
+says nothing about the **object**'s own name, which is what let the casings diverge
 with no rule naming any of them wrong. GitHub issue :issue:`937` closed that gap: the
 owner ruled for SCREAMING_SNAKE and accepted the resulting breaking change outright, with
 no backport. So the object is named in SCREAMING_SNAKE and the type-naming rule above
@@ -36,7 +36,7 @@ derives from it mechanically -- title-case each underscore-separated word and ap
      - ``AbsentType``
      - :mod:`pcapkit.corekit.sentinels`
 
-GitHub issue :issue:`911`'s housing ruling -- one module for all four -- is why the table
+GitHub issue :issue:`911`'s housing ruling -- one module for all of them -- is why the table
 names a single defining module, and it is the only import path. The modules that *use* a
 sentinel import it from there but do not re-export it: :issue:`1744` dropped the
 per-module re-exports, under the ruling on :issue:`1715` that a moved name keeps no
@@ -69,7 +69,7 @@ public use rather than left off it, since the name alone no longer says so.
 
 .. note::
 
-   Of the four, only :class:`~pcapkit.corekit.sentinels.NullType` is a full worked
+   Of the sentinels, only :class:`~pcapkit.corekit.sentinels.NullType` is a full worked
    example. :class:`~pcapkit.corekit.sentinels.NoValueType` follows the naming rule but
    is **not** a singleton (``NoValueType() is NO_VALUE`` is :obj:`False`) and has no
    ``__repr__`` of its own, so it demonstrates the name and nothing else; ``AbsentType``
@@ -110,7 +110,7 @@ ever sees. The rule above is for sentinels this package writes itself.
 Per-Sentinel Dunder Methods
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The four sentinels deliberately differ, and the differences are **needs, not
+The sentinels deliberately differ, and the differences are **needs, not
 inconsistencies**:
 
 ``__new__`` returning a cached instance
@@ -134,7 +134,7 @@ inconsistencies**:
    prevent.
 
 ``__copy__`` / ``__deepcopy__`` / ``__reduce__``
-   :class:`~pcapkit.corekit.sentinels.NullType` is the only one of the four that has
+   :class:`~pcapkit.corekit.sentinels.NullType` is the only sentinel that has
    them, because ``NULL`` is stored in a
    :class:`~pcapkit.corekit.module.ModuleDescriptor` field, so a caller's
    :func:`copy.deepcopy` or :mod:`pickle` can walk into it and would otherwise
@@ -148,6 +148,6 @@ inconsistencies**:
    :attr:`FieldBase.default <pcapkit.corekit.fields.field.FieldBase.default>` through a
    field copy once per field per packet, keeps its identity there because
    :meth:`FieldBase.__copy__ <pcapkit.corekit.fields.field.FieldBase.__copy__>` is
-   shallow and shares the reference. Add all three when, and only when, the sentinel
+   shallow and shares the reference. Add them all when, and only when, the sentinel
    becomes reachable from a copy that is not.
 

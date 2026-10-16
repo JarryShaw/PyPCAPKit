@@ -1,5 +1,5 @@
-Base Class
-==========
+Reassembly Base Class
+=====================
 
 .. module:: pcapkit.foundation.reassembly.reassembly
 
