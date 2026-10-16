@@ -10,5 +10,7 @@ A redesign of the extension points, on metaclasses.
   class that are imported lazily on first use rather than at registration; the
   registry functions accept it throughout. ``VersionInfo`` gained a ``version``
   property.
-* **Changed** -- ``_Engine`` renamed ``EngineBase``; the ``beholder`` decorator
-  logs the error it swallows under devmode and verbose mode.
+* **Changed** -- what ``Engine`` defined moves into a new base, ``EngineBase``,
+  and ``Engine`` stays the class to subclass, registering an engine under its
+  ``name=`` class keyword; the ``beholder`` decorator logs the error it swallows
+  under devmode and verbose mode.
