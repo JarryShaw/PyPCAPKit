@@ -5,9 +5,8 @@
 from pcapkit.protocols.schema.misc.pcap import *
 
 # PCAP-NG file format
-from pcapkit.protocols.schema.misc.pcapng import UnknownSecrets as PCAPNG_UnknownSecrets
-from pcapkit.protocols.schema.misc.pcapng import BlockType as PCAPNG_BlockType
 from pcapkit.protocols.schema.misc.pcapng import PCAPNG
+from pcapkit.protocols.schema.misc.pcapng import BlockType as PCAPNG_BlockType
 from pcapkit.protocols.schema.misc.pcapng import CommentOption as PCAPNG_CommentOption
 from pcapkit.protocols.schema.misc.pcapng import CustomBlock as PCAPNG_CustomBlock
 from pcapkit.protocols.schema.misc.pcapng import CustomOption as PCAPNG_CustomOption
@@ -59,6 +58,9 @@ from pcapkit.protocols.schema.misc.pcapng import NS_DNSIP4AddrOption as PCAPNG_N
 from pcapkit.protocols.schema.misc.pcapng import NS_DNSIP6AddrOption as PCAPNG_NS_DNSIP6AddrOption
 from pcapkit.protocols.schema.misc.pcapng import NS_DNSNameOption as PCAPNG_NS_DNSNameOption
 from pcapkit.protocols.schema.misc.pcapng import Option as PCAPNG_Option
+from pcapkit.protocols.schema.misc.pcapng import PACK_FlagsOption as PCAPNG_PACK_FlagsOption
+from pcapkit.protocols.schema.misc.pcapng import PACK_HashOption as PCAPNG_PACK_HashOption
+from pcapkit.protocols.schema.misc.pcapng import PacketBlock as PCAPNG_PacketBlock
 from pcapkit.protocols.schema.misc.pcapng import SectionHeaderBlock as PCAPNG_SectionHeaderBlock
 from pcapkit.protocols.schema.misc.pcapng import SimplePacketBlock as PCAPNG_SimplePacketBlock
 from pcapkit.protocols.schema.misc.pcapng import \
@@ -67,6 +69,7 @@ from pcapkit.protocols.schema.misc.pcapng import TLSKeyLog as PCAPNG_TLSKeyLog
 from pcapkit.protocols.schema.misc.pcapng import UnknownBlock as PCAPNG_UnknownBlock
 from pcapkit.protocols.schema.misc.pcapng import UnknownOption as PCAPNG_UnknownOption
 from pcapkit.protocols.schema.misc.pcapng import UnknownRecord as PCAPNG_UnknownRecord
+from pcapkit.protocols.schema.misc.pcapng import UnknownSecrets as PCAPNG_UnknownSecrets
 from pcapkit.protocols.schema.misc.pcapng import WireGuardKeyLog as PCAPNG_WireGuardKeyLog
 from pcapkit.protocols.schema.misc.pcapng import ZigBeeAPSKey as PCAPNG_ZigBeeAPSKey
 from pcapkit.protocols.schema.misc.pcapng import ZigBeeNWKKey as PCAPNG_ZigBeeNWKKey
@@ -93,6 +96,7 @@ __all__ = [
     'PCAPNG_NS_DNSNameOption', 'PCAPNG_NS_DNSIP4AddrOption', 'PCAPNG_NS_DNSIP6AddrOption',
     'PCAPNG_ISB_StartTimeOption', 'PCAPNG_ISB_EndTimeOption', 'PCAPNG_ISB_IFRecvOption', 'PCAPNG_ISB_IFDropOption',
     'PCAPNG_ISB_FilterAcceptOption', 'PCAPNG_ISB_OSDropOption', 'PCAPNG_ISB_UsrDelivOption',
+    'PCAPNG_PACK_FlagsOption', 'PCAPNG_PACK_HashOption',
     'PCAPNG_NameResolutionRecord', 'PCAPNG_UnknownRecord', 'PCAPNG_EndRecord', 'PCAPNG_IPv4Record', 'PCAPNG_IPv6Record',
     'PCAPNG_DSBSecrets', 'PCAPNG_UnknownSecrets', 'PCAPNG_TLSKeyLog', 'PCAPNG_WireGuardKeyLog', 'PCAPNG_ZigBeeNWKKey',
     'PCAPNG_ZigBeeAPSKey',
@@ -100,7 +104,7 @@ __all__ = [
     'PCAPNG_UnknownBlock', 'PCAPNG_SectionHeaderBlock', 'PCAPNG_InterfaceDescriptionBlock',
     'PCAPNG_EnhancedPacketBlock', 'PCAPNG_SimplePacketBlock', 'PCAPNG_NameResolutionBlock',
     'PCAPNG_InterfaceStatisticsBlock', 'PCAPNG_SystemdJournalExportBlock', 'PCAPNG_DecryptionSecretsBlock',
-    'PCAPNG_CustomBlock',
+    'PCAPNG_CustomBlock', 'PCAPNG_PacketBlock',
 
     # misc protocols
     'NoPayload',

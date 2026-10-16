@@ -85,6 +85,7 @@ from pcapkit.protocols.data.internet.hopopt import MPLFlags as HOPOPT_MPLFlags
 from pcapkit.protocols.data.internet.hopopt import MPLOption as HOPOPT_MPLOption
 from pcapkit.protocols.data.internet.hopopt import PadOption as HOPOPT_PadOption
 from pcapkit.protocols.data.internet.hopopt import PDMOption as HOPOPT_PDMOption
+from pcapkit.protocols.data.internet.hopopt import QuickStartOption as HOPOPT_QuickStartOption
 from pcapkit.protocols.data.internet.hopopt import \
     QuickStartReportOption as HOPOPT_QuickStartReportOption
 from pcapkit.protocols.data.internet.hopopt import \
@@ -92,6 +93,7 @@ from pcapkit.protocols.data.internet.hopopt import \
 from pcapkit.protocols.data.internet.hopopt import RouterAlertOption as HOPOPT_RouterAlertOption
 from pcapkit.protocols.data.internet.hopopt import RPLFlags as HOPOPT_RPLFlags
 from pcapkit.protocols.data.internet.hopopt import RPLOption as HOPOPT_RPLOption
+from pcapkit.protocols.data.internet.hopopt import SMFDPDOption as HOPOPT_SMFDPDOption
 from pcapkit.protocols.data.internet.hopopt import \
     SMFHashBasedDPDOption as HOPOPT_SMFHashBasedDPDOption
 from pcapkit.protocols.data.internet.hopopt import \
@@ -150,6 +152,7 @@ from pcapkit.protocols.data.internet.ipv6_opts import MPLFlags as IPv6_Opts_MPLF
 from pcapkit.protocols.data.internet.ipv6_opts import MPLOption as IPv6_Opts_MPLOption
 from pcapkit.protocols.data.internet.ipv6_opts import PadOption as IPv6_Opts_PadOption
 from pcapkit.protocols.data.internet.ipv6_opts import PDMOption as IPv6_Opts_PDMOption
+from pcapkit.protocols.data.internet.ipv6_opts import QuickStartOption as IPv6_Opts_QuickStartOption
 from pcapkit.protocols.data.internet.ipv6_opts import \
     QuickStartReportOption as IPv6_Opts_QuickStartReportOption
 from pcapkit.protocols.data.internet.ipv6_opts import \
@@ -158,6 +161,7 @@ from pcapkit.protocols.data.internet.ipv6_opts import \
     RouterAlertOption as IPv6_Opts_RouterAlertOption
 from pcapkit.protocols.data.internet.ipv6_opts import RPLFlags as IPv6_Opts_RPLFlags
 from pcapkit.protocols.data.internet.ipv6_opts import RPLOption as IPv6_Opts_RPLOption
+from pcapkit.protocols.data.internet.ipv6_opts import SMFDPDOption as IPv6_Opts_SMFDPDOption
 from pcapkit.protocols.data.internet.ipv6_opts import \
     SMFHashBasedDPDOption as IPv6_Opts_SMFHashBasedDPDOption
 from pcapkit.protocols.data.internet.ipv6_opts import \
@@ -180,17 +184,49 @@ from pcapkit.protocols.data.internet.ipx import Address as IPX_Address
 # Mobility Header
 from pcapkit.protocols.data.internet.mh import MH
 from pcapkit.protocols.data.internet.mh import \
+    AccessNetworkIdentifierOption as MH_AccessNetworkIdentifierOption
+from pcapkit.protocols.data.internet.mh import \
+    AccessTechnologyTypeOption as MH_AccessTechnologyTypeOption
+from pcapkit.protocols.data.internet.mh import \
+    ActiveMulticastSubscriptionIPv4Option as MH_ActiveMulticastSubscriptionIPv4Option
+from pcapkit.protocols.data.internet.mh import \
+    ActiveMulticastSubscriptionIPv6Option as MH_ActiveMulticastSubscriptionIPv6Option
+from pcapkit.protocols.data.internet.mh import \
+    AllocationRetentionPriorityAttribute as MH_AllocationRetentionPriorityAttribute
+from pcapkit.protocols.data.internet.mh import \
     AlternateCareofAddressOption as MH_AlternateCareofAddressOption
+from pcapkit.protocols.data.internet.mh import \
+    AlternateIPv4CareofAddressOption as MH_AlternateIPv4CareofAddressOption
+from pcapkit.protocols.data.internet.mh import AnchoredPrefixOption as MH_AnchoredPrefixOption
+from pcapkit.protocols.data.internet.mh import \
+    ANICivicLocationSuboption as MH_ANICivicLocationSuboption
+from pcapkit.protocols.data.internet.mh import ANIGeoLocationSuboption as MH_ANIGeoLocationSuboption
+from pcapkit.protocols.data.internet.mh import \
+    ANIMAGGroupIdentifierSuboption as MH_ANIMAGGroupIdentifierSuboption
+from pcapkit.protocols.data.internet.mh import \
+    ANINetworkIdentifierSuboption as MH_ANINetworkIdentifierSuboption
+from pcapkit.protocols.data.internet.mh import \
+    ANIOperatorIdentifierSuboption as MH_ANIOperatorIdentifierSuboption
+from pcapkit.protocols.data.internet.mh import ANISuboption as MH_ANISuboption
+from pcapkit.protocols.data.internet.mh import ANIUpdateTimerSuboption as MH_ANIUpdateTimerSuboption
 from pcapkit.protocols.data.internet.mh import AuthOption as MH_AuthOption
+from pcapkit.protocols.data.internet.mh import AuthorizationDataOption as MH_AuthorizationDataOption
+from pcapkit.protocols.data.internet.mh import BADFOption as MH_BADFOption
+from pcapkit.protocols.data.internet.mh import BIDReferenceSuboption as MH_BIDReferenceSuboption
 from pcapkit.protocols.data.internet.mh import \
     BindingAcknowledgementMessage as MH_BindingAcknowledgementMessage
-from pcapkit.protocols.data.internet.mh import \
-    AuthorizationDataOption as MH_AuthorizationDataOption
 from pcapkit.protocols.data.internet.mh import BindingErrorMessage as MH_BindingErrorMessage
+from pcapkit.protocols.data.internet.mh import BindingIdentifierOption as MH_BindingIdentifierOption
+from pcapkit.protocols.data.internet.mh import \
+    BindingRefreshAdviceOption as MH_BindingRefreshAdviceOption
 from pcapkit.protocols.data.internet.mh import \
     BindingRefreshRequestMessage as MH_BindingRefreshRequestMessage
+from pcapkit.protocols.data.internet.mh import \
+    BindingReregistrationControlSuboption as MH_BindingReregistrationControlSuboption
+from pcapkit.protocols.data.internet.mh import \
+    BindingRevocationMessage as MH_BindingRevocationMessage
 from pcapkit.protocols.data.internet.mh import BindingUpdateMessage as MH_BindingUpdateMessage
-from pcapkit.protocols.data.internet.mh import BindingRefreshAdviceOption as MH_BindingRefreshAdviceOption
+from pcapkit.protocols.data.internet.mh import BitRateAttribute as MH_BitRateAttribute
 from pcapkit.protocols.data.internet.mh import CareofTestInitMessage as MH_CareofTestInitMessage
 from pcapkit.protocols.data.internet.mh import CareofTestInitOption as MH_CareofTestInitOption
 from pcapkit.protocols.data.internet.mh import CareofTestMessage as MH_CareofTestMessage
@@ -200,23 +236,139 @@ from pcapkit.protocols.data.internet.mh import CGAParameter as MH_CGAParameter
 from pcapkit.protocols.data.internet.mh import CGAParametersOption as MH_CGAParametersOption
 from pcapkit.protocols.data.internet.mh import \
     CGAParametersRequestOption as MH_CGAParametersRequestOption
+from pcapkit.protocols.data.internet.mh import ContextRequest as MH_ContextRequest
+from pcapkit.protocols.data.internet.mh import ContextRequestOption as MH_ContextRequestOption
+from pcapkit.protocols.data.internet.mh import DelegatedMNPOption as MH_DelegatedMNPOption
+from pcapkit.protocols.data.internet.mh import \
+    DLIFLinkLayerAddressOption as MH_DLIFLinkLayerAddressOption
+from pcapkit.protocols.data.internet.mh import \
+    DLIFLinkLocalAddressOption as MH_DLIFLinkLocalAddressOption
+from pcapkit.protocols.data.internet.mh import DNSUpdateOption as MH_DNSUpdateOption
+from pcapkit.protocols.data.internet.mh import \
+    DynamicIPMulticastSelectorOption as MH_DynamicIPMulticastSelectorOption
+from pcapkit.protocols.data.internet.mh import ExperimentalExtension as MH_ExperimentalExtension
+from pcapkit.protocols.data.internet.mh import ExperimentalMessage as MH_ExperimentalMessage
+from pcapkit.protocols.data.internet.mh import \
+    ExperimentalMobilityOption as MH_ExperimentalMobilityOption
+from pcapkit.protocols.data.internet.mh import \
+    FastBindingAcknowledgmentMessage as MH_FastBindingAcknowledgmentMessage
+from pcapkit.protocols.data.internet.mh import \
+    FastBindingUpdateMessage as MH_FastBindingUpdateMessage
+from pcapkit.protocols.data.internet.mh import \
+    FastNeighborAdvertisementMessage as MH_FastNeighborAdvertisementMessage
+from pcapkit.protocols.data.internet.mh import \
+    FlowBindingActionSuboption as MH_FlowBindingActionSuboption
+from pcapkit.protocols.data.internet.mh import FlowBindingMessage as MH_FlowBindingMessage
+from pcapkit.protocols.data.internet.mh import \
+    FlowIdentificationOption as MH_FlowIdentificationOption
+from pcapkit.protocols.data.internet.mh import \
+    FlowIdentificationSuboption as MH_FlowIdentificationSuboption
+from pcapkit.protocols.data.internet.mh import FlowSummaryOption as MH_FlowSummaryOption
+from pcapkit.protocols.data.internet.mh import GREKeyOption as MH_GREKeyOption
+from pcapkit.protocols.data.internet.mh import HandoffIndicatorOption as MH_HandoffIndicatorOption
+from pcapkit.protocols.data.internet.mh import \
+    HandoverAcknowledgeMessage as MH_HandoverAcknowledgeMessage
+from pcapkit.protocols.data.internet.mh import HandoverInitiateMessage as MH_HandoverInitiateMessage
+from pcapkit.protocols.data.internet.mh import \
+    HeartbeatControlSuboption as MH_HeartbeatControlSuboption
+from pcapkit.protocols.data.internet.mh import HeartbeatMessage as MH_HeartbeatMessage
+from pcapkit.protocols.data.internet.mh import HomeAgentSwitchMessage as MH_HomeAgentSwitchMessage
+from pcapkit.protocols.data.internet.mh import HomeNetworkPrefixOption as MH_HomeNetworkPrefixOption
 from pcapkit.protocols.data.internet.mh import HomeTestInitMessage as MH_HomeTestInitMessage
 from pcapkit.protocols.data.internet.mh import HomeTestMessage as MH_HomeTestMessage
+from pcapkit.protocols.data.internet.mh import \
+    IPv4AddressAcknowledgementOption as MH_IPv4AddressAcknowledgementOption
+from pcapkit.protocols.data.internet.mh import IPv4CareofAddressOption as MH_IPv4CareofAddressOption
+from pcapkit.protocols.data.internet.mh import \
+    IPv4DefaultRouterAddressOption as MH_IPv4DefaultRouterAddressOption
+from pcapkit.protocols.data.internet.mh import \
+    IPv4DHCPSupportModeOption as MH_IPv4DHCPSupportModeOption
+from pcapkit.protocols.data.internet.mh import IPv4HomeAddressOption as MH_IPv4HomeAddressOption
+from pcapkit.protocols.data.internet.mh import \
+    IPv4HomeAddressReplyOption as MH_IPv4HomeAddressReplyOption
+from pcapkit.protocols.data.internet.mh import \
+    IPv4HomeAddressRequestOption as MH_IPv4HomeAddressRequestOption
+from pcapkit.protocols.data.internet.mh import \
+    IPv4TrafficOffloadSelectorOption as MH_IPv4TrafficOffloadSelectorOption
+from pcapkit.protocols.data.internet.mh import IPv6AddressPrefixOption as MH_IPv6AddressPrefixOption
 from pcapkit.protocols.data.internet.mh import LinkLayerAddressOption as MH_LinkLayerAddressOption
+from pcapkit.protocols.data.internet.mh import LinkLocalAddressOption as MH_LinkLocalAddressOption
+from pcapkit.protocols.data.internet.mh import LMAAddressOption as MH_LMAAddressOption
+from pcapkit.protocols.data.internet.mh import \
+    LMAControlledMAGParametersOption as MH_LMAControlledMAGParametersOption
+from pcapkit.protocols.data.internet.mh import \
+    LMAControlledMAGSuboption as MH_LMAControlledMAGSuboption
+from pcapkit.protocols.data.internet.mh import \
+    LMAUserPlaneAddressOption as MH_LMAUserPlaneAddressOption
+from pcapkit.protocols.data.internet.mh import LoadInformationOption as MH_LoadInformationOption
+from pcapkit.protocols.data.internet.mh import \
+    LocalizedRoutingAcknowledgmentMessage as MH_LocalizedRoutingAcknowledgmentMessage
+from pcapkit.protocols.data.internet.mh import \
+    LocalizedRoutingInitiationMessage as MH_LocalizedRoutingInitiationMessage
+from pcapkit.protocols.data.internet.mh import LocalPrefixOption as MH_LocalPrefixOption
+from pcapkit.protocols.data.internet.mh import MAGIdentifierOption as MH_MAGIdentifierOption
+from pcapkit.protocols.data.internet.mh import MAGIPv6AddressOption as MH_MAGIPv6AddressOption
+from pcapkit.protocols.data.internet.mh import \
+    MAGMultipathBindingOption as MH_MAGMultipathBindingOption
 from pcapkit.protocols.data.internet.mh import MesgIDOption as MH_MesgIDOption
+from pcapkit.protocols.data.internet.mh import MNGroupIdentifierOption as MH_MNGroupIdentifierOption
 from pcapkit.protocols.data.internet.mh import MNIDOption as MH_MNIDOption
+from pcapkit.protocols.data.internet.mh import MNLLAIIDOption as MH_MNLLAIIDOption
+from pcapkit.protocols.data.internet.mh import MNLLIdentifierOption as MH_MNLLIdentifierOption
 from pcapkit.protocols.data.internet.mh import \
     MobileNetworkPrefixOption as MH_MobileNetworkPrefixOption
+from pcapkit.protocols.data.internet.mh import \
+    MulticastAcknowledgementOption as MH_MulticastAcknowledgementOption
+from pcapkit.protocols.data.internet.mh import MulticastMobilityOption as MH_MulticastMobilityOption
 from pcapkit.protocols.data.internet.mh import MultiPrefixExtension as MH_MultiPrefixExtension
+from pcapkit.protocols.data.internet.mh import NATDetectionOption as MH_NATDetectionOption
 from pcapkit.protocols.data.internet.mh import NonceIndicesOption as MH_NonceIndicesOption
 from pcapkit.protocols.data.internet.mh import Option as MH_Option
+from pcapkit.protocols.data.internet.mh import \
+    PadFlowIdentificationSuboption as MH_PadFlowIdentificationSuboption
 from pcapkit.protocols.data.internet.mh import PadOption as MH_PadOption
 from pcapkit.protocols.data.internet.mh import \
     PermanentHomeKeygenTokenOption as MH_PermanentHomeKeygenTokenOption
+from pcapkit.protocols.data.internet.mh import \
+    PerSessionBitRateAttribute as MH_PerSessionBitRateAttribute
+from pcapkit.protocols.data.internet.mh import PreviousMAAROption as MH_PreviousMAAROption
+from pcapkit.protocols.data.internet.mh import QoSAttribute as MH_QoSAttribute
+from pcapkit.protocols.data.internet.mh import \
+    QoSTrafficSelectorAttribute as MH_QoSTrafficSelectorAttribute
+from pcapkit.protocols.data.internet.mh import \
+    QoSVendorSpecificAttribute as MH_QoSVendorSpecificAttribute
+from pcapkit.protocols.data.internet.mh import QualityOfServiceOption as MH_QualityOfServiceOption
+from pcapkit.protocols.data.internet.mh import \
+    RedirectCapabilityOption as MH_RedirectCapabilityOption
+from pcapkit.protocols.data.internet.mh import RedirectOption as MH_RedirectOption
+from pcapkit.protocols.data.internet.mh import RestartCounterOption as MH_RestartCounterOption
+from pcapkit.protocols.data.internet.mh import ServiceSelectionOption as MH_ServiceSelectionOption
+from pcapkit.protocols.data.internet.mh import ServingMAAROption as MH_ServingMAAROption
 from pcapkit.protocols.data.internet.mh import SignatureOption as MH_SignatureOption
+from pcapkit.protocols.data.internet.mh import \
+    SubscriptionQueryMessage as MH_SubscriptionQueryMessage
+from pcapkit.protocols.data.internet.mh import \
+    SubscriptionResponseMessage as MH_SubscriptionResponseMessage
+from pcapkit.protocols.data.internet.mh import \
+    TargetCareofAddressSuboption as MH_TargetCareofAddressSuboption
+from pcapkit.protocols.data.internet.mh import TimestampOption as MH_TimestampOption
+from pcapkit.protocols.data.internet.mh import \
+    TrafficSelectorSuboption as MH_TrafficSelectorSuboption
+from pcapkit.protocols.data.internet.mh import TransientBindingOption as MH_TransientBindingOption
+from pcapkit.protocols.data.internet.mh import UnassignedANISuboption as MH_UnassignedANISuboption
+from pcapkit.protocols.data.internet.mh import \
+    UnassignedFlowIdentificationSuboption as MH_UnassignedFlowIdentificationSuboption
+from pcapkit.protocols.data.internet.mh import \
+    UnassignedLMAControlledMAGSuboption as MH_UnassignedLMAControlledMAGSuboption
 from pcapkit.protocols.data.internet.mh import UnassignedOption as MH_UnassignedOption
+from pcapkit.protocols.data.internet.mh import UnassignedQoSAttribute as MH_UnassignedQoSAttribute
 from pcapkit.protocols.data.internet.mh import UnknownExtension as MH_UnknownExtension
 from pcapkit.protocols.data.internet.mh import UnknownMessage as MH_UnknownMessage
+from pcapkit.protocols.data.internet.mh import \
+    UpdateNotificationAcknowledgementMessage as MH_UpdateNotificationAcknowledgementMessage
+from pcapkit.protocols.data.internet.mh import \
+    UpdateNotificationMessage as MH_UpdateNotificationMessage
+from pcapkit.protocols.data.internet.mh import VendorSpecificOption as MH_VendorSpecificOption
 
 __all__ = [
     # Authentication Header
@@ -248,6 +400,7 @@ __all__ = [
     # Hop-by-Hop Options
     'HOPOPT',
     'HOPOPT_RPLFlags', 'HOPOPT_MPLFlags', 'HOPOPT_DFFFlags',
+    'HOPOPT_SMFDPDOption', 'HOPOPT_QuickStartOption',
     'HOPOPT_UnassignedOption', 'HOPOPT_PadOption', 'HOPOPT_TunnelEncapsulationLimitOption',
     'HOPOPT_RouterAlertOption', 'HOPOPT_CALIPSOOption', 'HOPOPT_SMFIdentificationBasedDPDOption',
     'HOPOPT_SMFHashBasedDPDOption', 'HOPOPT_PDMOption', 'HOPOPT_QuickStartRequestOption',
@@ -275,6 +428,7 @@ __all__ = [
     # IPv6 Destination Options Header
     'IPv6_Opts',
     'IPv6_Opts_RPLFlags', 'IPv6_Opts_MPLFlags', 'IPv6_Opts_DFFFlags',
+    'IPv6_Opts_SMFDPDOption', 'IPv6_Opts_QuickStartOption',
     'IPv6_Opts_UnassignedOption', 'IPv6_Opts_PadOption', 'IPv6_Opts_TunnelEncapsulationLimitOption',
     'IPv6_Opts_RouterAlertOption', 'IPv6_Opts_CALIPSOOption', 'IPv6_Opts_SMFIdentificationBasedDPDOption',
     'IPv6_Opts_SMFHashBasedDPDOption', 'IPv6_Opts_PDMOption', 'IPv6_Opts_QuickStartRequestOption',
@@ -297,14 +451,48 @@ __all__ = [
     'MH',
     'MH_UnknownMessage', 'MH_BindingRefreshRequestMessage', 'MH_HomeTestInitMessage', 'MH_CareofTestInitMessage',
     'MH_HomeTestMessage', 'MH_CareofTestMessage', 'MH_BindingUpdateMessage', 'MH_BindingAcknowledgementMessage',
-    'MH_BindingErrorMessage',
+    'MH_BindingErrorMessage', 'MH_FastBindingUpdateMessage', 'MH_FastBindingAcknowledgmentMessage',
+    'MH_FastNeighborAdvertisementMessage', 'MH_ExperimentalMessage', 'MH_HandoverInitiateMessage',
+    'MH_HandoverAcknowledgeMessage', 'MH_HeartbeatMessage', 'MH_HomeAgentSwitchMessage', 'MH_BindingRevocationMessage',
+    'MH_LocalizedRoutingInitiationMessage', 'MH_LocalizedRoutingAcknowledgmentMessage', 'MH_UpdateNotificationMessage',
+    'MH_UpdateNotificationAcknowledgementMessage', 'MH_FlowBindingMessage', 'MH_SubscriptionQueryMessage',
+    'MH_SubscriptionResponseMessage',
     'MH_Option',
     'MH_UnassignedOption', 'MH_PadOption', 'MH_BindingRefreshAdviceOption', 'MH_AlternateCareofAddressOption',
-    'MH_NonceIndicesOption', 'MH_AuthorizationDataOption', 'MH_MobileNetworkPrefixOption',
-    'MH_LinkLayerAddressOption', 'MH_MNIDOption', 'MH_AuthOption', 'MH_MesgIDOption', 'MH_CGAParametersRequestOption',
-    'MH_CGAParametersOption', 'MH_SignatureOption', 'MH_PermanentHomeKeygenTokenOption', 'MH_CareofTestInitOption',
-    'MH_CareofTestOption',
+    'MH_NonceIndicesOption', 'MH_AuthorizationDataOption', 'MH_MobileNetworkPrefixOption', 'MH_LinkLayerAddressOption',
+    'MH_MNIDOption', 'MH_AuthOption', 'MH_MesgIDOption', 'MH_CGAParametersRequestOption', 'MH_CGAParametersOption',
+    'MH_SignatureOption', 'MH_PermanentHomeKeygenTokenOption', 'MH_CareofTestInitOption', 'MH_CareofTestOption',
+    'MH_ExperimentalMobilityOption', 'MH_BADFOption', 'MH_IPv6AddressPrefixOption', 'MH_HomeNetworkPrefixOption',
+    'MH_HandoffIndicatorOption', 'MH_AccessTechnologyTypeOption', 'MH_MNLLIdentifierOption',
+    'MH_LinkLocalAddressOption', 'MH_TimestampOption', 'MH_RestartCounterOption', 'MH_DNSUpdateOption',
+    'MH_VendorSpecificOption', 'MH_ServiceSelectionOption', 'MH_IPv4HomeAddressOption',
+    'MH_IPv4AddressAcknowledgementOption', 'MH_NATDetectionOption', 'MH_IPv4CareofAddressOption', 'MH_GREKeyOption',
+    'MH_BindingIdentifierOption', 'MH_IPv4HomeAddressRequestOption', 'MH_IPv4HomeAddressReplyOption',
+    'MH_IPv4DefaultRouterAddressOption', 'MH_IPv4DHCPSupportModeOption', 'MH_ContextRequestOption',
+    'MH_LMAAddressOption', 'MH_MNLLAIIDOption', 'MH_TransientBindingOption', 'MH_FlowSummaryOption',
+    'MH_FlowIdentificationOption', 'MH_RedirectCapabilityOption', 'MH_RedirectOption', 'MH_LoadInformationOption',
+    'MH_AlternateIPv4CareofAddressOption', 'MH_MNGroupIdentifierOption', 'MH_MAGIPv6AddressOption',
+    'MH_AccessNetworkIdentifierOption', 'MH_IPv4TrafficOffloadSelectorOption', 'MH_DynamicIPMulticastSelectorOption',
+    'MH_DelegatedMNPOption', 'MH_ActiveMulticastSubscriptionIPv4Option', 'MH_ActiveMulticastSubscriptionIPv6Option',
+    'MH_QualityOfServiceOption', 'MH_LMAUserPlaneAddressOption', 'MH_MulticastMobilityOption',
+    'MH_MulticastAcknowledgementOption', 'MH_LMAControlledMAGParametersOption', 'MH_MAGMultipathBindingOption',
+    'MH_MAGIdentifierOption', 'MH_AnchoredPrefixOption', 'MH_LocalPrefixOption', 'MH_PreviousMAAROption',
+    'MH_ServingMAAROption', 'MH_DLIFLinkLocalAddressOption', 'MH_DLIFLinkLayerAddressOption',
+    'MH_ContextRequest',
+    'MH_FlowIdentificationSuboption',
+    'MH_UnassignedFlowIdentificationSuboption', 'MH_PadFlowIdentificationSuboption', 'MH_BIDReferenceSuboption',
+    'MH_TrafficSelectorSuboption', 'MH_FlowBindingActionSuboption', 'MH_TargetCareofAddressSuboption',
+    'MH_ANISuboption',
+    'MH_UnassignedANISuboption', 'MH_ANINetworkIdentifierSuboption', 'MH_ANIGeoLocationSuboption',
+    'MH_ANIOperatorIdentifierSuboption', 'MH_ANICivicLocationSuboption', 'MH_ANIMAGGroupIdentifierSuboption',
+    'MH_ANIUpdateTimerSuboption',
+    'MH_QoSAttribute',
+    'MH_UnassignedQoSAttribute', 'MH_BitRateAttribute', 'MH_PerSessionBitRateAttribute',
+    'MH_AllocationRetentionPriorityAttribute', 'MH_QoSTrafficSelectorAttribute', 'MH_QoSVendorSpecificAttribute',
+    'MH_LMAControlledMAGSuboption',
+    'MH_UnassignedLMAControlledMAGSuboption', 'MH_BindingReregistrationControlSuboption',
+    'MH_HeartbeatControlSuboption',
     'MH_CGAParameter',
     'MH_CGAExtension',
-    'MH_UnknownExtension', 'MH_MultiPrefixExtension',
+    'MH_UnknownExtension', 'MH_MultiPrefixExtension', 'MH_ExperimentalExtension',
 ]

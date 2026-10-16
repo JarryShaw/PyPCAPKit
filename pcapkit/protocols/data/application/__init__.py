@@ -30,6 +30,7 @@ from pcapkit.protocols.data.application.httpv2 import PushPromiseFrame as HTTPv2
 from pcapkit.protocols.data.application.httpv2 import \
     PushPromiseFrameFlags as HTTPv2_PushPromiseFrameFlags
 from pcapkit.protocols.data.application.httpv2 import RSTStreamFrame as HTTPv2_RSTStreamFrame
+from pcapkit.protocols.data.application.httpv2 import Settings as HTTPv2_Settings
 from pcapkit.protocols.data.application.httpv2 import SettingsFrame as HTTPv2_SettingsFrame
 from pcapkit.protocols.data.application.httpv2 import \
     SettingsFrameFlags as HTTPv2_SettingsFrameFlags
@@ -60,7 +61,7 @@ __all__ = [
 
     # Hypertext Transfer Protocol (HTTP/2)
     'HTTPv2',
-    'HTTPv2_Flags',
+    'HTTPv2_Flags', 'HTTPv2_Settings',
     'HTTPv2_DataFrameFlags', 'HTTPv2_HeadersFrameFlags', 'HTTPv2_SettingsFrameFlags',
     'HTTPv2_PushPromiseFrameFlags', 'HTTPv2_PingFrameFlags', 'HTTPv2_ContinuationFrameFlags',
     'HTTPv2_UnassignedFrame', 'HTTPv2_DataFrame', 'HTTPv2_HeadersFrame', 'HTTPv2_PriorityFrame',
