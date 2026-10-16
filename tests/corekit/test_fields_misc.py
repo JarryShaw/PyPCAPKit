@@ -214,12 +214,12 @@ class SwitchFieldBoolDispatchTests(unittest.TestCase):
     def test_address_typed_switch_branches_already_reject_a_bool(self) -> None:
         """Every address-typed branch of every address-typed switch already refuses a bool.
 
-        Eighteen branches over ten switches in four protocol modules -- not just
-        :mod:`~pcapkit.protocols.schema.internet.mh`'s six -- because the claim
+        Every such branch, across the protocol modules -- not just
+        :mod:`~pcapkit.protocols.schema.internet.mh`'s -- because the claim
         being pinned is about ``SwitchField`` in general, so a fix scoped to one
         module would not settle it. Measured on ``main`` at ``27bb315d5``, i.e.
-        *before* #508's fix: all thirty-six probes (eighteen branches x
-        ``True``/``False``) raised, and none was laundered. That is what makes a
+        *before* #508's fix: every probe (each branch, with ``True`` and with
+        ``False``) raised, and none was laundered. That is what makes a
         guard in ``SwitchField`` dead code.
         """
         from pcapkit.corekit.fields.misc import SwitchField

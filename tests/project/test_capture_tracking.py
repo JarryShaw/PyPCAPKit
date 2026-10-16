@@ -9,11 +9,11 @@ the rendered reports :file:`examples/legacy_smoke/` produces out of those two
 inputs -- :file:`out.json`, :file:`out.plist`, :file:`out.txt` and
 :file:`pcapng.txt`, via ``make fixtures`` there.
 
-Those four reports were tracked once, and GitHub issue #685 is why they are not
-any more. A tracked report has no reader: no test asserts on one, and the
-documentation only quotes them as prose. So a parser change that alters how a
+Those reports were tracked once, and GitHub issue #685 is why they are not. A
+tracked report has no reader: no test asserts on one, and the documentation
+only quotes them as prose. So a parser change that alters how a
 frame renders leaves the committed copy wrong with nothing anywhere to say so --
-:file:`pcapng.txt` sat recording ``packet -> NIL`` for four blocks that had
+:file:`pcapng.txt` sat recording ``packet -> NIL`` for blocks that had
 started carrying their captured octets, and it was found by somebody reading the
 file rather than by anything failing.
 
@@ -24,10 +24,10 @@ interesting in a diff review:
 * ``git add -f examples/captures/out.txt`` on a freshly rebuilt report puts the
   staleness straight back, :file:`.gitignore` notwithstanding -- and so would a
   new ``!examples/captures/...`` exception line;
-* an over-eager cleanup that dropped the two real inputs as well would break the
+* an over-eager cleanup that dropped the real inputs as well would break the
   whole unit tier, which is entitled to read them on a fresh clone.
 
-The rule is stated by *suffix* rather than as a list of the two names, so adding
+The rule is stated by *suffix* rather than as a list of names, so adding
 a genuine input capture needs no edit here while committing a rendered report
 fails immediately. That is the same trade :mod:`tests._tiers` makes, and this
 module reuses its answer rather than shelling out to git a second time.
@@ -45,12 +45,12 @@ from tests import _tiers
 
 #: Reports rendered by :file:`examples/legacy_smoke/`, none of which git tracks.
 #: Named explicitly, rather than derived as "everything without a capture
-#: suffix", because these four are the ones that were tracked and the ones any
+#: suffix", because these are the ones that were tracked and the ones any
 #: regression would most likely reinstate.
 RENDERED_REPORTS = ('out.json', 'out.plist', 'out.txt', 'pcapng.txt')
 #: The captures that must stay committed, because nothing regenerates them:
-#: :file:`in.pcap` is read by roughly fifty modules and :file:`dhcp.pcapng` by
-#: nine, and the unit tier reads both on a fresh clone.
+#: :file:`in.pcap` and :file:`dhcp.pcapng` are each read by many test modules,
+#: and the unit tier reads both on a fresh clone.
 INPUT_CAPTURES = ('dhcp.pcapng', 'in.pcap')
 
 
@@ -94,7 +94,7 @@ class TrackedCaptureTests(unittest.TestCase):
         Redundant with :meth:`test_every_tracked_file_is_an_input_capture` today
         and deliberately so: that test's reach depends on
         :data:`~tests._tiers.CAPTURE_SUFFIXES`, and a future ``.txt`` capture
-        format would widen the suffix list and quietly let these four back in.
+        format would widen the suffix list and quietly let these back in.
 
         """
         for name in RENDERED_REPORTS:
@@ -140,7 +140,7 @@ class ReportReadTests(unittest.TestCase):
 
     This is the regression untracking invites, and it is *not* covered by the
     tier guard's own audit. That audit only flags a **unit-tier** module reading
-    a capture git does not track. These four are worse than untracked: nothing
+    a capture git does not track. These reports are worse than untracked: nothing
     rebuilds them as part of fixture generation either, because
     :file:`examples/generators/make_samples.py` does not produce them -- only
     ``make fixtures`` under :file:`examples/legacy_smoke/` does, and neither CI

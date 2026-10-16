@@ -56,7 +56,7 @@ def workflow_name(text: 'str') -> 'str':
 
 
 def expected_row(path: 'pathlib.Path', text: 'str') -> 'list[Any]':
-    """The seven cells the table should give this workflow file; "other" as a list."""
+    """The cells the table should give this workflow file; "other" as a list."""
     events = triggers(text)
 
     def branches(event: 'str') -> 'str':

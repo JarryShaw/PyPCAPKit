@@ -128,7 +128,7 @@ def pytest_sessionstart(session: 'pytest.Session') -> 'None':
     region is empty at the pin and restored to empty after every test, which
     makes each of the tests that does not purge for itself -- :mod:`tests.project`
     is the bulk of them -- pay a fresh ``import pcapkit`` it used to get from the
-    warm table. Measured over the 96 tests of ``tests/project/``: 1.59s with no
+    warm table. Measured over ``tests/project/``: 1.59s with no
     guard at all, **9.34s** guarded from a cold table, **0.35s** guarded from a
     warm one. The last is the fastest of the three because the import it would
     otherwise do inside the first test has moved here instead.
@@ -161,8 +161,8 @@ def pytest_sessionstart(session: 'pytest.Session') -> 'None':
     in ``TCP``/``UDP`` and :attr:`AppType.__registries__
     <pcapkit.const.reg.apptype.apptype.AppType.__registries__>`. The next direct
     import of the submodule then built a second ``TCP`` and ``UDP``, and
-    :mod:`tests.project.test_conventions_doc_claims` counted both generations:
-    ``127 != 129`` registries on the 3.10-3.13 unit legs of PR #1560.
+    :mod:`tests.project.test_conventions_doc_claims` counted both generations, and
+    its registry count came out wrong on the 3.10-3.13 unit legs of PR #1560.
 
     Failure here is not an error. A checkout without the runtime dependencies
     installed cannot import the package at all -- which is a supported way to run
@@ -244,9 +244,9 @@ def restore_module_table() -> 'Iterator[None]':
     :class:`~typing.Generic` stayed bound after the test that installed it, and
     the next test to import :mod:`pcapkit` died on ``TypeError: type
     'ProtocolBase' is not subscriptable`` at
-    ``pcapkit/protocols/misc/pcap/frame.py:69`` -- twelve tests in
+    ``pcapkit/protocols/misc/pcap/frame.py:69`` -- a run of tests in
     :mod:`tests.project`, and only when the polluting file happened to be
-    collected first. Three separate files turned out to leak this way, one of
+    collected first. Several files turned out to leak this way, one of
     which -- :mod:`tests.cli.test_main` -- did not import :mod:`tests._support`
     at all.
 
@@ -259,8 +259,8 @@ def restore_module_table() -> 'Iterator[None]':
     that will be written, which is the difference between the failure being
     unlikely and being impossible.
 
-    Two of the three were fixed at their call sites when this guard landed, and
-    the third was not: :mod:`tests.cli.test_main` kept its own purge loop, which
+    The others were fixed at their call sites when this guard landed, but
+    :mod:`tests.cli.test_main` was not: it kept its own purge loop, which
     purges and restores nothing, and this fixture went on quietly healing it for
     every test. That is issue #688 -- it took an audit rather than a failing run
     to find, because a guard that repairs a leak also hides it. It is now fixed

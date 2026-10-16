@@ -145,7 +145,7 @@ class ParseParenthesisedNumberTests(unittest.TestCase):
     """:func:`~pyshark_encap_map.parse_parenthesised_number`'s own robustness.
 
     **What this does not pin, stated plainly because it was previously
-    overclaimed here:** #851/#850's real defect -- 10 of 157 rows lost,
+    overclaimed here:** #851/#850's real defect -- rows lost,
     including ``null`` -- was in how the original ad hoc script extracted the
     *name* portion of a PDML ``showname`` such as ``"Encapsulation type:
     NULL/Loopback (15)"``. This generator never does that extraction at all;

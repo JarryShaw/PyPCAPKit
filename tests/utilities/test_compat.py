@@ -234,9 +234,9 @@ class CompatTests(unittest.TestCase):
         Checked here, immediately, rather than left to show up as the symptom,
         because the symptom is unrecoverable and lands somewhere else. Nothing
         this file can do afterwards puts a memoised value back, so the useful
-        moment to notice is the test that caused it -- not the ten tests of
-        :mod:`tests.project.test_public_api` that failed on it three directories
-        away.
+        moment to notice is the test that caused it -- not the tests of
+        :mod:`tests.project.test_public_api` that failed on it in another
+        directory.
 
         """
         real = sys.version_info[:2]
@@ -445,7 +445,7 @@ class CompatTests(unittest.TestCase):
         ``pcapkit/const/reg/apptype.py:26`` did for ``TransportProtocol`` when
         #687 was found, and it is the statement that raised
         ``AttributeError: 'TransportProtocol' object has no attribute
-        '__set_name__'`` for ten tests of :mod:`tests.project.test_public_api`
+        '__set_name__'`` for tests of :mod:`tests.project.test_public_api`
         when this file ran before them under :mod:`unittest`. Asserting on it
         here costs two lines and no ``import pcapkit``, which keeps this module in
         the unit tier (see :mod:`tests._tiers`).

@@ -40,11 +40,11 @@ directions -- not under the export ruling, which argues the opposite for an
 object like this one, but under the privacy ruling stated below, which treats a
 sentinel documented as private as having no place in :attr:`__all__` at all.
 
-A follow-up to this same issue moved all four *definitions* into
+A follow-up to this same issue moved every sentinel's *definition* into
 :mod:`pcapkit.corekit.sentinels`: the owner chose one shared module over one module
 per sentinel, on #911. The shared module is where the ``<SENTINEL>Type`` naming
 convention and the rules for when to add ``__bool__``, ``__copy__`` or ``__reduce__``
-can sit together, which four near-empty files would scatter.
+can sit together, which a near-empty file per sentinel would scatter.
 Every assertion above still holds unchanged, since it is about
 each original module's ``__all__``, which the re-export shims left untouched; what
 changed is only :attr:`type.__module__` for the four types, which
@@ -52,7 +52,7 @@ changed is only :attr:`type.__module__` for the four types, which
 checks against :data:`CANONICAL_MODULE` rather than against a different module per
 sentinel.
 
-GitHub issue #937 later renamed two of the four *objects* to SCREAMING_SNAKE --
+GitHub issue #937 later renamed two of the *objects* to SCREAMING_SNAKE --
 ``NoValue`` to ``NO_VALUE`` and ``_Absent`` to ``ABSENT``, the latter also dropping
 its leading underscore -- so every instance name agrees on one casing. Privacy for
 what is now ``ABSENT`` stopped being signalled by the name at all and became
@@ -138,21 +138,21 @@ from tests._support import reimport_once_per_class
 # every ``assertIs`` against the canonical one would fail. The sentinels are read
 # through :func:`_sentinels` after :func:`~tests._support.reimport_once_per_class`.
 
-#: Repository root, for the two tests that read a file rather than import it.
+#: Repository root, for the tests that read a file rather than import it.
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
-#: Where all four sentinels are now *defined*: the single shared module GitHub
+#: Where every sentinel is *defined*: the single shared module GitHub
 #: issue #911 chose over one module per sentinel. Each entry in :data:`SENTINELS`
 #: below used to name a different module here (``pcapkit.corekit.module``,
 #: ``pcapkit.corekit.fields.field``, ``pcapkit.corekit.enum`` and
-#: ``pcapkit.protocols.protocol`` respectively); all four now report this one.
+#: ``pcapkit.protocols.protocol`` respectively); each reports this one.
 CANONICAL_MODULE = 'pcapkit.corekit.sentinels'
 
 #: Every sentinel in the tree that follows the house ``<SENTINEL>Type`` convention,
-#: as ``(instance name, instance, type)``. Four, not the three
+#: as ``(instance name, instance, type)``. That is more sentinels than
 #: :file:`docs/source/contributing/conventions/sentinel-convention.rst` used to
 #: document -- see the module docstring.
-#: All four now share :data:`CANONICAL_MODULE` as their defining module, which is
+#: Every one shares :data:`CANONICAL_MODULE` as its defining module, which is
 #: why a per-entry module column is no longer part of this tuple -- see
 #: :data:`PUBLIC_SENTINELS` below for the (still distinct) *shim* locations.
 #: Built by :func:`_sentinels` from the live import, not at module load.
@@ -367,7 +367,7 @@ class SentinelPopulationTests(_ReimportCase):
         Neither ``NoValue`` (``N``, ``o``, ``V``, ... mixed case) nor ``_Absent``
         (leading underscore, mixed case) matches ``^[A-Z][A-Z0-9_]*$``, so this test
         fails twice over on that tree -- once for each -- and passes on this one for
-        all four.
+        every sentinel.
 
         """
         pattern = re.compile(r'^[A-Z][A-Z0-9_]*$')
@@ -491,7 +491,7 @@ class SentinelBehaviourTests(_ReimportCase):
     documents.
 
     Not part of the export change, and asserted here because the doc edit that goes
-    with it makes claims about all four -- an undocumented ``__bool__`` or a missing
+    with it makes claims about every sentinel -- an undocumented ``__bool__`` or a missing
     ``__repr__`` would make the corrected prose wrong in a way no other test sees.
 
     """

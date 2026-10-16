@@ -42,7 +42,7 @@ minting and converts others -- see :data:`ETHERTYPE_UNASSIGNED_PROBES` and
 untouched because they do not inherit :class:`~pcapkit.corekit.enum.
 EnumRegistry` and so have no ``_unregistered_member`` to convert to until
 GitHub issue #860 lands (blocked on #859); :class:`~pcapkit.const.reg.
-apptype.apptype.AppType` is the largest of those at 766 still-minting
+apptype.apptype.AppType` is by far the largest of those in still-minting
 branches. :class:`~pcapkit.const.mh.cga_type.CGAType` keeps minting too, but
 for a different reason: its ``Tag_<hex>`` mint is not an IANA-style
 range at all (see its own module for why), so the ruling never touched it.
@@ -110,11 +110,11 @@ registries (:class:`~pcapkit.const.reg.apptype.tcp.TCP`,
 :class:`~pcapkit.const.reg.apptype.sctp.SCTP`,
 :class:`~pcapkit.const.reg.apptype.dccp.DCCP`) now mix in
 :class:`~pcapkit.corekit.enum.EnumRegistry` and no longer mint on either of
-AppType's two mint sites -- the 766 ``_missing_`` branches, and the one more
-inside ``get()`` itself. See :class:`AppTypeUnmintConvertedTests` below,
-including the deliberate scope decision on the 8 of those 766 branches that
-name a real (if IANA-assigned to a whole span rather than declared
-individually) service rather than a placeholder.
+AppType's mint sites -- its ``_missing_`` branches, and the one more inside
+``get()`` itself. See :class:`AppTypeUnmintConvertedTests` below, including
+the deliberate scope decision on those branches that name a real (if
+IANA-assigned to a whole span rather than declared individually) service rather
+than a placeholder.
 
 Untouched, per the owner's ruling on #860 settling the ``needs: decision`` that
 issue re-opened: :class:`~pcapkit.const.ftp.command.CommandType` keeps
@@ -2365,26 +2365,26 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
     :class:`~pcapkit.const.reg.apptype.dccp.DCCP` -- brought onto
     :class:`~pcapkit.corekit.enum.EnumRegistry` and stopped from minting.
 
-    Largest of the 9 bespoke classes #860 step 2 converts: measured on
-    ``c411d072a`` by an AST walk over :meth:`AppType._missing_`, 766
-    range-bounded branches -- 754 ``unassigned_<port>`` and 4
-    ``reserved_<port>`` placeholders, plus 8 branches naming a real service
-    IANA assigns to a whole span rather than to one declared member each
-    (``x11`` for TCP and again for UDP, ``active-net``, ``satvid-datalnk``,
-    ``vrml-multi-use``, ``ircu``, ``swx``, ``flex-lm``) -- plus one more,
-    independent mint site inside :meth:`AppType.get` itself
-    (``PORT_<port>_<transport>``, labelled ``'unknown'``, for a port neither
+    Largest of the bespoke classes #860 step 2 converts: an AST walk over
+    :meth:`AppType._missing_` on ``c411d072a`` found range-bounded branches
+    -- placeholders (``unassigned_<port>`` and ``reserved_<port>``), and
+    branches naming a real service IANA assigns to a whole span rather than
+    to one declared member each (``x11`` for TCP and again for UDP,
+    ``active-net``, ``satvid-datalnk``, ``vrml-multi-use``, ``ircu``, ``swx``,
+    ``flex-lm``) -- plus one more, independent mint site inside
+    :meth:`AppType.get` itself (``PORT_<port>_<transport>``, labelled
+    ``'unknown'``, for a port neither
     ``_missing_``'s ranges nor the registry's own declared members cover).
 
     A deliberate scope decision, stated here because a reviewer could
-    reasonably expect the ``FEATCode`` precedent instead: the 8 real-name
+    reasonably expect the ``FEATCode`` precedent instead: the real-name
     spans above convert to :meth:`~pcapkit.corekit.enum.
-    EnumRegistry._unregistered_member` exactly like the 758 placeholder
-    spans, *not* declared as real, individually-listed members the way #860
-    step 2's PR 1 declared ``FEATCode``'s 15. ``FEATCode``'s fix addressed a
+    EnumRegistry._unregistered_member` exactly like the placeholder spans,
+    *not* declared as real, individually-listed members the way #860 step 2's
+    PR 1 declared ``FEATCode``'s. ``FEATCode``'s fix addressed a
     *different* defect -- a const module minting members as a side effect of
     merely being imported, which does not exist here, since every one of
-    these 766 spans mints only on an actual port lookup -- and the owner's
+    these spans mints only on an actual port lookup -- and the owner's
     ruling for the whole ``AppType`` family draws no distinction between a
     real name and a placeholder: GitHub issue #860 settled that ``get()``
     must not mint regardless of whether the value it would construct is a

@@ -4,7 +4,7 @@
 Every frame in :file:`examples/captures/options-tcp.pcap` is a TCP segment whose
 header comes from :data:`examples.generators.options.TCP_BASE` and whose only
 per-case difference is the one option it carries. So that mapping is the
-description of twenty-five fixture frames, and a key it spells wrongly is a
+description of every one of those fixture frames, and a key it spells wrongly is a
 description that does not match the octets.
 
 Nothing warned when one did. :meth:`TCP.make
@@ -41,7 +41,7 @@ agrees with whatever the mapping happens to say. Spelling the intended header
 out independently is what makes the failure read ``0 != 1``, which is the defect,
 rather than ``KeyError: 'seq_no'``, which is a symptom of it.
 
-It also gives the twenty-five fixture frames a stated contract. Changing
+It also gives those fixture frames a stated contract. Changing
 ``TCP_BASE``'s values changes the bytes of ``options-tcp.pcap``, so it should
 take two edits and a moment's thought, not one.
 

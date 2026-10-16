@@ -178,7 +178,7 @@ from unittest import mock
 #: :mod:`pcapkit.vendor.__main__` imports :mod:`pcapkit.vendor` (for its
 #: ``vendor_module`` default-target-list fallback), which pulls in every
 #: crawler subpackage unconditionally -- :mod:`pcapkit.vendor.default`
-#: itself imports :mod:`requests` at module scope and seven crawlers import
+#: itself imports :mod:`requests` at module scope and several crawlers import
 #: :mod:`bs4` at module scope.
 VENDOR_DEPS = ('requests', 'bs4')
 

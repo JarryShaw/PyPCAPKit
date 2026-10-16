@@ -2,8 +2,8 @@
 """GitHub issue #930, the blocked half of #877's phase 2: re-parenting the last
 seven non-registry enumerations onto :class:`~pcapkit.corekit.enum.EnumLookup`.
 
-GitHub pull request #921 re-parented 17 of the 24 non-registry enumerations and deliberately
-left seven alone, because the files holding them were still open under other pull
+GitHub pull request #921 re-parented every other non-registry enumeration and deliberately
+left these seven alone, because the files holding them were still open under other pull
 requests at the time: :mod:`pcapkit.const.ftp.command` (``CommandType``,
 ``ConformanceRequirement``) under #913, and :mod:`pcapkit.protocols.internet.esp`
 (``ESPStatus``) plus :mod:`pcapkit.protocols.internet.mh`
@@ -37,7 +37,7 @@ Measured before that final ruling: neither override ever minted an alias -- ``__
 and ``list(cls)`` agree at 6 and 4 -- so what each docstring called "Backport support for
 original codes" was the int-or-name dual resolution
 :meth:`~pcapkit.corekit.enum.EnumLookup.get` already provides for every other
-:class:`int`-valued registry in this tree. Checked before acting on it: none of the 20 call
+:class:`int`-valued registry in this tree. Checked before acting on it: none of the call
 sites either override had (all in tests, none in :mod:`pcapkit`) passed a key the base
 would have resolved differently. There was nothing left to backport, so ``get``/``get_all``
 on both now come from the base alone, the same as the five classes below that were pure
@@ -661,10 +661,10 @@ class ZeroRemainOutsideEnumLookupTests(unittest.TestCase):
     """The census this issue exists to finish: a runtime walk over every
     importable :mod:`pcapkit.*` module (vendor templates excluded), filtering
     on ``issubclass(cls, EnumLookup)``, must now find **zero** enumerations
-    outside the hierarchy -- the assertion that stops this recurring a
-    fourth time. Nested classes are walked too, since GitHub issue #877's own
-    count of 24 non-registry enumerations includes the seven ``httpv2``
-    ``Flags`` classes nested inside schema classes.
+    outside the hierarchy -- the assertion that stops this recurring yet
+    again. Nested classes are walked too, since GitHub issue #877's own
+    census of non-registry enumerations includes the ``httpv2`` ``Flags``
+    classes nested inside schema classes.
     """
 
     def test_the_walk_found_something_to_count(self) -> None:

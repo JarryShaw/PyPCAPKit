@@ -47,7 +47,7 @@ if TYPE_CHECKING:
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 WORKFLOW = ROOT / '.github' / 'workflows' / 'unit-tests.yml'
 
-#: The four legs a docs-only pull request may skip.
+#: The legs a docs-only pull request may skip.
 LEGS = ('test', 'integration', 'engine-tests', 'pypcap-parity')
 
 

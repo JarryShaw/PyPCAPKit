@@ -158,7 +158,7 @@ class IPAddressFieldTests(unittest.TestCase):
         :exc:`FieldValueError` for a value that is merely the wrong IP
         version. So ``except BaseError`` could not reliably catch a bad field
         value: whether the exception was in-library depended on *how* the
-        value was wrong. All four public field classes must now raise
+        value was wrong. Every public field class must raise
         :exc:`FieldValueError` here too, with the original :mod:`ipaddress`
         message preserved.
         """
@@ -521,7 +521,7 @@ class IPAddressFieldTests(unittest.TestCase):
         with no error at all, and ``addr=True`` gave an IPv4 ``MPTCPAddAddress``
         with ``address=IPv4Address('0.0.0.1')``.
 
-        The five ``mh`` sites are covered next to the rest of that module, in
+        The ``mh`` sites are covered next to the rest of that module, in
         ``MHUnitTests.test_mh_length_derived_addresses_reject_a_bool``.
         """
         from pcapkit.const.hip.parameter import Parameter

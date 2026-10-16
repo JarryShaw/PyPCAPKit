@@ -26,7 +26,7 @@ of the files under :file:`examples/captures/` are committed; the rest are built
 on demand and gitignored. A machine that has run ``make samples`` has them all,
 so the test passes locally and then fails on a fresh CI checkout with a
 missing-file error that blames the fixture rather than the tier rule. It has
-happened three times (GitHub pull requests #372 and #384, and once more), and
+happened more than once (GitHub pull requests #372 and #384 among them), and
 each time it cost a CI round-trip to work out.
 
 So this module answers, cheaply and without needing the fixtures themselves:
@@ -49,9 +49,10 @@ So this module answers, cheaply and without needing the fixtures themselves:
 * :func:`is_roundtrip_sweep` -- is this unit-tier module one of the round-trip
   sweeps, which only the ``latest`` leg of the ``test`` job runs (#1732)?
 
-:file:`tests/conftest.py` drives the first four at collection time, and
-:func:`tests._support.sample_path` consults :func:`check_unit_tier_read` on
-every call. Both paths no-op when git cannot answer, so an unpacked source
+:file:`tests/conftest.py` runs :func:`is_unit_tier` and :func:`audit_module` --
+and through it :func:`committed_captures` and :func:`explain` -- at collection
+time, and :func:`tests._support.sample_path` consults :func:`check_unit_tier_read`
+on every call. Both paths no-op when git cannot answer, so an unpacked source
 tarball still runs its tests.
 
 :func:`fixture_tier_paths` is what the ``integration`` job of

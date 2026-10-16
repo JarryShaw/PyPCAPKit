@@ -16,9 +16,9 @@ docstring against the real signature and the real ``raise`` statements, so a
 docstring written tomorrow is checked tomorrow rather than being a snapshot of
 what was wrong in 2026.
 
-Four properties are asserted, and the split between them is deliberate --
+These properties are asserted, and the split between them is deliberate --
 each is sound on its own, and the softer judgements are recorded rather than
-asserted. The first three derive their answer from the code; the fourth cannot,
+asserted. All but the last derive their answer from the code; the last cannot,
 and says so:
 
 :meth:`DocstringParameterTests.test_documented_parameters_exist`
@@ -223,7 +223,7 @@ class Known(NamedTuple):
 KNOWN_DEFECTS = (
     # NOTE: the ``register_extractor_engine`` entry that used to head this tuple
     # is gone because the defect is fixed -- it documented 'engine' where the
-    # parameter is 'name', which is #546's item 2. The remaining 34 register_*
+    # parameter is 'name', which is #546's item 2. The remaining register_*
     # functions in that file were checked at the same time and none of them
     # carries the same defect, so there is nothing left to record here for it.
     Known(Finding('pcapkit/vendor/mh/binding_ack_flag.py', 'context', 'soup'),

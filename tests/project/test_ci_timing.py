@@ -844,7 +844,7 @@ class TestTimingArtifacts(unittest.TestCase):
         self.assertEqual([f'Python {version}' for version in coverage], [ci_timing.COVERAGE_JOB])
 
     def test_the_reusable_workflow_asks_for_no_write_permission(self) -> 'None':
-        """Its four callers grant ``contents: read``, so a write scope would break them."""
+        """Its callers grant ``contents: read``, so a write scope would break them."""
         code = '\n'.join(line.split('#', 1)[0] for line in self.text.splitlines())
         self.assertNotRegex(code, r'(?m)^\s+[\w-]+:\s*write\s*$')
 

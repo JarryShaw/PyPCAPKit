@@ -87,9 +87,9 @@ no network call. Both classes are gated on :data:`HAS_VENDOR_DEPS`, the same
 two-dependency gate :file:`tests/vendor/test_crawler_reachability_unit.py`
 uses, because importing :mod:`pcapkit.vendor.default` first imports the
 :mod:`pcapkit.vendor` package, whose :file:`__init__.py` pulls in every
-crawler subpackage unconditionally -- seven of which ``import bs4`` at module
+crawler subpackage unconditionally -- several of which ``import bs4`` at module
 scope. ``html5lib`` is deliberately *not* in the gate: it appears nowhere at
-module scope, only as the string parser name in six crawlers'
+module scope, only as the string parser name in the crawlers'
 ``bs4.BeautifulSoup(text, 'html5lib')`` calls at actual crawl time, which
 nothing here reaches -- no test in this file calls :meth:`Vendor.__init__` or
 :meth:`~Vendor.context`. ``requests`` and ``beautifulsoup4`` both ship in the

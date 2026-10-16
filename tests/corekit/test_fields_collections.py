@@ -116,7 +116,7 @@ class OptionFieldTests(unittest.TestCase):
 class OptionFieldForeignBaseSchemaTests(unittest.TestCase):
     """Base schemas that the read-the-type-field-only shortcut does not fit.
 
-    Nothing in this package declares one -- all 34 ``OptionField`` declarations put
+    Nothing in this package declares one -- every ``OptionField`` declaration puts
     the type field first as a fixed-width number -- but ``OptionField`` is public
     and :mod:`pcapkit.foundation.registry` invites third-party protocols to
     register their own base schemas, which need not.
@@ -330,8 +330,8 @@ class ListFieldSchemaItemTests(unittest.TestCase):
     ``field``, discarding whatever the copy carries. C.f. #433.
 
     No declaration in this package passes either argument, so nothing here
-    parses differently today; both cases below construct a ``ListField``
-    directly rather than through one of the four in-tree declarations, since
+    parses differently; both cases below construct a ``ListField``
+    directly rather than through one of the in-tree declarations, since
     those are exactly the shape that hides the bug.
 
     """

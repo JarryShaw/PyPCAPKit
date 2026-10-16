@@ -2,7 +2,7 @@
 """Claims the split *House Conventions* pages make that the tree can be asked about.
 
 :file:`docs/source/contributing/conventions.rst` used to record every design ruling
-on one 966-line page, and most of what it records is reasoning -- which no test can
+on a single page, and most of what it records is reasoning -- which no test can
 check. Some of it is not: a count of classes, a per-class classification, a retired
 name, an exception type. Those are the parts that rot silently, because Sphinx builds
 without ``-W`` and without ``nitpicky``, so a page whose every factual claim has gone
@@ -15,7 +15,7 @@ preamble and the toctree. This file pins the checkable claims, plus the split's 
 structure:
 
 * :class:`ConventionAnchorTests` -- every ``.. _label:`` anchor, one now per
-  file. Before the split the original four lived on one page, and
+  file. Before the split the original anchors lived on one page, and
   ``tests/corekit/test_sentinel_exports_unit.py`` sliced the file *between* two of
   them -- which is exactly what GitHub issue #930 named as the split's concrete
   blocker, since separating those two anchors into different files made that slice
@@ -32,7 +32,7 @@ structure:
 * :class:`ExtensionHeaderClassificationTests` -- the page's bases-per-header table
   against the declarations themselves. ``tests/protocols/internet/test_ipv6_ext_unit.py``
   already pins the *code* to the ruling; nothing pinned the *page* to the code, which is
-  the half that goes stale when a ninth header lands.
+  the half that goes stale when a new header lands.
 * :class:`RetiredNameTests` -- the #924 ruling that the ``IPv6_GenericExt`` name goes for
   good. A ruling that a name must not exist is exactly the kind a later change
   reintroduces without noticing.
@@ -41,25 +41,25 @@ structure:
   :exc:`~pcapkit.utilities.exceptions.EnumKeyError`.
 * :class:`GetOverrideContractTests` -- what a ``get`` override owes the base:
   ``@classmethod`` for delegation, which Python forces rather than anyone ruling
-  (#913's precedent, followed by #908), plus the three rulings part 1 harvested --
+  (#913's precedent, followed by #908), plus the rulings part 1 harvested --
   ``quiet=True`` on the raise (#933), no suppression standing in for an honoured
   signature (#935), and deletion rather than repair when the override only
   reimplements the base (#940). Includes the guard for the audit row #940 falsified,
-  which rendered fine and failed nothing while claiming two overrides that no longer
+  which rendered fine and failed nothing while claiming overrides that no longer
   exist.
 * :class:`AenumRoleExclusionTests` -- GitHub issue #934 part C's ruling that
   ``aenum`` cannot be cross-referenced at all (``conf.py`` excludes it: its
-  ``objects.inv`` carries zero ``py:`` objects), converted to plain literals rather
+  ``objects.inv`` carries no ``py:`` objects), converted to plain literals rather
   than roles. A forbidden role needs a test or it comes back, exactly as
   :class:`RetiredNameTests` guards a retired name. Pins the other half of the same
-  fix alongside it: the four sentinel references #934 part B qualified stay
+  fix alongside it: the sentinel references #934 part B qualified stay
   qualified, since none of ``AbsentType``, ``NoValueType`` or ``ABSENT`` resolves
   unqualified outside :file:`docs/source/pcapkit/corekit/sentinels.rst`'s own module
   context. Both checks scan every split page rather than one file, since either
   could in principle land on any of them.
 
-* :class:`ProcessConventionTests` -- the three *process* rulings #918 harvested onto
-  the fifth page, :file:`process.rst`: what the ``all`` extra carries (#910), what a
+* :class:`ProcessConventionTests` -- the *process* rulings #918 harvested onto
+  :file:`process.rst`: what the ``all`` extra carries (#910), what a
   changelog entry is, and what the issue and pull request labels mean. Grounded in
   :file:`pyproject.toml`, :file:`docs/source/changelog/1.5.0.rst` and
   :file:`.github/PULL_REQUEST_TEMPLATE.md` rather than in the owner's phrasing, which
@@ -99,9 +99,10 @@ CONVENTIONS_DIR = ROOT / 'docs' / 'source' / 'contributing' / 'conventions'
 INDEX = CONVENTIONS_DIR / 'index.rst'
 
 #: Every ``.. _label:`` anchor, in the narrative order the pre-split page carried
-#: them in -- which is also the order the index's toctree lists the files in. The
-#: first three predate #918; ``extension-header-subclassing`` arrived with it, and
-#: ``process`` came last, on the owner's ruling that the three settled *process*
+#: them in -- which is also the order the index's toctree lists the files in.
+#: ``mint-criterion``, ``sentinel-convention`` and ``registry-protocol`` predate
+#: #918; ``extension-header-subclassing`` arrived with it, and ``process`` came
+#: next, on the owner's ruling that the settled *process*
 #: rulings -- the ``all`` extra, what a changelog entry is, and what the labels
 #: mean -- get a page of their own rather than being wedged onto a code-convention
 #: page. ``documentation`` came after it, carrying the rulings GitHub issue #719
@@ -209,9 +210,9 @@ def _every_enumeration() -> 'dict[type, str]':
 
     Both the :mod:`enum` and :mod:`aenum` flavours, because the tree uses both and a
     walk over one of them silently under-reports. Nested classes are walked too: the
-    seven ``Flags`` enumerations under
-    :mod:`pcapkit.protocols.schema.application.httpv2` are all nested, and they are
-    what makes the difference between 17 non-registry enumerations and 24.
+    ``Flags`` enumerations under
+    :mod:`pcapkit.protocols.schema.application.httpv2` are all nested, so a walk
+    that skipped nested classes would under-report the non-registry population.
 
     :mod:`pcapkit.vendor` is skipped. Its modules are crawlers whose classes are
     :class:`~pcapkit.vendor.default.Vendor` subclasses named after registries rather
@@ -238,10 +239,10 @@ def _every_enumeration() -> 'dict[type, str]':
     def walk(container: 'type') -> 'None':
         """Recurse through ``container``'s own attributes.
 
-        Into **every** nested class, not only the enumerations: the seven ``Flags``
-        are nested inside schema classes, which are not enumerations themselves, so a
-        recursion that only followed enumerations would never reach them -- and would
-        under-report the non-registry population by exactly those seven.
+        Into **every** nested class, not only the enumerations: the ``Flags``
+        enumerations are nested inside schema classes, which are not enumerations
+        themselves, so a recursion that only followed enumerations would never reach
+        them -- and would under-report the non-registry population by exactly those.
 
         """
         if container in visited:
@@ -420,9 +421,9 @@ class PhaseTwoRemainderTests(unittest.TestCase):
         """*"No enumeration remains outside the hierarchy"* -- against a runtime walk.
 
         GitHub issue #930 finished phase 2, so the page says it landed for every
-        non-registry enumeration. That replaces two figure checks, on how many
-        remained outside and how many of the total had landed (#1811): both said
-        the same thing as the walk finding none outside, which is what fails here
+        non-registry enumeration. That replaces the figure checks on how many
+        remained outside and how many of the total had landed (#1811), which said
+        no more than the walk finding none outside -- and that is what fails here
         once an enumeration is added outside :class:`~pcapkit.corekit.enum.EnumLookup`.
         """
         for claim in ('the phase landed for every non-registry enumeration',
@@ -696,18 +697,18 @@ class AenumRoleExclusionTests(unittest.TestCase):
     """GitHub issue #934 part C's ruling: ``aenum`` cannot be cross-referenced.
 
     ``docs/source/conf.py`` excludes ``aenum`` from ``intersphinx_mapping``
-    deliberately -- its ``objects.inv`` carries zero ``py:`` objects, so no
+    deliberately -- its ``objects.inv`` carries no ``py:`` objects, so no
     ``:mod:``/``:class:``/``:func:``/etc. role naming it could ever resolve. Part
-    B converted the six such roles this page carried to plain double-backtick
+    B converted every such role this page carried to plain double-backtick
     literals rather than leaving them promising a link that can never exist. A
     forbidden role needs a test, or a later edit reintroduces one without
     noticing -- exactly the failure mode :class:`RetiredNameTests` guards a
     retired name against.
 
-    The other half of the same fix is pinned alongside it: the four references to
+    The other half of the same fix is pinned alongside it: the references to
     ``AbsentType``, ``NoValueType`` and ``ABSENT`` that part B qualified to their
     real dotted path under ``pcapkit.corekit.sentinels`` have to stay qualified,
-    since none of the three resolves by its bare name outside
+    since none of them resolves by its bare name outside
     :file:`docs/source/pcapkit/corekit/sentinels.rst`'s own ``.. module::``
     context.
 
@@ -716,11 +717,11 @@ class AenumRoleExclusionTests(unittest.TestCase):
     #: Any Sphinx py-domain role whose target starts with ``aenum``, tilde-prefixed
     #: or not. Matches ``:mod:`aenum``` and ``:class:`~aenum.Enum``` alike; would
     #: also catch a role type never seen on this page (``:func:`aenum.something```),
-    #: since the ban is on naming ``aenum`` in a role at all, not on the six
-    #: specific roles #934 part C found.
+    #: since the ban is on naming ``aenum`` in a role at all, not on the specific
+    #: roles #934 part C found.
     FORBIDDEN_AENUM_ROLE = re.compile(r':(?:mod|class|meth|func|attr|exc|obj|data):`~?aenum\b')
 
-    #: The four qualified sentinel references part B's fix relies on: the role,
+    #: The qualified sentinel references part B's fix relies on: the role,
     #: the dotted target, and how many times that exact pairing has to appear.
     QUALIFIED_SENTINEL_REFS = (
         (':class:', '~pcapkit.corekit.sentinels.AbsentType', 2),
@@ -735,7 +736,7 @@ class AenumRoleExclusionTests(unittest.TestCase):
         plain double-backtick literal (``` ``aenum.Enum`` ```) and in prose
         (*"the aenum flavours"*) throughout these pages, which is exactly the
         point of the fix -- only the unresolvable *role* form is banned. Scanned
-        across every split page plus the index, since the six roles #934 part C
+        across every split page plus the index, since the roles #934 part C
         found could each have landed in any of them.
 
         """
@@ -753,8 +754,8 @@ class AenumRoleExclusionTests(unittest.TestCase):
 
         ``AbsentType``, ``NoValueType`` and ``ABSENT`` each resolve only against
         the sentinels page's own module context (GitHub pull request #936); written bare
-        anywhere on these pages, none of the three resolves at all. All four
-        qualified references happen to live in
+        anywhere on these pages, none of them resolves at all. The qualified
+        references happen to live in
         :file:`sentinel-convention.rst`, but this scans every split page plus the
         index so a later move of one does not go unnoticed.
 
@@ -773,14 +774,15 @@ class GetOverrideContractTests(unittest.TestCase):
     """What a ``get`` override owes the base, as recorded onto *The
     Registry Protocol* by GitHub issue #918 part 1.
 
-    Three of the four items are quoted from the owner on their own threads -- #933 on
-    ``quiet=True``, #935 on an advertised signature that is refused, #940 on deleting
-    an override that only reimplements the base. The fourth, the ``@classmethod``
-    requirement for delegation, is **not** a ruling and is not quoted as one: it is
+    All but one of the items are rulings the owner gave on their own threads -- #933
+    on ``quiet=True``, #935 on an advertised signature that is refused, #940 on
+    deleting an override that only reimplements the base. The remaining one, the
+    ``@classmethod`` requirement for delegation, is **not** a ruling and is not
+    presented as one: it is
     forced by the language, since zero-argument :func:`super` inside a
     ``@staticmethod`` has nothing to bind, and #913 set the shape that #908 then
     followed. Each states something the tree can be asked about. The page's
-    half is what rots: the same four claims are already pinned in ``tests/corekit``
+    half is what rots: the same claims are already pinned in ``tests/corekit``
     and ``tests/protocols`` against the *code*, so a later change that moves the code
     fails there, while a page still describing the old shape fails nothing. This
     class is the other direction, and it is how the stale audit row this change
@@ -820,7 +822,7 @@ class GetOverrideContractTests(unittest.TestCase):
         from pcapkit.const.http.method import Method
         from pcapkit.const.pcapng.option_type import OptionType
 
-        # Membership before indexing, for all three. `vars(klass)['get']` raises a bare
+        # Membership before indexing, for each class. `vars(klass)['get']` raises a bare
         # `KeyError: 'get'` when a class folds its own override into the inherited base
         # -- which is exactly what GitHub pull request #940 did to the mh/ngap helpers,
         # so it is a live failure mode rather than a hypothetical one. The KeyError
@@ -856,7 +858,7 @@ class GetOverrideContractTests(unittest.TestCase):
                          'OptionType.get now delegates, so the page is wrong to list it '
                          'as the surviving staticmethod')
 
-        # Execute the three outcomes rather than assert the page names them. The
+        # Execute the outcomes rather than assert the page names them. The
         # first draft of this test only grepped for the error string, and the
         # string it grepped for was the wrong one -- the page claimed
         # `RuntimeError: super(): no arguments` for a shape that actually raises
@@ -882,7 +884,7 @@ class GetOverrideContractTests(unittest.TestCase):
         # "obj must be an instance or subtype of type" while 3.13+ say "obj
         # (instance of str) is not an instance or subtype of type (Cls)". Only
         # `instance or subtype of type` is common to both, and pinning either
-        # full sentence would fail three of the five required Compat legs --
+        # full sentence would fail the required Compat legs that word it the other way --
         # invisible locally, since this venv is 3.14.
         self.assertIn('instance or subtype of type', str(caught.exception),
                       'zero-argument super() in a staticmethod binds the first '
@@ -902,13 +904,13 @@ class GetOverrideContractTests(unittest.TestCase):
 
         flat = self._flat()
         # Each wording pinned by a needle unique to it. The shared substring
-        # ``instance or subtype of type`` occurs **three** times on the page -- both
-        # quoted errors plus the sentence explaining what they share -- so asserting it
+        # ``instance or subtype of type`` occurs more than once on the page -- in both
+        # quoted errors and in the sentence explaining what they share -- so asserting it
         # pinned neither: corrupting the 3.13+ quote to something false still passed.
         #
-        # **Fourth instance of one defect shape**, after ``labels: bug`` (a bare token
-        # matched elsewhere), the bare ``26`` (matched by the page's own ``wc -l``
-        # output) and ``quiet=True`` (four occurrences). The rule, stated once here
+        # **A recurring defect shape**, after ``labels: bug`` (a bare token matched
+        # elsewhere), a bare figure (matched by the page's own ``wc -l`` output) and
+        # ``quiet=True`` (several occurrences). The rule, stated once here
         # because it kept being rediscovered: **an assertIn whose needle appears more
         # than once on the page pins nothing** -- a later occurrence satisfies it and
         # the claim it guards can be inverted freely. Count occurrences before
@@ -981,10 +983,10 @@ class GetOverrideContractTests(unittest.TestCase):
                       'reversal rather than his first answer, which is the whole reason '
                       'both answers are on the issue')
         # Anchored to the headline sentence, not the bare token. `quiet=True` occurs
-        # four times on the page, so `assertIn('``quiet=True``')` was satisfied by a
+        # more than once on the page, so `assertIn('``quiet=True``')` was satisfied by a
         # later mention -- inverting the ruling itself to `quiet=False` failed nothing.
-        # Third instance of this shape: the `labels: bug` assertion and the bare `26`
-        # both passed the same way, so the rule is now explicit -- never assert a token
+        # The same shape as the `labels: bug` assertion and the bare figure, which
+        # passed the same way, so the rule is explicit -- never assert a token
         # that appears more than once on the page it is meant to pin.
         self.assertIn('Raise the way the base raises, which means** ``quiet=True``', flat,
                       'the page no longer states the ruling as its headline, so a '
@@ -993,11 +995,11 @@ class GetOverrideContractTests(unittest.TestCase):
     def test_the_two_redundant_overrides_are_gone(self) -> 'None':
         """#940: the owner ruled for deleting the redundant overrides, not widening them.
 
-        Three things at once, because the ruling is only settled if all three hold:
+        Several things at once, because the ruling is only settled if they all hold:
         neither class defines ``get``, the module defines none at all, and the
         ``[override]``/``arguments-differ`` pair the old signatures needed went with
         them. Scoped to that exact pair rather than to ``arguments-differ`` alone,
-        which mh.py still carries four times for ``read`` and ``__post_init__`` --
+        which mh.py still carries for ``read`` and ``__post_init__`` --
         unrelated to any ``get``, and measured before asserting on it.
 
         """
@@ -1102,15 +1104,15 @@ def _optional_dependencies() -> 'dict[str, list[str]]':
 
     **Verified against** :mod:`tomllib` **rather than asserted.** A second version
     matched arrays with a non-greedy bracket pattern, which stopped at the first
-    literal ``]`` -- which mis-parsed **3 of the 14** extras, silently:
+    literal ``]`` -- which mis-parsed several extras, silently:
 
     * ``vendor`` came back **empty**, because the ``]`` inside ``"requests[socks]"``
       closed the match early.
-    * ``dev`` silently dropped its last two entries for the same reason.
+    * ``dev`` silently dropped its trailing entries for the same reason.
     * ``test`` was truncated at a ``]`` inside a *comment* and then picked up a quoted
       example from the prose, **inventing a dependency called** ``9 skipped``.
 
-    No shipped assertion read those three keys, so no test gave a wrong verdict -- but
+    No shipped assertion read those keys, so no test gave a wrong verdict -- but
     ``dev`` and ``vendor`` are both described in the page's own prose, so the next
     assertion to check either would have got wrong data with nothing raised. That is
     precisely the "renders fine and fails nothing" failure this suite exists to close,
@@ -1173,7 +1175,7 @@ def _optional_dependencies() -> 'dict[str, list[str]]':
 
 
 class ProcessConventionTests(unittest.TestCase):
-    """The three process rulings :file:`process.rst` carries, against the tree.
+    """The process rulings :file:`process.rst` carries, against the tree.
 
     Each check pins the *claim the page makes* next to the *fact behind it*, and
     deliberately pins neither against the owner's own phrasing. Quoting him is what
@@ -1211,7 +1213,7 @@ class ProcessConventionTests(unittest.TestCase):
         The reader exists because :mod:`tomllib` is 3.11+ and CI still tests 3.8-3.10
         (#1633's KTLO legs), so the assertions above cannot use it. That makes the reader itself an
         unverified dependency of every extras claim on the page -- and its second
-        version mis-parsed **3 of the 14** extras silently, inventing a requirement
+        version mis-parsed several extras silently, inventing a requirement
         called ``9 skipped`` out of comment prose.
 
         So wherever a real parser *is* available -- which is every interpreter from 3.11
@@ -1249,7 +1251,7 @@ class ProcessConventionTests(unittest.TestCase):
         Two halves, because either can rot without the other. The tree half asks
         :file:`pyproject.toml` whether ``all`` is still the union of ``cli``,
         ``crypto`` and ``NGAP`` and nothing else -- the shape GitHub issue #910's
-        ruling produced, eight requirements down to three. The page half asks whether
+        ruling produced, narrowed to the core addons. The page half asks whether
         the ``toml`` block on the page still shows that same list, since a page that
         prints a stale ``all =`` line is worse than one that prints none.
 
@@ -1272,11 +1274,11 @@ class ProcessConventionTests(unittest.TestCase):
     def test_the_page_keeps_the_engine_and_installability_exclusions_apart(self) -> 'None':
         """The two exclusion reasons are the part a reader collapses into one.
 
-        #910 excluded the four third-party engines **by kind** -- they are not core
+        #910 excluded the third-party engines **by kind** -- they are not core
         addons -- where ``PyPCAP`` and ``PCAP_CT`` were already out for
         *installability*, which the ruling did not touch. Reading those as one reason
         is what let the list drift the first time, so the page has to state both. The
-        tree half checks the six engine extras still exist to be excluded from, since
+        tree half checks the engine extras still exist to be excluded from, since
         a prose distinction about extras that no longer exist is not a distinction.
 
         """
@@ -1388,11 +1390,11 @@ class ProcessConventionTests(unittest.TestCase):
     def test_the_page_names_what_the_tree_has(self) -> 'None':
         """Every claim the page makes that has local ground truth.
 
-        A cross-review corrupted **46** claims on these two pages simultaneously and
+        A cross-review once corrupted a batch of claims on these pages at once and
         the suite stayed green, which is the honest measure of how much of the prose
         was decorative. This closes the subset that has local ground truth: a path
-        the page cites, a module it names. The page states no entry count any more
-        (#1103's ruling, #1811), so none is pinned.
+        the page cites, a module it names. The page states no entry count (#1103's
+        ruling, #1811), so none is pinned.
 
         **What stays unpinned, and why, so the gap is stated rather than implied.**
         Every claim whose ground truth is a GitHub query -- the label count, which
@@ -1476,7 +1478,7 @@ class ProcessConventionTests(unittest.TestCase):
         # came to name ``github_actions`` as dependabot-applied when
         # .github/dependabot.yml configures only ``pip``, so dependabot can never open a
         # workflow bump here. Saying a hand-applied label is a machine default is this
-        # section's own point stated backwards, and the two places the page mentioned it
+        # section's own point stated backwards, and the places the page mentioned it
         # disagreed with each other about ``python``.
         dependabot = (ROOT / '.github' / 'dependabot.yml').read_text(encoding='utf-8')
         ecosystems = re.findall(r'package-ecosystem:\s*"([^"]+)"', dependabot)
@@ -1493,8 +1495,9 @@ class ProcessConventionTests(unittest.TestCase):
         # the tool with the label is checked instead, so the phrasing no longer matters.
         #
         # Proximity is not the test, and a first attempt at #949 that used it was wrong:
-        # the section states **twice**, deliberately, that ``github_actions`` is *not*
-        # dependabot's, and both of those sentences name the tool and the label together.
+        # the section states more than once, deliberately, that ``github_actions`` is
+        # *not* dependabot's, and each of those sentences names the tool and the label
+        # together.
         # Distinguishing an attribution from a denial by looking for a negation nearby
         # also failed -- the attributing bullet's own sentence ends "so it never opens a
         # workflow bump here", so the negation is present in the sentence that makes the
@@ -1559,8 +1562,8 @@ class ProcessConventionTests(unittest.TestCase):
         """A ``#NNN`` label and the issue or pull number in its own URL must agree.
 
         Purely local, needing no network, and it closes the largest single class of
-        unpinned claim on these pages: a cross-review corrupted roughly thirty link
-        numbers across both files and not one was caught, because nothing compared the
+        unpinned claim on these pages: a cross-review corrupted a run of link
+        numbers across these files and not one was caught, because nothing compared the
         displayed number against the target. A mismatch is invisible to a reader --
         the text says #918 and the link goes to #919 -- and Sphinx cannot warn, since
         both halves are well-formed.
@@ -1606,15 +1609,15 @@ class ProcessConventionTests(unittest.TestCase):
         """The current shape of ``1.5.0.rst``, counted rather than eyeballed.
 
         This replaces a check on the file's *previous* shape. The page used to say the
-        entries carried three inline kind labels in a given number of separate runs,
+        entries carried inline kind labels in a given number of separate runs,
         and this test measured those runs and required the figure in the prose. The
         by-module restructure removed the inline labels outright, so that test did not
         merely go stale -- it went **vacuous**: its ``re.findall`` matched nothing,
-        ``runs`` was empty, and both of its ``assertGreater`` floors failed before the
+        ``runs`` was empty, and its ``assertGreater`` floors failed before the
         prose needle was ever reached. A test whose subject has been deleted cannot be
         repaired by updating a number.
 
-        What is checked now is the shape that actually shipped: one ``-`` underlined
+        What is checked is the shape that actually shipped: one ``-`` underlined
         section per top-level module plus one for what belongs to none, each carrying
         ``~`` underlined kind subsections, with no inline kind label left anywhere. The
         page used to state the section count as well, pinned here; it states the shape

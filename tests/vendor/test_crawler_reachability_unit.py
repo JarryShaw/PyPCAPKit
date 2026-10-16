@@ -81,7 +81,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 #: Whether the crawler machinery is importable at all. Importing
 #: :mod:`pcapkit.vendor` pulls in every subpackage unconditionally:
 #: :mod:`pcapkit.vendor.default` imports :mod:`requests` at module scope and
-#: seven of the crawlers import :mod:`bs4` at module scope, so both are needed
+#: several of the crawlers import :mod:`bs4` at module scope, so both are needed
 #: for this file rather than optional to it. (:mod:`pcapkit.vendor`'s own
 #: ``try: import bs4`` downgrades the *warning*, not the
 #: :exc:`ModuleNotFoundError` raised by the crawler imports below it.)

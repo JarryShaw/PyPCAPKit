@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
-"""GitHub issue #911's housing half: one module for all four sentinels.
+"""GitHub issue #911's housing half: one module for every sentinel.
 
 The `__all__` half of #911 landed as #916 and is pinned by
 :mod:`tests.corekit.test_sentinel_exports_unit`. The owner left the second
-question -- where the four sentinels should be *defined* -- open, offering
+question -- where the sentinels should be *defined* -- open, offering
 either one module per sentinel or one module for all of them, and settled it with
-a one-line ruling once offered the choice: one module for all four.
+a one-line ruling once offered the choice: one module for all of them.
 
-So :mod:`pcapkit.corekit.sentinels` is now the single defining module for all
-four -- :class:`~pcapkit.corekit.sentinels.NullType`,
+So :mod:`pcapkit.corekit.sentinels` is the single defining module for every
+sentinel -- :class:`~pcapkit.corekit.sentinels.NullType`,
 :class:`~pcapkit.corekit.sentinels.NoValueType`,
 :class:`~pcapkit.corekit.sentinels.NoDefaultType` and
-:class:`~pcapkit.corekit.sentinels.AbsentType`, and their four instances. The
-four original modules (:mod:`pcapkit.corekit.module`,
+:class:`~pcapkit.corekit.sentinels.AbsentType`, and their instances. The
+original modules (:mod:`pcapkit.corekit.module`,
 :mod:`pcapkit.corekit.fields.field`, :mod:`pcapkit.corekit.enum` and
 :mod:`pcapkit.protocols.protocol`) kept a re-export of each until GitHub issue
 #1744 dropped them, under the ruling on #1715 that a moved name keeps no
@@ -51,7 +51,7 @@ asserts that with ``is``, never ``==``.
 "on purpose" rather than left to the pre-existing ``cyclic-import`` findings
 :command:`pylint` reports for this package, which run to hundreds and would
 swallow one more without comment: that :mod:`pcapkit.corekit.sentinels` itself
-imports nothing from any of the four modules it is now depended on by, so the
+imports nothing from any of the modules that depend on it, so the
 dependency graph between them is a star with :mod:`pcapkit.corekit.sentinels`
 at the centre and no edge pointing back into it.
 
@@ -129,7 +129,7 @@ class NoImportCycleTests(unittest.TestCase):
         :mod:`pcapkit.corekit.enum` or :mod:`pcapkit.protocols.protocol` -- each
         of which imports *it*. Walked with :mod:`ast` rather than grepped for the
         dotted name as plain text, because the module's own docstring above
-        names all four *in prose*, explaining where each sentinel used to live --
+        names those modules *in prose*, explaining where each sentinel used to live --
         a text search would flag that explanation as if it were the cycle it is
         warning readers there is no longer any risk of.
 
@@ -178,7 +178,7 @@ class NoImportCycleTests(unittest.TestCase):
     def test_each_consumer_module_still_imports_cleanly_on_its_own(self) -> 'None':
         """The other direction: importing a consumer first must not deadlock either.
 
-        Each of the four is tried as the *first* thing imported after a purge,
+        Each consumer is tried as the *first* thing imported after a purge,
         one at a time -- the order a cycle would actually be sensitive to,
         since a cycle through ``pcapkit.corekit.sentinels`` would surface as
         whichever of the two modules is entered second finding the other only

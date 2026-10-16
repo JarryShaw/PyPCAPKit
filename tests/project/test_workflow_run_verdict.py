@@ -2,10 +2,10 @@
 """Tests that Conda Update, Vendor Update and GitHub Pages act only under a verdict
 for the commit they build (#1643).
 
-All three chain off ``Unit Tests`` completing and check out ``github.sha``, which
+Each chains off ``Unit Tests`` completing and checks out ``github.sha``, which
 for a ``workflow_run`` is ``main``'s tip when the event is raised -- not the commit
 the completed run verified. Conda Update 38325136710 was raised 2 s after the run
-for 9083163f5 succeeded, ran on 2e941bbb7 (three merged pull requests later), and
+for 9083163f5 succeeded, ran on 2e941bbb7 (with later pull requests merged), and
 pushed f4f94bcad at 00:03:38Z; 2e941bbb7's own run 38323130015 finished at
 00:13:35Z.
 
@@ -368,7 +368,7 @@ def _context(event_name: 'str' = 'workflow_run', conclusion: 'str' = 'success',
 
 
 #: ``[(row, context, whether verdict's if: holds, whether the acting job's does)]``,
-#: for all three workflows; :data:`None` asserts nothing about that job.
+#: for every workflow above; :data:`None` asserts nothing about that job.
 ROWS = [
     ('run 38325136710: the verdict is for an older commit',
      _context(verified='false'), True, False),
@@ -400,7 +400,7 @@ _GROUP = re.compile(r'^concurrency:\n  group: (?P<prefix>[^$\n]*)\$\{\{(?P<body>
 
 
 class TestEachWorkflowGatesOnTheVerdict(unittest.TestCase):
-    """The ``verdict`` job, and the job it gates, in each of the three workflows."""
+    """The ``verdict`` job, and the job it gates, in each of those workflows."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -419,7 +419,7 @@ class TestEachWorkflowGatesOnTheVerdict(unittest.TestCase):
                 self.assertIn('verdict', declared_needs(self._jobs(workflow)[job]))
 
     def test_every_scenario_decides_correctly(self) -> None:
-        """The table above, for both jobs, in all three workflows."""
+        """The table above, for both jobs, in every workflow."""
         violations = []  # type: list[str]
         for workflow, job in ACTING_JOBS.items():
             jobs = self.jobs[workflow]
@@ -447,7 +447,7 @@ class TestEachWorkflowGatesOnTheVerdict(unittest.TestCase):
                 self.assertTrue(declared_if(self._jobs(workflow)[job]).startswith('!cancelled() && '))
 
     def test_the_verdict_job_is_one_job_in_three_places(self) -> None:
-        """Identical text, so a fix to one cannot leave the other two behind."""
+        """Identical text, so a fix to one cannot leave the others behind."""
         blocks = {workflow: self._jobs(workflow)['verdict'] for workflow in ACTING_JOBS}
         self.assertEqual(len(set(blocks.values())), 1, sorted(blocks))
 

@@ -15,7 +15,7 @@ He then went with the recommendation to keep both on :class:`EnumRegistry`.
 
 What this module pins, and why each part is worth pinning:
 
-* the split is where it was ruled to be -- three methods on the base, the five
+* the split is where it was ruled to be -- the lookup methods on the base, the
   mutating ones still on :class:`~pcapkit.corekit.enum.EnumRegistry`, asserted as
   an **exact** partition rather than as mere presence, so that a later change
   cannot quietly migrate one across (:class:`TwoTierSplitTests`);
@@ -191,7 +191,7 @@ class TwoTierSplitTests(unittest.TestCase):
                 self.assertFalse(hasattr(EnumLookup, name))
 
     def test_registries_still_reach_every_mutating_method(self) -> 'None':
-        """And the registry tier keeps all five, inherited or not."""
+        """And the registry tier keeps every mutating method, inherited or not."""
         for name in MUTATING:
             with self.subTest(method=name):
                 self.assertTrue(callable(getattr(_PickleInt, name)))

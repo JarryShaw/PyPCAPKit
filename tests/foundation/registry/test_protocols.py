@@ -282,7 +282,7 @@ class ProtocolRegistryTests(unittest.TestCase):
         :func:`~pcapkit.foundation.registry.protocols.register_protocol`, and
         it is the part of #681 that does generalise.
 
-        All seven code-keyed registrars are covered, including the two that reach
+        Every code-keyed registrar is covered, including those that reach
         :meth:`Transport.register
         <pcapkit.protocols.transport.transport.Transport.register>` through
         :class:`~pcapkit.protocols.transport.tcp.TCP` and
@@ -847,8 +847,8 @@ class ProtocolRegistryTests(unittest.TestCase):
     def test_register_tcp_bad_class_name_raises_protocolerror(self) -> None:
         """GitHub issue #832: the fix is family-wide, not one function.
 
-        :func:`register_apptype` is not the only one of the nine ``register_*``
-        wrappers that builds a :class:`~pcapkit.corekit.module.ModuleDescriptor`
+        :func:`register_apptype` is not the only ``register_*``
+        wrapper that builds a :class:`~pcapkit.corekit.module.ModuleDescriptor`
         from a :class:`str` ``module`` -- :func:`register_tcp` is a sibling
         that shares the same :attr:`ModuleDescriptor.klass` resolution, so it
         must fail a bad class name the same way.

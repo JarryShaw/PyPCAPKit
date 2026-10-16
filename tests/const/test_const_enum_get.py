@@ -14,38 +14,36 @@ The integer path -- the one every numeric lookup takes -- could not.
 
 The sweep below is the one #584 asked for before fixing ("the real scope is
 likely wider since most ``const/`` modules are generated from the same
-skeleton"). Measured: of the 118 :class:`~aenum.IntEnum` and
+skeleton"). Measured: across the :class:`~aenum.IntEnum` and
 :class:`~aenum.IntFlag` registries defined under :mod:`pcapkit.const`, the
-defect was live in 110 -- not just the three the issue named. Three of the
-remaining eight never raise on an out-of-range integer because they auto-extend
-the whole space, and five carry no ``get(key, default)`` at all.
+defect was live in all but a handful -- not just the three the issue named. Of
+the rest, some never raise on an out-of-range integer because they auto-extend
+the whole space, and the others carry no ``get(key, default)`` at all.
 
-GitHub issue #647 moved one of those three into the sweep, so the arithmetic
-was 111 + 2 + 5. :class:`~pcapkit.const.tcp.flags.Flags` resolved every
-integer only because it defined no ``_missing_`` to bound its domain; it does
-now, so its ``get`` has a failure for ``default`` to fall back from like the
-other 110.
+GitHub issue #647 moved one of the auto-extending registries into the sweep.
+:class:`~pcapkit.const.tcp.flags.Flags` resolved every integer only because it
+defined no ``_missing_`` to bound its domain; it defines one, so its ``get``
+has a failure for ``default`` to fall back from like the others.
 
 GitHub issue #860 step 2 then brought :class:`~pcapkit.const.ftp.return_code.
 GroupingInformation` and :class:`~pcapkit.const.ftp.return_code.ResponseKind`
 onto :class:`~pcapkit.corekit.enum.EnumRegistry`, giving each the base
-``get(key, default)`` it never had before -- two fewer of the five with no
-integer ``default`` at all, two more in the main sweep. The full arithmetic,
-spelled out completely rather than left to imply a total that silently
-dropped :class:`~pcapkit.const.pcapng.filter_type.FilterType` (in
+``get(key, default)`` it never had before -- moving both out of the set with
+no integer ``default`` at all and into the main sweep. The full composition,
+spelled out rather than left to imply a total that silently dropped
+:class:`~pcapkit.const.pcapng.filter_type.FilterType` (in
 :data:`EXPECTED_WITHOUT_A_CACHEABLE_FALLBACK`, excused from the main sweep
-for a separate reason and covered by its own test below) the way the "111 +
-2 + 5" phrasing above always did: 112 (main sweep) + 2
-(:data:`EXPECTED_TO_RESOLVE_ANYTHING`) + 3
-(:data:`EXPECTED_WITHOUT_AN_INTEGER_DEFAULT`) + 1 (``FilterType``) = 118,
-matching :meth:`test_the_sweep_size_is_pinned`.
+for a separate reason and covered by its own test below): the main sweep,
+plus :data:`EXPECTED_TO_RESOLVE_ANYTHING`, plus
+:data:`EXPECTED_WITHOUT_AN_INTEGER_DEFAULT`, plus ``FilterType`` -- together,
+the population :meth:`test_the_sweep_size_is_pinned` counts.
 
-Two more registries are outside this sweep because they are
-:class:`~aenum.StrEnum` rather than integer enums, and both were deliberately
+Some registries are outside this sweep because they are
+:class:`~aenum.StrEnum` rather than integer enums, and were deliberately
 left alone: :class:`~pcapkit.const.pcapng.option_type.OptionType` and
 :class:`~pcapkit.const.reg.apptype.AppType` each carry a bespoke integer
 fallback that already resolves every value, so neither drops a default by
-raising. The two string-keyed registries
+raising. The string-keyed registries
 :class:`~pcapkit.const.ftp.command.Command` and
 :class:`~pcapkit.const.http.method.Method` have no integer path at all; they are
 the subject of #582 and #583 instead.
@@ -320,7 +318,7 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
                             f'sweep is missing: {expected - names}')
 
     def test_every_integer_path_consults_the_default(self) -> None:
-        """The registry-wide form of #584, across all 120 integer registries."""
+        """The registry-wide form of #584, across every integer registry."""
         covered = 0
         for obj in self.enums:
             qualname = _qualname(obj)

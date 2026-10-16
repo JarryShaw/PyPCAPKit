@@ -2,7 +2,7 @@
 """The application layer registry as a per-transport package.
 
 GitHub issue #732. :file:`pcapkit/const/reg/apptype.py` was one
-:class:`~aenum.StrEnum` holding 8,182 members across every transport protocol,
+:class:`~aenum.StrEnum` holding the members of every transport protocol,
 with a ``__members_proto__`` mapping that kept **one** member per
 ``(transport, port)`` pair -- so of the three services IANA assigns to port 80,
 two were reachable only by attribute name and none of that was visible from a
@@ -11,15 +11,15 @@ lookup. It is now :mod:`pcapkit.const.reg.apptype`: a memberless
 transport protocol, each keyed on port by a
 :class:`~pcapkit.corekit.multidict.MultiDict` that keeps every assignment.
 
-Four properties carry the design and none of them held before, so each is
+These properties carry the design and none of them held before, so each is
 asserted directly rather than left to the generic sweeps in
 :mod:`tests.const.test_const_enum_builtin_parity`:
 
 #. the base holds **no** members, which is not a tidiness preference --
    :mod:`aenum` refuses to subclass an enumeration that has any, so a single
-   member on the base makes all four registries impossible to declare;
-#. a member is still an ``AppType``, which is what keeps the seven
-   ``isinstance`` sites in :mod:`pcapkit.protocols` working across the split;
+   member on the base makes every per-transport registry impossible to declare;
+#. a member is still an ``AppType``, which is what keeps the ``isinstance``
+   check against it in :mod:`pcapkit.protocols` working across the split;
 #. a colliding port keeps **every** service IANA assigned it, answering with one
    canonical member and keeping the rest reachable as named aliases;
 #. :func:`~aenum.extend_enum` on an occupied port *appends* rather than
@@ -43,13 +43,14 @@ _DUNDER_SAMPLE_SIZE = 48
 def _dunder_sample(registry: 'type') -> 'list':
     """The members of ``registry`` the byte-identity sweep formats, in row order.
 
-    GitHub issue #1062. Sweeping every member ran 37,173 subtests, and per-test
-    coverage contexts found only **4** distinct arc sets among them: ``repr``
-    and ``str``, each with and without an ``(aliases: ...)`` suffix -- the
-    registry, the port and the service name never change which code runs. So
-    the sample keeps every member that carries an alias (the suffix branch),
+    GitHub issue #1062. Sweeping every member ran a subtest per member, and
+    per-test coverage contexts found only a few distinct arc sets among them:
+    ``repr`` and ``str``, each with and without an ``(aliases: ...)`` suffix --
+    the registry, the port and the service name never change which code runs.
+    So the sample keeps every member that carries an alias (the suffix branch),
     the first and last row, and an evenly spaced stride through the rest, which
-    covers all four sets across the registries and is the same list on every run.
+    covers every one of those sets across the registries and is the same list
+    on every run.
 
     """
     members = list(registry)
@@ -106,7 +107,7 @@ class AppTypeSplitTests(unittest.TestCase):
     """The shape of the split registry."""
 
     def test_the_base_registry_holds_no_members(self) -> None:
-        """And that is what makes the four registries declarable at all."""
+        """And that is what makes the per-transport registries declarable at all."""
         import aenum
 
         from pcapkit.const.reg.apptype import AppType, TransportProtocol
@@ -131,7 +132,7 @@ class AppTypeSplitTests(unittest.TestCase):
         self.assertEqual(len(AppType.__members__), 0)
 
     def test_a_member_is_still_an_apptype(self) -> None:
-        """What the seven ``isinstance`` sites in :mod:`pcapkit.protocols` rely on."""
+        """What the ``isinstance`` check in :mod:`pcapkit.protocols` relies on."""
         from pcapkit.const.reg.apptype import DCCP, SCTP, TCP, UDP, AppType
 
         for cls in (TCP, UDP, SCTP, DCCP):
@@ -187,9 +188,9 @@ class AppTypeSplitTests(unittest.TestCase):
         """One member, and the one the rest of the world names.
 
         IANA names no precedence among the services it registers on a port, and
-        registry row order does not supply one: of the 44 colliding
-        ``(port, transport)`` pairs it answers 28 the way :file:`/etc/services`
-        does and 16 differently, giving ``l2f`` for 1701 and ``shilp`` for 2049.
+        registry row order does not supply one: on the colliding
+        ``(port, transport)`` pairs it answers some the way :file:`/etc/services`
+        does and others differently, giving ``l2f`` for 1701 and ``shilp`` for 2049.
         So the canonical member is curated from :file:`/etc/services`, which is
         what :func:`socket.getservbyport` reads.
 
@@ -424,8 +425,8 @@ class AppTypeSplitTests(unittest.TestCase):
 
         ``register_alias`` cannot pick a transport for the caller the way
         ``get``/``get_all`` do through their ``proto=`` keyword: per-transport
-        registration is the point, so it has to be called on one of the four
-        subclasses directly.
+        registration is the point, so it has to be called on one of the
+        per-transport subclasses directly.
         """
         from pcapkit.const.reg.apptype import AppType
 
@@ -484,7 +485,7 @@ class AppTypeSplitTests(unittest.TestCase):
         self.assertIn('unit-test-80', [member.svc for member in UDP.get_all(80)])
 
     def test_every_registry_rejects_a_negative_value(self) -> None:
-        """GitHub issue #647's guard, now over five classes rather than one.
+        """GitHub issue #647's guard, over the base and every per-transport registry.
 
         ``ValueError`` specifically, and from every one of them: an ``IntEnum``
         with ``settings=NoAlias`` -- the other way to keep two members on one port
@@ -541,7 +542,7 @@ class AppTypeSplitTests(unittest.TestCase):
         self.assertNotIn(-1, TCP.__registry__)
 
     def test_unassigned_rows_are_documented_rather_than_declared(self) -> None:
-        """The 1,004 ``port == -1`` rows and the 704 with no transport protocol.
+        """The ``port == -1`` rows, and the rows with no transport protocol.
 
         They are not members -- there is nothing for a member to be valued on --
         so they are rendered as a ``list-table`` in the docstring of the registry
@@ -564,16 +565,16 @@ class AppTypeSplitTests(unittest.TestCase):
     def test_a_real_port_with_no_transport_no_longer_resolves(self) -> None:
         """The one deliberate behaviour change, pinned so it cannot happen twice.
 
-        124 registry entries carry a real port with an **empty** transport
+        Some registry entries carry a real port with an **empty** transport
         protocol column, and the old ``_missing_`` consulted them as a fallback
         tier after the transport-specific lookup missed -- so ``get(51,
         proto=tcp)`` answered ``reserved``, claiming a TCP assignment IANA never
-        made. They are documented on the base class now, and the lookup answers
-        an unknown port instead, which is the honest answer -- as of GitHub issue
+        made. They are documented on the base class instead, and the lookup
+        answers an unknown port, which is the honest answer -- since GitHub issue
         #860 step 2 PR 2, an unregistered one rather than a permanent mint, so
         there is nothing left for :meth:`_purge_member` to undo (it no-ops when
         the name it is asked to remove was never added, which is exactly what
-        happens here now; kept anyway as a harmless guard against a regression
+        happens here; kept anyway as a harmless guard against a regression
         that reintroduced minting).
         """
         from pcapkit.const.reg.apptype import TCP, AppType
@@ -626,9 +627,9 @@ class AppTypeSplitTests(unittest.TestCase):
         self.assertEqual(minted.port, 59000)
 
     def test_a_span_on_two_transports_answers_each_with_its_own_row(self) -> None:
-        """GitHub issue #760: source order decided, so the TCP row answered all four.
+        """GitHub issue #760: source order decided, so the TCP row answered every registry.
 
-        IANA registers exactly two port *spans* on more than one transport
+        IANA registers some port *spans* on more than one transport
         protocol, and the crawler rendered one ``_missing_`` branch per registry
         row -- two branches with an identical condition, the second unreachable.
         Every registry therefore answered with the first: ``AppType.get(6010,
@@ -718,7 +719,7 @@ class AppTypeSplitTests(unittest.TestCase):
                     # which would pass on a prefix collision -- e.g. `claim`
                     # ending in ``TransportProtocol.tc`` would falsely match a
                     # condition actually naming ``TransportProtocol.tcp``. Not
-                    # reachable today, since none of the five declared names
+                    # reachable, since none of the declared names
                     # is a prefix of another, but the check should not depend
                     # on that being true to stay correct.
                     self.assertTrue(condition.endswith(claim), condition)
@@ -859,7 +860,7 @@ class AppTypeSplitTests(unittest.TestCase):
         This test used to sweep every multi-transport member through
         ``AppType.get(m.port, proto=m.proto)`` and require each of them to be
         *refused*, because a member's own ``proto`` was the whole set IANA assigned
-        the service and so named up to four registries. Retyping ``proto`` to the
+        the service and so named several registries. Retyping ``proto`` to the
         single transport protocol of the registry the member lives in removes that
         population outright, and a member's own ``proto`` is now the one thing a
         lookup can always be given.
@@ -1092,16 +1093,15 @@ class AppTypeSplitTests(unittest.TestCase):
         """Why refusing one breaks nothing, asserted rather than taken on trust.
 
         The refusal is only safe while every library caller passes a single
-        transport protocol. There are four call sites into the base registry's lookup
-        outside :mod:`pcapkit.const`: one in ``Transport._make_port``, which passes
-        the ``proto`` its six call sites hand it -- a literal member every time, two
-        per transport in the TCP, UDP and SCTP protocol modules -- and three in the
-        shared ``PortEnumField.post_process`` in :mod:`pcapkit.corekit.fields.numbers`,
-        which binds ``proto`` to the member its constructor was handed and then uses
-        it for ``_dispatch`` and both ``get`` calls. That constructor is called six
-        times, two per transport in the TCP, UDP and SCTP schemas, each with a
-        literal member (GitHub issue #1516). None of them can pass a composite,
-        because none of those modules builds one.
+        transport protocol. Outside :mod:`pcapkit.const`, the base registry's lookup
+        is called from ``Transport._make_port``, which passes the ``proto`` its own
+        callers hand it -- a literal member every time, from the TCP, UDP and SCTP
+        protocol modules -- and from the shared ``PortEnumField.post_process`` in
+        :mod:`pcapkit.corekit.fields.numbers`, which binds ``proto`` to the member
+        its constructor was handed and then uses it for ``_dispatch`` and its
+        ``get`` calls. That constructor is called from the TCP, UDP and SCTP
+        schemas, each time with a literal member (GitHub issue #1516). None of
+        them can pass a composite, because none of those modules builds one.
 
         Read off disk rather than through :func:`inspect.getsource`, so this needs
         no import of :mod:`pcapkit.protocols` -- whose runtime dependencies this
@@ -1201,10 +1201,11 @@ class AppTypeSplitTests(unittest.TestCase):
         self.assertEqual(bindings, [('pcapkit/corekit/fields/numbers.py', 'self._proto')])
         self.assertEqual(stored, [('pcapkit/corekit/fields/numbers.py', 'proto')])
 
-        # The sixteen the sweep found, so a new one cannot appear without this test
-        # saying so. ``transport.py`` holds the single lookup and the six literal
-        # ``_make_port`` arguments that feed it; ``numbers.py`` holds the port
-        # field's three, and each schema module constructs that field twice.
+        # The sites the sweep found, so a new one cannot appear without this test
+        # saying so. ``transport.py`` holds the lookup, fed by the literal
+        # ``_make_port`` arguments in the TCP, UDP and SCTP modules; ``numbers.py``
+        # holds the port field's, and each schema module constructs that field
+        # once per port.
         self.assertEqual(sorted(lookups), [
             'pcapkit/corekit/fields/numbers.py _dispatch(proto=proto)',
             'pcapkit/corekit/fields/numbers.py get(proto=proto)',
@@ -1378,7 +1379,7 @@ class AppTypeSplitTests(unittest.TestCase):
         derives its expectation from ``member.proto`` instead and so is invariant
         across this change by construction.
 
-        Swept over every declared member of all four registries rather than
+        Swept over every declared member of every per-transport registry rather than
         spot-checked, since the blast radius is most of the enumeration. That the
         sweep reached every one is checked against the members the generated
         modules declare (see :func:`_declared`), not against counts a vendor

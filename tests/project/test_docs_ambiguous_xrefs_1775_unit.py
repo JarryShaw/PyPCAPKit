@@ -1,23 +1,23 @@
 # -*- coding: utf-8 -*-
 """Pins the fixes for the docs build's ambiguous cross-references.
 
-GitHub issue #1775: the docs build gave 36 ``more than one target found for
+GitHub issue #1775: the docs build gave ``more than one target found for
 cross-reference`` warnings, and every one of those links landed on the wrong
-object. They had three causes, each fixed where it starts rather than at the
+object. They had these causes, each fixed where it starts rather than at the
 references:
 
-* A bare builtin name in a type -- ``dict`` 21 times, ``type`` 3, ``set`` 1 -- was
+* A bare builtin name in a type -- ``dict``, ``type``, ``set`` -- was
   suffix-matched to registry members such as ``TCP.dict``.
   ``resolve_builtins_exactly`` in :file:`docs/source/conf.py` stops it.
 * Napoleon read a URL's colon in a registry member's docstring as Google's inline
   ``type: description`` form, and the bogus type was then parsed as references --
-  ``http`` 3, ``Echo`` 1. ``save_enum_member_docstring`` and
+  ``http``, ``Echo``. ``save_enum_member_docstring`` and
   ``restore_enum_member_docstring`` undo it.
-* 44 hand-written ``.. data::`` and ``.. function::`` directives spelled out their
+* Hand-written ``.. data::`` and ``.. function::`` directives spelled out their
   full dotted name under a ``.. module::`` that already supplied it, so each was
   registered as ``<module>.<module>.<name>``. The exact lookup for a TypeVar such
   as ``_AT`` then failed, and the fuzzy one found every ``_AT`` in the package --
-  the other 7 warnings.
+  the remaining warnings.
 
 The hook tests drive the hooks with the nodes Sphinx's own producers build and
 with napoleon itself, and check that ``setup`` connects each one where the build
@@ -220,7 +220,7 @@ class BuiltinReferenceTests(unittest.TestCase):
         self.assertEqual(reference['reftitle'], probe)
 
     def test_setup_connects_it_to_doctree_read(self) -> 'None':
-        """Unconnected, the hook never runs and the 25 builtin warnings come back."""
+        """Unconnected, the hook never runs and the builtin warnings come back."""
         wired = [(event, priority) for event, handler, priority in connections(self.conf)
                  if handler is self.conf.resolve_builtins_exactly]
         self.assertEqual(wired, [('doctree-read', 500)])

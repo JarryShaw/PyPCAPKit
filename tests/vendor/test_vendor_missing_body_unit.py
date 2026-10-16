@@ -30,8 +30,8 @@ and only the third of the three returns::
     miss.append(f'    #: {desc}')
     miss.append(f"    return cls._unregistered_member(value, '{self.safe_name(name)}')")
 
-Measured: 53 crawlers emit 109 such non-returning lines between them, and
-three registries under :mod:`pcapkit.const` carry exactly that shape today.
+Measured: many crawlers emit such non-returning lines between them, and
+registries under :mod:`pcapkit.const` carry exactly that shape.
 A crawler hard-coding a range-guarded body as a list literal is writing
 something valid, so the guard below checks only that a hard-coded body
 *ends* in a ``return`` and that no emitted line re-enters ``_missing_`` for

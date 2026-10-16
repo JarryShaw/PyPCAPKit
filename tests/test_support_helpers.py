@@ -28,7 +28,7 @@ The module-isolation helpers are pinned here too, for the same reason and with
 more cause: :class:`SnapshotRestoreTests` and
 :class:`StandInsDoNotOutliveTheirTestTests` cover
 :func:`~tests._support.isolate_modules` and the snapshot/restore pair beneath it,
-which exist because issue #660 -- twelve failures in :mod:`tests.project`,
+which exist because issue #660 -- a run of failures in :mod:`tests.project`,
 visible only in some collection orders -- was a stand-in module left bound in
 :data:`sys.modules` by a test that had finished.
 
@@ -564,8 +564,8 @@ class LoadedModulesDoNotOutliveTheirTestTests(unittest.TestCase):
     hides the next one.
 
     The polluting cases are *borrowed* rather than written here, so what is pinned
-    is the behaviour of call sites the suite actually has. All five leaked before
-    the fix, and none of them looked wrong.
+    is the behaviour of call sites the suite actually has. Every one of them
+    leaked before the fix, and none of them looked wrong.
 
     """
 
@@ -654,8 +654,8 @@ class LoadedModulesDoNotOutliveTheirTestTests(unittest.TestCase):
 class ArrangedRestoreTests(unittest.TestCase):
     """The guards and the bookkeeping around :func:`~tests._support.restore_modules_after`.
 
-    Four things that have to hold for the #674 fix to be more than a patch on
-    five call sites: the snapshot kept is the earliest one, the test found on the
+    What has to hold for the #674 fix to be more than a patch on the call
+    sites it touched: the snapshot kept is the earliest one, the test found on the
     stack is the running one rather than any object that happens to be called
     ``self``, a loader that cannot find a test to restore for refuses rather than
     proceeding, and :func:`~tests._support.ensure_package` refuses to bind a stub
@@ -734,7 +734,7 @@ class ArrangedRestoreTests(unittest.TestCase):
         and a cleanup registered on a test that has already finished is never run,
         so the stubs outlive the test exactly as in #674 but with no error to show
         for it. Measured before :func:`~tests._support._is_running_test` was
-        consulted: ten names left bound, silently.
+        consulted: names left bound, silently.
 
         Contrived, and deliberately so: no call site in the suite looks like this,
         which is the point. The heuristic has to be sound for the call sites
