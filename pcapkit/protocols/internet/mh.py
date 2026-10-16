@@ -7742,20 +7742,19 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             A ``PadN`` option spends two octets on its own type and
             ``Option Length`` fields before any padding data, so occupying
             ``pad_len`` octets means an ``Option Length`` of ``pad_len - 2``.
-            One or two octets are padded with ``Pad1`` options instead, that
-            being the only form which can occupy a single octet
-            [:rfc:`6275#section-6.2.2`]; two octets need two separate ``Pad1``
-            schemas, since a schema instance is mutable and must not be shared
-            between two entries of the option list.
+            One octet is padded with a ``Pad1`` option instead, that being the
+            only form which can occupy a single octet. Two octets are one
+            ``PadN`` with an ``Option Length`` of ``0``, not two ``Pad1``:
+            :rfc:`6275#section-6.2.2` says a ``PadN`` should be used rather than
+            multiple ``Pad1`` options.
 
         """
         if offset % 8 == 0:
             return [], 0
 
         pad_len = 8 - (offset % 8)
-        if pad_len <= 2:
-            return [self._make_opt_pad(Enum_Option.Pad1, length=0)  # type: ignore[arg-type]
-                    for _ in range(pad_len)], pad_len
+        if pad_len == 1:
+            return [self._make_opt_pad(Enum_Option.Pad1, length=0)], pad_len  # type: ignore[arg-type]
         return [self._make_opt_pad(Enum_Option.PadN, length=pad_len - 2)], pad_len  # type: ignore[arg-type]
 
     def _pad_mh_message(self, data: 'Schema_Packet | bytes') -> 'Schema_Packet | bytes':

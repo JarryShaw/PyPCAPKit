@@ -2052,8 +2052,9 @@ class MHUnitTests(unittest.TestCase):
 
         brr = Packet.Binding_Refresh_Request
         cases = (
-            # 2 octets of reserved + a 6-octet PadN = 8, so 6 + 8 = 14 needs 2 more
-            ('padn then two pad1', [(Option.PadN, {'length': 4})], 16),
+            # 2 octets of reserved + a 6-octet PadN = 8, so 6 + 8 = 14 needs 2
+            # more, which are one PadN of Option Length 0 (#1793)
+            ('padn then a two-octet padn', [(Option.PadN, {'length': 4})], 16),
             # 2 + 8 = 10, and 6 + 10 = 16 is already aligned
             ('padn, already aligned', [(Option.PadN, {'length': 6})], 16),
             # 2 + 4 = 6, and 6 + 6 = 12 needs 4 more octets

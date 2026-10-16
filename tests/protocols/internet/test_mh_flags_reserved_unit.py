@@ -52,6 +52,14 @@ FRAMES = {
     'PerSessionBitRateAttribute': ('3b020000000000003a0e00000000000003063fff000003e8', 14),
 }
 
+#: ``site -> octets make() emits``, where they differ from :data:`FRAMES`. Two
+#: octets of fresh padding are one ``PadN`` of length 0 (#1793), whereas these
+#: frames end in two ``Pad1``, which a parsed header keeps on rebuild.
+MADE = {
+    'DynamicIPMulticastSelectorOption': '3b0100000000000036048f7f00000100',
+    'IPv4TrafficOffloadSelectorOption': '3b0100000000000035047fffffff0100',
+}
+
 MESSAGES = {
     'BindingRevocationMessage': 'Binding_Revocation_Message',
     'FastBindingAcknowledgmentMessage': 'Fast_Binding_Acknowledgment',
@@ -169,7 +177,7 @@ class TestMHFlagsReserved(unittest.TestCase):
         for site, (frame, width) in FRAMES.items():
             with self.subTest(site=site):
                 built = self._make(site, value=(1 << width) - 1)
-                self.assertEqual(built.hex(), frame)
+                self.assertEqual(built.hex(), MADE.get(site, frame))
                 model, attr = self._site(self._parse(built).info, site)  # type: ignore[attr-defined]
                 self.assertEqual(getattr(model, attr), (1 << width) - 1)
 

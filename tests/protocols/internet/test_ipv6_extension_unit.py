@@ -1068,17 +1068,19 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         self.assertEqual(schema_length, 14)
         self.assertEqual(type(schema_options[0]).__name__, 'UnassignedOption')
 
-        # NOTE: Two ``Pad1`` options are emitted when the shortfall is exactly 2
-        # octets, i.e. when ``2 + opt_len`` is 6 past a multiple of 8. That is a
-        # 4-octet option, not the 6-octet one this case used to pass -- 2 + 6 is
-        # already aligned and now needs no padding at all.
-        pad1_options, pad1_length = make_options([
+        # NOTE: A shortfall of exactly 2 octets, i.e. ``2 + opt_len`` 6 past a
+        # multiple of 8, is one ``PadN`` of ``Opt Data Len`` 0 rather than two
+        # ``Pad1`` (#1793). That is a 4-octet option, not the 6-octet one this
+        # case used to pass -- 2 + 6 is already aligned and needs no padding.
+        pad2_options, pad2_length = make_options([
             bytes([Option.CALIPSO]) + b'123',
         ])
-        # 4 octets of CALIPSO + two 1-octet Pad1 = 6; 2 + 6 = 8
-        self.assertEqual(pad1_length, 6)
+        # 4 octets of CALIPSO + a 2-octet PadN = 6; 2 + 6 = 8
+        self.assertEqual(pad2_length, 6)
         self.assertEqual([type(item).__name__ if not isinstance(item, bytes) else 'bytes'
-                          for item in pad1_options], ['bytes', 'PadOption', 'PadOption'])
+                          for item in pad2_options], ['bytes', 'PadOption'])
+        self.assertEqual(pad2_options[1].type, Option.PadN)
+        self.assertEqual(pad2_options[1].pack(), b'\x01\x00')
 
         # NOTE: Likewise, the option that needs no padding is the 6-octet one; the
         # 8-octet option this case used to pass leaves 2 + 8 = 10 and now draws 6
@@ -1113,7 +1115,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         for label, (built, built_len) in {
                 'bytes + padn': (options, total_length),
                 'schema + padn': (schema_options, schema_length),
-                'two pad1': (pad1_options, pad1_length),
+                'two-octet padn': (pad2_options, pad2_length),
                 'no padding': (no_pad_options, no_pad_length),
                 'from dict': (dict_options, dict_length),
         }.items():
@@ -2287,8 +2289,9 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
         The option lengths are chosen for the padding they draw: the whole
         header, its two fixed octets included, has to be a multiple of 8, so an
-        option of ``8n + 5`` octets needs a single ``Pad1``, one of ``8n + 4``
-        needs two, and anything else needs a ``PadN``.
+        option of ``8n + 5`` octets needs a single ``Pad1``, and anything else
+        short of the boundary needs a ``PadN`` -- including one of ``8n + 4``,
+        whose two spare octets are a ``PadN`` of ``Opt Data Len`` 0.
 
         """
         from pcapkit.const.ipv6.option import Option
@@ -2298,9 +2301,9 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
             # a 5-octet option leaves one octet, which only a Pad1 can fill
             ('one pad1', [(Option.get(250), {'data': b'abc'})], 8,
              [(Option.get(250), 5), (Option.Pad1, 1)]),
-            # a 4-octet option leaves two, i.e. two Pad1 rather than a PadN
-            ('two pad1', [(Option.Router_Alert, {'alert': 0})], 8,
-             [(Option.Router_Alert, 4), (Option.Pad1, 1), (Option.Pad1, 1)]),
+            # a 4-octet option leaves two, i.e. one PadN of length 0 (#1793)
+            ('two-octet padn', [(Option.Router_Alert, {'alert': 0})], 8,
+             [(Option.Router_Alert, 4), (Option.PadN, 2)]),
             # three or more spare octets are a PadN, whose own two octets of
             # overhead have to come out of the padding it is asked to occupy
             ('padn', [(Option.Tunnel_Encapsulation_Limit, {'limit': 3})], 8,
