@@ -20,8 +20,8 @@ efficiency in some way.
 .. _DPKT: https://dpkt.readthedocs.io
 .. _PyShark: https://kiminewt.github.io/pyshark
 
-In :mod:`pcapkit`, all files can be described as following nine
-different components.
+In :mod:`pcapkit`, all files can be described as the following
+components.
 
 - Interface (:mod:`pcapkit.interface`)
 

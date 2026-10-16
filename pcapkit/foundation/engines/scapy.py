@@ -124,7 +124,7 @@ def _reader_type() -> 'Type[PcapReader]':
     to one table across Section Header Blocks, so a later section's interface 0
     resolved to the first section's, with its link type and resolution (#1522).
 
-    And it dates two kinds of packet that `Scapy`_ misdates. A Simple Packet
+    And it dates packets that `Scapy`_ misdates. A Simple Packet
     Block has no timestamp, and `Scapy`_ leaves its packet with the time it was
     built, so it is set to 0 (#1503). `Scapy`_ ignores an interface's
     ``if_tsoffset``, the seconds to add to each of its timestamps, so the

@@ -159,11 +159,11 @@ def register_protocol(protocol: 'Type[ProtocolBase]') -> 'None':
     the :data:`pcapkit.protocols.__proto__` registry.
 
     The registry is keyed on ``protocol.__name__.upper()``, which is **not**
-    unique across this package: three dispatchable protocol classes are all
+    unique across this package: several dispatchable protocol classes are
     named ``HTTP`` -- the generic base
-    :class:`pcapkit.protocols.application.http.HTTP` and the two version
+    :class:`pcapkit.protocols.application.http.HTTP` and the version
     implementations :class:`pcapkit.protocols.application.httpv1.HTTP` and
-    :class:`pcapkit.protocols.application.httpv2.HTTP` -- so all three compete
+    :class:`pcapkit.protocols.application.httpv2.HTTP` -- so they all compete
     for the single key ``'HTTP'``. Registering one of them replaces whichever
     was there, and the replacement is observable through every reader of the
     registry, e.g. :meth:`ProtocolBase.expand_comp
@@ -286,7 +286,7 @@ class _NameLease:
 _NAME_LEASES = {}  # type: dict[str, list[_NameLease]]
 #: ``(destination, code)`` -> the lease its registration holds.
 _CODE_LEASES = {}  # type: dict[tuple[type, Any], _NameLease]
-#: Serialises the two tables above, so concurrent registrars cannot tear them.
+#: Serialises the lease tables above, so concurrent registrars cannot tear them.
 _LEASE_LOCK = threading.RLock()
 
 
@@ -404,16 +404,17 @@ def _register_name(protocol: 'Type[ProtocolBase]', *targets: 'tuple[type, Any]')
             _CODE_LEASES[target] = lease
 
 
-#: Enum type -> the class(es) owning the :attr:`ProtocolBase.__proto__
-#: <pcapkit.protocols.protocol.ProtocolBase.__proto__>` dispatch registry
-#: keyed by that enum type -- the "registry-of-registries" that lets
-#: ``code=`` infer a destination from a key's own type, per :issue:`514`. It is
-#: the same targeting
-#: :func:`register_ethertype`, :func:`register_transtype`,
-#: :func:`register_linktype` and :func:`register_sctp` hard-code by
-#: hand, in one table so :func:`register_protocol_code` can consult
-#: it. ``LinkType`` naming two classes is deliberate, not ambiguous --
-#: :func:`register_linktype` already fans out to both.
+#: Destination classes for each enum type a ``code=`` key can carry.
+#:
+#: Maps an enum type to the class(es) owning the
+#: :attr:`ProtocolBase.__proto__ <pcapkit.protocols.protocol.ProtocolBase.__proto__>`
+#: dispatch registry keyed by that enum type -- the "registry-of-registries" that
+#: lets ``code=`` infer a destination from a key's own type, per :issue:`514`. It
+#: is the same targeting :func:`register_ethertype`, :func:`register_transtype`,
+#: :func:`register_linktype` and :func:`register_sctp` hard-code by hand, in one
+#: table so :func:`register_protocol_code` can consult it. ``LinkType`` naming
+#: more than one class is deliberate, not ambiguous -- :func:`register_linktype`
+#: already fans out to each of them.
 _CODE_DESTINATIONS: 'dict[type, tuple[Type[ProtocolBase], ...]]' = {
     Enum_EtherType: (Link,),
     Enum_TransType: (Internet,),
@@ -523,8 +524,8 @@ def register_protocol_code(protocol: 'Type[ProtocolBase]', code: 'Any') -> 'None
         code: Registration key(s); see above.
 
     Raises:
-        RegistryError: If a bare :class:`int` (or any other non-enum, non-
-            mapping value) is given without an explicit destination, or if
+        RegistryError: If a bare :class:`int` (or any other non-enum,
+            non-mapping value) is given without an explicit destination, or if
             an enum member's type names no known destination registry --
             inference refuses rather than guesses.
 
@@ -551,8 +552,8 @@ def register_linktype(code: 'LinkType', module: 'str | ModuleDescriptor[Protocol
     r"""Register a new protocol class.
 
     Notes:
-        The full qualified class name of the new protocol class
-        should be as ``{module}.{class_}``.
+        The fully qualified class name of the new protocol class
+        should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
     following registries:
@@ -596,8 +597,8 @@ def register_pcap(code: 'LinkType', module: 'str | ModuleDescriptor[ProtocolBase
     r"""Register a new protocol class.
 
     Notes:
-        The full qualified class name of the new protocol class
-        should be as ``{module}.{class_}``.
+        The fully qualified class name of the new protocol class
+        should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
     :data:`pcapkit.protocols.misc.pcap.frame.Frame.__proto__` registry.
@@ -633,8 +634,8 @@ def register_pcapng(code: 'LinkType', module: 'str | ModuleDescriptor[ProtocolBa
     r"""Register a new protocol class.
 
     Notes:
-        The full qualified class name of the new protocol class
-        should be as ``{module}.{class_}``.
+        The fully qualified class name of the new protocol class
+        should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
     :data:`pcapkit.protocols.misc.pcapng.PCAPNG.__proto__` registry.
@@ -675,8 +676,8 @@ def register_ethertype(code: 'EtherType', module: 'str | ModuleDescriptor[Protoc
     r"""Register a new protocol class.
 
     Notes:
-        The full qualified class name of the new protocol class
-        should be as ``{module}.{class_}``.
+        The fully qualified class name of the new protocol class
+        should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
     :data:`pcapkit.protocols.link.link.Link.__proto__` registry.
@@ -717,8 +718,8 @@ def register_transtype(code: 'TransType', module: 'str | ModuleDescriptor[Protoc
     r"""Register a new protocol class.
 
     Notes:
-        The full qualified class name of the new protocol class
-        should be as ``{module}.{class_}``.
+        The fully qualified class name of the new protocol class
+        should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
     :data:`pcapkit.protocols.internet.internet.Internet.__proto__` registry.
@@ -870,14 +871,14 @@ def register_ipv6_route_routing(code: 'IPv6_Routing', meth: 'str | tuple[IPv6_Ro
 # NOTE: pcapkit.protocols.internet.mh.MH.__message__
 def register_mh_message(code: 'MH_Packet', meth: 'str | tuple[MH_PacketParser, MH_PacketConstructor]', *,
                         schema: 'Optional[Type[Schema_MH_Packet]]' = None) -> 'None':
-    """Register a MH message type parser.
+    """Register an MH message type parser.
 
     The function will register the given message type parser to the
     :data:`pcapkit.protocols.internet.mh.MH.__message__` registry.
 
     Args:
         code: :class:`~pcapkit.protocols.internet.mh.MH`
-            data type code as in :class:`~pcapkit.const.mh.packet.Packet`.
+            message type code as in :class:`~pcapkit.const.mh.packet.Packet`.
         meth: Method name or callable to parse and/or construct the data.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the message type.
             It should be a subclass of :class:`pcapkit.protocols.schema.internet.mh.Packet`.
@@ -895,16 +896,16 @@ def register_mh_message(code: 'MH_Packet', meth: 'str | tuple[MH_PacketParser, M
 # NOTE: pcapkit.protocols.internet.mh.MH.__option__
 def register_mh_option(code: 'MH_Option', meth: 'str | tuple[MH_OptionParser, MH_OptionConstructor]', *,
                        schema: 'Optional[Type[Schema_MH_Option]]' = None) -> 'None':
-    """Register a MH option parser.
+    """Register an MH option parser.
 
     The function will register the given option parser to the
     :data:`pcapkit.protocols.internet.mh.MH.__option__` registry.
 
     Args:
         code: :class:`~pcapkit.protocols.internet.mh.MH`
-            data type code as in :class:`~pcapkit.const.mh.option.Option`.
+            option code as in :class:`~pcapkit.const.mh.option.Option`.
         meth: Method name or callable to parse and/or construct the data.
-        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the message type.
+        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
             It should be a subclass of :class:`pcapkit.protocols.schema.internet.mh.Option`.
 
     """
@@ -922,14 +923,14 @@ def register_mh_extension(code: 'MH_CGAExtension', meth: 'str | tuple[MH_Extensi
                           schema: 'Optional[Type[Schema_MH_CGAExtension]]' = None) -> 'None':
     """Register a CGA extension parser.
 
-    The function will register the given CGA extension to the
+    The function will register the given CGA extension parser to the
     :data:`pcapkit.protocols.internet.mh.MH.__extension__` registry.
 
     Args:
         code: :class:`~pcapkit.protocols.internet.mh.MH`
-            data type code as in :class:`~pcapkit.const.mh.cga_extension.CGAExtension`.
+            CGA extension code as in :class:`~pcapkit.const.mh.cga_extension.CGAExtension`.
         meth: Method name or callable to parse and/or construct the data.
-        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the message type.
+        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the CGA extension.
             It should be a subclass of :class:`pcapkit.protocols.schema.internet.mh.CGAExtension`.
 
     .. versionchanged:: 1.5.0
@@ -968,8 +969,8 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
     r"""Register a new protocol class.
 
     Notes:
-        The full qualified class name of the new protocol class
-        should be as ``{module}.{class_}``.
+        The fully qualified class name of the new protocol class
+        should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
     :data:`pcapkit.protocols.transport.tcp.TCP.__proto__` and/or
@@ -1030,12 +1031,12 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
         keyed by the DATA chunk's payload protocol identifier rather than by
         port number, so writing a port number into it would dispatch on a
         number from the wrong registry. Use
-        :func:`pcapkit.foundation.registry.register_sctp` instead.
+        :func:`pcapkit.foundation.registry.protocols.register_sctp` instead.
 
     See Also:
-        * :func:`pcapkit.foundation.registry.register_tcp`
-        * :func:`pcapkit.foundation.registry.register_udp`
-        * :func:`pcapkit.foundation.registry.register_sctp`
+        * :func:`pcapkit.foundation.registry.protocols.register_tcp`
+        * :func:`pcapkit.foundation.registry.protocols.register_udp`
+        * :func:`pcapkit.foundation.registry.protocols.register_sctp`
 
     .. versionremoved:: 1.3.1
 
@@ -1085,7 +1086,7 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
     # being an ``IntEnum`` rather than an ``IntFlag`` changes neither -- so
     # ``registries.get(1)`` resolves to ``TCP`` just as
     # ``registries.get(TransportProtocol.tcp)`` does, and would otherwise
-    # register the port before the ``proto.name`` access two lines below it
+    # register the port before the ``proto.name`` access below it
     # raised -- leaving the port written into ``TCP.__proto__`` with
     # ``register_protocol`` never called.
     coerced: 'list[TransportProtocol]' = []
@@ -1155,8 +1156,8 @@ def register_tcp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Pro
     r"""Register a new protocol class.
 
     Notes:
-        The full qualified class name of the new protocol class
-        should be as ``{module}.{class_}``.
+        The fully qualified class name of the new protocol class
+        should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
     :data:`pcapkit.protocols.transport.tcp.TCP.__proto__` registry.
@@ -1244,8 +1245,8 @@ def register_udp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Pro
     r"""Register a new protocol class.
 
     Notes:
-        The full qualified class name of the new protocol class
-        should be as ``{module}.{class_}``.
+        The fully qualified class name of the new protocol class
+        should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
     :data:`pcapkit.protocols.transport.udp.UDP.__proto__` registry.
@@ -1283,8 +1284,8 @@ def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'str | M
     r"""Register a new protocol class.
 
     Notes:
-        The full qualified class name of the new protocol class
-        should be as ``{module}.{class_}``.
+        The fully qualified class name of the new protocol class
+        should be ``{module}.{class_}``.
 
     The function will register the given protocol class to the
     :data:`pcapkit.protocols.transport.sctp.SCTP.__proto__` registry.

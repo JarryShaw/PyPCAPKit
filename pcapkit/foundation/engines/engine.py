@@ -166,6 +166,7 @@ class EngineBase(Generic[_T], metaclass=EngineMeta):
     ##########################################################################
 
     def __init__(self, extractor: 'Extractor') -> 'None':
+        #: Extractor instance this engine reads for.
         self._extractor = extractor
 
     def __call__(self) -> 'None':
@@ -283,7 +284,7 @@ class Engine(EngineBase[_T], Generic[_T]):
             :attr:`__engine_name__
             <pcapkit.foundation.engines.engine.EngineBase.__engine_name__>` is
             *not* an opt-in. It supplies the
-            :attr:`name <pcapkit.foundation.engines.engine.EngineMeta.name>`
+            :attr:`name <pcapkit.foundation.engines.engine.EngineBase.name>`
             the engine reports, which it does whether or not the engine is
             registered; only the keyword decides registration.
 
@@ -292,12 +293,12 @@ class Engine(EngineBase[_T], Generic[_T]):
             cannot be passed as a class keyword at all on Python 3.10:
             :meth:`abc.ABCMeta.__new__` takes ``mcls``, ``name``, ``bases`` and
             ``namespace`` as positional-*or-keyword* parameters
-            before 3.11, so a class keyword by any of those four names collides
+            before 3.11, so a class keyword by any of those names collides
             with one of them and the class statement raises :exc:`TypeError` from
             the metaclass before this method is reached. ``engine`` is outside
             that set, so the documented registration path works on every
             supported version. Measured on 3.10.21, 3.11.15 and 3.14.7; those
-            four are the whole of the :meth:`abc.ABCMeta.__new__` collision
+            names are the whole of the :meth:`abc.ABCMeta.__new__` collision
             surface. Separately, and for an unrelated reason that holds on every
             version, ``metaclass`` is not usable as a class keyword either: a
             ``class`` statement consumes it to choose the metaclass, so it never
@@ -316,7 +317,7 @@ class Engine(EngineBase[_T], Generic[_T]):
         # no exception, no warning. So reject it.
         #
         # One typo this cannot catch is ``name=``, and only on Python 3.10: it is
-        # one of the four names that collide with ``ABCMeta.__new__``, so it fails
+        # one of the names that collide with ``ABCMeta.__new__``, so it fails
         # in the metaclass before reaching here. It is still loud, just as a
         # ``TypeError`` rather than an ``UnsupportedCall``.
         #

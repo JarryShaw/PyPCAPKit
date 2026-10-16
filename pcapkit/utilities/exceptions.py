@@ -162,8 +162,8 @@ class BaseError(Exception):
     """Base error class of all kinds.
 
     A loud error -- the default -- is reported once, at
-    :data:`logging.CRITICAL` level, on the
-    :data:`~pcapkit.utilities.logging.logger` logger. Outside development mode it
+    :data:`logging.CRITICAL` level, on the ``pcapkit`` logger
+    (:data:`~pcapkit.utilities.logging.logger`). Outside development mode it
     also installs :func:`_excepthook` as :data:`sys.excepthook` and
     :func:`_threading_excepthook` as :data:`threading.excepthook`, the first time
     a loud error needs them, so that error -- and every loud error reaching the
@@ -184,15 +184,15 @@ class BaseError(Exception):
         * The terseness is deliberately not done by setting
           :data:`sys.tracebacklimit` to ``0``: that is process-global, so one loud
           error would truncate the tracebacks of every *other*, unrelated
-          exception for the rest of the process. Each of the two hooks here
+          exception for the rest of the process. Each hook here
           shortens the printing of a :class:`BaseError` only, and hands every
           other exception, unchanged, to whatever hook :mod:`pcapkit` found
           installed before it first needed its own.
-        * Both hooks are installed lazily, from here, rather than at import
+        * The hooks are installed lazily, from here, rather than at import
           time, so a program that imports :mod:`pcapkit` but never raises one of
           its errors never has :data:`sys.excepthook` or
           :data:`threading.excepthook` touched.
-        * The two hooks still do not cover *every* path an exception can take.
+        * The hooks still do not cover *every* path an exception can take.
           A traceback a caller formats itself with :mod:`traceback` -- rather
           than letting it reach the top level uncaught -- passes through
           neither. See GitHub issue :issue:`719`.
@@ -392,8 +392,7 @@ def _install_excepthook() -> 'None':
     :data:`sys.excepthook` or :data:`threading.excepthook` touched merely for
     having imported the package.
 
-    Idempotent for *this* module instance, independently for each of the two
-    hooks: if a given hook slot already holds this instance's own function --
+    Idempotent for *this* module instance, independently for each hook: if a given hook slot already holds this instance's own function --
     checked by identity, ``is``, not by the ``installed_by_pcapkit`` marker --
     installing it again does nothing, so a loud error later in the same run
     never wraps either hook in another copy of itself. That distinction matters
@@ -438,11 +437,11 @@ class IntError(BaseError, TypeError):
 
 
 class RealError(BaseError, TypeError):
-    """The function is not defined for real number."""
+    """The function is not defined for real numbers."""
 
 
 class ComplexError(BaseError, TypeError):
-    """The function is not defined for complex instance."""
+    """The function is not defined for complex numbers."""
 
 
 class BytesError(BaseError, TypeError):
@@ -717,8 +716,8 @@ class EnumKeyError(BaseError, KeyError):
     circumstances, and raise it from this module rather than as a builtin.
 
     Deriving from :exc:`KeyError` is what makes that ruling cheap to carry out:
-    six in-library call sites catch :meth:`~pcapkit.corekit.enum.EnumLookup.get`'s
-    name miss as :exc:`KeyError` -- :meth:`~pcapkit.const.http.method.Method.get`
+    the in-library call sites that catch
+    :meth:`~pcapkit.corekit.enum.EnumLookup.get`'s name miss as :exc:`KeyError` -- :meth:`~pcapkit.const.http.method.Method.get`
     catches it in order to build an unregistered member, so for that one a
     failed name lookup is part of a successful call -- and every one of them
     keeps catching.

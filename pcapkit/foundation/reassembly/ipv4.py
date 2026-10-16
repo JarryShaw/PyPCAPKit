@@ -67,8 +67,8 @@ class IPv4(IP):
     #: scheme is ``TIMER <- MAX(TIMER,TTL)`` seeded from a "Timer Lower Bound",
     #: for which "the current recommendation for the initial timer setting is 15
     #: seconds" -- an initial lower bound that a later fragment's TTL raises,
-    #: up to the 4.25-minute TTL ceiling, not a 15-second deadline. Two things
-    #: rule it out here: the recommendation is superseded, and TTL is not in
+    #: up to the 4.25-minute TTL ceiling, not a 15-second deadline. It is ruled
+    #: out here: the recommendation is superseded, and TTL is not in
     #: :class:`~pcapkit.foundation.reassembly.data.ip.Packet` at all, so the
     #: fragment model would have to grow a field to express a scheme the current
     #: requirement asks implementations not to use.

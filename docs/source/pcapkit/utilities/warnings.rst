@@ -16,9 +16,9 @@ How a Warning Is Reported
 
 Every warning :mod:`pcapkit` reports goes through
 :func:`~pcapkit.utilities.warnings.warn`, which reports it **exactly once on each
-of two channels**:
+channel**:
 
-1. the :data:`~pcapkit.utilities.logging.logger` logger, at
+1. the ``pcapkit`` logger (:data:`~pcapkit.utilities.logging.logger`), at
    :data:`logging.WARNING` level, unconditionally -- so a consumer watching the
    ``pcapkit`` logger sees every complaint whatever the warning filters say;
 2. the standard :mod:`warnings` machinery, via :func:`warnings.warn`, subject to

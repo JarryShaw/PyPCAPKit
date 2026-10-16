@@ -115,11 +115,12 @@ class ReassemblyBase(Generic[_PT, _DT, _IT, _BT], metaclass=ReassemblyMeta):
             contiguous payload, its holes zero-filled -- or, for IP while the
             total length is unknown, only the prefix up to the first hole
         store: if store reassembled datagram in memory, i.e.,
-            :attr:`self._dtgram <_dtgram>` (if not, datagram
-            will be discarded after callback)
+            :attr:`self._dtgram <pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram>`
+            (if not, datagram will be discarded after callback)
         timeout: reassembly timeout in seconds, measured on the
             *capture's* clock; :data:`None` selects the protocol's
-            own :attr:`__timeout__` default
+            own :attr:`__timeout__ <pcapkit.foundation.reassembly.reassembly.Reassembly.__timeout__>`
+            default
 
     Note:
         This class is for internal use only. For customisation, please use
@@ -583,7 +584,7 @@ class Reassembly(ReassemblyBase[_PT, _DT, _IT, _BT], Generic[_PT, _DT, _IT, _BT]
 
         Note:
             :attr:`__protocol_name__` is *not* an opt-in. It supplies the
-            :attr:`name <pcapkit.foundation.reassembly.reassembly.ReassemblyMeta.name>`
+            :attr:`name <pcapkit.foundation.reassembly.reassembly.Reassembly.name>`
             the reassembly reports, which it does whether or not the class is
             registered; only the keyword decides registration.
 

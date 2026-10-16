@@ -144,10 +144,9 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[str, tuple[ModuleDescriptor[Dumper] | ~typing.Type[Dumper], str | None]]:
-    #: Format dumper mapping for writing output files. The values should be a
-    #: tuple representing the module name and class name, or a
-    #: :class:`dictdumper.dumper.Dumper` subclass, and corresponding file extension.
+    #: Format dumper mapping for writing output files. Each value pairs the dumper,
+    #: as a module descriptor or a :class:`dictdumper.dumper.Dumper` subclass, with
+    #: the file extension of its format.
     __output__ = collections.defaultdict(
         lambda: (ModuleDescriptor('pcapkit.dumpkit', 'NotImplementedIO'), None),
         {
@@ -213,8 +212,8 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
         r"""Register a new dumper class.
 
         Notes:
-            The full qualified class name of the new dumper class
-            should be as ``{dumper.module}.{dumper.name}``.
+            The fully qualified class name of the new dumper class
+            should be ``{dumper.module}.{dumper.name}``.
 
             The overwrite guard fires only when the incumbent dumper differs
             from the replacement, so re-registering the exact same object is
@@ -241,6 +240,13 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
             format: format name
             dumper: module descriptor or a :class:`dictdumper.dumper.Dumper` subclass
             ext: file extension
+
+        Raises:
+            RegistryError: If ``dumper`` is not a class, or not a ``Dumper`` subclass.
+
+        Warns:
+            RegistryWarning: If a different dumper is already registered for
+                ``format``; it is overwritten.
 
         .. versionremoved:: 1.2.0
 
@@ -561,7 +567,7 @@ class TraceFlow(TraceFlowBase[_DT, _BT, _IT, _PT], Generic[_DT, _BT, _IT, _PT]):
 
         Note:
             :attr:`__protocol_name__` is *not* an opt-in. It supplies the
-            :attr:`name <pcapkit.foundation.traceflow.traceflow.TraceFlowMeta.name>`
+            :attr:`name <pcapkit.foundation.traceflow.traceflow.TraceFlow.name>`
             the class reports, which it does whether or not the class is
             registered; only the keyword decides registration.
 

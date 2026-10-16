@@ -51,16 +51,16 @@ __all__ = ['packet2dict', 'tcp_traceflow', 'ENCAP_TYPE_TO_LINKTYPE', 'FILTER_NAM
 #:     # key   := the frame.encap_type that `tshark -r out.pcap -c 1 -T pdml` then reports
 #:
 #: so each pair is one round trip through Wireshark's own ``wiretap/pcap-common.c``, in the read
-#: direction :mod:`pyshark` actually exercises. The trailing comment on each line names the
-#: ``editcap -T`` encapsulation that produced it.
+#: direction :mod:`pyshark` actually exercises. In the source, the trailing comment on each line
+#: names the ``editcap -T`` encapsulation that produced it.
 #:
 #: What the sweep does **not** cover, since that bounds this table: of the 226 encapsulations
 #: ``editcap -T`` accepts, 157 could be written as pcap from the Ethernet source above and the
 #: other 69 refused the rewrite, so they are untested. Those 157 yielded 153 distinct
 #: ``frame.encap_type`` keys, with no key mapping to two DLTs and no DLT reading back as two keys.
-#: 152 of them are below; ``frame.encap_type`` 32 (``editcap -T hhdlc``, DLT 121) is left out
-#: because :class:`LinkType` has no member for 121. An encapsulation absent from this table raises
-#: rather than resolving to a near-miss DLT.
+#: Each is below except ``frame.encap_type`` 32 (``editcap -T hhdlc``, DLT 121), left out because
+#: :class:`~pcapkit.const.reg.linktype.LinkType` has no member for 121. An encapsulation absent
+#: from this table raises rather than resolving to a near-miss DLT.
 ENCAP_TYPE_TO_LINKTYPE = {
     1: Enum_LinkType.ETHERNET,                     # ether
     2: Enum_LinkType.IEEE802_5,                    # tr
@@ -223,19 +223,21 @@ ENCAP_TYPE_TO_LINKTYPE = {
 #: the PDML
 #: ``<proto name=...>`` attribute, which is Wireshark's own dissector *filter* name -- the third
 #: argument to ``proto_register_protocol()`` in the relevant ``epan/dissectors/packet-*.c`` -- and
-#: that vocabulary is not :class:`LinkType`'s: Ethernet's filter name is ``eth``, never
+#: that vocabulary is not :class:`~pcapkit.const.reg.linktype.LinkType`'s: Ethernet's filter
+#: name is ``eth``, never
 #: ``ETHERNET``.
 #:
 #: Every entry comes from the same sweep as ``ENCAP_TYPE_TO_LINKTYPE`` above: the root ``<proto
 #: name=...>`` of ``tshark -r out.pcap -c 1 -T pdml`` against the DLT in ``out.pcap``'s own file
-#: header. The trailing comment on each line names the ``editcap -T`` encapsulation that produced
-#: it, so an entry can be re-checked, or corrected when upstream moves, by rerunning that one
-#: rewrite. Names are listed even where they already spell their :class:`LinkType` member
+#: header. In the source, the trailing comment on each line names the ``editcap -T`` encapsulation
+#: that produced it, so an entry can be re-checked, or corrected when upstream moves, by rerunning
+#: that one rewrite. Names are listed even where they already spell their
+#: :class:`~pcapkit.const.reg.linktype.LinkType` member
 #: (``docsis``, ``fddi``, ``pflog``, ...): there is deliberately **no** fallback onto a like-named
 #: member, because upper-casing the name is exactly what would answer 101 for a ``rawip6`` capture
 #: and 0 for a ``DLT_LOOP`` one -- valid DLTs, wrong ones, and silent (:issue:`843`).
 #:
-#: Three classes of name are absent, all three measured rather than assumed:
+#: These classes of name are absent, each measured rather than assumed:
 #:
 #: * **Ambiguous** -- one name, several DLTs, and the PDML node does not say which arrived. These
 #:   cannot be mapped at any size: ``user_dlt`` (16 DLTs), ``bluetooth`` (6), ``usb`` (5),
@@ -247,12 +249,12 @@ ENCAP_TYPE_TO_LINKTYPE = {
 #: * **Unswept** -- the 69 encapsulations ``editcap -T`` would not write as pcap from an Ethernet
 #:   source. No evidence either way was gathered for them.
 #:
-#: Two caveats on what "unambiguous" means here. It means unambiguous *within* the 157 swept
+#: Caveats on what "unambiguous" means here. It means unambiguous *within* the 157 swept
 #: encapsulations: one of the 69 unswept could still root at the same name (``ether-nettl`` and
-#: ``tr-nettl`` are the obvious candidates, for ``eth`` and ``tr``). And five of the entries name a
-#: *payload* dissector that happened to be the outermost PDML node for exactly one encapsulation
-#: -- ``llc``, ``sctp``, ``pppoes``, ``fpp`` and ``irlap`` -- rather than a link-layer dissector
-#: registered against a ``WTAP_ENCAP_*``. Both are why this table is the fallback and
+#: ``tr-nettl`` are the obvious candidates, for ``eth`` and ``tr``). And some entries -- ``llc``,
+#: ``sctp``, ``pppoes``, ``fpp`` and ``irlap`` -- name a *payload* dissector that happened to be the
+#: outermost PDML node for exactly one encapsulation, rather than a link-layer dissector
+#: registered against a ``WTAP_ENCAP_*``. These caveats are why this table is the fallback and
 #: ``frame.encap_type`` is the primary key; ``eth`` and ``tr`` additionally check out against
 #: Wireshark's own registrations (``packet-eth.c`` on ``WTAP_ENCAP_ETHERNET``, ``packet-tr.c`` on
 #: ``WTAP_ENCAP_TOKEN_RING``).
@@ -404,7 +406,7 @@ def _frame_layer(packet: 'Packet') -> 'Any':
         PyShark takes the second PDML ``<proto>`` as ``frame_info``. On a packet
         with a comment that is ``pkt_comment``, and the frame layer is
         ``layers[0]`` (measured on ``test.pcapng`` frames 1 and 6 with tshark
-        4.6.9), so the layer is looked up by name, as the engine does (#1515).
+        4.6.9), so the layer is looked up by name, as the engine does (:issue:`1515`).
 
     """
     for layer in (packet.frame_info, *packet.layers):
@@ -420,8 +422,8 @@ def packet2dict(packet: 'Packet') -> 'dict[str, Any]':
         packet: PyShark packet.
 
     Returns:
-        A :obj:`dict` mapping of packet data: the ``frame`` layer's fields at
-        the top level, and each later layer nested in the one before it. A
+        A :obj:`dict` mapping of packet data, with the ``frame`` layer's fields
+        at the top level and each later layer nested in the one before it. A
         packet comment, which PyShark reports as ``frame_info`` in place of the
         frame layer, is kept under its own ``PKT_COMMENT`` key. A record with
         no ``frame`` layer keeps PyShark's ``frame_info`` at the top level.
@@ -530,22 +532,20 @@ def _has_addresses(ip: 'Any') -> 'bool':
 def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | None':
     """Trace packet flow for TCP.
 
+    A packet can be traced if it contains a TCP layer with a whole fixed header (see
+    :func:`_has_fixed_header`), keyed by the IP layer that carries it -- in an IP-in-IP
+    tunnel, the innermost (see :func:`_carrier`) -- if tshark reports both its addresses
+    (see :func:`_has_addresses`).
+
     Args:
         packet: PyShark packet.
-        count: Packet index. If not provided, default to ``-1``. The engine
+        count: Packet index. If not provided, defaults to ``-1``. The engine
             passes its own frame count, not tshark's ``frame.number``, which
-            also numbers records that are not packets (#1515).
+            also numbers records that are not packets (:issue:`1515`).
 
     Returns:
-        Data for TCP flow tracing.
-
-        * If the ``packet`` can be used for TCP flow tracing. A packet can be traced
-          if it contains TCP layer with a whole fixed header (see
-          :func:`_has_fixed_header`), keyed by the IP layer that carries it -- in an
-          IP-in-IP tunnel, the innermost (see :func:`_carrier`) -- if tshark reports
-          both its addresses (see :func:`_has_addresses`).
-        * If the ``packet`` can be traced, then the :obj:`dict` mapping of data for TCP
-          flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.
+        Data for TCP flow tracing (:term:`trace.tcp.packet`) if the ``packet`` can be
+        traced; otherwise :data:`None`.
 
     Raises:
         MissingKeyError: If the frame's link type cannot be resolved.
@@ -642,7 +642,7 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
             # them, so there is no header or payload to hand over -- which is
             # the same reason this module carries no ``tcp_reassembly`` at all.
             # ``Extractor`` refuses ``trace_analyse=True`` on this engine, so
-            # nothing reads these two.
+            # nothing reads them.
             header=b'',                                                          # unavailable
             payload=bytearray(),                                                 # unavailable
         )

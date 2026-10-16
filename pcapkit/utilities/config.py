@@ -32,7 +32,7 @@ documents those variables itself.
 
 Besides the standard library, this module imports
 :mod:`pcapkit.utilities.warnings` and nothing else from :mod:`pcapkit`, which is
-what lets :mod:`pcapkit.utilities.logging` load before it. The three flags that
+what lets :mod:`pcapkit.utilities.logging` load before it. The flags that
 :mod:`pcapkit.utilities.logging` needs while it is loading,
 :envvar:`PCAPKIT_DEVMODE`, :envvar:`PCAPKIT_VERBOSE` and
 :envvar:`PCAPKIT_SPHINX`, are therefore read there instead.
@@ -222,9 +222,9 @@ IPV6_TCP_WARNED_LIMIT = read_limit('IPV6_TCP_WARNED_LIMIT', 32, risk=(
 #: expands for one top-level object, counting an object once per time it is met,
 #: :envvar:`PCAPKIT_FALLBACK_LIMIT`; ``-1`` expands without bound.
 #:
-#: No fallback object in the ``foundation``, ``dumpkit`` or ``interface`` test
-#: legs expands into more than 7, so the default leaves three orders of
-#: magnitude of room.
+#: Measured over the ``foundation``, ``dumpkit`` and ``interface`` test legs, no
+#: fallback object expands into more than 7, so the default leaves three orders
+#: of magnitude of room.
 #:
 #: .. versionadded:: 1.5.0
 #:
@@ -275,9 +275,11 @@ READ_CHUNK = read_limit('READ_CHUNK', 1 << 20, minimum=1, risk=(
 #: should ever declare a length past it.
 #:
 #: The bound is deliberately *not* "any declared length beyond what the
-#: buffer holds": :meth:`ListField.unpack <pcapkit.corekit.fields.collections.
-#: ListField.unpack>` and :meth:`OptionField.unpack <pcapkit.corekit.fields.
-#: collections.OptionField.unpack>` depend on reading a short, sometimes
+#: buffer holds":
+#: :meth:`ListField.unpack <pcapkit.corekit.fields.collections.ListField.unpack>`
+#: and
+#: :meth:`OptionField.unpack <pcapkit.corekit.fields.collections.OptionField.unpack>`
+#: depend on reading a short, sometimes
 #: empty, tail past a truncated area and having it decode as zero -- that is
 #: how an over-long ``ihl``, or a capture cut short by the snapshot length,
 #: reads as end-of-option-list or ``Pad1`` instead of wedging or raising (see
@@ -305,19 +307,19 @@ MAX_ZERO_PAD_LENGTH = read_limit('MAX_ZERO_PAD_LENGTH', 0x40_000, risk=(
 #:
 #: :data:`MAX_ZERO_PAD_LENGTH` bounds each field on its own, and a packet holds
 #: many fields, so it leaves the *sum* unbounded: a declared length just under the
-#: ceiling is honoured however often it is declared. Measured on this tree, 200
+#: ceiling is honoured however often it is declared. Measured for :issue:`573`, 200
 #: minimal PCAP-NG Decryption Secrets Blocks -- 4,800 wire octets, each block
 #: declaring ``secrets_length`` of 262,142 against two supplied octets through
 #: ``UnknownSecrets.data`` (``pcapkit/protocols/schema/misc/pcapng.py``) --
 #: retained 50.0 MiB, an amplification of 10,922x per block. Every individual
-#: field was under the ceiling, so nothing refused any of them (:issue:`573`).
+#: field was under the ceiling, so nothing refused any of them.
 #:
 #: The sum therefore wants a budget, and this is the figure that makes one
 #: *safe*. A budget on its own is not: a capture cut short by its snapshot length
 #: pads legitimately and must keep parsing (:issue:`431`, and the reasoning that
 #: declined :issue:`554`), and it pads far more than it reads, so any running
 #: budget tight enough to matter starts refusing real captures. Worse, it refuses
-#: them *sometimes* -- measured on this tree with a running budget alone, the
+#: them *sometimes* -- measured with a running budget alone, the
 #: same legitimate 54-octet frame parsed to one result on 37 of 40 calls and to
 #: another on calls 26, 33 and 39, because whether it fit depended on what had
 #: been parsed before it. A guard whose answer moves with history is not a guard.

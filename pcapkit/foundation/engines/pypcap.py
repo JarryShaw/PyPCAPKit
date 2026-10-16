@@ -177,7 +177,7 @@ class PyPCAP(EngineBase['RawFrame']):
     def backend(self) -> 'str':
         """The distribution, version and location this engine is driving.
 
-        Two distributions provide :mod:`pcap`, so "the PyPCAP engine failed" is
+        More than one distribution provides :mod:`pcap`, so "the PyPCAP engine failed" is
         not a complete statement of what ran. This says which one it was, e.g.
         ``pypcap 1.3.0 (/.../pcap.cpython-310-x86_64-linux-gnu.so)``.
 
@@ -255,7 +255,7 @@ class PyPCAP(EngineBase['RawFrame']):
         as an iterator from :class:`pcap.pcap`.
 
         Warns:
-            AttributeWarning: Warns under following circumstances:
+            AttributeWarning: Warns under the following circumstances:
 
                 * if :attr:`self.extractor._exlyr <pcapkit.foundation.extraction.Extractor._exlyr>`
                   and/or :attr:`self.extractor._exptl <pcapkit.foundation.extraction.Extractor._exptl>`

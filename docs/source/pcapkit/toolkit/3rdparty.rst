@@ -67,11 +67,33 @@ cannot be used for it.
 Auxiliary Functions
 -------------------
 
+.. autofunction:: pcapkit.toolkit.dpkt.attach_timestamp
+
+.. autofunction:: pcapkit.toolkit.dpkt.packet2timestamp
+
+.. autofunction:: pcapkit.toolkit.dpkt.attach_buffer
+
+.. autofunction:: pcapkit.toolkit.dpkt.packet2bytes
+
+.. autofunction:: pcapkit.toolkit.dpkt.packet2frame
+
 .. autofunction:: pcapkit.toolkit.dpkt.ipv6_hdr_len
 
 .. autofunction:: pcapkit.toolkit.dpkt.packet2chain
 
 .. autofunction:: pcapkit.toolkit.dpkt.packet2dict
+
+Auxiliary Data
+--------------
+
+.. autoclass:: pcapkit.toolkit.dpkt.RecordTimestamp
+   :show-inheritance:
+
+.. autoclass:: pcapkit.toolkit.dpkt.Timestamp
+   :show-inheritance:
+
+.. autoclass:: pcapkit.toolkit.dpkt.DecimalTimestamp
+   :show-inheritance:
 
 PyShark Tools
 =============
@@ -93,8 +115,10 @@ cannot be used for it.
 .. autofunction:: pcapkit.toolkit.pyshark.tcp_traceflow
 
 .. autodata:: pcapkit.toolkit.pyshark.ENCAP_TYPE_TO_LINKTYPE
+   :no-value:
 
 .. autodata:: pcapkit.toolkit.pyshark.FILTER_NAME_TO_LINKTYPE
+   :no-value:
 
 Auxiliary Functions
 -------------------

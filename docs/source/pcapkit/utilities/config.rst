@@ -26,8 +26,8 @@ here reaches every engine and protocol that reads it.
 The :mod:`pcapkit.vendor` crawlers' :envvar:`PCAPKIT_VENDOR_RETRY`,
 :envvar:`PCAPKIT_CI_MODE`, :envvar:`PCAPKIT_HTTP_PROXY` and
 :envvar:`PCAPKIT_HTTPS_PROXY` are not held here. They are read by
-:mod:`pcapkit.vendor.default`, the first two with the :ref:`readers
-<config-readers>` below, and documented with it under :ref:`vendor-variables`.
+:mod:`pcapkit.vendor.default`, :envvar:`PCAPKIT_VENDOR_RETRY` and
+:envvar:`PCAPKIT_CI_MODE` with the :ref:`readers <config-readers>` below, and documented with it under :ref:`vendor-variables`.
 
 :envvar:`PCAPKIT_DEVMODE`, :envvar:`PCAPKIT_VERBOSE` and :envvar:`PCAPKIT_SPHINX`
 are read by :mod:`pcapkit.utilities.logging`, which needs them while it loads

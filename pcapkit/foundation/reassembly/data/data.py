@@ -28,9 +28,9 @@ class Completion(EnumLookup, StrEnum):
     This is the value of
     :attr:`Datagram.completed <pcapkit.foundation.reassembly.data.ip.Datagram.completed>`,
     which widens a plain :obj:`bool` rather than adding a second channel beside
-    it: reassembly has *three* outcomes to report, not two, since a buffer
-    abandoned under the :rfc:`1122` / :rfc:`8200` reassembly timeout is a different
-    event from one that simply had not finished when the capture did. An expired
+    it: reassembly has more outcomes to report than a :obj:`bool` can hold, since
+    a buffer abandoned under the :rfc:`1122` / :rfc:`8200` reassembly timeout is
+    a different event from one that simply had not finished when the capture did. An expired
     datagram says "these fragments are gone", a partial one says "these fragments
     had not arrived yet".
 
@@ -42,8 +42,8 @@ class Completion(EnumLookup, StrEnum):
     instead.
 
     It derives from :class:`~pcapkit.utilities.compat.StrEnum`, as
-    :class:`~pcapkit.protocols.application.httpv1.Type` does, which buys two
-    things a plain :class:`enum.Enum` does not: the value survives
+    :class:`~pcapkit.protocols.application.httpv1.Type` does, which buys what a
+    plain :class:`enum.Enum` does not: the value survives
     :func:`json.dumps` -- a plain enumeration raises :exc:`TypeError` there, and
     :meth:`Datagram.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` hands this
     field straight out -- and ``datagram.completed == 'timeout'`` works, so a
@@ -51,7 +51,7 @@ class Completion(EnumLookup, StrEnum):
     :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` is the same kind of
     string enumeration, but it is generated like its :mod:`pcapkit.const.pcapng`
     siblings (:issue:`886`), so it derives from :class:`aenum`'s own
-    ``StrEnum`` (via :class:`~pcapkit.corekit.enum.EnumRegistry`). Both
+    ``StrEnum`` (via :class:`~pcapkit.corekit.enum.EnumRegistry`). The
     properties above hold for it, as ``aenum.StrEnum`` is a :class:`str`
     subclass, but ``isinstance``/``issubclass`` against
     :class:`pcapkit.utilities.compat.StrEnum` does not.
@@ -124,9 +124,10 @@ class Deferred:
     :file:`http.pcap` pass against 1117.
 
     Holding the call here defers it to the first read of
-    :attr:`Datagram.packet`, where :class:`~pcapkit.corekit.packet.DeferredPacket`
-    runs it, so a caller that wants the parsed payload still gets exactly the
-    object an eager call would produce, and one that does not never pays for it.
+    :attr:`Datagram.packet <pcapkit.foundation.reassembly.data.ip.Datagram.packet>`,
+    where :class:`~pcapkit.corekit.packet.DeferredPacket` runs it, so a caller that
+    wants the parsed payload still gets exactly the object an eager call would
+    produce, and one that does not never pays for it.
 
     Args:
         analyze: The analyser to call, i.e.

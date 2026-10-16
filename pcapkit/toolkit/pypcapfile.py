@@ -125,7 +125,7 @@ def packet2timestamp(packet: 'Packet') -> 'float':
         packet: PyPCAPFile packet.
 
     Returns:
-        Timestamp of the packet, in seconds since the epoch: the :obj:`float`
+        Timestamp of the packet, in seconds since the epoch, as the :obj:`float`
         nearest the exact value.
 
     Note:
@@ -492,8 +492,8 @@ def _default_accepts(name: 'str', header: 'bytes') -> 'bool':
 
     Note:
         The parser stops at its own layer, so nothing past the header is
-        dissected. The answer depends on the octets alone, so the last two are
-        remembered.
+        dissected. The answer depends on the octets alone, so the most recent
+        answers are remembered, as many as the cache's ``maxsize``.
 
     """
     protocol = Protocol_IPv4 if name == 'IPv4' else Protocol_TCP
@@ -622,7 +622,7 @@ def _layer2dict(layer: 'Any') -> 'dict[str, Any]':
         and :class:`~pcapfile.protocols.network.ip.IP` decoders hex-encode the
         payload they retain rather than decoding it further (see
         :func:`_maybe_unhex`), so a raw payload reached by recursing *from* one of
-        those two classes is un-hexed before being reported here. Without that,
+        those classes is un-hexed before being reported here. Without that,
         an ``IP`` layer with options would report its own ``opt`` correctly
         (:func:`_ipv4_2dict` already un-hexes it) while its nested ``'Raw'``
         payload stayed hex-encoded and twice the true length -- an inconsistency
@@ -692,7 +692,7 @@ def packet2dict(packet: 'Packet', *, data_link: 'Enum_LinkType') -> 'dict[str, A
         data_link: Data link type, from the savefile header.
 
     Returns:
-        Dict[str, Any]: A :obj:`dict` mapping of packet data.
+        A :obj:`dict` mapping of packet data.
 
     Raises:
         ProtocolError: If a decoded IPv4 layer's ``src``/``dst`` cannot be
@@ -723,19 +723,17 @@ def packet2dict(packet: 'Packet', *, data_link: 'Enum_LinkType') -> 'dict[str, A
 def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Address] | None':
     """Make data for IPv4 reassembly.
 
+    A packet can be reassembled if it contains an IPv4 layer
+    (:class:`pcapfile.protocols.network.ip.IP`) whose header was captured whole (see
+    :func:`_network`), and the **DF** flag is :data:`False`.
+
     Args:
         packet: PyPCAPFile packet.
-        count: Packet index. If not provided, default to ``-1``.
+        count: Packet index. If not provided, defaults to ``-1``.
 
     Returns:
-        Data for IPv4 reassembly.
-
-        * If the ``packet`` can be used for IPv4 reassembly. A packet can be reassembled
-          if it contains an IPv4 layer (:class:`pcapfile.protocols.network.ip.IP`) whose
-          header was captured whole (see :func:`_network`), and the **DF** flag is
-          :data:`False`.
-        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv4
-          reassembly (:term:`reasm.ipv4.packet`) will be returned; otherwise, returns :data:`None`.
+        Data for IPv4 reassembly (:term:`reasm.ipv4.packet`) if the ``packet`` can be
+        reassembled; otherwise :data:`None`.
 
     Raises:
         ProtocolError: If ``ipv4.src`` or ``ipv4.dst`` cannot be parsed as an
@@ -775,7 +773,7 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
 
     Args:
         packet: PyPCAPFile packet.
-        count: Packet index. If not provided, default to ``-1``.
+        count: Packet index. If not provided, defaults to ``-1``.
 
     Raises:
         UnsupportedCall: Always, as `PyPCAPFile`_ has no IPv6 decoder.
@@ -791,18 +789,16 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
 def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None':
     """Make data for TCP reassembly.
 
+    A packet can be reassembled if it contains an IPv4 layer carrying a TCP segment (see
+    :func:`_transport`); TCP over IPv6 cannot be, as `PyPCAPFile`_ has no IPv6 decoder.
+
     Args:
         packet: PyPCAPFile packet.
-        count: Packet index. If not provided, default to ``-1``.
+        count: Packet index. If not provided, defaults to ``-1``.
 
     Returns:
-        Data for TCP reassembly.
-
-        * If the ``packet`` can be used for TCP reassembly. A packet can be reassembled
-          if it contains an IPv4 layer carrying a TCP segment (see :func:`_transport`);
-          TCP over IPv6 cannot be, as `PyPCAPFile`_ has no IPv6 decoder.
-        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
-          reassembly (:term:`reasm.tcp.packet`) will be returned; otherwise, returns :data:`None`.
+        Data for TCP reassembly (:term:`reasm.tcp.packet`) if the ``packet`` can be
+        reassembled; otherwise :data:`None`.
 
     Raises:
         ProtocolError: If ``ipv4.src`` or ``ipv4.dst`` cannot be parsed as an
@@ -864,19 +860,17 @@ def tcp_traceflow(packet: 'Packet', *, data_link: 'Enum_LinkType',
                   count: 'int' = -1) -> 'TF_TCP_Packet | None':
     """Trace packet flow for TCP.
 
+    A packet can be traced if it contains an IPv4 layer carrying a TCP segment (see
+    :func:`_transport`); TCP over IPv6 cannot be, as `PyPCAPFile`_ has no IPv6 decoder.
+
     Args:
         packet: PyPCAPFile packet.
         data_link: Data link layer protocol (from the savefile header).
-        count: Packet index. If not provided, default to ``-1``.
+        count: Packet index. If not provided, defaults to ``-1``.
 
     Returns:
-        Data for TCP flow tracing.
-
-        * If the ``packet`` can be used for TCP flow tracing. A packet can be traced
-          if it contains an IPv4 layer carrying a TCP segment (see :func:`_transport`);
-          TCP over IPv6 cannot be, as `PyPCAPFile`_ has no IPv6 decoder.
-        * If the ``packet`` can be traced, then the :obj:`dict` mapping of data for TCP
-          flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.
+        Data for TCP flow tracing (:term:`trace.tcp.packet`) if the ``packet`` can be
+        traced; otherwise :data:`None`.
 
     Raises:
         ProtocolError: If ``ipv4.src`` or ``ipv4.dst`` cannot be parsed as an

@@ -4,7 +4,7 @@ Null Dumper
 .. module:: pcapkit.dumpkit.null
 
 :mod:`pcapkit.dumpkit.null` is the dumper for the **NotImplemented** format,
-alike those in :mod:`dictdumper`.
+like those in :mod:`dictdumper`.
 
 .. note::
 

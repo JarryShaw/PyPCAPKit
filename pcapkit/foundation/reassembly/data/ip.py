@@ -85,8 +85,9 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     #: stores a field whose name is a *builtin* name under a mangled key and maps
     #: it back on the way out, so ``packet`` never lands in :attr:`__dict__`
     #: itself -- which routes reading it through :meth:`__getattr__`, where a
-    #: :class:`Deferred` analysis can be run, while ``dict(datagram)``,
-    #: :meth:`to_dict` and iteration still report the field under its own name.
+    #: :class:`~pcapkit.foundation.reassembly.data.data.Deferred` analysis can be
+    #: run, while ``dict(datagram)``, :meth:`to_dict` and iteration still report the
+    #: field under its own name.
     #: See :class:`~pcapkit.corekit.packet.DeferredPacket`.
     __additional__ = ['packet']
     #: Placeholder class :attr:`packet` may hold, for
@@ -94,9 +95,10 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     __deferred__ = Deferred
 
     #: How completely the datagram was reassembled, and why reassembly stopped.
-    #: Only :attr:`Completion.COMPLETE` is truthy, so ``if datagram.completed:``
-    #: reads as it would for a :obj:`bool`; equality against :obj:`True` or
-    #: :obj:`False` does not hold.
+    #: Only :attr:`Completion.COMPLETE
+    #: <pcapkit.foundation.reassembly.data.data.Completion.COMPLETE>` is truthy, so
+    #: ``if datagram.completed:`` reads as it would for a :obj:`bool`; equality
+    #: against :obj:`True` or :obj:`False` does not hold.
     completed: 'Completion'
     #: Original packet identifier.
     id: 'DatagramID[_AT]'
@@ -107,8 +109,8 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     #: Reassembled IP payload.
     payload: 'bytes | tuple[bytes, ...]'
     #: Parsed IP payload. Analysed on first read, not at construction time; a
-    #: :class:`Deferred` may be passed in its place, and reading this attribute
-    #: then runs it and keeps the result.
+    #: :class:`~pcapkit.foundation.reassembly.data.data.Deferred` may be passed in its
+    #: place, and reading this attribute then runs it and keeps the result.
     packet: 'Optional[ProtocolBase]'
     #: Octet ranges, absolute into the reassembled payload and both
     #: **inclusive** -- the same convention as :attr:`Packet.fo` combined with

@@ -597,8 +597,8 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
             old: already-buffered bytes of this fragment over the range.
             new: the arriving segment's bytes over the same range.
             start: absolute sequence number of ``old[0]``/``new[0]``, which
-                cover the same range by construction -- see the two call
-                sites, :meth:`_reassemble_append` and :meth:`_reassemble_prepend`.
+                cover the same range by construction -- see the call sites,
+                :meth:`_reassemble_append` and :meth:`_reassemble_prepend`.
 
         Returns:
             The bytes to keep for the range, and any ``(first, last)``
@@ -662,7 +662,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
             buf: :term:`buffer <reasm.tcp.buffer>` dict of reassembled packets
             bufid: buffer identifier
             timeout: whether this buffer is being submitted because
-                :meth:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase.expire`
+                :meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.expire`
                 abandoned it under the reassembly timeout
 
         Returns:

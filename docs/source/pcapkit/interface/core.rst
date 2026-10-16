@@ -4,7 +4,7 @@ Core Interface
 .. module:: pcapkit.interface.core
 
 :mod:`pcapkit.interface.core` defines core user-oriented
-interfaces, variables, and etc., which wraps around the
+interfaces and variables, which wrap around the
 foundation classes from :mod:`pcapkit.foundation`.
 
 .. autofunction:: pcapkit.interface.core.extract

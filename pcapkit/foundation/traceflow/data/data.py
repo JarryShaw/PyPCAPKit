@@ -33,11 +33,11 @@ class Deferred:
         Deliberately not
         :class:`pcapkit.foundation.reassembly.data.data.Deferred`, and not shared
         with it. That one postpones a single ``analyze()`` call over bytes already
-        in hand; this postpones a *submit* over a reassembler's buffers. The two
-        subpackages are siblings and neither should depend on the other, so the
-        few lines are written twice rather than one importing the other -- the
-        same reason the two ``data/data.py`` modules mirror each other instead of
-        merging.
+        in hand; this postpones a *submit* over a reassembler's buffers. The
+        reassembly and flow tracing subpackages are siblings and neither should
+        depend on the other, so the few lines are written in each rather than one
+        importing the other -- the same reason their ``data/data.py`` modules
+        mirror each other instead of merging.
 
     Args:
         reassembly: The flow's own

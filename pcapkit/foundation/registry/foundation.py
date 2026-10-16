@@ -70,8 +70,8 @@ def register_extractor_engine(name: 'str', module: 'ModuleDescriptor[Engine] | T
     r"""Register a new engine class.
 
     Notes:
-        The full qualified class name of the new engine class
-        should be as ``{module}.{class_}``.
+        The fully qualified class name of the new engine class
+        should be ``{module}.{class_}``.
 
     The function will register the given engine class to the
     :data:`pcapkit.foundation.extraction.Extractor.__engine__` registry.
@@ -113,8 +113,8 @@ def register_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] | Type[Dump
     r"""Register a new dumper class.
 
     Notes:
-        The full qualified class name of the new dumper class
-        should be as ``{module}.{class_}``.
+        The fully qualified class name of the new dumper class
+        should be ``{module}.{class_}``.
 
     The function will register the given dumper class to the
     :data:`pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__` and
@@ -156,8 +156,8 @@ def register_extractor_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] |
     r"""Register a new dumper class.
 
     Notes:
-        The full qualified class name of the new dumper class
-        should be as ``{module}.{class_}``.
+        The fully qualified class name of the new dumper class
+        should be ``{module}.{class_}``.
 
     The function will register the given dumper class to the
     :data:`pcapkit.foundation.extraction.Extractor.__output__` registry.
@@ -193,8 +193,8 @@ def register_traceflow_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] |
     r"""Register a new dumper class.
 
     Notes:
-        The full qualified class name of the new dumper class
-        should be as ``{module}.{class_}``.
+        The fully qualified class name of the new dumper class
+        should be ``{module}.{class_}``.
 
     The function will register the given dumper class to the
     :data:`pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__` registry.
@@ -304,8 +304,8 @@ def register_extractor_reassembly(protocol: 'str', module: 'str | ModuleDescript
     r"""Register a new reassembly class.
 
     Notes:
-        The full qualified class name of the new reassembly class
-        should be as ``{module}.{class_}``.
+        The fully qualified class name of the new reassembly class
+        should be ``{module}.{class_}``.
 
     The function will register the given reassembly class to the
     :data:`pcapkit.foundation.extraction.Extractor.__reassembly__` registry.
@@ -339,8 +339,8 @@ def register_extractor_traceflow(protocol: 'str', module: 'str | ModuleDescripto
     r"""Register a new flow tracing class.
 
     Notes:
-        The full qualified class name of the new flow tracing class
-        should be as ``{module}.{class_}``.
+        The fully qualified class name of the new flow tracing class
+        should be ``{module}.{class_}``.
 
     The function will register the given flow tracing class to the
     :data:`pcapkit.foundation.extraction.Extractor.__traceflow__` registry.

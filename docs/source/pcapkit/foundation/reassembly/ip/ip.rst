@@ -29,7 +29,7 @@ Data Models
    :module: pcapkit.foundation.reassembly.data.ip
    :type: typing.Tuple[~pcapkit.foundation.reassembly.data.ip._AT, ~pcapkit.foundation.reassembly.data.ip._AT, int, pcapkit.const.reg.transtype.TransType]
 
-   Data module for buffer ID.
+   Data model for buffer ID.
 
 .. autoclass:: pcapkit.foundation.reassembly.data.ip.Buffer
    :members:
@@ -49,3 +49,5 @@ Type Variables
 .. data:: _AT
    :module: pcapkit.foundation.reassembly.data.ip
    :type: ipaddress.IPv4Address | ipaddress.IPv6Address
+
+   IP address type.

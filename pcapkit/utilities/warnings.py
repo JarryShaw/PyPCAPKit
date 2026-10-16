@@ -7,9 +7,9 @@
 :mod:`pcapkit.utilities.warnings` refined built-in warnings.
 
 Every warning :mod:`pcapkit` reports goes through :func:`warn`, which reports it
-**exactly once on each of two channels**:
+**exactly once on each channel**:
 
-1. the :data:`~pcapkit.utilities.logging.logger` logger, at
+1. the ``pcapkit`` logger (:data:`~pcapkit.utilities.logging.logger`), at
    :data:`logging.WARNING` level, unconditionally -- so a consumer watching the
    ``pcapkit`` logger sees every complaint whatever the warning filters say;
 2. the standard :mod:`warnings` machinery, via :func:`warnings.warn`, subject to
@@ -361,7 +361,7 @@ class EngineWarning(BaseWarning, ImportWarning):
 
 
 class InvalidVendorWarning(BaseWarning, ImportWarning):
-    """Vendor CLI invalid updater."""
+    """Invalid updater given to the vendor CLI."""
 
 
 ##############################################################################

@@ -50,7 +50,9 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
             :attr:`self._dtgram <pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram>`
             (if not, datagram will be discarded after callback)
         timeout: reassembly timeout in seconds, on the capture's own clock;
-            :data:`None` selects the protocol's :attr:`__timeout__` default
+            :data:`None` selects the protocol's
+            :attr:`__timeout__ <pcapkit.foundation.reassembly.reassembly.Reassembly.__timeout__>`
+            default
 
     Important:
         This class is not intended to be instantiated directly,
@@ -391,7 +393,7 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
             bufid: buffer identifier
             checked: buffer consistency checked flag
             timeout: whether this buffer is being submitted because
-                :meth:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase.expire`
+                :meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.expire`
                 abandoned it under the reassembly timeout, which is what
                 separates
                 :attr:`Completion.TIMEOUT <pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT>`

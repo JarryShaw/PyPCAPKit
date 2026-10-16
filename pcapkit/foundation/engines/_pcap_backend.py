@@ -4,7 +4,7 @@
 
 .. module:: pcapkit.foundation.engines._pcap_backend
 
-Two unrelated PyPI distributions install a top-level module named :mod:`pcap`:
+Unrelated PyPI distributions install a top-level module named :mod:`pcap`:
 
 * `PyPCAP`_ -- a Cython binding, shipped as a single extension module
   (:file:`pcap.cpython-*.so`), installable only up to Python 3.11.
@@ -12,7 +12,7 @@ Two unrelated PyPI distributions install a top-level module named :mod:`pcap`:
   interface, shipped as a *package* (:file:`pcap/__init__.py`), installable on
   3.10 and newer.
 
-They therefore **collide**: nothing stops both from being installed, and
+They therefore **collide**: nothing stops more than one from being installed, and
 ``import pcap`` then silently resolves to whichever the import system finds
 first. Measured on Python 3.10 with both present, the ``pcap/`` package wins and
 upstream's extension module is shadowed and unreachable -- so ``pcap-ct`` always
@@ -21,8 +21,8 @@ takes precedence, and no amount of ordering by the caller changes it.
 :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` and
 :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` are separate engines, so each
 has to know which distribution it actually got rather than assume. This module is
-the one place that answers that, deliberately shared: the two engines must agree
-on the answer, and two copies of the detection would be two chances to disagree.
+the one place that answers that, deliberately shared: the engines must agree on
+the answer, and a copy of the detection in each would be a chance to disagree.
 It is *only* detection -- nothing here is engine behaviour -- and it imports
 nothing from :mod:`pcapkit`, so it cannot introduce an import cycle.
 

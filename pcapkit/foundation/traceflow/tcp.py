@@ -53,7 +53,7 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         server's replies in separate flows, separate labels and separate output
         files, leaving a caller to pair them up by inspecting the labels.
 
-        Two consequences are worth knowing:
+        This has consequences worth knowing:
 
         * The reverse half of a conversation does not produce a flow of its
           own, so a capture of *n* connections yields *n* flows rather than
@@ -493,9 +493,8 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
     def finish(self) -> 'None':
         """Finalise every flow still being traced.
 
-        The end of the capture is the second of the two things that can prove a
-        bidirectional flow is over -- the first being a new connection on the same
-        endpoints. Draining the buffer here is what lets a flow keep the
+        The end of the capture can prove a bidirectional flow is over, as a new
+        connection on the same endpoints can. Draining the buffer here is what lets a flow keep the
         acknowledgement that completes its close and *still* have its callback
         fired, rather than having to choose between the two.
 
@@ -515,7 +514,7 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         Note:
             This reports flows still being traced **without** finalising them, so
             that reading
-            :attr:`TraceFlow.index <pcapkit.foundation.traceflow.traceflow.TraceFlowBase.index>`
+            :attr:`TraceFlow.index <pcapkit.foundation.traceflow.traceflow.TraceFlow.index>`
             part-way through a capture cannot disturb the tracing -- popping a
             buffer there would strand the rest of its conversation in a second
             flow. Such a flow is therefore reported here but has not fired its
@@ -530,15 +529,18 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
             not as it will stand once the conversation ends. Read it while the flow
             is open and the datagrams cover only the segments seen so far; segments
             arriving afterwards are reassembled into the buffer but cannot reach an
-            already-resolved snapshot, and nothing on the returned :class:`Index`
+            already-resolved snapshot, and nothing on the returned
+            :class:`~pcapkit.foundation.traceflow.data.tcp.Index`
             distinguishes one from the final result that :meth:`finish` produces.
 
             This call's own cache is not the cause and does not soften it: both
             :meth:`trace` and :meth:`finish` clear ``__cached__['submit']``, so a
             later call rebuilds the tuple with fresh
             :class:`~pcapkit.foundation.traceflow.data.data.Deferred` objects. It is
-            the *previously returned* :class:`Index`, if a caller kept one, that
-            cannot catch up. For a result that is final, read after :meth:`finish`.
+            the *previously returned*
+            :class:`~pcapkit.foundation.traceflow.data.tcp.Index`, if a caller kept
+            one, that cannot catch up. For a result that is final, read after
+            :meth:`finish`.
 
         """
         if (cached := self.__cached__.get('submit')) is not None:

@@ -115,15 +115,15 @@ class PyShark(EngineBase['PySharkPacket']):
         """Why this engine cannot run here, or :data:`None` when it can.
 
         Consulted by :meth:`pcapkit.foundation.extraction.Extractor.run` *before*
-        the import test, because neither of the two things that stop this engine
-        is visible to an import. `PyShark`_ imports perfectly well and then fails
+        the import test, because none of the things that stop this engine is
+        visible to an import. `PyShark`_ imports perfectly well and then fails
         when it is used, which without this hook escapes from :meth:`run` as a hard
         error rather than degrading to the default engine with a warning.
 
         **The interpreter.** ``pyshark`` 0.6 does
         ``asyncio.get_event_loop_policy().get_event_loop()`` at
         :file:`pyshark/capture/capture.py:183`, in a fresh interpreter with no
-        running loop. Measured on four interpreters: 3.10 and 3.11 return a loop
+        running loop. Measured: 3.10 and 3.11 return a loop
         silently, 3.12 returns one with a :exc:`DeprecationWarning`, and 3.14
         raises ``RuntimeError: There is no current event loop in thread
         'MainThread'``. Hence :attr:`PYTHON_CEILING` is ``(3, 14)``. Python 3.13 was
@@ -220,7 +220,7 @@ class PyShark(EngineBase['PySharkPacket']):
         :meth:`self.extractor.record_header <pcapkit.foundation.extraction.Extractor.record_header>`.
 
         Warns:
-            AttributeWarning: Warns under following circumstances:
+            AttributeWarning: Warns under the following circumstances:
 
                 * if :attr:`self.extractor._exlyr <pcapkit.foundation.extraction.Extractor._exlyr>`
                   and/or :attr:`self.extractor._exptl <pcapkit.foundation.extraction.Extractor._exptl>`

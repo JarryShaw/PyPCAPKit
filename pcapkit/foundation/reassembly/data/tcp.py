@@ -85,12 +85,13 @@ class DatagramID(Info, Generic[_AT]):
 
 @info_final
 class Datagram(DeferredPacket, Info, Generic[_AT]):
-    """Data model for :term:`TCP <reasm.tcp.datagram>`."""
+    """Data model for :term:`TCP <reasm.tcp.datagram>` reassembled datagram."""
 
     #: How completely the datagram was reassembled, and why reassembly stopped;
     #: see :class:`~pcapkit.foundation.reassembly.data.data.Completion`. Only
-    #: :attr:`Completion.COMPLETE` is truthy, so ``if datagram.completed:`` reads
-    #: as it would for a :obj:`bool`.
+    #: :attr:`Completion.COMPLETE
+    #: <pcapkit.foundation.reassembly.data.data.Completion.COMPLETE>` is truthy, so
+    #: ``if datagram.completed:`` reads as it would for a :obj:`bool`.
     completed: 'Completion'
     #: Listing ``packet`` here is what makes it lazy -- see
     #: :class:`~pcapkit.corekit.packet.DeferredPacket`.
@@ -108,8 +109,8 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     #: Reassembled payload (application layer data).
     payload: 'bytes | tuple[bytes, ...]'
     #: Parsed TCP payload. Analysed on first read rather than at construction;
-    #: a :class:`Deferred` may be passed in its place, and reading this
-    #: attribute then runs it and keeps the result.
+    #: a :class:`~pcapkit.foundation.reassembly.data.data.Deferred` may be passed in
+    #: its place, and reading this attribute then runs it and keeps the result.
     packet: 'Optional[ProtocolBase]'
     #: Sequence ranges on which two segments disagreed, i.e. where an arriving
     #: segment overlapped bytes already buffered but did not repeat them.
@@ -186,11 +187,11 @@ class Fragment(Info):
     isn: 'int'
     #: Length of payload buffer.
     len: 'int'
-    #: Reassembled payload holes set to b'\x00'.
+    #: Reassembled payload, holes set to ``b'\x00'``.
     raw: 'bytearray'
     #: Sequence ranges, absolute and inclusive, still zero-fill placeholder in
     #: :attr:`raw` rather than an actually-received byte *of this fragment*.
-    #: Only the two gap-creating sites in :meth:`TCP.reassembly
+    #: Only the gap-creating sites in :meth:`TCP.reassembly
     #: <pcapkit.foundation.reassembly.tcp.TCP.reassembly>` -- the forward
     #: append and the reach-back prepend, the only places that ever splice a
     #: ``bytearray(GAP)`` filler into :attr:`raw` -- add an entry; an overlap
@@ -216,12 +217,11 @@ class Fragment(Info):
     #: to have received something at the same absolute sequence numbers.
     #:
     #: Absolute sequence numbers rather than offsets into :attr:`raw` --
-    #: :attr:`conflict` below uses the same convention -- for two reasons:
-    #: it is what :meth:`TCP.reassembly
-    #: <pcapkit.foundation.reassembly.tcp.TCP.reassembly>` already computes
-    #: (``GAP = PSN - (ISN + LEN)`` and its mirror), so this reuses an
-    #: existing concept rather than adding a second one; and it means a gap
-    #: entry never needs shifting when :attr:`isn` is revised downward by the
+    #: :attr:`conflict` below uses the same convention -- because it is what
+    #: :meth:`TCP.reassembly <pcapkit.foundation.reassembly.tcp.TCP.reassembly>`
+    #: already computes (``GAP = PSN - (ISN + LEN)`` and its mirror), so this
+    #: reuses an existing concept rather than adding a second one; and because a
+    #: gap entry then never needs shifting when :attr:`isn` is revised downward by the
     #: reach-back path, unlike an offset-based or a per-octet representation.
     #: A typical fragment carries zero or a handful of entries, against a
     #: per-octet marker the length of the whole payload -- the difference

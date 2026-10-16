@@ -150,7 +150,7 @@ Compatibility Note
    :data:`logging.INFO` (or :data:`logging.DEBUG` under
    :envvar:`PCAPKIT_DEVMODE`). That hijacked the logging configuration of every
    application importing :mod:`pcapkit`, so 1.5.0 does it only under
-   :envvar:`PCAPKIT_DEVMODE`. Two consequences are visible to existing code:
+   :envvar:`PCAPKIT_DEVMODE`. That has consequences visible to existing code:
 
    1. **Nothing reaches stderr by default.** The ``registered ...`` bookkeeping
       is at :data:`logging.DEBUG`, not :data:`logging.INFO`. To restore the
@@ -167,6 +167,7 @@ Compatibility Note
 
       .. code-block:: python
 
+         import logging
          from pcapkit.utilities.logging import handler, logger
          logger.setLevel(logging.INFO)
          logger.addHandler(handler)

@@ -179,7 +179,7 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
         first frame is decoded.
 
         Warns:
-            AttributeWarning: Warns under following circumstances:
+            AttributeWarning: Warns under the following circumstances:
 
                 * if :attr:`self.extractor._exlyr <pcapkit.foundation.extraction.Extractor._exlyr>`
                   and/or :attr:`self.extractor._exptl <pcapkit.foundation.extraction.Extractor._exptl>`
@@ -327,16 +327,16 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
         """Read the savefile's records, every one of them.
 
         :func:`pcapfile.savefile._read_a_packet` (pypcapfile 0.12.0) drops
-        records in two ways:
+        records:
 
         * It picks the byte order of each record header by testing
           ``hdrp[0].byteorder == 'big'`` -- :class:`bytes` against :class:`str`,
           never true on Python 3. A big-endian record header is unpacked
           little-endian, its byte-swapped capture length overruns the file, and
-          the savefile ends at its first record (#1512).
+          the savefile ends at its first record (:issue:`1512`).
         * It ends the savefile at any record whose frame data is empty or shorter
           than its capture length, so a zero-length record drops itself and every
-          record after it, and a truncated final record is dropped (#1571).
+          record after it, and a truncated final record is dropped (:issue:`1571`).
 
         This reads each record in the byte order of the header :mod:`pcapfile`
         loaded, into the :class:`pcapfile.structs.pcap_packet` that function
