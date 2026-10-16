@@ -1169,8 +1169,9 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
                 # and both now close their enumeration block with a
                 # ``_unregistered_member`` classmethod (the override each
                 # needed for its own extra per-member attributes) rather
-                # than falling straight through to the ``get()``
-                # staticmethod each still keeps.
+                # than falling straight through to the ``get()`` override
+                # each still keeps -- a classmethod on both since #908 and
+                # #1824.
                 block = re.compile(
                     rf'class {cls_name}\(EnumRegistry, StrEnum\):\n    """.*?\n\n    (#:.*?)'
                     r'\n\n    @classmethod', re.S)

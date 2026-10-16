@@ -22,10 +22,11 @@ number and ``register`` must mint it: the comparison runs in both directions.
 
 The oracle is ``get`` with no default, except where ``get`` is a
 :class:`staticmethod` backport that bypasses the base lookup. ``OptionType``'s
-answers every integer code with an unregistered member, and ``Command``'s calls
-``key.upper()`` and so answers :class:`bytes` too. There the constructor is the
-oracle instead; ``OptionType``'s ``_missing_`` refusing anything above
-``0xFFFF`` is what the issue cites.
+answers every integer code with an unregistered member, so there the constructor
+is the oracle instead; ``OptionType``'s ``_missing_`` refusing anything above
+``0xFFFF`` is what the issue cites. ``Command``'s was one too, calling
+``key.upper()`` and so answering :class:`bytes`, until #1824 made it a
+:class:`classmethod` that hands a non-``str`` key to the base.
 
 Each test imports the registries after
 :func:`~tests._support.reimport_once_per_class`, whose ``restore`` puts the class's
