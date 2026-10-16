@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
-"""The workflows page's count, "At a Glance" table and graph, against the files.
+"""The workflows page's "At a Glance" table and graph, against the files.
 
-:file:`docs/source/contributing/workflows.rst` opens by counting the workflows under
-:file:`.github/workflows/`, tabulates each one's triggers, and draws them as a
-graph. #1732 added :file:`experimental.yml` and left all three describing twelve,
-so each is checked here against the ``on:`` block of every file: the count, one
-table row per file with its name and triggers, and one graph node per file with
-an edge for each ``push``, ``pull_request`` and ``workflow_run`` trigger.
+:file:`docs/source/contributing/workflows.rst` tabulates the triggers of each
+workflow under :file:`.github/workflows/` and draws them as a graph. #1732 added
+:file:`experimental.yml` and left both without it, so each is checked here against
+the ``on:`` block of every file: one table row per file with its name and
+triggers, and one graph node per file with an edge for each ``push``,
+``pull_request`` and ``workflow_run`` trigger. The page states no count of the
+files (#1103's ruling, #1811); the row and node per file are what keep it whole.
 
 """
 
@@ -24,8 +25,6 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 WORKFLOWS = ROOT / '.github' / 'workflows'
 DOC = ROOT / 'docs' / 'source' / 'contributing' / 'workflows.rst'
 
-NUMBERS = {'ten': 10, 'eleven': 11, 'twelve': 12, 'thirteen': 13, 'fourteen': 14,
-           'fifteen': 15, 'sixteen': 16}
 DAYS = {'0': 'Sun', '1': 'Mon', '2': 'Tue', '3': 'Wed', '4': 'Thu', '5': 'Fri', '6': 'Sat',
         '*': 'daily'}
 #: Events the table gives a column of their own; the rest go under "other".
@@ -113,10 +112,6 @@ def graph(page: 'str') -> 'tuple[dict[str, str], set[str]]':
 def problems(page: 'str', files: 'dict[pathlib.Path, str]') -> 'list[str]':
     """Every way the page disagrees with the workflow files."""
     found = []  # type: list[str]
-    count = re.search(r'The (\w+) workflows under :file:`\.github/workflows/`', ' '.join(page.split()))
-    if count is None or NUMBERS.get(count.group(1)) != len(files):
-        found.append(f'the note counts {count and count.group(1)!r} workflows; there are {len(files)}')
-
     rows = {row[1]: row for row in table_rows(page)}
     nodes, edges = graph(page)
     by_name = {workflow_name(text): nodes.get(path.name) for path, text in files.items()}
@@ -158,15 +153,17 @@ class TestTheWorkflowsPage(unittest.TestCase):
         self.assertEqual(problems(DOC.read_text(encoding='utf-8'), FILES), [])
 
     def test_a_missing_row_is_caught(self) -> None:
-        """The check bites: drop experimental.yml's row, node and count, and it fails."""
+        """The check bites: drop experimental.yml's row, or its node, and it fails."""
         page = DOC.read_text(encoding='utf-8')
         row = re.search(r'(?m)^   \* - Experimental Tests\n(?:     - .*\n)+', page)
         self.assertIsNotNone(row)
         assert row is not None
         found = problems(page.replace(row.group(0), ''), FILES)
         self.assertEqual(found, ['no table row for experimental.yml'])
-        found = problems(page.replace('The thirteen workflows', 'The twelve workflows'), FILES)
-        self.assertEqual(found, ["the note counts 'twelve' workflows; there are 13"])
+        node = re.search(r'(?m)^ +\w+\["[^"<]+<br/>experimental\.yml"\]\n', page)
+        self.assertIsNotNone(node)
+        assert node is not None
+        self.assertEqual(problems(page.replace(node.group(0), ''), FILES), ['no graph node for experimental.yml'])
 
 
 if __name__ == '__main__':

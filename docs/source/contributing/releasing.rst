@@ -331,13 +331,14 @@ checks *is* the one it is about to create:
 
 * ``tag`` checks whether ``conda-<version>+0``, the tag *it* creates, already
   exists.
-* ``pypi`` compares PyPI's file count for the version against the 7 expected
-  -- the 6 supported legs' wheels plus the sdist kept only on the 3.15 leg; the
+* ``pypi`` compares PyPI's file count for the version against the expected one
+  -- a wheel per supported leg plus the sdist kept only on the 3.15 leg; the
   KTLO legs' wheels (`#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__) are not counted. This job is
   already idempotent (``skip-existing: true`` on both upload steps), so the
   check exists only to save the cost of the build matrix, not for correctness.
-* ``conda`` compares Anaconda's aggregate count against the 10 expected (2 OS
-  x 5 Python versions) as the same kind of job-level cost saver, and *also*
+* ``conda`` compares Anaconda's aggregate count against the expected one (a
+  file per OS and Python version of its matrix) as the same kind of job-level
+  cost saver, and *also*
   checks, per matrix leg, whether that leg's own platform/Python distribution
   is already there -- this second check is the actual correctness fix, because
   ``anaconda/actions/upload-package`` has no ``skip-existing`` equivalent, only

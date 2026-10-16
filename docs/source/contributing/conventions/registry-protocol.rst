@@ -104,9 +104,9 @@ Three things about it are easy to get wrong:
 
    Re-parenting every non-registry enumeration onto
    :class:`~pcapkit.corekit.enum.EnumLookup` was **phase 2** of
-   :issue:`877`, and it is **complete**: the phase landed for 24 of the 24
-   non-registry enumerations. **Zero enumerations remain outside the hierarchy**,
-   measured by a runtime walk over both the :mod:`enum` and ``aenum`` flavours.
+   :issue:`877`, and it is **complete**: the phase landed for every non-registry
+   enumeration. **No enumeration remains outside the hierarchy**, measured by a
+   runtime walk over both the :mod:`enum` and ``aenum`` flavours.
 
 Failed-Lookup Exceptions
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -280,7 +280,7 @@ and it is the trap for whoever writes the next override: the base branches on
 branched on ``isinstance(key, int)`` and fell through to the *name* path for anything
 else. ``get(None)`` therefore raised a quiet
 :exc:`~pcapkit.utilities.exceptions.EnumKeyError` on those two and a loud
-:exc:`~pcapkit.utilities.exceptions.EnumValueError` on the other four of the six
+:exc:`~pcapkit.utilities.exceptions.EnumValueError` on the other
 locally-defined helpers in those two modules, and no prose
 anywhere said so. Re-implementing the dispatch is how an override acquires a
 divergence nobody wrote down; delegating to it is how it does not.
@@ -366,26 +366,24 @@ The Audit, per Class
 registry added later has something to check itself against. The owner set its scope:
 audit every registry first, and decide case-sensitivity per registry from that.
 
-The population it covers, with the counting convention spelled out because the
-figures move: **127** :class:`~pcapkit.corekit.enum.EnumRegistry` subclasses, every
-one of them under :mod:`pcapkit.const`, across 124 files -- 117 :class:`int`-valued
-(of which 5 are flag registries) and 10 ``aenum.StrEnum``-valued. Plus **24**
-non-registry enumerations counted by a runtime walk over both the :mod:`enum` and
-``aenum`` flavours and including nested classes: 17 top level (3 of them under
-:mod:`pcapkit.const` itself) and 7 nested, the nested ones being
-``FrameType.Flags`` in :mod:`pcapkit.protocols.schema.application.httpv2` plus its
-6 concrete per-frame subclasses. 151 enumerations in total.
+The population it covers is every :class:`~pcapkit.corekit.enum.EnumRegistry`
+subclass, every one of them under :mod:`pcapkit.const` and each either
+:class:`int`-valued (the flag registries among them) or ``aenum.StrEnum``-valued,
+plus every non-registry enumeration a runtime walk over both the :mod:`enum` and
+``aenum`` flavours finds, nested classes included -- such as ``FrameType.Flags`` in
+:mod:`pcapkit.protocols.schema.application.httpv2` and its concrete per-frame
+subclasses.
 
-**The** :class:`int`\ **-valued tier, all 117, is case-sensitive, and the criterion is
-vacuous on it rather than merely unmet.** A registry whose values are numbers has
+**The** :class:`int`\ **-valued tier is case-sensitive throughout, and the criterion
+is vacuous on it rather than merely unmet.** A registry whose values are numbers has
 nothing for case to apply to; the only way a string reaches
 :meth:`~pcapkit.corekit.enum.EnumLookup.get` on one is as a member *name*, and a name
 is the Python identifier :meth:`pcapkit.vendor.default.Vendor.safe_name` derives from
 the registry's own name column -- it preserves the registrar's casing exactly, but it
 is not itself a value any specification states a comparison rule for. Measured across
-all 151 enumerations: exactly **one** would collide if names were folded --
-:class:`~pcapkit.const.hip.parameter.Parameter`, on ``R1_Counter`` against
-``R1_COUNTER`` -- and **no** enumeration anywhere has two ``str`` *values* that
+every enumeration: **only** :class:`~pcapkit.const.hip.parameter.Parameter` would
+collide if names were folded, on ``R1_Counter`` against ``R1_COUNTER`` -- and
+**no** enumeration anywhere has two ``str`` *values* that
 collide when folded. So folding names is not merely unjustified, it is unsafe in a
 measured case; folding values is safe but unjustified except where the table below
 says otherwise.
@@ -466,16 +464,16 @@ That leaves the classes with something to decide:
        ``a`` 18, ``p`` 16, ``s/p`` 3, blank 1; ``o`` 28, ``m`` 27, ``h`` 7,
        ``m [1]`` 2). Both tallies cover all 64 rows.
      - **open** -- see below
-   * - The 6 :mod:`~pcapkit.protocols.internet.mh` and
+   * - The :mod:`~pcapkit.protocols.internet.mh` and
        :mod:`~pcapkit.protocols.application.ngap` helper enumerations
      - IANA Mobility Header registries, 3GPP TS 38.413
      - ``FastBindingAcknowledgmentStatus``, ``IPv6AddressPrefixCode``,
        ``LMAAddressCode``, ``LocalizedRoutingStatus``, ``Criticality`` and ``PDUKind``.
-       **Five** of the six carry numeric codes, so the criterion is vacuous on them
+       **All but** ``PDUKind`` carry numeric codes, so the criterion is vacuous on them
        exactly as for the :class:`int` tier above; ``PDUKind``'s are :class:`str` ASN.1
        identifiers from 3GPP TS 38.413, and ASN.1 identifiers are case-significant by
        construction, so it lands the same way for a different reason.
-       **None** of the six defines a ``get`` of its own. Two did when this
+       **None** of them defines a ``get`` of its own. Two did when this
        audit was taken --
        ``FastBindingAcknowledgmentStatus`` and ``IPv6AddressPrefixCode``, for
        signature reasons (no ``default``, and an :class:`int`/:class:`str` dispatch)

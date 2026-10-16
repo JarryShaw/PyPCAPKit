@@ -23,10 +23,12 @@ structure:
   exists, lives in exactly its own file, is listed in the index's toctree, and the
   top-level :file:`docs/source/index.rst` points at the new index page rather than
   the retired bare document path.
-* :class:`PhaseTwoRemainderTests` -- the three counts the page states about
-  `#877 <https://github.com/JarryShaw/PyPCAPKit/issues/877>`__'s phase 2, measured
-  rather than remembered. The page said the phase *"has not happened yet"* for as long
-  as it did because nothing contradicted it once #921 landed.
+* :class:`PhaseTwoRemainderTests` -- what the page says about
+  `#877 <https://github.com/JarryShaw/PyPCAPKit/issues/877>`__'s phase 2 and the
+  population its audit covers, measured rather than remembered. The page said the
+  phase *"has not happened yet"* for as long as it did because nothing contradicted
+  it once #921 landed. The page states no counts (#1103's ruling, #1811), so what is
+  checked is each claim about the whole population.
 * :class:`ExtensionHeaderClassificationTests` -- the page's bases-per-header table
   against the declarations themselves. ``tests/protocols/internet/test_ipv6_ext_unit.py``
   already pins the *code* to the ruling; nothing pinned the *page* to the code, which is
@@ -127,16 +129,6 @@ ANCHORS = (
 #: Each anchor's own file, one-to-one since the split -- there is no longer a single
 #: shared page to slice between two of them.
 PAGES = {anchor: CONVENTIONS_DIR / f'{anchor}.rst' for anchor in ANCHORS}
-
-#: Number words as the page spells them, so a count can be read back out of the prose.
-#: The page states its figures in words rather than digits, which is house style there.
-#: ``'zero'`` joined the set with GitHub issue #930, once phase 2 finished and the
-#: outside-the-hierarchy count it counts dropped to none.
-NUMBER_WORDS = {
-    'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6,
-    'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10, 'eleven': 11, 'twelve': 12,
-}
-
 
 def _page(anchor: 'str') -> 'str':
     """``anchor``'s own page, whole.
@@ -404,7 +396,7 @@ class ConventionAnchorTests(unittest.TestCase):
 
 
 class PhaseTwoRemainderTests(unittest.TestCase):
-    """The page's counts for GitHub issue #877's phase 2, measured."""
+    """The page's claims about GitHub issue #877's phase 2, measured."""
 
     def setUp(self) -> 'None':
         from pcapkit.corekit.enum import EnumLookup, EnumRegistry
@@ -424,22 +416,23 @@ class PhaseTwoRemainderTests(unittest.TestCase):
                            'the enumeration walk collapsed; the counts below would '
                            'pass vacuously')
 
-    def test_the_page_states_the_measured_number_outside_the_hierarchy(self) -> 'None':
-        """*"Zero enumerations remain outside the hierarchy"* -- against a runtime walk.
+    def test_the_page_says_phase_two_is_complete_and_the_walk_agrees(self) -> 'None':
+        """*"No enumeration remains outside the hierarchy"* -- against a runtime walk.
 
-        GitHub issue #930 finished phase 2, so the page's own wording moved from
-        *"are still outside"* -- true while seven remained -- to *"remain outside"*,
-        which reads correctly now that none do.
+        GitHub issue #930 finished phase 2, so the page says it landed for every
+        non-registry enumeration. That replaces two figure checks, on how many
+        remained outside and how many of the total had landed (#1811): both said
+        the same thing as the walk finding none outside, which is what fails here
+        once an enumeration is added outside :class:`~pcapkit.corekit.enum.EnumLookup`.
         """
-        stated = re.search(r'\*\*(\w+) enumerations remain outside the hierarchy\*\*',
-                           self.note)
-        self.assertIsNotNone(stated, 'the page no longer states how many enumerations '
-                                     'are outside EnumLookup; the wording this test '
-                                     'reads has changed')
-        assert stated is not None  # for type checkers; asserted above
-        self.assertEqual(NUMBER_WORDS[stated.group(1).lower()], len(self.outside),
-                         f'the page says {stated.group(1)!r} but the tree has '
-                         f'{len(self.outside)}: {sorted(self.outside.values())}')
+        for claim in ('the phase landed for every non-registry enumeration',
+                      '**No enumeration remains outside the hierarchy**'):
+            with self.subTest(claim=claim):
+                self.assertIn(claim, self.note,
+                              'the page no longer says phase 2 is complete; the wording '
+                              'this test reads has changed')
+        self.assertEqual(sorted(self.outside.values()), [],
+                         'enumerations outside EnumLookup, which the page says none are')
 
     def test_the_page_names_every_enumeration_outside_the_hierarchy(self) -> 'None':
         """The count alone would pass on a wrong list of the right length.
@@ -447,7 +440,7 @@ class PhaseTwoRemainderTests(unittest.TestCase):
         Vacuous while :attr:`self.outside` is empty -- GitHub issue #930 emptied
         it, and an empty dict gives the loop below nothing to iterate, so this
         method cannot fail no matter what the page says.
-        ``test_the_page_states_the_measured_number_outside_the_hierarchy`` is
+        ``test_the_page_says_phase_two_is_complete_and_the_walk_agrees`` is
         what actually pins the empty state; this one is dormant rather than
         deleted, for whenever a future regression makes :attr:`self.outside`
         non-empty again, at which point it resumes checking that the page names
@@ -460,39 +453,15 @@ class PhaseTwoRemainderTests(unittest.TestCase):
             with self.subTest(enumeration=name):
                 self.assertIn(name.rsplit('.', maxsplit=1)[-1], self.note)
 
-    def test_the_page_states_the_measured_phase_two_progress(self) -> 'None':
-        """*"landed for 24 of the 24 non-registry enumerations"*, both figures.
-
-        17 of 24 until GitHub issue #930 finished phase 2's remaining seven --
-        ``CommandType``, ``ConformanceRequirement``, ``ESPStatus`` and the four
-        Mobility Header helpers -- so both figures now read the same.
-        """
-        stated = re.search(r'landed for (\d+) of the (\d+) non-registry enumerations',
-                           self.note)
-        self.assertIsNotNone(stated, 'the page no longer states phase 2 progress in '
-                                     'the shape this test reads')
-        assert stated is not None  # for type checkers; asserted above
-        done, total = int(stated.group(1)), int(stated.group(2))
-        self.assertEqual(total, len(self.non_registry),
-                         'the page\'s non-registry enumeration count is stale')
-        self.assertEqual(done, len(self.non_registry) - len(self.outside),
-                         'the page\'s re-parented count is stale')
-
-    def test_the_audit_population_figures_are_the_measured_ones(self) -> 'None':
+    def test_the_audit_population_claims_hold_for_the_whole_population(self) -> 'None':
         """*The Audit, per Class*'s own population, against the same runtime walk.
 
-        Six figures the section opens with -- the registry count, that every one of
-        them is under :mod:`pcapkit.const`, the file count, the :class:`int`-valued
-        and flag splits, the ``aenum.StrEnum`` count and the grand total -- were
-        prose-only until GitHub issue #949 wired them to the walk. The section says
-        itself that *the figures move*, which is precisely the case that needs a
-        measurement rather than a reader's diligence: #930 moved the non-registry
-        figures once already, and only those had a test.
-
-        Each figure is read out of the page by its own regex and compared, so a stale
-        one fails naming both numbers. Wording is not pinned; the regexes are
-        deliberately loose about the prose between the figures and would survive a
-        rephrasing that kept the claims.
+        The section opened with figures for the registries, their files, the
+        :class:`int`-valued, flag and ``aenum.StrEnum`` splits and the grand total,
+        which GitHub issue #949 wired to the walk and #1811 removed with the figures
+        themselves (#1103's ruling: a count drifts). What the section still claims of
+        the whole population is checked here: every registry is :class:`int`- or
+        ``str``-valued, and every one of them is under :mod:`pcapkit.const`.
 
         """
         from pcapkit.corekit.enum import EnumRegistry
@@ -500,19 +469,16 @@ class PhaseTwoRemainderTests(unittest.TestCase):
         registries = {cls: name for cls, name in self.enumerations.items()
                       if issubclass(cls, EnumRegistry) and cls is not EnumRegistry}
         # ``issubclass(cls, int)`` rather than a check on ``_member_type_``: the flag
-        # registries are ``IntFlag`` subclasses and have to count inside the int tier,
-        # which is what the page's parenthetical "(of which N are flag registries)"
-        # says -- a disjoint reading would make the two figures fail to add up.
+        # registries are ``IntFlag`` subclasses and belong inside the int tier, which
+        # is where the page's parenthetical "(the flag registries among them)" puts
+        # them.
         int_valued = {c: n for c, n in registries.items() if issubclass(c, int)}
         str_valued = {c: n for c, n in registries.items() if issubclass(c, str)}
-        flags = {c: n for c, n in registries.items()
-                 if issubclass(c, (enum.Flag, aenum.Flag))}
-        files = {cls.__module__ for cls in registries}
 
         # Guards the rest from passing on a collapsed walk, as
-        # ``test_the_walk_found_something_to_count`` does for the counts above.
+        # ``test_the_walk_found_something_to_count`` does for the checks above.
         self.assertGreater(len(registries), 100,
-                           'the registry half of the walk collapsed; the figures below '
+                           'the registry half of the walk collapsed; the checks below '
                            'would pass vacuously')
         neither = sorted(name for cls, name in registries.items()
                          if not issubclass(cls, (int, str)))
@@ -520,32 +486,8 @@ class PhaseTwoRemainderTests(unittest.TestCase):
                          'a registry is neither int- nor str-valued, so the page\'s '
                          f'two-tier split no longer partitions the population: {neither}')
 
-        for pattern, measured, what in (
-            (r'\*\*(\d+)\*\* :class:`~pcapkit\.corekit\.enum\.EnumRegistry` subclasses',
-             len(registries), 'EnumRegistry subclasses'),
-            (r'across (\d+) files', len(files), 'files holding a registry'),
-            (r'(\d+) :class:`int`\\?-valued', len(int_valued), 'int-valued registries'),
-            (r'of which (\d+) are flag registries', len(flags), 'flag registries'),
-            (r'(\d+) ``aenum\.StrEnum``\\?-valued', len(str_valued),
-             'str-valued registries'),
-            (r'\*\*(\d+)\*\* non-registry enumerations', len(self.non_registry),
-             'non-registry enumerations'),
-            (r'(\d+) enumerations in total', len(self.enumerations),
-             'enumerations in total'),
-        ):
-            with self.subTest(figure=what):
-                stated = re.search(pattern, self.note)
-                self.assertIsNotNone(
-                    stated, f'the page no longer states how many {what} there are in '
-                            'the shape this test reads; re-derive the figure rather '
-                            'than deleting the check')
-                assert stated is not None  # for type checkers; asserted above
-                self.assertEqual(int(stated.group(1)), measured,
-                                 f'the page says {stated.group(1)} {what}, the tree has '
-                                 f'{measured}')
-
         # "every one of them under pcapkit.const" is a claim about the *whole*
-        # population, not a count, so a figure comparison cannot reach it.
+        # population, so the walk is asked about every registry.
         self.assertIn('every one of them under :mod:`pcapkit.const`', self.note,
                       'the page no longer claims every registry lives under '
                       'pcapkit.const, so this check is pinning a claim it has dropped')
@@ -1087,17 +1029,17 @@ class GetOverrideContractTests(unittest.TestCase):
         The base branches on ``isinstance(key, str)`` and treats everything else as
         a value, so ``get(None)`` is a *value* miss. The deleted overrides branched
         on :class:`int` and fell through to the name path, making it a ``KeyError``
-        on two of the six and a ``ValueError`` on the other four -- the same figures
-        the page carries, and the ones this method derives below rather than trusts.
+        on those two and a ``ValueError`` on the other helpers. The page names the
+        helpers rather than counting them (#1811), so each name is checked against
+        the derived population below.
 
         """
         from pcapkit.utilities.exceptions import EnumValueError
 
         # Derived, not listed: the population is every EnumLookup subclass those two
         # modules *define* -- re-exports from pcapkit.const.ngap.* are not helpers of
-        # theirs. An earlier version hard-coded three while its own name said seven
-        # and the page said five; the real answer is six, so it is measured here and
-        # asserted, rather than any of the three being trusted.
+        # theirs. An earlier version hard-coded a tally that disagreed with both its
+        # own name and the page, so the set is measured here and asserted by name.
         import inspect
 
         from pcapkit.corekit.enum import EnumLookup
@@ -1109,20 +1051,22 @@ class GetOverrideContractTests(unittest.TestCase):
             if inspect.isclass(obj) and issubclass(obj, EnumLookup)
             and obj is not EnumLookup and obj.__module__ == mod.__name__)
         self.assertEqual(
-            len(helpers), 6,
-            'the mh/ngap helper population changed, so the page\'s count of them is '
-            f'stale: {sorted(k.__name__ for k in helpers)}')
-        self.assertEqual(
             {k.__name__ for k in helpers},
             {'FastBindingAcknowledgmentStatus', 'IPv6AddressPrefixCode',
              'LMAAddressCode', 'LocalizedRoutingStatus', 'Criticality', 'PDUKind'})
 
-        # The page's own figure, which measurement alone does not pin. Round 6 found
-        # this row reading "The 5" against the measured six; the correction landed
-        # unguarded, so it could have regressed exactly as it arrived.
-        self.assertIn(f'The {len(helpers)} :mod:', _page('registry-protocol'),
-                      'the audit table no longer states the measured helper count, '
-                      'which is the figure that was already wrong once')
+        # The page's own row, which measurement alone does not pin. It once stated a
+        # helper count that disagreed with the measured one; it now names each
+        # helper, so a helper added without its name on the row fails here.
+        page = _page('registry-protocol')
+        head = '   * - The :mod:`~pcapkit.protocols.internet.mh` and'
+        self.assertIn(head, page, 'the audit table has no mh/ngap helper row')
+        start = page.index(head)
+        row = page[start:page.index('\n   * - ', start)]
+        for klass in helpers:
+            with self.subTest(named=klass.__name__):
+                self.assertIn(f'``{klass.__name__}``', row,
+                              'the audit table\'s helper row no longer names this helper')
 
         for klass in helpers:
             for key in (None, 1.5):
@@ -1134,7 +1078,7 @@ class GetOverrideContractTests(unittest.TestCase):
         self.assertIn('``isinstance(key, str)`` and treats everything else as a '
                       '*value*', flat,
                       "the page no longer records the base's own key dispatch, which "
-                      "is the reason #940's deletion converged the six")
+                      "is the reason #940's deletion converged the helpers")
 
 
 def _optional_dependencies() -> 'dict[str, list[str]]':
@@ -1431,14 +1375,14 @@ class ProcessConventionTests(unittest.TestCase):
                               'label, which the pull request template asks every '
                               'contributor to tick')
 
-    def test_the_page_pins_its_own_measured_numbers(self) -> 'None':
-        """Every figure the page states that has local ground truth.
+    def test_the_page_names_what_the_tree_has(self) -> 'None':
+        """Every claim the page makes that has local ground truth.
 
         A cross-review corrupted **46** claims on these two pages simultaneously and
         the suite stayed green, which is the honest measure of how much of the prose
-        was decorative. This closes the subset that has local ground truth: a figure
-        derived from a file in this repository, a path the page cites, a module it
-        names.
+        was decorative. This closes the subset that has local ground truth: a path
+        the page cites, a module it names. The page states no entry count any more
+        (#1103's ruling, #1811), so none is pinned.
 
         **What stays unpinned, and why, so the gap is stated rather than implied.**
         Every claim whose ground truth is a GitHub query -- the label count, which
@@ -1450,18 +1394,7 @@ class ProcessConventionTests(unittest.TestCase):
         and no offline test can change that.
 
         """
-        import inspect
         import re as _re
-
-        changelog = (ROOT / 'docs' / 'source' / 'changelog' / '1.5.0.rst') \
-            .read_text(encoding='utf-8')
-        # ``^\* \*\*Kind\*\*`` before the by-module restructure; the kinds are now
-        # subsection headings, so an entry is simply a column-zero bullet.
-        entries = _re.findall(r'^\* ', changelog, _re.MULTILINE)
-
-        self.assertIn(f'{len(entries)} entries', self.flat,
-                      f'the page no longer states the entry count, measured at '
-                      f'{len(entries)}')
 
         # The module list the page prints as the by-module target. The tree half was
         # already checked; this is the page half, which a corruption inserting a
@@ -1674,9 +1607,10 @@ class ProcessConventionTests(unittest.TestCase):
         What is checked now is the shape that actually shipped: one ``-`` underlined
         section per top-level module plus one for what belongs to none, each carrying
         ``~`` underlined kind subsections, with no inline kind label left anywhere. The
-        section count is required in the page's prose for the same reason the run count
-        was -- a page that states a measured number has to restate it when the
-        measurement moves.
+        page used to state the section count as well, pinned here; it states the shape
+        instead (#1103's ruling, #1811), so what is checked is its one-to-one claim:
+        the sections are the packages under :file:`pcapkit/` and *Project
+        infrastructure*, nothing more and nothing less.
 
         """
         changelog = (ROOT / 'docs' / 'source' / 'changelog' / '1.5.0.rst') \
@@ -1709,9 +1643,15 @@ class ProcessConventionTests(unittest.TestCase):
             'an entry carries an inline kind label again, so the file is back to the '
             'shape the page says it left')
 
-        self.assertIn(f'**{len(sections)}** module-level sections', self.flat,
-                      'the page no longer states the measured section count, which is '
-                      'the figure a reader would check the restructure against')
+        packages = {f'pcapkit.{d.name}' for d in (ROOT / 'pcapkit').iterdir()
+                    if d.is_dir() and not d.name.startswith('__')}
+        self.assertEqual(sorted(sections), sorted(packages | {'Project infrastructure'}),
+                         'the changelog sections are not one per package plus Project '
+                         'infrastructure, which is the map the page says they follow')
+        for claim in ('one-to-one with the package list', '*Project infrastructure*'):
+            with self.subTest(claim=claim):
+                self.assertIn(claim, self.flat,
+                              'the page no longer states the map this test checks')
         self.assertNotIn('separate runs', self.flat,
                          'the page still describes the entries as kind-label runs, '
                          'which the restructure removed')

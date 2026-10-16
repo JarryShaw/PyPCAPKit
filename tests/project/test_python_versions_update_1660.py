@@ -276,7 +276,8 @@ class TestTheTiers(unittest.TestCase):
         _, plan, texts = plan_for(self, snapshot())
         self.assertEqual(changes(plan), {'pypy3.12': (None, {'tier': 'supported'})})
         self.assertEqual(plan['latest'], ['3.15', '3.15'])
-        self.assertEqual(sorted(texts), ['.github/python-versions.toml', 'docs/source/contributing/releasing.rst'])
+        # Only the tier file: releasing.rst counted the wheels until #1811, so a new PyPy rewrote it.
+        self.assertEqual(sorted(texts), ['.github/python-versions.toml'])
         self.assertEqual(plan['required'], {'remove': [], 'add': []})
         self.assertEqual(plan['added'], ['PyPI distribution for Python pypy3.12'])
 
@@ -550,15 +551,17 @@ class TestTheRewrite(unittest.TestCase):
                 self.assertEqual(problems, [])
                 self.assertEqual(rewritten, text)
 
-    def test_a_count_keeps_its_case_and_a_claim_never_spans_a_break(self) -> None:
+    def test_a_claim_rewrites_each_group_and_never_spans_a_break(self) -> None:
+        """#1811 retired the count claims and their spelt-out words; a claim states versions and lines."""
         module = updater()
-        claim = module.Claim(r'(\w+) legs, (3\.\d+)', lambda facts: (module.Word(4), '3.16'))
-        self.assertEqual(module.apply_claims('Five legs, 3.15.', [claim], {}), ('Four legs, 3.16.', []))
-        self.assertEqual(module.apply_claims('# five legs,\n# 3.15', [claim], {}), ('# four legs,\n# 3.16', []))
-        broken = module.Claim(r'(legs, 3\.\d+)', lambda facts: ('x',))
-        self.assertEqual(module.apply_claims('legs,\n3.15', [broken], {})[1], [
-            '`(legs, 3\\.\\d+)` group 1 spans a line break'])
-        self.assertEqual(module.apply_claims('none', [claim], {})[1], ['`(\\w+) legs, (3\\.\\d+)` matches 0 times'])
+        claim = module.Claim(r'(3\.\d+) to (3\.\d+)', lambda facts: ('3.12', '3.16'))
+        self.assertEqual(module.apply_claims('Tests 3.11 to 3.15.', [claim], {}), ('Tests 3.12 to 3.16.', []))
+        self.assertEqual(module.apply_claims('# tests 3.11 to\n# 3.15', [claim], {}), ('# tests 3.12 to\n# 3.16', []))
+        broken = module.Claim(r'(to 3\.\d+)', lambda facts: ('x',))
+        self.assertEqual(module.apply_claims('to\n3.15', [broken], {})[1], [
+            '`(to 3\\.\\d+)` group 1 spans a line break'])
+        self.assertEqual(module.apply_claims('none', [claim], {})[1], ['`(3\\.\\d+) to (3\\.\\d+)` matches 0 times'])
+        self.assertFalse(hasattr(module, 'Word'), 'a count claim is back; #1103 rules counts out of the prose')
 
     def test_no_file_under_workflows_is_written_or_restates_a_tier(self) -> None:
         """An App token needs ``workflows: write`` to push a workflow change, and ``pr``'s has none.
@@ -620,9 +623,16 @@ class TestTheExperimentalEntriesAreHandKept(unittest.TestCase):
         root = self.scratch()
         plan, texts = updater().compute_plan(root, as_of_the_file(snapshot()))
         self.assertEqual((plan['changes'], texts, plan['notes']), ([], {}, []))
-        page = ' '.join((root / 'docs/source/contributing/workflows.rst').read_text(encoding='utf-8').split())
-        self.assertIn('``test`` (five Python legs), ``test-ktlo`` (four)', page)
-        self.assertIn('``experimental`` (two)', page)
+        # The leg counts this read back went with #1811; the fact behind them is
+        # that the hand-kept entries are experimental.yml's legs and no Unit Tests job's.
+        module = updater()
+        values = module.pv.outputs(module.validate((root / module.TIER_FILE).read_text(encoding='utf-8')))
+        found = {job: {leg.get('python-version') for leg in legs}
+                 for job, legs in module.matrix_legs(module.load_workflows(root), values).items()}
+        hand_kept = {'3.14t', 'graalpy-25.4'}
+        self.assertEqual(found[('experimental.yml', 'experimental')], hand_kept)
+        self.assertEqual({job: versions & hand_kept for job, versions in found.items()
+                          if job[0] == 'unit-tests.yml' and versions & hand_kept}, {})
 
     def test_a_tier_move_keeps_them_byte_for_byte_after_the_computed_versions(self) -> None:
         root = self.scratch()
@@ -672,14 +682,14 @@ class TestTheExperimentalEntriesAreHandKept(unittest.TestCase):
 
 
 def run_prose_audit(root: 'pathlib.Path') -> 'unittest.TestResult':
-    """The prose classes of the audit, reading ``root`` instead of the checkout.
+    """The audit's prose class, reading ``root`` instead of the checkout.
 
-    Imported here, as :mod:`tests.project.test_python_matrix_tiers_1633` reads the
-    tier file on import, which skips the whole module where :mod:`tomllib` is missing.
+    The prose the script rewrites is what :class:`TestTheProseFollowsTheFile` reads;
+    the leg-count check :mod:`tests.project.test_python_matrix_tiers_1633` added to
+    it went with the counts (#1811).
 
     """
     # pylint: disable=import-outside-toplevel
-    from tests.project import test_python_matrix_tiers_1633 as tiers
     from tests.project import test_python_versions_1660 as versions
 
     script = versions.script()
@@ -687,13 +697,11 @@ def run_prose_audit(root: 'pathlib.Path') -> 'unittest.TestResult':
     tier_file = root / '.github' / 'python-versions.toml'
     suite = unittest.TestSuite()
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(versions.TestTheProseFollowsTheFile))
-    suite.addTest(tiers.TestTheProseFollowsTheTiers('test_the_workflows_page_counts_each_matrix_jobs_legs'))
     with contextlib.ExitStack() as stack:
         stack.enter_context(mock.patch.object(versions, 'ROOT', root))
         stack.enter_context(mock.patch.object(versions, 'WORKFLOWS', root / '.github' / 'workflows'))
         stack.enter_context(mock.patch.object(versions, 'TIER_FILE', tier_file))
         stack.enter_context(mock.patch.object(script, 'load', lambda path=tier_file: original(path)))
-        stack.enter_context(mock.patch.object(tiers, 'ROOT', root))
         return unittest.TextTestRunner(stream=io.StringIO(), verbosity=0).run(suite)
 
 

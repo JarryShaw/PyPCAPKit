@@ -836,12 +836,6 @@ def fingerprint(latest: 'str', versions: 'dict[str, Any]') -> 'str':
 
 #: A line break, and a comment marker after it, as the audit tests' ``prose()`` reads them.
 SEPARATOR = re.compile(r'[ \t]*\n[ \t]*(?:#:?[ \t]*)?')
-WORDS = ('zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven',
-         'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty')
-
-
-class Word(int):
-    """A count written as a word, in the case of the word it replaces."""
 
 
 def prose_view(text: 'str') -> 'tuple[str, list[int]]':
@@ -857,15 +851,6 @@ def prose_view(text: 'str') -> 'tuple[str, list[int]]':
     pieces.append(text[position:])
     origin.extend(range(position, len(text)))
     return ''.join(pieces), origin
-
-
-def spell(value: 'Any', old: 'str') -> 'str':
-    if isinstance(value, Word):
-        if not 0 <= value < len(WORDS):
-            raise ValueError(f'no word for {int(value)}')
-        word = WORDS[value]
-        return word.capitalize() if old[:1].isupper() else word
-    return str(value)
 
 
 class Claim(NamedTuple):
@@ -895,7 +880,7 @@ def apply_claims(text: 'str', claims: 'Iterable[Claim]', facts: 'dict[str, Any]'
                 problems.append(f'`{claim.pattern}` group {group} spans a line break')
                 break
             first, last = offsets[0], offsets[0] + len(offsets)
-            edits.append((first, last, spell(value, text[first:last])))
+            edits.append((first, last, str(value)))
     for start, end, value in sorted(edits, reverse=True):
         text = text[:start] + value + text[end:]
     return text, problems
@@ -921,11 +906,6 @@ def lines_of(facts: 'dict[str, Any]', tier: 'str') -> 'Optional[tuple[int, int]]
     return (numbers[0], numbers[-1]) if consecutive(numbers) else None
 
 
-def counted(count: 'int', ends: 'Optional[tuple[Any, Any]]') -> 'Optional[tuple[Any, ...]]':
-    """``count`` as a word, then ``ends``; :data:`None` when ``ends`` is."""
-    return None if ends is None else (Word(count),) + ends
-
-
 #: The sentences restating the tiers, by file. Never a workflow (see the module docstring).
 CLAIMS = {
     'pyproject.toml': (
@@ -949,22 +929,10 @@ CLAIMS = {
     'docs/source/contributing/workflows.rst': (
         Claim(r'The \*\*supported\*\* tier, (3\.\d+)-(3\.\d+),', lambda f: span(f['supported'])),
         Claim(r'end-of-life (3\.\d+)-(3\.\d+), still built', lambda f: span(f['ktlo'])),
-        Claim(r'requires (\w+) contexts', lambda f: (Word(len(f['required'])),)),
-        Claim(r'the (\w+) required legs are its supported tier \(``python-versions\.toml:(\d+)-(\d+)``\)',
-              lambda f: counted(len(f['required']) - 1, lines_of(f, 'supported'))),
-        Claim(r'its (\w+) KTLO legs \(``python-versions\.toml:(\d+)-(\d+)``\)',
-              lambda f: counted(len(f['ktlo']), lines_of(f, 'ktlo'))),
-        Claim(r'and the (\w+) ``Compat Python (3\.\d+)``-``(3\.\d+)`` legs',
-              lambda f: counted(len(f['required']) - 1, span(f['supported']))),
-        # #1738: each gating job's legs, then its KTLO twin's.
-        Claim(r'``test`` \((\w+) Python legs\)', lambda f: (Word(f['legs']['test']),)),
-        Claim(r'``test-ktlo`` \((\w+)\)', lambda f: (Word(f['legs']['test-ktlo']),)),
-        Claim(r'``experimental`` \((\w+)\)', lambda f: (Word(f['legs']['experimental']),)),
-        Claim(r'``integration`` \((\w+)\)', lambda f: (Word(f['legs']['integration']),)),
-        Claim(r'``integration-ktlo`` \((\w+)\)', lambda f: (Word(f['legs']['integration-ktlo']),)),
-        Claim(r'each looping over (\w+) Python versions', lambda f: (Word(f['engines']),)),
-        Claim(r'``pypcap-parity`` \((\w+)\)', lambda f: (Word(f['legs']['pypcap-parity']),)),
-        Claim(r'``pypcap-parity-ktlo`` \((\w+)\)', lambda f: (Word(f['legs']['pypcap-parity-ktlo']),)),
+        Claim(r'the required legs are its supported tier \(``python-versions\.toml:(\d+)-(\d+)``\)',
+              lambda f: lines_of(f, 'supported')),
+        Claim(r'its KTLO legs \(``python-versions\.toml:(\d+)-(\d+)``\)', lambda f: lines_of(f, 'ktlo')),
+        Claim(r'and the ``Compat Python (3\.\d+)``-``(3\.\d+)`` legs', lambda f: span(f['supported'])),
         Claim(r'the ``Python (3\.\d+)`` leg of ``test`` \(matrix key ``coverage: true``\)',
               lambda f: (f['latest'],)),
     ),
@@ -980,9 +948,6 @@ CLAIMS = {
     ),
     'docs/source/contributing/releasing.rst': (
         Claim(r'the sdist kept only on the (\d+\.\d+) leg', lambda f: (f['latest'],)),
-        Claim(r'against the (\d+) expected -- the (\d+) supported legs', lambda f: (f['wheels'] + 1, f['wheels'])),
-        Claim(r'against the (\d+) expected \(2 OS x (\d+) Python versions\)',
-              lambda f: (2 * f['conda'], f['conda'])),
     ),
 }  # type: dict[str, tuple[Claim, ...]]
 
@@ -1046,13 +1011,6 @@ TARGETS = tuple(sorted({TIER_FILE} | set(CLAIMS) | set(REWRITERS)))
 def make_facts(data: 'dict[str, Any]', values: 'dict[str, str]', workflows: 'dict[str, Any]',
                tier_file: 'str') -> 'dict[str, Any]':
     """What the prose states, computed from the new tiers and the workflows' matrices."""
-    legs = matrix_legs(workflows, values)
-    engine = workflows['unit-tests.yml']['jobs']['engine-tests']
-    engines = set()  # type: set[str]
-    for step in setup_steps(engine):
-        found = resolve(workflows, 'unit-tests.yml', 'engine-tests', step['with']['python-version'], values)
-        if found is not NOTHING:
-            engines.update(str(found).split())
     tier_lines = {}
     for number, line in enumerate(tier_file.splitlines(), 1):
         match = ENTRY.match(line)
@@ -1063,12 +1021,6 @@ def make_facts(data: 'dict[str, Any]', values: 'dict[str, str]', workflows: 'dic
         'supported': pv.tier(data, 'cpython', 'supported'),
         'ktlo': pv.tier(data, 'cpython', 'ktlo'),
         'experimental': [version for impl in data['versions'] for version in pv.tier(data, impl, 'experimental')],
-        'wheels': len(values['pypi-wheels'].split()),
-        'conda': len(json.loads(values['conda'])),
-        # #1732: experimental.yml's one job, which unit-tests.yml's prose counts with its own.
-        'legs': {job_id: len(found) for (name, job_id), found in legs.items()
-                 if name in ('unit-tests.yml', 'experimental.yml')},
-        'engines': len(engines),
         'required': required_contexts(workflows, values),
         'tier_lines': tier_lines,
     }
