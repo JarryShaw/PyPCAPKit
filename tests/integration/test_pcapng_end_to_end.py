@@ -42,8 +42,8 @@ PCAPNG_FRAMES = {
 #: stand-in the generator synthesises when that download fails (#1478).
 UPSTREAM_ONLY_COUNTS = frozenset({'many_interfaces.pcapng'})
 
-#: Block inventory of each fixture whose report can be read back. The
-#: ``test.pcapng`` report cannot; see :class:`PcapngUnescapedKeyTests`.
+#: Block inventory of each fixture's ``json`` report. The ``test.pcapng`` report
+#: is read back by :class:`PcapngUnescapedKeyTests` instead.
 PCAPNG_SECTIONS = {
     'dhcp.pcapng': {'Section Header': 1, 'Interface Description': 1, 'Frame': 4},
     'dhcp_big_endian.pcapng': {'Section Header': 1, 'Interface Description': 1, 'Frame': 4},
@@ -166,48 +166,30 @@ class PcapngByteOrderTests(EndToEndTestCase):
                          [['Ethernet:IPv4:UDP:Raw'] * 4] * 3)
 
 
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class PcapngUnescapedKeyTests(EndToEndTestCase):
-    """The report of :file:`test.pcapng`, which carries a decryption secrets block.
+    """The ``json`` report of :file:`test.pcapng`, whose mapping keys need escaping.
 
-    Its tree report is fine -- :class:`PcapngTreeReportTests` covers it -- and
-    since #784 its ``plist`` report parses too. Its ``json`` report still comes
-    out unparseable, so that round trip lives here behind a skip rather than
-    being asserted either way.
+    The fixture's decryption secrets block keys its TLS key log entries by a raw
+    :class:`bytes` client random, and :mod:`dictdumper` writes a mapping key
+    into a ``json`` report without escaping it. The report parses only because
+    :mod:`pcapkit.dumpkit` escapes the keys itself (GitHub issue #1152).
 
     """
 
-    @unittest.skip('blocked on dictdumper interpolating mapping keys into the report without '
-                   'escaping them (dictdumper/json.py:224), which the bytes-keyed TLS key log '
-                   'entries of a decryption secrets block then break')
     def test_json_report_of_a_decryption_secrets_block_parses(self) -> None:
-        """A ``json`` report should be readable by :func:`json.load`.
+        """The report is readable by :func:`json.load` despite its keys.
 
-        For this fixture it is not, and two things stack up to make it so:
-
-        1. ``pcapkit/protocols/schema/misc/pcapng.py:2244`` keys the TLS key log
-           entries by ``bytes.fromhex(random)``, i.e. by a raw :class:`bytes`
-           client random rather than by its hex text, so the report's key is a
-           Python ``bytes`` repr: ``b' !"#$%&\\'()*+,-./0123456789:;<=>?'``.
-        2. ``dictdumper/json.py:224`` writes a key as
-           ``'"{item}": '.format(item=item)``, with no escaping at all -- values
-           go through ``_encode_value`` and are escaped, keys do not. The quotes
-           inside that repr therefore land in the document verbatim. Reproduce
-           with::
-
-               >>> import dictdumper, json
-               >>> dictdumper.JSON('probe.json')({'a"b': 'c"d'})
-               >>> json.load(open('probe.json'))
-               json.decoder.JSONDecodeError: Expecting ':' delimiter ...
-
-        Measured on this fixture at ``ef859f776``: ``json.load`` fails with
-        ``Expecting ':' delimiter: line 1019 column 12`` -- quoted as what that
-        commit measured, not as a promise the fixture will keep producing it,
-        since a stale instance of exactly this number is what #785 was filed
-        over. The same key used to make the ``plist`` report invalid XML too;
-        #784 fixed that half by adding an ``escape_key`` helper in
-        ``pcapkit/dumpkit/common.py:351`` that XML-escapes mapping keys, leaving
-        only this ``json`` quoting defect, still open upstream as
-        JarryShaw/DictDumper#121.
+        :meth:`TLSKeyLog.post_process
+        <pcapkit.protocols.schema.misc.pcapng.TLSKeyLog.post_process>` keys the
+        entries by ``bytes.fromhex(random)``, so the key the writer formats is a
+        :class:`bytes` repr carrying ``"`` and ``\\``:
+        ``b' !"#$%&\\'()*+,-./0123456789:;<=>?'``.
+        :meth:`dictdumper.json.JSON._append_object` writes a key into
+        ``'"{item}": '`` raw, so that ``"`` would end the JSON string early --
+        still open upstream as JarryShaw/DictDumper#121. The ``escape_key``
+        helper of :func:`~pcapkit.dumpkit.common.make_dumper` escapes it with
+        :func:`json.dumps` first; without that, this test fails.
 
         """
         extractor = self.extract(fin=sample_path('test.pcapng'), fout=self.out('report'),
