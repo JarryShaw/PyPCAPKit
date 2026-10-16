@@ -5,7 +5,7 @@
 
 .. module:: pcapkit.protocols
 
-:mod:`pcapkit.protocols` is collection of all protocol families,
+:mod:`pcapkit.protocols` is a collection of all protocol families,
 with detailed implementation and methods.
 
 """

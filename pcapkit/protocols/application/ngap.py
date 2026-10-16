@@ -36,7 +36,7 @@ unregistered PPID would, because
 Decoder Dependency
 ------------------
 
-|pycrate|_ is used rather than a PER codec of our own, for two reasons. It
+|pycrate|_ is used rather than a PER codec of our own. It
 **ships NGAP already compiled**, at ``pycrate_asn1dir/NGAP.py``, so the 3GPP
 ASN.1 source does not have to be vendored here and tracked across releases; and
 it is **pure Python**, with no compiled extension to build on any platform.
@@ -50,19 +50,18 @@ Generic Conversion
 The decoded value tree is mapped into :class:`~pcapkit.corekit.infoclass.Info`
 objects **structurally**, by ASN.1 shape rather than by procedure:
 
-===============================  ==========================================================
-ASN.1 / |pycrate|_ shape          :mod:`pcapkit` model
-===============================  ==========================================================
-``SEQUENCE`` / ``SET`` (a dict)   :class:`~pcapkit.protocols.data.application.ngap.Sequence`
-``SEQUENCE OF`` (a list)          :obj:`list`
-``CHOICE`` / open type            :class:`~pcapkit.protocols.data.application.ngap.Choice`
-``BIT STRING``                    :class:`~pcapkit.protocols.data.application.ngap.BitString`
-``INTEGER``, ``OCTET STRING``,    kept as :obj:`int`, :obj:`bytes`, :obj:`str`
-``ENUMERATED``, ``BOOLEAN``
-===============================  ==========================================================
+==========================================================  ==========================================================
+ASN.1 / |pycrate|_ shape                                    :mod:`pcapkit` model
+==========================================================  ==========================================================
+``SEQUENCE`` / ``SET`` (a dict)                             :class:`~pcapkit.protocols.data.application.ngap.Sequence`
+``SEQUENCE OF`` (a list)                                    :obj:`list`
+``CHOICE`` / open type                                      :class:`~pcapkit.protocols.data.application.ngap.Choice`
+``BIT STRING``                                              :class:`~pcapkit.protocols.data.application.ngap.BitString`
+``INTEGER``, ``OCTET STRING``, ``ENUMERATED``, ``BOOLEAN``  kept as :obj:`int`, :obj:`bytes`, :obj:`str`, :obj:`bool`
+==========================================================  ==========================================================
 
-That is a deliberate trade. Every one of the 81 elementary procedures and 438
-protocol IEs works on the day it is decoded, and a new 3GPP release needs no
+That is a deliberate trade. Every elementary procedure and protocol IE
+works on the day it is decoded, and a new 3GPP release needs no
 code change here; what is given up is per-IE typing, so an IE's value is
 reported in the specification's own shape rather than as a
 :mod:`pcapkit`-specific model. The fields worth reading at a glance -- the PDU
@@ -81,8 +80,8 @@ Known Limitations
 * **The specification version is that of the installed decoder, not this
   package's.** :class:`~pcapkit.const.ngap.procedure_code.ProcedureCode` and
   :class:`~pcapkit.const.ngap.protocol_ie.ProtocolIE` were generated from
-  ``NGAP_Constants`` of |pycrate|_ 0.8.1 (Release-18-era: 81 procedure
-  codes, 438 protocol IE IDs, highest 443). A |pycrate|_ that carries a newer
+  ``NGAP_Constants`` of |pycrate|_ 0.8.1 (Release-18-era). A |pycrate|_ that
+  carries a newer
   NGAP will decode values these enumerations do not name. Such a value
   resolves to a non-registering member called ``Unassigned`` rather than
   failing or adding a member to either enumeration -- see
@@ -128,7 +127,7 @@ __all__ = ['NGAP', 'PDUKind', 'Criticality']
 
 #: Cached ``NGAP-PDU`` object, c.f. :func:`load_pycrate`. :data:`NotImplemented`
 #: means the import has not been attempted yet, and :data:`None` that it was
-#: attempted and |pycrate|_ is not installed -- three states, so a capture full
+#: attempted and |pycrate|_ is not installed -- a state of its own, so a capture full
 #: of NGAP packets does not pay for a failing import on every frame.
 _PYCRATE = NotImplemented  # type: Any
 
@@ -284,7 +283,7 @@ def _convert(value: 'Any') -> 'Any':
         :class:`~pcapkit.protocols.data.application.ngap.BitString`.
 
     Notes:
-        The two 2-tuple shapes are told apart by their first element, which is
+        The 2-tuple shapes are told apart by their first element, which is
         unambiguous: |pycrate|_ spells a ``CHOICE`` as ``(name, value)`` with a
         :obj:`str` name and a ``BIT STRING`` as ``(bits, length)`` with two
         :obj:`int`. Any other tuple is passed through with its members
@@ -398,8 +397,8 @@ class NGAP(Application[Data_NGAP, Schema_NGAP],
         with _PDU_LOCK:
             try:
                 # NOTE: `reset_val()` must not be called here, tempting though it
-                # looks before a decode into a reused object. It walks all 318
-                # submodules of the compiled specification and costs ~105 ms,
+                # looks before a decode into a reused object. It walks every
+                # submodule of the compiled specification and costs ~105 ms,
                 # some 700x the ~0.15 ms of the decode itself; and `from_aper()`
                 # overwrites the stored value outright, so it would buy nothing
                 # even if it were free.
@@ -455,7 +454,7 @@ class NGAP(Application[Data_NGAP, Schema_NGAP],
                 raise
             except Exception as exc:
                 # NOTE: `Exception` rather than something narrower on purpose.
-                # pycrate signals a bad encoding from two unrelated hierarchies
+                # pycrate signals a bad encoding from unrelated hierarchies
                 # -- `pycrate_asn1rt.err.ASN1Err` and `pycrate_core.charpy.
                 # CharpyErr` -- and a truncated payload can also surface as
                 # `KeyError` or `IndexError` from inside the codec. None of them

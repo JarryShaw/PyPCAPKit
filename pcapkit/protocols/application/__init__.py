@@ -13,7 +13,7 @@ application layer.
 #       NNTP, NTP, ONC:RPC, POP, RIP, RTP, SIP, SMTP, SNMP,
 #       SSH, TELNET, TLS/SSL, XMPP.
 #
-# NB: NGAP below is the one protocol here whose decoder is an optional
+# NB: NGAP's decoder below is an optional
 #     dependency, c.f. pcapkit.protocols.application.ngap. Importing the module
 #     is free -- ``pycrate`` is imported inside the parse path, not here.
 

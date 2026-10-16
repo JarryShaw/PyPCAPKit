@@ -30,7 +30,7 @@ class Frame(Schema):
 
     #: Timestamp seconds.
     ts_sec: 'int' = UInt32Field(callback=byteorder_callback)
-    #: Timestamp microseconds.
+    #: Timestamp microseconds, or nanoseconds in a nanosecond-resolution file.
     ts_usec: 'int' = UInt32Field(callback=byteorder_callback)
     #: Number of octets of packet saved in file.
     incl_len: 'int' = UInt32Field(callback=byteorder_callback)

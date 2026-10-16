@@ -141,7 +141,7 @@ class FrameType(EnumSchema[Enum_Frame]):
         """Flags enumeration for HTTP/2 frames.
 
         Built on :class:`~pcapkit.corekit.enum.EnumLookup`, the lookup contract
-        shared by every non-registry enumeration. The six concrete per-frame
+        shared by every non-registry enumeration. The concrete per-frame
         subclasses below each declare ``class Flags(FrameType.Flags):`` with no
         base list of their own, so they inherit :class:`~pcapkit.corekit.enum.EnumLookup`
         transitively rather than needing it repeated.
@@ -166,13 +166,13 @@ class FrameType(EnumSchema[Enum_Frame]):
         # -- routine in HTTP/2, not an edge case -- leaves an ``int`` behind and
         # a membership test against it raises :exc:`TypeError` rather than
         # answering. This mirrors the construct path, which seeds
-        # ``Flags(0)`` at every one of its six sites.
+        # ``Flags(0)`` at every site that builds one.
         #
         # ``FrameType.Flags`` itself declares no members, and from Python 3.11
         # the enum rewrite makes a memberless :class:`enum.Flag` subclass refuse
         # ``Flags(0)`` outright with ``TypeError: <flag 'Flags'> has no members
         # defined`` (3.10 and earlier hand back a pseudo-member instead), so
-        # the five frame schemas that inherit it unchanged -- ``UnassignedFrame``,
+        # the frame schemas that inherit it unchanged -- ``UnassignedFrame``,
         # ``PriorityFrame``, ``RSTStreamFrame``, ``GoawayFrame`` and
         # ``WindowUpdateFrame`` -- keep the plain ``int``, which is what their
         # data objects' bare ``Flags`` carries as ``__value__``.
@@ -217,8 +217,6 @@ class DataFrame(FrameType, code=Enum_Frame.DATA):
         UInt8Field(),
         lambda pkt: pkt['flags']['bit_3'],  # PADDED
     )
-    #: Data.
-    #
     # NOTE: the conditional subtracts the padding length, it does not *replace*
     # the whole expression. A conditional expression binds looser than ``-``, so
     # writing ``pkt['__length__'] - pkt['pad_len'] if <test> else 0`` groups as
@@ -232,6 +230,7 @@ class DataFrame(FrameType, code=Enum_Frame.DATA):
     # ``pkt['pad_len']`` from being read at all when ``PADDED`` is clear, where
     # the :class:`~pcapkit.corekit.fields.misc.ConditionalField` above has left
     # it as :data:`~pcapkit.corekit.sentinels.NO_VALUE`.
+    #: Data.
     data: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'] - (
         pkt['pad_len'] if pkt['flags']['bit_3'] else 0
     ))
@@ -275,12 +274,11 @@ class HeadersFrame(FrameType, code=Enum_Frame.HEADERS):
         UInt8Field(),
         lambda pkt: pkt['flags']['bit_5'],  # PRIORITY
     )
-    #: Header block fragment.
-    #
     # NOTE: the conditional subtracts the padding length rather than replacing
     # the whole expression -- see :attr:`DataFrame.data` for why the outer
     # parentheses are load-bearing. Without them an unpadded ``HEADERS`` frame
     # would read its header block fragment as ``b''``.
+    #: Header block fragment.
     fragment: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'] - (
         pkt['pad_len'] if pkt['flags']['bit_3'] else 0
     ))
@@ -373,12 +371,11 @@ class PushPromiseFrame(FrameType, code=Enum_Frame.PUSH_PROMISE):
         'reserved': (0, 1),
         'sid': (1, 31),
     })
-    #: Header block fragment.
-    #
     # NOTE: the conditional subtracts the padding length rather than replacing
     # the whole expression -- see :attr:`DataFrame.data` for why the outer
     # parentheses are load-bearing. Without them an unpadded ``PUSH_PROMISE``
     # frame would read its header block fragment as ``b''``.
+    #: Header block fragment.
     fragment: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'] - (
         pkt['pad_len'] if pkt['flags']['bit_3'] else 0
     ))

@@ -44,7 +44,10 @@ as below:
 .. versionremoved:: 1.5.0
 
    ``pcapkit.protocols.link.ospf``, ``pcapkit.protocols.data.link.ospf`` and
-   ``pcapkit.protocols.schema.link.ospf``, with no alias (:issue:`719`).
+   ``pcapkit.protocols.schema.link.ospf``, and the ``OSPF`` name that
+   ``pcapkit.protocols.link``, ``pcapkit.protocols.data.link`` and
+   ``pcapkit.protocols.schema.link`` each exported, with no alias
+   (:issue:`719`).
 
 .. versionchanged:: 1.5.0
 
@@ -273,6 +276,12 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
                 :obj:`bytes` that are not exactly 8 octets long; or if
                 ``packet_length`` is not an :obj:`int` in ``0..65535``.
 
+        .. versionchanged:: 1.5.0
+
+           ``packet_length`` is a new parameter before ``router_id``, so a
+           1.4.x positional argument meant for ``router_id`` or a later
+           parameter lands one parameter early (:issue:`1249`).
+
         """
         type_ = self._make_index(type, type_default, namespace=type_namespace,
                                  reversed=type_reversed, pack=False)
@@ -405,7 +414,7 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
 
     def _read_encrypt_auth(self, schema: 'Schema_CryptographicAuthentication') -> 'Data_CryptographicAuthentication':
         """Read Authentication field when Cryptographic Authentication is employed,
-        i.e. :attr:`~OSPF.autype` is ``2``.
+        i.e. :attr:`~pcapkit.protocols.data.application.ospf.OSPF.autype` is ``2``.
 
         Structure of Cryptographic Authentication [:rfc:`2328`]:
 

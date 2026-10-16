@@ -42,6 +42,7 @@ which implements extractor for PCAP-NG file format [*]_, and the
    .. autoproperty:: ts_timezone
    .. autoproperty:: linktype
    .. autoproperty:: block
+   .. autoproperty:: packet
 
    .. automethod:: register
    .. automethod:: register_block
@@ -225,14 +226,15 @@ IANA registry.
 
 .. versionremoved:: 1.5.0
 
-   ``pcapkit.protocols.misc.pcapng.TLSKeyLabel``, now
-   :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` (:issue:`886`,
-   :issue:`1744`).
+   ``pcapkit.protocols.misc.pcapng.TLSKeyLabel``, with no alias; use
+   :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` instead
+   (:issue:`886`, :issue:`1744`).
 
 .. autoclass:: pcapkit.protocols.misc.pcapng.WireGuardKeyLabel
    :members:
    :undoc-members:
    :show-inheritance:
+   :exclude-members: +_generate_next_value_
 
 Header Schemas
 --------------

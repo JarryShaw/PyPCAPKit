@@ -90,6 +90,7 @@ Header Schemas
 .. autoclass:: pcapkit.protocols.schema.application.httpv2.FrameType
    :members:
    :show-inheritance:
+   :exclude-members: +_generate_next_value_
 
 .. autoclass:: pcapkit.protocols.schema.application.httpv2.UnassignedFrame
    :members:
@@ -98,10 +99,12 @@ Header Schemas
 .. autoclass:: pcapkit.protocols.schema.application.httpv2.DataFrame
    :members:
    :show-inheritance:
+   :exclude-members: +_generate_next_value_
 
 .. autoclass:: pcapkit.protocols.schema.application.httpv2.HeadersFrame
    :members:
    :show-inheritance:
+   :exclude-members: +_generate_next_value_
 
 .. autoclass:: pcapkit.protocols.schema.application.httpv2.PriorityFrame
    :members:
@@ -118,14 +121,17 @@ Header Schemas
 .. autoclass:: pcapkit.protocols.schema.application.httpv2.SettingsFrame
    :members:
    :show-inheritance:
+   :exclude-members: +_generate_next_value_
 
 .. autoclass:: pcapkit.protocols.schema.application.httpv2.PushPromiseFrame
    :members:
    :show-inheritance:
+   :exclude-members: +_generate_next_value_
 
 .. autoclass:: pcapkit.protocols.schema.application.httpv2.PingFrame
    :members:
    :show-inheritance:
+   :exclude-members: +_generate_next_value_
 
 .. autoclass:: pcapkit.protocols.schema.application.httpv2.GoawayFrame
    :members:
@@ -138,6 +144,7 @@ Header Schemas
 .. autoclass:: pcapkit.protocols.schema.application.httpv2.ContinuationFrame
    :members:
    :show-inheritance:
+   :exclude-members: +_generate_next_value_
 
 Type Stubs
 ~~~~~~~~~~

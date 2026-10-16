@@ -38,7 +38,8 @@ Octets      Bits        Name                    Description
 
 .. versionremoved:: 1.5.0
 
-   ``pcapkit.protocols.link.rarp``, with no alias (:issue:`719`).
+   ``pcapkit.protocols.link.rarp``, and the ``RARP`` and ``DRARP`` names
+   that ``pcapkit.protocols.link`` exported, with no alias (:issue:`719`).
 
 """
 from typing import TYPE_CHECKING
@@ -61,7 +62,7 @@ class RARP(Application, ARP, schema=Schema_ARP, data=Data_ARP):  # pylint: disab
     :rfc:`1122#section-1.1.3` lists RARP in the application layer, among the
     "support protocols, used for host name mapping, booting, and management",
     while putting ARP in the Link Layer chapter at :rfc:`1122#section-2.3.2` --
-    two sibling protocols sharing one frame format and one EtherType, placed on
+    two sibling protocols sharing one frame format, placed on
     function alone. Hence the two bases: the layer base
     :class:`~pcapkit.protocols.application.application.Application` first, for
     ``layer == 'Application'``, then the protocol family base
@@ -69,11 +70,11 @@ class RARP(Application, ARP, schema=Schema_ARP, data=Data_ARP):  # pylint: disab
     :doc:`/contributing/conventions/protocol-layer-placement`.
 
     Note:
-        The order is load-bearing, not stylistic. :class:`ARP`'s chain reaches
+        The order is load-bearing, not stylistic. :class:`~pcapkit.protocols.link.arp.ARP`'s chain reaches
         :class:`~pcapkit.protocols.link.link.Link`, which *owns* ``__layer__``,
         so ``class RARP(ARP, Application)`` would report ``'Link'``.
 
-        The subpackage does not track the dispatch tier either: RARP is
+        The subpackage does not track the dispatch tier: RARP is
         dispatched from :attr:`Link.__proto__
         <pcapkit.protocols.link.link.Link.__proto__>` at
         :attr:`~pcapkit.const.reg.ethertype.EtherType.Reverse_Address_Resolution_Protocol`,

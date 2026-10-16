@@ -41,7 +41,10 @@ as below:
 .. versionremoved:: 1.5.0
 
    ``pcapkit.protocols.link.ospf``, ``pcapkit.protocols.data.link.ospf`` and
-   ``pcapkit.protocols.schema.link.ospf``, with no alias (:issue:`719`).
+   ``pcapkit.protocols.schema.link.ospf``, and the ``OSPF`` name that
+   ``pcapkit.protocols.link``, ``pcapkit.protocols.data.link`` and
+   ``pcapkit.protocols.schema.link`` each exported, with no alias
+   (:issue:`719`).
 
 .. versionchanged:: 1.5.0
 

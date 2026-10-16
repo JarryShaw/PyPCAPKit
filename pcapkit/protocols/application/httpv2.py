@@ -159,8 +159,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[Enum_Frame, str | tuple[FrameParser, FrameConstructor]]: Frame
-    #: code to method mapping. A :obj:`str` value names the
+    #: Frame code to method mapping. A :obj:`str` value names the
     #: ``_read_http_${name}`` and ``_make_http_${name}`` methods, which fall back
     #: to ``_read_http_none`` and ``_make_http_none`` when not defined, as an
     #: unregistered code does; any other value is a ``(parser, constructor)``
@@ -355,6 +354,12 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
         Returns:
             Constructed packet data.
+
+        .. versionchanged:: 1.5.0
+
+           ``reserved`` is a new parameter before ``sid``, so a 1.4.x
+           positional argument meant for ``sid`` or ``frame`` lands one
+           parameter early (:issue:`1246`).
 
         """
         type_val = cast('Enum_Frame',
