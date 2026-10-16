@@ -33,6 +33,7 @@ import tempfile
 import textwrap
 import unittest
 import zipfile
+from unittest import mock
 from typing import TYPE_CHECKING
 
 try:
@@ -211,13 +212,15 @@ class DeriveTests(unittest.TestCase):
         module = vendor()
         envs = module.environments(self.PYTHONS)
         found = self.found('core', 'crypt', 'backport; python_version < "3.11"')
-        written = requirement_lines(*module.lines(found, envs, VERSIONS.__getitem__))
-        self.assertEqual(module.compare(written, found, envs), [])
-        repinned = written.replace('core==1.0', 'core==9.9')
-        self.assertEqual(module.compare(repinned, found, envs), [])
-        stale = requirement_lines('backport==1.0; python_version < "3.11"', 'core==1.0',
-                                  'crypt==1.0', 'ffi==1.0', 'helper==1.0', 'lxml==6.1.3')
-        problems = module.compare(stale, found, envs)
+        # The stand-in packages have no platform pins (#1827's are its own tests').
+        with mock.patch.object(module, 'PLATFORM_PINS', {}):
+            written = requirement_lines(*module.lines(found, envs, VERSIONS.__getitem__))
+            self.assertEqual(module.compare(written, found, envs), [])
+            repinned = written.replace('core==1.0', 'core==9.9')
+            self.assertEqual(module.compare(repinned, found, envs), [])
+            stale = requirement_lines('backport==1.0; python_version < "3.11"', 'core==1.0',
+                                      'crypt==1.0', 'ffi==1.0', 'helper==1.0', 'lxml==6.1.3')
+            problems = module.compare(stale, found, envs)
         self.assertEqual([problem.split(':')[0] + ':' + problem.split()[1] for problem in problems],
                          ['dead:backport', 'stale:lxml', 'missing:parser'])
 
@@ -237,8 +240,9 @@ class CommittedListTests(unittest.TestCase):
                     self.assertNotIn(name, have)
                     continue
                 self.assertIn(name, have)
-                marker = module.render_marker(entry['builds'], envs)
-                self.assertEqual(have[name], None if marker is None else str(Marker(marker)))
+                # #1827: a line per platform pin, each with its own marker.
+                self.assertEqual(set(have[name]), {None if marker is None else str(Marker(marker))
+                                                   for marker, _ in module.pins(name, entry, envs)})
 
     def test_check_passes_on_its_own_output_and_fails_on_a_stale_file(self) -> None:
         module = vendor()
