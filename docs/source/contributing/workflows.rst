@@ -128,7 +128,9 @@ The Graph
 ---------
 
 Solid arrows are direct triggers (``push``, ``pull_request``, ``schedule``,
-``workflow_dispatch``). Thick arrows are ``workflow_run`` edges -- a
+``workflow_dispatch``, ``issues``, ``pull_request_target``), drawn in the first
+graph with a node for each schedule day. The second graph is the edges from one
+workflow to another. Thick arrows are ``workflow_run`` edges -- a
 *separate* run, started only after the upstream workflow's run has fully
 completed. Dotted arrows are ``uses:`` edges -- a reusable-workflow call that
 runs synchronously *inside* the caller's own run, sharing its run id rather
@@ -136,32 +138,29 @@ than starting a new one.
 
 .. mermaid::
 
-   flowchart TD
+   flowchart LR
        PUSH["push: main"]
        PR["pull_request: main"]
-       TAG["push: tags v*"]
-       SCHED["schedule (Saturday, Monday, or daily)"]
+       SAT["schedule: Saturday"]
+       MON["schedule: Monday"]
+       DISPATCH["workflow_dispatch"]
+       DAILY["schedule: daily"]
        ISSUES["issues"]
        PRT["pull_request_target"]
-       DISPATCH["workflow_dispatch"]
+       TAG["push: tags v*"]
 
-       CQ["CodeQL<br/>codeql-analysis.yml"]
        UT["Unit Tests<br/>unit-tests.yml"]
        EX["Experimental Tests<br/>experimental.yml"]
        PC["Python Compatibility<br/>python-compatibility.yml"]
+       CQ["CodeQL<br/>codeql-analysis.yml"]
+       GP["GitHub Pages<br/>deploy-pages.yml"]
+       CU["Conda Update<br/>cron-conda.yml"]
        LT["Lint<br/>lint.yml"]
        VU["Vendor Update<br/>cron-vendor.yml"]
-       CU["Conda Update<br/>cron-conda.yml"]
-       GP["GitHub Pages<br/>deploy-pages.yml"]
-       CR["Create Release<br/>create-release.yml"]
-       PS["Project Status<br/>project-status.yml"]
-       CC["Coverage Comment<br/>coverage-comment.yml"]
-       CT["CI Timing<br/>ci-timing.yml"]
        PV["Python Versions<br/>cron-python-versions.yml"]
-
-       PUSH --> CQ
-       PR --> CQ
-       SCHED -->|02:00| CQ
+       CT["CI Timing<br/>ci-timing.yml"]
+       PS["Project Status<br/>project-status.yml"]
+       CR["Create Release<br/>create-release.yml"]
 
        PUSH --> UT
        PR --> UT
@@ -171,30 +170,48 @@ than starting a new one.
 
        PUSH --> PC
        PR --> PC
-       SCHED -->|04:00| PC
+       SAT -->|04:00| PC
 
-       PR --> LT
-       SCHED -->|06:00| LT
-       DISPATCH --> LT
+       PUSH --> CQ
+       PR --> CQ
+       SAT -->|02:00| CQ
 
        PR --> GP
-       SCHED -->|02:00| GP
+       SAT -->|02:00| GP
 
-       SCHED -->|10:00| VU
-       SCHED -->|10:00| CU
+       SAT -->|10:00| CU
+
+       PR --> LT
+       SAT -->|06:00| LT
+       DISPATCH --> LT
+
+       SAT -->|10:00| VU
+
+       MON -->|05:41| PV
+       DISPATCH --> PV
+
+       MON -->|07:23| CT
+       DISPATCH --> CT
+
+       DISPATCH --> PS
+       DAILY -->|00:37| PS
+       ISSUES --> PS
+       PRT --> PS
 
        TAG --> CR
 
-       ISSUES --> PS
-       PRT --> PS
-       SCHED -->|daily 00:37| PS
-       DISPATCH --> PS
+       classDef trig fill:none,stroke-dasharray:2 2
+       class PUSH,PR,SAT,MON,DISPATCH,DAILY,ISSUES,PRT,TAG trig
 
-       SCHED -->|Mon 07:23| CT
-       DISPATCH --> CT
+.. mermaid::
 
-       SCHED -->|Mon 05:41| PV
-       DISPATCH --> PV
+   flowchart LR
+       UT["Unit Tests<br/>unit-tests.yml"]
+       VU["Vendor Update<br/>cron-vendor.yml"]
+       CU["Conda Update<br/>cron-conda.yml"]
+       GP["GitHub Pages<br/>deploy-pages.yml"]
+       CC["Coverage Comment<br/>coverage-comment.yml"]
+       CR["Create Release<br/>create-release.yml"]
 
        UT ==>|workflow_run: completed| VU
        UT ==>|workflow_run: completed| CU
@@ -202,26 +219,26 @@ than starting a new one.
        VU ==>|workflow_run: completed| CR
        UT ==>|workflow_run: completed| CC
 
-       VU -.->|uses: gate-only| UT
-       CU -.->|uses: gate-only| UT
-       GP -.->|uses: gate-only| UT
-       CR -.->|uses: gate-only| UT
+       VU -.-> UT
+       CU -.-> UT
+       GP -.-> UT
+       CR -.-> UT
 
-       classDef trig fill:none,stroke-dasharray:2 2
-       class PUSH,PR,TAG,SCHED,DISPATCH,ISSUES,PRT trig
-
-The double relationship between **Unit Tests** and the four dependants that
-also call it is the
-part that reading a single file cannot show, and it is deliberate rather than
-redundant: each of the four calls ``unit-tests.yml`` with ``gate-only: true``
-itself (dotted, above) **only when its own trigger is not** ``workflow_run``
-(their gate jobs' ``if:`` guards this explicitly) -- i.e. only on the
-Saturday ``schedule`` path, where no completed Unit Tests run exists yet to
-read a verdict from. On the ``workflow_run`` path (thick arrows), each reads
-the verdict Unit Tests already reached instead of re-running the gate a second
-time. Vendor Update, Conda Update and GitHub Pages act on it only once their
-``verdict`` job, described under the edge list below, says it is a verdict on
-the commit they build.
+The double relationship between **Unit Tests** and the dependants that also
+call it is the part that reading a single file cannot show, and it is
+deliberate rather than redundant. Vendor Update, Conda Update and GitHub Pages
+call ``unit-tests.yml`` with ``gate-only: true`` themselves (dotted, above)
+**only when their own trigger is** ``schedule`` -- their gate jobs' ``if:``
+skips ``workflow_run``, and GitHub Pages' skips ``pull_request`` as well -- so
+only on the Saturday path, where no completed Unit Tests run exists yet to read
+a verdict from. On the ``workflow_run`` path (thick arrows), each reads the
+verdict Unit Tests already reached instead of re-running the gate a second
+time, and acts on it only once its ``verdict`` job, described under the edge
+list below, says it is a verdict on the commit it builds. Create Release has
+no ``schedule``, and its gate job's ``if:`` reads ``version_check``'s evidence
+rather than the event, so its gate runs on both of its triggers: on a ``v*``
+tag push, and on a ``workflow_run`` from Vendor Update when some target is not
+yet published (:doc:`releasing` gives the conditions).
 
 ``workflow_run`` Edges
 ----------------------

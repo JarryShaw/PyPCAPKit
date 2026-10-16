@@ -44,10 +44,10 @@ hierarchy:
        click PLIST "https://dictdumper.jarryshaw.me/en/latest/dictdumper.plist.html#dictdumper.plist.PLIST"
        click VueJS "https://dictdumper.jarryshaw.me/en/latest/dictdumper.vuejs.html#dictdumper.vuejs.VueJS"
 
-       click DumperBase "/pcapkit/dumpkit/common.html#pcapkit.dumpkit.common.DumperBase"
-       click Dumper "/pcapkit/dumpkit/common.html#pcapkit.dumpkit.common.Dumper"
-       click PCAPIO "/pcapkit/dumpkit/pcap.html#pcapkit.dumpkit.pcap.PCAPIO"
-       click NotImplementedIO "/pcapkit/dumpkit/null.html#pcapkit.dumpkit.null.NotImplementedIO"
+       click DumperBase "common.html#pcapkit.dumpkit.common.DumperBase"
+       click Dumper "common.html#pcapkit.dumpkit.common.Dumper"
+       click PCAPIO "pcap.html#pcapkit.dumpkit.pcap.PCAPIO"
+       click NotImplementedIO "null.html#pcapkit.dumpkit.null.NotImplementedIO"
 
 .. note::
 

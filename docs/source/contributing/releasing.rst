@@ -417,7 +417,7 @@ The Release Pipeline
    flowchart TD
        T1["push: tags v*<br/>ref_name starts with v"] --> VC
        T2["workflow_run: Vendor Update completed<br/>ref_name = main"] --> VC
-       VC["version_check -- reads pcapkit.__version__<br/>computes each job's own evidence<br/>no gate, read-only"]
+       VC["version_check -- reads pcapkit.\_\_version\_\_<br/>computes each job's own evidence<br/>no gate, read-only"]
        VC --> UT
        UT["unit-tests -- Release test gate<br/>skipped when nothing is publishable"] --> GH
        GH["github -- GitHub Release<br/>creates/attaches the v* tag<br/>THE ONLY APPROVAL"]
@@ -425,12 +425,12 @@ The Release Pipeline
        GH --> PY["pypi -- build + publish<br/>OIDC trusted publishing"]
        TG --> CD["conda -- build + upload<br/>matrix: 2 OS, per-leg evidence"]
        GH --> CD
-       UT --> RS
        VC --> RS
+       UT --> RS
        GH --> RS
        TG --> RS
-       PY --> RS
        CD --> RS
+       PY --> RS
        RS["release_status -- always runs<br/>reports why nothing released, or that it did"]
        classDef gate stroke-dasharray:6 3,stroke-width:2px
        class GH gate

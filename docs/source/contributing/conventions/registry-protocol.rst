@@ -140,14 +140,11 @@ Which branch a key takes, and what each miss ends in:
 .. mermaid::
 
    flowchart TD
-       GET["get(key, default)"] -->|"isinstance(key, str)"| NAME["_member_map_ lookup"]
+       GET["get(key, default)"] -->|"isinstance(key, str)"| NAME["\_member\_map\_ lookup"]
        GET -->|"otherwise"| VALUE["_validate_value(key)<br/>then cls(key)"]
-       NAME -->|"hit"| OK["canonical member"]
-       NAME -->|"miss, key is a registered value"| OK
-       NAME -->|"miss, default is a registered value"| OK
        NAME -->|"miss, no usable default"| KEYERR["EnumKeyError<br/>quiet, derives KeyError"]
-       VALUE -->|"resolves, or _missing_ answers"| OK
-       VALUE -->|"ValueError, default is a registered value"| OK
+       NAME -->|"hit,<br/>or miss, key is a registered value,<br/>or miss, default is a registered value"| OK["canonical member"]
+       VALUE -->|"resolves, or \_missing\_ answers,<br/>or ValueError, default is a registered value"| OK
        VALUE -->|"ValueError, no usable default"| VALERR["EnumValueError<br/>loud, derives ValueError"]
 
 Do not "improve" on the shape by making both misses report identically. Converting
