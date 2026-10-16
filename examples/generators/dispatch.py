@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-"""Enumerate the eight ``__proto__`` dispatch registries, and probe every entry.
+"""Enumerate the ``__proto__`` dispatch registries, and probe every entry.
 
 :file:`pcapkit/foundation/registry/protocols.py` documents the registries that
 decide *which* :class:`~pcapkit.protocols.protocol.Protocol` subclass parses the
-next layer -- 47 entries across eight tables. Nothing enumerated them: several
+next layer. Nothing enumerated them: several
 test modules reference ``__proto__``, and
 :file:`tests/protocols/test_registry_runtime.py` checks that a table entry
 *resolves* to the right class object, but that is a weaker property than the one
@@ -13,7 +13,7 @@ a packet if it tried.
 that shipped once: its own docstring records that
 :class:`~pcapkit.protocols.application.ospf.OSPF` "was reachable from no table at all
 and could not have parsed a packet if it had been". But that module hand-picks
-its eleven cases rather than enumerating, so it guards the entries someone
+its cases rather than enumerating, so it guards the entries someone
 remembered rather than the registries themselves. See GitHub issue #496.
 
 This module is the ``__proto__`` counterpart to
@@ -24,17 +24,17 @@ harness -- tomorrow. What differs is the *check* itself. The option harness
 round-trips construct -> parse -> construct and compares octets; dispatch has no
 such symmetry to exploit, so :func:`probe` instead builds one minimal envelope
 per code, decodes it the way the library itself would (through
-:func:`pcapkit.extract` for the six packet-level tables, or by handing the
+:func:`pcapkit.extract` for the packet-level tables, or by handing the
 :class:`~pcapkit.protocols.misc.pcap.frame.Frame` bytes straight to
-:func:`pcapkit.extract` for the two pcap/pcapng link-type tables, which is the
+:func:`pcapkit.extract` for the pcap/pcapng link-type tables, which is the
 same call with a different global header), and asks whether the resulting
 :class:`~pcapkit.corekit.protochain.ProtoChain` actually contains the class
 :data:`PINNED_TARGETS` says the code is *supposed* to reach -- not merely that
 the alias string looks right, since several of these classes rename themselves
 on the wire (:class:`~pcapkit.protocols.application.rarp.RARP` reports ``'ARP'`` for
 ``oper in (1, 2)``; :class:`~pcapkit.protocols.internet.hip.HIP` reports
-``'HIPv2'``) and one table entry's target *is* itself
-:class:`~pcapkit.protocols.misc.raw.Raw` rather than a defect.
+``'HIPv2'``), and a table entry whose target *is*
+:class:`~pcapkit.protocols.misc.raw.Raw` itself is not a defect.
 
 The expected class is deliberately **not** read out of the registry under
 test. An earlier version of this module did exactly that
@@ -51,9 +51,9 @@ keeps the registry's own current answer alongside it purely as a diagnostic,
 so a mismatch between the two is reported as what it is rather than folded
 into "dispatch failed".
 
-Two of the 47 entries are known to degrade to :class:`Raw`, for reasons
+Some entries are known to degrade to :class:`Raw`, for reasons
 recorded in :data:`KNOWN_DEGRADED` rather than fixed here -- this module reports
-defects, it does not carry workarounds for them. Both are
+defects, it does not carry workarounds for them. They are
 :class:`~pcapkit.protocols.transport.sctp.SCTP` payload protocol identifiers
 reaching :class:`~pcapkit.protocols.application.ngap.NGAP`, and neither is a
 defect: building a well-formed PER-encoded ``NGAP-PDU`` is out of scope for
@@ -139,7 +139,7 @@ def code_name(code: 'Any', enum: 'Optional[Any]' = None) -> 'str':
 
     Most ``__proto__`` tables are keyed entirely by enumeration members, whose
     own ``.name`` is used directly. ``Link.__proto__`` and
-    ``Internet.__proto__`` each hold one entry keyed by a bare :class:`int`
+    ``Internet.__proto__`` each hold an entry keyed by a bare :class:`int`
     instead (0x8137 for IPX, in ``Link``'s case) -- :func:`_resolve` does not
     care, since dict lookup does not distinguish an :class:`~enum.IntEnum`
     member from the plain :class:`int` it equals, but a case label needs a
@@ -511,8 +511,8 @@ def _linktype_payload(code: 'Any') -> 'tuple[bytes, bool]':
     Returns:
         The record's octets, and whether they still need an Ethernet wrapper
         (true for :attr:`~pcapkit.const.reg.linktype.LinkType.ETHERNET`, false
-        for the two raw-IP link types, which carry no link layer at all, and
-        for the two loopback link types, whose header is built here).
+        for the raw-IP link types, which carry no link layer at all, and
+        for the loopback link types, whose header is built here).
 
     """
     from pcapkit.const.reg.linktype import LinkType
@@ -905,10 +905,10 @@ def outcomes(families: 'Optional[tuple[Family, ...]]' = None) -> 'list[Outcome]'
 #: names has been fixed; a case *not* listed here must reach its target, or a
 #: fresh regression has gone unnoticed.
 KNOWN_DEGRADED = {
-    # NGAP is registered for both PPIDs (SCTP.__proto__ is a defaultdict of
-    # exactly two entries). Building a well-formed PER-encoded NGAP-PDU is out
-    # of scope for a minimal dispatch probe -- this uses the same placeholder
-    # payload (``b'ngap-pdu'``) test_sctp_unit.py::test_ppid_dispatch_hook
+    # NGAP is registered for both of its PPIDs. Building a well-formed
+    # PER-encoded NGAP-PDU is out of scope for a minimal dispatch probe --
+    # this uses the same placeholder payload (``b'ngap-pdu'``)
+    # test_sctp_unit.py::test_ppid_dispatch_hook
     # does, which is not an aligned PER encoding and fails inside NGAP's own
     # decoder. The *reason* reported depends on the environment: where the
     # optional ``pycrate`` dependency is installed the decoder runs and reports

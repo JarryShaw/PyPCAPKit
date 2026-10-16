@@ -2,7 +2,7 @@
 """Recompute the Python version tiers in :file:`.github/python-versions.toml` (#1660).
 
 :file:`.github/workflows/cron-python-versions.yml` runs this weekly. It reads
-four sources:
+these sources:
 
 ``release-cycle``
     python.org's release cycle, ``https://peps.python.org/api/release-cycle.json``:
@@ -66,7 +66,7 @@ requests only. Workflow comments name the tiers instead of restating them. Nor
 does it retire a job whose matrix the new tiers leave empty: the proposal names
 the job as a manual step, for the owner to retire or remove first (#1747).
 
-Three commands:
+Its commands:
 
 ``update``
     Recompute, print what changed, and with ``--write`` rewrite the files.
@@ -397,7 +397,7 @@ EXPRESSION = re.compile(r'\$\{\{\s*(.*?)\s*\}\}')
 
 
 def evaluate(expression: 'str', leg: 'dict[str, Any]') -> 'str':
-    """The three expression shapes job names use: ``matrix.K``, ``matrix.K && 'A' || 'B'``, ``matrix.K || 'A'``."""
+    """The expression shapes job names use: ``matrix.K``, ``matrix.K && 'A' || 'B'``, ``matrix.K || 'A'``."""
     match = re.fullmatch(r'matrix\.([\w-]+)', expression)
     if match:
         value = leg.get(match.group(1))

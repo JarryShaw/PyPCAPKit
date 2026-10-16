@@ -11,7 +11,7 @@ PYTHON ?= python
 #: README for the reason.
 FIXTURE_TZ ?= UTC
 
-## Build the four reference reports in ../captures/. Git tracks none of them -- they
+## Build the reference reports in ../captures/. Git tracks none of them -- they
 ## are generated output, so a fresh clone has to run this before it has them (#685).
 ##   out.json, out.plist, out.txt  <- test_extractor.py, from ../captures/in.pcap
 ##   pcapng.txt                    <- test_pcapng.py,    from ../captures/dhcp.pcapng

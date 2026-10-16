@@ -350,7 +350,7 @@ def _ordered(documents: 'Sequence[dict[str, Any]]') -> 'list[dict[str, Any]]':
     Presentation only -- :func:`collect` keeps the order it was given, since the order
     ratios are pooled in does not change them. This exists so that what the report
     *says* does not depend on the order the JSON files happened to arrive in, which
-    for a matrix of nine environments is otherwise a diff between two runs of the same
+    for a matrix of environments is otherwise a diff between two runs of the same
     thing.
 
     Args:
@@ -798,7 +798,7 @@ def _provenance(documents: 'Sequence[dict[str, Any]]', image: 'Optional[str]',
     # "pass" throughout rather than "repeat", so this row and the table's "Samples"
     # column are counting the same unit. They are not the same *number*, and cannot be:
     # a pass happens once per environment, so the table's count is this figure times the
-    # number of environments -- 3 passes over 7 environments is 21 samples per engine.
+    # number of environments.
     # The column was called "Passes" while there were two environments and one
     # interpreter, where the difference was easy to overlook; across a matrix it reads as
     # a contradiction, hence the rename.
@@ -990,7 +990,7 @@ def render_versions_rst(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, An
                 continue
             by_reason.setdefault(reason, []).append(series)
         # Grouped by reason rather than one bullet per cell: the usual case is one
-        # sentence true of three consecutive versions, and repeating it three times
+        # sentence true of several consecutive versions, and repeating it for each
         # makes the notes longer than the table they annotate.
         for reason, series_list in by_reason.items():
             notes.append(f'* ``{row.label}`` on {", ".join(series_list)} -- {_escape(reason)}')

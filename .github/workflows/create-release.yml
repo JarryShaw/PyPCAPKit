@@ -32,8 +32,8 @@ concurrency:
   cancel-in-progress: false
 
 # Every job below with an effect outside this run declares a deployment
-# ``environment:``, but only one of them -- ``github-release`` -- carries a
-# required reviewer (#887). Four jobs still get four environments rather than
+# ``environment:``, but only ``github-release`` carries a required reviewer
+# (#887). Each such job still gets an environment of its own rather than
 # one shared ``release``, for credential and blast-radius separation, not for
 # approval count:
 #
@@ -50,7 +50,7 @@ concurrency:
 # published. See :file:`docs/source/contributing/releasing.rst` for the full pipeline and the
 # reasoning behind one approval being enough.
 #
-# The other three environments keep their names -- ``pypi``'s matters because
+# The other environments keep their names -- ``pypi``'s matters because
 # PyPI trusted publishing matches its OIDC claim against it -- and keep their
 # secret scoping, they just hold no required reviewer of their own. Do
 # not add one back to any of them without re-examining the ``needs:`` chain: a
@@ -60,7 +60,7 @@ concurrency:
 # ``tests/project/test_release_gates.py``'s ``TestGatedJobsDependOnGithub``
 # asserts that every gated job's ``needs:`` closure includes ``github``, which
 # is the checkable half of this paragraph -- reverting the line above to
-# ``needs: [ version_check ]`` fails only that one test.
+# ``needs: [ version_check ]`` fails only that test.
 #
 # One environment per distinct credential and blast radius regardless of who
 # gates it: a single ``release`` approved once would release PyPI and Anaconda
@@ -75,7 +75,7 @@ concurrency:
 # whereas ``tag`` spends a long-lived PAT and a deploy key to write to the
 # default branch.
 #
-# Two things about this that are not self-enforcing, and #641 is the first of them:
+# Some things about this are not self-enforcing, and #641 is the first of them:
 #
 #   * An ``environment:`` naming an environment that does not exist is created
 #     implicitly, with no protection rules, and the job proceeds unapproved. So
@@ -129,7 +129,7 @@ concurrency:
 # pair does not. A cancelled ``tag`` would otherwise send ``conda`` into its
 # check that ``conda-<version>+0`` names this run's commit, for a tag ``tag``
 # never pushed, trading a clean skip for a failed step. ``version_check`` is held
-# to a stricter bar still: all three require ``needs.version_check.result ==
+# to a stricter bar still: all of them require ``needs.version_check.result ==
 # 'success'`` with no ``|| 'skipped'``, since it produces the evidence the gates
 # below read, and a skipped or cancelled ``version_check`` leaves them nothing
 # to decide on. Either spelling bypasses the default ``success()`` GitHub
@@ -148,9 +148,9 @@ concurrency:
 # that the gate -- a ~20-minute full-suite run -- is spent only when something
 # is going to be published. Every successful Vendor Update triggers this
 # workflow, and most of them leave ``__version__`` alone, so the gate used to
-# run on commits Unit Tests had already passed only for all four jobs below to
+# run on commits Unit Tests had already passed only for every job below to
 # skip (eight times on 2026-10-05 alone). ``unit-tests`` runs when the ref
-# is a ``v*`` tag or *any* of the four evidence outputs is not ``'true'``,
+# is a ``v*`` tag or *any* of the evidence outputs is not ``'true'``,
 # which covers every case in which ``github``, ``tag``, ``pypi`` or ``conda``
 # could run: each of them runs only on a ``v*`` ref or on its own evidence
 # reading ``'false'``. ``!= 'true'`` rather than ``== 'false'`` is deliberate --
@@ -191,11 +191,11 @@ concurrency:
 # and runs ``tag``'s scripts against a scratch repository.
 #
 # #1748: so a version tagged at another commit would fail every later run for
-# it: ``v1.5.0b12`` names ``2025da5e5`` with 1 of its 10 Anaconda files, and
-# each push-raised run spent the test gate and 10 ``conda`` legs on refusals.
+# it: ``v1.5.0b12`` names ``2025da5e5`` with only part of its Anaconda files,
+# and each push-raised run spent the test gate and every ``conda`` leg on refusals.
 # ``version_check``'s ``owner`` step resolves the ``v*`` tag as the #1634 check
 # does, and on a ref that is not a ``v*`` tag, ``PCAPKIT_RELEASED_ELSEWHERE``
-# reading ``'true'`` skips the gate and all four publishers -- ``github``
+# reading ``'true'`` skips the gate and every publisher -- ``github``
 # mostly skips there already, the tag existing. ``release_status`` then posts
 # a notice when that release is complete and a warning naming what it lacks
 # when not, and stays green. A ``v*`` push still meets the #1634 check, and
@@ -209,7 +209,7 @@ jobs:
   # ``success``, and Create Release took it for a real one (Vendor Update
   # 38650191283, a second Create Release run for ``0cdd3cdd1``). Measured: that
   # run's jobs read ``success``/``skipped``/``skipped``, and 38655782606, whose
-  # three jobs all skipped, concluded ``skipped``; ``verdict`` has to run to
+  # jobs all skipped, concluded ``skipped``; ``verdict`` has to run to
   # decide, so Vendor Update could not conclude otherwise without a failed or
   # cancelled run. This job reads that run's ``vendor-update`` job instead, with
   # "List jobs for a workflow run", whose ``filter`` defaults to ``latest``,
@@ -269,7 +269,7 @@ jobs:
     # The outermost gate, moved here from ``unit-tests`` by #1052: a
     # ``workflow_run`` trigger proceeds only when the Vendor Update run that
     # triggered it concluded ``success``, and a tag push always proceeds. This
-    # job is read-only -- it installs the package and reads three public
+    # job is read-only -- it installs the package and reads public
     # endpoints -- so running it ahead of the test gate risks nothing.
     #
     # #1634: a ``v*`` push by the release App's bot skips too. That is the tag
@@ -303,7 +303,7 @@ jobs:
 
       # #1660: .github/python-versions.toml, read with the runner's own python3:
       # `latest` for this job and the ``pypi`` and ``conda`` matrices, from this
-      # run's commit, and the tags the two completeness checks below count until
+      # run's commit, and the tags the completeness checks below count until
       # the version is tagged.
       - name: Read the Python versions
         id: python-versions
@@ -337,7 +337,7 @@ jobs:
       # above legitimately uses since the ``v*`` tag *is* its own artefact. It is
       # the wrong question for ``tag``, ``pypi`` and ``conda``, whose artefacts
       # are a different tag, PyPI, and Anaconda respectively -- a half-failed
-      # release leaves the ``v*`` tag behind while those three are still
+      # release leaves the ``v*`` tag behind while those are still
       # incomplete, and gating them on it is what made every one of them skip
       # silently. Each gets its own evidence step below instead.
       - uses: mukunku/tag-exists-action@v1.7.0
@@ -345,7 +345,7 @@ jobs:
         with:
           tag: "conda-${{ steps.get_version.outputs.PCAPKIT_VERSION }}+0"
 
-      # #1660: the two checks below count what the version was released with.
+      # #1660: the checks below count what the version was released with.
       # Once its ``v*`` tag exists, that is the tier file at the tag's commit,
       # read by that commit's own util/python_versions.py, not this run's file:
       # a version added to the supported tier since was never built for it, and
@@ -404,7 +404,7 @@ jobs:
       #
       # The per-version endpoint's own ``releases`` mapping was empty on every
       # request checked while writing this, including against a version that
-      # genuinely has all 8 files -- so this reads ``urls``, the field the
+      # genuinely has every file -- so this reads ``urls``, the field the
       # per-version endpoint actually populates for the requested version.
       # ``/pypi/pypcapkit/json`` (no version) does populate ``releases``, but at
       # ~950KB against this endpoint's ~15KB, for one release's worth of data.
@@ -573,7 +573,7 @@ jobs:
   # effect, and a job that calls a reusable workflow may not declare one anyway.
   #
   # #1052: runs only when a release will actually happen -- a ``v*`` tag push,
-  # or any of the four targets still incomplete by its own evidence. See the
+  # or any target still incomplete by its own evidence. See the
   # note above ``jobs:`` for why ``!= 'true'`` and why a skip here can never
   # let a publisher through. #1748: nor on a version tagged at another commit,
   # unless this is a ``v*`` push, on the same clause as ``tag``, ``pypi`` and
@@ -603,7 +603,7 @@ jobs:
     # ``github.sha`` (#1634) -- that every job below then verifies before
     # publishing under it. This is the release's only approval (#887) --
     # see the note above ``jobs:``. Still gated on ``PCAPKIT_TAG_EXISTS``,
-    # unlike the three jobs below it: the tag that output answers for is this
+    # unlike the publishing jobs below it: the tag that output answers for is this
     # job's own artefact, not a proxy for someone else's -- see the #888 note
     # above ``jobs:``. ``unit-tests`` is listed because the gate follows
     # ``version_check`` (#1052); this ``if:`` calls no status-check function,
@@ -613,8 +613,8 @@ jobs:
     # #1748: a tag naming another commit is a tag that exists, so
     # ``PCAPKIT_TAG_EXISTS`` already skips this job off a ``v*`` ref -- unless
     # the tag was pushed between ``check_tag`` and ``owner``, which read it
-    # separately. The same clause as the other three covers that too, so the
-    # gate runs whenever any of the four would.
+    # separately. The same clause as the other publishers' covers that too, so the
+    # gate runs whenever any publisher would.
     environment: github-release
     permissions:
       contents: write
@@ -830,7 +830,7 @@ jobs:
           fetch-depth: 0
 
       # Everything after this step writes through the deploy key loaded above.
-      # Kept to these lines alone: the project test runs the two steps below
+      # Kept to these lines alone: the project test runs the steps below
       # against a scratch repository, standing in for this one.
       - name: Configure git for the deploy key
         run: |
@@ -1103,7 +1103,7 @@ jobs:
       # byte-identical -- but only an asset in state ``uploaded``: after a 502,
       # Upload a release asset "may leave an empty asset with a state of
       # starter", which ``--clobber`` deletes before uploading the file again.
-      # Two failures the action did not have: no release fails ``gh release
+      # Failures the action did not have: no release fails ``gh release
       # view`` with "release not found", where the action created one with the
       # default branch as its target, and a pattern matching nothing is an
       # ``::error``, where it only warned. ``conda`` runs the same script.
@@ -1466,7 +1466,7 @@ jobs:
           packages: ${{ steps.conda_build.outputs.packages }}
           labels: ${{ needs.version_check.outputs.PCAPKIT_CONDA_LABEL }}
 
-      # ``pypi``'s upload script, for the same two reasons (#1634, #1640). Not
+      # ``pypi``'s upload script, for the same reasons (#1634, #1640). Not
       # gated on ``check_leg`` as the Anaconda upload is: a leg whose Anaconda
       # upload landed and whose GitHub upload then failed would get no GitHub
       # asset on any re-run. Skipping a file the release already has is what
@@ -1644,11 +1644,11 @@ jobs:
           # and skips with work outstanding, every publisher skips behind it
           # and the same reconciliation reaches the loud #888 branch instead.
           #
-          # Reconcile each of the four release jobs against its OWN evidence,
+          # Reconcile each release job against its OWN evidence,
           # not against each other. A self-heal is a MIXED outcome by design
           # -- github/tag skip because their artefacts already existed going
           # in, pypi/conda run and succeed because theirs did not -- and
-          # demanding uniformity across all four (either all skipped, or all
+          # demanding uniformity across all of them (either all skipped, or all
           # succeeded, as an earlier revision of this job did) reads that
           # mix as the #888 shape itself, firing the error below on the run
           # that just finished the release. "Reconciled" means: this target
@@ -1695,7 +1695,7 @@ jobs:
           fi
 
           # Every target reconciled, but at least one of them actually ran --
-          # either a fresh full release (all four `success`) or a self-heal
+          # either a fresh full release (every one `success`) or a self-heal
           # (a mix of `success` and legitimately-`skipped`). Both are the
           # release working as intended, so both are quiet.
           if [ "$all_reconciled" = "true" ]; then

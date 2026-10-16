@@ -14,12 +14,12 @@ machine, and because the numbers in it were not reproducible. Both problems are 
 same problem -- the environment was never pinned and could not hold every engine at
 once -- so the fix is to define the environment precisely and ship it. Once the
 environment is a container, the number of them is a loop, which is what makes a
-complete table a single command rather than five hand-run measurements pasted
-together.
+complete table a single command rather than one hand-run measurement per version
+pasted together.
 
 ## The matrix
 
-**One image per Python version**, five of them by default, each pinned by digest in
+**One image per Python version**, each pinned by digest in
 [python-images.txt](python-images.txt) -- which is the matrix, and is a table
 rather than logic so that a reader can check it. Inside each image, **one or two
 virtualenvs**, so an "environment" here is a *(Python version, pcap provider)*
@@ -31,19 +31,19 @@ pair:
 | 3.12, 3.13, 3.14 | `-pcap_ct` only | `pypcap` cannot be installed at all, so a second virtualenv would compile for minutes to produce nothing |
 | 3.15 | opt-in, `-pcap_ct` only | no released image; see below |
 
-Seven environments for a default run, and a version named with `--pythons` that is
-not in the file is a typo rather than a column.
+A version named with `--pythons` that is not in the file is a typo rather than a
+column.
 
 ## Why this cannot be one virtualenv, or one Python
 
-Two hard constraints shape everything here. Neither is a `pcapkit` defect and
-neither can be worked around from inside `pcapkit`:
+Hard constraints shape everything here. None of them is a `pcapkit` defect, and
+none can be worked around from inside `pcapkit`:
 
 1. **pypcap and pcap-ct are mutually exclusive.** Both distributions install
    a top-level module named `pcap`. With both present, `import pcap` resolves to
    `pcap-ct`'s package directory and upstream's extension module is shadowed and
    unreachable, so `engine='pypcap'` cannot run at all. No install order changes
-   that. **So no single environment can hold all seven engines**, and an image that
+   that. **So no single environment can hold every engine**, and an image that
    can hold `pypcap` carries two virtualenvs -- `/opt/venv-pypcap` and
    `/opt/venv-pcap_ct`, identical but for which `pcap` provider they have.
 2. **3.11 is the** *last* **interpreter on which every engine runs**, and 3.10 is the
@@ -129,10 +129,10 @@ This is not hypothetical; it is what the first full run of this harness did.
 `pyshark` spawns a `tshark` process per extraction, so a default run spawns **three
 thousand** of them per environment, and one of them died -- `TSharkCrashException ... retcode: 255`,
 on the third pass. The exception propagated, `benchmark.py` exited, no JSON was
-written, and the run produced **no table at all**. Six working engines went unreported
-because the seventh hiccupped once.
+written, and the run produced **no table at all**. Every working engine went unreported
+because one hiccupped once.
 
-So failure is contained at two levels, and counted at both:
+So failure is contained, and counted, at each level below:
 
 - **A failed extraction** is discarded and the pass carries on, up to
   `TOLERATED_FAILURES` (5) per engine per pass. A crashed extraction is a
@@ -144,9 +144,9 @@ So failure is contained at two levels, and counted at both:
   with what was lost. If *every* pass failed, the engine becomes `*not measured*`
   with the exception as its reason.
 
-Two things are never tolerated, because tolerating them would mean reporting a number
+Some things are never tolerated, because tolerating them would mean reporting a number
 that is not true: the escalated `EngineWarning` that means the engine fell back to
-`pcapkit`'s parser, and a capture that yielded no packets. Both end the run.
+`pcapkit`'s parser, and a capture that yielded no packets. Either ends the run.
 
 The same principle covers the build. `pypcap` is the only engine in the set that
 compiles, and therefore the only one whose *install* can fail for reasons these pins
@@ -159,7 +159,7 @@ so a failure installing it is a real error and stays fatal.
 
 ## A missing column is held to the same standard as a missing row
 
-With five images there are five chances for something outside these pins to go wrong:
+Each image is a chance for something outside these pins to go wrong:
 a base image withdrawn, a wheel that stops publishing for one interpreter, a daemon
 that runs out of disk halfway through. **None of those ends the run**, and none of
 them silently narrows the table:
@@ -177,7 +177,7 @@ them silently narrows the table:
 **The exit status says which happened**, because a scheduled invocation reads nothing
 else: `0` when every requested version was measured, `3` **when the tables were
 written but a version was lost**, `1` when no table was produced at all, and `2`
-for bad arguments. A `make bench` that measured one column out of five is not a
+for bad arguments. A `make bench` that measured only some of its columns is not a
 failure -- the tables are there -- but it is not success either, and it should not be
 indistinguishable from it.
 
@@ -213,7 +213,7 @@ does not apply to it would be the wrong kind of caution.
 
 The text report additionally prints each shared engine's median *per environment*: if
 two environments disagree about `dpkt`, the join on `default` is not doing its
-job, and that is the line that shows it. With seven environments that line is also the
+job, and that is the line that shows it. That line is also the
 quickest way to see whether an engine behaves differently on one interpreter.
 
 ## Departures from the legacy methodology
@@ -227,7 +227,7 @@ milliseconds per packet. What changed, and why:
 | Change | Why |
 | --- | --- |
 | The whole set is measured `--repeats` times, not once | one pass gives no way to tell a real gap from noise, which is most of what was wrong with the old table |
-| Every Python version is measured in one run, not one per sitting | the legacy script measures whichever interpreter invokes it, so a complete table was five separate sittings hand-assembled; a column measured last week is not comparable in absolute terms with one measured today, which is the property the per-version table depends on |
+| Every Python version is measured in one run, not one per sitting | the legacy script measures whichever interpreter invokes it, so a complete table was one sitting per version, hand-assembled; a column measured last week is not comparable in absolute terms with one measured today, which is the property the per-version table depends on |
 | A second table reports ratios, with one absolute footnote | absolute times are not comparable across machines, and "which engine is faster" is a question about engines rather than about this host |
 | The driver is asserted on every extraction | the legacy script preflights once; an engine that stops being itself mid-run would go unnoticed |
 | Progress is printed to stderr every 100 rounds, not to stdout every round | stdout carries the JSON document, and a flushed write per round is jitter bought for nothing |
@@ -284,7 +284,7 @@ compared with anything.
 Pinned exactly:
 
 - every base image, **by digest**, in `python-images.txt` rather than by tag:
-  `3.11-slim-bookworm` and its four siblings are mutable and rebuilt whenever Debian
+  `3.11-slim-bookworm` and its siblings are mutable and rebuilt whenever Debian
   or CPython ships a patch, so a tag pin is a pin in name only. They are all
   **slim-bookworm**, which is a measurement decision rather than a packaging one --
   the per-version table's columns are compared with each other, so everything but the
@@ -349,17 +349,17 @@ would undo that, and would leak machine identity into a public README.
 
 **A full default matrix is on the order of two hours**, and it splits roughly in two:
 
-- **build: 15-25 minutes.** Five images, each installing the same pinned set, plus a
+- **build: 15-25 minutes.** One image per version, each installing the same pinned set, plus a
   `pypcap` C extension compiled twice (3.10 and 3.11). Docker's layer cache does not
   help across versions -- a different base image is a different layer chain -- so this
   cost is per column. Measured on this suite: a 3.12 image, which compiles nothing,
   takes about a minute and a half; a 3.11 image, which does, takes about three.
-- **measure: 1.5-2 hours.** Seven environments x 1,000 rounds x 3 passes, and **almost
+- **measure: 1.5-2 hours.** 1,000 rounds x 3 passes in every environment, and **almost
   all of it is** `pyshark`, which spawns a `tshark` process per extraction and is
   two to three orders of magnitude slower than anything else in the table. It runs in
-  six of the seven environments (everything but 3.14, where it cannot run at all).
+  every environment but 3.14's, where it cannot run at all.
 
-Three ways to cut it, in descending order of how much they save:
+Ways to cut it, in descending order of how much they save:
 
 ```shell
 # drop pyshark and the run is minutes rather than hours
@@ -452,8 +452,8 @@ back to `pcapkit`'s parser refuses to report a number.
   to report "running".
 - The `pypcap` layer takes minutes on arm64 -- expected, and explained above:
   its `setup.py` walks `/usr` recursively to find a library its search list does
-  not name. It is built for 3.10 and 3.11 only, so this cost is paid twice, not five
-  times.
+  not name. It is built for 3.10 and 3.11 only, so this cost is paid on those images,
+  not on every one.
 - `pyshark` reports not measured, "the tshark binary ... is not installed" --
   the image installs `tshark`, so this means the apt install was skipped or failed;
   rebuild without `--no-build`.

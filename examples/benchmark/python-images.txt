@@ -31,7 +31,7 @@
 # ## Which engines run on which interpreter
 #
 # Measured, not assumed. `default` (pcapkit's own parser), `dpkt` and `scapy` run
-# everywhere. The other four have ceilings, and only the first of them is a
+# everywhere. The others have ceilings, and only the first of them below is a
 # *build* problem, which is why only it needs a column here:
 #
 #   | engine       | interpreters      | why it stops                              |

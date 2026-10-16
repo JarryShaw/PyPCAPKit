@@ -31,8 +31,8 @@ For every encapsulation :program:`editcap` accepts under ``-T``:
    .layer_name`` and what :func:`pcapkit.toolkit.pyshark.tcp_traceflow` falls
    back to when a capture carries no ``frame.encap_type`` field at all.
 
-Two traps, both costing real time when #850's tables were first produced
---------------------------------------------------------------------------
+Traps that cost real time when #850's tables were first produced
+----------------------------------------------------------------
 
 **A PDML ``showname`` can hold a ``/``.** ``tshark`` renders
 ``frame.encap_type``'s ``showname`` as ``"Encapsulation type: NULL/Loopback
@@ -666,7 +666,7 @@ def main(argv: 'Optional[Sequence[str]]' = None) -> int:
             # newline='\n' rather than the default None: every string this
             # script builds already ends its lines in '\n', so on Windows the
             # default would translate each into '\r\n' on the way out and
-            # rewrite all ~210 lines rather than the handful that actually
+            # rewrite every line rather than the few that actually
             # changed. .gitattributes' `* text=auto` keeps CRLF from reaching
             # a commit either way, so this is hardening against a noisy local
             # diff, not a fix for output this repository would ever ship.

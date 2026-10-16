@@ -2,8 +2,8 @@
 """Generate the ``.pcap`` sample captures used by the test suite.
 
 The tests under ``tests/`` extract capture files from ``examples/captures/``, but
-``.gitignore`` keeps that directory empty except for a handful of committed
-files, so a fresh checkout cannot run them. This module rebuilds the missing
+``.gitignore`` keeps that directory empty except for the files committed
+there, so a fresh checkout cannot run them. This module rebuilds the missing
 ``.pcap`` fixtures with :mod:`scapy`, deterministically and without network
 access, so every machine gets byte-identical captures.
 
@@ -67,8 +67,8 @@ specification rather than a suggestion; see the "pinned by" notes.
     indexes frames 114, 117, 393, 556, 587, 629 and 1113 directly -- hence
     the ``_HTTPBuilder.fill`` calls that pace the surrounding traffic.
 
-Two details are worth flagging, because both look like sleight of hand and
-neither is:
+These details are worth flagging, because each looks like sleight of hand and
+none is:
 
 1. Some tests pin a UDP checksum. A checksum is a function of the datagram,
    so the datagram is chosen to have that checksum: a single free 16-bit word

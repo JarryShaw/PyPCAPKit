@@ -3,7 +3,7 @@
 
 This is the script :file:`.github/workflows/ci-timing.yml` runs every Monday, the
 periodic review GitHub issue #1538 asked for. It reads the Actions API for the last
-``--days`` days and writes three things: ``report.json`` (the next run's baseline), a
+``--days`` days and writes ``report.json`` (the next run's baseline), a
 Markdown summary, and one ``::error::`` or ``::warning::`` annotation per threshold
 that fired. Exit status: 0 when no HARD threshold fired, 1 when one did, 2 when the
 API could not be read or the arguments are wrong, 3 for anything else. A HARD
@@ -106,7 +106,7 @@ EXPERIMENTAL_SUFFIX = ' (experimental)'
 
 #: The aggregate job the ruleset requires; its completion is "mergeable".
 REQUIRED_JOB = 'Required checks passed'
-#: The Python version tiers (#1660), which the two names below are read from. This
+#: The Python version tiers (#1660), which the names below are read from. This
 #: script runs on ``latest`` (ci-timing.yml), so :mod:`tomllib`, 3.11+, is there.
 TIERS = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.github', 'python-versions.toml')
 

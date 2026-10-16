@@ -102,16 +102,16 @@ coverage: samples
 # since the whole point is that the measuring environments are the pinned ones
 # inside the images rather than whatever is installed here.
 #
-# Expect around two hours at the defaults: five interpreters, seven engines,
+# Expect around two hours at the defaults, every default interpreter and engine,
 # and almost all of the measuring time is pyshark, which spawns a tshark process
 # per extraction. Cut it with --engines, --pythons, or --quick.
 bench:
 	examples/benchmark/run.sh
 
-# A smoke check that the harness works end to end, not a measurement -- two
-# interpreters and the two cheapest engines, which is enough to exercise both
+# A smoke check that the harness works end to end, not a measurement -- the
+# interpreters and cheapest engines named below, which is enough to exercise both
 # virtualenvs, the matrix loop and both emitted tables. The full matrix at --quick
-# would still build five images, and building is most of a quick run's cost.
+# would still build every image, and building is most of a quick run's cost.
 bench-quick:
 	examples/benchmark/run.sh --quick --pythons 3.11,3.12 --engines default,dpkt
 
@@ -145,8 +145,8 @@ isort:
 RUN ?= pipenv run
 
 # Flag sets are variables rather than literals for the same reason -- `vermin`
-# needs two recipes (see below) and would otherwise carry two copies of its
-# flags. Note the `pcapkit` before the flags as well as after: that is how this
+# needs more than one recipe (see below) and would otherwise carry a copy of its
+# flags in each. Note the `pcapkit` before the flags as well as after: that is how this
 # recipe has always read, and vermin de-duplicates the paths (it reports the
 # same number of files analyzed either way), so it is preserved verbatim rather
 # than tidied.
