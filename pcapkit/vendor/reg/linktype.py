@@ -170,7 +170,7 @@ class LinkType(Vendor):
                     # member always lands in ``enum`` unconditionally,
                     # rather than through the per-row ``sink`` above.
                     # Otherwise one range row whose notes happened to mention
-                    # "legacy" would sink all sixteen expanded members at
+                    # "legacy" would sink every member it expands to at
                     # once instead of just itself (item 2 in #852).
                     enum.append(f'{sufs}\n    {pres}')
 

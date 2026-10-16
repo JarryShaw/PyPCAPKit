@@ -242,8 +242,8 @@ class AppType(EnumRegistry, StrEnum):
     .. versionchanged:: 1.5.0
 
        Split by transport protocol (:issue:`732`): :mod:`pcapkit.const.reg.apptype`
-       is a package, and every assignment is a member of one of the four
-       registries above rather than of this class. ``get()`` raises
+       is a package, and every assignment is a member of one of the per-transport
+       registries rather than of this class. ``get()`` raises
        :exc:`ValueError` for a port outside ``0``-``65535`` (:issue:`758`), and
        returns an unregistered member rather than minting one for a port the
        registry does not assign (:issue:`860`).
@@ -2417,15 +2417,15 @@ class AppType(EnumRegistry, StrEnum):
     #: the last of them.
     #:
     #: Declared here as :obj:`None` and overridden in each subclass: a mutable
-    #: class attribute declared on this class would be *shared* by all four
-    #: subclasses, so they would collide with each other exactly as the ports of
+    #: class attribute declared on this class would be *shared* by every
+    #: subclass, so they would collide with each other exactly as the ports of
     #: one transport used to collide inside the old flat registry.
     __registry__: 'Optional[MultiDict[int, AppType]]' = None
 
     #: Registry class owning each transport protocol, i.e. what
     #: :meth:`get` delegates to when called on this class rather than on one of
-    #: them. Populated by :mod:`pcapkit.const.reg.apptype` once all four have
-    #: been imported, since this module cannot import its own subclasses.
+    #: them. Populated by :mod:`pcapkit.const.reg.apptype` once every one of
+    #: them has been imported, since this module cannot import its own subclasses.
     __registries__: 'dict[TransportProtocol, Type[AppType]]' = {}
 
     #: Canonical service per port, for the ports carrying more than one. The base
@@ -2457,7 +2457,7 @@ class AppType(EnumRegistry, StrEnum):
     def aliases(self) -> 'tuple[AppType, ...]':
         """Other services sharing :attr:`port` in this member's own registry.
 
-        GitHub issue :issue:`807`. No storage of its own: IANA already keeps every
+        GitHub issue :issue:`807`. No storage of its own: the registry already keeps every
         colliding service as its own member of :data:`__registry__`, keyed on
         the shared port -- :meth:`get_all` already walks that same bucket to
         answer with the aliases after the canonical member, so this is exactly
@@ -2504,7 +2504,7 @@ class AppType(EnumRegistry, StrEnum):
         # consequence worth stating plainly rather than leaving for a doctest
         # to trip over: ``str(member) == member.value`` already breaks at
         # class-creation time for every port that statically carries more
-        # than one service (94 such members as shipped);
+        # than one service;
         # :meth:`register_alias` merely adds to that set at runtime.
         base = f'{self.svc} [{self.port} - {self.proto.name}]'
         aliases = self.aliases
@@ -2583,7 +2583,7 @@ class AppType(EnumRegistry, StrEnum):
             proto = TransportProtocol.get(proto.lower())
 
         # NOTE: a direct dict lookup covers every genuine single transport --
-        # one of the four real members, or a bare int equal to one of their
+        # one of the real members, or a bare int equal to one of their
         # values -- since ``__registries__`` keys compare by the same
         # int-valued hash/eq every member and bare int alike already use. The
         # cast is for mypy alone: ``dict.get`` accepts any hashable key at run
@@ -2599,7 +2599,7 @@ class AppType(EnumRegistry, StrEnum):
         # member's value at the dict lookup above, and nothing below decodes
         # ``proto``'s bits looking for a partial answer either -- on either
         # numbering. A genuine member reaching this point is ``undefined`` --
-        # the four real transports would already have resolved above, and
+        # a real transport would already have resolved above, and
         # :meth:`TransportProtocol.get` cannot mint anything else, per the
         # maintainer ruling given in review of the work for #808, against
         # extending TransportProtocol at all -- and a bare :class:`int` reaches
@@ -2725,7 +2725,7 @@ class AppType(EnumRegistry, StrEnum):
         Returns:
             The canonical member followed by its aliases, in registry row order.
             Never empty: a port with no assignment goes through :meth:`get`, so it
-            is minted rather than answered with an empty result.
+            is answered with an unregistered member rather than an empty result.
 
         Raises:
             ValueError: As :meth:`get`.
@@ -2831,8 +2831,8 @@ class AppType(EnumRegistry, StrEnum):
 
         Raises:
             ValueError: If called on a class that holds no members, i.e. on
-                :class:`AppType` itself, which is not one of the four
-                per-transport registries; if ``port`` already carries a
+                :class:`AppType` itself, which is not a
+                per-transport registry; if ``port`` already carries a
                 member of this registry; if ``name`` sanitises to text that
                 is not a valid Python identifier at all; or if the identifier
                 it does sanitise to already names an unrelated member of this
@@ -2885,7 +2885,7 @@ class AppType(EnumRegistry, StrEnum):
 
         The Python attribute name is derived from ``name`` through
         :meth:`_sanitize_identifier`. It has to be ``name``, not ``port`` and
-        a counter: an alias whose own name does not resolve through
+        a counter: an alias whose own name resolves through
         subscription is most of the point of registering one, and
         ``TCP['www_http']`` resolving is exactly what lets a caller reach an
         alias the same way every statically declared member already is.
@@ -2906,8 +2906,8 @@ class AppType(EnumRegistry, StrEnum):
 
         Raises:
             ValueError: If called on a class that holds no members, i.e. on
-                :class:`AppType` itself, which is not one of the four
-                per-transport registries; if ``port`` carries no member of
+                :class:`AppType` itself, which is not a
+                per-transport registry; if ``port`` carries no member of
                 this registry yet; if ``name`` already names one of the
                 members already there; if ``name`` sanitises to text that is
                 not a valid Python identifier at all -- empty, or leading with
@@ -2926,9 +2926,9 @@ class AppType(EnumRegistry, StrEnum):
         if any(member.svc == name for member in existing):
             raise ValueError(f'{name!r} is already registered on port {port} of {cls.__name__}')
 
-        # NOTE: the 58 members the generator mints via safe_name's own
+        # NOTE: the members the generator mints via safe_name's own
         # fallback -- ``{cls.__name__}_{residue}``, when the sanitised
-        # residue is not a valid identifier (28 TCP, 29 UDP, 1 SCTP, 0 DCCP) --
+        # residue is not a valid identifier --
         # are names this runtime path refuses rather than accepts: that
         # fallback is deliberately not reproduced in
         # :meth:`_sanitize_identifier`, which raises here instead (see Raises
@@ -2965,7 +2965,7 @@ class AppType(EnumRegistry, StrEnum):
         :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`
         bypasses :meth:`__new__` entirely
         (it builds through ``cls._member_type_.__new__`` directly), so this
-        class's own three attributes would otherwise be missing and every
+        class's own attributes (``svc``, ``port``, ``proto``) would otherwise be missing and every
         method reading them (:meth:`__repr__`, :meth:`__str__`, :meth:`__int__`,
         the comparison operators, :attr:`aliases`) would raise on the result.
         Deliberately *not* added to :data:`__registry__` -- unlike

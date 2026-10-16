@@ -3,7 +3,7 @@ Enumeration Base
 
 .. module:: pcapkit.corekit.enum
 
-:mod:`pcapkit.corekit.enum` contains the two bases every enumeration in this
+:mod:`pcapkit.corekit.enum` contains the bases every enumeration in this
 library inherits from: :class:`EnumLookup`, the *lookup* half shared by open
 registries and closed sets alike, and its subclass :class:`EnumRegistry`, which
 adds the *mutating* half every registry under :mod:`pcapkit.const` inherits.

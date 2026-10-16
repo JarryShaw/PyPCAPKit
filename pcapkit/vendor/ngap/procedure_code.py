@@ -145,7 +145,7 @@ class ProcedureCode(Vendor):
         naming which ``NGAP-CommonDataTypes`` open type it belongs to (``.called``,
         a ``(module, type)`` pair), a private ``_name`` holding the ASN.1
         identifier verbatim (``'id-AMFConfigurationUpdate'``), and a private
-        ``_val`` holding the assigned integer. None of the three has a public
+        ``_val`` holding the assigned integer. None of these has a public
         accessor that survives this far:
         :meth:`~pycrate_asn1rt.asnobj.ASN1Obj.get_typeref`
         resolves to the *referenced type object* rather than its
@@ -195,7 +195,7 @@ class ProcedureCode(Vendor):
 
         Unlike a hand-scraped CSV, |pycrate|_'s compiled specification names
         each assignment once -- measured, zero duplicate names and zero
-        duplicate values across all 81 -- so
+        duplicate values across every assignment -- so
         :meth:`~pcapkit.vendor.default.Vendor.rename`'s
         per-name counter has nothing to disambiguate and this
         crawler never calls it.

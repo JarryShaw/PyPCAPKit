@@ -94,7 +94,7 @@ enumerations include:
    * - :class:`MH_CGASec <pcapkit.vendor.mh.cga_sec.CGASec>`
      - CGA SEC [*]_
    * - :class:`MH_BindingError <pcapkit.vendor.mh.binding_error.BindingError>`
-     - Bingding Error Status Code [*]_
+     - Binding Error Status Code [*]_
 
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#mobility-parameters-1
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#mobility-parameters-2

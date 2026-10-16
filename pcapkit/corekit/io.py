@@ -251,11 +251,11 @@ class SeekableReader(io.BufferedReader):
 
         The buffer is a sliding window whose octet 0 sits at absolute ``_buffer_set`` and
         whose content occupies ``[0:_buffer_cur]``, so ``_buffer_set + _buffer_cur`` is how
-        far the underlying stream has been consumed. Two things follow, and every buffered
-        read path needs both of them:
+        far the underlying stream has been consumed. Every buffered read path needs what
+        follows from that:
 
         * The buffer's own cursor is a **derived** quantity, ``_tell - _buffer_set``, rather
-          than a fourth piece of state to be maintained. Nothing keeps it in step: a read
+          than another piece of state to be maintained. Nothing keeps it in step: a read
           served from the stream writes through :attr:`_buffer_view` and leaves the cursor
           untouched, and :meth:`_write_buffer` rewinds it to the start of the appended
           octets when the window slides. Deriving it here, at each point of use, is what makes the drift
@@ -557,7 +557,7 @@ class SeekableReader(io.BufferedReader):
             cannot be seeked: its octet 0 sits at absolute offset ``_buffer_set``, its content
             occupies ``[0:_buffer_cur]``, and everything past that is padding never read.
 
-            Two consequences for which octets survive. An extension appends its zero octets at
+            As for which octets survive: an extension appends its zero octets at
             the **tail**, the new area being by definition the region past the old end. A
             reduction below the content keeps the **most recent** ``size`` octets and advances
             ``_buffer_set`` past the ones it drops, because what this holds is lookback: the
@@ -805,12 +805,12 @@ class PeekableStream:
 
     :class:`~pcapkit.foundation.extraction.Extractor` and the PCAP-NG engine
     read ahead with ``peek``, which :class:`io.BufferedReader` has and a plain
-    :class:`typing.IO` such as :class:`io.BytesIO` does not (#1506). The
+    :class:`typing.IO` such as :class:`io.BytesIO` does not (:issue:`1506`). The
     read-ahead is a read and a seek back, and every other attribute is the
     stream's own. It is not an :class:`io.IOBase`, so it has no finaliser that
-    could close the caller's stream behind their back (#610).
+    could close the caller's stream behind their back (:issue:`610`).
 
-    Copying and pickling follow the stream (#1524). :func:`copy.copy` gives a
+    Copying and pickling follow the stream (:issue:`1524`). :func:`copy.copy` gives a
     second proxy over the *same* stream, so the two share one position.
     :func:`copy.deepcopy` and :mod:`pickle` copy the stream too, so they work
     exactly when the stream itself can be deep-copied or pickled at that
@@ -842,7 +842,7 @@ class PeekableStream:
             self._stream.seek(pos, io.SEEK_SET)
 
     def __getattr__(self, name: 'str') -> 'Any':
-        # NOTE: reached only for a name the proxy lacks, and two kinds are refused
+        # NOTE: reached only for a name the proxy lacks, and some names are refused
         # rather than forwarded. ``_stream`` is the proxy's own: :mod:`copy` and
         # :mod:`pickle` build an instance without :meth:`__init__`, so it is not set
         # yet, and forwarding would look it up through here again until the

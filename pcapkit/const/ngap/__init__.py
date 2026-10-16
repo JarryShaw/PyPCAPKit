@@ -16,9 +16,9 @@ enumerations include:
    * - :class:`NGAP_ProtocolIE <pcapkit.const.ngap.protocol_ie.ProtocolIE>`
      - NGAP Protocol IE Identifiers [*]_
 
-Both are automatically generated from
+Each is automatically generated, by
 :mod:`pcapkit.vendor.ngap.procedure_code` and
-:mod:`pcapkit.vendor.ngap.protocol_ie`, which source the assignment from
+:mod:`pcapkit.vendor.ngap.protocol_ie` respectively, which source the assignment from
 |pycrate|_'s compiled NGAP specification rather than a network registry --
 see that module's docstring for why, and GitHub issue :issue:`880` for the ruling.
 

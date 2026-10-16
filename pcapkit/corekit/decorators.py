@@ -20,7 +20,7 @@ so they live with the packet model rather than in :mod:`pcapkit.utilities`
 .. versionremoved:: 1.5.0
 
    ``pcapkit.utilities.decorators``, now :mod:`pcapkit.corekit.decorators`
-   (:issue:`1735`). :mod:`pcapkit.utilities` does not export the three
+   (:issue:`1735`). :mod:`pcapkit.utilities` does not export these
    decorators either.
 
 """
@@ -58,7 +58,7 @@ def seekset(func: 'Callable[Concatenate[ProtocolBase, P], R_seekset]') -> 'Calla
     """Read file from start then set back to original.
 
     Important:
-        This decorator function is designed for decorating *class methods*.
+        This decorator function is designed for decorating *instance methods*.
 
     The decorator will keep the current offset of :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>`,
     then call the decorated function. Afterwards, it will rewind the  offset of
@@ -101,7 +101,7 @@ def beholder(
     """Behold extraction procedure.
 
     Important:
-        This decorator function is designed for decorating *class methods*.
+        This decorator function is designed for decorating *instance methods*.
 
     This decorator calls the decorated function. Should any exception be
     raised, it logs the error and re-parses the current layer's payload as
@@ -159,7 +159,7 @@ def beholder(
             # NOTE: ``self._get_payload()`` rather than
             # ``self.__header__.get_payload()``, which it wraps. The two agree
             # for every protocol whose payload is a schema field, and differ for
-            # the two that override it: SCTP carries user data inside a DATA
+            # the protocols that override it: SCTP carries user data inside a DATA
             # chunk and PCAP-NG inside a block, so neither header schema has a
             # ``payload`` field at all. Going through the schema there raises
             # ProtocolUnbound('unknown field: payload') *from the recovery path*,
@@ -226,12 +226,11 @@ def prepare(func: 'Callable[Concatenate[Type[R_prepare], bytes | IO[bytes], Opti
                  packet: 'Optional[dict[str, Any]]') -> 'pcapkit.protocols.schema.schema.Schema'
 
         No further positional or keyword arguments are read from -- or
-        forwarded to -- the decorated function. :func:`prepare` is applied to
-        exactly one function in this tree,
+        forwarded to -- the decorated function. :func:`prepare` is applied only to
         :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`,
-        whose real signature has exactly these four parameters, and nothing
+        whose real signature has exactly these parameters, and nothing
         calls it with more. Rather than discard extras silently (:issue:`454`),
-        the wrapper raises :exc:`TypeError` for a fifth positional argument or
+        the wrapper raises :exc:`TypeError` for an extra positional argument or
         an unconsumed keyword, the same as an ordinary call with too many
         arguments would.
 
@@ -254,9 +253,9 @@ def prepare(func: 'Callable[Concatenate[Type[R_prepare], bytes | IO[bytes], Opti
         length = cast('Optional[int]', args[2] if len(args) > 2 else kwargs.pop('length', None))
         packet = cast('Optional[dict[str, Any]]', args[3] if len(args) > 3 else kwargs.pop('packet', None))
 
-        # NOTE: The decorated function's real signature is exactly the four
+        # NOTE: The decorated function's real signature is exactly the
         # parameters above -- see #454. Anything left over here is therefore
-        # unwanted rather than something to forward: a fifth positional
+        # unwanted rather than something to forward: an extra positional
         # argument, or a keyword that ``kwargs.pop`` above never touched
         # because ``length``/``packet`` arrived positionally instead. The
         # latter is also what catches ``length`` (or ``packet``) supplied

@@ -375,7 +375,7 @@ class NumberField(Field[int], Generic[_T]):
             one that captured them honours them; any other field, and any other
             value -- one a caller built, or the result of arithmetic on a
             parsed one, which is a plain :obj:`int` -- is truncated to
-            :attr:`bit_length` bits exactly as before. See GitHub issue
+            :attr:`bit_length` bits. See GitHub issue
             :issue:`1488`.
 
         """
@@ -427,7 +427,7 @@ class NumberField(Field[int], Generic[_T]):
             value the sign extension -- they are captured but uninterpreted,
             and the value records them (see :func:`_with_outside_bits`) so that
             packing it writes them back. Otherwise the value is a plain
-            :obj:`int`, as before. See GitHub issue :issue:`1488`.
+            :obj:`int`. See GitHub issue :issue:`1488`.
 
         """
         if not self._need_process:
@@ -843,8 +843,7 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
             :mod:`pcapkit.protocols.transport.transport` before passing it
             through unchanged (see ``test_a_member_is_still_an_apptype`` in
             ``tests/const/test_const_apptype_split_unit.py``); a value that
-            fails them would be a second defect standing in for the one this
-            fix removes.
+            fails them would be a defect of its own.
 
             The member this returns is absent from ``_value2member_map_``, so
             a *value*-keyed lookup on it -- ``self._namespace(value)`` --
@@ -857,8 +856,8 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
             builds an unregistered member of its own, through the registry's
             ``_unregistered_member`` -- measured on this tree,
             ``AppType.get(54321, proto=tcp)`` returns
-            ``<TCP.unknown: 54321 [tcp]>``, ``TCP.__members__`` stays at
-            6147, and a second call with the same port returns an equal
+            ``<TCP.unknown: 54321 [tcp]>``, ``TCP.__members__`` does not
+            grow, and a second call with the same port returns an equal
             member rather than the same one. Two
             unregistered members for the same value also compare equal
             without being identical, since
@@ -895,7 +894,7 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
             emulate 3.10, where those two do not exist. Rebuilding re-enters
             this method rather than ``namespace.__new__``, so an unpickled
             member is unregistered exactly as the original was and the
-            registry does not grow -- ``TCP.__members__`` measured at 6147
+            registry does not grow -- ``TCP.__members__`` measured unchanged
             before and after. On 3.11+ ``copy``/``deepcopy`` still return the
             member itself, since ``Enum.__copy__`` short-circuits ahead of
             any reduction; on 3.10 they return an equal rebuilt one, which is
@@ -1070,7 +1069,7 @@ class PortEnumField(EnumField):
         """
         # NOTE: imported here rather than at module level, as
         # :mod:`pcapkit.const` itself imports :mod:`pcapkit.corekit`; and tested
-        # against AppType rather than ``self._namespace``, as the three
+        # against AppType rather than ``self._namespace``, as the
         # per-transport copies this class replaced did (:issue:`1516`).
         from pcapkit.const.reg.apptype import AppType  # pylint: disable=import-outside-toplevel
 
@@ -1112,7 +1111,7 @@ class PortEnumField(EnumField):
 
             That member carries the registry's own ``__transport__``, as
             ``get``'s does, rather than ``self._proto``. The two are the same
-            member for each of the three schemas, but a composite built by hand
+            member for each of the TCP, UDP and SCTP schemas, but a composite built by hand
             such as ``TransportProtocol.tcp | TransportProtocol.udp`` is a bare
             :class:`int` (``3``, which dispatches to SCTP), and reading ``.name``
             off it would raise :exc:`AttributeError` on a miss ``get`` resolves.
@@ -1127,7 +1126,7 @@ class PortEnumField(EnumField):
             catch keyed on exception type alone cannot see the difference
             between that and a "no member has this value", so it would quietly
             turn the rejection into a miss. Within the width, ``_missing_``
-            raises for no port of any of the four registries: it returns a
+            raises for no port of any per-transport registry: it returns a
             member for a documented span and :data:`None` otherwise. Checking
             the width first needs no exception-based distinction at all.
             ``self.length`` is the field's own declared byte width (``2`` for

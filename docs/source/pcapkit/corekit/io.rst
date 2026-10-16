@@ -5,7 +5,7 @@ I/O Objects
 
 :mod:`pcapkit.corekit.io` contains
 :class:`~pcapkit.corekit.io.SeekableReader`, a seekable customisation of
-:class:`io.BufferedReader`, and two stream proxies:
+:class:`io.BufferedReader`, and the stream proxies:
 :class:`~pcapkit.corekit.io.PeekableStream`, which adds ``peek`` to a seekable
 stream, and :class:`~pcapkit.corekit.io.NamedStream`, which gives a stream a
 ``name``.

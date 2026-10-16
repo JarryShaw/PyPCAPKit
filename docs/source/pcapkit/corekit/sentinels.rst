@@ -8,7 +8,7 @@ singleton sentinel this package defines for itself: a value recognised only by
 identity (``value is SENTINEL``), so it cannot be confused with a value a
 caller might legitimately pass.
 
-All four are defined here, and this is their only import path: the modules
+They are all defined here, and this is their only import path: the modules
 that use them do not re-export them (:issue:`1744`).
 
 .. versionadded:: 1.5.0
@@ -31,7 +31,7 @@ that use them do not re-export them (:issue:`1744`).
 
    :class:`AbsentType` and :data:`ABSENT` are **private** -- never imported outside
    :mod:`pcapkit.protocols.protocol`, and named in no module's ``__all__``. For
-   SCREAMING_SNAKE consistency with the other three sentinels (see
+   SCREAMING_SNAKE consistency with the other sentinels (see
    :ref:`sentinel-convention`), neither carries the leading underscore that would
    hide it from Sphinx, so both are documented below and marked private.
 
