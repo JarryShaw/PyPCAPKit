@@ -3258,7 +3258,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             Constructed option data.
 
         """
-        if schema.code != Enum_LLACode.MH:
+        if schema.code != Enum_LLACode.MN:
             raise ProtocolError(f'{self.alias}: [Opt {schema.type}] invalid format')
 
         data = Data_LinkLayerAddressOption(
@@ -8106,7 +8106,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         return Schema_LinkLayerAddressOption(
             type=type,
             length=len(address) + 1,
-            code=Enum_LLACode.MH,  # type: ignore[arg-type]
+            code=Enum_LLACode.MN,  # type: ignore[arg-type]
             lla=address,
         )
 
