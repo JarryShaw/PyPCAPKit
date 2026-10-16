@@ -4,7 +4,7 @@ name: Coverage Comment
 # unit-tests.yml as a pull-request comment. It runs no tests. The comment cannot
 # be posted from unit-tests.yml itself: that file is also a reusable workflow,
 # and a called workflow can only narrow the token its caller passes, never widen
-# it. All four callers grant `contents: read`, so asking for
+# it. Every caller grants `contents: read`, so asking for
 # `pull-requests: write` there would break every one of them, the release gate
 # included.
 #

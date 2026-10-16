@@ -22,7 +22,7 @@ name: Project Status
 #     `env:` rather than interpolated into the script, and re-reads everything else
 #     (labels, state) from the API.
 #
-# tests/project/test_project_status.py asserts all three over this file -- no
+# tests/project/test_project_status.py asserts each of them over this file -- no
 # checkout or `uses:`, no `${{ }}` inside a `run:` script, and no event-payload
 # reference outside `env:` other than the item number -- so a later edit that
 # breaks one fails a test rather than a security review.

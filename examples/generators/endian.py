@@ -28,14 +28,14 @@ Fixture                         Exercises
 =============================== ==========================================
 ``big_endian.pcap``             magic ``a1 b2 c3 d4`` -- big-endian,
                                 microsecond timestamps
-``little_endian.pcap``          magic ``d4 c3 b2 a1`` -- the same three
+``little_endian.pcap``          magic ``d4 c3 b2 a1`` -- the same
                                 records in the little-endian container
 ``big_endian_nanosecond.pcap``  magic ``a1 b2 3c 4d`` -- big-endian,
                                 nanosecond timestamps
 =============================== ==========================================
 
 The little-endian twin is the point of the set rather than a spare. It carries
-the *same three records* as ``big_endian.pcap`` -- identical timestamps,
+the *same records* as ``big_endian.pcap`` -- identical timestamps,
 identical lengths, byte-identical packet data -- so a test can assert that the
 two files parse to the same values instead of only that the big-endian one
 parses to values hardcoded in the test. That is the property the byte-order
@@ -43,7 +43,7 @@ branch exists to provide, and it is not assertable from one file alone.
 
 The packet data comes from :mod:`scapy`, as it does in :file:`pcap.py`, so the
 frames carry real headers and real checksums. The *containers* are packed here
-by hand with :mod:`struct`, for two reasons: :func:`scapy.utils.wrpcap` writes
+by hand with :mod:`struct`, for these reasons: :func:`scapy.utils.wrpcap` writes
 the host's byte order and offers no way to ask for the other one, and the byte
 order of the container is the whole subject of these fixtures -- spelling it out
 where it can be read is worth more than delegating it.
@@ -103,8 +103,8 @@ NETWORK = 1
 EPOCH = 1500000000
 
 #: The fixtures this module writes, as ``(file name, byte order, nanosecond
-#: flag)``. The two microsecond files carry byte-identical records in the two
-#: containers; the nanosecond one holds the same packets, timed more finely.
+#: flag)``. The microsecond files carry byte-identical records in both byte
+#: orders; the nanosecond one holds the same packets, timed more finely.
 FIXTURES = (
     ('big_endian.pcap', 'big', False),
     ('little_endian.pcap', 'little', False),
@@ -116,7 +116,7 @@ class _Record(NamedTuple):
     """One record of a capture: a record header's four fields, and its data.
 
     The record header is *not* stored as octets here, because the octets are
-    what differs between the three fixtures. :func:`_pack` turns these numbers
+    what differs between the fixtures. :func:`_pack` turns these numbers
     into a header in whichever byte order it was asked for.
 
     """
@@ -156,7 +156,7 @@ def _filler(length: 'int', tag: 'bytes') -> 'bytes':
 
 
 def _records(nanosecond: 'bool' = False) -> 'list[_Record]':
-    """Build the three records every fixture in this module carries.
+    """Build the records every fixture in this module carries.
 
     Args:
         nanosecond: Whether the timestamp fractions are nanoseconds. Only the

@@ -275,7 +275,7 @@ trap cleanup EXIT INT TERM
 # bullet under the table, so the person reading the table months later sees the same
 # reason as the person who watched the run.
 #
-# "a gap" rather than "not measured", because the two callers below that record a note
+# "a gap" rather than "not measured", because the callers below that record a note
 # *after* copying results out may well have collected an environment or two first, and
 # the reporting pass tells those cases apart -- a column with figures in it and a note
 # attached is partly measured, not unmeasured.
@@ -306,10 +306,10 @@ for version in ${VERSIONS}; do
 
     if [ "${DO_BUILD}" -eq 1 ]; then
         echo "==> building for ${PLATFORM} (pcapkit ${REVISION}, base ${base_image})" >&2
-        # The one place a build failure is caught rather than propagated. Five
-        # versions means five chances for a base image to have gone missing or a
+        # The one place a build failure is caught rather than propagated. Every
+        # version is a chance for a base image to have gone missing or a
         # wheel to have stopped publishing for one interpreter, and none of those is
-        # a reason to abandon the four columns that would have worked.
+        # a reason to abandon the columns that would have worked.
         if ! docker build \
                 --platform "${PLATFORM}" \
                 --file "${SCRIPT_DIR}/Dockerfile" \

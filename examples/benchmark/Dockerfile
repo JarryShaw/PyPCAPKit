@@ -46,7 +46,7 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
     VENV_PYPCAP=/opt/venv-pypcap \
     VENV_PCAP_CT=/opt/venv-pcap_ct
 
-# Three things beyond the base image, each needed by exactly one engine:
+# What this image adds beyond the base image, each needed by exactly one engine:
 #
 #   build-essential + libpcap-dev -- `pypcap` is an sdist with a C extension, and
 #       its setup.py hard-fails unless it can find both `pcap.h` and an
@@ -122,7 +122,7 @@ RUN set -eux; \
 # not name. So its failure is recorded rather than fatal.
 #
 # The alternative is worse: a fatal failure here means `run.sh` produces no table at
-# all, and the six engines that do work go unreported because the seventh did not
+# all, and the engines that do work go unreported because one did not
 # build. Recording it keeps the promise that a missing engine is an explained row
 # rather than an absent one -- benchmark.py reads this file and reports the build
 # error as the reason `pypcap` was not measured.

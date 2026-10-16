@@ -140,8 +140,8 @@ jobs:
       # nothing per leg and adds no new job or leg, unlike Scapy below.
       #
       # crypto (cryptography) and NGAP (pycrate) join it for the same reason,
-      # covering two of #738's remaining gates -- HAS_CRYPTO (test_esp_unit.py,
-      # 14 methods) and HAS_PYCRATE (test_ngap_unit.py, 10 methods), both plain
+      # covering #738's remaining HAS_CRYPTO gate (test_esp_unit.py) and its
+      # HAS_PYCRATE gate (test_ngap_unit.py), both plain
       # unit-tier. `cli` (emoji) is deliberately NOT added here: its only
       # HAS_EMOJI-gated tests are in tests/integration/test_cli_subprocess.py,
       # which this job ignores wholesale, so installing it here would unlock
@@ -154,12 +154,12 @@ jobs:
       # PyPCAPFile (pypcapfile) is deliberately NOT here. It used to be kept off
       # every job in this file: on 3.10/3.11 (where its
       # `python_version < '3.12'` marker lets it install), installing it turned
-      # 7 of the 10 HAS_PYPCAPFILE-gated methods this comment used to count
+      # most of the HAS_PYPCAPFILE-gated methods of the time
       # into failures, against a real bug in pcapkit/toolkit/pypcapfile.py's
       # handling of pypcapfile 0.12.0's `IP.src`/`IP.dst`. #743 and #746 fixed
       # that bug, and #751 gave the extra a home: the dedicated
-      # `engine-tests` and `pypcap-parity` jobs below install it (15
-      # HAS_PYPCAPFILE-gated methods between them), deliberately apart from
+      # `engine-tests` and `pypcap-parity` jobs below install it, covering the
+      # HAS_PYPCAPFILE-gated methods between them, deliberately apart from
       # this job rather than added to it -- see either job's own comment for
       # why.
       #
@@ -473,7 +473,7 @@ jobs:
       # The Scapy extra is there for examples/generators/pcap.py and legacy.py,
       # which build their captures with scapy; examples/generators/pcapng.py needs
       # nothing beyond the standard library and pcapkit itself, which it uses to
-      # parse each fixture back. DPKT joins it so the two dpkt-gated methods
+      # parse each fixture back. DPKT joins it so the dpkt-gated methods
       # living under tests/integration/ (test_engine_parity.py,
       # test_engine_runtime.py) actually run here instead of skipping -- see
       # #729; same reasoning as the `test` job above.
@@ -481,16 +481,16 @@ jobs:
       # `cli` (emoji) joins it for one of #738's remaining gates. This job's
       # selection (tests/_tiers.py's fixture_tier_paths()) always includes the
       # whole of tests/integration/ -- which is where every HAS_EMOJI-gated
-      # method lives (test_cli_subprocess.py, 14 methods). `crypto` and `NGAP`
+      # method lives (test_cli_subprocess.py). `crypto` and `NGAP`
       # are deliberately NOT added here: test_esp_unit.py and test_ngap_unit.py
       # are plain unit-tier and never enter this job's selection, so installing
       # cryptography/pycrate here would unlock nothing -- they are already
       # covered, on every Python version, by the `test` job above.
       # PyPCAPFile is NOT added here either, even though this job's selection
-      # also reaches test_new_engine_parity_runtime.py's 6 HAS_PYPCAPFILE
+      # also reaches test_new_engine_parity_runtime.py's HAS_PYPCAPFILE
       # methods -- see the `test` job's comment above for the bug that used to
       # make installing it here a regression, fixed by #743/#746. #751's
-      # `pypcap-parity` job below covers those 6 methods instead, on the same
+      # `pypcap-parity` job below covers those methods instead, on the same
       # fixture-tier selection as this job but in a venv of its own.
       #
       # A KTLO leg that cannot install stops here, as in the `test` job above.
@@ -526,7 +526,7 @@ jobs:
             exit 1
           fi
 
-          # examples/generators/pcapng.py fetches two captures from the Wireshark
+          # examples/generators/pcapng.py fetches captures from the Wireshark
           # repository and synthesises stand-ins when the download fails. The
           # stand-ins parse, and tests/protocols/test_pcapng_regression.py only
           # asserts that extraction succeeds, so a degraded run goes green and
@@ -551,7 +551,7 @@ jobs:
       # same commit. Re-running them here (a bare ``pytest -q`` used to) bought
       # no signal and cost ~21.75 minutes per Python version -- ~130 minutes per
       # PR push across the matrix (see #715). So this selects only the
-      # fixture-dependent tier plus the handful of unit-tier modules whose
+      # fixture-dependent tier plus the unit-tier modules whose
       # capture read is skipped, not exercised, in the `test` job -- see
       # tests/_tiers.py's module docstring and fixture_tier_paths() for why a
       # module can be unit-tier by path and still belong here. The selection is
@@ -652,7 +652,7 @@ jobs:
   # Per-engine coverage for the third-party capture engines (#845): every
   # (Python version, engine) pair is checked, and a failure -- or a correctly
   # asserted decline -- names the one engine and interpreter responsible. Each
-  # pair ("cell") resolves to one of three expected outcomes, decided by the
+  # pair ("cell") resolves to one of these expected outcomes, decided by the
   # cell script's `expect` case below (anything not listed there is
   # `supported`):
   #
@@ -682,12 +682,12 @@ jobs:
   #                        green and never red for the wrong reason. If it
   #                        ever starts building, the cell fails loudly.
   #
-  # One job per engine loops over the six interpreters, each in a fresh venv,
-  # rather than one job per cell (6 Pythons x 5 engines): the queue, not the
-  # runners, is the bottleneck, and 30 jobs would each pay checkout, setup and
-  # apt for a minute of work. One job per *engine* rather than per Python
+  # One job per engine loops over every interpreter, each in a fresh venv,
+  # rather than one job per cell (every Python times every engine): the queue,
+  # not the runners, is the bottleneck, and a job per cell would pay checkout,
+  # setup and apt for a minute of work. One job per *engine* rather than per Python
   # because the engine is what varies the environment: the apt packages
-  # are per engine (installed once per job instead of six times), and pcap-ct
+  # are per engine (installed once per job, not once per interpreter), and pcap-ct
   # and pypcap both install a top-level `pcap` module, so a per-Python job
   # looping over engines would need a fresh venv per engine anyway while also
   # carrying every engine's system packages. It also keeps `matrix.engine` as
@@ -698,7 +698,7 @@ jobs:
   # every annotation titled by engine and Python version and a per-cell row in
   # the job summary.
   #
-  # #1633 splits the interpreters into two tiers, read from
+  # #1633 splits the interpreters into supported and KTLO tiers, read from
   # .github/python-versions.toml by `python-versions` (#1660). The supported
   # cells share one step, and any one of them failing fails the job. The KTLO
   # cells (3.10 alone; see below) are end-of-life, still tested on every run,
@@ -766,7 +766,7 @@ jobs:
       # time; without it, PCAP_CT.unsupported_reason() degrades the engine to
       # the default parser instead of running it.
       #
-      # build-essential + libpcap-dev: PyPCAP is the one engine that compiles
+      # build-essential + libpcap-dev: PyPCAP compiles
       # (pcap.c against libpcap's headers), on every cell -- including the
       # `not-installable` ones, deliberately, so that failure is a genuine
       # compile failure against the 3.12+ C API rather than merely "no
@@ -1110,14 +1110,14 @@ jobs:
   # Whether upstream PyPCAP is worth building in CI at all -- #751's own
   # instruction was "try to build and if the CI is not a good suit, then we
   # ripe it". This job is that attempt: a C toolchain plus libpcap headers, on
-  # the two Python versions its own marker allows
-  # ("pypcap; python_version < '3.12'", pyproject.toml:168). If a clean run of
+  # the Python versions its own marker allows (the PyPCAP extra's
+  # "pypcap; python_version < '3.12'" in pyproject.toml). If a clean run of
   # this job's install step goes red -- not a flake -- the fix is deleting this
   # job and returning HAS_PYPCAP to
   # tests/_dependency_gates.DEPENDENCY_GATE_EXCLUSIONS with that run linked as
   # the reason, per the ruling.
   #
-  # Kept apart from `engine-tests` above for two reasons: it needs a compiler
+  # Kept apart from `engine-tests` above: it needs a compiler
   # that job has no other reason to carry, and its `pcap` module would collide
   # with pcap-ct's if both were installed into the one venv (see
   # `engine-tests`'s own comment on that). The HAS_PYPCAP-gated module this job
@@ -1126,10 +1126,10 @@ jobs:
   # docstring), so this mirrors the `integration` job's fixture-tier selection
   # and Scapy/DPKT/cli baseline rather than `test`'s ignore-shape one, and pays
   # that job's full run cost a second time on top -- accepted here rather than
-  # discovered, since tests/_dependency_gates.py's guard has no cheaper of its
-  # three known selection shapes for reaching one fixture-dependent module (see
-  # that module's own docstring). The same module also carries 6 of
-  # HAS_PYPCAPFILE's 15 gated methods, which come along for free once
+  # discovered, since tests/_dependency_gates.py's guard has no cheaper known
+  # selection shape for reaching one fixture-dependent module (see
+  # that module's own docstring). The same module also carries some of
+  # HAS_PYPCAPFILE's gated methods, which come along for free once
   # PyPCAPFile is on this job's install line too.
   #
   # The matrix is deliberately just 3.10 and 3.11, not every version: PyPCAP's
@@ -1150,8 +1150,8 @@ jobs:
       # Read by the apt plan step; see `engine-tests`'s note on it.
       APT_PACKAGES: build-essential libpcap-dev tshark
       APT_SET: pypcap-parity
-      # Both cells install the same set under the same key; only one saves it,
-      # or the other's save fails with `Unable to reserve cache`. The supported
+      # Every cell installs the same set under the same key; only one saves it,
+      # or another's save fails with `Unable to reserve cache`. The supported
       # leg, so the cache does not depend on a leg that may not get that far.
       APT_CACHE_SAVE: ${{ matrix.python-version == '3.11' }}
       # See the `test` job above.
@@ -1396,8 +1396,8 @@ jobs:
   # (tests/protocols/application/test_http_unit.py and
   # tests/test_base_class_contract.py) each pass alone, and pytest -- the
   # runner every job above uses -- reports the combined run green, while
-  # plain unittest over the same two modules in one process fails four
-  # subTest cases. pytest-subtests is not why -- it is not even installed in
+  # plain unittest over the same two modules in one process fails some of
+  # their subTest cases. pytest-subtests is not why -- it is not even installed in
   # this project (absent from the `test` extra in pyproject.toml), and plain
   # pytest already reports a failed subTest as its own top-level SUBFAILED
   # entry rather than folding it into a passing parent. The real cause is
@@ -1413,7 +1413,7 @@ jobs:
   #
   # A cheaper, narrower alternative: `pytest --noconftest` over just those two
   # modules, in that order, disables that same autouse fixture directly and
-  # reproduced the identical four subTest failures in about 70s on the pre-fix
+  # reproduced the identical subTest failures in about 70s on the pre-fix
   # tree, under the pytest this CI already installs. Whether that single
   # invocation would have been sufficient instead of this dedicated job and its
   # per-directory matrix was not evaluated when this job was written --
@@ -1428,7 +1428,7 @@ jobs:
   # #981's own reproduction needs, since the defect is an earlier module
   # polluting a later one. Running the whole suite in one process is not an
   # option (it OOMs at 29 GB on the machine this was diagnosed on); a matrix
-  # of one leg per top-level directory (protocols being two cells, #1029)
+  # of one leg per top-level directory (protocols split across cells, #1029)
   # is the affordable approximation, and it
   # is sized for wall time rather than for memory. Peak RSS was measured for
   # the three cheapest legs only -- cli 152 MiB, dumpkit 237 MiB, interface
@@ -1443,8 +1443,8 @@ jobs:
   #
   # GitHub issue #1029: the protocols cell measured 30.4 minutes on a CI
   # runner against this job's 45-minute cap (#1029 measured the next slowest
-  # leg at 6.2 minutes on CI), so it is two cells: `protocols/internet` and the rest of
-  # tests/protocols (its other five subdirectories and the modules sitting
+  # leg at 6.2 minutes on CI), so it is split: `protocols/internet` and the rest of
+  # tests/protocols (its other subdirectories and the modules sitting
   # directly in it), the latter expressed as `protocols` with
   # `--exclude protocols/internet`. run_unittest_leg.py takes a sub-path and
   # repeatable --exclude for this; every other cell is untouched.
@@ -1470,33 +1470,33 @@ jobs:
   # pre-#1029 local serial table above is left as it was measured.
   #
   # What sharding costs: modules in different cells no longer share a process,
-  # so pollution from one to the other is invisible again. Counts below were
-  # derived with leg_modules() on main at 30714cd51 plus #1029's split: 51
-  # modules in tests/protocols (12 under internet, 39 in the rest, of which 10
-  # sit directly in tests/protocols). "Pairs" are unordered, C(n,2), since a
-  # single serial run realises each pair in one order. Before: 1275 pairs
-  # co-ran in one process. After: 807 (internet x internet 66, rest x rest
-  # 741); 468 do not. The 255 pairs of a protocols module followed by a
-  # root-level module (51 x 5 roots) all survive, since every cell still runs
-  # the root modules after its own. The 10 modules sitting directly in
-  # tests/protocols stay in the rest cell: moving them into internet would keep
-  # 637 pairs instead of 807 and lengthen internet, the slower cell already.
+  # so pollution from one to the other is invisible again. A pair of
+  # tests/protocols modules still co-runs when both land in the same cell
+  # (leg_modules() is what places each module); a pair split between
+  # internet and the rest no longer does, where the unsharded leg ran it in
+  # one process. Pairs are unordered, since a single serial run realises each
+  # pair in one order. Every pair of a protocols module followed by a
+  # root-level module survives, since every cell still runs the root modules
+  # after its own. The modules sitting directly in tests/protocols stay in the
+  # rest cell: moving them into internet would split more of the pairs that
+  # still co-run than it would join, and lengthen internet, the slower cell
+  # already.
   #
   # tests/vendor was first left out of ``leg`` because running it this way
   # surfaced an instance of the very defect this job exists to catch (issue
   # #985): a stale VendorRuntimeWarning generation made assertWarnsRegex fail
   # in tests/vendor/test_vendor_snapshot_restore_unit.py. That was fixed by
-  # re-resolving the class fresh per test, so the directory is a leg (297
-  # tests in the leg, 118 of them tests/vendor's own, measured on this venv).
+  # re-resolving the class fresh per test, so the directory is a leg like
+  # the others.
   #
-  # Two directories are deliberately absent from ``leg``, for reasons that
+  # These directories are deliberately absent from ``leg``, for reasons that
   # are not this job's to fix:
   #
   #   * tests/corekit -- already known and already accepted, not a new
   #     finding. tests/_support.py's own purge_modules() docstring measures
-  #     and documents exactly this: "python -m unittest discover -s
-  #     tests/corekit fails 5 of that class's identity subtests, because
-  #     test_module sorts first and purges". pytest is "the supported
+  #     and documents exactly this: plain `python -m unittest discover -s
+  #     tests/corekit` fails identity subtests there, because
+  #     test_module sorts first and purges. pytest is "the supported
   #     runner" for precisely this reason -- tests/conftest.py's autouse
   #     restore_module_table fixture reconciles the module-identity drift
   #     that plain unittest has no way to see coming. Running this leg
@@ -1507,7 +1507,7 @@ jobs:
   #     build, and is already run whole, under pytest, by the `integration`
   #     job above. The exclusion lives here, in this matrix, and nowhere else:
   #     util/run_unittest_leg.py does not refuse the directory, it collects
-  #     nothing from it. tests._tiers.is_unit_tier() rejects all 12 of its
+  #     nothing from it. tests._tiers.is_unit_tier() rejects every one of its
   #     test_*.py files, so leg_modules('integration') returns an empty tuple
   #     and the leg would run the root-level modules alone -- green, while
   #     covering none of tests/integration. Adding it back here would buy that
@@ -1518,8 +1518,8 @@ jobs:
   # maintainer's call to make separately from landing it.
   unittest-ordering:
     name: Plain unittest ordering (${{ matrix.label || matrix.leg }})
-    # Every push to main and no PR (#1052 item H): not required, and its 11
-    # cells would be a sixth of each PR push's jobs. `needs: [test]` (#1538)
+    # Every push to main and no PR (#1052 item H): not required, and its
+    # cells would add a large share of each PR push's jobs. `needs: [test]` (#1538)
     # queues them behind this push's own legs; `!cancelled()` still runs them
     # if `test` fails, so a red cell still fails the run that gates publishing.
     if: ${{ !cancelled() && inputs.gate-only != true && github.event_name != 'pull_request' }}
@@ -1619,7 +1619,7 @@ jobs:
   #
   # ``tests/project/test_changelog_md.py`` asserts the same identity, so the
   # matrix covers it too -- but that test ``skipTest``s when either file is
-  # absent, and reports a mismatch as two 17 KB strings. ``--check`` cannot skip,
+  # absent, and reports a mismatch as two whole-file strings. ``--check`` cannot skip,
   # exits 1 when the file is missing, and prints a unified diff.
   changelog:
     name: Changelog drift
@@ -1791,7 +1791,7 @@ jobs:
       # DPKT joins Scapy here for the same reason as the `integration` job
       # above -- this is the full, unfiltered suite, so it is the one place
       # where skipping the dpkt-gated tests would be most misleading. crypto,
-      # cli and NGAP join it for the same reason and cover the three of #738's
+      # cli and NGAP join it for the same reason and cover those of #738's
       # remaining gates they were added for, since an unfiltered `pytest` run (no
       # --ignore, no tier selection) reaches every one of them regardless of
       # which tier they live in -- unlike the `test` and `integration` jobs
@@ -1852,7 +1852,7 @@ jobs:
   # lists, because rulesets match check names literally and support no
   # wildcard: requiring each matrix cell by name would mean hand-editing the
   # ruleset every time a matrix changes. On a docs-only pull request it
-  # accepts `skipped` for the four code legs (see below). The `Compat` legs
+  # accepts `skipped` for the code legs (see below). The `Compat` legs
   # are required on their own because a job cannot `needs:` a job in another
   # workflow file, so nothing here can stand in for
   # them.
@@ -1882,14 +1882,14 @@ jobs:
   #     call, not a PR, which is not where ruleset 23497679 applies anyway.
   #   * The check itself inspects every dependency explicitly and prints each
   #     one's result before failing, so a red run names which leg broke
-  #     instead of leaving that to be re-discovered from the four jobs' own
+  #     instead of leaving that to be re-discovered from the jobs' own
   #     logs.
   #
   # Note for whoever adds a caller of this reusable workflow: under
   # `workflow_call`, GitHub prefixes a called workflow's check names with the
   # calling job's own name (`<caller job> / Required checks passed`), which
   # would not match a ruleset entry naming just `Required checks passed`.
-  # Harmless for the four callers -- create-release, cron-conda, cron-vendor and
+  # Harmless for the callers -- create-release, cron-conda, cron-vendor and
   # deploy-pages each pass `gate-only: true`, which skips this job via the guard
   # above before that renaming would ever matter -- but a caller that does NOT
   # set `gate-only: true` would produce a differently-named, unrequired check.
@@ -1926,7 +1926,7 @@ jobs:
   # `pypcap-parity` are skipped by their own `if:`, and `project-tests` runs
   # instead. A job-level `if:` rather than workflow-level `paths-ignore`,
   # because `paths-ignore` would not run this workflow at all and leave this
-  # required context pending forever. So `skipped` is accepted for those four
+  # required context pending forever. So `skipped` is accepted for those
   # legs **only** when `changes` succeeded and said `code == 'false'`, and then
   # `project-tests` must have succeeded. Every other combination keeps the
   # strict rule: `changes` failing, its output missing, or any leg skipped

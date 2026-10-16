@@ -10,8 +10,8 @@ network packets and [PCAP](https://en.wikipedia.org/wiki/Pcap) files, with
 Unlike popular PCAP extractors such as [Scapy](https://scapy.net),
 [DPKT](https://dpkt.readthedocs.io) and [PyShark](https://kiminewt.github.io/pyshark),
 `pcapkit` reports more detail about each packet through a more *Pythonic* interface.
-Where that depth is not needed, the same interface also drives six third-party
-extraction engines.
+Where that depth is not needed, the same interface also drives third-party extraction
+engines.
 
 The whole project declares **Python 3.6** or later. CI supports 3.11 to 3.15, and
 still tests the end-of-life 3.7 to 3.10 without letting a failure block anything;
@@ -41,7 +41,7 @@ pip install pypcapkit[all]          # core addons only: cli + crypto + NGAP (pyc
 ```
 
 Engines are on demand; `all` bundles only the core addons the library needs for
-full functionality. Four engines also need something beyond `pip install` -- a
+full functionality. Some engines also need something beyond `pip install` -- a
 `tshark` binary, a C compiler, `libpcap` headers, or an older interpreter -- and
 `pypcap`/`pcap-ct` must never be installed together. The
 [installation guide](https://jarryshaw.github.io/PyPCAPKit/#installation) gives each
@@ -89,7 +89,7 @@ reference. Pages worth knowing by name:
 | Page | What is in it |
 |---|---|
 | [API reference](https://jarryshaw.github.io/PyPCAPKit/pcapkit/index.html) | Every module, protocol and constant |
-| [Module structure](https://jarryshaw.github.io/PyPCAPKit/#module-structure) | What each of the nine subpackages is for |
+| [Module structure](https://jarryshaw.github.io/PyPCAPKit/#module-structure) | What each subpackage is for |
 | [Engine comparison](https://jarryshaw.github.io/PyPCAPKit/#engine-comparison) | Which engines exist, which Python versions they run on, and measured speed per packet |
 | [Engine support](https://jarryshaw.github.io/PyPCAPKit/pcapkit/foundation/engines/index.html) | What each engine does *not* support, and how the gap is surfaced |
 | [Installation](https://jarryshaw.github.io/PyPCAPKit/#installation) | Extras, engine prerequisites and the local development setup |

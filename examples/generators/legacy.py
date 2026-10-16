@@ -8,7 +8,7 @@ write, but two read captures that exist nowhere in the repository, so those two
 scripts cannot run at all on a fresh checkout. This module writes them, with
 :mod:`scapy`, deterministically and without network access.
 
-``test.pcap`` (34 frames)
+``test.pcap``
     Read by ``examples/legacy_smoke/test_reassembly.py``, which extracts it
     with ``tcp=True``, ``reasm_strict=True`` and ``reassembly=True`` and prints
     every reassembled TCP datagram. Two connections to port 80, one over IPv4
@@ -18,22 +18,22 @@ scripts cannot run at all on a fresh checkout. This module writes them, with
     delivered out of order, with one of them retransmitted; the IPv6 request
     body is spread over three segments delivered in order. The IPv4 connection
     closes with a FIN from each end, the IPv6 one with a FIN from the server
-    and an abortive RST from the client, so the capture covers both of the
-    events that make :mod:`pcapkit` submit a datagram.
+    and an abortive RST from the client, so the capture covers each event
+    that makes :mod:`pcapkit` submit a datagram.
 
-``http6.cap`` (26 frames)
+``http6.cap``
     Read by ``examples/legacy_smoke/test_analyse.py``, which pretty-prints the
     application layer :mod:`pcapkit` finds in each reassembled datagram. Two
     HTTP/1.1 connections over IPv6 to port 80: a page fetch whose response body
     spans three segments, and a conditional request for a stylesheet answered
-    ``304 Not Modified`` with no body at all. All four datagrams -- two
-    requests, two responses -- analyse as HTTP.
+    ``304 Not Modified`` with no body at all. Every datagram, requests and
+    responses alike, analyses as HTTP.
 
     That script does not run to completion even with this fixture in place, and
     the reason is the script rather than the capture: it asks for ``tcp=True``
     and ``reasm_strict=True`` but never for ``reassembly=True``, so reading
     ``extraction.reassembly`` raises ``UnsupportedCall: 'Extractor(reassembly=
-    False)' object has no attribute 'reassembly'``. It extracts all 26 frames
+    False)' object has no attribute 'reassembly'``. It extracts every frame
     first, and adding that one keyword makes the rest of it work; the fixture
     is built for the script as it will read once repaired.
 
@@ -45,7 +45,7 @@ seed rather than randomly, so a second run rewrites byte-identical files.
 How pcapkit's TCP reassembly shapes these captures
 --------------------------------------------------
 
-The layouts above are not arbitrary. Four properties of
+The layouts above are not arbitrary. These properties of
 :class:`pcapkit.foundation.reassembly.tcp.TCP` decide what a capture has to
 look like for a datagram to come out of it at all:
 
@@ -673,7 +673,7 @@ def _write_test(dest: 'pathlib.Path') -> 'pathlib.Path':
                 delay=0.014772)
 
     # ------------------------------------------------------------------
-    # 2-16: the IPv4 page fetch
+    # 2-20: the IPv4 page fetch
     # ------------------------------------------------------------------
     page = _Flow(_CLIENT4, _SERVER4, 49812, 80)
     request = _http_request('GET', host4, '/index.html',
@@ -714,7 +714,7 @@ def _write_test(dest: 'pathlib.Path') -> 'pathlib.Path':
     capture.add(page.ack(False))
 
     # ------------------------------------------------------------------
-    # 17-22: the IPv6 telemetry upload
+    # 21-33: the IPv6 telemetry upload
     # ------------------------------------------------------------------
     upload = _Flow(_CLIENT6, _SERVER6, 49814, 80, client_window=32768)
     report = _http_request('POST', host6, '/v1/telemetry',
@@ -755,7 +755,7 @@ def _write_http6(dest: 'pathlib.Path') -> 'pathlib.Path':
     conditional request the browser makes for the stylesheet the page
     references, which the server answers ``304 Not Modified`` -- a response
     with a header block, no body and no ``Content-Length``. Both connections
-    close from both ends, so all four datagrams are submitted.
+    close from both ends, so every datagram is submitted.
 
     Args:
         dest: Destination directory.

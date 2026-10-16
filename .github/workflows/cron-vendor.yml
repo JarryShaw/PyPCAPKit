@@ -18,7 +18,7 @@ on:
 # Least privilege by default, since `workflow_run` is in the trigger list --
 # that event can be raised by a pull request's `Unit Tests` run completing, so
 # the ambient token this workflow gets should default to nothing rather than
-# whatever the repository's default is. Both jobs below already declare their
+# whatever the repository's default is. Every job below already declares its
 # own narrower `permissions:`, so this changes nothing they rely on; it only
 # closes the gap for anything added later that forgets to.
 permissions: {}
@@ -168,7 +168,7 @@ jobs:
           # #910 moved those to the `dev` extra instead, which is
           # for the toolchain rather than for a vendor crawl. `vendor` is
           # installed alongside `all` for those two: `pcapkit-vendor` below
-          # regenerates every crawler with no target given, and six of them
+          # regenerates every crawler with no target given, and some of them
           # import `bs4` at module scope while `pcapkit.vendor.default` imports
           # `requests` the same way (#507). See the `vendor` extra's own
           # comment in pyproject.toml for the full reasoning.

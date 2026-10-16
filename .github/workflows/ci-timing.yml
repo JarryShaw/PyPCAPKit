@@ -30,7 +30,7 @@ on:
 
 # Read-only: the runs, jobs and artifacts need `actions: read`, the workflow
 # files at each run's sha need `contents: read`. GITHUB_TOKEN allows 1,000 API
-# requests an hour per repository; a default run uses about 690.
+# requests an hour per repository; a default run was estimated at about 690.
 permissions:
   actions: read
   contents: read

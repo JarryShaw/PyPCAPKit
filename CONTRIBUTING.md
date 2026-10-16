@@ -34,8 +34,8 @@ Thanks for your contributions!
 
 ## Running the tests
 
-The suite runs in two tiers. The tier is a property of a module's *path*, not of the command that
-collects it; `tests/_tiers.py` is the rule.
+The suite runs in a unit tier and a fixture-dependent tier. The tier is a property of a module's
+*path*, not of the command that collects it; `tests/_tiers.py` is the rule.
 
 ```shell
 make test        # the unit tier -- the selection CI runs
@@ -59,7 +59,7 @@ Entries live in `docs/source/changelog/<version>.rst`, one file per version, lis
 the toctree of `docs/source/changelog.rst`. That tree is the single source of the project's history.
 
 **`CHANGELOG.md` is generated — never edit it by hand.** `util/changelog_md.py` derives it from the
-newest entry alone, because its two consumers (the `Create Release` workflow's release body and the
+newest entry alone, because its consumers (the `Create Release` workflow's release body and the
 source distribution) read Markdown rather than reStructuredText. Add your bullet to the `.rst`
 entry, then regenerate:
 
@@ -114,13 +114,13 @@ it, which is correct — they are reachable only through that class.
 The sweep runs **in both directions**: a must-implement member with no directive is the same defect as
 a recipe body with one, only quieter. Add the missing directive rather than aiming for a small diff.
 
-Two mechanical points that decide real cases:
+Mechanical points that decide real cases:
 
 - **A private base class must stay documented when a documented subclass carries
   `:show-inheritance:`.** Sphinx renders that subclass's `Bases:` line as a link into the private
   class's page, so dropping the directive breaks a link a public page renders. This keeps
-  `pcapkit.protocols.schema.misc.pcapng._OPT_Option` and its five siblings, plus `_IPField`,
-  `_IPInterfaceField` and `_TextField`.
+  `pcapkit.protocols.schema.misc.pcapng._OPT_Option` and the other per-block option bases with
+  documented subclasses, plus `_IPField`, `_IPInterfaceField` and `_TextField`.
 - **Dunders keep their directives.** A `__dunder__` is reached through public syntax, not by name
   (`len()` calls `__len__`, `obj[key]` calls `__getitem__`), so overriding one changes behaviour a
   caller observes without writing the name. PyPCAPKit's own `__proto__`, `__option__`, `__schema__`
@@ -149,7 +149,7 @@ make bandit    # security lint
 make vermin    # minimum-Python-version check
 ```
 
-Four of them — `pylint`, `mypy`, `bandit` and `vermin` — also run in CI as the `Lint` job in
+`pylint`, `mypy`, `bandit` and `vermin` also run in CI as the `Lint` job in
 `.github/workflows/lint.yml`: on every pull request against `main`, on a weekly Saturday schedule
 and on demand through `workflow_dispatch`, on the newest supported Python alone (`latest` in
 `.github/python-versions.toml`) rather than across the test matrix.
@@ -158,8 +158,8 @@ The job drives them through the `Makefile` rather than restating their flags (`v
 variables, so a check cannot come out clean locally and red in CI because the two drifted.
 
 **Those steps are advisory, not a gate.** Each carries `continue-on-error: true`, so a finding lands
-as a non-blocking annotation and a red linter will not fail your pull request; none of the four is
-clean. The workflow's header records the counts and what each tool would need before
+as a non-blocking annotation and a red linter will not fail your pull request; none of them is
+clean. The workflow's header records what each tool would need before
 its `continue-on-error` line could be deleted. Read the job's run summary, where each step writes
 its verdict, and try not to add to the numbers.
 

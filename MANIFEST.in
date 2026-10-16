@@ -41,9 +41,9 @@ prune temp
 # So the failure mode is real in principle; it just cannot be reached by removing
 # this line, because the README is in the sdist regardless.
 #
-# Of the three ``include`` lines this file originally carried, only
-# ``include CHANGELOG.md`` is load-bearing: deleting it alone drops exactly one
-# entry from the listing, and nothing else changes.
+# Of the ``include`` lines this file originally carried, only
+# ``include CHANGELOG.md`` is load-bearing: deleting it alone drops just that
+# file from the listing, and nothing else changes.
 #
 # These two are kept anyway, as an explicit statement of intent that does not
 # depend on a setuptools default staying where it is -- a much weaker reason than
@@ -68,7 +68,7 @@ include LICENSE
 # distribution".
 include CITATION.cff
 
-# The changelog needs two lines of its own, and neither is redundant.
+# The changelog needs lines of its own, and none of them is redundant.
 #
 # ``global-include *.py`` above matches only ``*.py``, so the root
 # ``CHANGELOG.md`` is picked up by nothing and would be absent from every source

@@ -8,7 +8,7 @@ out the next one under :pep:`440`, and writes it back.
 Where it is invoked from, and why that matters
 ----------------------------------------------
 
-Exactly one caller: the ``Bump Version`` step of
+Its caller is the ``Bump Version`` step of
 :file:`.github/workflows/cron-vendor.yml`, between the crawl and the ``git
 commit``. Completion of that workflow is itself the ``workflow_run`` trigger of
 :file:`.github/workflows/create-release.yml`, which reads ``pcapkit.__version__``
@@ -57,13 +57,14 @@ eleven cases; it is an argument for eventually anchoring both fields to
 actually going out. Until then this is the better of the two available answers, and
 the ``version`` half is guarded by a test that fails when the file drifts from
 ``pcapkit.__version__`` -- which also covers the version changes made by hand,
-which never run this script at all. Those are 40 of the 167 commits that have
-moved ``__version__`` on ``main``: a quarter over the project's life, and 11 of
-the most recent 25.
+which never run this script at all. Those are about a quarter of the commits
+that have moved ``__version__`` on ``main`` over the project's life, and a larger
+share of the recent ones.
 
 The rewrite is line-oriented rather than a :mod:`yaml` load-and-dump. A round
 trip through a YAML library would reorder keys, normalise quoting, and drop the
-sixteen lines of comment that explain why the file omits ``doi`` and ``orcid`` --
+comment header, which among other things explains why the file omits ``doi``
+and ``orcid`` --
 none of which is a change anyone asked for. Matching ``^version:`` and
 ``^date-released:`` at column zero is enough to identify the two top-level keys,
 since every nested key in the file is indented and ``cff-version`` does not

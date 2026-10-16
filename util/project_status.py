@@ -9,7 +9,7 @@ is the table under "Milestones and the Project Board" in
 is the only place it is written in code -- the tests parse that table and hold the
 two to each other.
 
-Two modes:
+It runs in one of these modes:
 
 * ``--item N`` -- one issue or pull request, for an ``issues`` or
   ``pull_request_target`` event. Its labels and state are re-read through the API

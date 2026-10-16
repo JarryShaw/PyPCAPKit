@@ -35,7 +35,7 @@ latest = "3.15"
 # no wheel, conda build or required context. The weekly job has no source for
 # either, so it keeps these lines as written, after the other versions of their
 # table. Promoting one once its leg is green is a hand edit, which
-# util/python_versions.py refuses until it has those three.
+# util/python_versions.py refuses until it has all of them.
 [versions.graalpy]
 "graalpy-25.4" = { tier = "experimental" }
 
@@ -43,8 +43,8 @@ latest = "3.15"
 # tests/project/test_python_versions_1660.py fails on a pin not listed here, on
 # an entry that matches no pin, and on an entry without a comment.
 
-# The parity matrix's one supported leg saves the apt cache. Both legs install
-# one set under one key, and a second saver fails with `Unable to reserve
+# Only the parity matrix's supported leg saves the apt cache. Every leg installs
+# one set under one key, and another saver fails with `Unable to reserve
 # cache`.
 [[exemptions]]
 workflow = "unit-tests.yml"

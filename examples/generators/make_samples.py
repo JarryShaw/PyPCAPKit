@@ -2,7 +2,7 @@
 """Regenerate the sample captures used by the test suite and the examples.
 
 The captures under ``examples/captures/`` are not tracked in git, apart from the
-two inputs ``in.pcap`` and ``dhcp.pcapng`` (see ``.gitignore``), yet the runtime,
+inputs ``in.pcap`` and ``dhcp.pcapng`` (see ``.gitignore``), yet the runtime,
 regression and integration tests read them and pin their contents, as do the
 demonstration scripts in ``examples/legacy_smoke/``. This script rebuilds the
 generated captures, so a fresh clone can run ``pytest`` without any ignore flags:
