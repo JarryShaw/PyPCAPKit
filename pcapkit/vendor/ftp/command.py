@@ -72,7 +72,7 @@ class FEATCode(EnumRegistry, StrEnum):
     .. note::
 
        Declares every FEAT keyword the IANA registry's own ``FEAT code``
-       column names -- the 5 group markers below plus the per-command
+       column names -- the group markers below plus the per-command
        keywords generated after them (data-driven, not hand-picked; see
        :meth:`~pcapkit.vendor.ftp.command.Command.process`) -- rather than
        minting the per-command ones at import time as an incidental side
@@ -129,9 +129,9 @@ class FEATCode(EnumRegistry, StrEnum):
         this is done, implementations are recommended to use upper case
         letters when transmitting the feature response."* A caller feeding a
         ``FEAT`` response line is therefore holding upper case by
-        recommendation, while 5 of this registry's 15 codes are registered in
-        lower case -- measured on the IANA CSV: 10 distinct all-upper-case
-        keywords against ``base``, ``feat``, ``hist``, ``nat6`` and ``secu``,
+        recommendation, while some of this registry's codes are registered in
+        lower case -- measured on the IANA CSV: ``base``, ``feat``, ``hist``,
+        ``nat6`` and ``secu``, against all-upper-case keywords for the rest,
         with none mixed. Without this override ``get('BASE')`` raised
         :exc:`KeyError`, which is the defect GitHub issue :issue:`903`'s audit found.
 
@@ -286,7 +286,7 @@ class {NAME}(EnumRegistry, StrEnum):
        :meth:`register`, and ``get`` is not given enough information to create
        one. Concretely true here -- a bare wire command word carries no
        :attr:`feat`/:attr:`desc`/:attr:`type`/:attr:`conf`, so a minted member
-       had all four hollowed out to their defaults; :meth:`register` is the
+       had each of them hollowed out to its default; :meth:`register` is the
        path that can actually supply them.
 
     """
@@ -329,10 +329,10 @@ class {NAME}(EnumRegistry, StrEnum):
         entirely --
         :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`
         bypasses :meth:`__new__` (it calls
-        :class:`str`'s directly), so those four attributes would otherwise
+        :class:`str`'s directly), so those attributes would otherwise
         be absent and :meth:`__repr__` (which reads :attr:`desc`) would
         raise on the result. There is no more specific value to reconstruct
-        them from -- a bare wire command word carries none of the four,
+        them from -- a bare wire command word carries none of them,
         which is exactly the owner's reasoning for why ``get()``/
         ``_missing_`` must not mint one: :meth:`register` is the path that
         can actually supply them.

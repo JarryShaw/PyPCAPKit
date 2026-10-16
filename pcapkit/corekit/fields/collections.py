@@ -78,7 +78,7 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
             :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
     This field is used to represent a list of fields, as in the case of lists of
-    constrant-length-field items in a protocol.
+    constant-length-field items in a protocol.
 
     """
 
@@ -294,7 +294,7 @@ class OptionField(ListField, Generic[_TS]):
         :meth:`self.unpack <unpack>` selects an option's schema by reading the
         ``type_name`` field of ``base_schema`` **alone** off the front of the
         option, instead of unpacking the whole base schema and keeping only that
-        one value. That is only the same read when three things hold of the type
+        one value. That is only the same read when the following hold of the type
         field:
 
         1. it is the base schema's **first** field, so that it is what sits at the
@@ -366,7 +366,7 @@ class OptionField(ListField, Generic[_TS]):
         # docstring above for what the fast path requires and why a base schema
         # that does not meet it is accommodated rather than rejected.
         #
-        # The three conditions are exactly what makes reading the type field alone
+        # The conditions above are exactly what makes reading the type field alone
         # the same read that ``Schema.unpack`` performs for it: it must sit at the
         # front of the option, ``Schema.unpack`` must handle it through its generic
         # branch rather than one of the special ones (a ``NumberField`` is never

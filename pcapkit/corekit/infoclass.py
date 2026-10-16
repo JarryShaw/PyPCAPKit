@@ -781,14 +781,14 @@ class _MultiInfo(Info[VT], Generic[KT, VT]):
     live in the multi-mapping rather than in :attr:`~object.__dict__`.
 
     That is the whole carve-out from :class:`Info`, and it is confined to this
-    class and the two below it:
+    class and its subclasses, :class:`MultiInfo` and :class:`OrderedMultiInfo`:
 
     * :meth:`__new__` gives the multi-mapping its empty storage, and
       :meth:`__update__` *adds* every pair to it, so that the inherited
       :meth:`Info.from_dict` builds one; :func:`info_final` generates no
       ``__init__`` for such a class (it has no declared fields);
     * :meth:`__setattr__` admits the multi-mapping's own bookkeeping, and
-      only while one of those two is writing;
+      only while :meth:`__new__` or :meth:`__update__` is writing;
     * every mutator of the multi-mapping raises
       :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`, as assignment to
       an :class:`Info` does;
@@ -1083,8 +1083,8 @@ def _as_info_type(hint: 'Any') -> 'Optional[Type[Info]]':
         :class:`types.GenericAlias` such as ``list[Packet]`` satisfies
         ``isinstance(hint, type)`` while :func:`issubclass` still refuses it
         with :exc:`TypeError` -- which would otherwise escape
-        :meth:`Info.from_dict` for the 26 of 487 :class:`Info` classes that
-        carry such an annotation. From 3.11 on the ``isinstance`` is already
+        :meth:`Info.from_dict` for any :class:`Info` class that carries such an
+        annotation. From 3.11 on the ``isinstance`` is already
         :data:`False`, so only the older interpreters reach the
         :exc:`TypeError`; ``NestedTypeResolverTests`` in
         :file:`tests/corekit/test_from_dict_roundtrip_unit.py` pins the shape

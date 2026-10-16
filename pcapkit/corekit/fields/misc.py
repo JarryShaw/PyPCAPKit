@@ -585,8 +585,8 @@ def nested_packet_context(packet: 'dict[str, Any]') -> 'dict[str, Any]':
         too, so handing a nested schema the enclosing mapping itself would let
         the inner ``length`` overwrite the outer one mid-pack.
 
-        Two consequences of it being a copy rather than a live view, both
-        deliberate and neither reached by any call site in this package. A name
+        Its being a copy rather than a live view has consequences, each
+        deliberate and none reached by any call site in this package. A name
         deleted from the returned mapping is simply gone, rather than
         reverting to the enclosing schema's value. And the copy is taken when
         this function is called, so a later mutation of ``packet`` is not

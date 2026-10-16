@@ -17,8 +17,9 @@ compiled ASN.1, at ``pycrate_asn1dir/NGAP.py``'s ``NGAP_Constants`` class (one
 or ``ProtocolIE-ID`` open type it belongs to) -- and it is the very same
 dependency :mod:`pcapkit.protocols.application.ngap` already needs installed to
 decode NGAP at all. So this crawler reads that already-installed package
-directly instead of fetching anything over the network: :attr:`~ProcedureCode.LINK`
-is :obj:`None` and :meth:`ProcedureCode._request` imports ``pycrate_asn1dir.NGAP``
+directly instead of fetching anything over the network: it leaves
+:attr:`~pcapkit.vendor.default.Vendor.LINK` at its :obj:`None` default, and
+:meth:`ProcedureCode._request` imports ``pycrate_asn1dir.NGAP``
 in place of :meth:`~pcapkit.vendor.default.Vendor._request`'s HTTP round trip.
 No network access happens at generation time -- only, if at all, whenever
 ``pip install pypcapkit[NGAP]`` last ran.
@@ -145,7 +146,7 @@ class ProcedureCode(Vendor):
         naming which ``NGAP-CommonDataTypes`` open type it belongs to (``.called``,
         a ``(module, type)`` pair), a private ``_name`` holding the ASN.1
         identifier verbatim (``'id-AMFConfigurationUpdate'``), and a private
-        ``_val`` holding the assigned integer. None of the three has a public
+        ``_val`` holding the assigned integer. None of these has a public
         accessor that survives this far:
         :meth:`~pycrate_asn1rt.asnobj.ASN1Obj.get_typeref`
         resolves to the *referenced type object* rather than its
@@ -195,7 +196,7 @@ class ProcedureCode(Vendor):
 
         Unlike a hand-scraped CSV, |pycrate|_'s compiled specification names
         each assignment once -- measured, zero duplicate names and zero
-        duplicate values across all 81 -- so
+        duplicate values across every assignment -- so
         :meth:`~pcapkit.vendor.default.Vendor.rename`'s
         per-name counter has nothing to disambiguate and this
         crawler never calls it.

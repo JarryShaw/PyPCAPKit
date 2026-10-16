@@ -7,9 +7,9 @@
 This module contains the vendor crawler for **Application Layer Protocol Numbers**,
 which is automatically generating :class:`pcapkit.const.reg.apptype.apptype.AppType`.
 
-It also carries the machinery the four per-transport crawlers in this package
+It also carries the machinery the per-transport crawlers in this package
 share -- the one pass over IANA's CSV that groups its rows, and the templates
-that render them -- since all five read the same registry and differ only in
+that render them -- since they all read the same registry and differ only in
 which rows they claim. See :class:`~pcapkit.vendor.reg.apptype.tcp.TCP` and its
 siblings for those.
 
@@ -41,9 +41,9 @@ TRANSPORTS = ('tcp', 'udp', 'sctp', 'dccp')
 
 #: Per-process cache of the parsed registry, keyed by :attr:`Vendor.LINK`.
 #:
-#: The five crawlers in this package read one 1.1 MB CSV between them, and
+#: The crawlers in this package all read the same IANA CSV, and
 #: :meth:`Vendor._request` is per-instance, so ``pcapkit-vendor`` would otherwise
-#: fetch the same file from IANA five times in a row for a single run.
+#: fetch the same file from IANA once per crawler in a single run.
 _CACHE = {}  # type: dict[str, list[str]]
 
 #: The canonical service for each port IANA assigns more than one to, per
@@ -52,9 +52,8 @@ _CACHE = {}  # type: dict[str, list[str]]
 #: IANA genuinely registers three services on TCP/80 -- ``http``, ``www`` and
 #: ``www-http`` -- and gives no precedence among them, so the registry cannot
 #: derive which one a port lookup should answer with. Registry row order does not
-#: supply it either: taken alone it answers 28 of these 44 pairs the way the rest
-#: of the world does and 16 of them differently, giving ``l2f`` for 1701 and
-#: ``shilp`` for 2049.
+#: supply it either: taken alone it answers many of these pairs differently
+#: from the rest of the world, giving ``l2f`` for 1701 and ``shilp`` for 2049.
 #:
 #: So this follows the industry convention instead, taken from :file:`/etc/services`
 #: -- the same answer :func:`socket.getservbyport` gives. Each entry is the first
@@ -335,8 +334,8 @@ class {NAME}(EnumRegistry, StrEnum):
     .. versionchanged:: 1.5.0
 
        Split by transport protocol (:issue:`732`): :mod:`pcapkit.const.reg.apptype`
-       is a package, and every assignment is a member of one of the four
-       registries above rather than of this class. ``get()`` raises
+       is a package, and every assignment is a member of one of the per-transport
+       registries rather than of this class. ``get()`` raises
        :exc:`ValueError` for a port outside ``0``-``65535`` (:issue:`758`), and
        returns an unregistered member rather than minting one for a port the
        registry does not assign (:issue:`860`).
@@ -372,15 +371,15 @@ class {NAME}(EnumRegistry, StrEnum):
     #: the last of them.
     #:
     #: Declared here as :obj:`None` and overridden in each subclass: a mutable
-    #: class attribute declared on this class would be *shared* by all four
-    #: subclasses, so they would collide with each other exactly as the ports of
+    #: class attribute declared on this class would be *shared* by every
+    #: subclass, so they would collide with each other exactly as the ports of
     #: one transport used to collide inside the old flat registry.
     __registry__: 'Optional[MultiDict[int, {NAME}]]' = None
 
     #: Registry class owning each transport protocol, i.e. what
     #: :meth:`get` delegates to when called on this class rather than on one of
-    #: them. Populated by :mod:`pcapkit.const.reg.apptype` once all four have
-    #: been imported, since this module cannot import its own subclasses.
+    #: them. Populated by :mod:`pcapkit.const.reg.apptype` once every one of
+    #: them has been imported, since this module cannot import its own subclasses.
     __registries__: 'dict[TransportProtocol, Type[{NAME}]]' = {{}}
 
     #: Canonical service per port, for the ports carrying more than one. The base
@@ -412,7 +411,7 @@ class {NAME}(EnumRegistry, StrEnum):
     def aliases(self) -> 'tuple[{NAME}, ...]':
         """Other services sharing :attr:`port` in this member's own registry.
 
-        GitHub issue :issue:`807`. No storage of its own: IANA already keeps every
+        GitHub issue :issue:`807`. No storage of its own: the registry already keeps every
         colliding service as its own member of :data:`__registry__`, keyed on
         the shared port -- :meth:`get_all` already walks that same bucket to
         answer with the aliases after the canonical member, so this is exactly
@@ -459,7 +458,7 @@ class {NAME}(EnumRegistry, StrEnum):
         # consequence worth stating plainly rather than leaving for a doctest
         # to trip over: ``str(member) == member.value`` already breaks at
         # class-creation time for every port that statically carries more
-        # than one service (94 such members as shipped);
+        # than one service;
         # :meth:`register_alias` merely adds to that set at runtime.
         base = f'{{self.svc}} [{{self.port}} - {{self.proto.name}}]'
         aliases = self.aliases
@@ -538,7 +537,7 @@ class {NAME}(EnumRegistry, StrEnum):
             proto = TransportProtocol.get(proto.lower())
 
         # NOTE: a direct dict lookup covers every genuine single transport --
-        # one of the four real members, or a bare int equal to one of their
+        # one of the real members, or a bare int equal to one of their
         # values -- since ``__registries__`` keys compare by the same
         # int-valued hash/eq every member and bare int alike already use. The
         # cast is for mypy alone: ``dict.get`` accepts any hashable key at run
@@ -554,7 +553,7 @@ class {NAME}(EnumRegistry, StrEnum):
         # member's value at the dict lookup above, and nothing below decodes
         # ``proto``'s bits looking for a partial answer either -- on either
         # numbering. A genuine member reaching this point is ``undefined`` --
-        # the four real transports would already have resolved above, and
+        # a real transport would already have resolved above, and
         # :meth:`TransportProtocol.get` cannot mint anything else, per the
         # maintainer ruling given in review of the work for #808, against
         # extending TransportProtocol at all -- and a bare :class:`int` reaches
@@ -680,7 +679,7 @@ class {NAME}(EnumRegistry, StrEnum):
         Returns:
             The canonical member followed by its aliases, in registry row order.
             Never empty: a port with no assignment goes through :meth:`get`, so it
-            is minted rather than answered with an empty result.
+            is answered with an unregistered member rather than an empty result.
 
         Raises:
             ValueError: As :meth:`get`.
@@ -786,8 +785,8 @@ class {NAME}(EnumRegistry, StrEnum):
 
         Raises:
             ValueError: If called on a class that holds no members, i.e. on
-                :class:`{NAME}` itself, which is not one of the four
-                per-transport registries; if ``port`` already carries a
+                :class:`{NAME}` itself, which is not a
+                per-transport registry; if ``port`` already carries a
                 member of this registry; if ``name`` sanitises to text that
                 is not a valid Python identifier at all; or if the identifier
                 it does sanitise to already names an unrelated member of this
@@ -840,7 +839,7 @@ class {NAME}(EnumRegistry, StrEnum):
 
         The Python attribute name is derived from ``name`` through
         :meth:`_sanitize_identifier`. It has to be ``name``, not ``port`` and
-        a counter: an alias whose own name does not resolve through
+        a counter: an alias whose own name resolves through
         subscription is most of the point of registering one, and
         ``TCP['www_http']`` resolving is exactly what lets a caller reach an
         alias the same way every statically declared member already is.
@@ -861,8 +860,8 @@ class {NAME}(EnumRegistry, StrEnum):
 
         Raises:
             ValueError: If called on a class that holds no members, i.e. on
-                :class:`{NAME}` itself, which is not one of the four
-                per-transport registries; if ``port`` carries no member of
+                :class:`{NAME}` itself, which is not a
+                per-transport registry; if ``port`` carries no member of
                 this registry yet; if ``name`` already names one of the
                 members already there; if ``name`` sanitises to text that is
                 not a valid Python identifier at all -- empty, or leading with
@@ -881,9 +880,9 @@ class {NAME}(EnumRegistry, StrEnum):
         if any(member.svc == name for member in existing):
             raise ValueError(f'{{name!r}} is already registered on port {{port}} of {{cls.__name__}}')
 
-        # NOTE: the 58 members the generator mints via safe_name's own
+        # NOTE: the members the generator mints via safe_name's own
         # fallback -- ``{{cls.__name__}}_{{residue}}``, when the sanitised
-        # residue is not a valid identifier (28 TCP, 29 UDP, 1 SCTP, 0 DCCP) --
+        # residue is not a valid identifier --
         # are names this runtime path refuses rather than accepts: that
         # fallback is deliberately not reproduced in
         # :meth:`_sanitize_identifier`, which raises here instead (see Raises
@@ -920,7 +919,7 @@ class {NAME}(EnumRegistry, StrEnum):
         :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`
         bypasses :meth:`__new__` entirely
         (it builds through ``cls._member_type_.__new__`` directly), so this
-        class's own three attributes would otherwise be missing and every
+        class's own attributes (``svc``, ``port``, ``proto``) would otherwise be missing and every
         method reading them (:meth:`__repr__`, :meth:`__str__`, :meth:`__int__`,
         the comparison operators, :attr:`aliases`) would raise on the result.
         Deliberately *not* added to :data:`__registry__` -- unlike
@@ -976,7 +975,7 @@ class {NAME}(EnumRegistry, StrEnum):
         {'' if ''.join(MISS.splitlines()[-1:]).startswith('return') else 'return super()._missing_(value)'}
 '''.strip()  # type: Callable[[str, str, str, str, str, str], str]
 
-#: Template for a per-transport registry, i.e. the four modules holding the
+#: Template for a per-transport registry, i.e. each module holding the
 #: members of one transport protocol and nothing else.
 TRANSPORT = lambda NAME, DOCS, PROTO, CANON, TABLE, ENUM, MODL: f'''\
 # -*- coding: utf-8 -*-
@@ -1019,7 +1018,7 @@ class {NAME}(AppType):
     __transport__: 'TransportProtocol' = TransportProtocol.{PROTO}
 
     #: Members of this registry, keyed on port number. Declared per registry
-    #: rather than inherited, since one mapping shared by all four would put
+    #: rather than inherited, since one mapping shared by every registry would put
     #: every transport's ports in the same key space.
     __registry__: 'MultiDict[int, {NAME}]' = MultiDict()
 
@@ -1239,8 +1238,8 @@ class AppType(Vendor):
 
                 # NOTE: a span IANA assigns to a transport protocol is claimed by
                 # that registry alone, through a test on ``cls.__transport__``.
-                # Source order decided instead until GitHub issue #760: the only
-                # two spans registered on more than one transport -- 6000-6063 and
+                # Source order decided instead until GitHub issue #760: the
+                # spans registered on more than one transport -- 6000-6063 and
                 # 6665-6669 -- rendered the same condition twice, leaving the
                 # second copy unreachable, so *every* registry answered with the
                 # first row's. That is not merely a duplicate to collapse: the
@@ -1250,7 +1249,7 @@ class AppType(Vendor):
                 #
                 # A span naming no transport protocol is an unassigned or reserved
                 # marker belonging to whichever registry was asked, so it carries
-                # no test and keeps answering all four.
+                # no test and keeps answering every registry.
                 flag = self.flag([proto])
                 claim = '' if proto == 'undefined' else f' and cls.__transport__ is {flag}'
 
@@ -1299,7 +1298,7 @@ class AppType(Vendor):
             # ``record.protos`` here instead put the whole
             # ``(service, port)`` IANA set on every member, which made
             # ``TCP.http.proto`` name UDP and SCTP as well. That was a second
-            # copy of what the four registries already encode, it is the copy
+            # copy of what the per-transport registries already encode, it is the copy
             # that could drift, and being multi-bit it was refused by every
             # entry point that consumed it.
             pres = f"{key} = {record.port}, {record.svc!r}, {self.flag([self.TRANSPORT])}"

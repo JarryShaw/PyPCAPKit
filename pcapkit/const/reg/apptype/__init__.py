@@ -157,9 +157,9 @@ class _Registries(dict):
 
 # NOTE: this is what makes ``AppType.get(port, proto=...)`` work on the base
 # class, which is where every caller in the library addresses it. It cannot live
-# in ``apptype.py``: that module is imported *by* all four registries, so it
-# cannot import them back. Here is the first point at which all four exist, or
-# for the lazy two, where to import them from.
+# in ``apptype.py``: that module is imported *by* every per-transport registry,
+# so it cannot import them back. Here is the first point at which all of them
+# exist, or, for the lazy ones, where to import them from.
 AppType.__registries__ = _Registries({
     TransportProtocol.tcp: ModuleDescriptor(f'{__name__}.tcp', _LAZY['tcp']),
     TransportProtocol.udp: ModuleDescriptor(f'{__name__}.udp', _LAZY['udp']),
@@ -187,7 +187,7 @@ def __getattr__(name: 'str') -> 'Any':
 
 
 def __dir__() -> 'list[str]':
-    """The names an eager import of all four registries would list."""
+    """The names an eager import of every per-transport registry would list."""
     helpers = {'importlib', 'sys', 'TYPE_CHECKING', 'ModuleDescriptor', '_LAZY', '_Registries',
                '__getattr__', '__dir__'}
     return sorted({*globals(), *_LAZY, *_LAZY.values()} - helpers)

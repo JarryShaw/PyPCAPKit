@@ -4,7 +4,7 @@
 
 .. module:: pcapkit.corekit.enum
 
-:mod:`pcapkit.corekit.enum` contains the two bases every enumeration in this
+:mod:`pcapkit.corekit.enum` contains the bases every enumeration in this
 library is meant to inherit from, split by whether the enumeration may *grow*:
 
 * :class:`EnumLookup` -- the bare **lookup** half: :meth:`~EnumLookup.get`,
@@ -29,16 +29,16 @@ withhold ``register_alias``, so drawing the line between them risked setting a
 bad precedent. Following that through,
 a base holding both would leave :class:`EnumRegistry` with only
 ``register_aliases``, ``_extend`` and ``_unregistered_member`` -- too thin to
-justify a second class, collapsing the two tiers into one. So all five mutating
-methods stay put, and what the base carries instead is the other requirement
+justify a second class, collapsing the two tiers into one. So every mutating
+method stays put, and what the base carries instead is the other requirement
 from that thread: some range-validation logic that inheriting classes can hook
 into, which is :meth:`EnumLookup._validate_value`. Legality is
 every enumeration's concern; mutation is only the open registries'.
 
-Supporting measurement, taken when :issue:`877` split the tiers: **0** of the
-26 non-registry enumerations define ``register``, ``register_alias``,
-``register_aliases`` or ``_unregistered_member``, and there are **0**
-:class:`EnumRegistry` subclasses outside :mod:`pcapkit.const`. The mutating half
+Supporting measurement, taken when :issue:`877` split the tiers: **none** of
+the non-registry enumerations defines ``register``, ``register_alias``,
+``register_aliases`` or ``_unregistered_member``, and **no**
+:class:`EnumRegistry` subclass exists outside :mod:`pcapkit.const`. The mutating half
 therefore had no users to serve among the classes being re-parented.
 
 The registry tier's own shape is the earlier design settled in GitHub issue
@@ -49,15 +49,16 @@ contract. ``AppType``'s sub-base class carries the overrides and dispatching
 logic it needs, and ``AppType``'s subclasses override again where their contracts
 differ.
 
-That is a three-tier hierarchy, of which this module is **tier one**:
+That is a tiered hierarchy, of which this module is **tier one**:
 
-1. :class:`EnumRegistry` -- the four methods, in the form that suits a registry
-   mapping one key to one member. Two are its own, ``register`` and
-   ``register_alias``; ``get`` and ``get_all`` are declared one level up on
-   :class:`EnumLookup` and reach it by inheritance. So a registry under
-   :mod:`pcapkit.const` gets all four from this module, apart from the
+1. :class:`EnumRegistry` -- ``get``, ``get_all``, ``register`` and
+   ``register_alias``, in the form that suits a registry mapping one key to one
+   member. ``register`` and ``register_alias`` are its own; ``get`` and
+   ``get_all`` are declared one level up on :class:`EnumLookup` and reach it by
+   inheritance. So a registry under :mod:`pcapkit.const` gets all of them from
+   this module, apart from the
    overrides below and a few hand-written ``get`` overrides.
-2. ``AppType``'s sub-base -- overrides all four, routing the two lookups
+2. ``AppType``'s sub-base -- overrides each of them, routing the lookups
    through its ``_dispatch``, because a port lookup needs a transport protocol
    to be answerable at all. Defined not in this module but in
    :class:`pcapkit.const.reg.apptype.apptype.AppType` itself (GitHub issue
@@ -65,16 +66,16 @@ That is a three-tier hierarchy, of which this module is **tier one**:
    ``register_alias`` are overridden without that dispatch, staying on the
    registry they are called on, so that a write never leaks onto a transport
    IANA never assigned the service to -- a minted member for the first, an
-   alias for the second. Plus ``_unregistered_member``, for its own three extra
+   alias for the second. Plus ``_unregistered_member``, for its own extra
    attributes (``svc``, ``port``, ``proto``) that the generic one below does
    not know to set.
 3. The ``AppType`` transport subclasses -- ``TCP``, ``UDP``, ``SCTP``, ``DCCP``
    -- need no override of their own at all: ``_dispatch``
    already returns ``cls`` unchanged the moment ``cls.__registry__`` is not
-   :obj:`None`, which is true for exactly these four, so tier 2's lookups
+   :obj:`None`, which is true for exactly these subclasses, so tier 2's lookups
    already answer correctly on each of them without a further layer.
 
-Defining the four methods here, rather than as generated *text* written out
+Defining these methods here, rather than as generated *text* written out
 longhand in :data:`pcapkit.vendor.default.LINE` and copied into each crawler
 that replaces that template wholesale, is what :issue:`775` asks for: as text,
 adding one method means editing every bespoke template by hand.
@@ -124,7 +125,7 @@ class EnumLookup:
     ``class Bar(EnumLookup, IntEnum)`` -- it contributes methods only, so
     :mod:`aenum` still resolves the member data type from the enumeration base:
     ``int`` for :class:`~aenum.IntEnum` and :class:`~aenum.IntFlag`, ``str`` for
-    :class:`~aenum.StrEnum`. That is what lets one base serve all three, where a
+    :class:`~aenum.StrEnum`. That is what lets one base serve each of them, where a
     generated template fragment would have needed a separate rendering per
     member type.
 
@@ -134,11 +135,11 @@ class EnumLookup:
     EnumLookup -> IntFlag -> int -> ...``, so ``_member_type_`` still comes from
     the enumeration base and not from anything in this module. Had this tier
     subclassed :class:`~aenum.Enum` in order to "be an enum", it would have
-    become the member type itself and broken all three shapes at once.
+    become the member type itself and broken every one of these shapes at once.
 
     The methods deliberately touch only ``_member_map_``, ``_member_names_`` and
     ``_value2member_map_``, which both :mod:`enum` and :mod:`aenum` maintain, so
-    nothing on this tier depends on :mod:`aenum` internals at all -- the one
+    nothing on this tier depends on :mod:`aenum` internals at all -- the
     :func:`~aenum.extend_enum` call in this module belongs to
     :class:`EnumRegistry`, which is the tier that mutates.
 
@@ -154,7 +155,7 @@ class EnumLookup:
         # NOTE: deliberately ``Any`` rather than ``type``. Annotating the member
         # data type precisely makes ``cls._member_type_.__new__(cls, value)``
         # resolve to ``type.__new__``, which mypy then reads as building a
-        # *class* rather than an instance -- five errors for a call that is
+        # *class* rather than an instance -- mypy errors for a call that is
         # correct. Which concrete type it is depends on the Enum base each
         # subclass picks, so there is nothing more precise to say here anyway.
         _member_type_: 'Any'
@@ -206,7 +207,7 @@ class EnumLookup:
         message and the single log record it already emitted are what the caller
         sees.
 
-        Called from exactly two places, and the omissions are deliberate:
+        Called from the places below, and the omissions are deliberate:
 
         * :meth:`get`, immediately before ``cls(key)`` -- the one point at which
           a lookup can reach a subclass's ``_missing_`` and mint. The ``str``-key
@@ -222,7 +223,7 @@ class EnumLookup:
         :meth:`OptionType.register <pcapkit.const.pcapng.option_type.OptionType.register>`
         and
         :meth:`AppType.register <pcapkit.const.reg.apptype.apptype.AppType.register>`
-        both call it at the same point.
+        each call it at the same point.
 
         :meth:`EnumRegistry.register_alias` does not call it, and does not need
         to: it refuses any ``value`` that is not already registered, so the value
@@ -260,14 +261,14 @@ class EnumLookup:
 
         It never mints while resolving ``default``; ``key`` may still mint
         through a ``_missing_`` that GitHub issue :issue:`775`'s ruling
-        deliberately kept minting, on one registry (``CGAType``). Registering a member any other way is :meth:`register`'s job
+        deliberately kept minting, on ``CGAType``. Registering a member any other way is :meth:`register`'s job
         and nobody else's, which is the ruling :issue:`775` exists to carry
         out: an unrecognised or unregistered value does not become a registered
         member unless a user or caller explicitly creates one. A value inside a
         registry's declared-but-unassigned range still resolves, through that
         registry's own ``_missing_`` and :meth:`_unregistered_member`, to a
         member that is deliberately absent from the lookup tables -- true
-        outside the one registry named above, where such a value instead lands
+        outside ``CGAType``, where such a value instead lands
         in *both* tables, exactly as :meth:`register` would leave it -- for a
         non-``str`` key; the ``str`` case is qualified below. Both describe
         ``key`` resolution only. ``default`` never reaches ``_missing_`` on
@@ -288,15 +289,15 @@ class EnumLookup:
         (:class:`~pcapkit.const.ftp.command.Command`,
         :class:`~pcapkit.const.ftp.command.FEATCode`, :class:`~pcapkit.const.http.method.Method`,
         :class:`~pcapkit.const.pcapng.option_type.OptionType`,
-        :class:`~pcapkit.const.reg.apptype.apptype.AppType` and its four
+        :class:`~pcapkit.const.reg.apptype.apptype.AppType` and its
         transport subclasses :class:`~pcapkit.const.reg.apptype.tcp.TCP`,
         :class:`~pcapkit.const.reg.apptype.udp.UDP`,
         :class:`~pcapkit.const.reg.apptype.sctp.SCTP` and
         :class:`~pcapkit.const.reg.apptype.dccp.DCCP`, and
         :class:`~pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`) mints on
-        any path, so no live witness exists in this tree. The one registry
-        that still mints directly via :func:`~aenum.extend_enum`,
-        :class:`~pcapkit.const.mh.cga_type.CGAType`, is :class:`int`-valued, so
+        any path, so no live witness exists in this tree.
+        :class:`~pcapkit.const.mh.cga_type.CGAType`, which still mints directly
+        via :func:`~aenum.extend_enum`, is :class:`int`-valued, so
         a ``str`` name could not reach its mint branch even if this restriction
         did not exist; it is not an exception to it, just not reachable by it.
         This is about a future ``str``-valued registry (or a present one whose
@@ -344,14 +345,14 @@ class EnumLookup:
         so every ``except KeyError`` and ``except ValueError`` around a call to
         this method catches.
 
-        Two details are worth stating, since neither is visible from the
-        exception type alone:
+        These details are worth stating, since the exception type alone does
+        not show them:
 
         * **The name miss is raised quietly** --
           :exc:`~pcapkit.utilities.exceptions.EnumKeyError` with ``quiet=True``,
           so nothing is logged and :data:`sys.tracebacklimit` is left alone.
           That is not a cosmetic choice: this method's name miss is in-library
-          control flow at six call sites, and at
+          control flow, and at
           :meth:`~pcapkit.const.http.method.Method.get` it is part of a
           *successful* call -- that override catches it in order to build an
           unregistered member. A loud
@@ -426,8 +427,9 @@ class EnumLookup:
         registry inheriting this base unmodified -- that tuple holds exactly one
         entry, since an alias registered by :meth:`register_alias` is a second
         *name* for the canonical member rather than a second member. The method
-        still exists here, because all four methods are to exist on every const
-        registry (GitHub issue :issue:`842`), and it is where a registry with genuinely
+        still exists here, because ``get``, ``get_all``, ``register`` and
+        ``register_alias`` are all to exist on every const registry (GitHub
+        issue :issue:`842`), and it is where a registry with genuinely
         several matches puts them: ``AppType`` overrides it to return every service IANA
         assigns to a port.
 
@@ -465,7 +467,7 @@ class EnumRegistry(EnumLookup):
     issue :issue:`877` is what draws that line: an enumeration is immutable
     unless RFC or IANA says otherwise.
 
-    Mixed in ahead of the enum base exactly as before -- ``class
+    Mixed in ahead of the enum base -- ``class
     Foo(EnumRegistry, IntFlag)`` -- and gaining :class:`EnumLookup` as a parent
     does not disturb that: both tiers are plain classes, so ``_member_type_``
     still resolves past them to the enumeration base.

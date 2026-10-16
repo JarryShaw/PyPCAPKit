@@ -128,9 +128,9 @@ class StringField(_TextField[str]):
     octet the charset cannot decode, a lossy ``errors`` scheme, or a URL quoting
     that differs from the original -- the field returns a :class:`DecodedString`,
     which remembers those octets and packs back as exactly them. The decoded
-    *text* is whatever it has always been, U+FFFD and all: a consumer that only
-    reads the text, such as a dumper writing it back out as UTF-8, sees no
-    change. A length of ``-1`` is resolved to the number of *encoded* octets.
+    *text* is the plain decoding, U+FFFD and all: a consumer that only reads
+    the text, such as a dumper writing it back out as UTF-8, sees an ordinary
+    :obj:`str`. A length of ``-1`` is resolved to the number of *encoded* octets.
 
     .. |chardet| replace:: ``chardet``
     .. _chardet: https://chardet.readthedocs.io

@@ -10,10 +10,6 @@ Protocol Chain
    :no-members:
    :show-inheritance:
 
-   :param proto: New protocol class on the top stack.
-   :param alias: New protocol alias on the top stack.
-   :param basis: Original protocol chain as base stacks.
-
    .. autoproperty:: protocols
    .. autoproperty:: aliases
    .. autoproperty:: chain

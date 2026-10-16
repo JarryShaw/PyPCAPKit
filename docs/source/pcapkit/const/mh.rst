@@ -93,7 +93,7 @@ enumerations include:
    * - :class:`MH_CGASec <pcapkit.const.mh.cga_sec.CGASec>`
      - CGA SEC [*]_
    * - :class:`MH_BindingError <pcapkit.const.mh.binding_error.BindingError>`
-     - Bingding Error Status Code [*]_
+     - Binding Error Status Code [*]_
 
 Access Technology Type Option Type Values
 =========================================

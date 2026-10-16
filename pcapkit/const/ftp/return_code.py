@@ -339,7 +339,7 @@ class ReturnCode(EnumRegistry, IntEnum):
         same way :meth:`__new__` would, rather than leaving them unset --
         :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`
         bypasses :meth:`__new__` entirely (it calls :class:`int`'s directly),
-        so those three attributes would otherwise be missing from the result
+        so those attributes would otherwise be missing from the result
         and :meth:`__str__`/:meth:`__repr__` would raise on it.
 
         Args:

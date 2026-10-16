@@ -119,7 +119,7 @@ DATA = {
     # Processes", https://www.novell.com/documentation/nw6p/ipx_enu/data/hvvqznoa.html
     # -- still live. That page is also the citation the article itself used.
     #
-    # NOTE: Table 2 has **seven** rows and only five of them are below. In full
+    # NOTE: Table 2 has **seven** rows and not all of them are below. In full
     # it reads 0x451 NCP, 0x452 SAP, 0x453 RIP, 0x455 Novell NetBIOS, 0x456
     # Diagnostics, 0x9001 NLSP, 0x9004 "IPXWAN(TM) protocol". The last two have
     # never been in this enumeration, and 0x9004 is independently reserved by
@@ -132,7 +132,7 @@ DATA = {
     # byte-identity proof this change rests on, which makes them a follow-up
     # rather than part of #507.
     #
-    # Two of the five below also depart from Novell's own wording: Novell writes
+    # Some of the rows below also depart from Novell's own wording: Novell writes
     # "Novell NetBIOS" and "Diagnostics" where this table says "NetBIOS" and
     # "Diagnostic Packet". Those are the archived revision's strings, kept for
     # the same member-renaming reason as everything else here.
@@ -142,16 +142,16 @@ DATA = {
     0x0455: ('NetBIOS', 'NetBIOS'),
     0x0456: ('Diagnostic Packet', 'Diagnostic Packet'),
 
-    # These two are the only rows the archived revision alone supplies: absent
+    # These are the only rows the archived revision alone supplies: absent
     # from Novell's Table 2, absent from the Xerox registry above, and absent
     # from every RFC swept. The sweep covered RFCs 1132, 1362, 1377, 1551, 1552,
-    # 1553, 1634, 1791, 1973 and 2043, looking for the five codes 0x0001, 0x0002,
-    # 0x0003, 0x0457 and 0x4003, and found 0 hits. (The first three of those five
+    # 1553, 1634, 1791, 1973 and 2043, looking for the codes 0x0001, 0x0002,
+    # 0x0003, 0x0457 and 0x4003, and found 0 hits. (0x0001, 0x0002 and 0x0003
     # turned out to be sourced after all, just not from an RFC -- see the Xerox
     # note above.)
     #
-    # "0 hits" is a claim about those five codes and nothing more. Three of the
-    # ten RFCs do assign an IPX socket, 0x9004, which this table lacks; see the
+    # "0 hits" is a claim about those codes and nothing more. Some of the
+    # RFCs swept do assign an IPX socket, 0x9004, which this table lacks; see the
     # note on Novell's Table 2 above.
     #
     # 0x4003 is the weaker of the two: it falls inside Novell's own
@@ -210,7 +210,7 @@ DATA = {
 #: Socket number ranges, transcribed from the same revision as
 #: :data:`~pcapkit.vendor.ipx.socket.DATA`, as ``(start, stop, name)``.
 #:
-#: Three of the five have a primary source, and it is not the archived
+#: Some of these ranges have a primary source, and it is not the archived
 #: revision. Xerox, *Internet Transport Protocols*, XSIS 028112, December 1981,
 #: Appendix D: "The socket numbers zero and all ones are reserved to mean
 #: unknown and all, respectively. Well-known socket numbers have the range 1 to
@@ -219,13 +219,13 @@ DATA = {
 #: under a column header that the scan OCRs as ``goctalf`` and which reads
 #: "Well-Known Socket (octal)".
 #:
-#: That reproduces the first three ranges exactly, and the arithmetic confirms
+#: That reproduces the Xerox ranges exactly, and the arithmetic confirms
 #: the radix without having to trust that OCR: 3000 decimal is 0x0BB8, 3001 is
-#: 0x0BB9, and octal 40-77 is 0x0020-0x003F -- all three as transcribed. Read as
+#: 0x0BB9, and octal 40-77 is 0x0020-0x003F -- each as transcribed. Read as
 #: decimal instead, 40-77 would be 0x0028-0x004D, which is not what the table
 #: says. So the octal reading is settled by the numbers themselves.
 #:
-#: Novell's *IPX Addressing* bears on the last two, and in opposite directions.
+#: Novell's *IPX Addressing* bears on the remaining ranges, in opposite directions.
 #: ``(0x8000, 0xFFFF)`` matches it exactly -- "Socket numbers between 0x8000 and
 #: 0xFFFF are well-known sockets; these are assigned by Novell to specific
 #: processes." ``(0x4000, 0x4FFF)`` is *contradicted*, not merely rounded: the

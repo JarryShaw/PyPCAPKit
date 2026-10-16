@@ -92,7 +92,7 @@ class {NAME}(EnumRegistry, StrEnum):
         :meth:`__new__` itself would, rather than missing entirely --
         :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`
         bypasses :meth:`__new__` (it calls :class:`str`'s directly), so
-        those two attributes would otherwise be absent. There is no more
+        those attributes would otherwise be absent. There is no more
         specific value to reconstruct them from -- a bare wire method verb
         carries neither, which is exactly the owner's reasoning for why
         ``get()``/``_missing_`` must not mint one: :meth:`register` is the
@@ -234,8 +234,8 @@ class {NAME}(EnumRegistry, StrEnum):
                 :meth:`get`, which is case-**sensitive** per
                 :rfc:`9110#section-9.1`. The split was ruled deliberate on
                 GitHub issue :issue:`896`; GitHub issue :issue:`908` is the pointer between
-                the two, so a reader of this one file is not left with two
-                contradictory rationales and nothing tying them together.
+                the two, so the two rationales are not left contradicting each
+                other with nothing tying them together.
 
         """
         if not isinstance(value, str):

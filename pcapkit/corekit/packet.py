@@ -12,7 +12,7 @@ is a second parse of its payload, and a traced flow's is a reassembly of its
 stream; most callers want neither, so both are postponed until somebody reads
 them.
 
-A subclass keeps a three-part contract, which
+A subclass keeps a contract, which
 :meth:`DeferredPacket.__init_subclass__` checks at class creation:
 
 * It is declared ``class X(DeferredPacket, Info)``, mixin first, so the methods
@@ -76,7 +76,7 @@ class DeferredPacket:
     # undefined *on this mixin*, which is what a mixin is -- the base arrives at
     # the point of use, where every subclass is declared
     # ``class X(DeferredPacket, Info)`` and :class:`~pcapkit.corekit.infoclass.Info`
-    # supplies all three. Neither mypy nor pylint can see that from here, and
+    # supplies each of them. Neither mypy nor pylint can see that from here, and
     # pylint calls it an *error* rather than a warning.
 
     def __init_subclass__(cls, /, *args: 'Any', **kwargs: 'Any') -> 'None':

@@ -25,9 +25,9 @@ if TYPE_CHECKING:
     from bs4.element import Tag
 
 ###############################################################################
-# NOTE: on the registry URL, which this module and its two siblings
+# NOTE: on the registry URL, which this module and its siblings
 # (:mod:`~pcapkit.vendor.pcapng.option_type`,
-# :mod:`~pcapkit.vendor.pcapng.record_type`) share. Why all three read ``-03`` is
+# :mod:`~pcapkit.vendor.pcapng.record_type`) share. Why they all read ``-03`` is
 # stated for readers in the note in ``docs/source/pcapkit/vendor/pcapng.rst``,
 # which renders; what follows is the measurement detail behind it. See #518.
 #
@@ -39,9 +39,9 @@ if TYPE_CHECKING:
 # the only HTML ``<table>`` is the running-header one, so
 # ``soup.select('table#table-9')`` below finds nothing and raises ``IndexError``.
 # Measured across every published revision, ``-03`` is the only one that
-# reproduces all three committed constant files byte for byte.
+# reproduces every committed constant file byte for byte.
 #
-# Two renderings of ``-03`` were compared, and both reproduce the three constant
+# Two renderings of ``-03`` were compared, and both reproduce the constant
 # files byte-identically, so the choice is about exposure rather than data:
 #
 #   * https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html

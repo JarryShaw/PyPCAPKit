@@ -902,7 +902,7 @@ class TCP(AppType):
     __transport__: 'TransportProtocol' = TransportProtocol.tcp
 
     #: Members of this registry, keyed on port number. Declared per registry
-    #: rather than inherited, since one mapping shared by all four would put
+    #: rather than inherited, since one mapping shared by every registry would put
     #: every transport's ports in the same key space.
     __registry__: 'MultiDict[int, TCP]' = MultiDict()
 

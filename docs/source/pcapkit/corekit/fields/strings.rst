@@ -21,6 +21,10 @@ String-based Fields
    :members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.corekit.fields.strings.DecodedString
+   :members:
+   :show-inheritance:
+
 .. autoclass:: pcapkit.corekit.fields.strings.BitField
    :members:
    :show-inheritance:
@@ -36,4 +40,4 @@ Type Variables
 --------------
 
 .. data:: _T
-   :type: str | bytes | python:dict[str, typing.Any]
+   :type: str | bytes | dict[str, typing.Any]

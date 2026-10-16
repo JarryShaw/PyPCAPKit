@@ -125,7 +125,7 @@ class ProtocolIE(Vendor):
         """Read the assignment from |pycrate|_'s compiled NGAP specification.
 
         See :meth:`pcapkit.vendor.ngap.procedure_code.ProcedureCode._request`
-        for why the three private attributes read here (``_typeref``,
+        for why the private attributes read here (``_typeref``,
         ``_name``, ``_val``) have no surviving public equivalent.
 
         Returns:
@@ -166,8 +166,8 @@ class ProtocolIE(Vendor):
         """No duplicate-name bookkeeping needed.
 
         See :meth:`pcapkit.vendor.ngap.procedure_code.ProcedureCode.count` --
-        measured, zero duplicate names and zero duplicate values across all
-        438.
+        measured, zero duplicate names and zero duplicate values across every
+        assignment.
 
         """
         return collections.Counter()

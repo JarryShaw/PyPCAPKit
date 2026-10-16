@@ -178,7 +178,7 @@ def parse_ip_address(value: 'IPv4Address | IPv6Address | bytes | int | str',
 
         This raises :exc:`~pcapkit.utilities.exceptions.FieldValueError` and not
         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, which is deliberate
-        even though two sibling guards for the same mistake --
+        even though sibling guards for the same mistake --
         :meth:`MH._make_opt_mn_id
         <pcapkit.protocols.internet.mh.MH._make_opt_mn_id>` from :issue:`469`
         and :class:`ESP's SecurityAssociation
@@ -187,10 +187,10 @@ def parse_ip_address(value: 'IPv4Address | IPv6Address | bytes | int | str',
         conversion, so it answers with what :meth:`_IPAddressField.pre_process`
         answers with for the identical value, and a caller sees one exception
         whether the :obj:`bool` reached the field through the schema or through
-        a ``_make_*``. The two protocol-level guards answer for the *option*,
+        a ``_make_*``. Those protocol-level guards answer for the *option*,
         alongside siblings that are not about addresses at all --
-        ``_make_opt_mn_id`` refuses a :obj:`bool` for all eight MN-ID subtypes,
-        only one of which is address-typed -- so neither can route through here
+        ``_make_opt_mn_id`` refuses a :obj:`bool` for every MN-ID subtype,
+        address-typed or not -- so none of them can route through here
         without losing the subtype-aware message that is the point of it. Both
         exception classes derive from
         :exc:`~pcapkit.utilities.exceptions.BaseError` *and* :exc:`ValueError`,

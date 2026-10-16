@@ -10,11 +10,11 @@ whose only job is to be recognised by identity (``value is SENTINEL``), so
 that it can never be confused with a value a caller might legitimately pass.
 See the "Naming a Sentinel" section of
 :file:`docs/source/contributing/conventions/sentinel-convention.rst` for the
-house rule the four below follow.
+house rule the sentinels below follow.
 
 The owner's ruling on GitHub issue :issue:`911` chose one shared module over
-one module per sentinel, and this module is the only import path for all
-four: the module of the class that uses each one does not re-export it
+one module per sentinel, and this module is the only import path for each
+of them: the module of the class that uses each one does not re-export it
 (:issue:`1744`), per the ruling recorded on :issue:`1103` that a moved name keeps no
 re-export at its old path. :mod:`pcapkit.corekit.module`,
 :mod:`pcapkit.corekit.fields.field`, :mod:`pcapkit.corekit.enum` and
@@ -314,9 +314,9 @@ class NoDefaultType:
     *absent* value, so reading falsy in a boolean context is the point.
     :data:`NO_DEFAULT` models something different: a marker meaning *no
     default was supplied*, checked exclusively by ``is`` at
-    :meth:`EnumLookup.get <pcapkit.corekit.enum.EnumLookup.get>`'s two
+    :meth:`EnumLookup.get <pcapkit.corekit.enum.EnumLookup.get>`'s
     comparison sites -- nothing here ever evaluates it for truthiness. Giving
-    it ``__bool__ -> False`` for symmetry with the other two would invite
+    it ``__bool__ -> False`` for symmetry with those two would invite
     exactly the conflation this sentinel exists to rule out: code that writes
     ``if not default:`` instead of ``if default is NO_DEFAULT:`` would then
     read :data:`NO_DEFAULT` the same way it reads a caller's genuine falsy

@@ -173,8 +173,8 @@ class TLSKeyLabel(Vendor):
             # such member carried in the hand-written
             # ``pcapkit.protocols.misc.pcapng.TLSKeyLabel`` (#882) --
             # bandit's B105 (hardcoded password string) flags a string
-            # constant assigned to a name containing ``SECRET``, which eight
-            # of these ten labels' names do.
+            # constant assigned to a name containing ``SECRET``, which most
+            # of these labels' names do.
             if 'SECRET' in label:
                 pref += '  # nosec B105'
 
