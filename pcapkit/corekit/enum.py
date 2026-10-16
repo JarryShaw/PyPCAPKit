@@ -170,8 +170,10 @@ class EnumLookup:
         one is only an open registry's concern.
 
         The base implementation accepts everything, because a base cannot know
-        any subclass's range. Overriding it is how a subclass states one -- the
-        shape ``_missing_`` spells by hand across the generated registries::
+        any subclass's range. Overriding it is how a subclass states one, and
+        every registry under :mod:`pcapkit.const` does, its vendor generator
+        emitting the check its ``_missing_`` makes (:issue:`1816`) -- in the
+        shape::
 
             @classmethod
             def _validate_value(cls, value: 'Any') -> 'None':

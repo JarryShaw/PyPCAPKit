@@ -39,9 +39,10 @@ from typing import TYPE_CHECKING
 from aenum import StrEnum
 
 from pcapkit.corekit.enum import EnumRegistry
+from pcapkit.utilities.exceptions import EnumValueError
 
 if TYPE_CHECKING:
-    from typing import Optional, Type
+    from typing import Any, Optional, Type
 
 __all__ = ['{NAME}']
 
@@ -173,8 +174,9 @@ class {NAME}(EnumRegistry, StrEnum):
 
         Raises:
             ValueError: If ``key`` is not a :class:`str`. This reaches the
-                caller from the base's non-``str`` branch, which calls
-                ``cls(key)`` and so ``_missing_``, and is **not** caught by
+                caller from the base's non-``str`` branch, where
+                :meth:`_validate_value` refuses it before ``cls(key)`` could
+                reach ``_missing_``, and is **not** caught by
                 the ``except KeyError`` fallback below -- only a failed
                 *name* lookup is. Raising is the intended behaviour for
                 ``get(b'GET')`` as well: a member whose name and
@@ -198,6 +200,29 @@ class {NAME}(EnumRegistry, StrEnum):
             # that are *not* equal -- each is exactly what its own caller
             # passed, per GitHub issue #860's conversion away from minting.
             return cls._unregistered_member(default if default is not None else key, key.upper())
+
+    @classmethod
+    def _validate_value(cls, value: 'Any') -> 'None':
+        """Reject ``value`` unless it is a :class:`str`, as :meth:`_missing_` does.
+
+        Overrides :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value`
+        with the check :meth:`_missing_` makes, and the message it raises, so
+        :meth:`~pcapkit.corekit.enum.EnumRegistry.register` refuses exactly the
+        values :meth:`get` refuses, in the same words (:issue:`1816`). Any
+        :class:`str` passes, since :meth:`get` and :meth:`_missing_` resolve
+        every one.
+
+        Args:
+            value: Value about to be looked up or minted.
+
+        Raises:
+            EnumValueError: If ``value`` is not a :class:`str`. A
+                :exc:`ValueError`, so an ``except ValueError`` caller is
+                unaffected.
+
+        """
+        if not isinstance(value, str):
+            raise EnumValueError(f'{{value!r}} is not a valid {{cls.__name__}}')
 
     @classmethod
     def _missing_(cls, value: 'str') -> '{NAME}':

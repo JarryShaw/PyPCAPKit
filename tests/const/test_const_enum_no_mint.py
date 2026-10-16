@@ -698,6 +698,36 @@ def _purge_member(cls: 'type', name: 'str', value: 'int') -> 'None':
     cls._value2member_map_.pop(value, None)  # type: ignore[attr-defined]
 
 
+def _mintable_value(cls: 'type', preferred: 'int') -> 'Optional[int]':
+    """``preferred`` if ``cls.register`` may mint it, else the highest value it may.
+
+    ``register`` refuses what ``_validate_value`` refuses (#1816). Every
+    registry this is used on checks a range ``0`` to some top, so the top is
+    found by bisection on that hook, then stepped down past any member.
+    :obj:`None` if every value in range already has a member.
+
+    """
+    def legal(value: 'int') -> 'bool':
+        try:
+            cls._validate_value(value)  # type: ignore[attr-defined]
+        except ValueError:
+            return False
+        return True
+
+    if legal(preferred) and preferred not in cls._value2member_map_:  # type: ignore[attr-defined]
+        return preferred
+    low, high = 0, preferred
+    while low < high:
+        mid = (low + high + 1) // 2
+        if legal(mid):
+            low = mid
+        else:
+            high = mid - 1
+    while low in cls._value2member_map_:  # type: ignore[attr-defined]
+        low -= 1
+    return low if legal(low) else None
+
+
 class UnassignedRangeDoesNotMintTests(unittest.TestCase):
     """A bounded-but-unassigned value must not grow the registry."""
 
@@ -845,17 +875,32 @@ class RegisterStillMintsTests(unittest.TestCase):
         on every one of tier 1's 105 registries, the full set the shared
         template now reaches (:data:`ALL_105_REGISTRIES`), not only the 22
         with a bounded-unassigned range. A high, fixed value is deliberately
-        outside any registry's assigned codes -- most bound themselves to 16
-        bits or fewer -- so this cannot collide with anything either the CSV
-        seeded or a sibling test minted.
+        outside any registry's assigned codes, so this cannot collide with
+        anything either the CSV seeded or a sibling test minted.
+
+        Since #1816, ``register`` refuses a value outside the range a
+        registry's ``_missing_`` checks, and most bound themselves to 16 bits
+        or fewer. So the fixed value is used where the range reaches it, and
+        elsewhere the highest value in range that no member carries. A
+        registry whose whole range is assigned has nothing left to mint, and
+        must refuse the fixed value instead.
 
         """
-        value = 0x6E7A0001  # arbitrary, outside every registry's own domain
+        from pcapkit.utilities.exceptions import EnumValueError
+
         name = 'PyPCAPKit_775_sweep'
+        preferred = 0x6E7A0001  # arbitrary, outside most registries' own domains
 
         for module_name, class_name in ALL_105_REGISTRIES:
             with self.subTest(registry=class_name):
                 cls = getattr(importlib.import_module(module_name), class_name)
+                value = _mintable_value(cls, preferred)
+                if value is None:
+                    before = len(cls.__members__)
+                    with self.assertRaises(EnumValueError):
+                        cls.register(preferred, name)
+                    self.assertEqual(len(cls.__members__), before)
+                    continue
                 self.addCleanup(_purge_member, cls, name, value)
 
                 before = len(cls.__members__)

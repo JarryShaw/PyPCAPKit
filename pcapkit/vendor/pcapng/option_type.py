@@ -44,6 +44,7 @@ from typing import TYPE_CHECKING
 from aenum import StrEnum, extend_enum
 
 from pcapkit.corekit.enum import EnumRegistry
+from pcapkit.utilities.exceptions import EnumValueError
 
 __all__ = ['{NAME}']
 
@@ -181,6 +182,10 @@ class {NAME}(EnumRegistry, StrEnum):
         Raises:
             ValueError: If ``value`` is already assigned in ``name``'s
                 namespace or in ``opt``, or if ``name`` is already taken.
+            EnumValueError: If ``value`` is outside the range
+                :meth:`_missing_` accepts, from :meth:`_validate_value`. A
+                :exc:`ValueError`, carrying the message the constructor raises
+                for the same code.
 
         """
         namespace = name.split('_', maxsplit=1)[0]
@@ -284,6 +289,29 @@ class {NAME}(EnumRegistry, StrEnum):
         # IANA would attach to it -- this returns an unregistered
         # pseudo-member with the same attributes such a mint would set.
         return {NAME}._unregistered_member(default, key)
+
+    @classmethod
+    def _validate_value(cls, value: 'Any') -> 'None':
+        """Reject ``value`` unless it passes the range check :meth:`_missing_` makes.
+
+        Overrides :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value`
+        with that check and the message it raises, so :meth:`register`
+        refuses exactly the option codes the constructor refuses, in the same
+        words (:issue:`1816`). :meth:`get` never calls it: that override
+        answers every :class:`int` code, out of range or not, with an
+        unregistered member.
+
+        Args:
+            value: Option code about to be minted.
+
+        Raises:
+            EnumValueError: If ``value`` fails that check. A
+                :exc:`ValueError`, so an ``except ValueError`` caller is
+                unaffected.
+
+        """
+        if not ({FLAG}):
+            raise EnumValueError('%r is not a valid %s' % (value, cls.__name__))
 
     @classmethod
     def _missing_(cls, value: 'int') -> '{NAME}':

@@ -231,7 +231,7 @@ KNOWN_DEFECTS = (
           "and holds CSV rows. Nothing was renamed here despite the "
           '``# pylint: disable=arguments-renamed`` pragma -- the parameter '
           'matches the base ``Vendor.context(self, data)`` in '
-          'pcapkit/vendor/default.py:417, which documents it as '
+          'pcapkit/vendor/default.py:445, which documents it as '
           "'data: CSV data.'. The line was copy-pasted from a sibling whose "
           "process()/context() really does take 'soup', so both the name and "
           'the description are wrong'),

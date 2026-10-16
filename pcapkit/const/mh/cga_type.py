@@ -10,9 +10,15 @@ which is automatically generated from :class:`pcapkit.vendor.mh.cga_type.CGAType
 
 """
 
+from typing import TYPE_CHECKING
+
 from aenum import IntEnum, extend_enum
 
 from pcapkit.corekit.enum import EnumRegistry
+from pcapkit.utilities.exceptions import EnumValueError
+
+if TYPE_CHECKING:
+    from typing import Any
 
 __all__ = ['CGAType']
 
@@ -40,6 +46,28 @@ class CGAType(EnumRegistry, IntEnum):
 
     #: 0x00B5 A69C 795D F5D5 F008 7F56 843F 2C40 [:rfc:`9374`]
     Tag_00B5_A69C_795D_F5D5_F008_7F56_843F_2C40 = 0x00B5_A69C_795D_F5D5_F008_7F56_843F_2C40
+
+    @classmethod
+    def _validate_value(cls, value: 'Any') -> 'None':
+        """Reject ``value`` unless it passes the range check :meth:`_missing_` makes.
+
+        Overrides :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value`
+        with that check and the message it raises, so
+        :meth:`~pcapkit.corekit.enum.EnumRegistry.register` refuses exactly the
+        values :meth:`~pcapkit.corekit.enum.EnumLookup.get` refuses, in the
+        same words (:issue:`1816`).
+
+        Args:
+            value: Value about to be looked up or minted.
+
+        Raises:
+            EnumValueError: If ``value`` fails that check. A
+                :exc:`ValueError`, so an ``except ValueError`` caller is
+                unaffected.
+
+        """
+        if not (isinstance(value, int) and 0 <= value <= 0xFFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF):
+            raise EnumValueError('%r is not a valid %s' % (value, cls.__name__))
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'CGAType':
