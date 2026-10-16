@@ -473,7 +473,7 @@ jobs:
           echo "PCAPKIT_PYPI_COMPLETE=$complete" >> "$GITHUB_OUTPUT"
 
       # Anaconda evidence, same shape as PyPI's above but for the ``conda``
-      # matrix (2 OS x the supported tier read above). Unlike PyPI's, this
+      # matrix (linux-64 and osx-64, each Python read above). Unlike PyPI's, this
       # endpoint reported ``cf-cache-status: DYNAMIC`` on every request checked
       # while writing this, i.e. not cached -- so there is no staleness direction to
       # reason about here. This is the job-level cost saver mirroring ``pypi``'s;
@@ -488,7 +488,9 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Each of ``conda``'s two platforms, for each supported version.
+          # linux-64 and osx-64, for each supported version. osx-arm64 is
+          # published too and not counted, as it was not when ``macos-latest``
+          # uploaded it beside the osx-64 package it converted (#1822).
           read -r -a builds <<< "$PCAPKIT_CONDA_BUILDS"
           expected=$(( 2 * ${#builds[@]} ))
           # Same coupling risk, and the same fix, as the PyPI check above.
@@ -1216,8 +1218,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # #1822: each leg builds and publishes its own runner's platform only,
+        # since ``conda convert`` copies binaries unchanged. ``macos-latest`` is
+        # arm64, so osx-arm64, and ``macos-26-intel`` is Intel, so osx-64, per
+        # https://docs.github.com/en/actions/reference/runners/github-hosted-runners
+        # (GA in actions/runner-images#13739). The osx-64 leg ends with GitHub's
+        # Intel images, which actions/runner-images#13045 says will end.
         os:
           - macos-latest
+          - macos-26-intel
           - ubuntu-latest
           # - windows-latest  # skip for now
         # #1633: the supported tier only, from .github/python-versions.toml
@@ -1267,6 +1276,9 @@ jobs:
 
           case "${{ matrix.os }}" in
             macos-latest)
+              target_platform="osx-arm64"
+              ;;
+            macos-26-intel)
               target_platform="osx-64"
               ;;
             ubuntu-latest)
@@ -1407,6 +1419,9 @@ jobs:
 
           case "${{ matrix.os }}" in
             macos-latest)
+              target_platform="osx-arm64"
+              ;;
+            macos-26-intel)
               target_platform="osx-64"
               ;;
             ubuntu-latest)
@@ -1420,9 +1435,11 @@ jobs:
               ;;
           esac
 
+          # #1822: never ``conda convert`` across architectures; see the matrix.
           host_platform="$(basename "$(dirname "$host_package")")"
-          if [ -n "$target_platform" ] && [ "$target_platform" != "$host_platform" ]; then
-            conda convert "$host_package" -o "$out_dir" -p "$target_platform"
+          if [ "$host_platform" != "$target_platform" ]; then
+            echo "::error title=${host_platform} package on a ${target_platform:-unmapped} leg (#1822)::${{ matrix.os }} publishes ${target_platform:-nothing}, and conda built ${host_platform} here; a package is published only for the platform it was built on."
+            exit 1
           fi
 
           package_paths="$(find "$out_dir" -type f \( -name '*.tar.bz2' -o -name '*.conda' \) -print | sort)"

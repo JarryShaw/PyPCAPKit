@@ -37,8 +37,12 @@ packages or markers than it derives -- the pins aside, since they move with ever
 release and the weekly run refreshes them. With ``--smoke PACKAGE`` it unpacks a
 built ``.tar.bz2`` conda package and checks that every distribution vendored in
 it shipped every file its ``RECORD`` lists, and that each of its modules imports
-from :file:`pcapkit/_extern` with nothing else on the path; that mode needs only
-the standard library.
+from :file:`pcapkit/_extern` with nothing else on the path. It also checks that
+the package is for this runner's platform, and that every native binary in it
+is for that platform too (#1822): ``conda convert`` relabels a package without
+touching its binaries, so a relabelled one imports cleanly on the runner that
+built it and fails everywhere it was relabelled for. That mode needs only the
+standard library.
 
 """
 
@@ -47,7 +51,9 @@ from __future__ import annotations
 import argparse
 import importlib.metadata
 import importlib.util
+import json
 import pathlib
+import platform
 import subprocess  # nosec B404
 import sys
 import tarfile
@@ -57,7 +63,7 @@ import tomllib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Callable, Iterable, Optional
+    from typing import Callable, Iterable, Literal, Optional
 
     from packaging.markers import Marker
     from packaging.requirements import Requirement
@@ -69,11 +75,27 @@ FILE = ROOT / 'conda' / 'requirements.txt'
 #: The extras the conda distribution carries, besides ``dependencies``.
 EXTRAS = ('all',)
 #: The platforms the conda workflows build on -- ``cron-conda.yml`` and
-#: ``create-release.yml`` -- each as ``platform.system()`` and
-#: ``platform.machine()`` read on its runner: ``ubuntu-latest`` and the arm64
-#: ``macos-latest``. Their Windows legs are commented out, and with them the
-#: recipe's ``bld.bat``.
-PLATFORMS = {'linux': ('Linux', 'x86_64'), 'darwin': ('Darwin', 'arm64')}
+#: ``create-release.yml`` -- by the conda subdir each leg publishes, as
+#: ``sys.platform``, ``platform.system()`` and ``platform.machine()`` read on its
+#: runner: ``ubuntu-latest``, the Intel ``macos-26-intel`` and the arm64
+#: ``macos-latest``. Each leg publishes only its own runner's platform (#1822).
+#: Their Windows legs are commented out, and with them the recipe's ``bld.bat``.
+PLATFORMS = {
+    'linux-64': ('linux', 'Linux', 'x86_64'),
+    'osx-64': ('darwin', 'Darwin', 'x86_64'),
+    'osx-arm64': ('darwin', 'Darwin', 'arm64'),
+}
+#: The object format and the machine of every native binary a package for each
+#: of :data:`PLATFORMS` may carry (#1822). A universal Mach-O passes when one of
+#: its slices is the machine.
+BINARIES = {'linux-64': ('ELF', 'x86_64'), 'osx-64': ('Mach-O', 'x86_64'), 'osx-arm64': ('Mach-O', 'arm64')}
+#: What ELF's ``e_machine`` and Mach-O's ``cputype`` say, as :data:`BINARIES` spells it.
+ELF_MACHINES = {3: 'i386', 20: 'ppc', 21: 'ppc64', 40: 'arm', 62: 'x86_64', 183: 'arm64', 243: 'riscv'}
+MACHO_CPUS = {7: 'i386', 0x01000007: 'x86_64', 12: 'arm', 0x0100000c: 'arm64', 0x0200000c: 'arm64_32',
+              18: 'ppc', 0x01000012: 'ppc64'}
+#: File names a native extension or library goes by, so one whose header this
+#: cannot read is reported rather than passed over.
+NATIVE_SUFFIXES = ('.so', '.dylib', '.pyd', '.dll')
 
 
 def _load_python_versions() -> 'object':
@@ -96,11 +118,11 @@ def environments(pythons: 'Iterable[str]') -> 'list[dict[str, str]]':
     """A marker environment per conda build: each Python on each of :data:`PLATFORMS`."""
     found = []
     for python in pythons:
-        for platform, (system, machine) in PLATFORMS.items():
+        for sys_platform, system, machine in PLATFORMS.values():
             found.append({
                 'python_version': python, 'python_full_version': f'{python}.0',
                 'implementation_name': 'cpython', 'platform_python_implementation': 'CPython',
-                'implementation_version': f'{python}.0', 'sys_platform': platform,
+                'implementation_version': f'{python}.0', 'sys_platform': sys_platform,
                 'platform_system': system, 'os_name': 'posix',
                 'platform_machine': machine, 'platform_release': '', 'platform_version': '',
             })
@@ -338,8 +360,69 @@ PROBE = textwrap.dedent('''\
 ''')
 
 
+def native(head: 'bytes') -> 'Optional[tuple[str, frozenset[str]]]':
+    """The object format and machines of a binary starting with ``head``; :data:`None` for any other file."""
+    magic = head[:4]
+    if magic == b'\x7fELF' and len(head) >= 20 and head[5] in (1, 2):
+        order = 'little' if head[5] == 1 else 'big'  # type: Literal['little', 'big']
+        machine = int.from_bytes(head[18:20], order)
+        return 'ELF', frozenset((ELF_MACHINES.get(machine, f'e_machine {machine}'),))
+    thin = {b'\xcf\xfa\xed\xfe': 'little', b'\xce\xfa\xed\xfe': 'little',
+            b'\xfe\xed\xfa\xcf': 'big', b'\xfe\xed\xfa\xce': 'big'}  # type: dict[bytes, Literal['little', 'big']]
+    if magic in thin and len(head) >= 8:
+        cpu = int.from_bytes(head[4:8], thin[magic])
+        return 'Mach-O', frozenset((MACHO_CPUS.get(cpu, f'cputype {cpu:#x}'),))
+    if magic in (b'\xca\xfe\xba\xbe', b'\xca\xfe\xba\xbf') and len(head) >= 8:
+        count = int.from_bytes(head[4:8], 'big')
+        # A Java class file shares the magic, and there the next word is its
+        # version, 45 and up, where a universal binary counts its slices.
+        if not 0 < count < 30:
+            return None
+        size = 20 if magic == b'\xca\xfe\xba\xbe' else 32
+        cpus = [int.from_bytes(head[8 + size * index:12 + size * index], 'big') for index in range(count)]
+        return 'Mach-O', frozenset(MACHO_CPUS.get(cpu, f'cputype {cpu:#x}') for cpu in cpus)
+    return None
+
+
+def foreign(root: 'pathlib.Path', subdir: 'str') -> 'tuple[int, list[str]]':
+    """How many native binaries ``root`` holds, and each one that does not run on ``subdir``.
+
+    ``noarch`` may hold none; a platform outside :data:`BINARIES` fails every one.
+    A file named as a native library whose header is neither ELF nor Mach-O is
+    reported too, since this cannot vouch for it.
+
+    """
+    want = BINARIES.get(subdir)
+    count, problems = 0, []
+    for path in sorted(root.rglob('*')):
+        if path.is_symlink() or not path.is_file():
+            continue
+        with path.open('rb') as file:
+            head = file.read(4096)
+        found = native(head)
+        name = path.relative_to(root).as_posix()
+        if found is None:
+            if path.name.endswith(NATIVE_SUFFIXES) or '.so.' in path.name:
+                problems.append(f'{name}: neither ELF nor Mach-O, so its machine is unknown')
+            continue
+        count += 1
+        kind, machines = found
+        if want is None or kind != want[0] or want[1] not in machines:
+            what = f'{kind} {", ".join(sorted(machines))}'
+            problems.append(f'{name}: {what}, but {subdir} has no native machine' if want is None else
+                            f'{name}: {what}, not {want[0]} {want[1]} as {subdir} needs')
+    return count, problems
+
+
+def runner_platform() -> 'Optional[str]':
+    """This machine's conda subdir among :data:`PLATFORMS`, or :data:`None` when it is none of them."""
+    here = (platform.system(), platform.machine())
+    return next((subdir for subdir, (_, system, machine) in PLATFORMS.items() if (system, machine) == here),
+                None)
+
+
 def smoke(package: 'pathlib.Path') -> 'int':
-    """Unpack a built ``.tar.bz2`` conda package and run :data:`PROBE` against it."""
+    """Unpack a built ``.tar.bz2`` conda package, check its platform and binaries, and run :data:`PROBE`."""
     with tempfile.TemporaryDirectory() as temp:
         with tarfile.open(package, 'r:bz2') as archive:
             archive.extractall(temp, filter='data')
@@ -352,8 +435,26 @@ def smoke(package: 'pathlib.Path') -> 'int':
         if built != f'python{sys.version_info.major}.{sys.version_info.minor}':
             print(f'{package} is built for {built}, and this is {sys.version}', file=sys.stderr)
             return 1
-        return subprocess.run([sys.executable, '-I', '-S', '-c', PROBE, str(site)],  # nosec B603
-                              check=False).returncode
+        try:
+            index = json.loads((pathlib.Path(temp) / 'info' / 'index.json').read_text(encoding='utf-8'))
+            subdir = str(index['subdir'])
+        except (OSError, ValueError, TypeError, KeyError) as error:
+            print(f'{package}: info/index.json names no subdir ({error!r}), so its platform is unknown',
+                  file=sys.stderr)
+            return 1
+        runner = runner_platform()
+        if subdir not in ('noarch', runner):
+            print(f'{package} is filed under {subdir}, and this runner is '
+                  f'{runner or " ".join((platform.system(), platform.machine()))}: '
+                  'a package is checked on the platform it is for', file=sys.stderr)
+            return 1
+        count, problems = foreign(pathlib.Path(temp), subdir)
+        for problem in problems:
+            print(f'FOREIGN {problem}')
+        print(f'{subdir}: {count} native binaries read, {len(problems) or "none"} failing', flush=True)
+        status = subprocess.run([sys.executable, '-I', '-S', '-c', PROBE, str(site)],  # nosec B603
+                                check=False).returncode
+        return 1 if problems else status
 
 
 def main(argv: 'Optional[list[str]]' = None) -> 'int':

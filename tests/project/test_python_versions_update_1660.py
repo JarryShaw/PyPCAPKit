@@ -256,7 +256,8 @@ class TestTheTiers(unittest.TestCase):
     def test_the_labels_come_from_the_workflows(self) -> None:
         """``matrix.os || 'ubuntu-latest'``; the conda jobs' ``os`` axis; where ``latest`` is installed."""
         found = context(snapshot()).labels
-        self.assertEqual(found, {'default': ['ubuntu-latest'], 'supported': ['macos-latest', 'ubuntu-latest'],
+        self.assertEqual(found, {'default': ['ubuntu-latest'],
+                                 'supported': ['macos-26-intel', 'macos-latest', 'ubuntu-latest'],
                                  'latest': ['macos-latest', 'ubuntu-latest']})
 
     def test_ubuntu_latest_counts_as_its_image_and_every_newer_one(self) -> None:

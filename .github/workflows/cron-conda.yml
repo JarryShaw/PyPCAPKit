@@ -424,8 +424,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # #1822: each leg builds and publishes its own runner's platform only,
+        # as create-release.yml's `conda` job says.
         os:
           - macos-latest
+          - macos-26-intel
           - ubuntu-latest
           # - windows-latest  # skip for now
         # #1633: the supported tier, from .github/python-versions.toml through
@@ -512,6 +515,9 @@ jobs:
 
           case "${{ matrix.os }}" in
             macos-latest)
+              target_platform="osx-arm64"
+              ;;
+            macos-26-intel)
               target_platform="osx-64"
               ;;
             ubuntu-latest)
@@ -527,9 +533,13 @@ jobs:
 
           echo "host_package=$host_package" >> "$GITHUB_OUTPUT"
 
+          # #1822: never `conda convert` across architectures. It relabels the
+          # package and copies its binaries unchanged, so the osx-64 package it
+          # made from the arm64 build carried arm64 extensions.
           host_platform="$(basename "$(dirname "$host_package")")"
-          if [ -n "$target_platform" ] && [ "$target_platform" != "$host_platform" ]; then
-            conda convert "$host_package" -o "$out_dir" -p "$target_platform"
+          if [ "$host_platform" != "$target_platform" ]; then
+            echo "::error title=${host_platform} package on a ${target_platform:-unmapped} leg (#1822)::${{ matrix.os }} publishes ${target_platform:-nothing}, and conda built ${host_platform} here; a package is published only for the platform it was built on."
+            exit 1
           fi
 
           package_paths="$(find "$out_dir" -type f \( -name '*.tar.bz2' -o -name '*.conda' \) -print | sort)"
@@ -552,9 +562,11 @@ jobs:
       # modules alone. This unpacks the package built for this runner and
       # checks that every vendored distribution has every file its RECORD lists
       # and imports from there, with no site-packages on the path, before
-      # anything is uploaded. setup-python's interpreter, not conda's: it is
-      # the matrix version the package was built for, which conda's base is
-      # not on 3.15.
+      # anything is uploaded. #1822: it also fails unless the package, and every
+      # native binary in it, is for this runner's platform, so a relabelled
+      # package cannot pass on the runner that built it. setup-python's
+      # interpreter, not conda's: it is the matrix version the package was
+      # built for, which conda's base is not on 3.15.
       - name: Smoke-test the vendored packages
         env:
           PCAPKIT_CONDA_PACKAGE: ${{ steps.conda_build.outputs.host_package }}
