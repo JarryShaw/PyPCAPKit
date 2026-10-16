@@ -682,8 +682,8 @@ jobs:
   #                        green and never red for the wrong reason. If it
   #                        ever starts building, the cell fails loudly.
   #
-  # One job per engine loops over every interpreter, each in a fresh venv,
-  # rather than one job per cell (every Python times every engine): the queue,
+  # One job per engine loops over its interpreters, each in a fresh venv,
+  # rather than one job per cell (one engine on one Python): the queue,
   # not the runners, is the bottleneck, and a job per cell would pay checkout,
   # setup and apt for a minute of work. One job per *engine* rather than per Python
   # because the engine is what varies the environment: the apt packages

@@ -52,17 +52,17 @@
 #
 # `dependencies` used to be the first category, and its pull requests are
 # almost all bot noise, from pyup and Dependabot. Moving it down is a
-# judgement call, not a data requirement: nothing in the overlaps above forces its position
-# relative to anything except `release` and `ci`, both of which already rank
-# ahead of it regardless of where it sits. The case for moving it here: a
-# future pull request that mixes a real change with a `dependencies` label
-# (say, a fix prompted by a dependency bump) surfaces under that real category
-# instead of being swallowed by bot noise -- which is also, concretely, what
-# keeps #22 ("New distribution [0.13.3.post2]", ci+dependencies+release) filed
-# under Release rather than Dependencies. The case for leaving it first, as
-# before: it keeps a high-volume, low-interest category out of the way
-# of everything else on a first read. This file takes the former; flip its
-# position in the list below if that judgement is wrong.
+# judgement call, not a data requirement: nothing in the overlaps above forces
+# its position relative to anything except `release` and `ci`, both of which
+# already rank ahead of it regardless of where it sits. The case for moving it
+# here: a future pull request that mixes a real change with a `dependencies`
+# label (say, a fix prompted by a dependency bump) surfaces under that real
+# category instead of being swallowed by bot noise -- which is also,
+# concretely, what keeps #22 ("New distribution [0.13.3.post2]",
+# ci+dependencies+release) filed under Release rather than Dependencies. The
+# case for leaving it first, as before: it keeps a high-volume, low-interest
+# category out of the way of everything else on a first read. This file takes
+# the former; flip its position in the list below if that judgement is wrong.
 #
 # `*` catches whatever matches none of the categories above -- nothing in the
 # sample, since every pull request in it carried a type label, but it stays

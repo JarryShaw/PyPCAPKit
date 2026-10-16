@@ -18,8 +18,8 @@ scripts cannot run at all on a fresh checkout. This module writes them, with
     delivered out of order, with one of them retransmitted; the IPv6 request
     body is spread over three segments delivered in order. The IPv4 connection
     closes with a FIN from each end, the IPv6 one with a FIN from the server
-    and an abortive RST from the client, so the capture covers each event
-    that makes :mod:`pcapkit` submit a datagram.
+    and an abortive RST from the client, so the capture covers a
+    FIN-completed stream and an RST-aborted one.
 
 ``http6.cap``
     Read by ``examples/legacy_smoke/test_analyse.py``, which pretty-prints the
@@ -49,10 +49,16 @@ The layouts above are not arbitrary. These properties of
 :class:`pcapkit.foundation.reassembly.tcp.TCP` decide what a capture has to
 look like for a datagram to come out of it at all:
 
-1. A buffer is keyed by the connection's four-tuple *including direction*, and
-   :meth:`~pcapkit.foundation.reassembly.tcp.TCP.submit` runs only when that
-   direction sends FIN or RST. A half-closed connection yields one datagram,
-   not two, so both ends of every connection here close.
+1. A buffer is keyed by the connection's four-tuple *including direction*, so
+   each direction is a datagram of its own.
+   :meth:`~pcapkit.foundation.reassembly.tcp.TCP.submit` runs on that
+   direction's RST; once its FIN has been seen and every octet below the FIN
+   has arrived; when a SYN, or a segment farther than ``__window__`` from the
+   buffer, opens a new one on the same four-tuple; on a timeout, if one is
+   set; and, for whatever is still buffered, when the capture ends. So a
+   half-closed connection still yields a datagram per direction. Both ends of
+   every connection here close anyway, so that each datagram is submitted by
+   its own FIN or RST rather than by that final flush.
 2. Inside a buffer, fragments are keyed by the segment's *acknowledgement*
    number, so consecutive data segments merge only while the peer sends no
    data of its own. Both fixtures therefore keep each direction of each
@@ -706,8 +712,8 @@ def _write_test(dest: 'pathlib.Path') -> 'pathlib.Path':
     capture.add(page.data(False, parts[2], offset=offset), delay=0.198365)
     capture.add(page.ack())
 
-    # and the connection closes from both ends, which is what makes pcapkit
-    # submit the two datagrams
+    # and the connection closes from both ends, so each direction's FIN
+    # submits its datagram
     capture.add(page.fin(False))
     capture.add(page.ack())
     capture.add(page.fin())
@@ -755,7 +761,7 @@ def _write_http6(dest: 'pathlib.Path') -> 'pathlib.Path':
     conditional request the browser makes for the stylesheet the page
     references, which the server answers ``304 Not Modified`` -- a response
     with a header block, no body and no ``Content-Length``. Both connections
-    close from both ends, so every datagram is submitted.
+    close from both ends, so each datagram is submitted by its own FIN.
 
     Args:
         dest: Destination directory.
