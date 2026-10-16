@@ -14,7 +14,9 @@ import collections
 __all__ = ['VersionInfo']
 
 
-class VersionInfo(collections.namedtuple('VersionInfo', ['major', 'minor'])):
+# The generated base carries a name of its own, so that the class's ``Bases:``
+# line in the docs does not link the class to itself (#1843).
+class VersionInfo(collections.namedtuple('_VersionInfo', ['major', 'minor'])):
     """VersionInfo is alike :class:`sys.version_info`.
 
     .. versionchanged:: 1.3.0

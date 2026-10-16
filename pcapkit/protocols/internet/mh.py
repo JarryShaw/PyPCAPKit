@@ -535,7 +535,9 @@ if TYPE_CHECKING:
 __all__ = ['MH']
 
 
-class NTPTimestamp(collections.namedtuple('NTPTimestamp', 'seconds fraction')):
+# Each generated base below carries a name of its own, so that the class's
+# ``Bases:`` line in the docs does not link the class to itself (#1843).
+class NTPTimestamp(collections.namedtuple('_NTPTimestamp', 'seconds fraction')):
     """NTP timestamp format, c.f., :rfc:`1305`."""
 
     __slots__ = ()
@@ -546,7 +548,7 @@ class NTPTimestamp(collections.namedtuple('NTPTimestamp', 'seconds fraction')):
     fraction: int
 
 
-class PMIPv6Timestamp(collections.namedtuple('PMIPv6Timestamp', 'seconds fraction')):
+class PMIPv6Timestamp(collections.namedtuple('_PMIPv6Timestamp', 'seconds fraction')):
     """Proxy Mobile IPv6 timestamp format, c.f., :rfc:`5213#section-8.8`.
 
     Note:

@@ -27,7 +27,9 @@ if TYPE_CHECKING:
 _T = TypeVar('_T')
 
 
-class ModuleDescriptor(collections.namedtuple('ModuleDescriptor', ['module', 'name']), Generic[_T]):
+# The generated base carries a name of its own, so that the class's ``Bases:``
+# line in the docs does not link the class to itself (#1843).
+class ModuleDescriptor(collections.namedtuple('_ModuleDescriptor', ['module', 'name']), Generic[_T]):
     """Module descriptor contains module name and class name, the actual
     class can be imported by ``from module import name``."""
 
