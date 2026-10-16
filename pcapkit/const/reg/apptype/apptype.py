@@ -17,6 +17,7 @@ from aenum import IntEnum, StrEnum, auto, extend_enum
 
 from pcapkit.corekit.enum import EnumLookup, EnumRegistry
 from pcapkit.corekit.sentinels import NO_DEFAULT
+from pcapkit.utilities.exceptions import EnumValueError
 
 __all__ = ['TransportProtocol', 'AppType']
 
@@ -2774,6 +2775,27 @@ class AppType(EnumRegistry, StrEnum):
         return identifier
 
     @classmethod
+    def _validate_value(cls, value: 'Any') -> 'None':
+        """Reject ``value`` unless it is a port number in ``0``-``65535``.
+
+        Overrides :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value`
+        with the check :meth:`_missing_` makes, and the message it raises, so
+        :meth:`register` refuses exactly the ports :meth:`get` refuses, in the
+        same words (:issue:`1792`).
+
+        Args:
+            value: Port number about to be minted.
+
+        Raises:
+            EnumValueError: If ``value`` is not an :class:`int` in
+                ``0``-``65535``. A :exc:`ValueError`, so an ``except
+                ValueError`` caller is unaffected.
+
+        """
+        if not (isinstance(value, int) and 0 <= value <= 65535):
+            raise EnumValueError(f'{value!r} is not a valid {cls.__name__}')
+
+    @classmethod
     def register(cls, port: 'int', name: 'str') -> 'AppType':  # pylint: disable=arguments-renamed
         """Mint the first, canonical member at ``port``, in this registry alone.
 
@@ -2793,6 +2815,10 @@ class AppType(EnumRegistry, StrEnum):
         the operation where guessing the right transport for the caller is
         the wrong default.
 
+        Routes ``port`` through :meth:`_validate_value` after the duplicate
+        check, as :meth:`~pcapkit.corekit.enum.EnumRegistry.register` does, so
+        a port :meth:`get` refuses cannot be minted here either.
+
         Args:
             port: Port number to register under. Must not already carry a
                 member of this registry -- see :meth:`register_alias` for
@@ -2811,6 +2837,10 @@ class AppType(EnumRegistry, StrEnum):
                 is not a valid Python identifier at all; or if the identifier
                 it does sanitise to already names an unrelated member of this
                 registry.
+            EnumValueError: If ``port`` is not an :class:`int` in
+                ``0``-``65535``, from :meth:`_validate_value`. A
+                :exc:`ValueError`, carrying the message :meth:`get` raises for
+                the same port.
 
         """
         if cls.__registry__ is None:
@@ -2823,6 +2853,7 @@ class AppType(EnumRegistry, StrEnum):
                              f'({", ".join(member.svc for member in existing)}); use '
                              f'{cls.__name__}.register_alias() to add a further service name '
                              'for it')
+        cls._validate_value(port)
 
         identifier = cls._sanitize_identifier(name)
         if not identifier.isidentifier():
