@@ -1,5 +1,5 @@
-Base Protocol
-=============
+Transport Layer Base Protocol
+=============================
 
 .. module:: pcapkit.protocols.transport.transport
 

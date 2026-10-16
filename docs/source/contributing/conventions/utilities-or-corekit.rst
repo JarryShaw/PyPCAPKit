@@ -4,7 +4,7 @@ Choosing Between ``utilities`` and ``corekit``
 ----------------------------------------------
 
 Which of the two support packages a module belongs in. Settled by the owner on
-:issue:`1712`, over two alternatives that sorted modules by packet knowledge or by
+:issue:`1712`, over alternatives that sorted modules by packet knowledge or by
 who uses them. This rule can be checked from the import graph alone, and it needed
 the fewest moves: one.
 

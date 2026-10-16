@@ -12,7 +12,7 @@ construction and analysis.
 
    The whole project declares **Python 3.6** or later. CI supports 3.11 to 3.15, and
    still tests the end-of-life 3.7 to 3.10 without letting a failure block anything;
-   3.7 cannot import the package yet.
+   3.7 cannot import the package.
 
 .. .. contents::
 ..    :depth: 2
@@ -65,7 +65,7 @@ About
       :mod:`PyPCAPKit <pcapkit>` project as its CLI support.
 
 Unlike popular PCAP extractors such as :mod:`Scapy <scapy>`,
-:mod:`dpkt <dpkt>` and `PyShark`_, :mod:`pcapkit` aims to be more
+`DPKT`_ and `PyShark`_, :mod:`pcapkit` aims to be more
 comprehensive: more detailed packet information, and a more *Pythonic*
 interface.
 
@@ -73,7 +73,7 @@ interface.
 Module Structure
 ----------------
 
-:mod:`pcapkit` is made of nine subpackages.
+:mod:`pcapkit` is made of these subpackages.
 
 - Interface (:mod:`pcapkit.interface`)
 
@@ -83,12 +83,12 @@ Module Structure
 - Foundation (:mod:`pcapkit.foundation`)
 
   Synthesises file I/O and protocol analysis, coordinates
-  information exchange in all network layers, as well as
+  information exchange in all network layers, and
   provides the fundamental functions for :mod:`pcapkit`.
 
 - Protocols (:mod:`pcapkit.protocols`)
 
-  Collection of all protocol family, with detailed
+  Collection of all protocol families, with detailed
   implementation and methods.
 
 - Utilities (:mod:`pcapkit.utilities`)
@@ -135,7 +135,7 @@ spelled ``'pcapkit'``) is :mod:`pcapkit`'s own parser and the only one with no
 third-party requirement.
 
 `PyPCAP`_ and `pcap-ct`_ are two independent distributions of the same
-:manpage:`libpcap(3)` interface and both install a top-level :mod:`pcap` module,
+:manpage:`libpcap(3)` interface and both install a top-level ``pcap`` module,
 so they are two engines rather than one: upstream `PyPCAP`_ stops at Python 3.11,
 `pcap-ct`_ covers 3.10 and newer. **Install exactly one of them** -- with both
 present, ``pcap-ct`` wins the import and the other becomes unselectable.
@@ -193,7 +193,7 @@ Engine              3.10     3.11     3.12     3.13         3.14     3.15 [*]_
 reasons under `Engine prerequisites`_. **Python 3.11 is the last version on which
 every engine can run** -- and even there ``pypcap`` and ``pcap_ct`` remain
 mutually exclusive for the reason given above, so no single environment ever has
-all seven at once.
+every engine at once.
 
 Test Environment
 ----------------
@@ -217,28 +217,27 @@ first extraction is discarded as a warm-up. Values are milliseconds per packet.
 =================== ======= ======= ======= ======= =======
 Engine              3.10    3.11    3.12    3.13    3.14
 =================== ======= ======= ======= ======= =======
-``pypcapfile`` [2]_ 0.0133  0.0093      --      --      --
+``pypcapfile`` [1]_ 0.0133  0.0093      --      --      --
 ``dpkt``             0.0163  0.0113  0.0118  0.0117  0.0125
-``pypcap`` [3]_      0.0289  0.0212      --      --      --
-``pcap_ct`` [4]_     0.0364  0.0320  0.0366  0.0322  0.0396
+``pypcap`` [2]_      0.0289  0.0212      --      --      --
+``pcap_ct`` [3]_     0.0364  0.0320  0.0366  0.0322  0.0396
 ``scapy``            0.1082  0.0822  0.0877  0.0832  0.0967
 ``pcapkit``          0.2342  0.1906  0.1985  0.1920  0.2392
-``pyshark`` [1]_    18.8158 18.7852 19.2694 20.3751      --
+``pyshark`` [4]_    18.8158 18.7852 19.2694 20.3751      --
 =================== ======= ======= ======= ======= =======
 
 The unavailable cells were attempted. They are not zeroes and must not be
 compared with a measured row.
 
-.. [1] `PyShark`_ 0.6 cannot create the implicit event loop it expects on Python
+.. [1] `PyPCAPFile`_ 0.12.0 imports :mod:`imp`, which Python removed in 3.12.
+
+.. [2] `PyPCAP`_ 1.3.0 is unsupported on Python 3.12+, and its build does not
+   search Homebrew's libpcap library prefix.
+
+.. [3] `pcap-ct`_ and `libpcap`_ are published only as pre-releases.
+
+.. [4] `PyShark`_ 0.6 cannot create the implicit event loop it expects on Python
    3.14; it ran on 3.10--3.13.
-
-.. [2] `PyPCAPFile`_ 0.12.0 imports :mod:`imp`, which Python removed in 3.12.
-
-.. [3] `PyPCAP`_ 1.3.0 could not be built here: its build does not search
-   Homebrew's libpcap library prefix. It is also unsupported on Python 3.12+.
-
-.. [4] The prerelease `pcap-ct`_ / `libpcap`_ wheels load Linux ``libc.so.6`` on
-   this macOS host, so their engine could not be preflighted.
 
 Installation
 ============
@@ -257,7 +256,7 @@ Installation
    is intent rather than something that works. ``bpc-poseur`` 0.4.3.post1 crashes
    on positional-only parameters declared on a *method* rather than a plain
    function, and exits 0 so the build does not notice; such methods -- including
-   the 14 on :class:`~pcapkit.corekit.io.SeekableReader`, plus a dozen more across
+   those on :class:`~pcapkit.corekit.io.SeekableReader` and others across
    the protocols, foundation, dumpkit and corekit modules -- then survive into the
    installed package and ``import pcapkit`` fails with :exc:`SyntaxError`.
 
@@ -296,7 +295,7 @@ the package caches inside the project directory:
 
    make setup
 
-This resolves two common local setup issues on macOS/Homebrew installations:
+This resolves common local setup issues on macOS/Homebrew installations:
 ``pipenv`` cache permission errors under :file:`~/Library/Caches`, and ``lxml``
 builds failing to locate Homebrew's ``libxml2``/``libxslt`` headers.
 
@@ -360,7 +359,7 @@ plug-in functions, you may want to install the optional ones:
 .. warning::
 
    **Install only one of** ``pypcap`` **and** ``pcap-ct``. Both own the top-level
-   :mod:`pcap` module, and ``pip`` will install both without complaint. With both
+   ``pcap`` module, and ``pip`` will install both without complaint. With both
    present the ``pcap-ct`` package wins the import and ``pypcap``'s extension
    module is shadowed and unreachable, so ``engine='pypcap'`` stops working --
    measured on Python 3.10. :mod:`pcapkit` detects that state and warns with an
@@ -371,13 +370,13 @@ plug-in functions, you may want to install the optional ones:
 Engine Prerequisites
 --------------------
 
-Four of the engines need something beyond a ``pip install``. Each constraint
+Some of the engines need something beyond a ``pip install``. Each constraint
 below is also enforced in code, by the
 :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`
 preflight described under `Engine Comparison`_.
 
 :class:`~pcapkit.foundation.engines.pyshark.PyShark`
-   Two requirements, and neither is visible to an import: the package imports
+   Requirements, none of them visible to an import: the package imports
    cleanly and then fails when used.
 
    - Drives Wireshark's :program:`tshark` binary. It need not be on ``PATH``:
@@ -408,7 +407,7 @@ preflight described under `Engine Comparison`_.
       # macOS
       brew install libpcap
 
-   Two caveats, both upstream packaging problems rather than :mod:`pcapkit` ones:
+   Caveats, each an upstream packaging problem rather than a :mod:`pcapkit` one:
 
    - ``pypcap`` 1.3.0 ships a **pre-generated** :file:`pcap.c` produced by Cython
      0.29.x, which does not compile against the Python **3.12+** C API. Having
@@ -431,7 +430,7 @@ preflight described under `Engine Comparison`_.
    ``libpcap`` dependency ship ``py3-none-any`` wheels. Verified reading a capture
    on Python 3.10 and 3.14.
 
-   Two caveats:
+   Caveats:
 
    - **A system** :manpage:`libpcap(3)` **is still required at run time.** The
      ``libpcap`` distribution ships a vendored :file:`libpcap.so` and, as
@@ -449,12 +448,12 @@ preflight described under `Engine Comparison`_.
    `PyPCAPFile`_ 0.12.0 imports the ``imp`` module, which was **removed in
    Python 3.12**, so ``pcapfile.savefile`` -- the module needed to read a
    capture -- cannot be imported at all on 3.12 or newer. Upstream ``master``
-   has fixed this but no release carries the fix yet, so this engine also
+   has fixed this but no release carries the fix, so this engine also
    requires Python **3.11 or older** until 0.12.1 is published.
 
 .. note::
 
-   Only the four engines above carry extra constraints. :mod:`pcapkit` itself and
+   Only the engines above carry extra constraints. :mod:`pcapkit` itself and
    its ``default``, ``dpkt`` and ``scapy`` engines need nothing beyond their
    ``pip install`` -- ``dpkt`` 1.9.8 and ``scapy`` 2.7.0 were both measured
    reading a capture on Python 3.14. The ``scapy`` engine needs **scapy 2.6.0 or
@@ -471,7 +470,6 @@ For CLI usage, you will need to install the optional packages:
    # or explicitly...
    pip install pypcapkit emoji
 
-==================
 Indices and Tables
 ==================
 

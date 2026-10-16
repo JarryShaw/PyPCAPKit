@@ -118,7 +118,7 @@ At a Glance
 .. note::
 
    Only Coverage Comment fires *exclusively* on ``workflow_run``: it has
-   nothing to do without a completed Unit Tests run. Each of the other four
+   nothing to do without a completed Unit Tests run. Each of the others
    that carry one pairs it with a direct trigger of its own -- a Saturday
    ``schedule`` for Vendor Update, Conda Update and GitHub Pages, a ``v*`` tag
    push for Create Release -- for the path where no upstream run exists yet to
@@ -236,15 +236,16 @@ verdict Unit Tests already reached instead of re-running the gate a second
 time, and acts on it only once its ``verdict`` job, described under the edge
 list below, says it is a verdict on the commit it builds. Create Release has
 no ``schedule``, and its gate job's ``if:`` reads ``version_check``'s evidence
-rather than the event, so its gate runs on both of its triggers: on a ``v*``
-tag push, and on a ``workflow_run`` from Vendor Update when some target is not
-yet published (:doc:`releasing` gives the conditions).
+rather than the event, so its gate can run whichever way the run was raised, once
+``version_check`` itself has passed: on a ``v*`` tag push, and on a
+``workflow_run`` from Vendor Update when some target is not yet published
+(:doc:`releasing` gives the conditions).
 
 ``workflow_run`` Edges
 ----------------------
 
-Five in total, found by grepping every ``on:`` block rather than trusting a
-hand-maintained list:
+Found by grepping every ``on:`` block rather than trusting a hand-maintained
+list:
 
 * ``.github/workflows/cron-vendor.yml:14-16`` -- **Vendor Update** fires on
   completion of **Unit Tests**.
@@ -259,8 +260,8 @@ hand-maintained list:
 
 ``workflow_run`` fires for *every* completion of the named workflow --
 success, failure, or skipped -- and regardless of what triggered it,
-including a pull request's own run of Unit Tests. Every one of the five
-downstream workflows therefore re-checks ``github.event.workflow_run.event``
+including a pull request's own run of Unit Tests. Every
+downstream workflow therefore re-checks ``github.event.workflow_run.event``
 and ``.head_branch`` (or, for Create Release and Coverage Comment, ``.conclusion``) itself before
 doing anything with an outward effect; none of the filtering happens in the
 ``on:`` block.
@@ -300,8 +301,8 @@ Reusable-Workflow Calls (``uses:``)
 
 A ``uses:`` call is a different relationship from triggering: it runs inside
 the caller's own workflow run, as one of the caller's own jobs, rather than
-starting an independent run after the caller finishes. All four calls in this
-repository target the same reusable workflow, with the same input:
+starting an independent run after the caller finishes. Every call in this
+repository targets the same reusable workflow, with the same input:
 
 * ``.github/workflows/create-release.yml:595`` -- job ``unit-tests`` calls
   ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
@@ -332,7 +333,7 @@ comment (``unit-tests.yml:1612-1618``): ``create-release.yml`` feeds
 where a drifted file must not go unchecked. Confirmed on run `36210743295
 <https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295>`__ (a
 schedule-triggered GitHub Pages run): both ``Changelog drift`` and ``Gate
-(full suite, Python 3.14)`` succeeded, with the four matrix jobs that
+(full suite, Python 3.14)`` succeeded, with the matrix jobs that
 existed then -- ``Python ${{ matrix.python-version }}``, ``Integration
 Python …``, ``Engines Python …`` and ``PyPCAP/PyPCAPFile parity Python
 …`` -- all reporting ``skipped``.
@@ -340,7 +341,7 @@ Python …``, ``Engines Python …`` and ``PyPCAP/PyPCAPFile parity Python
 The Skip Cascade (`#888 <https://github.com/JarryShaw/PyPCAPKit/issues/888>`__)
 -------------------------------------------------------------------------------
 
-The two relationships above compose into a failure mode worth seeing on its
+The relationships above compose into a failure mode worth seeing on its
 own graph. Create Release's ``version_check`` -- ahead of the ``uses:`` call
 above -- carries:
 
@@ -363,8 +364,8 @@ anything other than ``success`` -- including
 `#1748 <https://github.com/JarryShaw/PyPCAPKit/issues/1748>`__ it is also false
 for a Vendor Update that concluded ``success`` with ``vendor-update`` skipped --
 its ``verdict`` job found the Unit Tests verdict was for another commit -- which
-the ``vendor_update`` job reads from that run's jobs first, as run 38650191283
-was. ``!cancelled()`` keeps a skipped ``vendor_update``, on a push, from
+the ``vendor_update`` job reads from that run's jobs first (observed on run
+38650191283). ``!cancelled()`` keeps a skipped ``vendor_update``, on a push, from
 skipping it. ``unit-tests`` then depends on that job with
 ``needs: [ version_check ]`` (``create-release.yml:583``) and an ``if:`` that
 calls no status-check function, so a skipped dependency skips it too -- and
@@ -409,7 +410,7 @@ notice. Observed in production on runs `36511610205
 `36510774776
 <https://github.com/JarryShaw/PyPCAPKit/actions/runs/36510774776>`__, both
 ``workflow_run``-triggered **Create Release** runs on ``main`` that concluded
-``skipped`` with every one of their six jobs -- ``Release test gate``,
+``skipped`` with every one of their jobs -- ``Release test gate``,
 ``Check Version``, ``GitHub Release``, ``Conda Tag (release)``, ``PyPI
 distribution for Python …`` and ``Conda deployment (release) …`` -- reporting
 ``skipped`` in turn.
@@ -469,7 +470,7 @@ report as the ``coverage-html`` artifact (30 days), with the bare numbers as the
 
 The PR comment comes from **Coverage Comment** (:file:`coverage-comment.yml`),
 not from ``unit-tests.yml``. That file is also a reusable workflow, a called
-workflow can only narrow the token its caller passes, and all four callers grant
+workflow can only narrow the token its caller passes, and every caller grants
 ``contents: read``, so a ``pull-requests: write`` job there would break them.
 Coverage Comment runs no tests. On ``workflow_run`` it uses the default
 branch's file and its own token, so fork pull requests get a comment too. It
@@ -594,13 +595,13 @@ acting on before the cap.
 Work Kept Off the Pull-Request Queue (`#1538 <https://github.com/JarryShaw/PyPCAPKit/issues/1538>`__)
 -----------------------------------------------------------------------------------------------------
 
-Two cuts in :file:`unit-tests.yml` keep work that cannot gate a merge from competing
+Cuts in :file:`unit-tests.yml` keep work that cannot gate a merge from competing
 with pull-request jobs for the 20-runner pool. None touches a required check or adds a
 permission to the reusable workflow.
 
 * ``unittest-ordering`` runs on ``main`` pushes only, per `#1052
   <https://github.com/JarryShaw/PyPCAPKit/issues/1052>`__ item H, and has
-  ``needs: [test]``, so its eleven cells join the queue once ``test`` finishes rather
+  ``needs: [test]``, so its cells join the queue once ``test`` finishes rather
   than when the push run is created, ahead of that run's own ``Python`` legs and of
   pull-request jobs created later in a merge wave. Its ``if:`` opens with
   ``!cancelled()``, so the cells still run when ``test`` fails, and a red cell still
@@ -611,7 +612,7 @@ permission to the reusable workflow.
   :file:`tests/toolkit/test_dpkt_unit.py`, which ``test`` runs with ``DPKT`` installed
   on every leg. Dropped with it: that file in a venv holding only ``test`` and ``DPKT``.
 
-A third cut, running the then-prerelease 3.15 engine cell on ``main`` pushes only,
+Another cut, running the then-prerelease 3.15 engine cell on ``main`` pushes only,
 ended with `#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__: 3.15 is
 in the supported tier, so its cells block on every run.
 
@@ -670,7 +671,7 @@ for the docs-only path -- and checks each result explicitly
 (``unit-tests.yml:1936-1990``). Rulesets match check names literally, with no
 wildcard, so requiring the matrix cells one by one would mean editing the
 ruleset whenever a matrix changes; the aggregate keeps the required list fixed.
-It accepts the four legs as ``skipped`` only on a docs-only pull request, where
+It accepts those legs as ``skipped`` only on a docs-only pull request, where
 ``project-tests`` -- every test that reads ``docs/`` or Markdown -- must pass
 instead. The ``Compat`` legs stay required separately because they come from
 ``python-compatibility.yml``, and a job cannot ``needs:`` a job in another
@@ -709,14 +710,14 @@ with supported legs. Every job holding KTLO legs works the same way:
   report the same way.
 * Never job-level ``continue-on-error`` alone: it passes the *run*, but the leg's
   check run still concludes ``failure``, which showed every commit red while
-  ``Compat Python 3.7 (KTLO)`` carried it. ``unit-tests.yml``'s three KTLO jobs
+  ``Compat Python 3.7 (KTLO)`` carried it. ``unit-tests.yml``'s KTLO jobs
   carry it on top of the step-level guards, as a backstop for the failures no step
   contains, as ``experimental.yml``'s job does; it "prevents a workflow run from
   failing when a job fails" (`Workflow syntax
   <https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idcontinue-on-error>`__),
   so the Unit Tests run its ``workflow_run`` consumers read stays green.
 
-Two errors remain on a failed KTLO step, neither changing a conclusion: the
+Errors remain on a failed KTLO step, though none changes a conclusion: the
 runner's ``Process completed with exit code N.`` for a ``run:`` step, and an
 action's own. And `#1634 <https://github.com/JarryShaw/PyPCAPKit/issues/1634>`__'s tag check still blocks the ``pypi`` KTLO legs: it fails
 every leg alike, and masked, the leg would go on to publish.
@@ -746,7 +747,7 @@ workflow of their own, by the owner's ruling that nothing waits on them. **That
 workflow reports separately and holds up nothing**: a job cannot ``needs:`` one in
 another workflow, nothing calls it, and no ``workflow_run`` names it, so the Unit
 Tests run completes without it, and with it ``Required checks passed``,
-``unittest-ordering`` and the four workflows that wait on Unit Tests completing
+``unittest-ordering`` and the workflows that wait on Unit Tests completing
 (``coverage-comment.yml``, ``deploy-pages.yml``, ``cron-vendor.yml`` and
 ``cron-conda.yml``). It runs on Unit Tests' ``push`` and ``pull_request`` events,
 skips a docs-only pull request by the same ``changes`` script, and cancels a
@@ -771,14 +772,14 @@ job, and none on a step. Promoting one whose leg stays green is a hand edit, whi
 :file:`util/python_versions.py` refuses until the build has a wheel, a conda build
 and a ``Compat`` leg.
 
-The tests' 120 minutes are sized for GraalPy, the slower of the two legs that share
+The tests' 120 minutes are sized for GraalPy, the slowest of the legs that share
 them: its leg reached 26% of the unit tier in 25 minutes (job 115915976024), where
 3.14t's ran the whole tier in 5.8 (run 38581834697). By the owner's ruling the
 round-trip sweeps run on ``latest`` alone: every leg but ``latest`` adds
 ``--ignore-glob='*roundtrip*'``, which leaves out each unit-tier module whose path
 holds ``roundtrip`` (``ROUNDTRIP_SWEEP_GLOB`` in :file:`tests/_tiers.py`), and
 ``latest``, the coverage leg, runs them as before. The subset covers
-``integration`` too: off ``latest`` its legs leave out the three
+``integration`` too: off ``latest`` its legs leave out the
 ``*roundtrip*_runtime.py`` modules (``ROUNDTRIP_RUNTIME_GLOB``), dropping them from
 ``fixture_tier_paths()``'s selection and adding the glob as an ``--ignore-glob``,
 since pytest applies no ignore to a path it was handed. On 2026-10-14 they were 41 modules
@@ -804,7 +805,7 @@ skipped every step after its tests, ``Post Run actions/checkout@v7`` too, whose
 `post-if
 <https://docs.github.com/en/actions/reference/workflows-and-actions/metadata-syntax#runspost-if>`__
 "defaults to ``always()``". On a lost runner, then, the ``[monitor]`` lines in the
-tests' log are the record. The monitor's three steps, start, stop and upload, are each
+tests' log are the record. The monitor's steps -- start, stop and upload -- are each
 ``continue-on-error`` with no cap of their own, so the caps above and the check names
 are as they were.
 
@@ -873,7 +874,7 @@ jobs' ``!= '3.15'``. ``tests/project/test_python_versions_1660.py`` fails on a
 pin the file does not list, on an exemption with no comment, and on a
 classifier, doc or comment that no longer matches the file -- a tier range,
 the coverage leg's version. Its tests, and the other tests that
-read the file, skip on the KTLO interpreters, which have no ``tomllib``. Two
+read the file, skip on the KTLO interpreters, which have no ``tomllib``. Some
 edits it names rather than makes: a new ``pypi`` KTLO leg needs its own
 ``ktlo_*`` output for ``release_status``, and a pre-release leg needs
 non-blocking mechanics no workflow has yet, so the script refuses one.
@@ -884,7 +885,7 @@ Every Monday, or on dispatch, its ``detect`` job runs
 release cycle, PyPy's releases, setup-python's ``versions-manifest.json`` and
 the runner-images README, recomputes the tiers by the rules in that script's
 docstring, rewrites the file and the prose these tests pin to it, and runs the
-three audit modules on the result. Only when that changes something does ``pr``
+audit modules on the result. Only when that changes something does ``pr``
 enter ``github-release``, so the owner approves only those runs. It mints a
 release App token (:doc:`releasing`, "The Release App") with contents and pull
 requests write, force-pushes ``bot/python-versions`` and opens or updates its
@@ -913,8 +914,8 @@ proposal.
 Deployment ``environment:``
 ----------------------------
 
-Five jobs declare a deployment ``environment:`` and can therefore pause for an
-approval, four in ``create-release.yml`` and one in ``cron-python-versions.yml``:
+These jobs declare a deployment ``environment:`` and can therefore pause for an
+approval, in ``create-release.yml`` and ``cron-python-versions.yml``:
 
 * ``github`` -- ``environment: github-release`` (``create-release.yml:618``)
 * ``tag`` -- ``environment: conda-tag`` (``create-release.yml:806``)
@@ -926,7 +927,7 @@ approval, four in ``create-release.yml`` and one in ``cron-python-versions.yml``
 No other workflow in scope here declares one -- including
 ``deploy-pages.yml``, whose ``deploy-pages`` job pushes straight to the
 ``gh-pages`` branch via ``JamesIves/github-pages-deploy-action`` rather than
-through an ``environment:``-gated deployment. Of the four environments, only
+through an ``environment:``-gated deployment. Of these environments, only
 ``github-release`` carries a required reviewer; :doc:`releasing`
 covers why one approval on that single environment is enough to gate the
 whole release graph, and is the page to read for the reasoning rather than

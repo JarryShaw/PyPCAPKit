@@ -1,5 +1,5 @@
-Base Protocol
-=============
+Application Layer Base Protocol
+===============================
 
 .. module:: pcapkit.protocols.application.application
 
