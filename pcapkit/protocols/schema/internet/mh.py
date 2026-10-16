@@ -408,17 +408,18 @@ def pad_opt_data_len(pkt: 'dict[str, Any]') -> 'int':
 
     Note:
         A ``Pad1`` option is a single octet with neither an ``Option Length``
-        field nor any option data (c.f. :rfc:`6275#section-6.2.2`), which is why
-        :attr:`Option.length` is declared as a
+        field nor any option data (c.f. :rfc:`6275#section-6.2.2`), which is
+        why :attr:`Option.length` is declared as a
         :class:`~pcapkit.corekit.fields.misc.ConditionalField` and is skipped
         for it. A skipped conditional field is *recorded* in the packet data as
-        :data:`~pcapkit.corekit.sentinels.NO_VALUE`, rather than being left
-        out of it, so the test below has to be on the **value** and not on the
-        presence of the key: ``pkt.get('length', 0)`` on its own hands that
-        :class:`~pcapkit.corekit.sentinels.NoValueType` straight to
+        :data:`~pcapkit.corekit.sentinels.NO_VALUE`, rather than being left out
+        of it, so the test this function makes has to be on the **value** and
+        not on the presence of the key: ``pkt.get('length', 0)`` on its own
+        hands that :class:`~pcapkit.corekit.sentinels.NoValueType` straight to
         :class:`~pcapkit.corekit.fields.strings.PaddingField`, where it becomes
         an unusable :mod:`struct` template and surfaces much later as an opaque
-        :exc:`struct.error`, which is how a ``Pad1`` option would fail to parse.
+        :exc:`struct.error`, which is how a ``Pad1`` option would fail to
+        parse.
 
     """
     length = pkt.get('length', 0)
@@ -592,7 +593,14 @@ def fb_code_selector(pkt: 'dict[str, Any]') -> 'Field':
 
 @schema_final
 class MH(Schema):
-    """Header schema for MH packets."""
+    """Header schema for MH packets.
+
+    .. versionchanged:: 1.5.0
+
+       ``reserved`` is read as an :obj:`int` rather than as zero padding
+       :obj:`bytes`, and written back as given (:issue:`1329`).
+
+    """
 
     #: Next header.
     next: 'Enum_TransType' = EnumField(length=1, namespace=Enum_TransType)
@@ -2129,10 +2137,10 @@ class BitRateAttribute(QoSAttribute, code=[Enum_QoSAttribute.Per_MN_Agg_Max_DL_B
     """Header schema for the MH Quality-of-Service attributes that carry a bare
     bit rate.
 
-    Six of the eleven registered attributes share this shape -- two reserved
-    octets and a 32-bit rate [:rfc:`7222#section-4.2.1`,
-    :rfc:`7222#section-4.2.2`, :rfc:`7222#section-4.2.6` to
-    :rfc:`7222#section-4.2.9`] -- so one schema is registered against all six.
+    Several registered attributes share this shape -- two reserved octets and
+    a 32-bit rate [:rfc:`7222#section-4.2.1`, :rfc:`7222#section-4.2.2`,
+    :rfc:`7222#section-4.2.6` to :rfc:`7222#section-4.2.9`] -- so one schema is
+    registered against each of them.
 
     Note:
         The rate is in **bits** per second, not kilobits
@@ -2562,7 +2570,14 @@ class UnknownMessage(Packet):
 
 @schema_final
 class BindingRefreshRequestMessage(Packet, code=Enum_Packet.Binding_Refresh_Request):
-    """Header schema for MH Binding Refresh Request (BRR) message."""
+    """Header schema for MH Binding Refresh Request (BRR) message.
+
+    .. versionchanged:: 1.5.0
+
+       ``reserved`` is read as an :obj:`int` rather than as zero padding
+       :obj:`bytes`, and written back as given (:issue:`1329`).
+
+    """
 
     #: Reserved.
     reserved: 'int' = UInt16Field(default=0)

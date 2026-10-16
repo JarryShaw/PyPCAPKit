@@ -27,7 +27,14 @@ AH_HEADER_LEN = 12
 
 @schema_final
 class AH(Schema):
-    """Header schema for AH packet."""
+    """Header schema for AH packet.
+
+    .. versionchanged:: 1.5.0
+
+       ``reserved`` is read as an :obj:`int` rather than as zero padding
+       :obj:`bytes`, and written back as given (:issue:`1327`).
+
+    """
 
     #: Next header.
     next: 'Enum_TransType' = EnumField(length=1, namespace=Enum_TransType)

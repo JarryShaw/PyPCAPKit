@@ -176,7 +176,10 @@ class BindingRefreshRequestMessage(MH):
 
     .. versionchanged:: 1.5.0
 
-       New required field ``msg_reserved`` (:issue:`1329`).
+       New required field ``msg_reserved`` (:issue:`1329`), and
+       ``options`` is an immutable
+       :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` rather than an
+       :class:`~pcapkit.corekit.multidict.OrderedMultiDict` (:issue:`1484`).
 
     """
 
@@ -197,7 +200,10 @@ class HomeTestInitMessage(MH):
 
     .. versionchanged:: 1.5.0
 
-       New required field ``msg_reserved`` (:issue:`1437`).
+       New required field ``msg_reserved`` (:issue:`1437`), and
+       ``options`` is an immutable
+       :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` rather than an
+       :class:`~pcapkit.corekit.multidict.OrderedMultiDict` (:issue:`1484`).
 
     """
 
@@ -221,7 +227,10 @@ class CareofTestInitMessage(MH):
 
     .. versionchanged:: 1.5.0
 
-       New required field ``msg_reserved`` (:issue:`1437`).
+       New required field ``msg_reserved`` (:issue:`1437`), and
+       ``options`` is an immutable
+       :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` rather than an
+       :class:`~pcapkit.corekit.multidict.OrderedMultiDict` (:issue:`1484`).
 
     """
 
@@ -241,7 +250,15 @@ class CareofTestInitMessage(MH):
 
 @info_final
 class HomeTestMessage(MH):
-    """Data model for MH Home Test (HoT) message type."""
+    """Data model for MH Home Test (HoT) message type.
+
+    .. versionchanged:: 1.5.0
+
+       ``options`` is an immutable
+       :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` rather than an
+       :class:`~pcapkit.corekit.multidict.OrderedMultiDict` (:issue:`1484`).
+
+    """
 
     #: Home nonce index.
     nonce_index: 'int'
@@ -260,7 +277,15 @@ class HomeTestMessage(MH):
 
 @info_final
 class CareofTestMessage(MH):
-    """Data model for MH Care-of Test (CoT) message type."""
+    """Data model for MH Care-of Test (CoT) message type.
+
+    .. versionchanged:: 1.5.0
+
+       ``options`` is an immutable
+       :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` rather than an
+       :class:`~pcapkit.corekit.multidict.OrderedMultiDict` (:issue:`1484`).
+
+    """
 
     #: Care-of nonce index.
     nonce_index: 'int'
@@ -283,8 +308,11 @@ class BindingUpdateMessage(MH):
 
     .. versionchanged:: 1.5.0
 
-       New required fields for the flag bits later RFCs assign, ``map_reg``
-       through ``dmm``, and ``flags_reserved`` for the rest (:issue:`1329`).
+       * New required fields for the flag bits later RFCs assign, ``map_reg``
+         through ``dmm``, and ``flags_reserved`` for the rest (:issue:`1329`).
+       * ``options`` is an immutable
+         :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` rather than an
+         :class:`~pcapkit.corekit.multidict.OrderedMultiDict` (:issue:`1484`).
 
     """
 
@@ -336,9 +364,12 @@ class BindingAcknowledgementMessage(MH):
 
     .. versionchanged:: 1.5.0
 
-       New required fields for the flag bits later RFCs assign,
-       ``mobile_router`` through ``dmm``, and ``flags_reserved`` for the rest
-       (:issue:`1329`).
+       * New required fields for the flag bits later RFCs assign,
+         ``mobile_router`` through ``dmm``, and ``flags_reserved`` for the rest
+         (:issue:`1329`).
+       * ``options`` is an immutable
+         :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` rather than an
+         :class:`~pcapkit.corekit.multidict.OrderedMultiDict` (:issue:`1484`).
 
     """
 
@@ -381,7 +412,10 @@ class BindingErrorMessage(MH):
 
     .. versionchanged:: 1.5.0
 
-       New required field ``msg_reserved`` (:issue:`1437`).
+       New required field ``msg_reserved`` (:issue:`1437`), and
+       ``options`` is an immutable
+       :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` rather than an
+       :class:`~pcapkit.corekit.multidict.OrderedMultiDict` (:issue:`1484`).
 
     """
 
@@ -830,6 +864,11 @@ class BindingRefreshAdviceOption(Option):
        re-export ``pcapkit.protocols.data.internet.MH_BindRefreshAdviceOption``,
        with no alias.
 
+    .. versionchanged:: 1.5.0
+
+       ``interval`` is a :class:`~datetime.timedelta` rather than the raw
+       count of 4-second units (:issue:`493`).
+
     """
 
     #: Refresh interval before re-registration. Counted on the wire in units of
@@ -1026,7 +1065,15 @@ class MultiPrefixExtension(CGAExtension):
 
 @info_final
 class CGAParameter(Data):
-    """Data model for CGA parameter."""
+    """Data model for CGA parameter.
+
+    .. versionchanged:: 1.5.0
+
+       ``extensions`` is an immutable
+       :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` rather than an
+       :class:`~pcapkit.corekit.multidict.OrderedMultiDict` (:issue:`1484`).
+
+    """
 
     #: Modifier.
     modifier: 'Enum_CGAType'
@@ -2079,7 +2126,7 @@ class QualityOfServiceOption(Option):
     #: Differentiated services code point, the significant 6 bits of the traffic
     #: class octet.
     dscp: 'int'
-    #: Operational code: ``0`` response, ``1`` allocate, ``2`` de-allocate,
+    #: Operational code -- ``0`` response, ``1`` allocate, ``2`` de-allocate,
     #: ``3`` modify, ``4`` query, ``5`` negotiate.
     oc: 'int'
     #: The three reserved octets, as captured.
@@ -2113,7 +2160,7 @@ class LMAUserPlaneAddressOption(Option):
 class MulticastMobilityOption(Option):
     """Data model for MH Multicast Mobility option."""
 
-    #: Option code: ``1`` IGMPv3, ``2`` MLDv2, ``3`` IGMPv3 in IGMPv2
+    #: Option code -- ``1`` IGMPv3, ``2`` MLDv2, ``3`` IGMPv3 in IGMPv2
     #: compatibility mode, ``4`` MLDv2 in MLDv1 compatibility mode.
     code: 'int'
     #: The reserved octet, as captured.
@@ -2132,7 +2179,7 @@ class MulticastAcknowledgementOption(Option):
 
     #: Option code; always ``0``.
     code: 'int'
-    #: Status: ``1`` report payload type unsupported, ``2`` requested group
+    #: Status -- ``1`` report payload type unsupported, ``2`` requested group
     #: service unsupported, ``3`` administratively prohibited.
     status: 'int'
     #: MLD or IGMP unsupported report payload, kept opaque.

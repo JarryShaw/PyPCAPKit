@@ -183,7 +183,7 @@ class IPv6_Frag(IPv6_Ext[Data_IPv6_Frag, Schema_IPv6_Frag],
             reserved_octet: The reserved octet after the next header, truncated or
                 zero-filled to one octet.
             offset: Fragment offset, in on-wire 8-octet units (:rfc:`8200#section-4.5`).
-                Note that :attr:`Data_IPv6_Frag.offset
+                Note that the data model's :attr:`offset
                 <pcapkit.protocols.data.internet.ipv6_frag.IPv6_Frag.offset>` is in
                 octets, so it must be divided by 8 before being passed here.
             reserved: Reserved bits (``Res``) between the offset and the M flag.
@@ -194,6 +194,12 @@ class IPv6_Frag(IPv6_Ext[Data_IPv6_Frag, Schema_IPv6_Frag],
 
         Returns:
             Constructed packet data.
+
+        .. versionchanged:: 1.5.0
+
+           Takes ``reserved_octet`` ahead of ``offset`` (:issue:`1223`) and
+           ``reserved`` ahead of ``mf`` (:issue:`1235`), which shifts every
+           later positional argument.
 
         """
         next_val = self._make_index(next, next_default, namespace=next_namespace,

@@ -266,18 +266,18 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
     :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` alone, while one also
     usable as a standalone protocol names
     :class:`~pcapkit.protocols.internet.internet.Internet` as well. HIP is both,
-    on two independent grounds:
+    on independent grounds:
 
     * :rfc:`7401#section-5.1` states that "the HIP header is logically an
       IPv6 extension header", and IANA lists protocol 139 in its *IPv6
-      Extension Header Types* registry (11 entries).
+      Extension Header Types* registry.
     * :rfc:`7401#appendix-C.2`, "IPv4 HIP Packet (I1 Packet)", works a checksum
       for an **IPv4** header carrying ``Next Header: 139`` with
       ``Payload Protocol: 59``. HIP therefore travels directly as an IPv4
       payload, as do :class:`~pcapkit.protocols.internet.ah.AH` and
       :class:`~pcapkit.protocols.internet.esp.ESP`.
 
-    The second ground separates HIP from
+    The IPv4 ground separates HIP from
     :class:`~pcapkit.protocols.internet.mh.MH` and Shim6, which are protocols
     in their own right but cannot appear under IPv4:
     :rfc:`6275#section-6.1.1` defines the Mobility Header checksum over a
@@ -417,8 +417,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[Enum_Parameter, str | tuple[ParameterParser, ParameterConstructor]]:
-    #: Parameter code to method mapping, c.f. :meth:`_read_hip_param` and/or
+    #: DefaultDict[Enum_Parameter, str | tuple[ParameterParser, ParameterConstructor]]: Parameter
+    #: code to method mapping, c.f. :meth:`_read_hip_param` and/or
     #: :meth:`_make_hip_param`. A :obj:`str` value names the methods
     #: ``_read_param_${name}`` and ``_make_param_${name}``, falling back to
     #: ``_read_param_unassigned`` / ``_make_param_unassigned`` when they do not
@@ -504,7 +504,6 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         Raises:
             UnsupportedCall: if the protocol is used as an IPv6 extension header
 
-        :rtype: pcapkit.protocols.protocol.Protocol
         """
         if self._extf:
             raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'payload'")
@@ -674,6 +673,14 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         Returns:
             Constructed packet data.
+
+        .. versionchanged:: 1.5.0
+
+           Takes ``packet_fixed`` ahead of ``version`` and ``version_fixed``
+           ahead of ``checksum`` (:issue:`1459`), ``version_reserved`` before
+           ``version_fixed`` (:issue:`1417`), and ``controls_reserved`` ahead of
+           ``shit`` (:issue:`1328`), which shifts every later positional
+           argument.
 
         """
         next_value = self._make_index(next, next_default, namespace=next_namespace,
@@ -1319,7 +1326,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         Raises:
-            ProtocolError: If ``schema.len`` is **NOT** ``4`` modulo.
+            ProtocolError: If ``schema.len`` is **not** a multiple of ``4``.
 
         """
         if schema.len % 4 != 0:
@@ -1441,7 +1448,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         Raises:
             ProtocolError: If the parameter is used in a version other than
-                HIPv1, or ``schema.len`` is **NOT** a ``2`` modulo.
+                HIPv1, or ``schema.len`` is **not** a multiple of ``2``.
 
         """
         if version != 1:
@@ -1485,7 +1492,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         Raises:
             ProtocolError: If the parameter is used in HIPv1, or ``schema.len`` is
-                **NOT** a ``2`` modulo.
+                **not** a multiple of ``2``.
 
         """
         if version == 1:
@@ -1541,7 +1548,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         Raises:
-            ProtocolError: If ``schema.len`` is **NOT** a ``2`` modulo.
+            ProtocolError: If ``schema.len`` is **not** a multiple of ``2``.
 
         """
         if schema.len % 2 != 0:
@@ -2123,7 +2130,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         Raises:
             ProtocolError: If the parameter is used in HIPv1, or ``schema.len`` is
-                **NOT** ``2`` modulo.
+                **not** a multiple of ``2``.
 
         """
         if version == 1:
@@ -2168,7 +2175,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         Raises:
-            ProtocolError: If ``schema.len`` is **NOT** ``2`` modulo.
+            ProtocolError: If ``schema.len`` is **not** a multiple of ``2``.
 
         """
         if schema.len % 2 != 0:
@@ -2248,7 +2255,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         Raises:
-            ProtocolError: If ``schema.len`` is **NOT** ``4`` modulo.
+            ProtocolError: If ``schema.len`` is **not** a multiple of ``4``.
 
         """
         if schema.len % 4 != 0:
@@ -2462,7 +2469,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         Raises:
-            ProtocolError: If ``schema.len`` is **NOT** ``2`` modulo.
+            ProtocolError: If ``schema.len`` is **not** a multiple of ``2``.
 
         """
         if schema.len % 2 != 0:
@@ -3000,7 +3007,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         Raises:
-            ProtocolError: If ``schema.len`` is **NOT** ``16`` modulo.
+            ProtocolError: If ``schema.len`` is **not** a multiple of ``16``.
 
         """
         if schema.len % 16 != 0:
@@ -3416,8 +3423,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         ``Length = 20`` ``SOLUTION`` as ``Length = 6`` and build, under HIPv1,
         parameters this library's own reader rejects.
 
-        Two things this deliberately does *not* reject, both of which look like
-        oversights and are not:
+        Things this deliberately does *not* reject, each of which looks like an
+        oversight and is not:
 
         * ``rhash_len == 0``, i.e. a zero-width payload field. No real hash has a
           zero-length output, so no conformant packet carries one -- but it is what

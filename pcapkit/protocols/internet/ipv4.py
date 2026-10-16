@@ -214,8 +214,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[Enum_OptionNumber, str | tuple[OptionParser, OptionConstructor]]:
-    #: Option code to method mapping, c.f. :meth:`_read_ipv4_options` and/or
+    #: DefaultDict[Enum_OptionNumber, str | tuple[OptionParser, OptionConstructor]]: Option
+    #: code to method mapping, c.f. :meth:`_read_ipv4_options` and/or
     #: :meth:`_make_ipv4_options`. A :obj:`str` value names the methods
     #: ``_read_opt_${name}`` and ``_make_opt_${name}``, falling back to
     #: ``_read_opt_unassigned`` / ``_make_opt_unassigned`` when they do not
@@ -500,6 +500,12 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
 
         Returns:
             Constructed packet data.
+
+        .. versionchanged:: 1.5.0
+
+           Takes ``reserved`` ahead of ``df`` (:issue:`1326`), and
+           ``total_length`` (:issue:`1155`) and ``padding`` (:issue:`1317`)
+           ahead of ``payload``, which shifts every later positional argument.
 
         """
         tos_pre_val = self._make_index(tos_pre, tos_pre_default, namespace=tos_pre_namespace,

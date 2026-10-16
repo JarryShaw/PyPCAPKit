@@ -103,7 +103,9 @@ class HIP(Protocol):
     .. versionchanged:: 1.5.0
 
        New required fields ``packet_fixed``, ``reserved`` and ``version_fixed``
-       (:issue:`1417`, :issue:`1459`).
+       (:issue:`1417`, :issue:`1459`), and ``parameters`` is an immutable
+       :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` rather than an
+       :class:`~pcapkit.corekit.multidict.OrderedMultiDict` (:issue:`1484`).
 
     """
 
@@ -256,7 +258,8 @@ class PuzzleParameter(Parameter):
     .. versionchanged:: 1.5.0
 
        New required fields ``lifetime_exponent`` and ``rhash_len``
-       (:issue:`653`, :issue:`1323`).
+       (:issue:`653`, :issue:`1323`), and ``lifetime`` is :obj:`None` past
+       :attr:`datetime.timedelta.max` (:issue:`1323`).
 
     """
 

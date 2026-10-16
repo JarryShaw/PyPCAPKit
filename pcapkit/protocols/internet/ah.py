@@ -215,12 +215,17 @@ class AH(IPsec[Data_AH, Schema_AH], IPv6_Ext[Data_AH, Schema_AH],
                 but written as given so that a parsed header rebuilds unchanged.
             spi: Security Parameters Index.
             seq: Sequence Number Field.
-            icv: Integrity Check Value-ICV.
+            icv: Integrity Check Value (ICV).
             payload: Payload of current instance.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed packet data.
+
+        .. versionchanged:: 1.5.0
+
+           Takes ``reserved`` ahead of ``spi`` (:issue:`1327`), which shifts
+           every later positional argument.
 
         """
         next_value = self._make_index(next, next_default, namespace=next_namespace,

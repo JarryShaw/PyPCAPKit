@@ -16,7 +16,7 @@ Octets      Bits        Name                    Description
   0           0   ``ipv6.version``            Version (``6``)
   0           4   ``ipv6.class``              Traffic Class
   1          12   ``ipv6.label``              Flow Label
-  4          32   ``ipv6.payload``            Payload Length (header excludes)
+  4          32   ``ipv6.payload``            Payload Length (header excluded)
   6          48   ``ipv6.next``               Next Header
   7          56   ``ipv6.limit``              Hop Limit
   8          64   ``ipv6.src``                Source Address
@@ -108,7 +108,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
     #: :class:`~pcapkit.protocols.misc.raw.Raw`, which has no ``next`` field
     #: and so cannot continue the walk in :meth:`_decode_next_layer`.
     #:
-    #: Three groups are deliberately absent:
+    #: These groups are deliberately absent:
     #:
     #: * :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6`
     #:   has no dedicated parser class in this package, so there is no "own
@@ -327,6 +327,11 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
 
         Returns:
             Constructed packet data.
+
+        .. versionchanged:: 1.5.0
+
+           Takes ``payload_length`` ahead of ``payload`` (:issue:`1155`), which
+           shifts a positional ``payload``.
 
         """
         next_val = self._make_index(next, next_default, namespace=next_namespace,

@@ -6,7 +6,7 @@ IPsec - Internet Protocol Security
 :mod:`pcapkit.protocols.internet.ipsec` contains
 :class:`~pcapkit.protocols.internet.ipsec.IPsec`
 only, which is a base class for Internet Protocol
-Security (IPsec) protocol family [*]_, eg.
+Security (IPsec) protocol family [*]_, e.g.
 :class:`~pcapkit.protocols.internet.ah.AH` and
 :class:`~pcapkit.protocols.internet.esp.ESP`.
 

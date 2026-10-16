@@ -14,7 +14,7 @@ as below:
 Octets      Bits        Name                    Description
 ======= ========= ====================== =====================================
   0           0   ``ipx.chksum``            Checksum
-  2          16   ``ipx.len``               Packet Length (header includes)
+  2          16   ``ipx.len``               Packet Length (header included)
   4          32   ``ipx.count``             Transport Control (hop count)
   5          40   ``ipx.type``              Packet Type
   6          48   ``ipx.dst``               Destination Address
@@ -153,7 +153,7 @@ class IPX(Internet[Data_IPX, Schema_IPX],
             type_default: Default value for undefined packet type.
             type_namespace: Namespace for packet type.
             type_reversed: Reverse namespace for packet type.
-            total_length: Packet length (header includes); computed as ``30`` plus
+            total_length: Packet length (header included); computed as ``30`` plus
                 the payload length when not given.
             dst: Destination Address.
             src: Source Address.
@@ -164,6 +164,11 @@ class IPX(Internet[Data_IPX, Schema_IPX],
 
         Returns:
             Constructed packet data.
+
+        .. versionchanged:: 1.5.0
+
+           Takes ``total_length`` ahead of ``dst`` (:issue:`1315`), which
+           shifts every later positional argument.
 
         """
         type_val = self._make_index(type, type_default, namespace=type_namespace,

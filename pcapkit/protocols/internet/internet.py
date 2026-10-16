@@ -6,9 +6,9 @@
 .. module:: pcapkit.protocols.internet.internet
 
 :mod:`pcapkit.protocols.internet.internet` contains :class:`~pcapkit.protocols.internet.internet.Internet`,
-which is a base class for internet layer protocols, eg. :class:`~pcapkit.protocols.internet.ah.AH`,
+which is a base class for internet layer protocols, e.g. :class:`~pcapkit.protocols.internet.ah.AH`,
 :class:`~pcapkit.protocols.internet.ipsec.IPsec`, :class:`~pcapkit.protocols.internet.ipv4.IPv4`,
-:class:`~pcapkit.protocols.internet.ipv6.IPv6`, :class:`~pcapkit.protocols.internet.ipx.IPX`, and etc.
+:class:`~pcapkit.protocols.internet.ipv6.IPv6` and :class:`~pcapkit.protocols.internet.ipx.IPX`.
 
 """
 import collections
@@ -371,9 +371,10 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             nothing to parse; :class:`~pcapkit.protocols.misc.raw.Raw` if the
             parse stops at this layer, or the next layer is an IPv6 extension
             header past :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` in a row; otherwise the
-            class registered for ``proto``. With it, the keywords only that next
-            layer is constructed with: the warning given, as ``error``, or the
-            next layer's place in its chain, as ``_exthdr_depth``.
+            class registered for ``proto``. Paired with it, the keywords that
+            only that next layer is constructed with: the warning given, as
+            ``error``, or the next layer's place in its chain, as
+            ``_exthdr_depth``.
 
         Warns:
             ProtocolWarning: If the next layer is past
@@ -428,7 +429,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             Current protocol with next layer extracted.
 
         Notes:
-            ``dict_`` gains the key ``__next_type__`` (next layer protocol
+            ``dict_`` gains the keys ``__next_type__`` (next layer protocol
             type) and ``__next_name__`` (next layer protocol name). Neither
             is included when :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` is called.
 

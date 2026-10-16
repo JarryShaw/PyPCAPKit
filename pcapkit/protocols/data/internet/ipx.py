@@ -26,7 +26,7 @@ class Address(Data):
     network: 'str'
     #: Node number (``-`` separated).
     node: 'str'
-    #: Socket number (``:`` separated).
+    #: Socket number.
     socket: 'Socket'
     #: Full address (``:`` separated).
     addr: 'str'
@@ -41,7 +41,7 @@ class IPX(Protocol):
 
     #: Checksum.
     chksum: 'bytes'
-    #: Packet length (header includes).
+    #: Packet length (header included).
     len: 'int'
     #: Transport control (hop count).
     count: 'int'
