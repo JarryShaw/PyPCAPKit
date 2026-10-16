@@ -13,7 +13,8 @@
 * The committed list holds every requirement :file:`pyproject.toml` makes live on
   a conda build, with its marker, and none that is dead there.
 * ``--smoke`` passes on a conda package whose vendored distributions are complete
-  and fails on one missing a data file.
+  and fails on one missing a data file. Its platform checks (#1822) are
+  :file:`test_conda_native_platforms_1822.py`'s.
 
 """
 
@@ -276,11 +277,17 @@ class SmokeTests(unittest.TestCase):
     def package(self, temp: 'str', files: 'dict[str, str]') -> 'pathlib.Path':
         site = f'lib/python{sys.version_info.major}.{sys.version_info.minor}/site-packages/'
         path = pathlib.Path(temp) / 'pypcapkit-0-py_0.tar.bz2'
+        # #1822: filed under this runner's platform, which --smoke requires.
+        runner = vendor().runner_platform()
+        if runner is None:  # pragma: no cover
+            raise unittest.SkipTest('this machine is none of the platforms the conda legs build on')
+        members = {site + name: text for name, text in dict({'pcapkit/__init__.py': SHIM}, **files).items()}
+        members['info/index.json'] = json.dumps({'name': 'pypcapkit', 'subdir': runner})
         buffer = io.BytesIO()
         with tarfile.open(fileobj=buffer, mode='w') as archive:
-            for name, text in dict({'pcapkit/__init__.py': SHIM}, **files).items():
+            for name, text in members.items():
                 data = text.encode('utf-8')
-                info = tarfile.TarInfo(site + name)
+                info = tarfile.TarInfo(name)
                 info.size = len(data)
                 archive.addfile(info, io.BytesIO(data))
         path.write_bytes(bz2.compress(buffer.getvalue()))

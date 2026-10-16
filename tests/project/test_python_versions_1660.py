@@ -236,6 +236,9 @@ KTLO_AT_MAIN = [{'python-version': '3.7', 'ktlo': True, 'os': 'ubuntu-22.04'},
                 {'python-version': '3.9', 'ktlo': True, 'os': 'ubuntu-24.04'},
                 {'python-version': '3.10', 'ktlo': True}]
 CONDA_AT_MAIN = {'os': ['macos-latest', 'ubuntu-latest'], 'python-version': SUPPORTED_AT_MAIN}
+#: The conda jobs' ``os`` axis since #1822, which added the Intel macOS runner.
+CONDA_JOBS = (('create-release.yml', 'conda'), ('cron-conda.yml', 'conda-dist'))
+CONDA_OS = ['macos-latest', 'macos-26-intel', 'ubuntu-latest']
 MAIN_MATRICES = {
     ('unit-tests.yml', 'test'): {
         'python-version': SUPPORTED_AT_MAIN,
@@ -569,6 +572,9 @@ class TestNothingMovedButLatest(unittest.TestCase):
                     leg.pop('coverage', None)
                     if leg['python-version'] == TIERS_AT_MAIN['latest']:
                         leg['coverage'] = True
+            if (name, job_id) in CONDA_JOBS:
+                # #1822: an Intel macOS leg per version, so osx-64 is built natively.
+                expected = legs(dict(spec, os=CONDA_OS))
             if (name, job_id) in KTLO_TWINS:
                 # #1738: the KTLO legs, in MAIN's order, are the twin job's.
                 twin = KTLO_TWINS[(name, job_id)]
