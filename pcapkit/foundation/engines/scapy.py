@@ -51,6 +51,7 @@ from pcapkit.utilities.warnings import AttributeWarning, warn
 __all__ = ['Scapy']
 
 if TYPE_CHECKING:
+    from types import ModuleType
     from typing import Any, Iterator, Type
 
     from scapy.packet import Packet as ScapyPacket
@@ -282,10 +283,8 @@ class Scapy(EngineBase['ScapyPacket']):
 
     """
     if TYPE_CHECKING:
-        import scapy.all
-
-        #: Engine extraction package.
-        _expkg: 'scapy.all'
+        #: Engine extraction package, i.e. :mod:`scapy.all`.
+        _expkg: 'ModuleType'
         #: Engine extraction temporary storage.
         _extmp: 'Iterator[ScapyPacket]'
 

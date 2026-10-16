@@ -27,6 +27,7 @@ from pcapkit.utilities.warnings import AttributeWarning, ProtocolWarning, warn
 __all__ = ['PyPCAPFile']
 
 if TYPE_CHECKING:
+    from types import ModuleType
     from typing import Any, Callable, Iterator, Optional
 
     from pcapfile.structs import __pcap_header__ as PCAPFileHeader
@@ -68,10 +69,8 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
 
     """
     if TYPE_CHECKING:
-        import pcapfile
-
-        #: Engine extraction package.
-        _expkg: 'pcapfile'
+        #: Engine extraction package, i.e. :mod:`pcapfile`.
+        _expkg: 'ModuleType'
         #: Engine extraction temporary storage.
         _extmp: 'Iterator[PCAPFilePacket]'
         #: Data link layer protocol, from the savefile header.

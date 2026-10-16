@@ -24,6 +24,7 @@ from pcapkit.utilities.warnings import AttributeWarning, EngineWarning, warn
 __all__ = ['PCAP_CT']
 
 if TYPE_CHECKING:
+    from types import ModuleType
     from typing import Iterator, Optional
 
     from pcap import pcap as Handle
@@ -111,10 +112,8 @@ class PCAP_CT(EngineBase['RawFrame']):
 
     """
     if TYPE_CHECKING:
-        import pcap
-
-        #: Engine extraction package.
-        _expkg: 'pcap'
+        #: Engine extraction package, i.e. :mod:`pcap`.
+        _expkg: 'ModuleType'
         #: Capture handle, kept separately from the iterator it is read through
         #: so that :meth:`close` does not depend on ``iter(handle) is handle``.
         _handle: 'Handle'

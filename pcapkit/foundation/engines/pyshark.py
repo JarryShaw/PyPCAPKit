@@ -22,6 +22,7 @@ from pcapkit.utilities.warnings import AttributeWarning, warn
 __all__ = ['PyShark']
 
 if TYPE_CHECKING:
+    from types import ModuleType
     from typing import Optional
 
     from pyshark.capture.file_capture import FileCapture
@@ -82,10 +83,8 @@ class PyShark(EngineBase['PySharkPacket']):
 
     """
     if TYPE_CHECKING:
-        import pyshark
-
-        #: Engine extraction package.
-        _expkg: 'pyshark'
+        #: Engine extraction package, i.e. :mod:`pyshark`.
+        _expkg: 'ModuleType'
         #: Engine extraction temporary storage.
         _extmp: 'FileCapture'
 

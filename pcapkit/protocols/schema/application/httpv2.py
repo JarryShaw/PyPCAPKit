@@ -133,7 +133,10 @@ class FrameType(EnumSchema[Enum_Frame]):
     """Header schema for HTTP/2 frame payload."""
 
     if TYPE_CHECKING:
-        __flags__: 'Flags'
+        # Qualified rather than ``'Flags'``: documentation tools evaluate a class
+        # annotation against the module's globals, not the class body, so the
+        # bare nested name cannot be found there (#1857).
+        __flags__: 'FrameType.Flags'
 
     __enum__ = collections.defaultdict(lambda: UnassignedFrame)
 

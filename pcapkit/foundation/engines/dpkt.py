@@ -29,6 +29,7 @@ from pcapkit.utilities.warnings import AttributeWarning, DPKTWarning, warn
 __all__ = ['DPKT', 'PCAPNGReader']
 
 if TYPE_CHECKING:
+    from types import ModuleType
     from typing import IO, Iterator, Literal, Optional, Type, Union
 
     from dpkt.dpkt import Packet as DPKTPacket
@@ -380,10 +381,8 @@ class DPKT(EngineBase['DPKTPacket']):
 
     """
     if TYPE_CHECKING:
-        import dpkt
-
-        #: Engine extraction package.
-        _expkg: 'dpkt'
+        #: Engine extraction package, i.e. :mod:`dpkt`.
+        _expkg: 'ModuleType'
         #: Engine extraction temporary storage.
         _extmp: 'Reader'
 
@@ -441,7 +440,6 @@ class DPKT(EngineBase['DPKTPacket']):
         from pcapkit.foundation.engines.pcapng import PCAPNG
 
         ext = self._extractor
-        dpkt = self._expkg
 
         if ext._exlyr != 'none' or ext._exptl != 'null':
             warn("'Extractor(engine=dpkt)' does not support protocol and layer threshold; "
