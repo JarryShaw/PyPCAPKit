@@ -586,7 +586,7 @@ class MPLOption(Option, code=Enum_Option.MPL_Option):
     #: MPL sequence number.
     seq: 'int' = UInt8Field()
     #: MPL Seed-ID.
-    seed: 'int' = ConditionalField(
+    seed: 'int | IPv6Address' = ConditionalField(
         NumberField(length=mpl_opt_seed_id_len, signed=False),
         lambda pkt: pkt['flags']['type'] != Enum_SeedID.IPV6_SOURCE_ADDRESS,
     )
@@ -609,7 +609,7 @@ class MPLOption(Option, code=Enum_Option.MPL_Option):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', len: 'int', flags: 'MPLFlags', seq: 'int',
-                     seed: 'Optional[int]') -> 'None': ...
+                     seed: 'Optional[int | IPv6Address]') -> 'None': ...
 
 
 @schema_final
