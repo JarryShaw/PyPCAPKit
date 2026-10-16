@@ -28,6 +28,9 @@ asserted directly rather than left to the generic sweeps in
 
 """
 
+import ast
+import functools
+import inspect
 import unittest
 
 __all__ = ['AppTypeSplitTests']
@@ -54,6 +57,49 @@ def _dunder_sample(registry: 'type') -> 'list':
     keep = set(range(0, len(members), step)) | {len(members) - 1}
     return [member for index, member in enumerate(members)
             if index in keep or member.aliases]
+
+
+@functools.lru_cache(maxsize=None)
+def _declarations(path: 'str', name: 'str') -> 'tuple[tuple[str, int], ...]':
+    """The ``(name, port)`` rows class ``name`` declares in the module at ``path``."""
+    with open(path, encoding='utf-8') as file:
+        tree = ast.parse(file.read(), filename=path)
+    body = next(node.body for node in tree.body
+                if isinstance(node, ast.ClassDef) and node.name == name)
+
+    rows = []  # type: list[tuple[str, int]]
+    for node in body:
+        if not isinstance(node, ast.Assign):
+            continue
+        # A member is ``name = port, 'svc', TransportProtocol.x``. Any other
+        # assignment is refused rather than skipped, so a change of shape in the
+        # generator fails here instead of quietly shrinking the oracle.
+        value = node.value
+        if not (len(node.targets) == 1 and isinstance(node.targets[0], ast.Name)
+                and isinstance(value, ast.Tuple) and len(value.elts) == 3):
+            raise ValueError(f'{path}:{node.lineno}: not a member declaration')
+        rows.append((node.targets[0].id, ast.literal_eval(value.elts[0])))
+    return tuple(rows)
+
+
+def _declared(registry: 'type') -> 'list[tuple[str, int]]':
+    """Every member ``registry``'s generated module declares, in source order.
+
+    GitHub issue #1820. The population checks in this file used to pin IANA's
+    per-registry member counts, so a vendor update that added or removed a port
+    turned them red with nothing wrong. They compare against this instead: the
+    ``(name, port)`` rows the generated class body declares, read with
+    :mod:`ast` rather than off the live class, so the oracle does not depend on
+    what the registry holds at run time. A vendor update moves both sides alike,
+    while a member the class holds but its source never declared -- a mint, as
+    in GitHub issue #758 -- or one the source declares but the class lost, still
+    shows as a difference.
+
+    """
+    path = inspect.getsourcefile(registry)
+    if path is None:
+        raise ValueError(f'{registry.__name__} has no source file to read')
+    return list(_declarations(path, registry.__name__))
 
 
 class AppTypeSplitTests(unittest.TestCase):
@@ -115,8 +161,8 @@ class AppTypeSplitTests(unittest.TestCase):
             for other in registries[index + 1:]:
                 self.assertIsNot(registry, other)
 
-        # SCTP has 91 assignments against TCP's thousands; a shared mapping would
-        # show them the same size.
+        # SCTP holds far fewer assignments than TCP; a shared mapping would show
+        # them the same size.
         self.assertLess(len(SCTP.__registry__), len(TCP.__registry__))
 
     def test_a_colliding_port_keeps_every_service(self) -> None:
@@ -225,8 +271,8 @@ class AppTypeSplitTests(unittest.TestCase):
         live lookup key in ``_value2member_map_`` and is built once when the
         class is created -- see
         ``test_every_member_renders_its_own_registrys_transport_protocol`` for
-        the sweep over all 12,391 members that pins this for every one of them,
-        aliased or not, and
+        the sweep over every member that pins this for each of them, aliased or
+        not, and
         ``test_the_new_dunders_are_byte_identical_to_the_percent_form`` for the
         sample #1062 formats against the pre-#798 form.
         """
@@ -551,7 +597,10 @@ class AppTypeSplitTests(unittest.TestCase):
         did raise; ``get``'s ``except ValueError`` caught that very rejection and
         minted regardless, leaving ``get`` more permissive than ``cls(...)``. So
         the assertion has to be on ``.get``, and on the registry not having grown:
-        the defect was visible as ``len(TCP)`` going 6147 to 6148.
+        the defect was visible as ``len(TCP)`` growing by the member it minted.
+        That is measured against the registry's own size just before each call
+        rather than against a pinned population, which a vendor update moves
+        (GitHub issue #1820).
         """
         from pcapkit.const.reg.apptype import DCCP, SCTP, TCP, UDP, AppType, TransportProtocol
 
@@ -623,9 +672,15 @@ class AppTypeSplitTests(unittest.TestCase):
         transport protocol is claimed by that registry, and one minting for
         ``undefined`` claims nothing, since IANA's unassigned and reserved markers
         belong to whichever registry was asked.
+
+        "Every branch" is checked against the same source parsed with :mod:`ast`:
+        the pattern has to find one branch per ``_unregistered_member`` call in
+        the method, so a branch emitted in a shape it does not match fails here
+        rather than going unchecked. That replaces a pinned branch count, which
+        a vendor update that splits or merges a span moves (GitHub issue #1820).
         """
-        import inspect
         import re
+        import textwrap
 
         from pcapkit.const.reg.apptype import AppType
 
@@ -644,7 +699,14 @@ class AppTypeSplitTests(unittest.TestCase):
                               r"return cls\._unregistered_member\(value, .+?, "
                               r'TransportProtocol\.(\w+)\)',
                               source)
-        self.assertEqual(len(branches), 766)
+        function = ast.parse(textwrap.dedent(source)).body[0]
+        calls = [node for node in ast.walk(function)
+                 if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+                 and node.func.attr == '_unregistered_member']
+        self.assertNotEqual(branches, [])
+        self.assertEqual(len(branches), len(calls))
+        # Both kinds are present, so neither half of the loop below is vacuous.
+        self.assertEqual({proto == 'undefined' for _, proto in branches}, {True, False})
 
         for condition, proto in branches:
             with self.subTest(condition=condition):
@@ -794,13 +856,13 @@ class AppTypeSplitTests(unittest.TestCase):
     def test_no_member_carries_a_multi_transport_proto(self) -> None:
         """GitHub issue #806: the composite that caused #759 is gone at the source.
 
-        This test used to sweep the 10,625 multi-transport members through
-        ``AppType.get(m.port, proto=m.proto)`` and require every one of them to be
+        This test used to sweep every multi-transport member through
+        ``AppType.get(m.port, proto=m.proto)`` and require each of them to be
         *refused*, because a member's own ``proto`` was the whole set IANA assigned
         the service and so named up to four registries. Retyping ``proto`` to the
         single transport protocol of the registry the member lives in removes that
-        population outright: the sweep count goes from **10,625 to 0**, and a
-        member's own ``proto`` is now the one thing a lookup can always be given.
+        population outright, and a member's own ``proto`` is now the one thing a
+        lookup can always be given.
 
         So the assertion inverts. Instead of "every multi-bit member refuses its own
         ``proto``" it is "no member has a multi-bit ``proto``, and every member
@@ -808,11 +870,11 @@ class AppTypeSplitTests(unittest.TestCase):
         the callers from, established at generation time rather than defended at
         every entry point.
 
-        The 23 ``(port, service)`` pairs #759 measured are kept and re-checked
+        The ``(port, service)`` pairs #759 measured are kept and re-checked
         against the *new* behaviour, because they are the pairs where the defect was
         observable: each is declared in both the TCP and the UDP registry, and each
         used to come back as its port's TCP canonical. Every one of them now
-        resolves inside its own registry. The two whose ``__canonical__`` genuinely
+        resolves inside its own registry. The ones whose ``__canonical__`` genuinely
         disagrees between the registries -- port **888**, ``accessbuilder`` against
         TCP's ``cddbp``, and port **999**, ``puprouter`` against TCP's ``garcon``
         where UDP answers ``applix`` -- were the whole blast radius, and are the
@@ -822,12 +884,16 @@ class AppTypeSplitTests(unittest.TestCase):
         population is what the crawler regenerates: a future crawl that adds a
         service to a second transport adds members here, and they have to be
         single-bit too. The failures are collected rather than run through
-        :meth:`~unittest.TestCase.subTest`, since 12,391 subtests would dominate
-        the suite's own output.
+        :meth:`~unittest.TestCase.subTest`, since a subtest per member would
+        dominate the suite's own output.
 
-        Counted over members the crawler *declared*, so the figure does not depend
+        Swept over members the crawler *declared*, so the result does not depend
         on what else has run in this process: a mint carries ``svc == 'unknown'``
-        and no generated member does, which makes that the filter.
+        and no generated member does, which makes that the filter. The swept
+        population is then compared with the one the generated modules declare
+        (see :func:`_declared`), rather than with a pinned count that every
+        vendor update moves (GitHub issue #1820), so a member the sweep never
+        reached still fails it.
 
         "Multi-bit" used to be checked with :func:`~pcapkit.utilities.compat.
         show_flag_values`, decoding ``member.proto`` into its set bits --
@@ -838,7 +904,7 @@ class AppTypeSplitTests(unittest.TestCase):
         binary ``11`` -- two bits -- despite being every bit as single a
         member as the other three. A bit-decomposition helper reads that as
         "multi-bit" regardless of what produced it, so it would flag every one
-        of SCTP's 91 declared members as a false positive under the new
+        of SCTP's declared members as a false positive under the new
         numbering. The real invariant was never about bit *shape* in the first
         place; it is "is this one of the four real transports", checked
         directly below instead.
@@ -850,14 +916,14 @@ class AppTypeSplitTests(unittest.TestCase):
 
         real_transports = (TransportProtocol.tcp, TransportProtocol.udp,
                            TransportProtocol.sctp, TransportProtocol.dccp)
-        declared = 0
+        swept = {cls: [] for cls in registries}  # type: dict[type, list[str]]
         multi = []  # type: list[tuple[str, int, str, str]]
         foreign = []  # type: list[tuple[str, int, str, str]]
         for cls in registries:
             for member in list(cls):
                 if member.svc == 'unknown':
                     continue
-                declared += 1
+                swept[cls].append(member.name)
                 if member.proto not in real_transports:
                     multi.append((cls.__name__, member.port, member.svc, member.proto.name))
                 if member.proto is not cls.__transport__:
@@ -865,12 +931,14 @@ class AppTypeSplitTests(unittest.TestCase):
 
         self.assertEqual(multi, [])
         self.assertEqual(foreign, [])
-        self.assertEqual(declared, 12391)
+        for cls in registries:
+            with self.subTest(registry=cls.__name__):
+                self._assert_declared_population(cls, swept[cls])
         self.assertEqual({cls.__name__: len(cls) for cls in registries}, before)
 
-        # The 23 ``(port, service)`` pairs #759 measured, kept so the counts above
-        # are not the only thing pinning the fix. Each is a member of both the TCP
-        # and the UDP registry -- 23 * 2 = 46 lookups -- and each used to answer
+        # The ``(port, service)`` pairs #759 measured, kept so the sweep above is
+        # not the only thing pinning the fix. Each is a member of both the TCP and
+        # the UDP registry, so each is looked up in both, and each used to answer
         # from TCP whichever registry it was declared in.
         mismatched = (
             (42, 'name'), (63, 'whoispp'), (80, 'www'), (80, 'www-http'), (105, 'cso'),
@@ -905,11 +973,12 @@ class AppTypeSplitTests(unittest.TestCase):
                     self.assertIn(member, cls.get_all(port))
 
                     # NOTE: the blast radius, still named. ``tcp`` was the lowest
-                    # bit of all 46, so the TCP registry's answer is what the
-                    # composite used to resolve to; where that differs from the
-                    # member's own registry's answer, the lookup returned a service
-                    # that registry does not answer at all. Those are the two rows
-                    # below, and they are now answered from UDP as they should be.
+                    # bit of every one of them, so the TCP registry's answer is
+                    # what the composite used to resolve to; where that differs
+                    # from the member's own registry's answer, the lookup returned
+                    # a service that registry does not answer at all. Those are the
+                    # rows below, and they are now answered from UDP as they
+                    # should be.
                     if TCP.get(port).svc != cls.get(port).svc:
                         divergent.append((cls.__name__, port, svc,
                                           TCP.get(port).svc, cls.get(port).svc))
@@ -930,21 +999,20 @@ class AppTypeSplitTests(unittest.TestCase):
         early return for a class that holds members, so it never runs the guard and
         is an independent oracle for what the guard must not have changed.
 
-        The population, measured on ``fe80b8525`` and unchanged by the fix, because
-        four numbers here are easy to confuse:
+        The population is the one the generated modules declare (see
+        :func:`_declared`), compared rather than pinned as counts, which every
+        vendor update moves (GitHub issue #1820). These are easy to confuse:
 
-        * **12,391** declared members -- 6,147 TCP, 6,143 UDP, 91 SCTP, 10 DCCP;
-        * of those, **all 12,391** now carry a single-bit ``.proto`` and **0** a
-          multi-bit one. It was 10,625 multi-bit against 1,766 single-bit until
-          GitHub issue #806 retyped ``proto`` to the registry's own transport
-          protocol. That is a property of the *members*, and it is not what this
-          test partitions on;
-        * they sit on **12,341** distinct ``(registry, port)`` pairs -- 6,121 TCP,
-          6,119 UDP, 91 SCTP, 10 DCCP -- the other **50** sharing a port with
-          another service, as IANA's three on TCP/80 do;
-        * so the sweep below makes 12,341 distinct lookups, each passing **one**
-          transport protocol, which is now also what every member's own ``.proto``
-          holds.
+        * the declared members, every one of which now carries a single-bit
+          ``.proto``. Most carried a multi-bit one until GitHub issue #806
+          retyped ``proto`` to the registry's own transport protocol. That is a
+          property of the *members*, and it is not what this test partitions on;
+        * the distinct ``(registry, port)`` pairs they sit on, which are fewer,
+          since some members share a port with another service, as IANA's
+          services on TCP/80 do;
+        * so the sweep below makes one lookup per distinct pair, each passing
+          **one** transport protocol, which is now also what every member's own
+          ``.proto`` holds.
 
         The sweep resolves each ``(registry, port)`` to the same member either side
         of #806, since the lookup key is the port and the registry and neither
@@ -967,8 +1035,9 @@ class AppTypeSplitTests(unittest.TestCase):
         ``__members__`` at all -- so ``list(cls)`` here would already exclude
         it without the filter; the filter is kept anyway, both because it
         costs nothing and because a regression that reintroduced minting
-        would otherwise inflate the counts below silently instead of tripping
-        this test specifically.
+        would otherwise surface here as other tests' leftovers in the
+        population compared below, rather than through the before-and-after
+        size check, which is about this test's own sweep.
         """
         from pcapkit.const.reg.apptype import DCCP, SCTP, TCP, UDP, AppType, TransportProtocol
 
@@ -977,9 +1046,10 @@ class AppTypeSplitTests(unittest.TestCase):
 
         members = {cls.__name__: [each for each in cls if each.svc != 'unknown']
                    for cls in registries}
-        self.assertEqual({name: len(rows) for name, rows in members.items()},
-                         {'TCP': 6147, 'UDP': 6143, 'SCTP': 91, 'DCCP': 10})
-        self.assertEqual(sum(len(rows) for rows in members.values()), 12391)
+        for cls in registries:
+            with self.subTest(registry=cls.__name__):
+                self._assert_declared_population(
+                    cls, [each.name for each in members[cls.__name__]])
         # See test_no_member_carries_a_multi_transport_proto's own docstring
         # for why this is a direct membership check rather than
         # show_flag_values-based bit decomposition: sctp's own auto()
@@ -988,14 +1058,13 @@ class AppTypeSplitTests(unittest.TestCase):
                            TransportProtocol.sctp, TransportProtocol.dccp)
         widths = [1 if each.proto in real_transports else 2
                   for rows in members.values() for each in rows]
-        self.assertEqual(sum(1 for width in widths if width > 1), 0)
-        self.assertEqual(sum(1 for width in widths if width == 1), 12391)
+        self.assertEqual(set(widths), {1})
 
-        per_registry = {}  # type: dict[str, int]
+        per_registry = {}  # type: dict[str, list[int]]
         divergent = []  # type: list[tuple[str, int, str, str]]
         for cls in registries:
             ports = sorted({member.port for member in members[cls.__name__]})
-            per_registry[cls.__name__] = len(ports)
+            per_registry[cls.__name__] = ports
             for port in ports:
                 own = cls.get(port)
                 for proto in (cls.__transport__, cls.__transport__.name):
@@ -1004,10 +1073,12 @@ class AppTypeSplitTests(unittest.TestCase):
                         divergent.append((cls.__name__, port, resolved.svc, own.svc))
 
         self.assertEqual(divergent, [])
-        self.assertEqual(per_registry, {'TCP': 6121, 'UDP': 6119, 'SCTP': 91, 'DCCP': 10})
-        self.assertEqual(sum(per_registry.values()), 12341)
-        self.assertEqual(sum(len(rows) for rows in members.values())
-                         - sum(per_registry.values()), 50)
+        # One lookup per distinct port each generated module declares -- fewer
+        # lookups than members, since some members share a port.
+        self.assertEqual(per_registry, {cls.__name__: sorted({port for _, port in _declared(cls)})
+                                        for cls in registries})
+        self.assertLess(sum(len(ports) for ports in per_registry.values()),
+                        sum(len(rows) for rows in members.values()))
         self.assertEqual({cls.__name__: len(cls) for cls in registries}, before)
 
         # Spot-checked against the answers ``/etc/services`` gives, so the sweep
@@ -1047,7 +1118,6 @@ class AppTypeSplitTests(unittest.TestCase):
         asserted **absent**, and the new shape asserted present, so that a
         reintroduced fan-out cannot pass this test.
         """
-        import ast
         import pathlib
 
         root = pathlib.Path(__file__).resolve().parents[2]
@@ -1173,8 +1243,6 @@ class AppTypeSplitTests(unittest.TestCase):
         # further maintainer ruling on #815, reversing the keyword-only shape this
         # test used to pin -- restoring consistency with ``register_tcp`` and its
         # siblings.
-        import inspect
-
         from pcapkit.foundation.registry.protocols import register_apptype
 
         parameters = inspect.signature(register_apptype).parameters
@@ -1223,12 +1291,13 @@ class AppTypeSplitTests(unittest.TestCase):
         real member's underlying :class:`~aenum.StrEnum` value -- a far larger
         blast radius than an error path. It is checked on a deterministic
         sample rather than member by member, because one f-string formats every
-        member and a full sweep reaches only four distinct code paths (see
-        :func:`_dunder_sample`).
+        member and a full sweep reaches only the with- and without-suffix
+        branches of each dunder (see :func:`_dunder_sample`).
 
-        The population is counted over all 12,391 real members (TCP 6147,
-        UDP 6143, SCTP 91, DCCP 10, matching the population PR #783 measured),
-        but only :func:`_dunder_sample` is formatted, each member compared
+        The population is checked whole, against the members the generated
+        modules declare (see :func:`_declared`) rather than against counts a
+        vendor update moves (GitHub issue #1820), but only
+        :func:`_dunder_sample` is formatted, each member compared
         against what the pre-#798 ``%``-style formula would have produced for
         that same member's own ``svc``/``port``/``proto``. This
         is an invariance check -- it is true either side of #798's fix by
@@ -1240,8 +1309,8 @@ class AppTypeSplitTests(unittest.TestCase):
         does) rather than whatever module instance an earlier test in this
         file left behind: several sibling tests here mint throwaway members
         via :func:`~aenum.extend_enum` and clean up with
-        :meth:`~unittest.TestCase.addCleanup`, but the population counts below
-        are only meaningful against a registry no other test has touched.
+        :meth:`~unittest.TestCase.addCleanup`, but the population check below
+        is only meaningful against a registry no other test has touched.
 
         GitHub issue #807 grew ``repr``/``str`` an ``(aliases: ...)`` suffix
         for a member that shares its port with another service in the same
@@ -1261,13 +1330,11 @@ class AppTypeSplitTests(unittest.TestCase):
         from pcapkit.const.reg.apptype import DCCP, SCTP, TCP, UDP
 
         registries = {'TCP': TCP, 'UDP': UDP, 'SCTP': SCTP, 'DCCP': DCCP}
-        expected_counts = {'TCP': 6147, 'UDP': 6143, 'SCTP': 91, 'DCCP': 10}
-        total = 0
         aliased = 0  # the suffix branch of both dunders; only TCP and UDP have any
 
         for name, cls in registries.items():
-            count = len(list(cls))
-            total += count
+            with self.subTest(registry=name, check='population'):
+                self._assert_declared_population(cls, [member.name for member in cls])
             sample = _dunder_sample(cls)
             aliased += sum(1 for member in sample if member.aliases)
             for member in sample:
@@ -1290,13 +1357,10 @@ class AppTypeSplitTests(unittest.TestCase):
                     old_str = '%s [%d - %s]%s' % (svc, port, proto.name, suffix)  # pylint: disable=consider-using-f-string
                     self.assertEqual(str(member), old_str)
 
-            self.assertEqual(count, expected_counts[name], f'{name} population changed')
-
-        self.assertEqual(total, 12391)
         self.assertGreater(aliased, 0, 'the sample lost the aliased branch')
 
     def test_every_member_renders_its_own_registrys_transport_protocol(self) -> None:
-        """GitHub issue #806, member by member over all 12,391.
+        """GitHub issue #806, member by member over every declared member.
 
         ``proto.name`` is folded into the member's underlying
         :class:`~aenum.StrEnum` *value* by ``__new__``, not merely into its display,
@@ -1309,13 +1373,16 @@ class AppTypeSplitTests(unittest.TestCase):
         Checked against the formula rather than against the member's own ``proto``:
         the expected text is built from ``cls.__transport__``, which is declared once
         per registry and is independent of what any member carries. That is what
-        makes this fail on stock ``4530424df``, where 10,625 of the 12,391 render a
+        makes this fail on stock ``4530424df``, where most members render a
         composite -- ``test_the_new_dunders_are_byte_identical_to_the_percent_form``
         derives its expectation from ``member.proto`` instead and so is invariant
         across this change by construction.
 
         Swept over every declared member of all four registries rather than
-        spot-checked, since the blast radius is 85.7% of the enumeration.
+        spot-checked, since the blast radius is most of the enumeration. That the
+        sweep reached every one is checked against the members the generated
+        modules declare (see :func:`_declared`), not against counts a vendor
+        update moves (GitHub issue #1820).
 
         GitHub issue #807 grew ``str``/``repr`` an ``(aliases: ...)`` suffix
         for a member sharing its port with another service in this registry,
@@ -1335,16 +1402,13 @@ class AppTypeSplitTests(unittest.TestCase):
 
         from pcapkit.const.reg.apptype import DCCP, SCTP, TCP, UDP
 
-        expected_counts = {'TCP': 6147, 'UDP': 6143, 'SCTP': 91, 'DCCP': 10}
-        total = 0
         wrong = []  # type: list[tuple[str, str, str, str]]
 
         for cls in (TCP, UDP, SCTP, DCCP):
-            count = 0
+            rendered = []  # type: list[str]
             transport = cls.__transport__.name
             for member in cls:
-                count += 1
-                total += 1
+                rendered.append(member.name)
                 value = f'{member.svc} [{member.port} - {transport}]'
                 if str(member._value_) != value:  # type: ignore[attr-defined]
                     wrong.append((cls.__name__, member.name, 'value', str(member._value_)))  # type: ignore[attr-defined]
@@ -1362,12 +1426,11 @@ class AppTypeSplitTests(unittest.TestCase):
                 # unaffected by the display-only suffix checked just above.
                 if cls(value) is not member:
                     wrong.append((cls.__name__, member.name, 'lookup', value))
-            self.assertEqual(count, expected_counts[cls.__name__],
-                             f'{cls.__name__} population changed')
+            with self.subTest(registry=cls.__name__, check='population'):
+                self._assert_declared_population(cls, rendered)
 
         self.assertEqual(wrong[:20], [])
         self.assertEqual(len(wrong), 0)
-        self.assertEqual(total, 12391)
 
     def test_transport_protocol_dropped_its_flag_base(self) -> None:
         """GitHub issue #808: the base itself, once #806 removed every composite.
@@ -1563,6 +1626,23 @@ class AppTypeSplitTests(unittest.TestCase):
             AppType.get(80, proto=17)
         self.assertNotIsInstance(caught.exception, ProtocolError)
         self.assertIn('names no transport protocol registry', str(caught.exception))
+
+    def _assert_declared_population(self, registry: 'type', names: 'list[str]') -> None:
+        """``names`` are the members ``registry``'s generated module declares, in order.
+
+        GitHub issue #1820's replacement for the pinned member counts (see
+        :func:`_declared`). Extra and missing names are reported before the order
+        is compared, so a failure names the members involved rather than diffing
+        the whole of both lists.
+
+        """
+        declared = [name for name, _ in _declared(registry)]
+        self.assertNotEqual(declared, [], f'no member declarations found for {registry.__name__}')
+        self.assertEqual(sorted(set(names) - set(declared)), [],
+                         f'{registry.__name__} holds members its generated module never declared')
+        self.assertEqual(sorted(set(declared) - set(names)), [],
+                         f'{registry.__name__} lacks members its generated module declares')
+        self.assertEqual(names, declared, f'{registry.__name__} population changed')
 
     @staticmethod
     def _purge_member(cls: type, name: str, port: int) -> None:
