@@ -23,11 +23,11 @@ __all__ = ['LLACode']
 #: LLA option codes.
 DATA = {
     #: Wildcard requesting resolution for all nearby access points.
-    0: 'Wilcard',
+    0: 'Wildcard',
     #: Link-Layer Address of the New Access Point.
     1: 'New Access Point',
     #: Link-Layer Address of the MN.
-    2: 'MH',
+    2: 'MN',
     #: Link-Layer Address of the NAR (i.e., Proxied Originator).
     3: 'NAR',
     #: Link-Layer Address of the source of RtSolPr or PrRtAdv.

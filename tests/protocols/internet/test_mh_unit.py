@@ -364,7 +364,7 @@ class MHUnitTests(unittest.TestCase):
         ).prefix), '2001:db8::/64')
         self.assertEqual(proto._read_opt_lla(
             schema.LinkLayerAddressOption(type=Option.Mobility_Header_Link_Layer_Address_option,
-                                          length=7, code=LLACode.MH, lla=b'abcdef'),
+                                          length=7, code=LLACode.MN, lla=b'abcdef'),
             options=options,
         ).lla, b'abcdef')
         self.assertEqual(proto._read_opt_mn_id(
@@ -798,7 +798,7 @@ class MHUnitTests(unittest.TestCase):
             self.assertEqual(proto._make_opt_lla(
                 Option.Mobility_Header_Link_Layer_Address_option,
                 data.LinkLayerAddressOption(type=Option.Mobility_Header_Link_Layer_Address_option,
-                                            length=7, code=LLACode.MH, lla=b'abcdef'),
+                                            length=7, code=LLACode.MN, lla=b'abcdef'),
             ).lla, b'abcdef')
             self.assertEqual(proto._make_opt_mn_id(
                 Option.MN_ID_OPTION_TYPE,
@@ -1298,7 +1298,7 @@ class MHUnitTests(unittest.TestCase):
             )
             self.assertEqual(fna.type, Packet.Fast_Neighbor_Advertisement)
             self.assertEqual(fna.length, 24)
-            self.assertEqual(fna.options[mhlla_type].code, LLACode.MH)
+            self.assertEqual(fna.options[mhlla_type].code, LLACode.MN)
             self.assertEqual(fna.options[mhlla_type].lla, b'\x00\x11\x22\x33\x44\x55')
             self.assertEqual(fna.options[Option.PadN].length, 7)
 

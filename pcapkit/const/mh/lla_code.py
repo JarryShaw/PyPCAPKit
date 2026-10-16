@@ -26,11 +26,11 @@ __all__ = ['LLACode']
 class LLACode(EnumRegistry, IntEnum):
     """[LLACode] Link-Layer Address (LLA) Option Code"""
 
-    Wilcard = 0
+    Wildcard = 0
 
     New_Access_Point = 1
 
-    MH = 2
+    MN = 2
 
     NAR = 3
 
