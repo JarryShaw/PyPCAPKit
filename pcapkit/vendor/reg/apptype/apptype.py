@@ -1099,6 +1099,17 @@ class AppType(Vendor):
     def wrap_comment(text: 'str') -> 'str':
         """Wraps long-length text to shorter lines of comments.
 
+        The lines are :meth:`Vendor.wrap_comment`'s, so the text is made safe
+        for reST and never broken at a hyphen, the same way. Each continuation
+        takes a hanging indent instead, which keeps it inside the bullet a
+        merged entry renders it in.
+
+        .. versionchanged:: 1.5.0
+
+           Takes its lines from :meth:`Vendor.wrap_comment` rather than
+           wrapping on its own, so it no longer breaks a line at a hyphen
+           (:issue:`1847`) and escapes what that escapes (:issue:`1846`).
+
         Args:
             text: Source text.
 
@@ -1106,7 +1117,9 @@ class AppType(Vendor):
             Wrapped comments.
 
         """
-        return '\n    #:   '.join(textwrap.wrap(text.strip(), 76))
+        # NOTE: textwrap turns every whitespace character into a space, so the
+        # only newlines in the base's output are the ones it joins lines with.
+        return Vendor.wrap_comment(text).replace('\n    #: ', '\n    #:   ')
 
     @staticmethod
     def flag(protos: 'Iterable[str]') -> 'str':
@@ -1135,6 +1148,14 @@ class AppType(Vendor):
         :mod:`sphinx.ext.autodoc` renders in place rather than as comments it
         drops.
 
+        A cell breaks only at whitespace, never at a hyphen or inside a word:
+        its continuation lines join it with a space, so a URL split at a hyphen
+        would render as two words and lose the rest of its link.
+
+        .. versionchanged:: 1.5.0
+
+           No longer breaks a cell at a hyphen (:issue:`1847`).
+
         Args:
             title: Table caption.
             widths: Relative column widths.
@@ -1156,7 +1177,8 @@ class AppType(Vendor):
         ]
         for row in [header, *rows]:
             for index, cell in enumerate(row):
-                wrapped = textwrap.wrap(cell, 68, break_long_words=False) or ['N/A']
+                wrapped = textwrap.wrap(cell, 68, break_long_words=False,
+                                        break_on_hyphens=False) or ['N/A']
                 bullet = '* - ' if not index else '  - '
                 lines.append(f'   {bullet}{wrapped[0]}')
                 lines.extend(f'       {part}' for part in wrapped[1:])

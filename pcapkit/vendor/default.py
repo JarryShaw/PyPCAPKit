@@ -275,6 +275,25 @@ class Vendor(metaclass=VendorMeta):
     def wrap_comment(text: 'str') -> 'str':
         """Wraps long-length text to shorter lines of comments.
 
+        Sphinx renders a ``#:`` comment as reST, and its continuation lines
+        join into one paragraph, so the text is made safe for that first:
+
+        * a space goes after a URL reference that another bracket follows
+          directly, as in ``[http://ele2.io][Damir Franusic]``. docutils reads
+          ``]`` and ``[`` as URL characters, so the autolink would run on into
+          the next citation;
+        * a leading enumerator, such as the ``(S)`` of ``(S) flag``, is
+          backslash-escaped, since reST would render it as an enumerated list.
+
+        A line never breaks at a hyphen, which would render ``run-time`` as
+        ``run- time``. Only a word longer than a whole line is split inside.
+
+        .. versionchanged:: 1.5.0
+
+           Spaces a URL reference off the bracket after it and escapes a
+           leading enumerator (:issue:`1846`), and no longer breaks a line at a
+           hyphen (:issue:`1847`).
+
         Args:
             text: Source text.
 
@@ -282,7 +301,12 @@ class Vendor(metaclass=VendorMeta):
             Wrapped comments.
 
         """
-        return '\n    #: '.join(textwrap.wrap(text.strip(), 76))
+        text = re.sub(r'(://[^\s\[\]]*\])(?=\[)', r'\1 ', text.strip())
+        # NOTE: the enumerator forms docutils recognises -- ``1.``, ``(a)``,
+        # ``iv)``, ``#.`` and so on -- each followed by a space or nothing.
+        text = re.sub(r'\A(?=(?:\((?:[0-9]+|[a-zA-Z]|[ivxlcdm]+|[IVXLCDM]+|#)\)'
+                      r'|(?:[0-9]+|[a-zA-Z]|[ivxlcdm]+|[IVXLCDM]+|#)[.)])(?: |\Z))', r'\\', text)
+        return '\n    #: '.join(textwrap.wrap(text, 76, break_on_hyphens=False))
 
     @staticmethod
     def split_references(text: 'str') -> 'list[str]':

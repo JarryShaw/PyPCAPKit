@@ -235,6 +235,16 @@ MODULE_PROVIDERS = {
     # extra carries either.
     'sphinx': ('Sphinx',),
     'sphinx_autodoc_typehints': ('sphinx-autodoc-typehints',),
+    # The reST parser Sphinx renders the const comments with, which the
+    # ``HAS_DOCUTILS`` gate on #1846's rendering check asks for. No extra
+    # declares it: Sphinx requires it, so the ``docs`` extra is what installs it.
+    # The bare name is listed as well, as with ``html5lib`` above, and the day an
+    # extra declares docutils itself this entry has to change: the bare name goes
+    # live alongside Sphinx, :func:`contested_imports` reports docutils, and the
+    # :data:`MUTUALLY_EXCLUSIVE_IMPORTS` liveness test fails until the entry is
+    # cut to ``('docutils',)``. If the ``test`` and ``gate`` jobs install that
+    # extra, its gap closes and the ``HAS_DOCUTILS`` exclusion has to go as well.
+    'docutils': ('Sphinx', 'docutils'),
 }
 
 #: Flags whose condition is not a distribution, with what it is instead. A flag
@@ -635,6 +645,25 @@ DEPENDENCY_GATE_EXCLUSIONS = {
             'two classes. They run wherever Sphinx is importable, a developer checkout '
             'with the docs extra included, and skip visibly elsewhere. The '
             'directive-name test in the same module needs nothing and runs on every leg.'
+        ),
+    ),
+    'HAS_DOCUTILS': Exclusion(
+        dark={'test': ('docutils',), 'gate': ('docutils',)},
+        reason=(
+            "The method it gates (#1846) parses Vendor.wrap_comment's output with "
+            'docutils and asserts it is nothing but a plain paragraph, so it needs '
+            'docutils, which no pytest job installs. No workflow installs the docs extra; '
+            'deploy-pages.yml gets Sphinx, and with it docutils, from '
+            'docs/requirements.txt, and it builds the documentation rather than running '
+            'pytest. Installing docutils on these jobs would not run it anyway: it sits in '
+            'a class gated on '
+            'HAS_VENDOR_DEPS, which these same jobs leave dark by declining html5lib '
+            "(#738, above), so closing this gap would also mean the vendor extra on a "
+            'blocking leg. The cost argument of HAS_SPHINX applies too. What runs on '
+            'every leg instead is the ungated committed-const class in the same module, '
+            'which pins the re-rendered lines themselves; the string assertions on the '
+            'wrapper run wherever the vendor extra is installed, and the docutils parse '
+            'wherever docutils is importable as well.'
         ),
     ),
 }
