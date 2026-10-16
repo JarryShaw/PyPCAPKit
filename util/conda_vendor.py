@@ -29,12 +29,19 @@ falls in exactly one of these classes:
 Each line pins the version installed here, as ``conda-update`` in
 :file:`.github/workflows/cron-conda.yml` installs ``.[all]`` before running this
 script. Resolving the newest releases is that install step's job, and needs the
-network; this script reads only what is installed, so it works offline.
+network; this script reads only what is installed, so it works offline. The one
+exception is :data:`PLATFORM_PINS`: a package whose newest release has no wheel
+for some platform keeps an older pin for it, on a line of its own whose marker
+names that platform, beside the installed pin for the rest (#1827). The conda
+legs build natively, so each leg's ``pip download`` evaluates those markers on
+its own runner.
 
 Run without arguments it rewrites :file:`conda/requirements.txt`. With
 ``--check`` it writes nothing, and exits 1 when the file names a different set of
-packages or markers than it derives -- the pins aside, since they move with every
-release and the weekly run refreshes them. With ``--smoke PACKAGE`` it unpacks a
+packages or markers than it derives, a platform pin other than
+:data:`PLATFORM_PINS`, or when that table names a package no build vendors --
+the other pins aside, since they move with every release and the weekly run
+refreshes them. With ``--smoke PACKAGE`` it unpacks a
 built ``.tar.bz2`` conda package and checks that every distribution vendored in
 it shipped every file its ``RECORD`` lists, and that each of its modules imports
 from :file:`pcapkit/_extern` with nothing else on the path. It also checks that
@@ -85,6 +92,11 @@ PLATFORMS = {
     'osx-64': ('darwin', 'Darwin', 'x86_64'),
     'osx-arm64': ('darwin', 'Darwin', 'arm64'),
 }
+#: The packages pinned apart on some of :data:`PLATFORMS`, as {package: {conda
+#: subdir: version}} (#1827). cryptography stopped shipping Intel macOS wheels at
+#: 49.0.0, so osx-64 vendors 48.0.1, the newest release with one (universal2);
+#: otherwise its build would compile cryptography from source.
+PLATFORM_PINS = {'cryptography': {'osx-64': '48.0.1'}}
 #: The object format and the machine of every native binary a package for each
 #: of :data:`PLATFORMS` may carry (#1822). A universal Mach-O passes when one of
 #: its slices is the machine.
@@ -244,42 +256,92 @@ def render_marker(builds: 'frozenset[int]', envs: 'list[dict[str, str]]') -> 'Op
     return ' or '.join(f'python_version == "{python}"' for python in pythons)
 
 
+def platform_marker(subdirs: 'Iterable[str]', negate: 'bool' = False) -> 'str':
+    """The marker selecting the builds on ``subdirs`` of :data:`PLATFORMS`, or with ``negate`` all others."""
+    terms = []
+    for subdir in sorted(subdirs):
+        sys_platform, _, machine = PLATFORMS[subdir]
+        terms.append(f'sys_platform != "{sys_platform}" or platform_machine != "{machine}"' if negate else
+                     f'sys_platform == "{sys_platform}" and platform_machine == "{machine}"')
+    if len(terms) == 1:
+        return terms[0]
+    return (' and ' if negate else ' or ').join(f'({term})' for term in terms)
+
+
+def pins(name: 'str', entry: 'dict[str, object]',
+         envs: 'list[dict[str, str]]') -> 'list[tuple[Optional[str], Optional[str]]]':
+    """Each line ``name`` gets: its marker, and the version :data:`PLATFORM_PINS` fixes or :data:`None`."""
+    python = render_marker(entry['builds'], envs)  # type: ignore[arg-type]
+    # One for a platform no leg builds is unpinnable()'s to report.
+    fixed = {subdir: version for subdir, version in PLATFORM_PINS.get(name, {}).items() if subdir in PLATFORMS}
+    if not fixed:
+        return [(python, None)]
+    groups = {}  # type: dict[str, set[str]]
+    for subdir, version in fixed.items():
+        groups.setdefault(version, set()).add(subdir)
+    found = [(platform_marker(subdirs), version)
+             for version, subdirs in sorted(groups.items())]  # type: list[tuple[str, Optional[str]]]
+    found.append((platform_marker(fixed, negate=True), None))
+    return [(marker if python is None else f'({python}) and ({marker})', version)
+            for marker, version in found]
+
+
 def lines(found: 'dict[str, dict[str, object]]', envs: 'list[dict[str, str]]',
           version: 'Callable[[str], str]') -> 'list[str]':
-    """:file:`conda/requirements.txt`'s lines, sorted, one pin per vendored package."""
+    """:file:`conda/requirements.txt`'s lines, sorted: a pin per vendored package, and per platform pin."""
     result = []
     for name, entry in sorted(found.items()):
         if entry['class'] == 'dead':
             continue
-        marker = render_marker(entry['builds'], envs)  # type: ignore[arg-type]
-        pin = f'{name}=={version(name)}'
-        result.append(pin if marker is None else f'{pin}; {marker}')
+        for marker, fixed in pins(name, entry, envs):
+            pin = f'{name}=={fixed or version(name)}'
+            result.append(pin if marker is None else f'{pin}; {marker}')
     return result
 
 
-def parse(text: 'str') -> 'dict[str, Optional[str]]':
-    """A requirements file's packages, by canonical name, each with its marker."""
+def parse(text: 'str') -> 'dict[str, dict[Optional[str], str]]':
+    """A requirements file's packages, by canonical name, each as {its markers: the versions they pin}."""
     from packaging.requirements import Requirement  # pylint: disable=import-outside-toplevel
     from packaging.utils import canonicalize_name  # pylint: disable=import-outside-toplevel
-    result = {}  # type: dict[str, Optional[str]]
+    result = {}  # type: dict[str, dict[Optional[str], str]]
     for line in text.splitlines():
         line = line.split('#', 1)[0].strip()
         if not line:
             continue
         req = Requirement(line)
-        result[canonicalize_name(req.name)] = None if req.marker is None else str(req.marker)
+        versions = [spec.version for spec in req.specifier if spec.operator == '==']
+        markers = result.setdefault(canonicalize_name(req.name), {})
+        markers[None if req.marker is None else str(req.marker)] = versions[0] if versions else ''
     return result
+
+
+def unpinnable(found: 'dict[str, dict[str, object]]') -> 'list[str]':
+    """Each :data:`PLATFORM_PINS` entry no conda build can use, one line apiece."""
+    problems = []
+    for name, fixed in sorted(PLATFORM_PINS.items()):
+        entry = found.get(name)
+        if entry is None or entry['class'] == 'dead':
+            problems.append(f'override: {name} is pinned for {", ".join(sorted(fixed))}, '
+                            'and no conda build vendors it')
+        for subdir in sorted(set(fixed) - set(PLATFORMS)):
+            problems.append(f'override: {name} is pinned for {subdir}, which no conda leg builds')
+    return problems
+
+
+def _show(markers: 'Iterable[Optional[str]]') -> 'str':
+    shown = sorted(markers, key=str)
+    return repr(shown[0]) if len(shown) == 1 else repr(shown)
 
 
 def compare(text: 'str', found: 'dict[str, dict[str, object]]',
             envs: 'list[dict[str, str]]') -> 'list[str]':
     """Why ``text`` is stale against ``found``, one line per package; empty when current."""
     from packaging.markers import Marker  # pylint: disable=import-outside-toplevel
+    problems = unpinnable(found)
     have = parse(text)
-    want = {name: render_marker(entry['builds'], envs)  # type: ignore[arg-type]
+    want = {name: {None if marker is None else str(Marker(marker)): fixed
+                   for marker, fixed in pins(name, entry, envs)}
             for name, entry in found.items() if entry['class'] != 'dead'}
-    want = {name: None if marker is None else str(Marker(marker)) for name, marker in want.items()}
-    problems = []
     for name in sorted(set(have) | set(want)):
         if name not in have:
             problems.append(f'missing: {name} ({found[name]["class"]})')
@@ -290,8 +352,13 @@ def compare(text: 'str', found: 'dict[str, dict[str, object]]',
             else:
                 problems.append(f'stale: {name} -- neither the dependencies nor the '
                                 f'{", ".join(EXTRAS)} extra need it, directly or not')
-        elif have[name] != want[name]:
-            problems.append(f'marker: {name} has {have[name]!r}, derived {want[name]!r}')
+        elif set(have[name]) != set(want[name]):
+            problems.append(f'marker: {name} has {_show(have[name])}, derived {_show(want[name])}')
+        else:
+            for marker, fixed in sorted(want[name].items(), key=str):
+                if fixed is not None and have[name][marker] != fixed:
+                    problems.append(f'pin: {name} pins {have[name][marker]!r} where {marker}, '
+                                    f'and PLATFORM_PINS {fixed!r}')
     return problems
 
 
@@ -481,6 +548,11 @@ def main(argv: 'Optional[list[str]]' = None) -> 'int':
         for problem in problems:
             print(f'{FILE.relative_to(ROOT)}: {problem}')
         return 1 if problems else 0
+
+    problems = unpinnable(found)
+    if problems:
+        print('\n'.join(problems), file=sys.stderr)
+        return 1
 
     FILE.write_text(''.join(f'{line}\n' for line in lines(found, envs, _version)), encoding='utf-8')
     return 0

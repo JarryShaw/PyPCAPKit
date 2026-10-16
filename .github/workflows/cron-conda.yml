@@ -159,9 +159,9 @@ jobs:
       # `.[all]`, which is what `util/conda_vendor.py` below vendors (#1814):
       # it derives `conda/requirements.txt` from `dependencies` and the `all`
       # extra, walks what they require through the installed metadata, and
-      # pins each package at the version installed here. So this install is
-      # the step that resolves the newest releases, and the script itself
-      # reads nothing from the network.
+      # pins each package at the version installed here, but for its
+      # `PLATFORM_PINS` (#1827). So this install is the step that resolves the
+      # newest releases, and the script itself reads nothing from the network.
       - name: Install and Setup
         run: |
           set -x
@@ -459,6 +459,9 @@ jobs:
           python -m pip install -U pip setuptools wheel
           python -m pip install -e .[all]
 
+      # #1827: pip evaluates conda/requirements.txt's platform markers here,
+      # on this leg's own runner, so Intel macOS fetches its own cryptography
+      # pin; the recipe's build.sh installs whatever this downloaded.
       - name: Setup Conda Distribution
         if: ${{ matrix.os != 'windows-latest' }}
         run: |
