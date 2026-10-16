@@ -126,9 +126,10 @@ if TYPE_CHECKING:
 __all__ = ['NGAP', 'PDUKind', 'Criticality']
 
 #: Cached ``NGAP-PDU`` object, c.f. :func:`load_pycrate`. :data:`NotImplemented`
-#: means the import has not been attempted yet, and :data:`None` that it was
-#: attempted and |pycrate|_ is not installed -- a state of its own, so a capture full
-#: of NGAP packets does not pay for a failing import on every frame.
+#: means the import has not been attempted yet, :data:`None` that it was
+#: attempted and |pycrate|_ is not installed, and anything else is the loaded
+#: object. "Not installed" is kept apart from "not attempted" so that a capture
+#: full of NGAP packets does not pay for a failing import on every frame.
 _PYCRATE = NotImplemented  # type: Any
 
 #: Guards the module-level ``NGAP-PDU`` object returned by :func:`load_pycrate`.

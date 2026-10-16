@@ -986,7 +986,7 @@ class PacketBlock(PCAPNG):
 
     #: Interface ID.
     interface_id: 'int'
-    #: Drop count.
+    #: Drops count.
     drop_count: 'int'
     #: Timestamp.
     timestamp: 'dt_type'

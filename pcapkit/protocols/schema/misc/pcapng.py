@@ -2471,7 +2471,7 @@ class PacketBlock(BlockType, code=Enum_BlockType.Packet_Block):
     length: 'int' = UInt32Field(callback=byteorder_callback)
     #: Interface ID.
     interface_id: 'int' = UInt16Field(callback=byteorder_callback)
-    #: Drop count.
+    #: Drops count.
     drop_count: 'int' = UInt16Field(callback=byteorder_callback, default=0xFFFF)
     #: Timestamp (high).
     timestamp_high: 'int' = UInt32Field(callback=byteorder_callback)

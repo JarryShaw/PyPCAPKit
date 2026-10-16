@@ -234,7 +234,6 @@ IANA registry.
    :members:
    :undoc-members:
    :show-inheritance:
-   :exclude-members: +_generate_next_value_
 
 Header Schemas
 --------------

@@ -307,6 +307,40 @@ def maybe_skip_member(app: 'Sphinx', what: str, name: str,  # pylint: disable=un
     return skip
 
 
+def skip_enum_value_hook(app: 'Sphinx', what: str, name: str,  # pylint: disable=unused-argument
+                         obj: 'Any', skip: bool, options: 'Dict[str, Any]') -> 'Optional[bool]':  # pylint: disable=unused-argument
+    """Skip the enum machinery's own ``_generate_next_value_`` hook.
+
+    The enum metaclass copies ``_generate_next_value_`` into the namespace of
+    every enumeration it creates, so ``:members:`` finds it as the documented
+    class's own member. ``exclude-members`` cannot remove it: autodoc applies
+    that first and then lets ``autodoc-skip-member`` overrule it, and
+    napoleon's handler, with ``napoleon_include_private_with_doc`` on, includes
+    a private member that has a docstring and was defined in a class body --
+    true of the standard library's hooks and of ``aenum``'s ``StrEnum`` one.
+    None of them is part of any pcapkit enumeration's interface.
+
+    Args:
+        app: Sphinx application.
+        what: Type of the object whose member is being considered.
+        name: Name of the member.
+        obj: The member itself.
+        skip: Whether autodoc would skip it.
+        options: Directive options.
+
+    Returns:
+        :obj:`True` for a ``_generate_next_value_`` that pcapkit does not
+        define itself, and :obj:`None` for anything else, which leaves the
+        decision to the other handlers.
+
+    """
+    if name == '_generate_next_value_':
+        module = getattr(obj, '__module__', None) or ''
+        if module.partition('.')[0] != 'pcapkit':
+            return True
+    return None
+
+
 def bind_type_checking_names(app: 'Sphinx') -> None:
     """Execute every ``pcapkit`` module's ``if TYPE_CHECKING:`` block.
 
@@ -555,6 +589,10 @@ def restore_enum_member_docstring(app: 'Sphinx', what: str, name: str,  # pylint
 def setup(app: 'Sphinx') -> None:
     app.connect('builder-inited', bind_type_checking_names)
     app.connect('autodoc-skip-member', maybe_skip_member)
+    # NB: before napoleon's ``autodoc-skip-member`` handler, which connects at the
+    # default 500 and returns ``False`` for this hook; the first answer that is
+    # not ``None`` is the one autodoc uses.
+    app.connect('autodoc-skip-member', skip_enum_value_hook, priority=400)
     # NB: below ``sphinx_autodoc_typehints``, which connects at the default 500 and
     # would otherwise win the tie on registration order -- conf.py's ``setup`` runs
     # after the extensions in ``extensions`` have been set up.

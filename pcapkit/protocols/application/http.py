@@ -491,8 +491,8 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
                 arm, or from that HTTP/2 trial, propagates unconverted.
 
         Note:
-            What this deliberately does **not** decide, because one payload
-            with no flow context cannot:
+            This deliberately does **not** decide the following, because one
+            payload with no flow context cannot:
 
             * **An** ``Upgrade: h2c`` **exchange** (:rfc:`7540#section-3.2`,
               deprecated but not removed by :rfc:`9113#section-3.1`) stays

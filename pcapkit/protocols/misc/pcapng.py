@@ -4843,7 +4843,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         Args:
             block: Block data model.
             interface_id: Interface ID.
-            drop_count: Drop count.
+            drop_count: Drops count.
             timestamp: Packet timestamp.
             captured_len: Captured length.
             original_len: Original length.

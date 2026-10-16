@@ -1244,14 +1244,19 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                 given) is unaffected.
 
         Note:
-            The ``_layer``, ``_protocol``, ``packet`` and ``__context__``
-            keywords are *out-of-band*: they configure the parse rather than
-            describing the packet, and every one of them is consumed here, at
-            the one point each of a protocol's producers passes through. That is deliberate, and the normalisation below relies on it: fixing
-            a spelling here fixes it for the engines, for every
+            The ``_layer``, ``_protocol`` and ``__context__`` keywords are
+            *out-of-band*: they configure the parse rather than describing the
+            packet, and every one of them is consumed here, at the one point
+            each of a protocol's producers passes through. That is deliberate,
+            and the normalisation below relies on it: fixing a spelling here
+            fixes it for the engines, for every
             :meth:`_import_next_layer <ProtocolBase._import_next_layer>`
             implementation, and for any third party protocol that copied their
             shape, rather than one call site at a time.
+
+            ``packet`` is read but not consumed: it stays in the keywords
+            forwarded to :meth:`__post_init__`, and while parsing a copy is
+            republished beside it as ``__packet__``.
 
         """
         #logger.debug('%s(file, %s, **%s)', type(self).__name__, length, kwargs)
