@@ -218,9 +218,9 @@ class EnumLookup:
         Of the registries that override :meth:`EnumRegistry.register` to mint
         through a path of their own,
         :meth:`OptionType.register <pcapkit.const.pcapng.option_type.OptionType.register>`
-        calls it at the same point and
+        and
         :meth:`AppType.register <pcapkit.const.reg.apptype.apptype.AppType.register>`
-        does not.
+        both call it at the same point.
 
         :meth:`EnumRegistry.register_alias` does not call it, and does not need
         to: it refuses any ``value`` that is not already registered, so the value

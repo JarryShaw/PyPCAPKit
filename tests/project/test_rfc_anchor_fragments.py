@@ -41,7 +41,7 @@ do not exist either -- RFC 8684's real HTML uses ``id="section-3.1"``, never
 test exists to catch, the same mistake as the allowlist above one layer down.
 The generators that produce them,
 :file:`pcapkit/vendor/tcp/mp_tcp_option.py:59` and
-:file:`pcapkit/vendor/reg/apptype/apptype.py:1169` (both parsing IANA's
+:file:`pcapkit/vendor/reg/apptype/apptype.py:1200` (both parsing IANA's
 ``RFC8684, Section 3.1`` with the same ``re.fullmatch(r'RFC(?P<rfc>\\d+)(, Section
 (?P<sec>.*?))?', ...)``, which discards the literal word ``Section`` and
 keeps only the number), are fixed to emit ``#section-{sec}``, and the ten
