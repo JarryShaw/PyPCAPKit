@@ -1,6 +1,10 @@
 [build-system]
 requires = [
-    "setuptools>=61.0.0",
+    # 62.3.0 is the first release whose ``package-data`` globs read ``**`` as any
+    # depth, which the ``pcapkit._extern`` entry below needs (#1814). Measured:
+    # 61.0.0 and 62.2.0 read it as ``*``, and ship only the files one directory
+    # down from it.
+    "setuptools>=62.3.0",
 
     # version compatibility
     "bpc-f2format; python_version < '3.6'",
@@ -50,7 +54,7 @@ license = { text="BSD 3-Clause License" }
 # blocking, and a failure there is a warning on a green leg (#1672). Each 3.7 leg
 # fails a step by design: the import fails as above, and the ``test`` extra's
 # ``pytest>=8`` needs 3.8. 3.6 is not run at all: setup-python
-# builds it only for retired Ubuntu images, and the build needs ``setuptools>=61``
+# builds it only for retired Ubuntu images, and the build needs ``setuptools>=62.3``
 # besides. The ``PCAP_CT`` extra needs 3.10 regardless.
 requires-python = ">=3.6, <4"
 description = "PyPCAPKit: comprehensive network packet analysis library"
@@ -367,6 +371,21 @@ exclude = [
     "docs*",
     "sample*",
 ]
+
+# Only the conda recipe creates ``pcapkit/_extern``: ``conda/pypcapkit/build.sh``
+# and ``bld.bat`` install the packages ``conda/requirements.txt`` names there,
+# then run ``pip install .``, which builds the wheel from the tree. Package
+# discovery reaches their modules alone, so every other file -- ``emoji``'s JSON,
+# ``chardet``'s models, compiled extensions, each ``dist-info`` -- stays behind
+# without this entry (#1814). Elsewhere ``pcapkit._extern`` is no package at all,
+# and setuptools ignores these entries without a warning; ``MANIFEST.in`` could not
+# do this, since a line naming a missing directory warns in every such build. The
+# bytecode ``pip install --target`` compiles stays out, as from any other wheel.
+[tool.setuptools.package-data]
+"pcapkit._extern" = [ "**/*" ]
+
+[tool.setuptools.exclude-package-data]
+"pcapkit._extern" = [ "*.pyc" ]
 
 [tool.setuptools.dynamic]
 version = { attr="pcapkit.__version__" }

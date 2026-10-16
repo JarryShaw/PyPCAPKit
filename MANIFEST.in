@@ -87,6 +87,7 @@ recursive-include docs/source/changelog *.rst
 # Nothing here names ``pcapkit/_extern``. ``conda/pypcapkit/build.sh`` and
 # ``bld.bat`` create it and then run ``pip install .``, which builds the wheel
 # straight from the tree, so the conda recipe builds no sdist; its modules
-# reach that wheel through package discovery. A line naming it would warn in
-# every other build, and ``include`` of a directory matched nothing even in the
-# conda one (#1794).
+# reach that wheel through package discovery, and every other file under it
+# through the ``package-data`` entry in ``pyproject.toml`` (#1814). A line naming
+# it would warn in every other build, and ``include`` of a directory matched
+# nothing even in the conda one (#1794).
