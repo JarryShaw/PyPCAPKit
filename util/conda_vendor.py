@@ -41,7 +41,9 @@ Run without arguments it rewrites :file:`conda/requirements.txt`. With
 packages or markers than it derives, a platform pin other than
 :data:`PLATFORM_PINS`, or when that table names a package no build vendors --
 the other pins aside, since they move with every release and the weekly run
-refreshes them. With ``--smoke PACKAGE`` it unpacks a
+refreshes them. Lines pinning one package differently under one marker fail it
+too, since pip cannot install them together when the pins disagree (#1852).
+With ``--smoke PACKAGE`` it unpacks a
 built ``.tar.bz2`` conda package and checks that every distribution vendored in
 it shipped every file its ``RECORD`` lists, and that each of its modules imports
 from :file:`pcapkit/_extern` with nothing else on the path. It also checks that
@@ -299,19 +301,50 @@ def lines(found: 'dict[str, dict[str, object]]', envs: 'list[dict[str, str]]',
     return result
 
 
-def parse(text: 'str') -> 'dict[str, dict[Optional[str], str]]':
-    """A requirements file's packages, by canonical name, each as {its markers: the versions they pin}."""
+class Conflicting(ValueError):
+    """A requirements file pinning one package differently on lines under one marker (#1852)."""
+
+
+def _read(text: 'str') -> 'tuple[dict[str, dict[Optional[str], str]], list[str]]':
+    """:func:`parse`'s result, with each marker's first pin, and each conflict it would raise."""
     from packaging.requirements import Requirement  # pylint: disable=import-outside-toplevel
     from packaging.utils import canonicalize_name  # pylint: disable=import-outside-toplevel
     result = {}  # type: dict[str, dict[Optional[str], str]]
+    specifiers = {}  # type: dict[tuple[str, Optional[str]], list[str]]
     for line in text.splitlines():
         line = line.split('#', 1)[0].strip()
         if not line:
             continue
         req = Requirement(line)
+        name, marker = canonicalize_name(req.name), None if req.marker is None else str(req.marker)
         versions = [spec.version for spec in req.specifier if spec.operator == '==']
-        markers = result.setdefault(canonicalize_name(req.name), {})
-        markers[None if req.marker is None else str(req.marker)] = versions[0] if versions else ''
+        result.setdefault(name, {}).setdefault(marker, versions[0] if versions else '')
+        seen = specifiers.setdefault((name, marker), [])
+        if str(req.specifier) not in seen:
+            seen.append(str(req.specifier))
+    conflicts = []  # type: list[str]
+    for (package, under), pinned in sorted(specifiers.items(), key=lambda item: str(item[0])):
+        if len(pinned) > 1:
+            conflicts.append(f'conflict: {package} pins {" and ".join(map(repr, pinned))} '
+                             f'under the marker {under!r}')
+    return result, conflicts
+
+
+def parse(text: 'str') -> 'dict[str, dict[Optional[str], str]]':
+    """A requirements file's packages, by canonical name, each as {its markers: the versions they pin}.
+
+    pip applies every line whose marker holds, so two lines naming one package
+    under one marker, with version specifiers that cannot both hold, make ``pip
+    download -r`` fail. Once the whole text is read, :class:`Conflicting` names
+    each package and marker whose lines pin it differently, whether or not the
+    pins could both hold, since the writer gives each a single line (#1852). An
+    identical duplicate line is accepted: pip resolves it, and it changes nothing
+    this reads.
+
+    """
+    result, conflicts = _read(text)
+    if conflicts:
+        raise Conflicting('\n'.join(conflicts))
     return result
 
 
@@ -338,7 +371,8 @@ def compare(text: 'str', found: 'dict[str, dict[str, object]]',
     """Why ``text`` is stale against ``found``, one line per package; empty when current."""
     from packaging.markers import Marker  # pylint: disable=import-outside-toplevel
     problems = unpinnable(found)
-    have = parse(text)
+    have, conflicts = _read(text)
+    problems.extend(conflicts)
     want = {name: {None if marker is None else str(Marker(marker)): fixed
                    for marker, fixed in pins(name, entry, envs)}
             for name, entry in found.items() if entry['class'] != 'dead'}

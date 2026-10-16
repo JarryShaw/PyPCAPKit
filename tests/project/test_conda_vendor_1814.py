@@ -12,6 +12,9 @@
   neither the network nor any vendored package installed.
 * The committed list holds every requirement :file:`pyproject.toml` makes live on
   a conda build, with its marker, and none that is dead there.
+* ``parse`` and ``--check`` report lines pinning one package differently under
+  one marker, which pip cannot install together, and accept an identical
+  duplicate (#1852).
 * ``--smoke`` passes on a conda package whose vendored distributions are complete
   and fails on one missing a data file. Its platform checks (#1822) are
   :file:`test_conda_native_platforms_1822.py`'s.
@@ -262,6 +265,77 @@ class CommittedListTests(unittest.TestCase):
                 with contextlib.redirect_stdout(io.StringIO()) as report:
                     self.assertEqual(module.main(['--check']), 1)
                 self.assertIn('stale: scapy', report.getvalue())
+            finally:
+                module.FILE, module.ROOT, module._requires, module._version = saved
+
+
+class DuplicatePinTests(unittest.TestCase):
+    """Lines pinning one package differently under one marker, which pip rejects (#1852)."""
+
+    #: A pin of aenum the committed file does not hold, as ``pip download -r`` got
+    #: beside it in the issue and failed with ``ResolutionImpossible``.
+    OTHER = '3.1.16'
+
+    def setUp(self) -> None:
+        self.module = vendor()
+        self.text = (ROOT / 'conda' / 'requirements.txt').read_text(encoding='utf-8')
+        self.envs = self.module.environments(self.module.conda_pythons())
+        # Stand-in metadata: what the committed file says that this does not
+        # derive is the same with the duplicate as without it.
+        self.found = self.module.derive(self.module.direct(), self.envs, lambda name: [])
+        self.pinned = self.module.parse(self.text)['aenum'][None]
+        self.assertNotEqual(self.pinned, self.OTHER, 'pick another conflicting aenum pin')
+
+    def added(self, line: 'str') -> 'list[str]':
+        """What ``--check`` reports of the committed file with ``line`` appended, and not without it."""
+        before = self.module.compare(self.text, self.found, self.envs)
+        after = self.module.compare(self.text + line + '\n', self.found, self.envs)
+        return [problem for problem in after if problem not in before]
+
+    def test_the_committed_file_has_no_conflict(self) -> None:
+        self.assertEqual([problem for problem in self.module.compare(self.text, self.found, self.envs)
+                          if problem.startswith('conflict:')], [])
+
+    def test_a_conflicting_pin_is_reported(self) -> None:
+        conflict = f"conflict: aenum pins '=={self.pinned}' and '=={self.OTHER}' under the marker None"
+        with self.assertRaises(self.module.Conflicting) as raised:
+            self.module.parse(self.text + f'aenum=={self.OTHER}\n')
+        self.assertEqual(str(raised.exception), conflict)
+        self.assertEqual(self.added(f'aenum=={self.OTHER}'), [conflict])
+
+    def test_markers_are_compared_once_normalised(self) -> None:
+        text = requirement_lines('Six==1.0; python_version == "3.12"', "six==2.0; python_version=='3.12'",
+                                 'six==3.0; python_version == "3.13"')
+        with self.assertRaises(self.module.Conflicting) as raised:
+            self.module.parse(text)
+        self.assertEqual(str(raised.exception),
+                         "conflict: six pins '==1.0' and '==2.0' under the marker 'python_version == \"3.12\"'")
+
+    def test_an_identical_duplicate_is_accepted(self) -> None:
+        line = f'aenum=={self.pinned}'
+        self.assertEqual(self.module.parse(self.text + line + '\n'), self.module.parse(self.text))
+        self.assertEqual(self.added(line), [])
+
+    def test_check_exits_1_on_a_conflicting_duplicate_of_its_own_output(self) -> None:
+        module = self.module
+        with tempfile.TemporaryDirectory() as temp:
+            target = pathlib.Path(temp) / 'requirements.txt'
+            saved = module.FILE, module.ROOT, module._requires, module._version
+            module.FILE, module.ROOT = target, pathlib.Path(temp)
+            module._requires = lambda name: []
+            module._version = lambda name: '1.0'
+            try:
+                self.assertEqual(module.main([]), 0)
+                written = target.read_text(encoding='utf-8')
+                target.write_text(written + 'aenum==1.0\n', encoding='utf-8')
+                with contextlib.redirect_stdout(io.StringIO()) as quiet:
+                    self.assertEqual(module.main(['--check']), 0)
+                self.assertEqual(quiet.getvalue(), '')
+                target.write_text(written + 'aenum==0.9\n', encoding='utf-8')
+                with contextlib.redirect_stdout(io.StringIO()) as report:
+                    self.assertEqual(module.main(['--check']), 1)
+                self.assertEqual(report.getvalue(), "requirements.txt: conflict: aenum pins '==1.0' and "
+                                                    "'==0.9' under the marker None\n")
             finally:
                 module.FILE, module.ROOT, module._requires, module._version = saved
 
