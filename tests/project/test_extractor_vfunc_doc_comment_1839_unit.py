@@ -9,7 +9,8 @@ and no description.
 
 The annotation is the ``VerboseHandler`` alias, whose signature is pinned too:
 the frame parameter is the whole ``Packet`` union, and the return is
-:class:`object`, because every caller discards it.
+:data:`~typing.Any`, because every caller discards it. The comparison is exact,
+so it fails on a return of ``None`` or :class:`object` as well.
 
 Every test reads source text and never imports the package. The one that asks
 Sphinx itself skips without it; the others run everywhere.
@@ -44,7 +45,7 @@ TEXT = 'Verbose callback function.'
 
 #: The alias that types the attribute, and the signature it should spell.
 ALIAS = 'VerboseHandler'
-SIGNATURE = "Callable[['Extractor', Packet], object]"
+SIGNATURE = "Callable[['Extractor', Packet], Any]"
 
 #: A documentation comment line, as :mod:`sphinx.pycode.parser` matches it.
 COMMENT = re.compile(r'^\s*#: ?(.*)$')

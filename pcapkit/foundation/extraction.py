@@ -85,10 +85,10 @@ if TYPE_CHECKING:
                    PCAPFilePacket, tuple[float, bytes]]
 
     Protocols = Union[str, ProtocolBase, Type[ProtocolBase]]
-    # NOTE: every caller discards the callback's result. ``object`` rather than
-    # ``None`` still accepts one that returns something, e.g.
+    # NOTE: every caller discards the callback's result, so it is typed ``Any``:
+    # any two-argument callback is accepted, whatever it returns, e.g.
     # ``lambda e, f: sys.stdout.write(str(f))``.
-    VerboseHandler = Callable[['Extractor', Packet], object]
+    VerboseHandler = Callable[['Extractor', Packet], Any]
 
 __all__ = ['Extractor']
 
