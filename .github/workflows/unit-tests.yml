@@ -1030,11 +1030,11 @@ jobs:
           fi
 
           case "$ENGINE" in
-            Scapy) TEST_PATHS="tests/toolkit/test_scapy_unit.py tests/foundation/engines/test_scapy_engine.py tests/protocols/transport/test_sctp_unit.py" ;;
-            PyShark) TEST_PATHS="tests/toolkit/test_pyshark_unit.py tests/foundation/engines/test_pyshark_engine.py" ;;
-            PyPCAPFile) TEST_PATHS="tests/toolkit/test_pypcapfile_unit.py tests/foundation/engines/test_pypcapfile_engine.py" ;;
-            PyPCAP) TEST_PATHS="tests/toolkit/test_pypcap_unit.py tests/foundation/engines/test_pypcap_engine.py tests/foundation/engines/test_pcap_backend.py" ;;
-            PCAP_CT) TEST_PATHS="tests/toolkit/test_pcap_ct_unit.py tests/foundation/engines/test_pcap_ct_engine.py tests/foundation/engines/test_pcap_backend.py" ;;
+            Scapy) TEST_PATHS="tests/toolkit/test_scapy_unit.py tests/foundation/engines/test_scapy_engine.py tests/protocols/transport/test_sctp_unit.py tests/foundation/engines/test_engine_verbose_callback_1874_unit.py" ;;
+            PyShark) TEST_PATHS="tests/toolkit/test_pyshark_unit.py tests/foundation/engines/test_pyshark_engine.py tests/foundation/engines/test_engine_verbose_callback_1874_unit.py" ;;
+            PyPCAPFile) TEST_PATHS="tests/toolkit/test_pypcapfile_unit.py tests/foundation/engines/test_pypcapfile_engine.py tests/foundation/engines/test_engine_verbose_callback_1874_unit.py" ;;
+            PyPCAP) TEST_PATHS="tests/toolkit/test_pypcap_unit.py tests/foundation/engines/test_pypcap_engine.py tests/foundation/engines/test_pcap_backend.py tests/foundation/engines/test_engine_verbose_callback_1874_unit.py" ;;
+            PCAP_CT) TEST_PATHS="tests/toolkit/test_pcap_ct_unit.py tests/foundation/engines/test_pcap_ct_engine.py tests/foundation/engines/test_pcap_backend.py tests/foundation/engines/test_engine_verbose_callback_1874_unit.py" ;;
           esac
           echo "Running: $TEST_PATHS"
           # shellcheck disable=SC2086

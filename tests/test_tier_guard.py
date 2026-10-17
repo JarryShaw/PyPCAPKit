@@ -2410,7 +2410,8 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
 
         """
         live = ('PyShark) TEST_PATHS="tests/toolkit/test_pyshark_unit.py '
-                'tests/foundation/engines/test_pyshark_engine.py" ;;')
+                'tests/foundation/engines/test_pyshark_engine.py '
+                'tests/foundation/engines/test_engine_verbose_callback_1874_unit.py" ;;')
         doctored = doctored_workflow(
             self,
             live,
@@ -2422,7 +2423,8 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
         pyshark_jobs = [job for job in jobs if job.name == 'engine-tests' and 'PyShark' in job.extras]
         self.assertEqual(len(pyshark_jobs), 1)
         self.assertEqual(pyshark_jobs[0].paths, ('tests/toolkit/test_pyshark_unit.py',
-                                                 'tests/foundation/engines/test_pyshark_engine.py'))
+                                                 'tests/foundation/engines/test_pyshark_engine.py',
+                                                 'tests/foundation/engines/test_engine_verbose_callback_1874_unit.py'))
 
     def test_the_undoctored_workflow_produces_no_unexplained_gap(self) -> None:
         """The control: the tests above fail for the doctoring, not by default."""
