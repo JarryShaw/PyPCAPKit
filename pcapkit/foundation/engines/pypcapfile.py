@@ -220,8 +220,8 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
         self._dlink = Enum_LinkType.get(sfile.header.ll_type)
         self._declf = self._get_decoder(sfile.header.ll_type)
 
-        # setup verbose handler
-        if ext._flag_v:
+        # setup verbose handler, unless the caller gave one of their own (#1874)
+        if ext._vfunc_default:
             from pcapkit.toolkit.pypcapfile import packet2chain  # isort:skip
             ext._vfunc = lambda e, f: print(
                 f'Frame {e._frnum:>3d}: {packet2chain(cast("PCAPFilePacket", f), data_link=self._dlink)}'  # pylint: disable=protected-access

@@ -963,6 +963,8 @@ class ExtractorTests(unittest.TestCase):
         run.assert_called_once()
         self.assertEqual(extractor.input, str(capture))
         self.assertTrue(extractor._flag_v)
+        # ``verbose=True`` asks for the default printer, which an engine may replace (#1874)
+        self.assertTrue(extractor._vfunc_default)
         self.assertTrue(extractor._ipv4)
         self.assertTrue(extractor._ipv6)
         self.assertTrue(extractor._tcp)
@@ -1012,6 +1014,7 @@ class ExtractorTests(unittest.TestCase):
             run.assert_called_once()
             self.assertEqual(defaulted._ifnm, str(capture))
             self.assertFalse(defaulted._flag_v)
+            self.assertFalse(defaulted._vfunc_default)
             defaulted._ifile.close()
 
             verbose_handler = mock.Mock()
@@ -1022,6 +1025,8 @@ class ExtractorTests(unittest.TestCase):
             self.assertFalse(streamed._flag_s)
             self.assertTrue(streamed._flag_v)
             self.assertIs(streamed._vfunc, verbose_handler)
+            # a caller's callback is not the default printer, so no engine replaces it (#1874)
+            self.assertFalse(streamed._vfunc_default)
             self.assertFalse(hasattr(streamed, '_ofile'))
             streamed._ifile.close()
 

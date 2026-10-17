@@ -312,8 +312,8 @@ class PyPCAP(EngineBase['RawFrame']):
         handle = cast('Handle', self._expkg.pcap(name=ext._ifnm, promisc=False))
         self._dlink = Enum_LinkType.get(handle.datalink())
 
-        # setup verbose handler
-        if ext._flag_v:
+        # setup verbose handler, unless the caller gave one of their own (#1874)
+        if ext._vfunc_default:
             from pcapkit.toolkit.pypcap import packet2chain  # isort:skip
             ext._vfunc = lambda e, f: print(
                 f'Frame {e._frnum:>3d}: {packet2chain(cast("RawFrame", f)[1], data_link=self._dlink)}'  # pylint: disable=protected-access

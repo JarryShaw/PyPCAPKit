@@ -152,6 +152,7 @@ class PCAP_CTEngineTests(unittest.TestCase):
             '_flag_q': False,
             '_flag_f': False,
             '_flag_v': False,
+            '_vfunc_default': False,
             '_flag_r': False,
             '_flag_t': False,
             '_flag_d': True,
@@ -443,7 +444,7 @@ class PCAP_CTEngineTests(unittest.TestCase):
         self.assertIs(extractor._trace, original_trace)
 
     def test_run_installs_verbose_handler_reporting_the_raw_chain(self) -> None:
-        extractor, _ = self.make_extractor(_flag_v=True)
+        extractor, _ = self.make_extractor(_flag_v=True, _vfunc_default=True)
         engine = self.engine(extractor)
         with mock.patch.object(engine._expkg, 'pcap', return_value=FakeHandle()):
             engine.run()
@@ -453,6 +454,16 @@ class PCAP_CTEngineTests(unittest.TestCase):
             extractor._vfunc(extractor, (1.5, b'payload'))
         printer.assert_called_once()
         self.assertIn('ETHERNET:Raw', printer.call_args.args[0])
+
+    def test_run_keeps_a_callers_verbose_callback(self) -> None:
+        # #1874: a callable given as ``verbose`` turns verbose output on without
+        # asking for the default printer, so the engine must not replace it
+        callback = mock.Mock()
+        extractor, _ = self.make_extractor(_flag_v=True, _vfunc_default=False, _vfunc=callback)
+        engine = self.engine(extractor)
+        with mock.patch.object(engine._expkg, 'pcap', return_value=FakeHandle()):
+            engine.run()
+        self.assertIs(extractor._vfunc, callback)
 
     ##########################################################################
     # read_frame()

@@ -127,7 +127,9 @@ class Extractor(Generic[_P]):
        so a positional argument after ``reasm_store`` has to move to a
        keyword. Flows are traced bidirectionally by default. :attr:`engine`
        is typed :class:`~pcapkit.foundation.engines.engine.EngineBase`, the
-       base every engine derives from (:issue:`1022`).
+       base every engine derives from (:issue:`1022`). A callback given as
+       ``verbose`` is called on every engine, where the third-party engines
+       replaced it with their own printer (:issue:`1874`).
 
     """
     if TYPE_CHECKING:
@@ -164,8 +166,10 @@ class Extractor(Generic[_P]):
         _flag_r: 'bool'
         #: Trace flag. It indicates if the flow tracing is enabled.
         _flag_t: 'bool'
-        #: Verbose flag. This is used to determine if the verbose callback
-        #: function should be called at each frame.
+        #: Verbose flag. It indicates if verbose output is enabled, whether by
+        #: ``verbose=True`` or by a callback, which
+        #: :attr:`~pcapkit.foundation.extraction.Extractor._vfunc_default`
+        #: tells apart.
         _flag_v: 'bool'
         #: No EOF flag. It is useful when the input is a live capture on a pipe or
         #: on standard input, where reaching the end of what has arrived so far
@@ -182,6 +186,13 @@ class Extractor(Generic[_P]):
 
         #: Verbose callback function.
         _vfunc: 'VerboseHandler'
+        #: Default verbose printer flag. It is set only by ``verbose=True``,
+        #: which asks for the default output, and an engine whose frames are
+        #: not PyPCAPKit's own replaces
+        #: :attr:`~pcapkit.foundation.extraction.Extractor._vfunc` with its own
+        #: printer only when it is set. A callback given as ``verbose`` leaves
+        #: it unset, so every engine keeps that callback (:issue:`1874`).
+        _vfunc_default: 'bool'
 
         #: Frame number.
         _frnum: 'int'
@@ -1282,6 +1293,7 @@ class Extractor(Generic[_P]):
         # verbose callback function
         if isinstance(verbose, bool):
             self._flag_v = verbose
+            self._vfunc_default = verbose
             if verbose:
                 # NOTE: ``verbose=True`` and the CLI's ``-v`` are a request for
                 # user-facing output on stdout, not diagnostics -- the frame
@@ -1297,6 +1309,7 @@ class Extractor(Generic[_P]):
                 self._vfunc = lambda e, f: None
         else:
             self._flag_v = True
+            self._vfunc_default = False
             self._vfunc = verbose
 
         self._frnum = 0   # frame number

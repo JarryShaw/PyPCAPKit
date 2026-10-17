@@ -49,6 +49,7 @@ def make_extractor(**overrides):
         '_flag_q': False,
         '_flag_f': False,
         '_flag_v': False,
+        '_vfunc_default': False,
         '_flag_r': True,
         '_flag_t': True,
         '_flag_d': True,
@@ -225,7 +226,7 @@ class ThirdPartyEngineTests(unittest.TestCase):
             def __next__(self):
                 return next(self.items)
 
-        extractor, sink = make_extractor(_exlyr='link', _flag_v=True)
+        extractor, sink = make_extractor(_exlyr='link', _flag_v=True, _vfunc_default=True)
         engine = DPKT(extractor)
         # A PCAP is read through the engine's :class:`dpkt.pcap.Reader` subclass,
         # which keeps each record's original length (#1507).
@@ -366,7 +367,7 @@ class ThirdPartyEngineTests(unittest.TestCase):
             sniff.assert_called_once_with(opened_socket={reader: 'capture.pcap'})
             reader.close.assert_called_once_with()
 
-        extractor, sink = make_extractor(_exptl='tcp', _flag_v=True)
+        extractor, sink = make_extractor(_exptl='tcp', _flag_v=True, _vfunc_default=True)
         run(Scapy(extractor))
         self.assertTrue(callable(extractor._vfunc))
         extractor.record_header.assert_called_once_with()
@@ -444,7 +445,7 @@ class ThirdPartyEngineTests(unittest.TestCase):
                 self.closed = True
 
         capture = FakeCapture()
-        extractor, sink = make_extractor(_exlyr='internet', _flag_v=True)
+        extractor, sink = make_extractor(_exlyr='internet', _flag_v=True, _vfunc_default=True)
         engine = PyShark(extractor)
         with mock.patch.object(engine._expkg, 'FileCapture', return_value=capture) as file_capture:
             engine.run()
