@@ -15,7 +15,9 @@ mypy itself is advisory in CI, so these are the parts pinned here: the
 annotations, the protocols covering what each engine reads, and the stubs
 covering what :mod:`pcapkit` imports.
 
-This module is unit-tier: it parses source and imports no engine package.
+This module is unit-tier: it parses source and imports no engine package. The
+unit tier runs on Python 3.8 too, so it reads nodes without :func:`ast.unparse`,
+which is 3.9+ (#1899).
 
 """
 from __future__ import annotations
@@ -76,15 +78,36 @@ def _class(tree: 'ast.Module', name: str) -> 'ast.ClassDef':
     raise AssertionError(f'no top-level class {name}')
 
 
+def _named(annotation: 'ast.expr') -> str:
+    """An annotation as the name it gives: a quoted one unquoted, a dotted one joined.
+
+    Only a protocol's name is looked up in what this returns, so any other form,
+    which names no protocol, is given as :func:`ast.dump` renders it.
+
+    """
+    if isinstance(annotation, ast.Constant) and isinstance(annotation.value, str):
+        return annotation.value
+    if isinstance(annotation, ast.Name):
+        return annotation.id
+    if isinstance(annotation, ast.Attribute):
+        return f'{_named(annotation.value)}.{annotation.attr}'
+    return ast.dump(annotation)
+
+
+def _is_protocol(base: 'ast.expr') -> bool:
+    """Whether a class base is written ``Protocol`` or ``typing.Protocol``."""
+    if isinstance(base, ast.Name):
+        return base.id == 'Protocol'
+    return (isinstance(base, ast.Attribute) and base.attr == 'Protocol'
+            and isinstance(base.value, ast.Name) and base.value.id == 'typing')
+
+
 def _expkg_annotation(cls: 'ast.ClassDef') -> 'Optional[str]':
     """The annotation of ``_expkg`` in the class body, a quoted one unquoted."""
     for statement in [*cls.body, *_guarded(cls.body)]:
         if (isinstance(statement, ast.AnnAssign) and isinstance(statement.target, ast.Name)
                 and statement.target.id == '_expkg'):
-            annotation = statement.annotation
-            if isinstance(annotation, ast.Constant) and isinstance(annotation.value, str):
-                return annotation.value
-            return ast.unparse(annotation)
+            return _named(statement.annotation)
     return None
 
 
@@ -92,20 +115,19 @@ def _guarded_protocols(tree: 'ast.Module') -> 'dict[str, ast.ClassDef]':
     """Every class the module-level guard defines as a ``Protocol``, by name."""
     return {
         statement.name: statement for statement in _guarded(tree.body)
-        if isinstance(statement, ast.ClassDef)
-        and any(ast.unparse(base) in ('Protocol', 'typing.Protocol') for base in statement.bases)
+        if isinstance(statement, ast.ClassDef) and any(_is_protocol(base) for base in statement.bases)
     }
 
 
 def _members(cls: 'ast.ClassDef') -> 'dict[str, str]':
-    """A protocol's members, each mapped to the annotation of its value."""
+    """A protocol's members, each mapped to the annotation of its value, a quoted one unquoted."""
     members = {}
     for statement in cls.body:
         if isinstance(statement, ast.FunctionDef):
-            members[statement.name] = ast.unparse(statement.returns) if statement.returns else ''
+            members[statement.name] = _named(statement.returns) if statement.returns else ''
         elif isinstance(statement, ast.AnnAssign) and isinstance(statement.target, ast.Name):
-            members[statement.target.id] = ast.unparse(statement.annotation)
-    return {name: value.strip('\'"') for name, value in members.items()}
+            members[statement.target.id] = _named(statement.annotation)
+    return members
 
 
 def _is_expkg(node: 'ast.AST') -> bool:
