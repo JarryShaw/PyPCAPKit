@@ -241,8 +241,13 @@ jobs:
             while :; do
               count=$((count + 1))
               # One write a sample, opening on a newline: `Run unit tests` copies
-              # it into a log where pytest may have left a line unfinished.
-              printf '\n%s\n' "$(sample "$count" 2>&1 | sed 's/^/[monitor] /')"
+              # it into a log where pytest may have left a line unfinished. bash
+              # line-buffers its builtins' output, so printf wrote a sample in
+              # pieces, `tail -F` could copy them apart and pytest's output land
+              # between them (#1888); `cat` reads the here-string whole and
+              # writes it in one call.
+              lines=$(sample "$count" 2>&1 | sed 's/^/[monitor] /')
+              cat <<< $'\n'"$lines"
               sleep 30 &
               sleeper=$!
               wait "$sleeper"
