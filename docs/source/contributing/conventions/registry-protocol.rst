@@ -106,13 +106,10 @@ What is easy to get wrong about it:
   ``get`` re-raises a :exc:`ValueError` that is already a
   :exc:`~pcapkit.utilities.exceptions.BaseError` exactly as the override raised it,
   and converts only ``aenum``'s and :mod:`enum`'s own "no member carries this
-  value". The consequences are the point of the discrimination rather
-  than side effects: the override's **own message** survives to the caller instead
-  of being replaced by the base's, and the error is **logged once** rather than
-  twice, since :class:`~pcapkit.utilities.exceptions.BaseError` logs on
-  construction and re-wrapping would construct a second one. So an override should
-  say in its message what it rejected and why; that message is what the caller
-  sees.
+  value". The consequence is the point of the discrimination rather than a side
+  effect: the override's **own message** survives to the caller instead of being
+  replaced by the base's. So an override should say in its message what it rejected
+  and why; that message is what the caller sees.
 * **A** ``str`` **key never reaches it.** That path never calls ``cls(key)``, so it
   resolves only against already-populated lookup tables, where every value present is
   legal by construction. ``register`` does call it, after its duplicate check.
@@ -161,8 +158,8 @@ Which branch a key takes, and what each miss ends in:
        GET -->|"otherwise"| VALUE["_validate_value(key)<br/>then cls(key)"]
        NAME -->|"miss, no usable default"| KEYERR["EnumKeyError<br/>quiet, derives KeyError"]
        NAME -->|"hit,<br/>or miss, key is a registered value,<br/>or miss, default is a registered value"| OK["canonical member"]
-       VALUE -->|"resolves, or \_missing\_ answers,<br/>or ValueError, default is a registered value<br/>(that ValueError quiet)"| OK
-       VALUE -->|"ValueError, no usable default"| VALERR["EnumValueError<br/>loud, derives ValueError"]
+       VALUE -->|"resolves, or \_missing\_ answers,<br/>or ValueError, default is a registered value"| OK
+       VALUE -->|"ValueError, no usable default"| VALERR["EnumValueError<br/>quiet, derives ValueError"]
 
 Do not "improve" on the shape by making both misses report identically. Converting
 one into the other is exactly what :issue:`923` retired, and it was retired in several
@@ -173,32 +170,35 @@ base's :exc:`KeyError` into a :exc:`ValueError`, and
 ways of getting it wrong reported identically.
 
 One more thing is not visible from the exception class, and it is deliberate:
-whether a miss is **reported**. A miss that ``get`` answers with ``default`` is
-quiet, and so is every **name** miss, while a **value** miss with no usable
-``default`` is loud. Quiet means what
+whether a miss is **reported**. **Every miss** ``get`` **reports is quiet** -- by name
+or by value, whether ``default`` answers it or it is raised -- while ``register``
+refusing the same value is loud. Quiet means what
 :class:`~pcapkit.utilities.exceptions.BaseError`'s ``quiet=True`` means: nothing is
-logged and no exception hook is installed.
+logged and no exception hook is installed. A raised miss is still an ordinary
+exception that reaches the caller; left uncaught, it is printed by whichever hook is
+installed, the interpreter's own unless an earlier loud error installed
+:mod:`pcapkit`'s.
 
 * **The name miss** is raised with ``quiet=True``. It is in-library control flow at
   several call sites, and at ``Method.get`` it is part of a *successful* call --
   that override catches it in order to mint.
-* **The value miss** is quiet only when ``default`` names a registered value. The
-  owner ruled for that on :issue:`1845`, on the ground that ``get`` is mostly called
-  from protocol parsing: a value ``get`` answers with ``default`` is input it has
-  handled, not a fault to report. In that case ``get`` runs ``_validate_value`` and
+* **The value miss** is quiet with or without a usable ``default``. The owner ruled
+  for that on :issue:`1845`, on the ground that ``get`` is mostly called from
+  protocol parsing, where a value that does not resolve is input for the caller to
+  handle rather than a fault to report. ``get`` runs ``_validate_value`` and
   ``cls(key)`` in a block declaring that it catches :exc:`ValueError` itself, so the
   loud :exc:`~pcapkit.utilities.exceptions.EnumValueError` a generated override
-  raises is constructed quietly without the override passing ``quiet=True``. With
-  no usable ``default`` the rejection reaches the caller and stays loud, and
-  :meth:`~pcapkit.corekit.enum.EnumRegistry.register` reports the same rejection
-  loudly even when reached from inside such a block.
+  raises is constructed quietly without the override passing ``quiet=True``, and
+  the error ``get`` converts from ``aenum``'s own is raised quiet as well. An error
+  of any other class is not a lookup miss, and stays loud.
+* :meth:`~pcapkit.corekit.enum.EnumRegistry.register` **stays loud**, even when
+  reached from inside such a block: refusing a mint the caller explicitly asked for
+  is a fault to report, not a lookup that missed.
 
-A loud error on either fallback would put a :data:`logging.CRITICAL` record on every
-such call -- the :issue:`362` defect ``quiet`` exists for -- and, outside development
-mode, install :mod:`pcapkit`'s exception hooks. So a ``get`` override that catches a
-name miss as control flow is following the convention; one that calls ``get``
-without a ``default`` and catches the *value* miss is silencing a logged error, and
-should pass a ``default`` instead.
+A loud miss would put a :data:`logging.CRITICAL` record on every lookup that misses
+-- the :issue:`362` defect ``quiet`` exists for -- and, outside development mode,
+install :mod:`pcapkit`'s exception hooks. So catching either miss as control flow, in
+a ``get`` override or anywhere else, follows the convention and silences nothing.
 
 ``get`` Override Obligations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~

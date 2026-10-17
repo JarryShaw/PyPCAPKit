@@ -195,7 +195,7 @@ class _CaughtByCaller:
 
     A class rather than :func:`contextlib.contextmanager`, because
     :meth:`EnumLookup.get <pcapkit.corekit.enum.EnumLookup.get>` enters one on
-    every call that has a usable ``default``, and the generator machinery
+    every call with a non-:class:`str` key, and the generator machinery
     measured at several times the cost of the lookup it would wrap.
 
     Args:

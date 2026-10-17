@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
-"""GitHub issue #1845: ``get(value, default)`` falls back quietly; ``register`` stays loud.
+"""GitHub issue #1845: ``get`` is quiet for a value it cannot resolve; ``register`` is loud.
 
 #1823 gave every generated registry a ``_validate_value`` override raising a loud
 :exc:`~pcapkit.utilities.exceptions.EnumValueError`, and
 :meth:`~pcapkit.corekit.enum.EnumLookup.get` calls that hook before ``cls(key)``.
 So ``get(out_of_range, default)`` returned ``default`` but logged a
 :data:`logging.CRITICAL` record and installed :mod:`pcapkit`'s exception hooks
-on the way. The owner took the quiet option for ``get`` and kept ``register``
-loud. The quiet path lives in :mod:`pcapkit.corekit`, so the generated overrides
-are untouched: ``get`` runs them inside a
-:class:`~pcapkit.utilities.exceptions._CaughtByCaller` block, which makes a
-:exc:`ValueError`-derived :class:`~pcapkit.utilities.exceptions.BaseError`
+on the way. The owner ruled ``get`` quiet for such a value, with a usable
+``default`` or without one -- without, the miss is still raised, just not
+reported -- and kept ``register`` loud. The quiet path lives in
+:mod:`pcapkit.corekit`, so the generated overrides are untouched: ``get`` runs
+them inside a :class:`~pcapkit.utilities.exceptions._CaughtByCaller` block, which
+makes a :exc:`ValueError`-derived :class:`~pcapkit.utilities.exceptions.BaseError`
 constructed there quiet.
 
 The generated registry under test is
@@ -23,7 +24,10 @@ because one of its members is being renamed in parallel (#1848).
 from __future__ import annotations
 
 import contextlib
+import os
+import subprocess  # nosec B404
 import sys
+import textwrap
 import threading
 import unittest
 from typing import TYPE_CHECKING
@@ -31,7 +35,7 @@ from typing import TYPE_CHECKING
 from aenum import IntEnum
 
 from pcapkit.const.ipv4.tos_pre import ToSPrecedence
-from pcapkit.corekit.enum import EnumRegistry
+from pcapkit.corekit.enum import EnumLookup, EnumRegistry
 from pcapkit.utilities import exceptions
 from pcapkit.utilities.exceptions import EnumValueError, IntError
 from pcapkit.utilities.logging import DEVMODE
@@ -43,13 +47,20 @@ if TYPE_CHECKING:
 
     from tests.utilities._harness import Recorder
 
-__all__ = ['QuietFallbackTests', 'LoudPathTests', 'MechanismTests']
+__all__ = ['QuietFallbackTests', 'QuietRaiseTests', 'LoudPathTests', 'MechanismTests']
 
 #: A value :class:`ToSPrecedence`'s ``_validate_value`` refuses: the field is 3 bits.
 OUT_OF_RANGE = 8
 
+#: The message every rejection of :data:`OUT_OF_RANGE` carries.
+MESSAGE = f'{OUT_OF_RANGE} is not a valid ToSPrecedence'
+
 #: The one record a loud rejection of :data:`OUT_OF_RANGE` leaves.
-LOUD_RECORD = ('CRITICAL', f'EnumValueError: {OUT_OF_RANGE} is not a valid ToSPrecedence')
+LOUD_RECORD = ('CRITICAL', f'EnumValueError: {MESSAGE}')
+
+#: Repository root, handed to a child interpreter as ``PYTHONPATH`` so it imports
+#: this tree rather than whatever :mod:`pcapkit` is installed.
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 #: Set by :class:`_Blocking`'s hook once it is parked inside ``get``.
 _INSIDE = threading.Event()
@@ -62,6 +73,12 @@ def _records() -> 'Iterator[tuple[Recorder, Recorder]]':
     """Capture the package logger and, separately, the exceptions module's own."""
     with capture(package_logger) as package, capture(exceptions.logger) as module:
         yield package, module
+
+
+class _Sparse(EnumLookup, IntEnum):
+    """No range hook and no ``_missing_``: a miss is :mod:`aenum`'s own error."""
+
+    one = 1
 
 
 class _Nested(EnumRegistry, IntEnum):
@@ -126,29 +143,26 @@ class _HookGuard(unittest.TestCase):
         sys.excepthook = _sys_sentinel
         threading.excepthook = _threading_sentinel
 
+    def assert_quiet(self, package: 'Recorder', module: 'Recorder') -> 'None':
+        """Nothing logged anywhere in :mod:`pcapkit`, and both hooks untouched."""
+        self.assertEqual(module.messages, [],
+                         'get() logged from pcapkit.utilities.exceptions')
+        self.assertEqual(package.messages, [])
+        self.assertIs(sys.excepthook, self.sys_sentinel, 'get() replaced sys.excepthook')
+        self.assertIs(threading.excepthook, self.threading_sentinel)
+
 
 class QuietFallbackTests(_HookGuard):
-    """The fix: an out-of-range value with a usable ``default`` is silent."""
+    """An out-of-range value with a usable ``default`` is answered silently."""
 
     def test_returns_the_default(self) -> 'None':
         self.assertIs(ToSPrecedence.get(OUT_OF_RANGE, 0), ToSPrecedence.Routine)
         self.assertIs(ToSPrecedence.get(-1, ToSPrecedence.Flash.value), ToSPrecedence.Flash)
 
-    def test_logs_nothing(self) -> 'None':
+    def test_logs_nothing_and_leaves_the_hooks_alone(self) -> 'None':
         with _records() as (package, module):
             ToSPrecedence.get(OUT_OF_RANGE, 0)
-        self.assertEqual(module.messages, [],
-                         'get() fell back to default and still logged from '
-                         'pcapkit.utilities.exceptions')
-        self.assertEqual(package.messages, [])
-
-    @unittest.skipIf(DEVMODE, 'a loud error installs no hook in development mode')
-    def test_leaves_the_exception_hooks_alone(self) -> 'None':
-        with _records():
-            ToSPrecedence.get(OUT_OF_RANGE, 0)
-        self.assertIs(sys.excepthook, self.sys_sentinel,
-                      'get() fell back to default and still replaced sys.excepthook')
-        self.assertIs(threading.excepthook, self.threading_sentinel)
+        self.assert_quiet(package, module)
 
     def test_mints_nothing(self) -> 'None':
         names, values = dict(ToSPrecedence._member_map_), dict(ToSPrecedence._value2member_map_)
@@ -158,38 +172,85 @@ class QuietFallbackTests(_HookGuard):
         self.assertEqual(ToSPrecedence._value2member_map_, values)
 
 
-class LoudPathTests(_HookGuard):
-    """What stays as it was. These pass before the fix too: they guard against a
-    fix that quiets more than ``get``'s fallback."""
+class QuietRaiseTests(_HookGuard):
+    """With no usable ``default`` the miss is still raised -- only not reported."""
 
-    def _assert_one_loud_record(self, module: 'Recorder') -> 'None':
-        self.assertEqual(module.messages, [LOUD_RECORD])
-        if not DEVMODE:
-            self.assertIs(sys.excepthook, exceptions._excepthook)
-
-    def test_get_without_default_is_loud(self) -> 'None':
-        with _records() as (_, module):
+    def test_get_without_default_raises_quietly(self) -> 'None':
+        with _records() as (package, module):
             with self.assertRaises(EnumValueError) as caught:
                 ToSPrecedence.get(OUT_OF_RANGE)
-        self.assertEqual(str(caught.exception), f'{OUT_OF_RANGE} is not a valid ToSPrecedence')
-        self._assert_one_loud_record(module)
+        self.assertEqual(str(caught.exception), MESSAGE)
+        self.assert_quiet(package, module)
 
-    def test_get_with_an_unregistered_default_is_loud(self) -> 'None':
+    def test_get_with_an_unregistered_default_raises_quietly(self) -> 'None':
         self.assertNotIn(99, ToSPrecedence._value2member_map_)
-        with _records() as (_, module):
-            with self.assertRaises(EnumValueError):
+        with _records() as (package, module):
+            with self.assertRaises(EnumValueError) as caught:
                 ToSPrecedence.get(OUT_OF_RANGE, 99)
-        self._assert_one_loud_record(module)
+        self.assertEqual(str(caught.exception), MESSAGE)
+        self.assert_quiet(package, module)
+
+    def test_get_all_raises_quietly(self) -> 'None':
+        with _records() as (package, module):
+            with self.assertRaises(EnumValueError):
+                ToSPrecedence.get_all(OUT_OF_RANGE)
+        self.assert_quiet(package, module)
+
+    def test_a_converted_enumeration_miss_is_quiet(self) -> 'None':
+        """``get`` converts :mod:`aenum`'s own miss, outside the block, so the
+        error it constructs has to be quiet in its own right."""
+        with _records() as (package, module):
+            with self.assertRaises(EnumValueError) as caught:
+                _Sparse.get(5)
+        self.assertNotIsInstance(caught.exception.__cause__, exceptions.BaseError)
+        self.assertIsInstance(caught.exception.__cause__, ValueError)
+        self.assert_quiet(package, module)
+
+    def test_an_uncaught_miss_prints_the_interpreters_own_traceback(self) -> 'None':
+        """Quiet installs no hook, so the default one prints the full traceback.
+
+        Run in a fresh interpreter, because an uncaught exception is the one
+        thing a test cannot raise in its own process. :mod:`pcapkit`'s stderr
+        handler is attached there so that a loud error would also show up as a
+        ``[CRITICAL]`` line.
+
+        """
+        code = textwrap.dedent(f'''
+            import pcapkit
+            assert pcapkit.__file__.startswith({REPO_ROOT!r}), pcapkit.__file__
+            from pcapkit.utilities.logging import handler, logger
+            logger.addHandler(handler)
+            from pcapkit.const.ipv4.tos_pre import ToSPrecedence
+            ToSPrecedence.get({OUT_OF_RANGE})
+        ''')
+        env = dict(os.environ, PCAPKIT_DEVMODE='0', PYTHONSAFEPATH='1', PYTHONPATH=REPO_ROOT)
+        proc = subprocess.run([sys.executable, '-c', code], capture_output=True,  # nosec B603
+                              text=True, env=env, timeout=60, check=False)
+        lines = proc.stderr.strip().splitlines()
+        self.assertEqual(proc.returncode, 1, proc.stderr)
+        self.assertNotIn('[CRITICAL]', proc.stderr, 'the miss was logged')
+        self.assertEqual(lines[0], 'Traceback (most recent call last):',
+                         "pcapkit's terse hook printed the miss, so one was installed")
+        self.assertTrue(any('corekit' in line and 'enum.py' in line for line in lines),
+                        'the traceback has no frames inside get()')
+        self.assertEqual(lines[-1], f'pcapkit.utilities.exceptions.EnumValueError: {MESSAGE}')
+
+
+class LoudPathTests(_HookGuard):
+    """What stays loud. These pass before the fix too: they guard against a fix
+    that quiets more than ``get``'s own lookup miss."""
 
     def test_register_is_loud(self) -> 'None':
         with _records() as (_, module):
             with self.assertRaises(EnumValueError):
                 ToSPrecedence.register(OUT_OF_RANGE, 'Probe_1845')
-        self._assert_one_loud_record(module)
+        self.assertEqual(module.messages, [LOUD_RECORD])
+        if not DEVMODE:
+            self.assertIs(sys.excepthook, exceptions._excepthook)
         self.assertNotIn('Probe_1845', ToSPrecedence.__members__)
 
     def test_a_non_value_error_from_the_hook_is_loud(self) -> 'None':
-        """``get`` catches only :exc:`ValueError`, so only that is quieted."""
+        """``get`` catches only :exc:`ValueError`, so only that is a lookup miss."""
 
         class _TypeRejecting(EnumRegistry, IntEnum):
             zero = 0
@@ -213,6 +274,15 @@ class MechanismTests(_HookGuard):
         self.assertEqual(module.messages, [LOUD_RECORD],
                          'expected exactly the register() rejection, loud, with the '
                          "get() fallback's own rejection quiet")
+
+    def test_register_reached_from_a_raising_get_stays_loud(self) -> 'None':
+        with _records() as (_, module):
+            with self.assertRaises(EnumValueError) as caught:
+                _Nested.get(99)
+        self.assertEqual(str(caught.exception), '99 is not a valid _Nested')
+        self.assertEqual(module.messages, [LOUD_RECORD],
+                         'expected exactly the register() rejection, loud, with the '
+                         "miss get() raised quiet")
 
     def test_register_inside_a_quiet_block_stays_loud(self) -> 'None':
         with _records() as (_, module):

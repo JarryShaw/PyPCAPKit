@@ -198,19 +198,17 @@ class EnumLookup:
         :meth:`get` path: :exc:`~pcapkit.utilities.exceptions.EnumValueError`
         subclasses :exc:`ValueError`, so a rejection here is caught by
         :meth:`get`'s own ``except ValueError`` and falls back to ``default``
-        just as any other unresolvable value does -- quietly, since :meth:`get`
-        calls this hook inside a
-        :class:`~pcapkit.utilities.exceptions._CaughtByCaller` block whenever it
-        has a usable ``default``, so an override need not pass ``quiet=True``
-        for its rejection to log nothing there (:issue:`1845`). An override
-        raising something outside that hierarchy would instead propagate past
+        just as any other unresolvable value does. It is also quiet:
+        :meth:`get` always calls this hook inside a
+        :class:`~pcapkit.utilities.exceptions._CaughtByCaller` block for
+        :exc:`ValueError`, so an override need not pass ``quiet=True`` for its
+        rejection to log nothing there (:issue:`1845`). An override raising
+        something outside that hierarchy would instead propagate past
         ``default``, unquieted, which is a real difference in behaviour rather
-        than a stylistic preference. With
-        no usable ``default``, a rejection from this hook reaches the caller
-        exactly as the override raised it -- :meth:`get` re-raises an in-library
-        ``ValueError`` unchanged rather than re-wrapping it, so the override's own
-        message and the single log record it already emitted are what the caller
-        sees.
+        than a stylistic preference. With no usable ``default``, a rejection
+        from this hook reaches the caller exactly as the override raised it --
+        :meth:`get` re-raises an in-library ``ValueError`` unchanged rather than
+        re-wrapping it, so the override's own message is what the caller sees.
 
         Called from the places below, and the omissions are deliberate:
 
@@ -224,7 +222,7 @@ class EnumLookup:
           a caller can introduce a value no member carries yet. Its rejection
           stays loud even when ``register`` runs inside :meth:`get`'s quiet
           block, since a refused mint is a fault to report rather than a
-          lookup falling back.
+          lookup that missed.
 
         Of the registries that override :meth:`EnumRegistry.register` to mint
         through a path of their own,
@@ -343,16 +341,16 @@ class EnumLookup:
         on the same terms; the ``str`` path does not call the hook, for the reason
         given on :meth:`_validate_value` itself.
 
-        When ``default`` names a registered value, the hook and ``cls(key)`` run
-        inside a :class:`~pcapkit.utilities.exceptions._CaughtByCaller` block for
-        :exc:`ValueError`, because every :exc:`ValueError` they raise is then
-        caught here and answered with ``default``. A loud
+        The hook and ``cls(key)`` run inside a
+        :class:`~pcapkit.utilities.exceptions._CaughtByCaller` block for
+        :exc:`ValueError`, because every :exc:`ValueError` they raise is this
+        method's own lookup miss: caught here, then answered with ``default`` or
+        raised to the caller as the miss. A loud
         :exc:`~pcapkit.utilities.exceptions.EnumValueError` an override
         constructs there is therefore quiet, though the override never passes
         ``quiet=True`` -- the generated overrides cannot know which caller they
-        serve. An error of any other class still escapes this method, so it
-        stays loud. Without a usable ``default`` no block is entered, and the
-        rejection reaches the caller loud, as before.
+        serve. An error of any other class is not a lookup miss and escapes
+        this method as it was raised, so it stays loud.
 
         Both failure paths raise from :mod:`pcapkit.utilities.exceptions`
         rather than a builtin, per the ruling recorded on GitHub issue
@@ -367,30 +365,34 @@ class EnumLookup:
         These details are worth stating, since the exception type alone does
         not show them:
 
-        * **A miss answered with** ``default`` **is quiet**, and so is every
-          name miss: nothing is logged and no exception hook is installed.
-          The name miss is :exc:`~pcapkit.utilities.exceptions.EnumKeyError`
-          with ``quiet=True``, because it is in-library control flow -- at
+        * **Every miss is quiet**, by name or by value, whether answered with
+          ``default`` or raised: nothing is logged and no exception hook is
+          installed. A raised miss still reaches the caller as an ordinary
+          exception; left uncaught, it is printed by whichever hook is installed
+          -- the interpreter's own, unless an earlier loud error installed
+          :mod:`pcapkit`'s. The name miss is
+          :exc:`~pcapkit.utilities.exceptions.EnumKeyError` with
+          ``quiet=True``, because it is in-library control flow -- at
           :meth:`~pcapkit.const.http.method.Method.get` it is part of a
           *successful* call, since that override catches it in order to build
           an unregistered member. The value miss is quiet through the block
-          described above, and only when ``default`` is usable, as ruled on
-          :issue:`1845` on the ground that this method is mostly called from
-          protocol parsing: a value answered with ``default`` is input handled,
-          not a fault to report. A value miss with no usable ``default``
-          reaches the caller, and stays loud. A loud error on either fallback
-          would put a :data:`logging.CRITICAL` record on every such call --
-          the GitHub issue :issue:`362` defect
+          described above, as ruled on :issue:`1845` on the ground that this
+          method is mostly called from protocol parsing: a value it cannot
+          resolve is input for the caller to handle, not a fault to report. A
+          loud miss would put a :data:`logging.CRITICAL` record on every such
+          call -- the GitHub issue :issue:`362` defect
           :class:`~pcapkit.utilities.exceptions.BaseError` documents ``quiet``
           for -- and, outside development mode, install :mod:`pcapkit`'s
-          exception hooks.
+          exception hooks. :meth:`EnumRegistry.register` refusing the same
+          value stays loud.
         * **An in-library rejection propagates unchanged.** A ``ValueError``
           that is already a :exc:`~pcapkit.utilities.exceptions.BaseError` --
           typically :exc:`~pcapkit.utilities.exceptions.EnumValueError` from a
           subclass's :meth:`_validate_value` -- is re-raised as it stands rather
-          than wrapped, so the subclass's own message survives and the error is
-          logged once instead of twice. Only :mod:`aenum`'s and :mod:`enum`'s
-          own "no member carries this value" is converted. This is the same
+          than wrapped, so the subclass's own message survives and no second
+          error is constructed. Only :mod:`aenum`'s and :mod:`enum`'s own "no
+          member carries this value" is converted, into a quiet
+          :exc:`~pcapkit.utilities.exceptions.EnumValueError`. This is the same
           discrimination :meth:`EnumField.post_process
           <pcapkit.corekit.fields.numbers.EnumField.post_process>` already
           makes for the same reason.
@@ -415,16 +417,17 @@ class EnumLookup:
                 rejection reaches the caller as, since that hook is documented
                 to raise this very class and it is passed through rather than
                 re-wrapped. A :exc:`ValueError`, so an
-                ``except ValueError`` caller is unaffected.
+                ``except ValueError`` caller is unaffected. Quiet.
             EnumKeyError: If a name does not resolve and there is no usable
                 default. A :exc:`KeyError`, so an ``except KeyError`` caller is
-                unaffected.
+                unaffected. Quiet.
 
         .. versionchanged:: 1.5.0
 
-           A value miss answered with ``default`` is quiet: it logs nothing and
-           installs no exception hook, while :meth:`EnumRegistry.register` still
-           reports the same range rejection loudly (:issue:`1845`).
+           A value miss is quiet, whether ``default`` answers it or it is
+           raised: it logs nothing and installs no exception hook, while
+           :meth:`EnumRegistry.register` still reports the same range
+           rejection loudly (:issue:`1845`).
 
         """
         if isinstance(key, str):
@@ -438,27 +441,18 @@ class EnumLookup:
                                        quiet=True) from None
                 return cls._value2member_map_[default]
         try:
-            usable = default is not NO_DEFAULT and default in cls._value2member_map_
-        except TypeError:
-            # NOTE: an unhashable ``default`` names no member. Left to raise
-            # here, it would fail a lookup whose ``key`` resolves, which never
-            # reads ``default`` at all.
-            usable = False
-        try:
-            if usable:
-                # NOTE: GitHub issue #1845. Every ValueError raised in this block
-                # is answered with ``default`` below, so a loud one is control
-                # flow here, whoever constructed it.
-                with _CaughtByCaller(ValueError):
-                    cls._validate_value(key)
-                    return cls(key)  # type: ignore[call-arg]
-            cls._validate_value(key)
-            return cls(key)  # type: ignore[call-arg]
+            # NOTE: GitHub issue #1845. Every ValueError raised in this block is
+            # this method's own lookup miss -- answered with ``default`` below,
+            # or raised as the miss -- so a loud one is quiet here, whoever
+            # constructed it.
+            with _CaughtByCaller(ValueError):
+                cls._validate_value(key)
+                return cls(key)  # type: ignore[call-arg]
         except ValueError as error:
             if default is NO_DEFAULT or default not in cls._value2member_map_:
                 if isinstance(error, BaseError):
                     raise
-                raise EnumValueError(str(error)) from error
+                raise EnumValueError(str(error), quiet=True) from error
             return cls._value2member_map_[default]
 
     @classmethod
@@ -549,11 +543,12 @@ class EnumRegistry(EnumLookup):
         only the genuinely new value that is about to be minted.
 
         That rejection is always loud. :meth:`~EnumLookup.get` quiets the same
-        hook when it has a ``default`` to fall back to, but a refused mint has
-        no fallback, so this calls the hook in a
+        hook, because there the rejection is a lookup miss for the caller to
+        handle; here it refuses a mint the caller explicitly asked for, which
+        is a fault to report. So this calls the hook in a
         :class:`~pcapkit.utilities.exceptions._CaughtByCaller` block declaring
         that nothing is caught -- loud even if ``register`` is reached from
-        inside such a ``get`` (:issue:`1845`).
+        inside a ``get`` (:issue:`1845`).
 
         Args:
             value: Value of the new member.
