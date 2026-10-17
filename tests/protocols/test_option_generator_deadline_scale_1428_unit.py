@@ -10,6 +10,12 @@ takes about 1.3 ms. The default is now 30 seconds, the budget
 and ``PCAPKIT_TEST_TIMEOUT_SCALE`` stretches it exactly as it stretches
 :func:`tests._support.time_limit`.
 
+The spin that stands in for a hang is bounded (#1889). Unbounded, a deadline
+whose raise was lost -- one raised inside a finaliser is reported and dropped --
+spun until pytest-timeout's backstop ended the whole xdist worker. Now it gives up
+after :data:`SPIN_LIMIT` and the test fails by name, and the generator repeats
+the raise until :func:`roundtrip` has it.
+
 This module is unit tier: it loads the generator by path and builds nothing, so
 it imports no :mod:`pcapkit` and reads no capture.
 
@@ -21,8 +27,11 @@ import importlib.util
 import os
 import signal
 import sys
+import threading
+import time
 import types
 import unittest
+import warnings
 from typing import TYPE_CHECKING
 from unittest import mock
 
@@ -34,6 +43,11 @@ if TYPE_CHECKING:
 #: The variable :mod:`tests._support` reads, spelled out so a generator reading a
 #: different name fails here rather than agreeing with itself.
 SCALE_ENV = 'PCAPKIT_TEST_TIMEOUT_SCALE'
+
+#: Seconds :class:`_Spin` runs before it gives up on being interrupted: ten times
+#: the one-second deadline the tests here arm, so a deadline that fires at all,
+#: repeats included, lands well inside it.
+SPIN_LIMIT = 10.0
 
 
 def _load_generator() -> 'types.ModuleType':
@@ -58,13 +72,85 @@ def _load_generator() -> 'types.ModuleType':
     return module
 
 
+class _SpinGaveUp(Exception):
+    """Raised by :class:`_Spin` once its limit passes with no deadline raised in it."""
+
+
 class _Spin:  # pylint: disable=too-few-public-methods
-    """A family whose constructor never returns, standing in for a real hang."""
+    """A family whose constructor spins until the deadline interrupts it.
+
+    It stands in for a real hang, but a bounded one: after ``limit`` seconds it
+    sets :attr:`gave_up` and raises :exc:`_SpinGaveUp`, so a lost deadline fails
+    the test in seconds instead of hanging the worker.
+
+    Args:
+        limit: Seconds to spin before giving up.
+        swallow: How many :exc:`TimeoutError` to drop before letting one
+            through, standing in for a finaliser that drops the deadline's raise.
+        clear: Cancel the pending alarm on entry, so no deadline ever fires.
+
+    """
+
+    def __init__(self, limit: float = SPIN_LIMIT, swallow: int = 0,
+                 clear: bool = False) -> None:
+        self.limit = limit
+        self.swallow = swallow
+        self.clear = clear
+        #: :exc:`TimeoutError` dropped so far.
+        self.swallowed = 0
+        #: Whether the limit passed before a deadline got through.
+        self.gave_up = False
 
     def build(self, code: 'Any', kwargs: 'Any') -> bytes:  # pylint: disable=unused-argument
-        """Loop until the deadline interrupts it."""
-        while True:
-            pass
+        """Loop until the deadline interrupts it, or until :attr:`limit` passes."""
+        if self.clear:
+            signal.alarm(0)
+        end = time.monotonic() + self.limit
+        while time.monotonic() < end:
+            try:
+                while time.monotonic() < end:
+                    pass
+            except TimeoutError:
+                if self.swallowed == self.swallow:
+                    raise
+                self.swallowed += 1
+        self.gave_up = True
+        raise _SpinGaveUp(f'no deadline interrupted the spin within {self.limit:g}s')
+
+
+class _Abort(BaseException):
+    """Leaves :func:`roundtrip` past every ``except Exception`` clause."""
+
+
+class _RaiseAt:
+    """A family that raises ``exc`` at ``step``, or round-trips one octet if it is :data:`None`."""
+
+    def __init__(self, step: 'str | None', exc: 'BaseException | None') -> None:
+        self.step = step
+        self.exc = exc
+
+    def _at(self, step: str) -> None:
+        if step == self.step and self.exc is not None:
+            raise self.exc
+
+    def build(self, code: 'Any', kwargs: 'Any') -> bytes:  # pylint: disable=unused-argument
+        """One zero octet, unless this is the step to raise at."""
+        self._at('build')
+        return b'\x00'
+
+    def parse(self, octets: bytes) -> bytes:
+        """``octets`` as they are, unless this is the step to raise at."""
+        self._at('parse')
+        return octets
+
+    def extract(self, parsed: bytes) -> bytes:
+        """``parsed`` as it is."""
+        return parsed
+
+    def rebuild(self, parsed: bytes) -> bytes:
+        """``parsed`` as it is, unless this is the step to raise at."""
+        self._at('rebuild')
+        return parsed
 
 
 @unittest.skipUnless(hasattr(signal, 'SIGALRM'), 'needs signal.SIGALRM')
@@ -93,6 +179,19 @@ class GeneratorDeadlineScaleTests(unittest.TestCase):
         """Seconds :class:`_deadline` arms for ``seconds``, read back from the alarm."""
         with self.options._deadline(seconds):  # pylint: disable=protected-access
             return signal.alarm(0)
+
+    def roundtrip(self, family: 'Any') -> 'Any':
+        """:func:`roundtrip` over ``family`` under a one-second deadline (scale 0.5 x 2s)."""
+        os.environ[SCALE_ENV] = '0.5'
+        case = self.options.Case('spin', 0, 'Spin', {})
+        with mock.patch.dict(self.options.FAMILY_MAP, {'spin': family}):
+            return self.options.roundtrip(case, deadline=2)
+
+    def assert_interrupted(self, spin: '_Spin', outcome: 'Any') -> None:
+        """Fail by name, rather than on a status mismatch, if the deadline never got through."""
+        if spin.gave_up:
+            self.fail(f'the deadline never interrupted the spin; roundtrip recorded '
+                      f'{outcome.status}: {outcome.detail}')
 
     def test_the_default_is_thirty_seconds_unscaled(self) -> None:
         """Unset, the default applies as written -- and it is no longer 5."""
@@ -142,13 +241,157 @@ class GeneratorDeadlineScaleTests(unittest.TestCase):
 
     def test_a_hang_is_still_recorded_as_timeout_naming_the_scaled_deadline(self) -> None:
         """The ``'TIMEOUT'`` contract holds, and its detail names the seconds allowed."""
-        os.environ[SCALE_ENV] = '0.5'
-        case = self.options.Case('spin', 0, 'Spin', {})
-        with mock.patch.dict(self.options.FAMILY_MAP, {'spin': _Spin()}):
-            outcome = self.options.roundtrip(case, deadline=2)
+        spin = _Spin()
+        outcome = self.roundtrip(spin)
+        self.assert_interrupted(spin, outcome)
         self.assertEqual(outcome.status, 'TIMEOUT')
         self.assertEqual(outcome.detail, 'did not finish within 1s')
         self.assertIs(signal.getsignal(signal.SIGALRM), self.handler)
+
+    def test_a_raise_that_never_reaches_the_body_is_repeated(self) -> None:
+        """#1889: a dropped raise is followed by another, still recorded as ``'TIMEOUT'``."""
+        spin = _Spin(swallow=1)
+        outcome = self.roundtrip(spin)
+        self.assert_interrupted(spin, outcome)
+        self.assertEqual(spin.swallowed, 1)
+        self.assertEqual(outcome.status, 'TIMEOUT')
+        self.assertEqual(outcome.detail, 'did not finish within 1s')
+        self.assertIs(signal.getsignal(signal.SIGALRM), self.handler)
+        self.assertEqual(signal.alarm(0), 0)
+
+    def test_each_raise_re_arms_until_the_body_settles_it(self) -> None:
+        """A raise re-arms one second; once :attr:`settled` is set, a firing does nothing."""
+        with self.options._deadline(5) as limit:  # pylint: disable=protected-access
+            expire = signal.getsignal(signal.SIGALRM)
+            with self.assertRaisesRegex(TimeoutError, 'did not finish within 5s'):
+                expire(signal.SIGALRM, None)
+            self.assertEqual(signal.alarm(5), 1)
+            limit.settled = True
+            self.assertIsNone(expire(signal.SIGALRM, None))
+            self.assertIn(signal.alarm(0), (4, 5))
+        self.assertIs(signal.getsignal(signal.SIGALRM), self.handler)
+
+    def test_a_lost_deadline_fails_in_seconds_rather_than_hanging(self) -> None:
+        """#1889: with the alarm cancelled under it, the spin gives up and the test says why."""
+        spin = _Spin(limit=0.5, clear=True)
+        outcome = self.roundtrip(spin)
+        self.assertTrue(spin.gave_up)
+        self.assertEqual(outcome.status, 'CONSTRUCT')
+        self.assertEqual(outcome.detail,
+                         '_SpinGaveUp: no deadline interrupted the spin within 0.5s')
+        with self.assertRaisesRegex(AssertionError, 'the deadline never interrupted the spin'):
+            self.assert_interrupted(spin, outcome)
+
+    @unittest.skipUnless(hasattr(signal, 'pthread_kill'), 'needs signal.pthread_kill')
+    def test_a_firing_on_the_way_out_leaves_nothing_behind(self) -> None:
+        """#1889: ``SIGALRM`` on the way out of :func:`roundtrip` changes nothing.
+
+        Fired while the outcome is built, as :meth:`_deadline.__exit__` is
+        entered (ahead of its first statement), just before it cancels the
+        alarm, and from :meth:`warnings.catch_warnings.__exit__`, on every way
+        out: each step's ``'TIMEOUT'`` and failure, a :exc:`BaseException`, and
+        ``'OK'``. Each time the outcome or the exception
+        comes back as it was, no alarm is left pending, and the handler is this
+        test's again. ``reached`` is whether the firing found the deadline's
+        handler still installed.
+        """
+        real_alarm = signal.alarm
+        real_outcome = self.options.Outcome
+        deadline = self.options._deadline  # pylint: disable=protected-access
+        real_entry = deadline.__exit__
+        real_exit = warnings.catch_warnings.__exit__
+        fired = []  # type: list[bool]
+
+        def fire() -> None:
+            fired.append(signal.getsignal(signal.SIGALRM) is not self.handler)
+            # Delivered to this thread, and its handler run before this returns.
+            signal.pthread_kill(threading.get_ident(), signal.SIGALRM)
+
+        def firing_outcome(*args: 'Any') -> 'Any':
+            if not fired:
+                fire()
+            return real_outcome(*args)
+
+        def firing_entry(limit: 'Any', *exc_info: 'Any') -> 'Any':
+            # Ahead of __exit__'s first statement, as the check on entry runs it.
+            fire()
+            return real_entry(limit, *exc_info)
+
+        def firing_alarm(seconds: int) -> int:
+            if not seconds and not fired:
+                fire()
+            return real_alarm(seconds)
+
+        def firing_exit(manager: 'Any', *exc_info: 'Any') -> 'Any':
+            fire()
+            return real_exit(manager, *exc_info)
+
+        where = {
+            'outcome': lambda: mock.patch.object(self.options, 'Outcome', firing_outcome),
+            'entry': lambda: mock.patch.object(deadline, '__exit__', firing_entry),
+            'cancel': lambda: mock.patch.object(signal, 'alarm', firing_alarm),
+            'catch_warnings': lambda: mock.patch.object(warnings.catch_warnings, '__exit__',
+                                                        firing_exit),
+        }
+        ways_out = (
+            ('build', TimeoutError, 'TIMEOUT'), ('build', ValueError, 'CONSTRUCT'),
+            ('parse', TimeoutError, 'TIMEOUT'), ('parse', ValueError, 'PARSE'),
+            ('rebuild', TimeoutError, 'TIMEOUT'), ('rebuild', ValueError, 'RECONSTRUCT'),
+            ('build', _Abort, '_Abort'), (None, None, 'OK'),
+        )
+        for point, patch in where.items():
+            for step, error, expected in ways_out:
+                if point == 'outcome' and expected == '_Abort':
+                    continue  # no outcome is built on that way out
+                # Only an ``'OK'`` outcome is built after the deadline is gone.
+                reached = point in ('entry', 'cancel') or (point == 'outcome' and expected != 'OK')
+                with self.subTest(fired=point, step=step, result=expected):
+                    fired.clear()
+                    try:
+                        with patch():
+                            result = self.roundtrip(_RaiseAt(step, error and error()))
+                    except (_Abort, TimeoutError) as exc:
+                        result = exc
+                    finally:
+                        pending = real_alarm(0)
+                        handler = signal.signal(signal.SIGALRM, self.handler)
+                    # One comparison, so a failure shows the leak and the result together.
+                    self.assertEqual(
+                        {'result': (result.status if isinstance(result, real_outcome)
+                                    else type(result).__name__),
+                         'reached': fired, 'pending': pending,
+                         'restored': handler is self.handler},
+                        {'result': expected, 'reached': [reached], 'pending': 0,
+                         'restored': True})
+
+    @unittest.skipUnless(hasattr(signal, 'pthread_kill'), 'needs signal.pthread_kill')
+    def test_a_firing_as_an_unsettled_deadline_cancels_is_a_no_op(self) -> None:
+        """#1889: :meth:`_deadline.__exit__` settles before it cancels, as a backstop.
+
+        The body here never settles the deadline, so only ``__exit__`` can stop a
+        firing between its first statement and the cancel from re-arming and
+        raising past the restore.
+        """
+        real_alarm = signal.alarm
+
+        def firing_alarm(seconds: int) -> int:
+            if not seconds:
+                signal.pthread_kill(threading.get_ident(), signal.SIGALRM)
+            return real_alarm(seconds)
+
+        result = None  # type: TimeoutError | None
+        try:
+            with mock.patch.object(signal, 'alarm', firing_alarm):
+                with self.options._deadline(5):  # pylint: disable=protected-access
+                    pass
+        except TimeoutError as exc:
+            result = exc
+        finally:
+            pending = real_alarm(0)
+            handler = signal.signal(signal.SIGALRM, self.handler)
+        self.assertEqual(
+            {'raised': result, 'pending': pending, 'restored': handler is self.handler},
+            {'raised': None, 'pending': 0, 'restored': True})
 
 
 if __name__ == '__main__':
