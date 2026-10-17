@@ -112,8 +112,8 @@ and for the same reason: that job runs on a ``macos-latest`` runner, so
 relying on ``bash`` >= 4.0 would have been exactly the mistake the Makefile's
 line first made. This module does not cover that fix, though: it only
 exercises ``make isort``, and :file:`cron-vendor.yml`'s ``vendor-update`` job
-never runs this test suite at all -- it commits and pushes on its own, with
-no pytest step in between.
+never runs it -- the tests that job runs before it commits are
+:file:`tests/const` and :file:`tests/vendor` alone (#1853).
 
 Until #766 this module gated on isort with a ``try: import isort`` inside
 :meth:`~TestIsortIsCleanOnThePackage.setUpClass`, raising

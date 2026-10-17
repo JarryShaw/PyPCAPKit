@@ -229,7 +229,7 @@ jobs:
               fi
               echo '```'
               echo
-              echo 'Const files from targets that exited zero are still isorted, diffed, committed and pushed below -- only the failing target(s) above were left as they were.'
+              echo 'Const files from targets that exited zero are still isorted, tested, diffed, committed and pushed below -- only the failing target(s) above were left as they were.'
             } >> "$GITHUB_STEP_SUMMARY"
 
             if [ -n "$failed_targets" ]; then
@@ -250,6 +250,51 @@ jobs:
           # depth. `-mindepth 2` keeps the same floor the old glob had: it
           # still skips `pcapkit/const/__init__.py` itself.
           isort -l100 -ppcapkit $(find pcapkit/const -mindepth 2 -name '*.py')
+
+      # #1853: neither gate above sees the regenerated tree -- `unit-tests` runs
+      # on the schedule alone, and `verdict` accepts the Unit Tests result for
+      # the commit from before the crawl -- so 1.5.0b13 was committed with a test
+      # failing on it. The owner's ruling: test the regenerated tree here, before
+      # anything is committed, under #872's rule above. A module the tests fail
+      # with is put back as HEAD has it and the rest go on to be committed, as
+      # for a sub-vendor that raised. util/vendor_test_gate.py, whose docstring
+      # gives the rule, decides which modules those are.
+      #
+      # `continue-on-error`, so the tests never fail the job. The script exits
+      # zero once it has decided; if this step fails or times out instead, the
+      # tree may hold modules no run passed with, and the next step discards
+      # every regenerated module. The test extra is installed here because only
+      # this step needs it. The script's budget bounds its runs together, and
+      # `timeout-minutes` sits above it as the backstop. Run serially, pytest
+      # peaked at 0.7 GB resident over tests/const, measured locally, so the
+      # memory cap leaves headroom on this runner; files are capped at 2 GiB, as
+      # in experimental.yml.
+      - name: Test the regenerated tree
+        id: vendor-tests
+        continue-on-error: true
+        timeout-minutes: 50
+        run: |
+          set -x
+
+          python -m pip install -e '.[test]'
+          python util/vendor_test_gate.py --budget-minutes 40 \
+              --max-memory-mib 4096 --max-file-size-mib 2048 -- \
+              python -m pytest -q -p no:cacheprovider tests/const tests/vendor
+
+      # What the step above left is untested if it did not finish, so HEAD's
+      # copy of every module goes back, new modules are removed, and nothing
+      # from this crawl is committed. Not a failure either, per #872.
+      - name: Discard untested const changes
+        if: steps.vendor-tests.outcome != 'success'
+        run: |
+          git checkout HEAD -- pcapkit/const
+          git clean -fdq -- pcapkit/const
+          echo "::warning title=Vendor test gate did not finish::the regenerated tree could not be tested, so every regenerated module was discarded; see the step log"
+          {
+            echo '### :warning: Vendor test gate did not finish'
+            echo
+            echo 'The step that tests the regenerated tree failed or timed out, so nothing from this crawl is committed.'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Verify Changed files
         uses: tj-actions/verify-changed-files@v17
