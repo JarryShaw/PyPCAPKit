@@ -21,6 +21,13 @@ re-export at its old path. :mod:`pcapkit.corekit.module`,
 :mod:`pcapkit.protocols.protocol` import the object they use from here, but
 none lists it in ``__all__`` or documents it, and none binds the type.
 
+Every sentinel type derives from :class:`Sentinel`, which with its
+metaclass :class:`SentinelMeta` makes it behave like the type of a built-in
+singleton such as :obj:`None`. Calling the type again, :func:`copy.copy`,
+:func:`copy.deepcopy` and every :mod:`pickle` protocol give back the one
+instance (:issue:`1842`). The instance reprs as its own name, neither it nor
+its type can be changed, and its type cannot be subclassed.
+
 ``ABSENT`` is private to :mod:`pcapkit.protocols.protocol` -- nothing outside
 that module ever reads it. It carries no leading underscore;
 :class:`AbsentType`'s docstring says what marks it private instead.
@@ -29,23 +36,278 @@ that module ever reads it. It carries no leading underscore;
 
    :class:`NoValueType` moves here from :mod:`pcapkit.corekit.fields.field`
    (:issue:`911`), and :data:`NO_VALUE` replaces its ``NoValue`` there
-   (:issue:`937`).
+   (:issue:`937`). :class:`Sentinel` is the public base of every sentinel
+   type (:issue:`1842`).
 
 """
-from typing import TYPE_CHECKING
+import abc
+from typing import TYPE_CHECKING, cast
 
 from pcapkit.utilities.compat import final
 
-__all__ = ['NULL', 'NO_VALUE', 'NO_DEFAULT']
+__all__ = ['Sentinel', 'NULL', 'NO_VALUE', 'NO_DEFAULT']
 
 if TYPE_CHECKING:
-    from typing import Any, Callable
+    from typing import Any, NoReturn, Type
 
-    from typing_extensions import Literal
+    from typing_extensions import Literal, Self
+
+#: str: Key a sentinel type carries in its own :attr:`~object.__dict__` once
+#: :meth:`SentinelMeta.__new__` has built it. From then on the type refuses
+#: every attribute write.
+_FROZEN = '_frozen'
+
+
+def _not_a_base(cls: 'type') -> 'TypeError':
+    """The error deriving from ``cls`` raises, worded as for ``type(None)``."""
+    return TypeError(f'type {cls.__name__!r} is not an acceptable base type')
+
+
+def _read_only(obj: 'object', name: 'str') -> 'AttributeError':
+    """The error setting or deleting ``name`` on ``obj`` raises, worded as for :obj:`None`."""
+    kind = type(obj).__name__
+    if hasattr(type(obj), name):
+        return AttributeError(f'{kind!r} object attribute {name!r} is read-only')
+    return AttributeError(f'{kind!r} object has no attribute {name!r}')
+
+
+class SentinelMeta(abc.ABCMeta):
+    """Metaclass of :class:`Sentinel`, so every sentinel type acts as ``type(None)`` does.
+
+    * A concrete sentinel type -- one that sets ``_name``, and so has no
+      abstract member left -- cannot be subclassed, either by a ``class``
+      statement or by :meth:`~abc.ABCMeta.register`. Both raise
+      :exc:`TypeError`, as ``class X(type(None))`` does. An abstract one,
+      :class:`Sentinel` included, can be.
+    * A concrete sentinel type makes its one instance while its ``class``
+      statement runs, and keeps it as ``_instance``.
+    * Every sentinel type is immutable once its ``class`` statement has run.
+      Setting or deleting any attribute on it raises :exc:`TypeError`, as
+      ``type(None).x = 1`` does, so ``_name``, ``_instance`` and the methods
+      every sentinel inherits stay as they were defined.
+
+    A concrete sentinel type also gets ``__final__`` set to :obj:`True` here.
+    :func:`~pcapkit.utilities.compat.final` would record the same, but a class
+    decorator runs only after the ``class`` statement, when the type already
+    refuses the write, and :func:`typing.final` skips an attribute it cannot
+    set.
+
+    These guards, and :class:`Sentinel`'s own, are Python-level hooks. So
+    :meth:`type.__setattr__` called directly on the type, or
+    :meth:`object.__setattr__` setting ``__class__`` on an instance, still
+    reaches past them, where nothing reaches past a built-in type's.
+
+    .. versionadded:: 1.5.0
+
+    """
+
+    def __new__(cls, name: 'str', bases: 'tuple[type, ...]', attrs: 'dict[str, Any]', /,
+                **kwargs: 'Any') -> 'SentinelMeta':
+        """Create the sentinel type, and its instance if it is concrete.
+
+        Args:
+            name: Sentinel type name.
+            bases: Sentinel type bases.
+            attrs: Sentinel type attributes.
+            **kwargs: Arbitrary keyword arguments in class definition.
+
+        Raises:
+            TypeError: If any of ``bases`` is a concrete sentinel type.
+
+        """
+        for base in bases:
+            if isinstance(base, SentinelMeta) and not base.__abstractmethods__:
+                raise _not_a_base(base)
+
+        klass = super().__new__(cls, name, bases, attrs, **kwargs)
+
+        # NOTE: ``type.__setattr__`` rather than an assignment, which would
+        # reach :meth:`__setattr__` below. The writes ``abc.ABCMeta.__new__``
+        # made above went through it, which is why the type is marked frozen
+        # only now.
+        if not klass.__abstractmethods__:
+            type.__setattr__(klass, '_instance', object.__new__(cast('Type[Sentinel]', klass)))
+            type.__setattr__(klass, '__final__', True)
+        type.__setattr__(klass, _FROZEN, True)
+        return klass
+
+    def __setattr__(cls, name: 'str', value: 'Any') -> 'None':
+        """Refuse to set an attribute on a built sentinel type.
+
+        Args:
+            name: Attribute name.
+            value: Attribute value.
+
+        Raises:
+            TypeError: Once the ``class`` statement of ``cls`` has run.
+
+        """
+        if cls.__dict__.get(_FROZEN):
+            raise TypeError(f'cannot set {name!r} attribute of immutable type {cls.__name__!r}')
+        super().__setattr__(name, value)
+
+    def __delattr__(cls, name: 'str') -> 'None':
+        """Refuse to delete an attribute from a built sentinel type.
+
+        Args:
+            name: Attribute name.
+
+        Raises:
+            TypeError: Once the ``class`` statement of ``cls`` has run.
+
+        """
+        if cls.__dict__.get(_FROZEN):
+            raise TypeError(f'cannot delete {name!r} attribute of immutable type {cls.__name__!r}')
+        super().__delattr__(name)
+
+    def register(cls, subclass: 'type[Any]') -> 'type[Any]':
+        """Register a virtual subclass, unless ``cls`` is a concrete sentinel type.
+
+        Args:
+            subclass: Class to register.
+
+        Returns:
+            ``subclass``, as :meth:`abc.ABCMeta.register` returns it.
+
+        Raises:
+            TypeError: If ``cls`` is concrete, which a virtual subclass would
+                defeat as surely as a real one: :func:`isinstance` would then
+                accept an object that is not the sentinel.
+
+        """
+        if not cls.__abstractmethods__:
+            raise _not_a_base(cls)
+        return super().register(subclass)
+
+
+class Sentinel(metaclass=SentinelMeta):
+    """Abstract base of every sentinel type, so each behaves like the type of :obj:`None`.
+
+    A subclass sets ``_name`` to the name of the module-level variable that
+    holds its one instance, which is what makes it concrete, and gets the
+    rest from here and from :class:`SentinelMeta`:
+
+    * :meth:`__new__` hands back the one instance, so calling the type again
+      cannot produce a second object that fails an ``is`` check. It returns
+      the existing instance rather than raising, as ``type(None)()`` returns
+      :obj:`None`, so a caller who builds one by mistake still gets the
+      sentinel.
+    * :meth:`__copy__` and :meth:`__deepcopy__` return ``self``.
+    * :meth:`__reduce__` returns ``_name``, as ``Ellipsis.__reduce__()``
+      returns ``'Ellipsis'``, so :mod:`pickle` stores the instance as a
+      reference to that module-level name and loads it back as the same
+      object, at every protocol. Guarding :meth:`__new__` alone would not
+      cover protocols 0 and 1, which rebuild through
+      :func:`copyreg._reconstructor` and so call :meth:`object.__new__`
+      directly.
+    * :meth:`__repr__` returns ``_name`` itself, as ``repr(None)`` is
+      ``'None'``. :func:`str` gives the same, since nothing here overrides
+      :meth:`object.__str__`.
+    * :meth:`__setattr__` and :meth:`__delattr__` raise
+      :exc:`AttributeError` for every name, as ``None.x = 1`` does, and
+      ``__slots__`` is empty, so an instance has no :attr:`~object.__dict__`
+      to change either.
+    * :class:`SentinelMeta` keeps the type itself immutable, and a concrete
+      one free of subclasses.
+
+    ``__bool__`` is left to each sentinel, since only some of them stand for
+    an absent value.
+
+    Public, as the library's other abstract bases are, so that an annotation
+    or an :func:`isinstance` check can name every sentinel at once. Every
+    sentinel the library itself uses is defined in this module
+    (:issue:`911`).
+
+    A pickle written before :issue:`1842` still loads. A pickle of
+    :data:`NULL` names ``_get_null``, kept for it, and a pickle of another
+    sentinel at protocol 2 or above rebuilds through :meth:`__new__`; both
+    load as the sentinel. A pickle of another sentinel at protocol 0 or 1
+    rebuilds through :func:`copyreg._reconstructor`, which no hook on the
+    class can reach, so it loads as a second instance of the type.
+
+    .. versionadded:: 1.5.0
+
+    """
+
+    __slots__ = ()
+
+    #: 'Sentinel | None': The one instance of a concrete subclass, which
+    #: :class:`SentinelMeta` makes and assigns on that subclass, so each
+    #: sentinel type has its own. :obj:`None` on an abstract one.
+    _instance: 'Sentinel | None' = None
+
+    @property
+    @abc.abstractmethod
+    def _name(self) -> 'str':
+        """Name of the module-level variable that holds the one instance.
+
+        A subclass overrides this with a plain class attribute, which is what
+        makes it concrete.
+
+        """
+
+    def __new__(cls) -> 'Self':
+        """Return the one instance of this class there will ever be.
+
+        Raises:
+            TypeError: If ``cls`` is abstract, as :meth:`object.__new__` does.
+
+        """
+        if cls._instance is None:
+            return super().__new__(cls)
+        return cast('Self', cls._instance)
+
+    def __repr__(self) -> 'str':
+        """Return the sentinel's own name, as ``repr(None)`` is ``'None'``."""
+        return self._name
+
+    def __setattr__(self, name: 'str', value: 'Any') -> 'NoReturn':
+        """Refuse, as ``None.x = 1`` does: a sentinel has no state to change.
+
+        Args:
+            name: Attribute name.
+            value: Attribute value.
+
+        Raises:
+            AttributeError: For every ``name``.
+
+        """
+        raise _read_only(self, name)
+
+    def __delattr__(self, name: 'str') -> 'NoReturn':
+        """Refuse, as ``del None.x`` does.
+
+        Args:
+            name: Attribute name.
+
+        Raises:
+            AttributeError: For every ``name``.
+
+        """
+        raise _read_only(self, name)
+
+    def __copy__(self) -> 'Self':
+        """Return ``self`` -- there is, and only ever will be, one of these."""
+        return self
+
+    def __deepcopy__(self, memo: 'dict[int, Any]') -> 'Self':
+        """Return ``self``, for the same reason as :meth:`__copy__`.
+
+        Args:
+            memo: The :func:`copy.deepcopy` memo table. Unused: returning
+                ``self`` needs no entry, since nothing about this object is
+                ever copied.
+
+        """
+        return self
+
+    def __reduce__(self) -> 'str':
+        """Reduce to ``_name``, which :mod:`pickle` stores as a global reference."""
+        return self._name
 
 
 @final
-class NullType:
+class NullType(Sentinel):
     """Type of :data:`NULL`, the omitted-``class_``/``module`` sentinel.
 
     A distinct class rather than a plain :class:`str` such as ``'(null)'``,
@@ -53,35 +315,15 @@ class NullType:
     :class:`str` a caller passes, including one that happens to spell
     ``'(null)'`` itself, can be this sentinel. See GitHub issue :issue:`833`.
 
-    Genuinely a singleton, not merely a class this module happens to
-    instantiate once: :meth:`__new__` always hands back the one instance
-    that already exists, rather than building a new one, so no caller --
-    direct, or :mod:`copy`/:mod:`pickle` reconstructing an instance behind
-    the scenes -- can end up holding a second object that fails an ``is
-    NULL`` check downstream. :meth:`ModuleDescriptor.klass
-    <pcapkit.corekit.module.ModuleDescriptor.klass>` makes exactly that
-    check; a second instance would slip past it to :func:`getattr` and
-    downgrade a clean :exc:`~pcapkit.utilities.exceptions.ProtocolError` into
-    a bare :exc:`TypeError` (``attribute name must be string, not
-    'NullType'``). A stricter guard that raises on a second call would be
-    truer to "singleton" in the abstract, but it would also mean the module's
-    own ``NULL = NullType()`` below is the only call that is ever allowed to
-    succeed -- fragile for no real benefit, since nothing here needs
-    *rejecting* a second construction, only preventing it from producing a
-    distinct object.
-
-    :func:`copy.copy`, :func:`copy.deepcopy` and :mod:`pickle` protocols 2
-    and up reconstruct through ``cls.__new__(cls)``, which the guard above
-    already keeps to one instance. Pickle protocols 0 and 1 do not: they
-    reconstruct through :func:`copyreg._reconstructor`, which calls
-    :func:`object.__new__` *directly*, bypassing :meth:`__new__` entirely.
-    :meth:`__reduce__` is defined so that every protocol is routed through
-    the same module-level getter instead of through reconstruction at all,
-    and :meth:`__copy__`/:meth:`__deepcopy__` return ``self`` without
-    reducing anything.
+    :class:`Sentinel` keeps it to one instance. :meth:`ModuleDescriptor.klass
+    <pcapkit.corekit.module.ModuleDescriptor.klass>` checks ``is NULL``; a
+    second instance would slip past it to :func:`getattr` and downgrade a
+    clean :exc:`~pcapkit.utilities.exceptions.ProtocolError` into a bare
+    :exc:`TypeError` (``attribute name must be string, not 'NullType'``).
 
     A caveat rather than a defect: :func:`importlib.reload` on this module
-    re-executes ``NULL = NullType()`` below, producing a *second* singleton
+    re-executes the ``class`` statement and ``NULL = NullType()`` below,
+    producing a *second* singleton
     that the reloaded code compares against correctly but that every module
     which already imported the pre-reload :data:`NULL` still holds -- so a
     comparison spanning the reload sees two "singletons" that are not each
@@ -93,7 +335,9 @@ class NullType:
     live registry this sentinel could be re-read from. It is a property of
     sharing one module-level binding across a reload, not something this
     class's singleton guarantees claim to solve, and nothing in this package
-    reloads :mod:`pcapkit.corekit.sentinels` after import.
+    reloads :mod:`pcapkit.corekit.sentinels` after import. Pickling a
+    pre-reload :data:`NULL` raises :exc:`pickle.PicklingError`, since it is
+    no longer the object its name refers to.
 
     Reloading :mod:`pcapkit.corekit.module` instead has no effect on the
     singleton at all. That module only imports :data:`NULL` from here, and
@@ -103,56 +347,13 @@ class NullType:
 
     """
 
-    #: 'NullType | None': The one instance :meth:`__new__` ever returns,
-    #: including for the module-level ``NULL = NullType()`` below that
-    #: creates it in the first place. Kept on the class rather than as a
-    #: module global so :meth:`__new__` can read and write it without a
-    #: ``global`` statement.
-    _instance: 'NullType | None' = None
+    __slots__ = ()
 
-    def __new__(cls) -> 'NullType':
-        """Return the one instance of this class there will ever be."""
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
+    _name = 'NULL'
 
     def __bool__(self) -> 'Literal[False]':
         """Return :obj:`False`."""
         return False
-
-    def __repr__(self) -> 'str':
-        """Return :obj:`str` representation of the sentinel."""
-        return '<NULL>'
-
-    def __copy__(self) -> 'NullType':
-        """Return ``self`` -- there is, and only ever will be, one of these."""
-        return self
-
-    def __deepcopy__(self, memo: 'dict[int, Any]') -> 'NullType':
-        """Return ``self``, for the same reason as :meth:`__copy__`.
-
-        Args:
-            memo: The :func:`copy.deepcopy` memo table. Unused: returning
-                ``self`` needs no entry, since nothing about this object is
-                ever copied.
-
-        """
-        return self
-
-    def __reduce__(self) -> 'tuple[Callable[[], NullType], tuple[()]]':
-        """Reduce to the module-level singleton getter, for every :mod:`pickle` protocol.
-
-        A class that defines :meth:`__reduce__` has it honoured by
-        :meth:`object.__reduce_ex__` for every protocol uniformly, rather
-        than only for the ones that would otherwise call
-        :func:`copyreg._reconstructor` -- so naming :func:`_get_null` here
-        sidesteps reconstruction, and therefore :meth:`__new__`, altogether.
-        That makes this correct independent of whatever :meth:`__new__` does,
-        which is what actually covers protocols 0 and 1; see the class
-        docstring.
-
-        """
-        return (_get_null, ())
 
 
 #: NullType: Sentinel for an omitted ``class_`` argument to the ``register_*``
@@ -163,25 +364,39 @@ NULL = NullType()
 
 
 def _get_null() -> 'NullType':
-    """Return :data:`NULL`, for :meth:`NullType.__reduce__`.
+    """Return :data:`NULL`, for a pickle written before :issue:`1842`.
 
-    A module-level function rather than a lambda or a bound method, so every
-    :mod:`pickle` protocol -- including 0 and 1, which cannot reference
-    anything nested inside a class -- can name it.
+    ``NullType.__reduce__`` used to name this function, so such a pickle
+    calls it to load. Nothing here calls it any more; it stays so that those
+    pickles keep loading, as :data:`NULL` itself.
 
     """
     return NULL
 
 
 @final
-class NoValueType:
+class NoValueType(Sentinel):
     """Type of :data:`NO_VALUE`, the default value for :mod:`pcapkit.corekit.fields`.
 
     Housed here per GitHub issue :issue:`911`;
     :attr:`FieldBase.default <pcapkit.corekit.fields.field.FieldBase.default>`
     documents it as the field-default sentinel.
 
+    .. versionchanged:: 1.5.0
+
+       A singleton: calling this type, :func:`copy.deepcopy` and :mod:`pickle`
+       give back :data:`NO_VALUE` rather than a second instance
+       (:issue:`1842`). It reprs as ``NO_VALUE``, its own name, as
+       ``repr(None)`` is ``'None'``, rather than as an object address, which
+       is what a field constructor's signature and a parsed schema's repr
+       show for an unset value (:issue:`1841`). Its attributes, and its
+       type's, cannot be set or deleted, and the type cannot be subclassed.
+
     """
+
+    __slots__ = ()
+
+    _name = 'NO_VALUE'
 
     def __bool__(self) -> 'Literal[False]':
         """Return :obj:`False`."""
@@ -194,7 +409,7 @@ NO_VALUE = NoValueType()
 
 
 @final
-class NoDefaultType:
+class NoDefaultType(Sentinel):
     """Type of :data:`NO_DEFAULT`, the omitted-``default`` sentinel for
     :meth:`EnumLookup.get <pcapkit.corekit.enum.EnumLookup.get>`.
 
@@ -203,63 +418,19 @@ class NoDefaultType:
     :class:`object` compares under ``is`` exactly as safely as a dedicated
     class with no ``__eq__`` of its own does; what it lacks is a readable
     representation: it prints as ``<object object at 0x...>`` in a signature,
-    in :func:`help`, and in a traceback, where ``NoDefaultType()`` -- via
-    :meth:`__repr__` below -- prints as ``<NO_DEFAULT>``. The names follow
-    the convention every sentinel here shares, settled by GitHub issue
-    :issue:`937`: ``<Name>Type`` for the class and SCREAMING_SNAKE for the
-    instance.
+    in :func:`help`, and in a traceback, where ``NoDefaultType()`` -- via the
+    ``__repr__`` :class:`Sentinel` gives it -- prints as ``NO_DEFAULT``.
+    The names follow the convention every sentinel here shares, settled by
+    GitHub issue :issue:`937`: ``<Name>Type`` for the class and
+    SCREAMING_SNAKE for the instance.
 
-    Genuinely a singleton, not merely a class this module happens to
-    instantiate once: :meth:`__new__` always hands back the one instance that
-    already exists, rather than building a new one. That guards against a
-    caller writing ``registry.get(key, default=NoDefaultType())`` -- perhaps
-    not realising :data:`NO_DEFAULT` already exists -- and getting back a
+    :class:`Sentinel` keeps it to one instance. That guards against a caller
+    writing ``registry.get(key, default=NoDefaultType())`` -- perhaps not
+    realising :data:`NO_DEFAULT` already exists -- and getting back a
     *second*, non-identical sentinel that silently fails ``is NO_DEFAULT``
     inside :meth:`EnumLookup.get <pcapkit.corekit.enum.EnumLookup.get>`, so
     their call is treated as supplying a real (if useless) default instead of
-    the *no default* they meant. With the guard, :class:`NoDefaultType() <NoDefaultType>`
-    always returns the one canonical :data:`NO_DEFAULT`, so that mistake
-    self-corrects.
-
-    Unlike :class:`NullType`, this does *not* also define ``__copy__``,
-    ``__deepcopy__`` or ``__reduce__`` -- but not because :func:`copy.deepcopy`
-    or :mod:`pickle` "bypass" :meth:`__new__`; they do not, for protocol 2 and
-    above. :meth:`object.__reduce_ex__` at protocol 2 reduces through
-    :func:`copyreg.__newobj__`, which reconstructs by calling
-    ``cls.__new__(cls)`` -- exactly the guarded path above -- so
-    ``copy.copy``, ``copy.deepcopy`` and every pickle protocol from 2 on
-    already come back as the one canonical instance with no extra code.
-    Measured::
-
-        >>> NO_DEFAULT.__reduce_ex__(2)
-        (<function __newobj__ at 0x...>, (<class '...NoDefaultType'>,), None, None, None)
-        >>> copy.deepcopy(NO_DEFAULT) is NO_DEFAULT
-        True
-
-    The one path :meth:`__new__` cannot see is pickle protocol 0 (and 1),
-    which reduces through :func:`copyreg._reconstructor` instead, and *that*
-    calls :func:`object.__new__` directly::
-
-        >>> NO_DEFAULT.__reduce_ex__(0)
-        (<function _reconstructor at 0x...>, (<class '...NoDefaultType'>, <class 'object'>, None))
-        >>> pickle.loads(pickle.dumps(NO_DEFAULT, protocol=0)) is NO_DEFAULT
-        False
-
-    That gap is exactly what :class:`NullType`'s own
-    :meth:`~NullType.__reduce__` exists to close, because :data:`NULL` is
-    stored as a :class:`~pcapkit.corekit.module.ModuleDescriptor` field that a
-    caller's own :func:`copy.deepcopy` or :mod:`pickle` call can walk into and
-    reconstruct. :data:`NO_DEFAULT` is left unhandled here not because the gap
-    cannot occur in principle, but because nothing in this package ever
-    pickles it at protocol 0: it is reachable -- from :meth:`EnumLookup.get
-    <pcapkit.corekit.enum.EnumLookup.get>`'s own bound parameter default
-    (``EnumLookup.get.__defaults__[0]``, or any subclass's, e.g.
-    ``Hardware.get.__func__.__defaults__[0]``) and from
-    ``inspect.signature(Hardware.get).parameters['default'].default`` -- but
-    neither is a field any object here gets pickled *as*, and both still
-    survive :func:`copy.deepcopy` with identity intact regardless, because
-    deep-copying either still reduces the sentinel itself through the same,
-    guarded protocol-2 path measured above.
+    the *no default* they meant.
 
     A reload caveat that is dormant rather than live. :func:`importlib.reload`
     on this module re-executes both ``class NoDefaultType:`` and
@@ -309,7 +480,7 @@ class NoDefaultType:
        :mod:`pcapkit.corekit.enum`'s own global stays pointed at whatever it
        read until something re-runs that import.
 
-    Also unlike both :class:`NullType` and :class:`NoValueType`, this
+    Unlike both :class:`NullType` and :class:`NoValueType`, this
     deliberately does *not* define ``__bool__``. Both of those model an
     *absent* value, so reading falsy in a boolean context is the point.
     :data:`NO_DEFAULT` models something different: a marker meaning *no
@@ -329,35 +500,21 @@ class NoDefaultType:
 
     """
 
-    #: 'NoDefaultType | None': The one instance :meth:`__new__` ever returns,
-    #: including for the module-level ``NO_DEFAULT = NoDefaultType()`` below
-    #: that creates it in the first place. Kept on the class rather than as a
-    #: module global so :meth:`__new__` can read and write it without a
-    #: ``global`` statement.
-    _instance: 'NoDefaultType | None' = None
+    __slots__ = ()
 
-    def __new__(cls) -> 'NoDefaultType':
-        """Return the one instance of this class there will ever be."""
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
-
-    def __repr__(self) -> 'str':
-        """Return :obj:`str` representation of the sentinel."""
-        return '<NO_DEFAULT>'
+    _name = 'NO_DEFAULT'
 
 
 #: NoDefaultType: The ``default`` argument value that means *no default*, i.e.
 #: let an unresolvable key propagate its lookup error rather than falling
 #: back. See :class:`NoDefaultType` for why this is a dedicated class rather
-#: than a bare :class:`object`, why it is a guarded singleton, and why it
-#: defines neither the copy/pickle hooks nor the ``__bool__`` that its
-#: :mod:`pcapkit.corekit` siblings do.
+#: than a bare :class:`object`, and why it does not define the ``__bool__``
+#: that its :mod:`pcapkit.corekit` siblings do.
 NO_DEFAULT = NoDefaultType()
 
 
 @final
-class AbsentType:
+class AbsentType(Sentinel):
     """Type of :data:`ABSENT`, the absent-key sentinel.
 
     A distinct class rather than a bare :obj:`object` so that the sentinel has a
@@ -384,13 +541,13 @@ class AbsentType:
 
     """
 
+    __slots__ = ()
+
+    _name = 'ABSENT'
+
     def __bool__(self) -> 'Literal[False]':
         """Return :obj:`False`."""
         return False
-
-    def __repr__(self) -> 'str':
-        """Return :obj:`str` representation of the sentinel."""
-        return '<absent>'
 
 
 #: AbsentType: Absent-versus-:obj:`None` sentinel for

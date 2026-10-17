@@ -213,7 +213,7 @@ import_module` or :data:`sys.modules` succeeding -- the omission is caught
         self.assertFalse(self.sentinels.NULL == '(null)')  # pylint: disable=unneeded-not
         self.assertIsNot(self.sentinels.NULL, '(null)')
         self.assertFalse(bool(self.sentinels.NULL))
-        self.assertEqual(repr(self.sentinels.NULL), '<NULL>')
+        self.assertEqual(repr(self.sentinels.NULL), 'NULL')
         self.assertIs(self.sentinels.NullType(), self.sentinels.NULL)
 
     def test_null_sentinel_identity_survives_copy_and_pickle(self) -> None:

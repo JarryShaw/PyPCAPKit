@@ -197,13 +197,16 @@ class NoImportCycleTests(unittest.TestCase):
 
 
 class SentinelsModuleExportRuleTests(unittest.TestCase):
-    """The canonical module follows its own house rule: objects only, in ``__all__``.
+    """The canonical module follows its own house rule: no sentinel's type in ``__all__``.
 
     Nothing forces :mod:`pcapkit.corekit.sentinels` to honour the ruling that the
     sentinel objects, and not their types, are what gets exported -- the ruling
     was stated about the shim locations, which #916 already fixed -- but shipping
     a brand new module that violates the rule its own docstring cites would be a
     strange way to land it, so this pins that it does not.
+
+    It does export :class:`~pcapkit.corekit.sentinels.Sentinel`, the abstract
+    base every sentinel type shares, since that is no sentinel's own type.
 
     """
 
@@ -218,15 +221,20 @@ class SentinelsModuleExportRuleTests(unittest.TestCase):
             with self.subTest(name=name):
                 self.assertNotIn(name, sentinels.__all__)
 
+        live = importlib.import_module('pcapkit.corekit.sentinels')
+        types = [name for name in live.__all__ if isinstance(getattr(live, name), type)]
+        self.assertEqual(types, ['Sentinel'])
+
 
 class PicklePayloadTests(unittest.TestCase):
     """A ``NULL`` pickle names :mod:`pcapkit.corekit.sentinels` and loads back.
 
-    :meth:`NullType.__reduce__` names its factory by module path. A pickle
-    written by 1.5.0b5 or b6, before GitHub issue #911 relocated the
-    definitions, named ``pcapkit.corekit.module _get_null`` instead; the
-    re-export that kept those loadable was dropped under GitHub issue #1744,
-    since nothing in the library reads that path.
+    ``NullType.__reduce__`` names ``NULL`` itself by module path, since GitHub
+    issue #1842 gave every sentinel that reduce. A pickle written by 1.5.0b5
+    or b6, before GitHub issue #911 relocated the definitions, named
+    ``pcapkit.corekit.module _get_null`` instead; the re-export that kept
+    those loadable was dropped under GitHub issue #1744, since nothing in the
+    library reads that path.
 
     """
 

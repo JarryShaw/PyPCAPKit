@@ -736,8 +736,9 @@ class SentinelTests(unittest.TestCase):
         else:  # pragma: no cover
             self.assertFalse(hasattr(AbsentType, '__final__'))
 
-        # A bare ``object()`` reads as ``<object object at 0x...>``.
-        self.assertEqual(repr(ABSENT), '<absent>')
+        # A bare ``object()`` reads as ``<object object at 0x...>``; this reads
+        # as its own name, as ``None`` does.
+        self.assertEqual(repr(ABSENT), 'ABSENT')
 
     def test_the_absent_marker_cannot_be_confused_with_another_singleton(self) -> None:
         """No other singleton in the library answers an ``is`` against it.
