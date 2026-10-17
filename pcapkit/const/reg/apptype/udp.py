@@ -142,9 +142,9 @@ class UDP(AppType):
            "_dots-call-home._tcp" for discovering Call Home DOTS clients used
            to establish DOTS signal channel call home. [:rfc:`8973`]; [UDP]
            DOTS Signal Channel Call Home Protocol. The service name is used to
-           construct the SRV service names "_dots-call-home._udp" and "_dots-
-           call-home._tcp" for discovering Call Home DOTS clients used to
-           establish DOTS signal channel call home. [:rfc:`8973`]
+           construct the SRV service names "_dots-call-home._udp" and
+           "_dots-call-home._tcp" for discovering Call Home DOTS clients used
+           to establish DOTS signal channel call home. [:rfc:`8973`]
        * - ``eb-sync``
          - [TCP] Easy Books App data sync helper for Mac OS X and iOS; [UDP]
            Easy Books App data sync helper for Mac OS X and iOS
@@ -23911,19 +23911,19 @@ class UDP(AppType):
     #: - [UDP] GameSmith Port
     gamesmith_port = 31765, 'gamesmith-port', TransportProtocol.udp
 
-    #: - [TCP] Embedded Device Configuration Protocol TX IANA assigned this well-
-    #:   formed service name as a replacement for "iceedcp_tx".
+    #: - [TCP] Embedded Device Configuration Protocol TX IANA assigned this
+    #:   well-formed service name as a replacement for "iceedcp_tx".
     #: - [TCP] Embedded Device Configuration Protocol TX
-    #: - [UDP] Embedded Device Configuration Protocol TX IANA assigned this well-
-    #:   formed service name as a replacement for "iceedcp_tx".
+    #: - [UDP] Embedded Device Configuration Protocol TX IANA assigned this
+    #:   well-formed service name as a replacement for "iceedcp_tx".
     #: - [UDP] Embedded Device Configuration Protocol TX
     iceedcp_tx = 31948, 'iceedcp-tx', TransportProtocol.udp
 
-    #: - [TCP] Embedded Device Configuration Protocol RX IANA assigned this well-
-    #:   formed service name as a replacement for "iceedcp_rx".
+    #: - [TCP] Embedded Device Configuration Protocol RX IANA assigned this
+    #:   well-formed service name as a replacement for "iceedcp_rx".
     #: - [TCP] Embedded Device Configuration Protocol RX
-    #: - [UDP] Embedded Device Configuration Protocol RX IANA assigned this well-
-    #:   formed service name as a replacement for "iceedcp_rx".
+    #: - [UDP] Embedded Device Configuration Protocol RX IANA assigned this
+    #:   well-formed service name as a replacement for "iceedcp_rx".
     #: - [UDP] Embedded Device Configuration Protocol RX
     iceedcp_rx = 31949, 'iceedcp-rx', TransportProtocol.udp
 

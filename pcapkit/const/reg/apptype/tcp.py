@@ -76,8 +76,8 @@ class TCP(AppType):
        * - ``affinity-cntent``
          - [TCP] Affinity content sharing
        * - ``ai-adp``
-         - [TCP] AI Agent Discovery Protocol (ADP) [draft-pro-adp-agent-
-           discovery-00]
+         - [TCP] AI Agent Discovery Protocol (ADP)
+           [draft-pro-adp-agent-discovery-00]
        * - ``airdrop``
          - [TCP] Airdrop
        * - ``airmate``
@@ -151,8 +151,7 @@ class TCP(AppType):
          - [TCP] Data transfer service
        * - ``boardgame``
          - [TCP] Two-player board game play
-           [https://github.com/chentianren0/MiniXiangqi/blob/main/docs/boardgame-
-           protocol.md]
+           [https://github.com/chentianren0/MiniXiangqi/blob/main/docs/boardgame-protocol.md]
        * - ``boardplus``
          - [TCP] board plus application transfer protocol
        * - ``booked-sync``
@@ -209,8 +208,8 @@ class TCP(AppType):
        * - ``cerebra``
          - [TCP] Control the Cerebra Aquarium Controller
        * - ``certificates``
-         - [TCP] Server for S/MIME and PGP certificates [draft-
-           bhjl-x509-srv-01]
+         - [TCP] Server for S/MIME and PGP certificates
+           [draft-bhjl-x509-srv-01]
        * - ``ciao``
          - [TCP] Ciao Arduino Protocol
        * - ``collabio``
@@ -285,9 +284,9 @@ class TCP(AppType):
            "_dots-call-home._tcp" for discovering Call Home DOTS clients used
            to establish DOTS signal channel call home. [:rfc:`8973`]; [UDP]
            DOTS Signal Channel Call Home Protocol. The service name is used to
-           construct the SRV service names "_dots-call-home._udp" and "_dots-
-           call-home._tcp" for discovering Call Home DOTS clients used to
-           establish DOTS signal channel call home. [:rfc:`8973`]
+           construct the SRV service names "_dots-call-home._udp" and
+           "_dots-call-home._tcp" for discovering Call Home DOTS clients used
+           to establish DOTS signal channel call home. [:rfc:`8973`]
        * - ``dots-data``
          - [TCP] DOTS Data Channel Protocol. The service name is used to
            construct the SRV service name "_dots-data._tcp" for discovering
@@ -727,17 +726,17 @@ class TCP(AppType):
        * - ``smartsocket``
          - [TCP] home control
        * - ``smimeca``
-         - [TCP] Domain signing certificate for S/MIME keys [draft-
-           bhjl-x509-srv-01]
+         - [TCP] Domain signing certificate for S/MIME keys
+           [draft-bhjl-x509-srv-01]
        * - ``snif-cln``
-         - [TCP] SNIF End-to-End TLS Relay Client Connection [draft-zubov-
-           snif-05, Section 4.5]
+         - [TCP] SNIF End-to-End TLS Relay Client Connection
+           [draft-zubov-snif-05, Section 4.5]
        * - ``snif-fifo``
          - [TCP] SNIF End-to-End TLS Relay Cluster [draft-zubov-snif-05,
            Section 4.6]
        * - ``snif-srv``
-         - [TCP] SNIF End-to-End TLS Relay Service Connection [draft-zubov-
-           snif-05, Section 4.3]
+         - [TCP] SNIF End-to-End TLS Relay Service Connection
+           [draft-zubov-snif-05, Section 4.3]
        * - ``soda``
          - [TCP] Secure On Device API
        * - ``spidap``
@@ -20695,8 +20694,8 @@ class TCP(AppType):
     #: (Passive Optical Network) systems [TR-352][Inter-Channel-Termination
     #: protocol (ICTP) is a peer-to-peer protocol with a binary message format that
     #: is used by a set of optical line terminal (OLT) channel terminations (CT)
-    #: comprising a 40-Gigabit-capable next-generation passive optical network (NG-
-    #: PON2) system to exchange channel profile configuration and status
+    #: comprising a 40-Gigabit-capable next-generation passive optical network
+    #: (NG-PON2) system to exchange channel profile configuration and status
     #: information and to coordinate the operation of tunable optical network units
     #: (ONUs) in a multi-wavelength channel environment.]
     pon_ictp = 7202, 'pon-ictp', TransportProtocol.tcp
@@ -23287,8 +23286,8 @@ class TCP(AppType):
     linogridengine = 12300, 'linogridengine', TransportProtocol.tcp
 
     #: [TCP] Remote Administration Daemon (RAD) is a system service that offers
-    #: secure, remote, programmatic access to Solaris system configuration and run-
-    #: time state
+    #: secure, remote, programmatic access to Solaris system configuration and
+    #: run-time state
     rads = 12302, 'rads', TransportProtocol.tcp
 
     #: - [TCP] Warehouse Monitoring Syst SSS
@@ -24487,19 +24486,19 @@ class TCP(AppType):
     #: - [UDP] GameSmith Port
     gamesmith_port = 31765, 'gamesmith-port', TransportProtocol.tcp
 
-    #: - [TCP] Embedded Device Configuration Protocol TX IANA assigned this well-
-    #:   formed service name as a replacement for "iceedcp_tx".
+    #: - [TCP] Embedded Device Configuration Protocol TX IANA assigned this
+    #:   well-formed service name as a replacement for "iceedcp_tx".
     #: - [TCP] Embedded Device Configuration Protocol TX
-    #: - [UDP] Embedded Device Configuration Protocol TX IANA assigned this well-
-    #:   formed service name as a replacement for "iceedcp_tx".
+    #: - [UDP] Embedded Device Configuration Protocol TX IANA assigned this
+    #:   well-formed service name as a replacement for "iceedcp_tx".
     #: - [UDP] Embedded Device Configuration Protocol TX
     iceedcp_tx = 31948, 'iceedcp-tx', TransportProtocol.tcp
 
-    #: - [TCP] Embedded Device Configuration Protocol RX IANA assigned this well-
-    #:   formed service name as a replacement for "iceedcp_rx".
+    #: - [TCP] Embedded Device Configuration Protocol RX IANA assigned this
+    #:   well-formed service name as a replacement for "iceedcp_rx".
     #: - [TCP] Embedded Device Configuration Protocol RX
-    #: - [UDP] Embedded Device Configuration Protocol RX IANA assigned this well-
-    #:   formed service name as a replacement for "iceedcp_rx".
+    #: - [UDP] Embedded Device Configuration Protocol RX IANA assigned this
+    #:   well-formed service name as a replacement for "iceedcp_rx".
     #: - [UDP] Embedded Device Configuration Protocol RX
     iceedcp_rx = 31949, 'iceedcp-rx', TransportProtocol.tcp
 

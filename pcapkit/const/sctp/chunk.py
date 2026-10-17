@@ -80,8 +80,8 @@ class Chunk(EnumRegistry, IntEnum):
     #: Payload Data supporting Interleaving (I-DATA) [:rfc:`8260`]
     Payload_Data_supporting_Interleaving = 64
 
-    #: DTLS (TEMPORARY - registered 2026-02-20, expires 2027-02-20) [draft-ietf-
-    #: tsvwg-sctp-dtls-chunk-01]
+    #: DTLS (TEMPORARY - registered 2026-02-20, expires 2027-02-20)
+    #: [draft-ietf-tsvwg-sctp-dtls-chunk-01]
     DTLS = 65
 
     #: Reserved for IETF-defined Chunk Extensions [:rfc:`9260`]

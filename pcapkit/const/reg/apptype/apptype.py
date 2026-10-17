@@ -1391,8 +1391,8 @@ class AppType(EnumRegistry, StrEnum):
          - [N/A] HP Remote Repository for Build and Test Results
        * - ``hpr-toollnx``
          - N/A
-         - [N/A] HP Remote System that houses compilers and tools for Linux-
-           based Systems
+         - [N/A] HP Remote System that houses compilers and tools for
+           Linux-based Systems
        * - ``hpr-toolwin``
          - N/A
          - [N/A] HP Remote System that houses compilers and tools for Microsoft
@@ -1909,8 +1909,8 @@ class AppType(EnumRegistry, StrEnum):
          - [N/A] Retrospect backup and restore service
        * - ``rfbc``
          - N/A
-         - [N/A] Remote Frame Buffer Client (Used by VNC viewers in listen-
-           mode)
+         - [N/A] Remote Frame Buffer Client (Used by VNC viewers in
+           listen-mode)
        * - ``rfid``
          - N/A
          - [N/A] RFID Reader Mach1(tm) Protocol

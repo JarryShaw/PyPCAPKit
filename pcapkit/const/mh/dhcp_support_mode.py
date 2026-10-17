@@ -29,7 +29,7 @@ class DHCPSupportMode(EnumRegistry, IntEnum):
     #: Unassigned
     Unassigned_0x0 = 0x0
 
-    #: (S) flag [:rfc:`5844`]
+    #: \(S) flag [:rfc:`5844`]
     S_flag = 0x1
 
     @classmethod

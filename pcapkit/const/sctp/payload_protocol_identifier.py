@@ -79,8 +79,8 @@ class PayloadProtocolIdentifier(EnumRegistry, IntEnum):
     #: published.]
     Q_IPC_Q_2150_3 = 14
 
-    #: SIMCO <draft-kiesel-midcom-simco-sctp-00.txt> [draft-kiesel-midcom-simco-
-    #: sctp-00][Sebastian Kiesel]
+    #: SIMCO <draft-kiesel-midcom-simco-sctp-00.txt>
+    #: [draft-kiesel-midcom-simco-sctp-00][Sebastian Kiesel]
     SIMCO_draft_kiesel_midcom_simco_sctp_00_txt = 15
 
     #: DDP Segment Chunk [:rfc:`5043`]
@@ -241,7 +241,7 @@ class PayloadProtocolIdentifier(EnumRegistry, IntEnum):
     #: 3GPP E1 Application Protocol (E1AP) [         3GPP TS 38.463][Yang Xudong]
     PayloadProtocolIdentifier_3GPP_E1_Application_Protocol = 64
 
-    #: ELE2 Lawful Interception [http://ele2.io][Damir Franusic]
+    #: ELE2 Lawful Interception [http://ele2.io] [Damir Franusic]
     ELE2_Lawful_Interception = 65
 
     #: 3GPP NGAP over DTLS over SCTP [         3GPP TS 38.413][Yang Xudong]
@@ -268,8 +268,8 @@ class PayloadProtocolIdentifier(EnumRegistry, IntEnum):
     #: 3GPP W1AP [3GPP TS 37.473][Lionel Morand]
     PayloadProtocolIdentifier_3GPP_W1AP = 73
 
-    #: DTLS Chunk Key-Management Messages [draft-westerlund-tsvwg-sctp-dtls-
-    #: chunk-01]
+    #: DTLS Chunk Key-Management Messages
+    #: [draft-westerlund-tsvwg-sctp-dtls-chunk-01]
     DTLS_Chunk_Key_Management_Messages = 4242
 
     @classmethod

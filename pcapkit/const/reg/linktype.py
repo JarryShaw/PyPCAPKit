@@ -527,12 +527,12 @@ class LinkType(EnumRegistry, IntEnum):
     #: [``DLT_NFLOG``] Linux netlink NETLINK NFLOG socket log messages.
     NFLOG = 239
 
-    #: [``DLT_NETANALYZER``] Ethernet frames with Hilscher netANALYZER pseudo-
-    #: header.
+    #: [``DLT_NETANALYZER``] Ethernet frames with Hilscher netANALYZER
+    #: pseudo-header.
     NETANALYZER = 240
 
-    #: [``DLT_NETANALYZER_TRANSPARENT``] Ethernet frames with netANALYZER pseudo-
-    #: header, preamble and SFD, preceded by a Hilscher.
+    #: [``DLT_NETANALYZER_TRANSPARENT``] Ethernet frames with netANALYZER
+    #: pseudo-header, preamble and SFD, preceded by a Hilscher.
     NETANALYZER_TRANSPARENT = 241
 
     #: [``DLT_IPOIB``] IP-over-InfiniBand.
@@ -544,8 +544,8 @@ class LinkType(EnumRegistry, IntEnum):
     #: [``DLT_NG40``] Frames from ng4T GmbH's ng40 protocol tester.
     NG40 = 244
 
-    #: [``DLT_NFC_LLCP``] NFC Logical Link Control Protocol frames, with a pseudo-
-    #: header.
+    #: [``DLT_NFC_LLCP``] NFC Logical Link Control Protocol frames, with a
+    #: pseudo-header.
     NFC_LLCP = 245
 
     #: Packet filter state syncing.
@@ -644,8 +644,8 @@ class LinkType(EnumRegistry, IntEnum):
     #: for Bluetooth LE packets.
     NORDIC_BLE = 272
 
-    #: [``DLT_DOCSIS31_XRA31``] DOCSIS packets and bursts, preceded by a pseudo-
-    #: header giving metadata about the packet.
+    #: [``DLT_DOCSIS31_XRA31``] DOCSIS packets and bursts, preceded by a
+    #: pseudo-header giving metadata about the packet.
     DOCSIS31_XRA31 = 273
 
     #: [``DLT_ETHERNET_MPACKET``] IEEE 802.3 mPackets.
