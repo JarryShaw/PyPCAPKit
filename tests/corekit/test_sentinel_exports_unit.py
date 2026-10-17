@@ -546,9 +546,13 @@ class SentinelBehaviourTests(_ReimportCase):
         no_value = _sentinels()[1][1]
         self.assertEqual(repr(no_value), 'NO_VALUE')
 
+        # NOTE: ``__init__`` rather than the class itself. Python 3.8 reports
+        # ``Generic.__new__``'s ``(*args, **kwds)`` as the signature of a
+        # ``Generic`` subclass, which both of these are; 3.9 and later report
+        # ``__init__``'s, so reading ``__init__`` directly agrees everywhere.
         for field in (StringField, IPv4AddressField):
             with self.subTest(field=field.__name__):
-                parameter = inspect.signature(field).parameters['default']
+                parameter = inspect.signature(field.__init__).parameters['default']
                 self.assertIs(parameter.default, no_value)
                 self.assertTrue(str(parameter).endswith(' = NO_VALUE'), str(parameter))
 
