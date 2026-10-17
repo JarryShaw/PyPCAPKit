@@ -27,13 +27,48 @@ from pcapkit.utilities.warnings import AttributeWarning, ProtocolWarning, warn
 __all__ = ['PyPCAPFile']
 
 if TYPE_CHECKING:
-    from types import ModuleType
-    from typing import Any, Callable, Iterator, Optional
+    from typing import Any, Callable, Iterator, Optional, Protocol, Type
 
+    from pcapfile.protocols.linklayer.ethernet import Ethernet as PCAPFileEthernet
+    from pcapfile.savefile import pcap_savefile as PCAPFileSavefile
     from pcapfile.structs import __pcap_header__ as PCAPFileHeader
     from pcapfile.structs import pcap_packet as PCAPFilePacket
 
     from pcapkit.foundation.extraction import Extractor
+
+    class _PCAPFileLinkLayerModule(Protocol):
+        """:mod:`pcapfile.linklayer`, as :class:`PyPCAPFile` reads it."""
+
+        def clookup(self, ll_type: 'int') -> 'Optional[Type[PCAPFileEthernet]]': ...
+
+    class _PCAPFileSavefileModule(Protocol):
+        """:mod:`pcapfile.savefile`, as :class:`PyPCAPFile` reads it."""
+
+        def load_savefile(self, input_file: 'NamedStream', layers: 'int' = ...,
+                          verbose: 'bool' = ..., lazy: 'bool' = ...) -> 'PCAPFileSavefile': ...
+
+    class _PCAPFileStructsModule(Protocol):
+        """:mod:`pcapfile.structs`, as :class:`PyPCAPFile` reads it."""
+
+        @property
+        def pcap_packet(self) -> 'Type[PCAPFilePacket]': ...
+
+    class _PCAPFilePackage(Protocol):
+        """:mod:`pcapfile`, as :class:`PyPCAPFile` reads it through :attr:`PyPCAPFile._expkg` (#1878).
+
+        Each attribute is a submodule, described by what the engine reads of it.
+        mypy matches a module with a protocol at the top level only, so the
+        submodules are checked through the stub types they name, under
+        :file:`typings/pcapfile`.
+
+        """
+
+        @property
+        def linklayer(self) -> '_PCAPFileLinkLayerModule': ...
+        @property
+        def savefile(self) -> '_PCAPFileSavefileModule': ...
+        @property
+        def structs(self) -> '_PCAPFileStructsModule': ...
 
 
 class PyPCAPFile(EngineBase['PCAPFilePacket']):
@@ -70,7 +105,7 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
     """
     if TYPE_CHECKING:
         #: Engine extraction package, i.e. :mod:`pcapfile`.
-        _expkg: 'ModuleType'
+        _expkg: '_PCAPFilePackage'
         #: Engine extraction temporary storage.
         _extmp: 'Iterator[PCAPFilePacket]'
         #: Data link layer protocol, from the savefile header.
@@ -372,9 +407,9 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
                 warn(f'PCAP: [Frame {number}] captured length {capture_len} runs past the data, '
                      f'which holds {len(data)} octet(s); kept as captured',
                      ProtocolWarning, stacklevel=stacklevel())
-            yield cast('PCAPFilePacket', self._expkg.structs.pcap_packet(
+            yield self._expkg.structs.pcap_packet(
                 hdrp, timestamp, timestamp_us, capture_len, packet_len, binascii.hexlify(data),
-            ))
+            )
 
     def _decode(self, packet: 'PCAPFilePacket', frnum: 'int') -> 'PCAPFilePacket':
         """Decode a raw savefile packet down to :attr:`LAYERS` depth.
@@ -417,7 +452,7 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
                  'frame left undecoded', AttributeWarning, stacklevel=stacklevel())
             return packet
 
-        return cast('PCAPFilePacket', self._expkg.structs.pcap_packet(
+        return self._expkg.structs.pcap_packet(
             packet.header, packet.timestamp, packet.timestamp_us,
             packet.capture_len, packet.packet_len, decoded,
-        ))
+        )
