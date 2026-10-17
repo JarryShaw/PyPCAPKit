@@ -59,7 +59,9 @@ What reaches users is the **object only**. The owner ruled on GitHub issue :issu
 that the objects alone -- ``NULL`` and its siblings -- are exported to users, so a
 public sentinel names its instance in :mod:`pcapkit.corekit.sentinels`'s ``__all__`` and
 leaves the type out of it. The type stays importable by its dotted path there, for an
-annotation or an ``is`` guard; it is only ``import *`` that does not offer it. A private
+annotation or an ``is`` guard; it is only ``import *`` that does not offer it. The
+``__all__`` there does name :class:`~pcapkit.corekit.sentinels.Sentinel`, the abstract
+base every sentinel type shares, since that is no sentinel's own type. A private
 sentinel such as ``ABSENT`` is in neither, which is what private means here -- dropping
 its leading underscore did not add it to either list, and
 :class:`~pcapkit.corekit.sentinels.AbsentType` and
@@ -69,12 +71,13 @@ public use rather than left off it, since the name alone no longer says so.
 
 .. note::
 
-   Every sentinel type subclasses :class:`~pcapkit.corekit.sentinels._Sentinel`, a private
-   abstract base that carries the singleton protocol and the repr. So a new sentinel is
-   short: subclass it, set ``_name`` to the object's name, and add ``__bool__`` if the
-   sentinel stands for an absent value. :class:`~pcapkit.corekit.sentinels.NoValueType`
-   is the smallest example. ``AbsentType`` also overrides ``__repr__``, to keep the
-   ``<absent>`` it had before the base gave every sentinel one built from its name.
+   Every sentinel type subclasses :class:`~pcapkit.corekit.sentinels.Sentinel`, the public
+   abstract base that carries the singleton protocol, the repr and the immutability, and
+   whose metaclass is :class:`~pcapkit.corekit.sentinels.SentinelMeta`. So a new sentinel
+   is short: subclass it, set ``__slots__ = ()`` and ``_name`` to the object's name, and
+   add ``__bool__`` if the sentinel stands for an absent value.
+   :class:`~pcapkit.corekit.sentinels.NoValueType` is the smallest example. Everything
+   goes in the ``class`` body, since the type refuses any attribute set on it afterwards.
 
 Why a Class and Not ``object()``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -90,7 +93,7 @@ appears in a signature, in :func:`help` output and in a traceback. Compare what
    default: 'Any' = <object object at 0x7fc393324cf0>
 
    # dedicated type with __repr__
-   default: 'Any' = <NO_DEFAULT>
+   default: 'Any' = NO_DEFAULT
 
 .. warning::
 
@@ -110,13 +113,15 @@ ever sees. The rule above is for sentinels this package writes itself.
 Per-Sentinel Dunder Methods
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Most of the protocol is shared and lives on ``_Sentinel``. Where the sentinels differ,
+Most of the protocol is shared and lives on ``Sentinel``. Where the sentinels differ,
 the differences are **needs, not inconsistencies**:
 
 ``__new__`` returning a cached instance
-   Every sentinel has it, from the base. It guards against a caller constructing a
-   second, non-identical sentinel that then fails every ``is`` check, and it hands back
-   the cached instance rather than raising, so that mistake corrects itself.
+   Every sentinel has it, from the base, and returns the instance the metaclass made as
+   the ``class`` statement ran. It guards against a caller constructing a second,
+   non-identical sentinel that then fails every ``is`` check, and it hands back the
+   cached instance rather than raising, as ``type(None)()`` does, so that mistake
+   corrects itself.
    :class:`~pcapkit.corekit.sentinels.NullType` documents the limit honestly: a module
    **reload** re-executes the class statement, so the guard does not survive one, and
    code holding the pre-reload instance will fail ``is``. The module that matters there
@@ -146,7 +151,20 @@ the differences are **needs, not inconsistencies**:
    instance, because nothing on the class can intercept it.
 
 ``__repr__``
-   The base builds it from the object's name -- ``<NULL>``, ``<NO_VALUE>``,
-   ``<NO_DEFAULT>`` -- which is what a signature, :func:`help` and a traceback show.
-   ``ABSENT`` keeps its own ``<absent>``.
+   Every sentinel has it, from the base. It is the object's own name -- ``NULL``,
+   ``NO_VALUE``, ``NO_DEFAULT``, ``ABSENT`` -- as ``repr(None)`` is ``'None'``, and
+   :func:`str` gives the same. That is what a signature, :func:`help` and a traceback
+   show.
+
+``__setattr__`` / ``__delattr__``
+   Every sentinel has them, from the base, and they raise :exc:`AttributeError` for any
+   name, as ``None.x = 1`` does. ``__slots__`` is empty, so there is no ``__dict__`` to
+   reach round them either. The metaclass does the same for the type, raising
+   :exc:`TypeError` as ``type(None).x = 1`` does, so neither ``_name`` nor the cached
+   instance can be swapped out. It also refuses to let a concrete sentinel type be
+   subclassed, by a ``class`` statement or by ``register``, as ``type(None)`` cannot be;
+   ``Sentinel`` itself stays subclassable, being abstract. The owner asked for this in
+   review of the change for :issue:`1842`: a sentinel's repr and its other behaviour
+   follow Python's own singletons, :obj:`None`, :obj:`Ellipsis` and
+   :obj:`NotImplemented`.
 

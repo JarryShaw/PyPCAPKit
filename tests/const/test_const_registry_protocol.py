@@ -1341,11 +1341,11 @@ class NoDefaultSentinelTests(unittest.TestCase):
         """The concrete reason #859 asked for a dedicated class over a bare
         ``object()``: the latter prints as ``<object object at 0x...>``
         wherever it turns up -- a signature, :func:`help`, a traceback --
-        and this prints as ``<NO_DEFAULT>`` instead."""
+        and this prints as ``NO_DEFAULT``, its own name, instead."""
         from pcapkit.corekit.sentinels import NO_DEFAULT
 
         rendered = repr(NO_DEFAULT)
-        self.assertEqual(rendered, '<NO_DEFAULT>')
+        self.assertEqual(rendered, 'NO_DEFAULT')
         self.assertNotIn('0x', rendered)
 
     def test_type_is_the_dedicated_sentinel_class_and_only_the_object_is_exported(self) -> None:

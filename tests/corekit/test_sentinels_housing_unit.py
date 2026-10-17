@@ -197,13 +197,16 @@ class NoImportCycleTests(unittest.TestCase):
 
 
 class SentinelsModuleExportRuleTests(unittest.TestCase):
-    """The canonical module follows its own house rule: objects only, in ``__all__``.
+    """The canonical module follows its own house rule: no sentinel's type in ``__all__``.
 
     Nothing forces :mod:`pcapkit.corekit.sentinels` to honour the ruling that the
     sentinel objects, and not their types, are what gets exported -- the ruling
     was stated about the shim locations, which #916 already fixed -- but shipping
     a brand new module that violates the rule its own docstring cites would be a
     strange way to land it, so this pins that it does not.
+
+    It does export :class:`~pcapkit.corekit.sentinels.Sentinel`, the abstract
+    base every sentinel type shares, since that is no sentinel's own type.
 
     """
 
@@ -217,6 +220,10 @@ class SentinelsModuleExportRuleTests(unittest.TestCase):
                      'ABSENT', 'AbsentType'):
             with self.subTest(name=name):
                 self.assertNotIn(name, sentinels.__all__)
+
+        live = importlib.import_module('pcapkit.corekit.sentinels')
+        types = [name for name in live.__all__ if isinstance(getattr(live, name), type)]
+        self.assertEqual(types, ['Sentinel'])
 
 
 class PicklePayloadTests(unittest.TestCase):

@@ -284,8 +284,8 @@ class SentinelExportTests(_ReimportCase):
     def test_star_import_binds_the_objects_and_not_the_types(self) -> 'None':
         """Through ``import *`` itself, which is the surface the ruling is about.
 
-        The canonical module binds every public object and no type; each former
-        re-export site binds neither.
+        The canonical module binds every public object and no sentinel's own
+        type; each former re-export site binds neither.
 
         """
         canonical = importlib.import_module(CANONICAL_MODULE)
@@ -515,21 +515,22 @@ class SentinelBehaviourTests(_ReimportCase):
         self.assertTrue(_sentinels()[2][1])
 
     def test_the_private_sentinel_reprs_as_its_own_name(self) -> 'None':
-        """``<absent>``, not ``<object object at 0x...>``.
+        """``ABSENT``, not ``<object object at 0x...>``.
 
-        The reason the house rule prefers a class at all. ``AbsentType`` keeps a
-        ``__repr__`` of its own, since the shared one would print ``<ABSENT>``.
-        This used to pin that ``NoValueType`` had none, until #1841 gave it one.
+        The reason the house rule prefers a class at all. ``AbsentType`` used to
+        keep a ``__repr__`` of its own, printing ``<absent>``; the shared one now
+        prints the object's own name, as ``repr(None)`` is ``'None'``, so it no
+        longer needs one.
 
         """
         live = _sentinels()
         absent, absent_type = live[3][1], live[3][2]
-        self.assertEqual(repr(absent), '<absent>')
+        self.assertEqual(repr(absent), 'ABSENT')
         self.assertNotIn('0x', repr(absent))
-        self.assertIn('__repr__', vars(absent_type))
+        self.assertNotIn('__repr__', vars(absent_type))
 
     def test_no_value_reprs_as_its_own_name(self) -> 'None':
-        """``<NO_VALUE>``, not ``<pcapkit.corekit.sentinels.NoValueType object at 0x...>``.
+        """``NO_VALUE``, not ``<pcapkit.corekit.sentinels.NoValueType object at 0x...>``.
 
         GitHub issue #1841. ``NO_VALUE`` is the ``default`` of the field
         constructors, so the address showed in :func:`inspect.signature`, in
@@ -543,20 +544,20 @@ class SentinelBehaviourTests(_ReimportCase):
         from pcapkit.protocols.internet.hopopt import HOPOPT
 
         no_value = _sentinels()[1][1]
-        self.assertEqual(repr(no_value), '<NO_VALUE>')
+        self.assertEqual(repr(no_value), 'NO_VALUE')
 
         for field in (StringField, IPv4AddressField):
             with self.subTest(field=field.__name__):
                 parameter = inspect.signature(field).parameters['default']
                 self.assertIs(parameter.default, no_value)
-                self.assertTrue(str(parameter).endswith(' = <NO_VALUE>'), str(parameter))
+                self.assertTrue(str(parameter).endswith(' = NO_VALUE'), str(parameter))
 
         # An MPL option whose seed is the IPv6 source address, parsed with no
         # IPv6 header around it, so ``post_process`` leaves the seed unset.
         octets = bytes.fromhex('3b006d0220070000')
         option = HOPOPT(octets, len(octets), extension=True).schema.options[0]
         self.assertIs(option.seed, no_value)
-        self.assertIn('seed=<NO_VALUE>', repr(option))
+        self.assertIn('seed=NO_VALUE', repr(option))
 
 
 class NoValueIsTheDocumentedFieldDefaultTests(_ReimportCase):
