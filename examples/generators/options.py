@@ -102,7 +102,12 @@ whole build with it. A signal is what interrupts it, because the loop is pure
 Python and holds the GIL for the whole of an iteration, so no watchdog thread
 would ever get to run. The deadline is wall-clock time, so a stalled runner
 can trip it on a case that normally takes milliseconds (#1428):
-:data:`TIMEOUT_SCALE_ENV` stretches it without disarming it.
+:data:`TIMEOUT_SCALE_ENV` stretches it without disarming it. It also repeats
+every second until :func:`roundtrip` has the :exc:`TimeoutError`, because one
+raise can be lost: a finaliser the cyclic collector runs reports it to
+:func:`sys.unraisablehook` and drops it, and an ``except OSError`` drops it too,
+:exc:`TimeoutError` being one. A single alarm then left the case running for good
+(#1889).
 
 """
 
@@ -1744,52 +1749,70 @@ def roundtrip(case: 'Case', deadline: 'int' = DEADLINE) -> 'Outcome':
     octets = b''
     again = b''
 
-    with _deadline(deadline), warnings.catch_warnings(record=True) as caught:
+    # The deadline is entered last, so it is torn down first: nothing of
+    # catch_warnings runs on the way out while it can still fire. The body
+    # settles it on every way out before :meth:`_deadline.__exit__` is entered
+    # (#1889): the ``finally`` covers finishing and a :exc:`BaseException`, and
+    # each ``except`` clause settles it first too, because a clause builds its
+    # outcome before the ``finally`` runs. A repeat firing after that, at
+    # ``__exit__``'s entry included, is a no-op. Attribute stores rather than a
+    # method call, which would give a repeat already due one more place to land.
+    with warnings.catch_warnings(record=True) as caught, _deadline(deadline) as limit:
         warnings.simplefilter('always')
-
-        def seen() -> 'tuple[str, ...]':
-            """Warning messages so far, deduplicated but in order.
-
-            :exc:`ResourceWarning` is dropped. It is raised by the garbage
-            collector rather than by the code under test, so whichever case
-            happens to be running when a file object from somewhere else is
-            finalised would otherwise be blamed for it -- which is exactly what
-            happened: a ``.pcapng`` handle left open by a sibling generator was
-            reported against ``hopopt-option/Router_Alert``.
-            """
-            return tuple(dict.fromkeys(
-                str(entry.message) for entry in caught
-                if not issubclass(entry.category, ResourceWarning)))
-
         try:
-            octets = bytes(family.build(case.code, case.kwargs))
-        except TimeoutError as exc:
-            return Outcome(case, 'TIMEOUT', str(exc), None, seen())
-        except Exception as exc:  # pylint: disable=broad-except
-            # Broad on purpose: the point is to find out *what* a constructor
-            # does when it is wrong, and narrowing this to ProtocolError would
-            # let an AttributeError or a KeyError -- which is what most of the
-            # current defects raise -- abort the sweep rather than be recorded
-            # as this case's result.
-            return Outcome(case, 'CONSTRUCT', f'{type(exc).__name__}: {exc}', None, seen())
+            def seen() -> 'tuple[str, ...]':
+                """Warning messages so far, deduplicated but in order.
 
-        try:
-            parsed = family.extract(family.parse(octets))
-        except TimeoutError as exc:
-            return Outcome(case, 'TIMEOUT', str(exc), octets, seen())
-        except Exception as exc:  # pylint: disable=broad-except
-            return Outcome(case, 'PARSE', f'{type(exc).__name__}: {exc}', octets, seen())
+                :exc:`ResourceWarning` is dropped. It is raised by the garbage
+                collector rather than by the code under test, so whichever case
+                happens to be running when a file object from somewhere else is
+                finalised would otherwise be blamed for it -- which is exactly
+                what happened: a ``.pcapng`` handle left open by a sibling
+                generator was reported against ``hopopt-option/Router_Alert``.
+                """
+                return tuple(dict.fromkeys(
+                    str(entry.message) for entry in caught
+                    if not issubclass(entry.category, ResourceWarning)))
 
-        try:
-            again = bytes(family.rebuild(parsed))
-        except TimeoutError as exc:
-            return Outcome(case, 'TIMEOUT', str(exc), octets, seen())
-        except Exception as exc:  # pylint: disable=broad-except
-            return Outcome(case, 'RECONSTRUCT', f'{type(exc).__name__}: {exc}',
-                           octets, seen())
+            try:
+                octets = bytes(family.build(case.code, case.kwargs))
+            except TimeoutError as exc:
+                limit.settled = True
+                return Outcome(case, 'TIMEOUT', str(exc), None, seen())
+            except Exception as exc:  # pylint: disable=broad-except
+                limit.settled = True
+                # Broad on purpose: the point is to find out *what* a
+                # constructor does when it is wrong, and narrowing this to
+                # ProtocolError would let an AttributeError or a KeyError --
+                # which is what most of the current defects raise -- abort the
+                # sweep rather than be recorded as this case's result.
+                return Outcome(case, 'CONSTRUCT', f'{type(exc).__name__}: {exc}', None,
+                               seen())
 
-        warned = seen()
+            try:
+                parsed = family.extract(family.parse(octets))
+            except TimeoutError as exc:
+                limit.settled = True
+                return Outcome(case, 'TIMEOUT', str(exc), octets, seen())
+            except Exception as exc:  # pylint: disable=broad-except
+                limit.settled = True
+                return Outcome(case, 'PARSE', f'{type(exc).__name__}: {exc}', octets,
+                               seen())
 
+            try:
+                again = bytes(family.rebuild(parsed))
+            except TimeoutError as exc:
+                limit.settled = True
+                return Outcome(case, 'TIMEOUT', str(exc), octets, seen())
+            except Exception as exc:  # pylint: disable=broad-except
+                limit.settled = True
+                return Outcome(case, 'RECONSTRUCT', f'{type(exc).__name__}: {exc}',
+                               octets, seen())
+        finally:
+            limit.settled = True
+
+    # Read after the deadline is gone; ``caught`` outlives the ``with``.
+    warned = seen()
     if octets != again:
         return Outcome(case, 'MISMATCH', f'{octets.hex()} != {again.hex()}',
                        octets, warned)
@@ -1842,6 +1865,13 @@ class _deadline:  # pylint: disable=invalid-name
     :exc:`TimeoutError` names the stretched value -- the seconds actually
     allowed.
 
+    Each raise re-arms the alarm for one more second, so the raise repeats until
+    :attr:`settled` is set (#1889). One raise is not enough: one that lands in a
+    finaliser, or in an ``except OSError``, never reaches the body, and a single
+    alarm then left a hung case hung. The body must set :attr:`settled` before
+    it leaves: :meth:`__exit__` sets it too, but a firing handled as
+    :meth:`__exit__` is entered runs before it can.
+
     Written as a class rather than a :func:`contextlib.contextmanager` so that
     it can be entered alongside :func:`warnings.catch_warnings` in one ``with``
     statement without the generator machinery swallowing the alarm.
@@ -1862,6 +1892,10 @@ class _deadline:  # pylint: disable=invalid-name
         self.armed = False
         #: Handler displaced by :meth:`__enter__`, restored by :meth:`__exit__`.
         self.previous = None  # type: Any
+        #: Set by the body before it leaves, and by :meth:`__exit__` as a
+        #: backstop: a firing after that does nothing, so it cannot interrupt
+        #: the way out.
+        self.settled = False
 
     def __enter__(self) -> '_deadline':
         if self.seconds <= 0 or not hasattr(signal, 'SIGALRM'):
@@ -1870,7 +1904,12 @@ class _deadline:  # pylint: disable=invalid-name
         # nothing installed that would need restoring.
         self.seconds = scale_deadline(self.seconds)
 
-        def expire(signum: 'int', frame: 'Any') -> 'None':
+        def expire(signum: 'int', frame: 'Any') -> 'None':  # pylint: disable=unused-argument
+            if self.settled:
+                return
+            # Re-armed before raising, so a raise that never reaches the body
+            # is followed by another one.
+            signal.alarm(1)
             raise TimeoutError(f'did not finish within {self.seconds}s')
 
         self.previous = signal.signal(signal.SIGALRM, expire)
@@ -1879,6 +1918,11 @@ class _deadline:  # pylint: disable=invalid-name
         return self
 
     def __exit__(self, *exc_info: 'Any') -> 'None':
+        # For a body that left without settling: a firing from here to the
+        # cancel below must not re-arm and raise, which would skip the restore.
+        # One handled on entry, before this line runs, is not stopped by it --
+        # only a body that settles before leaving stops that, as roundtrip does.
+        self.settled = True
         if self.armed:
             # Cancel before restoring, so an alarm firing between the two
             # cannot be delivered to whatever handler was installed before.
