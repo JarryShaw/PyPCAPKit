@@ -223,7 +223,7 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
         if ext._flag_v:
             from pcapkit.toolkit.pypcapfile import packet2chain  # isort:skip
             ext._vfunc = lambda e, f: print(
-                f'Frame {e._frnum:>3d}: {packet2chain(f, data_link=self._dlink)}'  # pylint: disable=protected-access
+                f'Frame {e._frnum:>3d}: {packet2chain(cast("PCAPFilePacket", f), data_link=self._dlink)}'  # pylint: disable=protected-access
             )  # pylint: disable=logging-fstring-interpolation
 
         # extract & analyse file

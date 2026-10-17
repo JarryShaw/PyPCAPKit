@@ -386,7 +386,7 @@ class Scapy(EngineBase['ScapyPacket']):
         if ext._flag_v:
             from pcapkit.toolkit.scapy import packet2chain  # isort:skip
             ext._vfunc = lambda e, f: print(
-                f'Frame {e._frnum:>3d}: {packet2chain(f)}'  # pylint: disable=protected-access
+                f'Frame {e._frnum:>3d}: {packet2chain(cast("ScapyPacket", f))}'  # pylint: disable=protected-access
             )
 
         # extract global header

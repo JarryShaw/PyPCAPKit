@@ -315,7 +315,7 @@ class PyPCAP(EngineBase['RawFrame']):
         if ext._flag_v:
             from pcapkit.toolkit.pypcap import packet2chain  # isort:skip
             ext._vfunc = lambda e, f: print(
-                f'Frame {e._frnum:>3d}: {packet2chain(f[1], data_link=self._dlink)}'  # pylint: disable=protected-access
+                f'Frame {e._frnum:>3d}: {packet2chain(cast("RawFrame", f)[1], data_link=self._dlink)}'  # pylint: disable=protected-access
             )  # pylint: disable=logging-fstring-interpolation
 
         # extract & analyse file

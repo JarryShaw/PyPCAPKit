@@ -85,6 +85,9 @@ if TYPE_CHECKING:
                    PCAPFilePacket, tuple[float, bytes]]
 
     Protocols = Union[str, ProtocolBase, Type[ProtocolBase]]
+    # NOTE: every caller discards the callback's result, so it is typed ``Any``:
+    # any two-argument callback is accepted, whatever it returns, e.g.
+    # ``lambda e, f: sys.stdout.write(str(f))``.
     VerboseHandler = Callable[['Extractor', Packet], Any]
 
 __all__ = ['Extractor']
@@ -178,7 +181,7 @@ class Extractor(Generic[_P]):
         _flag_s: 'bool'
 
         #: Verbose callback function.
-        #_vfunc: 'VerboseHandler'
+        _vfunc: 'VerboseHandler'
 
         #: Frame number.
         _frnum: 'int'
@@ -1284,9 +1287,11 @@ class Extractor(Generic[_P]):
                 # user-facing output on stdout, not diagnostics -- the frame
                 # chains are a feature of the tool, so they stay on ``print``
                 # rather than becoming log records a consumer has to configure
-                # a handler to see (and on a different stream at that).
+                # a handler to see (and on a different stream at that). Of the
+                # built-in engines only PCAP and PCAPNG keep this callback, so
+                # its frame is theirs; the others install their own.
                 self._vfunc = lambda e, f: print(
-                    f'Frame {e._frnum:>3d}: {f.protochain}'  # pylint: disable=protected-access
+                    f'Frame {e._frnum:>3d}: {cast("Frame | PCAPNG", f).protochain}'  # pylint: disable=protected-access
                 )
             else:
                 self._vfunc = lambda e, f: None
