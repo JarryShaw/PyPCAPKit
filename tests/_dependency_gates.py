@@ -247,6 +247,9 @@ MODULE_PROVIDERS = {
     # cut to ``('docutils',)``. If the ``test`` and ``gate`` jobs install that
     # extra, its gap closes and the ``HAS_DOCUTILS`` exclusion has to go as well.
     'docutils': ('Sphinx', 'docutils'),
+    # The theme ``HAS_FURO`` asks for, whose table wrapper the #1861 transform
+    # test runs. Only the ``docs`` extra carries it.
+    'furo': ('furo',),
 }
 
 #: Flags whose condition is not a distribution, with what it is instead. A flag
@@ -637,7 +640,7 @@ DEPENDENCY_GATE_EXCLUSIONS = {
         dark={'test': ('sphinx', 'sphinx_autodoc_typehints'),
               'gate': ('sphinx', 'sphinx_autodoc_typehints')},
         reason=(
-            'The classes it gates (#1775, #1856 and the enum-value hook\'s) load '
+            'The classes it gates (#1775, #1856, #1858-#1863 and the enum-value hook\'s) load '
             'docs/source/conf.py and drive its hooks with the nodes and events Sphinx '
             'itself builds, so they need Sphinx and the pinned sphinx-autodoc-typehints. '
             'Only deploy-pages.yml installs those, from docs/requirements.txt, and that '
@@ -672,6 +675,17 @@ DEPENDENCY_GATE_EXCLUSIONS = {
             'which pins the re-rendered lines themselves; the string assertions on the '
             'wrapper run wherever the vendor extra is installed, and the docutils parse '
             'wherever docutils is importable as well.'
+        ),
+    ),
+    'HAS_FURO': Exclusion(
+        dark={'test': ('furo',), 'gate': ('furo',)},
+        reason=(
+            'The class it gates (#1861) runs the table-wrapper transform of furo, the '
+            'docs theme, ahead of the conf.py transform that undoes its duplicate ids, '
+            'and is gated on HAS_SPHINX as well. It is declined for the reason '
+            'HAS_SPHINX is: only deploy-pages.yml installs furo, from '
+            'docs/requirements.txt, and no workflow installs the docs extra itself; that '
+            'build is the end-to-end check of the same transform.'
         ),
     ),
 }
