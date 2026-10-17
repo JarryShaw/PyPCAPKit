@@ -21,7 +21,9 @@ from __future__ import annotations
 import os
 import pathlib
 import re
+import select
 import shutil
+import socket
 import subprocess  # nosec B404
 import sys
 import tempfile
@@ -41,6 +43,8 @@ UPLOAD = "Upload the resource monitor's log"
 #: Where the sampler writes, and the pid it leaves for the stop step.
 LOG = '$RUNNER_TEMP/resource-monitor.log'
 PIDFILE = '$RUNNER_TEMP/resource-monitor.pid'
+#: The sampler's own output, the log alone, detached from the step's.
+REDIRECT = ') >> "$log" 2>&1'
 PREFIX = '[monitor] '
 #: What each sample holds, as the issue asked for it.
 PROBES = ('free -m', 'df -h / "$GITHUB_WORKSPACE"', 'cat /proc/loadavg',
@@ -116,13 +120,14 @@ class TestTheStepsAreInPlace(unittest.TestCase):
         })
 
 
-def sh(script: 'str', env: 'dict[str, str]', shell: 'tuple[str, ...]') -> 'subprocess.CompletedProcess[str]':
+def sh(script: 'str', env: 'dict[str, str]', shell: 'tuple[str, ...]',
+       pass_fds: 'tuple[int, ...]' = ()) -> 'subprocess.CompletedProcess[str]':
     """``script`` as the runner runs it: ``shell: bash`` or the default ``bash -e``."""
     with tempfile.NamedTemporaryFile('w', suffix='.sh', delete=False, encoding='utf-8') as file:
         file.write(script)
     try:
         return subprocess.run([*shell, file.name], env=env, capture_output=True, text=True,  # nosec B603
-                              check=False, timeout=60)
+                              check=False, timeout=60, pass_fds=pass_fds)
     finally:
         os.unlink(file.name)
 
@@ -187,6 +192,37 @@ class TestTheSamplesReachTheTestsLog(unittest.TestCase):
                 break
             time.sleep(0.1)
         self.assertFalse(pathlib.Path(f'/proc/{pid}').exists(), 'the stop step left the sampler running')
+
+    def test_each_sample_is_one_write_so_no_output_lands_inside_it(self) -> None:
+        """#1888: ``tail -F`` relays each write as it lands, so pytest's output can come between two.
+
+        The log is a ``SOCK_SEQPACKET`` socket here, which keeps every write apart, the most a relay
+        could split a sample, and pytest's unfinished line goes between each two.
+        """
+        script = step(START)['run']
+        self.assertIn(REDIRECT, script)
+        ours, theirs = socket.socketpair(socket.AF_UNIX, socket.SOCK_SEQPACKET)
+        self.addCleanup(ours.close)
+        with theirs:
+            start = sh(script.replace(REDIRECT, f') >&{theirs.fileno()} 2>&1'), self.env, BASH,
+                       pass_fds=(theirs.fileno(),))
+        self.assertEqual(start.returncode, 0, start.stderr)
+        pid = self.pid()
+        self.addCleanup(lambda: subprocess.run(['kill', str(pid)], capture_output=True, check=False))
+        ours.settimeout(30)
+        writes: 'list[str]' = []
+        while sum(bool(HEADER.match(line)) for write in writes for line in write.splitlines()) < 3:
+            data = ours.recv(1 << 16)
+            self.assertTrue(data, f'the sampler stopped after {writes!r}')
+            writes.append(data.decode())
+        lines = ''.join('uuu.u' + write for write in writes).splitlines()
+        self.assertEqual([line for line in lines if PREFIX.strip() in line and not line.startswith(PREFIX)], [])
+        for write in writes:
+            with self.subTest(write=write[:60]):
+                self.assertEqual(sum(bool(HEADER.match(line)) for line in write.splitlines()), 1)
+                self.assertTrue(write.endswith('\n'))
+                # No larger, and the relay's write of it to the step's pipe is atomic too.
+                self.assertLessEqual(len(write.encode()), select.PIPE_BUF)
 
     def test_the_stop_step_passes_on_a_leg_the_monitor_never_started(self) -> None:
         stop = sh(step(STOP)['run'], self.env, BASH)
