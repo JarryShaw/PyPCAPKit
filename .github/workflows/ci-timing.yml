@@ -54,10 +54,14 @@ jobs:
         id: python-versions
         run: python3 util/python_versions.py --github-output
 
-      # Nothing is installed: the script is standard library only.
       - uses: actions/setup-python@v7
         with:
           python-version: ${{ steps.python-versions.outputs.latest }}
+
+      # The script fetches with requests and parses the JUnit artifacts with lxml
+      # (#1894), and needs nothing else outside the standard library.
+      - name: Install requests and lxml
+        run: python -m pip install requests lxml
 
       # The newest earlier run that uploaded a report, so a week whose run failed
       # on a HARD threshold is still next week's baseline. A first run, or one

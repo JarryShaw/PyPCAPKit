@@ -264,8 +264,9 @@ jobs:
       # zero once it has decided; if this step fails or times out instead, the
       # tree may hold modules no run passed with, and the next step discards
       # every regenerated module. The test extra is installed here because only
-      # this step needs it. The script's budget bounds its runs together, and
-      # `timeout-minutes` sits above it as the backstop. Run serially, pytest
+      # this step needs it; it carries psutil too, which the script samples a
+      # run's memory with (#1894). The script's budget bounds its runs together,
+      # and `timeout-minutes` sits above it as the backstop. Run serially, pytest
       # peaked at 0.7 GB resident over tests/const, measured locally, so the
       # memory cap leaves headroom on this runner; files are capped at 2 GiB, as
       # in experimental.yml.

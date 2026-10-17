@@ -103,8 +103,6 @@ import sys
 import tempfile
 import time
 import tomllib
-import urllib.error
-import urllib.request
 from typing import TYPE_CHECKING, NamedTuple
 
 if TYPE_CHECKING:
@@ -177,14 +175,23 @@ SOURCES = {
 
 
 def fetch(name: 'str', attempts: 'int' = 3) -> 'str':
-    """Source ``name``'s text, retried twice on a network error."""
+    """Source ``name``'s text, retried twice on a network error or an HTTP error status.
+
+    Fetched with :mod:`requests` (#1894), imported here rather than at the top:
+    ``detect`` installs it, but ``pr`` runs ``publish`` on the runner's own
+    ``python3`` with nothing installed, and ``publish`` never fetches.
+
+    """
+    import requests  # pylint: disable=import-outside-toplevel
+
     source = SOURCES[name]
-    request = urllib.request.Request(source.url, headers={'User-Agent': 'PyPCAPKit cron-python-versions (#1660)'})
     for attempt in range(attempts):
         try:
-            with urllib.request.urlopen(request, timeout=60) as response:  # nosec B310 -- fixed https URLs
-                return response.read().decode('utf-8')
-        except (urllib.error.URLError, OSError) as error:
+            response = requests.get(source.url, timeout=60,
+                                    headers={'User-Agent': 'PyPCAPKit cron-python-versions (#1660)'})
+            response.raise_for_status()
+            return response.content.decode('utf-8')
+        except OSError as error:  # every requests.RequestException is one
             if attempt + 1 == attempts:
                 raise OSError(f'{source.url}: {error}') from error
             time.sleep(5 * (attempt + 1))
@@ -242,27 +249,56 @@ def numeric(version: 'str') -> 'tuple[int, ...]':
     return tuple(map(int, match.group(0).split('.')))
 
 
+def markdown_tables(text: 'str') -> 'list[list[list[Any]]]':
+    """Each GFM table in ``text``: its rows, header first, each a list of its cells' inline tokens.
+
+    Parsed with markdown-it-py (#1894), imported here for the reason
+    :func:`fetch` imports :mod:`requests` there. An escaped pipe, ``\\|``, stays
+    inside its cell, in a code span too, as GitHub renders it; splitting each
+    line on ``|`` cut such a cell in two and shifted every column after it.
+
+    """
+    from markdown_it import MarkdownIt  # pylint: disable=import-outside-toplevel
+
+    tables = []  # type: list[list[list[Any]]]
+    row = None  # type: Optional[list[Any]]
+    for token in MarkdownIt('commonmark').enable('table').parse(text):
+        if token.type == 'table_open':
+            tables.append([])
+        elif token.type == 'tr_open':
+            row = []
+            tables[-1].append(row)
+        elif token.type == 'tr_close':
+            row = None
+        elif token.type == 'inline' and row is not None:
+            row.append(token)
+    return tables
+
+
 def parse_images(text: 'str') -> 'list[Image]':
-    """The Ubuntu and macOS rows of the runner-images README's image table."""
-    rows = [line.strip() for line in text.splitlines() if line.strip().startswith('|')]
-    header = next((index for index, row in enumerate(rows) if 'YAML Label' in row), None)
-    if header is None:
+    """The Ubuntu and macOS rows of the runner-images README's image table.
+
+    The labels are the code spans of the YAML Label cell, read from its tokens,
+    so a span holding an escaped pipe reads as GitHub shows it, without the
+    backslash a backtick pattern over the cell's source would keep.
+
+    """
+    table = next((rows for rows in markdown_tables(text)
+                  if any('YAML Label' in cell.content for cell in rows[0])), None)
+    if table is None:
         raise ValueError('the runner-images README has no table with a "YAML Label" column')
-    columns = [cell.strip() for cell in rows[header].strip('|').split('|')]
+    columns = [cell.content.strip() for cell in table[0]]
     try:
         image, arch, label = columns.index('Image'), columns.index('Architecture'), columns.index('YAML Label')
     except ValueError as error:
         raise ValueError(f'the runner-images table has columns {columns}') from error
     images = []
-    for row in rows[header + 1:]:
-        cells = [cell.strip() for cell in row.strip('|').split('|')]
-        if len(cells) < len(columns):
-            continue
-        match = IMAGE.match(cells[image])
+    for cells in table[1:]:
+        match = IMAGE.match(cells[image].content.strip())
         if match is None:
             continue
-        images.append(Image(match.group(1).lower(), match.group(2), cells[arch],
-                            tuple(re.findall(r'`([^`]+)`', cells[label]))))
+        labels = tuple(child.content for child in cells[label].children or () if child.type == 'code_inline')
+        images.append(Image(match.group(1).lower(), match.group(2), cells[arch].content.strip(), labels))
     if not any(found.family == 'ubuntu' for found in images):
         raise ValueError('the runner-images README lists no Ubuntu image')
     return images

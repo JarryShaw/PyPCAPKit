@@ -38,8 +38,10 @@ or fail, and the first run's log already names every failing test.
 **Limits.** Each run is a child in a session of its own, with ``RLIMIT_FSIZE``
 at ``--max-file-size-mib``. It is killed, and counts as failing, once its
 process group holds more than ``--max-memory-mib`` resident, sampled with
-``ps``: ``RLIMIT_AS`` caps address space rather than resident memory, and the
-job runs on ``macos-latest``, which has no cgroup to cap it with.
+:mod:`psutil` (#1894), or with ``ps`` where psutil is not installed (the test
+extra installs it on CPython only): ``RLIMIT_AS`` caps address space rather
+than resident memory, and the job runs on ``macos-latest``, which has no cgroup
+to cap it with.
 ``--budget-minutes`` bounds every run together; when it runs out before a
 decision, every change is discarded. Each run imports through a
 ``PYTHONPYCACHEPREFIX`` of its own, removed after it, since a module swapped
@@ -70,6 +72,11 @@ import sys
 import tempfile
 import time
 from typing import TYPE_CHECKING, NamedTuple
+
+try:
+    import psutil
+except ImportError:  # the test extra installs it on CPython only
+    psutil = None  # type: ignore[assignment]
 
 if TYPE_CHECKING:
     from typing import FrozenSet, NoReturn, Optional, Sequence
@@ -154,8 +161,48 @@ def apply(changes: 'Sequence[Change]', selected: 'FrozenSet[str]') -> None:
             file.write(content)
 
 
+#: What samples a run's memory: psutil, or ``ps`` where psutil is not installed.
+SAMPLER = 'ps' if psutil is None else 'psutil'
+
+
 def group_rss(pgid: 'int') -> 'Optional[int]':
-    """Bytes resident in the processes of group ``pgid``, or :data:`None` if ``ps`` cannot say."""
+    """Bytes resident in the processes of group ``pgid``, or :data:`None` if :data:`SAMPLER` cannot say."""
+    if psutil is None:
+        return _ps_group_rss(pgid)
+    return _psutil_group_rss(pgid)
+
+
+def _psutil_group_rss(pgid: 'int') -> 'Optional[int]':
+    """:func:`group_rss` through psutil, which has no figure per process group.
+
+    So it is each process of the group, by :func:`os.getpgid`, summed. A process
+    that exits between the listing and its reading is left out, as ``ps`` would
+    not have listed it; one whose memory psutil may not read leaves the sample
+    unknown rather than short.
+
+    """
+    try:
+        processes = list(psutil.process_iter())
+    except (psutil.Error, OSError):
+        return None
+    total = 0
+    for process in processes:
+        try:
+            if os.getpgid(process.pid) != pgid:
+                continue
+        except OSError:  # exited since; or, where getpgid stops at a session, not in ours
+            continue
+        try:
+            total += process.memory_info().rss
+        except psutil.NoSuchProcess:  # exited since, a zombie included
+            continue
+        except psutil.AccessDenied:
+            return None
+    return total
+
+
+def _ps_group_rss(pgid: 'int') -> 'Optional[int]':
+    """:func:`group_rss` through ``ps``, where psutil is not installed."""
     try:
         listing = subprocess.run(['ps', '-A', '-o', 'pgid=', '-o', 'rss='],  # nosec B603 B607
                                  capture_output=True, check=False, timeout=30)
@@ -343,8 +390,8 @@ def report(changes: 'Sequence[Change]', kept: 'FrozenSet[str]', reason: 'str', g
         lines.extend(f'| {run.number} | {run.modules} of {len(changes)} | {run.result} | {run.seconds:.0f} |'
                      for run in gate.runs)
     if gate.unsampled:
-        print('::warning title=Vendor test gate could not sample memory::ps did not answer, so '
-              'the memory cap was not enforced on every sample')
+        print(f'::warning title=Vendor test gate could not sample memory::{SAMPLER} could not read '
+              "the run's memory, so the memory cap was not enforced on every sample")
     summary = os.environ.get('GITHUB_STEP_SUMMARY')
     if summary:
         with open(summary, 'a', encoding='utf-8') as file:

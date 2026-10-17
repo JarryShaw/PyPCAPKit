@@ -6,13 +6,14 @@ PCAP-NG captures out of ``examples/captures/`` that :file:`.gitignore` deliberat
 out of the repository. This module puts them back on any machine, without a
 checkout of anything private, by one of these routes:
 
-* **Downloaded** -- fetched from a public source, with the source URL and the
-  SHA-256 of the exact bytes pinned below. The digest is checked after every
-  download and a mismatch is a hard error, never a warning. An HTTP 429 or
-  5xx, or a timeout, is retried a few times with backoff (see
-  :func:`_download`). If the network is still unavailable the download
-  degrades to a synthesised stand-in, and both the console output and the
-  return value say so rather than pretending otherwise.
+* **Downloaded** -- fetched from a public source with :mod:`requests`, with the
+  source URL and the SHA-256 of the exact bytes pinned below. The digest is
+  checked after every download and a mismatch is a hard error, never a warning.
+  An HTTP 429 or 5xx, or a timeout, is retried a few times with backoff (see
+  :func:`_download`). If the network is still unavailable, or :mod:`requests`
+  is not installed, the download degrades to a synthesised stand-in, and both
+  the console output and the return value say so rather than pretending
+  otherwise.
 * **Synthesised** -- written byte by byte by :class:`_Blocks` below, with no
   network access whatsoever, from packet payloads carried in the committed
   ``examples/captures/dhcp.pcapng`` fixture. Generation is deterministic: the same input
@@ -162,8 +163,6 @@ import socket
 import struct
 import sys
 import time
-import urllib.error
-import urllib.request
 from typing import TYPE_CHECKING, NamedTuple
 
 if TYPE_CHECKING:
@@ -836,11 +835,22 @@ def _transient(exc: 'OSError') -> 'bool':
     server's final answer, and an unreachable host fails at once rather than
     after a wait, which keeps an offline run as quick as it was.
 
+    :mod:`requests` raises a :exc:`~requests.Timeout` for a timeout while it
+    connects or waits for the headers, but a timeout while the body is read
+    reaches here as a :exc:`~requests.ConnectionError` wrapping urllib3's
+    :exc:`~urllib3.exceptions.ReadTimeoutError`.
+
     """
-    if isinstance(exc, urllib.error.HTTPError):
-        return exc.code == 429 or 500 <= exc.code <= 599
-    reason = exc.reason if isinstance(exc, urllib.error.URLError) else exc
-    return isinstance(reason, (socket.timeout, TimeoutError))
+    import requests  # pylint: disable=import-outside-toplevel
+    import urllib3  # pylint: disable=import-outside-toplevel
+
+    if isinstance(exc, requests.HTTPError):
+        code = getattr(exc.response, 'status_code', None)
+        return code is not None and (code == 429 or 500 <= code <= 599)
+    if isinstance(exc, (requests.Timeout, socket.timeout, TimeoutError)):
+        return True
+    reason = exc.args[0] if isinstance(exc, requests.ConnectionError) and exc.args else None
+    return isinstance(reason, urllib3.exceptions.ReadTimeoutError)
 
 
 def _retry_after(exc: 'OSError', now: 'float') -> 'Optional[float]':
@@ -857,8 +867,8 @@ def _retry_after(exc: 'OSError', now: 'float') -> 'Optional[float]':
         The wait, or :data:`None` if there is no header or it does not parse.
 
     """
-    headers = getattr(exc, 'headers', None)
-    value = None if headers is None else headers.get('Retry-After')
+    response = getattr(exc, 'response', None)
+    value = None if response is None else response.headers.get('Retry-After')
     if value is None:
         return None
     value = value.strip()
@@ -893,14 +903,19 @@ def _download(url: 'str') -> 'bytes':
     Raises:
         OSError: The last failure, once the retries are over or for a failure
             that is not retried -- :func:`_materialise` then falls back to a
-            stand-in (#1658).
+            stand-in (#1658). Every :exc:`requests.RequestException` is one.
+        ImportError: :mod:`requests` is not installed, which
+            :func:`_materialise` treats as it does an unreachable host.
 
     """
+    import requests  # pylint: disable=import-outside-toplevel
+
     attempt, waited = 1, 0.0
     while True:
         try:
-            with urllib.request.urlopen(url, timeout=TIMEOUT) as response:  # nosec: B310
-                return response.read()
+            response = requests.get(url, timeout=TIMEOUT)
+            response.raise_for_status()
+            return response.content
         except OSError as exc:
             if attempt >= DOWNLOAD_ATTEMPTS or not _transient(exc):
                 raise
@@ -946,8 +961,10 @@ def _materialise(fixture: '_Fixture', path: 'pathlib.Path') -> 'tuple[bytes, str
 
     try:
         data = _download(fixture.url)
-    except (urllib.error.URLError, OSError, ValueError) as exc:
-        print(f'    ! {fixture.url} is unreachable ({exc});')
+    except (ImportError, OSError, ValueError) as exc:
+        why = ('cannot be fetched without requests' if isinstance(exc, ImportError)
+               else 'is unreachable')
+        print(f'    ! {fixture.url} {why} ({exc});')
         print(f'    ! synthesising a stand-in for {fixture.name} instead -- the '
               'upstream capture was NOT used')
         return fixture.build(), 'synthesised (download unavailable)'

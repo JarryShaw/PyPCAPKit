@@ -250,6 +250,15 @@ MODULE_PROVIDERS = {
     # The theme ``HAS_FURO`` asks for, whose table wrapper the #1861 transform
     # test runs. Only the ``docs`` extra carries it.
     'furo': ('furo',),
+    # The strict XML parser ``HAS_LXML`` asks for (#1894): util/ci_timing.py
+    # reads JUnit and util/pyshark_encap_map.py reads PDML with it, and neither
+    # falls back to a laxer parser. The ``test`` extra carries it with a
+    # ``platform_python_implementation != 'GraalVM'`` marker, because PyPI has
+    # no wheel for GraalPy, so the gate skips on experimental.yml's GraalPy leg.
+    # That is no :data:`DEPENDENCY_GATE_EXCLUSIONS` entry: this module does not
+    # model markers and does not read experimental.yml, so every job it reads
+    # satisfies the gate, and an entry would describe a gap that is not there.
+    'lxml': ('lxml',),
 }
 
 #: Flags whose condition is not a distribution, with what it is instead. A flag

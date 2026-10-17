@@ -363,6 +363,22 @@ test = [
     # Test-only, as ``pcapkit`` never imports ``yaml``. Unpinned, since
     # ``safe_load`` is all they use.
     "PyYAML",
+    # What util/vendor_test_gate.py samples a test run's memory with (#1894),
+    # here because cron-vendor.yml's gate step installs this extra and nothing
+    # else. CPython only: PyPI has wheels for every CPython leg, free-threaded
+    # 3.14t included, and none for PyPy or GraalPy, where the gate falls back to
+    # ``ps``. Unpinned, like the entries above.
+    "psutil; platform_python_implementation == 'CPython'",
+    # What util/update_python_versions.py reads the runner-images README's table
+    # with (#1894), for the tests under ``tests/project/`` that run it on the
+    # saved README. A pure-Python wheel; unpinned, like the entries above.
+    "markdown-it-py",
+    # The strict XML parser util/ci_timing.py reads JUnit with and
+    # util/pyshark_encap_map.py reads PDML with (#1894). PyPI has wheels for
+    # CPython and PyPy but none for GraalPy, which reports its implementation as
+    # ``GraalVM``; the tests that parse skip there, and the scripts do not fall
+    # back to a laxer parser. Unpinned, like the entries above.
+    "lxml; platform_python_implementation != 'GraalVM'",
 ]
 
 # setuptools specific

@@ -45,6 +45,10 @@ missing.
   measure agrees with the committed table rather than merely being present or
   absent from it. This is what still exercises the real binaries on the CI
   legs :class:`RealSweepTests` skips.
+* :class:`StrictPdmlTests` checks the hardened lxml parser the PDML is read
+  with (#1894), against stand-ins for editcap and tshark. It and the classes
+  above are gated on :data:`HAS_LXML` too, since the generator has no laxer
+  parser to fall back to.
 
 """
 
@@ -97,6 +101,12 @@ _TSHARK = shutil.which('tshark')
 #: :data:`~tests._dependency_gates.MODULE_PROVIDERS`, since a Wireshark binary
 #: is not something any ``pyproject.toml`` extra could ever install.
 HAS_WIRESHARK = _EDITCAP is not None and _TSHARK is not None
+
+#: Whether lxml, which the generator parses PDML with (#1894), is installed. The
+#: test extra installs it everywhere but GraalPy, which has no wheel; with no
+#: laxer parser to fall back to, everything here that parses PDML skips there.
+HAS_LXML = importlib.util.find_spec('lxml') is not None
+NO_LXML = 'lxml, from the test extra, is not installed'
 
 #: The one Wireshark release ``ENCAP_TYPE_TO_LINKTYPE`` and
 #: ``FILTER_NAME_TO_LINKTYPE`` were measured against, and the only one
@@ -285,6 +295,101 @@ def make_tmp_dir(case: unittest.TestCase) -> pathlib.Path:
     tmp = tempfile.TemporaryDirectory()
     case.addCleanup(tmp.cleanup)
     return pathlib.Path(tmp.name)
+
+
+#: The PDML :program:`tshark` 4.6.9 writes for ``editcap -T null``'s first
+#: packet, cut to what :func:`~pyshark_encap_map.measure_encap` reads, with the
+#: declaration, stylesheet instruction and comment it opens with.
+PDML = '''<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="pdml2html.xsl"?>
+<!-- You can find pdml2html.xsl in /usr/share/doc/wireshark. -->
+<pdml version="0" creator="wireshark/4.6.9" capture_file="null.pcap">
+<packet>
+  <proto name="geninfo" pos="0" showname="General information" size="86">
+    <field name="num" pos="0" show="1" showname="Number" value="1" size="86"/>
+  </proto>
+  <proto name="frame" showname="Frame 1: Packet, 86 bytes on wire" size="86" pos="0">
+    <field name="frame.encap_type" showname="Encapsulation type: NULL/Loopback (15)" size="0" pos="0" show="15"/>
+    {frame}
+  </proto>
+  <proto name="null" showname="Null/Loopback" size="4" pos="0"/>
+</packet>
+</pdml>
+'''
+
+
+@unittest.skipUnless(HAS_LXML, NO_LXML)
+class StrictPdmlTests(unittest.TestCase):
+    """#1894: the PDML is parsed by lxml with a hardened parser, where ElementTree read it before.
+
+    Through :func:`~pyshark_encap_map.measure_encap`, against stand-ins for
+    :program:`editcap` and :program:`tshark`: the first writes a pcap header
+    naming DLT 0, the second prints the document the test chose, as bytes.
+
+    """
+
+    def setUp(self) -> None:
+        from lxml import etree  # pylint: disable=import-outside-toplevel
+        self.etree = etree
+        self.tmp = make_tmp_dir(self)
+        self.editcap = self.tmp / 'fake-editcap'
+        self.editcap.write_text(
+            f'#!{sys.executable}\n'
+            'import struct, sys\n'
+            "open(sys.argv[-1], 'wb').write(struct.pack('<IHHiIII', 0xa1b2c3d4, 2, 4, 0, 0, 65535, 0))\n",
+            encoding='utf-8')
+        self.tshark = self.tmp / 'fake-tshark'
+        self.document = self.tmp / 'pdml.xml'
+        self.tshark.write_text(
+            f'#!{sys.executable}\n'
+            'import sys\n'
+            f'sys.stdout.buffer.write(open({str(self.document)!r}, "rb").read())\n',
+            encoding='utf-8')
+        for fake in (self.editcap, self.tshark):
+            fake.chmod(0o755)
+
+    def measure(self, document: 'bytes') -> 'object':
+        self.document.write_bytes(document)
+        return encap_map.measure_encap(str(self.editcap), str(self.tshark), self.tmp / 'in.pcap', 'null', self.tmp)
+
+    def test_tsharks_pdml_is_read_as_bytes(self) -> None:
+        """It declares its encoding, which lxml will not be handed a decoded string with."""
+        self.assertEqual(self.measure(PDML.format(frame='').encode('utf-8')),
+                         encap_map.Measurement(name='null', dlt=0, encap_type=15, root_name='null'))
+
+    def test_malformed_pdml_is_refused(self) -> None:
+        with self.assertRaises(self.etree.XMLSyntaxError):
+            self.measure(PDML.format(frame='<field name="unclosed">').encode('utf-8'))
+
+    def test_nesting_past_the_depth_limit_is_refused(self) -> None:
+        """``huge_tree=False`` keeps libxml2's limit on depth; ElementTree has none."""
+        deep = '<field name="f">' * 300 + '</field>' * 300
+        with self.assertRaisesRegex(self.etree.XMLSyntaxError, 'depth'):
+            self.measure(PDML.format(frame=deep).encode('utf-8'))
+
+    def test_an_attribute_naming_an_external_entity_is_refused(self) -> None:
+        """An attribute cannot hold an entity node, so libxml2 refuses it rather than read the file."""
+        document = PDML.format(frame='').replace(
+            '<pdml ', '<!DOCTYPE pdml [<!ENTITY outer SYSTEM "file:///nonexistent/canary.txt">]>\n<pdml ', 1
+        ).replace('NULL/Loopback (15)', '&outer;')
+        with self.assertRaisesRegex(self.etree.XMLSyntaxError, 'external entity'):
+            self.measure(document.encode('utf-8'))
+
+    def test_an_entity_in_text_is_neither_expanded_nor_read(self) -> None:
+        canary = self.tmp / 'canary.txt'
+        canary.write_text('READ', encoding='utf-8')
+        document = PDML.format(frame='<field name="note">&inner;&outer;</field>').replace(
+            '<pdml ', f'<!DOCTYPE pdml [<!ENTITY inner "INJECTED"><!ENTITY outer SYSTEM "{canary.as_uri()}">]>\n<pdml ',
+            1).encode('utf-8')
+        root = encap_map.parse_pdml(document)
+        note = root.find(".//field[@name='note']")
+        self.assertEqual([(child.tag is self.etree.Entity, child.name) for child in note],
+                         [(True, 'inner'), (True, 'outer')])
+        text = self.etree.tostring(root)
+        self.assertNotIn(b'INJECTED', text)
+        self.assertNotIn(b'READ', text)
+        self.assertEqual(self.measure(document),
+                         encap_map.Measurement(name='null', dlt=0, encap_type=15, root_name='null'))
 
 
 class RenderDictTests(unittest.TestCase):
@@ -497,6 +602,7 @@ class DetectTsharkVersionTests(unittest.TestCase):
 
 
 @unittest.skipUnless(HAS_WIRESHARK, 'editcap/tshark not found on PATH')
+@unittest.skipUnless(HAS_LXML, NO_LXML)
 @unittest.skipUnless(
     _TSHARK_VERSION == MEASURED_WIRESHARK_VERSION,
     f'tshark reports {_TSHARK_VERSION!r}, this class only trusts its exact '
@@ -550,6 +656,7 @@ class RealSweepTests(unittest.TestCase):
 
 
 @unittest.skipUnless(HAS_WIRESHARK, 'editcap/tshark not found on PATH')
+@unittest.skipUnless(HAS_LXML, NO_LXML)
 class VersionIndependentInvariantTests(unittest.TestCase):
     """Properties of a real sweep that hold on any Wireshark, not only 4.6.9.
 

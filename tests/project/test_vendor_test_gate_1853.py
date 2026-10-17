@@ -15,11 +15,16 @@ whole does not fail.
 * :class:`TestTheGate` runs :file:`util/vendor_test_gate.py` in throwaway
   repositories, with a stand-in test command that fails on a marker, so which
   modules it keeps is checked against which ones carry the marker.
+* :class:`TestTheMemorySampler` checks how the script sums a process group's
+  memory through psutil (#1894), against a stand-in for psutil listing real
+  process ids, and that it falls back to ``ps`` where psutil is not installed.
 
 """
 
 from __future__ import annotations
 
+import importlib.util
+import io
 import json
 import os
 import pathlib
@@ -30,8 +35,10 @@ import subprocess  # nosec B404
 import sys
 import tempfile
 import time
+import types
 import unittest
 from typing import TYPE_CHECKING
+from unittest import mock
 
 from tests._support import scale_timeout
 
@@ -87,6 +94,15 @@ def vendor_update() -> 'dict[str, Any]':
     if yaml is None:  # pragma: no cover
         raise unittest.SkipTest('PyYAML, from the test extra, is not installed')
     return yaml.safe_load(WORKFLOW.read_text(encoding='utf-8'))['jobs']['vendor-update']
+
+
+def load_gate() -> 'types.ModuleType':
+    """:file:`util/vendor_test_gate.py`, which is a script and not a package."""
+    spec = importlib.util.spec_from_file_location('vendor_test_gate_1853', SCRIPT)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 class TestTheWorkflowTestsBeforeItCommits(unittest.TestCase):
@@ -387,10 +403,10 @@ class TestTheGate(ScratchRepository):
         self.assertIn('budget ran out', result.stdout)
 
     def test_a_run_over_the_memory_cap_fails(self) -> None:
+        """Sampled by psutil where this interpreter has it, and by ``ps`` where not (#1894)."""
         self.write('pcapkit/const/a.py', module('a', 'regenerated'))
-        if subprocess.run(['ps', '-A', '-o', 'pgid=', '-o', 'rss='], capture_output=True,
-                          check=False).returncode != 0:  # pragma: no cover
-            self.skipTest('ps cannot list processes here, so memory cannot be sampled')
+        if load_gate().group_rss(os.getpgrp()) is None:  # pragma: no cover
+            self.skipTest('neither psutil nor ps can read memory here, so it cannot be sampled')
         start = time.monotonic()
         result = self.run_gate(memory=32, ALLOCATE=str(256 << 20))
         self.assertLess(time.monotonic() - start, 40, 'the run was not stopped at the cap')
@@ -437,6 +453,101 @@ class TestTheGate(ScratchRepository):
         self.assertEqual(self.changed(), [])
         with self.assertRaises(ProcessLookupError):
             os.kill(runs[0]['pid'], 0)
+
+
+class _NoSuchProcess(Exception):
+    """Stands in for ``psutil.NoSuchProcess``."""
+
+
+class _AccessDenied(Exception):
+    """Stands in for ``psutil.AccessDenied``."""
+
+
+class _Process:
+    """A process as ``psutil.process_iter`` yields it: a real id, and a resident size or an error."""
+
+    def __init__(self, pid: 'int', rss: 'int' = 0, error: 'Optional[Exception]' = None) -> None:
+        self.pid, self.rss, self.error = pid, rss, error
+
+    def memory_info(self) -> 'types.SimpleNamespace':
+        if self.error is not None:
+            raise self.error
+        return types.SimpleNamespace(rss=self.rss)
+
+
+class TestTheMemorySampler(unittest.TestCase):
+    """``group_rss`` sums a process group through psutil, or ``ps`` without it (#1894).
+
+    psutil reads no process group, so the script asks :func:`os.getpgid` of each
+    process it lists. The stand-in lists real processes -- this one, in its own
+    group, and a child in a session of its own -- so that question gets real
+    answers, and only the sizes are made up.
+
+    """
+
+    def setUp(self) -> None:
+        self.gate = load_gate()
+        child = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(60)'],
+                                 start_new_session=True)
+        self.addCleanup(child.wait)
+        self.addCleanup(child.kill)
+        self.other = child.pid
+        self.assertNotEqual(os.getpgid(self.other), os.getpgrp())
+        # A process id no process holds: one that has been reaped.
+        gone = subprocess.Popen([sys.executable, '-c', ''])
+        gone.wait()
+        self.gone = gone.pid
+
+    def psutil(self, *processes: '_Process', listing: 'Optional[Exception]' = None) -> 'types.SimpleNamespace':
+        def process_iter() -> 'list[_Process]':
+            if listing is not None:
+                raise listing
+            return list(processes)
+
+        return types.SimpleNamespace(process_iter=process_iter, Error=Exception,
+                                     NoSuchProcess=_NoSuchProcess, AccessDenied=_AccessDenied)
+
+    def rss(self, psutil: 'Any') -> 'Optional[int]':
+        # ``create``: before #1894 the script had no ``psutil`` to bind over, and
+        # this should fail there on what it returns.
+        with mock.patch.object(self.gate, 'psutil', psutil, create=True):
+            return self.gate.group_rss(os.getpgrp())
+
+    def test_the_group_is_summed_and_nothing_else(self) -> None:
+        listed = self.psutil(_Process(os.getpid(), rss=3 << 20), _Process(self.other, rss=1 << 30),
+                             _Process(self.gone, rss=1 << 30))
+        self.assertEqual(self.rss(listed), 3 << 20)
+
+    def test_a_process_that_exits_while_it_is_read_is_left_out(self) -> None:
+        listed = self.psutil(_Process(os.getpid(), rss=3 << 20), _Process(os.getpid(), error=_NoSuchProcess()))
+        self.assertEqual(self.rss(listed), 3 << 20)
+
+    def test_a_member_it_may_not_read_leaves_the_sample_unknown(self) -> None:
+        """Rather than short: an undercount would let a run past the cap."""
+        listed = self.psutil(_Process(os.getpid(), rss=3 << 20), _Process(os.getpid(), error=_AccessDenied()))
+        self.assertIsNone(self.rss(listed))
+
+    def test_a_listing_that_fails_leaves_the_sample_unknown(self) -> None:
+        self.assertIsNone(self.rss(self.psutil(listing=OSError('no /proc'))))
+
+    def test_without_psutil_ps_samples_the_group(self) -> None:
+        if subprocess.run(['ps', '-A', '-o', 'pgid=', '-o', 'rss='], capture_output=True,
+                          check=False).returncode != 0:  # pragma: no cover
+            self.skipTest('ps cannot list processes here')
+        rss = self.rss(None)
+        self.assertIsInstance(rss, int)
+        # This process alone holds more than a MiB resident.
+        self.assertGreater(rss, 1 << 20)
+
+    def test_the_warning_names_the_sampler_in_use(self) -> None:
+        """What ``report`` says when a sample came back unknown."""
+        self.assertEqual(self.gate.SAMPLER, 'ps' if self.gate.psutil is None else 'psutil')
+        gate = self.gate.Gate([], ['true'], 60, 1 << 30, 1 << 30)
+        gate.unsampled = True
+        with mock.patch.dict(os.environ, {'GITHUB_STEP_SUMMARY': ''}), \
+                mock.patch('sys.stdout', new_callable=io.StringIO) as stdout:
+            self.gate.report([], frozenset(), '', gate, 'true')
+        self.assertIn(f'could not sample memory::{self.gate.SAMPLER} could not read', stdout.getvalue())
 
 
 if __name__ == '__main__':

@@ -13,7 +13,8 @@ renames in the body, never a ruleset edit.
 
 Nothing here touches the network. The sources are the snapshots in
 :file:`tests/project/python_versions_fixtures/`, trimmed from what each URL
-served on 2026-10-13, and each scenario edits a copy of them. The scenarios run
+served on 2026-10-13, and each scenario edits a copy of them; :class:`TestFetch`
+stubs ``requests.get``, which the script fetches them with (#1894). The scenarios run
 on a scratch copy of the files the script writes, with the tier file as it stood
 then (the ``python-versions.toml`` there) and the prose regenerated to match it,
 so a later tier change, this job's own included, leaves them as they are. The
@@ -37,10 +38,14 @@ import shutil
 import subprocess  # nosec B404
 import sys
 import tempfile
+import types
 import unittest
 from typing import TYPE_CHECKING
 from unittest import mock
 
+import requests
+
+from tests._support import scale_timeout
 from tests.project.test_release_gates import evaluate_condition
 
 try:
@@ -243,6 +248,131 @@ def context(sources: 'dict[str, Any]') -> 'Any':
     module = updater()
     return module.Context(sources, module.parse_images(sources['runner-images']),
                           module.workflow_labels(module.load_workflows(ROOT)))
+
+
+###############################################################################
+# Fetching
+###############################################################################
+
+
+#: Where the stubbed source points: a reserved name, so nothing it reaches answers.
+INVALID_URL = 'https://example.invalid/release-cycle.json'
+
+
+def http_response(status: 'int', body: 'bytes' = b'') -> 'requests.Response':
+    """A :class:`requests.Response` as ``requests.get`` returns it."""
+    response = requests.Response()
+    response.status_code = status
+    response.url = INVALID_URL
+    response.raw = io.BytesIO(body)
+    return response
+
+
+class TestFetch(unittest.TestCase):
+    """#1894: :func:`fetch` reads each source through ``requests.get``."""
+
+    def setUp(self) -> None:
+        self.module = updater()
+        self.sleeps = []  # type: list[float]
+        self.calls = []  # type: list[tuple[str, dict[str, Any]]]
+        self.outcomes = []  # type: list[Any]
+        source = self.module.Source(INVALID_URL, 'release-cycle.json', 'json')
+        for patcher in (mock.patch.dict(self.module.SOURCES, {'release-cycle': source}),
+                        mock.patch.object(self.module, 'time', types.SimpleNamespace(sleep=self.sleeps.append)),
+                        mock.patch('requests.get', self.get)):
+            patcher.start()
+            self.addCleanup(patcher.stop)
+
+    def get(self, url: 'str', **kwargs: 'Any') -> 'requests.Response':
+        self.calls.append((url, kwargs))
+        outcome = self.outcomes.pop(0)
+        if isinstance(outcome, BaseException):
+            raise outcome
+        return outcome
+
+    def test_a_source_is_read_with_requests(self) -> None:
+        self.outcomes = [http_response(200, '{"3.15": {"status": "bugfix"}}'.encode('utf-8'))]
+        self.assertEqual(self.module.fetch('release-cycle'), '{"3.15": {"status": "bugfix"}}')
+        self.assertEqual(self.calls, [(INVALID_URL, {
+            'timeout': 60, 'headers': {'User-Agent': 'PyPCAPKit cron-python-versions (#1660)'}})])
+        self.assertEqual(self.sleeps, [])
+
+    def test_an_error_status_and_a_dropped_connection_are_retried(self) -> None:
+        self.outcomes = [http_response(503), requests.ConnectionError('connection reset'),
+                         http_response(200, b'{}')]
+        self.assertEqual(self.module.fetch('release-cycle'), '{}')
+        self.assertEqual(len(self.calls), 3)
+        self.assertEqual(self.sleeps, [5, 10])
+
+    def test_the_last_failure_is_an_oserror_naming_the_source(self) -> None:
+        """``main`` reports an :exc:`OSError` as the run's error, as it did before."""
+        self.outcomes = [http_response(404)] * 3
+        with self.assertRaises(OSError) as caught:
+            self.module.fetch('release-cycle')
+        self.assertTrue(str(caught.exception).startswith(f'{INVALID_URL}: 404 Client Error'), caught.exception)
+        self.assertIsInstance(caught.exception.__cause__, requests.HTTPError)
+        self.assertEqual(self.sleeps, [5, 10])
+
+    def test_loading_the_script_imports_neither_requests_nor_markdown_it(self) -> None:
+        """``pr`` runs ``publish`` on a bare ``python3``, so loading the script must not need them."""
+        imported = "print(sorted({'requests', 'markdown_it'} & set(sys.modules)))\n"
+        script = (
+            'import importlib.util, pathlib, sys\n'
+            + imported
+            + f'spec = importlib.util.spec_from_file_location("update_python_versions", {str(SCRIPT)!r})\n'
+            'module = importlib.util.module_from_spec(spec)\n'
+            'spec.loader.exec_module(module)\n'
+            f'module.read_sources(pathlib.Path({str(FIXTURES)!r}))\n'
+            + imported
+        )
+        result = subprocess.run([sys.executable, '-c', script], capture_output=True, text=True, check=False,
+                                timeout=scale_timeout(60))
+        # Not imported at startup either, or the second answer would prove nothing.
+        self.assertEqual((result.returncode, result.stdout), (0, '[]\n[]\n'), result.stderr)
+
+
+#: The runner-images table's header and delimiter rows, as the README has them.
+TABLE_HEAD = ('| Image | Architecture | YAML Label | Included Software |\n'
+              '| --------------------|--------------|---------------------|------------------|\n')
+
+
+class TestTheImageTable(unittest.TestCase):
+    """#1894: the runner-images table is read as GitHub renders it, by markdown-it-py."""
+
+    def test_an_escaped_pipe_stays_in_its_cell(self) -> None:
+        """In a cell's text or in a code span; splitting the line on ``|`` shifted every column after it."""
+        module = updater()
+        text = TABLE_HEAD + (
+            '| Ubuntu 24.04 \\| Noble<br>![Endpoint Badge](https://example.invalid/badge) | x64 '
+            '| `ubuntu-latest` or `ubuntu-24.04` | [ubuntu-24.04] |\n'
+            '| Ubuntu 22.04 | x64 | `ubuntu-22.04` or `ubuntu\\|22.04` | [ubuntu-22.04] |\n'
+            '| macOS 15 Arm64 | arm64 | `macos-15`, or `macos-15-xlarge` | [macOS-15-arm64] |\n')
+        self.assertEqual(module.parse_images(text), [
+            module.Image('ubuntu', '24.04', 'x64', ('ubuntu-latest', 'ubuntu-24.04')),
+            module.Image('ubuntu', '22.04', 'x64', ('ubuntu-22.04', 'ubuntu|22.04')),
+            module.Image('macos', '15', 'arm64', ('macos-15', 'macos-15-xlarge')),
+        ])
+
+    def test_a_line_of_prose_with_a_pipe_is_not_the_table(self) -> None:
+        """Only a table's header row names its columns, not any line that starts with ``|``."""
+        module = updater()
+        text = ('| The YAML Label column below is what `runs-on` takes.\n\n'
+                + TABLE_HEAD + '| Ubuntu 24.04 | x64 | `ubuntu-24.04` | [ubuntu-24.04] |\n')
+        self.assertEqual(module.parse_images(text), [module.Image('ubuntu', '24.04', 'x64', ('ubuntu-24.04',))])
+
+    def test_what_it_refuses(self) -> None:
+        """The same errors as before markdown-it-py read the table."""
+        module = updater()
+        cases = (
+            ('no table', 'Images: `ubuntu-24.04`.\n', 'has no table with a "YAML Label" column'),
+            ('no Architecture column', '| Image | YAML Label |\n| --- | --- |\n| Ubuntu 24.04 | `ubuntu-24.04` |\n',
+             r"has columns \['Image', 'YAML Label'\]"),
+            ('no Ubuntu image', TABLE_HEAD + '| macOS 15 | arm64 | `macos-15` | [macOS-15] |\n', 'lists no Ubuntu image'),
+        )
+        for label, text, message in cases:
+            with self.subTest(label):
+                with self.assertRaisesRegex(ValueError, message):
+                    module.parse_images(text)
 
 
 ###############################################################################

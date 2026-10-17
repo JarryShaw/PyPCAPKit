@@ -8,7 +8,10 @@ are checked, offline, since this tier has no network and no token:
   projection to a cap, and the indentation reader the caps come from, on the real
   workflow files as well as on the excerpt below.
 * :class:`TestClient`, :class:`TestEndToEnd` and the classes after it -- the script
-  against a fake API serving the fixtures in :file:`tests/project/ci_timing_fixtures/`.
+  against a fake API serving the fixtures in :file:`tests/project/ci_timing_fixtures/`,
+  and its :mod:`requests` transport (#1894) against servers on ``127.0.0.1``.
+  :class:`TestStrictJUnit` checks the hardened lxml parser the JUnit artifacts
+  are read with (#1894); it and what reads an artifact skip without lxml.
   The run listing and the job listings are real responses from 2026-10-05 and
   2026-10-09, trimmed to the fields the script reads; run 37323913186 is the push
   run that reads ``cancelled`` because its ``protocols`` ordering job hit the 45-minute
@@ -32,6 +35,7 @@ from __future__ import annotations
 import argparse
 import contextlib
 import datetime
+import http.server
 import importlib.util
 import io
 import json
@@ -40,11 +44,13 @@ import pathlib
 import re
 import statistics
 import tempfile
+import threading
 import unittest
-import urllib.error
 import urllib.parse
 import zipfile
 from unittest import mock
+
+import requests
 
 from tests.project.test_python_versions_1660 import NO_TOMLLIB
 from tests.project.test_python_versions_1660 import legs as matrix_legs
@@ -54,6 +60,12 @@ from tests.project.test_python_versions_1660 import matrix, tomllib
 # (#1660), and runs on ``latest`` only (ci-timing.yml); on 3.8-3.10 nothing here can.
 if tomllib is None:
     raise unittest.SkipTest(NO_TOMLLIB)
+
+#: Whether lxml, which the script parses JUnit with (#1894), is installed. The
+#: test extra installs it everywhere but GraalPy, which has no wheel; with no
+#: laxer parser to fall back to, what reads a JUnit artifact skips there.
+HAS_LXML = importlib.util.find_spec('lxml') is not None
+NO_LXML = 'lxml, from the test extra, is not installed'
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 FIXTURES = pathlib.Path(__file__).resolve().parent / 'ci_timing_fixtures'
@@ -112,6 +124,13 @@ def span(start: 'str', end: 'str') -> 'float':
     return (stamp(end) - stamp(start)).total_seconds() / 60
 
 
+def http_error(url: 'str', status: 'int') -> 'requests.HTTPError':
+    """The error the script's transport raises for an error status."""
+    response = requests.Response()
+    response.status_code, response.url = status, url
+    return requests.HTTPError(f'{status} Error for url: {url}', response=response)
+
+
 class FakeAPI:
     """Serves the fixtures by URL, recording every request.
 
@@ -149,7 +168,7 @@ class FakeAPI:
         if '/contents/.github/workflows/unit-tests.yml' in path:
             assert accept == 'application/vnd.github.raw+json', accept
             return fixture('workflow-unit-tests.yml'), {}
-        raise urllib.error.HTTPError(url, 404, 'Not Found', None, None)  # type: ignore[arg-type]
+        raise http_error(url, 404)
 
     def listing(self, runs: 'list[dict]', query: 'dict[str, list[str]]') -> 'tuple[bytes, dict[str, str]]':
         """The runs created inside the query's inclusive ``A..B`` range, a page at a time."""
@@ -299,7 +318,8 @@ class TestClient(unittest.TestCase):
             list(client.paginate(f'/repos/{REPO}/actions/workflows/unit-tests.yml/runs', 'workflow_runs'))
 
     def test_a_server_error_is_retried_and_a_client_error_is_not(self) -> 'None':
-        replies = [urllib.error.HTTPError('u', 502, 'Bad Gateway', None, None),  # type: ignore[arg-type]
+        """A requests ``HTTPError`` is an ``OSError`` too, so its status decides, not its type."""
+        replies = [http_error('u', 502), requests.ConnectionError('connection reset'),
                    (b'{"ok": 1}', {})]
 
         def flaky(url: 'str', accept: 'str') -> 'tuple[bytes, dict[str, str]]':
@@ -311,29 +331,184 @@ class TestClient(unittest.TestCase):
         waits = []  # type: list[float]
         client = ci_timing.Client('t', transport=flaky, sleep=waits.append)
         self.assertEqual(client.get('/x'), {'ok': 1})
-        self.assertEqual((client.calls, waits), (2, [ci_timing.RETRY_WAITS[0]]))
+        self.assertEqual((client.calls, waits), (3, list(ci_timing.RETRY_WAITS)))
         missing = ci_timing.Client('t', transport=FakeAPI(), sleep=waits.append)
-        with self.assertRaises(urllib.error.HTTPError):
+        with self.assertRaises(requests.HTTPError):
             missing.get('/nowhere')
         self.assertEqual(missing.calls, 1)
 
+    def test_the_link_header_is_read_as_requests_reads_it(self) -> 'None':
+        """GitHub's own shape: every relation in one header, ``next`` among them."""
+        first = 'https://api.github.com/repositories/1/actions/runs?page=1'
+        header = (f'<{first.replace("1", "2", 1)}>; rel="prev", <{LINK_ROOT}?page=3>; rel="next", '
+                  f'<{LINK_ROOT}?page=9>; rel="last", <{first}>; rel="first"')
+        self.assertEqual(ci_timing.next_link(header), f'{LINK_ROOT}?page=3')
+        self.assertIsNone(ci_timing.next_link(f'<{first}>; rel="first"'))
+        self.assertIsNone(ci_timing.next_link(''))
+
+
+class _Recorder(http.server.BaseHTTPRequestHandler):
+    """Records each request's headers on its server and answers from ``server.reply``."""
+
+    def do_GET(self) -> 'None':  # noqa: N802 -- the name http.server calls
+        self.server.seen.append((self.path, dict(self.headers.items())))  # type: ignore[attr-defined]
+        status, headers, body = self.server.reply(self.path)  # type: ignore[attr-defined]
+        self.send_response(status)
+        for name, value in headers.items():
+            self.send_header(name, value)
+        self.send_header('Content-Length', str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def log_message(self, format: 'str', *args: 'object') -> 'None':  # pylint: disable=redefined-builtin
+        """Quiet: the test reads what it needs from ``server.seen``."""
+
+
+def local_server(case: 'unittest.TestCase', reply: 'Any') -> 'Any':
+    """A :class:`_Recorder` server on ``127.0.0.1`` answering ``reply(path)``, shut down after ``case``."""
+    server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), _Recorder)
+    server.seen = []  # type: ignore[attr-defined]
+    server.reply = reply  # type: ignore[attr-defined]
+    server.root = f'http://127.0.0.1:{server.server_address[1]}'  # type: ignore[attr-defined]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    case.addCleanup(thread.join, 30)
+    case.addCleanup(server.server_close)
+    case.addCleanup(server.shutdown)
+    return server
+
+
+class TestTransport(unittest.TestCase):
+    """The default transport, :mod:`requests`, against servers on ``127.0.0.1`` (#1894).
+
+    :meth:`Client.fetch` refuses anything but https, so these call the transport
+    itself, which is what ``fetch`` calls.
+
+    """
+
+    def serve(self, reply: 'Any') -> 'str':
+        """A server answering with ``reply(path)``; its root URL."""
+        server = local_server(self, reply)
+        self.servers.append(server)
+        return server.root
+
+    def setUp(self) -> 'None':
+        self.servers = []  # type: list[Any]
+        self.client = ci_timing.Client('secret')
+        # No proxy between the test and its own servers, whatever the host has set.
+        proxies = mock.patch.dict(os.environ, {'NO_PROXY': '127.0.0.1', 'no_proxy': '127.0.0.1'})
+        proxies.start()
+        self.addCleanup(proxies.stop)
+
+    def test_a_reply_is_the_body_and_the_lower_cased_headers(self) -> 'None':
+        root = self.serve(lambda path: (200, {'Link': '<https://next>; rel="next"',
+                                              'X-RateLimit-Remaining': '7'}, b'{"ok": 1}'))
+        body, headers = self.client.transport(f'{root}/x', 'application/vnd.github+json')
+        self.assertEqual(body, b'{"ok": 1}')
+        self.assertEqual((headers['link'], headers['x-ratelimit-remaining']), ('<https://next>; rel="next"', '7'))
+        _, sent = self.servers[0].seen[0]
+        self.assertEqual((sent['Accept'], sent['Authorization'], sent['User-Agent']),
+                         ('application/vnd.github+json', 'Bearer secret', 'PyPCAPKit-ci-timing'))
+
+    def test_an_error_status_raises_requests_httperror_with_the_status(self) -> 'None':
+        """What :meth:`Client.fetch` retries on, and :func:`collect` reads a 404 from."""
+        root = self.serve(lambda path: (404, {}, b'{"message": "Not Found"}'))
+        with self.assertRaises(requests.HTTPError) as caught:
+            self.client.transport(f'{root}/nowhere', 'application/vnd.github+json')
+        self.assertEqual(ci_timing.status_of(caught.exception), 404)
+
     def test_the_token_is_not_forwarded_on_a_redirect(self) -> 'None':
-        """An artifact download redirects to blob storage, which must not see it."""
-        seen = []
+        """An artifact download redirects to blob storage, which must not see it.
 
-        class Response(io.BytesIO):
-            headers = {'X-RateLimit-Remaining': '7'}
+        The second server is another origin, as blob storage is another host;
+        requests compares the port as well as the host.
 
-        def urlopen(request, timeout):  # noqa: ARG001
-            seen.append(request)
-            return Response(b'{}')
+        """
+        blob = self.serve(lambda path: (200, {}, b'PK zip bytes'))
+        api = self.serve(lambda path: (302, {'Location': f'{blob}/artifact.zip'}, b''))
+        body, _ = self.client.transport(f'{api}/actions/artifacts/1/zip', 'application/vnd.github+json')
+        self.assertEqual(body, b'PK zip bytes')
+        (_, to_api), = self.servers[1].seen
+        (path, to_blob), = self.servers[0].seen
+        self.assertEqual(path, '/artifact.zip')
+        self.assertEqual(to_api.get('Authorization'), 'Bearer secret')
+        self.assertNotIn('Authorization', to_blob)
 
-        client = ci_timing.Client('secret')
-        with mock.patch.object(ci_timing.urllib.request, 'urlopen', urlopen):
-            client.get('/x')
-        self.assertEqual(seen[0].unredirected_hdrs.get('Authorization'), 'Bearer secret')
-        self.assertNotIn('Authorization', seen[0].headers)
-        self.assertEqual(client.rate_remaining, 7)
+    def test_one_session_serves_every_call(self) -> 'None':
+        root = self.serve(lambda path: (200, {}, b'{}'))
+        self.client.transport(f'{root}/a', 'application/vnd.github+json')
+        session = self.client.session
+        self.client.transport(f'{root}/b', 'application/vnd.github+json')
+        self.assertIsInstance(session, requests.Session)
+        self.assertIs(self.client.session, session)
+
+
+@unittest.skipUnless(HAS_LXML, NO_LXML)
+class TestStrictJUnit(unittest.TestCase):
+    """#1894: JUnit is parsed by lxml with a hardened parser, where ElementTree read it before."""
+
+    CASE = b'<testcase classname="tests.a.TestA" name="test_a" time="0.5"/>'
+    PARSED = [('tests.a.TestA', 'test_a', 0.5)]
+
+    def setUp(self) -> 'None':
+        from lxml import etree  # pylint: disable=import-outside-toplevel
+        self.etree = etree
+
+    def test_malformed_xml_is_refused(self) -> 'None':
+        with self.assertRaises(self.etree.XMLSyntaxError):
+            ci_timing.parse_junit(b'<testsuite tests="1"><testcase classname="c" name="n"></testsuite>')
+
+    def test_nesting_past_the_depth_limit_is_refused(self) -> 'None':
+        """``huge_tree=False`` keeps libxml2's limit on depth; ElementTree has none."""
+        deep = b'<testsuite tests="1">' + b'<properties>' * 300 + b'</properties>' * 300 + self.CASE + b'</testsuite>'
+        with self.assertRaisesRegex(self.etree.XMLSyntaxError, 'depth'):
+            ci_timing.parse_junit(deep)
+
+    def test_an_entity_is_neither_expanded_nor_read(self) -> 'None':
+        """An internal one stays an entity node, and one naming a file or a URL is never opened.
+
+        ElementTree expanded the internal one, and refused the document over the
+        external ones; neither is what this asks of the parser.
+
+        """
+        server = local_server(self, lambda path: (200, {}, b'FETCHED'))
+        with tempfile.TemporaryDirectory() as tmp:
+            canary = pathlib.Path(tmp) / 'canary.txt'
+            canary.write_text('READ', encoding='utf-8')
+            document = (f'<!DOCTYPE testsuite [<!ENTITY inner "INJECTED">'
+                        f'<!ENTITY outer SYSTEM "{canary.as_uri()}">'
+                        f'<!ENTITY remote SYSTEM "{server.root}/remote.xml">]>'
+                        '<testsuite tests="1"><testcase classname="tests.a.TestA" name="test_a" time="0.5">'
+                        '&inner;&outer;&remote;</testcase></testsuite>').encode('utf-8')
+            root = ci_timing.parse_xml(document)
+            self.assertEqual(ci_timing.parse_junit(document), {'cases': self.PARSED, 'suite_tests': 1})
+        case = root.find('testcase')
+        self.assertIsNone(case.text)
+        self.assertEqual([(child.tag is self.etree.Entity, child.name) for child in case],
+                         [(True, 'inner'), (True, 'outer'), (True, 'remote')])
+        text = self.etree.tostring(root)
+        for marker in (b'INJECTED', b'READ', b'FETCHED'):
+            with self.subTest(marker=marker):
+                self.assertNotIn(marker, text)
+        self.assertEqual(server.seen, [])
+
+    def test_an_attribute_naming_an_external_entity_is_refused(self) -> 'None':
+        """An attribute cannot hold an entity node, so libxml2 refuses it rather than read the file."""
+        document = (b'<!DOCTYPE testsuite [<!ENTITY outer SYSTEM "file:///nonexistent/canary.txt">]>'
+                    b'<testsuite tests="1"><testcase classname="c" name="&outer;" time="1"/></testsuite>')
+        with self.assertRaisesRegex(self.etree.XMLSyntaxError, 'external entity'):
+            ci_timing.parse_junit(document)
+
+    def test_comments_and_instructions_change_nothing(self) -> 'None':
+        """lxml's ``iter()`` yields them, but ``iter('testcase')`` and ``findall`` do not."""
+        plain = b'<testsuites><testsuite tests="2">' + self.CASE + b'</testsuite></testsuites>'
+        noisy = (b'<?xml version="1.0" encoding="utf-8"?><!-- a --><testsuites><!-- b --><?pi x?>'
+                 b'<testsuite tests="2"><!-- c -->' + self.CASE + b'<?pi y?></testsuite><!-- d --></testsuites>')
+        alone = b'<testsuite tests="2"><!-- c -->' + self.CASE + b'</testsuite>'
+        expected = {'cases': self.PARSED, 'suite_tests': 2}
+        for label, document in (('plain', plain), ('noisy', noisy), ('a bare testsuite', alone)):
+            with self.subTest(label):
+                self.assertEqual(ci_timing.parse_junit(document), expected)
 
 
 def counted(job: 'dict', cap: 'float') -> 'bool':
@@ -345,8 +520,9 @@ def counted(job: 'dict', cap: 'float') -> 'bool':
     return job['conclusion'] == 'cancelled' and span(job['started_at'], job['completed_at']) >= 0.95 * cap
 
 
+@unittest.skipUnless(HAS_LXML, NO_LXML)
 class TestEndToEnd(unittest.TestCase):
-    """``main`` over the recorded fixtures."""
+    """``main`` over the recorded fixtures, the JUnit artifact included."""
 
     @classmethod
     def setUpClass(cls) -> 'None':
@@ -554,6 +730,7 @@ class TestSampling(unittest.TestCase):
         self.assertEqual(report['window']['read']['unit-tests.yml']['listed'], 4)
         self.assertEqual((report['superseded']['runs'], report['superseded']['of']), (1, 2))
 
+    @unittest.skipUnless(HAS_LXML, NO_LXML)
     def test_a_day_past_the_listing_cap_is_reported(self) -> 'None':
         _, _, report, _ = run_main(api=FakeAPI(inflate=ci_timing.LISTING_CAP))
         self.assertTrue(any('of which the API returned 3' in note for note in report['notes']), report['notes'])
@@ -573,6 +750,32 @@ class TestExitStatus(unittest.TestCase):
                 status, stdout, report, _ = run_main(api=FakeAPI(broken=(broken,)))
                 self.assertEqual((status, report), (ci_timing.EXIT_CRASH, {}))
                 self.assertIn('::error title=CI timing crashed::', stdout)
+
+    def test_a_connection_that_never_answers_is_an_api_failure(self) -> 'None':
+        """requests' errors subclass ``OSError``, which ``main`` reports as an unreadable API."""
+        def down(url: 'str', accept: 'str') -> 'tuple[bytes, dict[str, str]]':
+            raise requests.ConnectionError('connection refused')
+
+        with mock.patch.object(ci_timing, 'RETRY_WAITS', (0, 0)):
+            status, stdout, report, _ = run_main(api=down)  # type: ignore[arg-type]
+        self.assertEqual((status, report), (ci_timing.EXIT_API, {}))
+        self.assertIn('::error title=CI timing could not read the API::connection refused', stdout)
+
+    @unittest.skipUnless(HAS_LXML, NO_LXML)
+    def test_a_workflow_missing_at_a_sha_is_a_note(self) -> 'None':
+        """A 404 for the workflow file leaves its caps unknown and the run going."""
+        class Missing(FakeAPI):
+            def __call__(self, url: 'str', accept: 'str') -> 'tuple[bytes, dict[str, str]]':
+                if '/contents/' in url:
+                    raise http_error(url, 404)
+                return super().__call__(url, accept)
+
+        with mock.patch.object(ci_timing, 'MIN_SAMPLES', 1):
+            status, _, report, _ = run_main(api=Missing())
+        self.assertNotIn(status, (ci_timing.EXIT_API, ci_timing.EXIT_CRASH))
+        missing = [note for note in report['notes'] if 'caps are unknown' in note]
+        self.assertEqual(len(missing), 2, report['notes'])
+        self.assertTrue(all(note.startswith('unit-tests.yml is not at ') for note in missing), missing)
 
 
 class TestRunningJobs(unittest.TestCase):

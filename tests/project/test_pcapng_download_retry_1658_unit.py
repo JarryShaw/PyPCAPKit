@@ -6,9 +6,13 @@ Wireshark mirror sent a CI leg straight to the synthesised stand-in. An HTTP 429
 or 5xx, or a timeout, is now retried with backoff, honouring ``Retry-After``,
 within a small budget; any other failure still falls back at once.
 
-Every test runs against a stubbed ``urllib.request.urlopen`` and a fake clock
-bound over the generator's ``time``, so nothing touches the network or sleeps.
-This module is unit-tier and reads no capture.
+#1894 moved the download from :mod:`urllib.request` to :mod:`requests`.
+:class:`DownloadRetryTests` runs against a stubbed ``requests.get`` and a fake
+clock bound over the generator's ``time``, so nothing touches the network or
+sleeps. :class:`LocalServerTests` sends real requests to a server on the
+loopback interface, because what :mod:`requests` raises for a timeout while the
+body is read is its own behaviour, not something a stub can show. This module
+is unit-tier and reads no capture.
 
 """
 from __future__ import annotations
@@ -16,22 +20,27 @@ from __future__ import annotations
 import contextlib
 import email.utils
 import http.client
+import http.server
 import importlib.util
 import io
 import os
 import pathlib
 import socket
+import subprocess  # nosec B404
 import sys
 import tempfile
+import threading
 import time
 import types
 import unittest
-import urllib.error
 from unittest import mock
 
-from tests._support import PCAPNG_GENERATOR
+import requests
+import urllib3
 
-#: URL the stubbed opener is asked for.
+from tests._support import PCAPNG_GENERATOR, scale_timeout
+
+#: URL the stubbed getter is asked for.
 URL = 'https://example.invalid/many_interfaces.pcapng.1'
 #: Fake current time, a whole second so an HTTP-date maps to it exactly.
 NOW = 1_800_000_000.0
@@ -61,37 +70,56 @@ def _load_generator() -> 'types.ModuleType':
     return module
 
 
-def _http_error(code: int, retry_after: 'str | None' = None) -> urllib.error.HTTPError:
-    """An :class:`~urllib.error.HTTPError` as ``urlopen`` raises it."""
-    headers = http.client.HTTPMessage()
+def _response(code: int, body: bytes = b'', retry_after: 'str | None' = None) -> requests.Response:
+    """A :class:`requests.Response` as ``requests.get`` returns it, unread."""
+    response = requests.Response()
+    response.status_code = code
+    response.reason = http.client.responses.get(code, 'Unknown')  # 599 has no registered phrase
+    response.url = URL
     if retry_after is not None:
-        headers['Retry-After'] = retry_after
-    reason = http.client.responses.get(code, 'Unknown')  # 599 has no registered phrase
-    return urllib.error.HTTPError(URL, code, reason, headers, io.BytesIO())
+        response.headers['Retry-After'] = retry_after
+    response.raw = io.BytesIO(body)
+    return response
 
 
-def _timeout() -> urllib.error.URLError:
-    """A connect timeout, as ``urlopen`` wraps it."""
-    return urllib.error.URLError(socket.timeout('timed out'))
+def _http_error(code: int, retry_after: 'str | None' = None) -> requests.HTTPError:
+    """The :exc:`requests.HTTPError` ``raise_for_status`` raises for ``code``."""
+    try:
+        _response(code, retry_after=retry_after).raise_for_status()
+    except requests.HTTPError as error:
+        return error
+    raise AssertionError(f'{code} is not an error status')  # pragma: no cover
 
 
-class _Opener:
-    """A stand-in for ``urllib.request.urlopen`` serving canned outcomes in turn."""
+def _body_timeout() -> requests.ConnectionError:
+    """A timeout while the body is read, as :mod:`requests` raises it."""
+    return requests.ConnectionError(urllib3.exceptions.ReadTimeoutError(None, URL, 'Read timed out.'))
 
-    def __init__(self, *outcomes: 'BaseException | bytes') -> None:
+
+class _Getter:
+    """A stand-in for ``requests.get`` serving canned outcomes in turn.
+
+    An exception is raised, a :class:`requests.Response` is returned as it is,
+    and bytes are returned as a 200 response with that body.
+
+    """
+
+    def __init__(self, *outcomes: 'BaseException | requests.Response | bytes') -> None:
         self.outcomes = list(outcomes)
         self.calls = []  # type: list[str]
 
-    def __call__(self, url: str, timeout: float) -> io.BytesIO:
+    def __call__(self, url: str, timeout: float) -> requests.Response:
         self.calls.append(url)
         outcome = self.outcomes.pop(0)
         if isinstance(outcome, BaseException):
             raise outcome
-        return io.BytesIO(outcome)
+        if isinstance(outcome, bytes):
+            return _response(200, outcome)
+        return outcome
 
 
-class DownloadRetryTests(unittest.TestCase):
-    """``_download`` retries what is transient, and nothing else."""
+class _Clocked(unittest.TestCase):
+    """The generator, with a fake clock bound over its ``time``."""
 
     generator: 'types.ModuleType'
 
@@ -109,106 +137,218 @@ class DownloadRetryTests(unittest.TestCase):
         self.addCleanup(patcher.stop)
         self.stdout, self.stderr = io.StringIO(), io.StringIO()
 
-    def run_download(self, opener: _Opener) -> bytes:
-        with mock.patch('urllib.request.urlopen', opener), \
+
+class DownloadRetryTests(_Clocked):
+    """``_download`` retries what is transient, and nothing else."""
+
+    def run_download(self, getter: _Getter) -> bytes:
+        with mock.patch('requests.get', getter), \
                 contextlib.redirect_stdout(self.stdout), contextlib.redirect_stderr(self.stderr):
             return self.generator._download(URL)
 
     def test_429_then_success_returns_the_body(self) -> None:
-        opener = _Opener(_http_error(429), b'upstream')
-        self.assertEqual(self.run_download(opener), b'upstream')
-        self.assertEqual(opener.calls, [URL, URL])
+        getter = _Getter(_response(429), b'upstream')
+        self.assertEqual(self.run_download(getter), b'upstream')
+        self.assertEqual(getter.calls, [URL, URL])
         self.assertEqual(self.sleeps, [BACKOFF])
-        self.assertIn('HTTP Error 429: Too Many Requests; retry 1 of 2', self.stderr.getvalue())
+        self.assertIn(f'429 Client Error: Too Many Requests for url: {URL}; retry 1 of 2',
+                      self.stderr.getvalue())
         self.assertEqual(self.stdout.getvalue(), '')
 
     def test_retry_after_is_waited_in_seconds_and_as_an_http_date(self) -> None:
         date = email.utils.formatdate(NOW + 11, usegmt=True)
-        opener = _Opener(_http_error(429, '7'), _http_error(503, date), b'upstream')
-        self.assertEqual(self.run_download(opener), b'upstream')
+        getter = _Getter(_response(429, retry_after='7'), _response(503, retry_after=date), b'upstream')
+        self.assertEqual(self.run_download(getter), b'upstream')
         self.assertEqual(self.sleeps, [7.0, 11.0])
-        self.assertEqual(len(opener.calls), 3)
+        self.assertEqual(len(getter.calls), 3)
 
     def test_retry_after_past_the_budget_is_not_waited(self) -> None:
         """A wait that would take the total past ``RETRY_BUDGET`` ends the retries."""
         cases = {
-            'one long wait': ([_http_error(429, str(int(BUDGET) + 1))], [], 1),
-            'two waits summed': ([_http_error(429, '20'), _http_error(429, '20')], [20.0], 2),
+            'one long wait': ([_response(429, retry_after=str(int(BUDGET) + 1))], [], 1),
+            'two waits summed': ([_response(429, retry_after='20'), _response(429, retry_after='20')], [20.0], 2),
         }
         for label, (errors, sleeps, calls) in cases.items():
             with self.subTest(label):
                 del self.sleeps[:]
                 self.stderr = io.StringIO()
-                opener = _Opener(*errors, b'upstream')
-                with self.assertRaises(urllib.error.HTTPError):
-                    self.run_download(opener)
+                getter = _Getter(*errors, b'upstream')
+                with self.assertRaises(requests.HTTPError):
+                    self.run_download(getter)
                 self.assertEqual(self.sleeps, sleeps)
-                self.assertEqual(len(opener.calls), calls)
+                self.assertEqual(len(getter.calls), calls)
                 self.assertIn('retry budget, so not retrying', self.stderr.getvalue())
 
     def test_waits_totalling_exactly_the_budget_are_waited(self) -> None:
         """``RETRY_BUDGET`` is inclusive: a total of exactly 30 s still retries."""
         cases = {
-            'one wait of the budget': ([_http_error(429, str(int(BUDGET)))], [BUDGET]),
-            'two waits summing to it': ([_http_error(429, '10'), _http_error(503, '20')], [10.0, 20.0]),
+            'one wait of the budget': ([_response(429, retry_after=str(int(BUDGET)))], [BUDGET]),
+            'two waits summing to it': ([_response(429, retry_after='10'), _response(503, retry_after='20')],
+                                        [10.0, 20.0]),
         }
         for label, (errors, sleeps) in cases.items():
             with self.subTest(label):
                 del self.sleeps[:]
-                opener = _Opener(*errors, b'upstream')
-                self.assertEqual(self.run_download(opener), b'upstream')
+                getter = _Getter(*errors, b'upstream')
+                self.assertEqual(self.run_download(getter), b'upstream')
                 self.assertEqual(self.sleeps, sleeps)
-                self.assertEqual(len(opener.calls), len(errors) + 1)
+                self.assertEqual(len(getter.calls), len(errors) + 1)
 
     def test_404_and_other_final_failures_are_not_retried(self) -> None:
         """Only a 429, a 5xx and a timeout get a second attempt.
 
         The 429, 5xx and timeout rows are the control: the same stub, a second
         outcome waiting, and only the error differs. 500 and 599 are the two
-        ends of the 5xx range, both inclusive.
+        ends of the 5xx range, both inclusive. A refused connection is a
+        :exc:`requests.ConnectionError` too, as a timeout while the body is read
+        is, but wraps no urllib3 ``ReadTimeoutError``.
 
         """
+        refused = requests.ConnectionError(urllib3.exceptions.MaxRetryError(
+            None, URL, ConnectionRefusedError(111, 'refused')))
         cases = (
-            ('HTTP 404', _http_error(404), 1),
-            ('HTTP 403', _http_error(403), 1),
-            ('HTTP 400', _http_error(400), 1),
-            ('connection refused', urllib.error.URLError(ConnectionRefusedError(111, 'refused')), 1),
-            ('HTTP 429', _http_error(429), 2),
-            ('HTTP 500', _http_error(500), 2),
-            ('HTTP 502', _http_error(502), 2),
-            ('HTTP 599', _http_error(599), 2),
-            ('connect timeout', _timeout(), 2),
-            ('read timeout', socket.timeout('timed out'), 2),
+            ('HTTP 404', _response(404), requests.HTTPError, 1),
+            ('HTTP 403', _response(403), requests.HTTPError, 1),
+            ('HTTP 400', _response(400), requests.HTTPError, 1),
+            ('connection refused', refused, requests.ConnectionError, 1),
+            ('HTTP 429', _response(429), None, 2),
+            ('HTTP 500', _response(500), None, 2),
+            ('HTTP 502', _response(502), None, 2),
+            ('HTTP 599', _response(599), None, 2),
+            ('connect timeout', requests.ConnectTimeout('timed out'), None, 2),
+            ('read timeout', requests.ReadTimeout('timed out'), None, 2),
+            ('timeout reading the body', _body_timeout(), None, 2),
+            ('bare socket timeout', socket.timeout('timed out'), None, 2),
         )
-        for label, error, calls in cases:
+        for label, outcome, raised, calls in cases:
             with self.subTest(label):
                 del self.sleeps[:]
-                opener = _Opener(error, b'upstream')
-                if calls == 1:
-                    with self.assertRaises(type(error)):
-                        self.run_download(opener)
+                getter = _Getter(outcome, b'upstream')
+                if raised is not None:
+                    with self.assertRaises(raised):
+                        self.run_download(getter)
                     self.assertEqual(self.sleeps, [])
                 else:
-                    self.assertEqual(self.run_download(opener), b'upstream')
-                self.assertEqual(len(opener.calls), calls)
+                    self.assertEqual(self.run_download(getter), b'upstream')
+                self.assertEqual(len(getter.calls), calls)
 
     def test_exhausted_retries_fall_back_to_the_stand_in(self) -> None:
         fixture = self.generator._Fixture(name='many_interfaces.pcapng', feature='probe',
                                           build=lambda: b'stand-in', url=URL, sha256='0' * 64)
-        opener = _Opener(_http_error(429), _http_error(503), _timeout(), b'never served')
+        timeout = requests.ConnectTimeout('timed out')
+        getter = _Getter(_response(429), _response(503), timeout, b'never served')
         with tempfile.TemporaryDirectory(prefix='pcapkit-1658-') as tmp, \
-                mock.patch('urllib.request.urlopen', opener), \
+                mock.patch('requests.get', getter), \
                 contextlib.redirect_stdout(self.stdout), contextlib.redirect_stderr(self.stderr):
             data, origin = self.generator._materialise(fixture, pathlib.Path(tmp) / fixture.name)
 
         self.assertEqual((data, origin), (b'stand-in', 'synthesised (download unavailable)'))
-        self.assertEqual(len(opener.calls), ATTEMPTS)
+        self.assertEqual(len(getter.calls), ATTEMPTS)
         self.assertEqual(self.sleeps, [BACKOFF, 2 * BACKOFF])
         self.assertEqual(self.stderr.getvalue().count('; retry '), 2)
         self.assertEqual(self.stdout.getvalue(), (
-            f'    ! {URL} is unreachable (<urlopen error timed out>);\n'
+            f'    ! {URL} is unreachable (timed out);\n'
             '    ! synthesising a stand-in for many_interfaces.pcapng instead -- the '
             'upstream capture was NOT used\n'))
+
+    def test_without_requests_the_stand_in_is_used(self) -> None:
+        """#1894: :mod:`requests` is imported for the download alone.
+
+        So the generator loads without it, and a fixture with a URL falls back as
+        it does offline rather than failing the whole run. In a child process,
+        whose ``sys.modules`` entry of ``None`` makes ``import requests`` raise
+        :exc:`ImportError` there and nowhere else.
+
+        """
+        script = (
+            'import importlib.util, pathlib, sys, tempfile\n'
+            "sys.modules['requests'] = None\n"
+            f'spec = importlib.util.spec_from_file_location("generator", {str(PCAPNG_GENERATOR)!r})\n'
+            'generator = importlib.util.module_from_spec(spec)\n'
+            'spec.loader.exec_module(generator)\n'
+            "fixture = generator._Fixture(name='many_interfaces.pcapng', feature='probe',\n"
+            f"                             build=lambda: b'stand-in', url={URL!r}, sha256='0' * 64)\n"
+            'with tempfile.TemporaryDirectory() as tmp:\n'
+            '    print(generator._materialise(fixture, pathlib.Path(tmp) / fixture.name))\n'
+        )
+        result = subprocess.run([sys.executable, '-c', script], capture_output=True, text=True,
+                                check=False, timeout=scale_timeout(60))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn(f'    ! {URL} cannot be fetched without requests (', result.stdout)
+        self.assertIn("(b'stand-in', 'synthesised (download unavailable)')", result.stdout)
+
+
+class _Handler(http.server.BaseHTTPRequestHandler):
+    """Serves the outcomes queued on its server, one per request."""
+
+    def do_GET(self) -> None:  # noqa: N802 -- the name http.server calls
+        status, headers, body, stall = self.server.outcomes.pop(0)  # type: ignore[attr-defined]
+        self.send_response(status)
+        for name, value in headers.items():
+            self.send_header(name, value)
+        self.send_header('Content-Length', str(len(body)))
+        self.end_headers()
+        if stall:
+            # Part of the body, then nothing until the test ends.
+            self.wfile.write(body[:4])
+            self.wfile.flush()
+            self.server.release.wait(30)  # type: ignore[attr-defined]
+            return
+        self.wfile.write(body)
+
+    def log_message(self, format: str, *args: object) -> None:  # pylint: disable=redefined-builtin
+        """Quiet: the test reads what it needs from the outcomes."""
+
+
+class LocalServerTests(_Clocked):
+    """``_download`` against real responses from a server on ``127.0.0.1``."""
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), _Handler)
+        self.server.outcomes = []  # type: ignore[attr-defined]
+        self.server.release = threading.Event()  # type: ignore[attr-defined]
+        thread = threading.Thread(target=self.server.serve_forever, daemon=True)
+        thread.start()
+        self.addCleanup(thread.join, 30)
+        self.addCleanup(self.server.server_close)
+        self.addCleanup(self.server.shutdown)
+        self.addCleanup(self.server.release.set)  # type: ignore[attr-defined]
+        self.url = f'http://127.0.0.1:{self.server.server_address[1]}/many_interfaces.pcapng.1'
+        # No proxy between the test and its own server, whatever the host has set.
+        proxies = mock.patch.dict(os.environ, {'NO_PROXY': '127.0.0.1', 'no_proxy': '127.0.0.1'})
+        proxies.start()
+        self.addCleanup(proxies.stop)
+
+    def serve(self, status: int, body: bytes = b'', stall: bool = False, **headers: str) -> None:
+        self.server.outcomes.append((status, headers, body, stall))  # type: ignore[attr-defined]
+
+    def download(self) -> bytes:
+        with contextlib.redirect_stdout(self.stdout), contextlib.redirect_stderr(self.stderr):
+            return self.generator._download(self.url)
+
+    def test_a_timeout_while_the_body_is_read_is_retried(self) -> None:
+        self.serve(200, b'upstream capture', stall=True)
+        self.serve(200, b'upstream capture')
+        with mock.patch.object(self.generator, 'TIMEOUT', 0.5):
+            self.assertEqual(self.download(), b'upstream capture')
+        self.assertEqual(self.sleeps, [BACKOFF])
+        self.assertIn('Read timed out', self.stderr.getvalue())
+
+    def test_retry_after_on_a_real_429_is_waited(self) -> None:
+        self.serve(429, **{'Retry-After': '3'})
+        self.serve(200, b'upstream capture')
+        self.assertEqual(self.download(), b'upstream capture')
+        self.assertEqual(self.sleeps, [3.0])
+
+    def test_a_real_404_is_not_retried(self) -> None:
+        self.serve(404)
+        self.serve(200, b'never served')
+        with self.assertRaises(requests.HTTPError) as caught:
+            self.download()
+        self.assertEqual(caught.exception.response.status_code, 404)
+        self.assertEqual(self.sleeps, [])
+        self.assertEqual(len(self.server.outcomes), 1)  # type: ignore[attr-defined]
 
 
 class RetryAfterTests(unittest.TestCase):
@@ -232,7 +372,9 @@ class RetryAfterTests(unittest.TestCase):
         with self.subTest('no header'):
             self.assertIsNone(generator._retry_after(_http_error(429), NOW))
         with self.subTest('not an HTTP error'):
-            self.assertIsNone(generator._retry_after(_timeout(), NOW))
+            self.assertIsNone(generator._retry_after(requests.ConnectTimeout('timed out'), NOW))
+        with self.subTest('not a requests error'):
+            self.assertIsNone(generator._retry_after(socket.timeout('timed out'), NOW))
 
     def test_a_minus_0000_date_is_utc_whatever_the_host_zone(self) -> None:
         """An HTTP-date in a ``-0000`` zone names a UTC instant.

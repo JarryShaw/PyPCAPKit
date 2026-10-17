@@ -472,8 +472,8 @@ jobs:
 
       # The Scapy extra is there for examples/generators/pcap.py and legacy.py,
       # which build their captures with scapy; examples/generators/pcapng.py needs
-      # nothing beyond the standard library and pcapkit itself, which it uses to
-      # parse each fixture back. DPKT joins it so the dpkt-gated methods
+      # requests (#1894), from the test extra, and pcapkit itself, which it uses
+      # to parse each fixture back. DPKT joins it so the dpkt-gated methods
       # living under tests/integration/ (test_engine_parity.py,
       # test_engine_runtime.py) actually run here instead of skipping -- see
       # #729; same reasoning as the `test` job above.
