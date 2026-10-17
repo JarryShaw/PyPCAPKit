@@ -8,6 +8,7 @@
         <title>pcapkit.utilities.exceptions - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=10b7d883" />
@@ -492,6 +493,7 @@
 <span class="sd">.. _tbtrim: https://github.com/gousaiyang/tbtrim</span>
 
 <span class="sd">"""</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">contextvars</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
@@ -639,6 +641,64 @@
 <span class="c1">##############################################################################</span>
 
 
+<span class="c1">#: ContextVar[tuple[Type[BaseException], ...]]: The exception classes the</span>
+<span class="c1">#: :mod:`pcapkit` code running in this context has undertaken to catch itself,</span>
+<span class="c1">#: as declared by the innermost :class:`_CaughtByCaller` block. A</span>
+<span class="c1">#: :class:`BaseError` that is an instance of one of them is constructed quiet,</span>
+<span class="c1">#: whatever its own ``quiet`` says.</span>
+<span class="c1">#:</span>
+<span class="c1">#: A :class:`~contextvars.ContextVar` rather than a module global, so that</span>
+<span class="c1">#: entering a block on one thread never changes what another thread reads, and</span>
+<span class="c1">#: one thread's lookup cannot silence an unrelated error on another.</span>
+<span class="n">_caught_here</span> <span class="o">=</span> <span class="n">contextvars</span><span class="o">.</span><span class="n">ContextVar</span><span class="p">(</span>
+    <span class="s1">'pcapkit.utilities.exceptions._caught_here'</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="p">(),</span>
+<span class="p">)</span>  <span class="c1"># type: contextvars.ContextVar[tuple[Type[BaseException], ...]]</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_CaughtByCaller</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Construct errors of the given classes quietly for the duration of a block.</span>
+
+<span class="sd">    For :mod:`pcapkit` code that is about to call something it does not own --</span>
+<span class="sd">    a generated :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value`</span>
+<span class="sd">    override, say -- and will catch the named exceptions itself. An error the</span>
+<span class="sd">    callee raises is then the quiet control flow it is at that call site,</span>
+<span class="sd">    without the callee having to pass ``quiet=True``, which it cannot know to</span>
+<span class="sd">    do (:issue:`1845`). Only the named classes are affected: anything else the</span>
+<span class="sd">    callee raises escapes the caller and so stays loud.</span>
+
+<span class="sd">    Given no classes, it declares that nothing is caught, which makes errors</span>
+<span class="sd">    loud again inside an enclosing block -- how</span>
+<span class="sd">    :meth:`~pcapkit.corekit.enum.EnumRegistry.register` keeps its rejection</span>
+<span class="sd">    loud whoever calls it.</span>
+
+<span class="sd">    Re-entrant: on exit a block restores whatever the enclosing block declared.</span>
+<span class="sd">    An instance holds the token of the one ``with`` it is entered by, so it is</span>
+<span class="sd">    built afresh for each.</span>
+
+<span class="sd">    A class rather than :func:`contextlib.contextmanager`, because</span>
+<span class="sd">    :meth:`EnumLookup.get &lt;pcapkit.corekit.enum.EnumLookup.get&gt;` enters one on</span>
+<span class="sd">    every call with a non-:class:`str` key, and the generator machinery</span>
+<span class="sd">    measured at several times the cost of the lookup it would wrap.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        *types: Exception classes the caller catches.</span>
+
+<span class="sd">    """</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'_types'</span><span class="p">,</span> <span class="s1">'_token'</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">types</span><span class="p">:</span> <span class="s1">'Type[BaseException]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_types</span> <span class="o">=</span> <span class="n">types</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+        <span class="c1"># NOTE: set here rather than in ``__init__``, since a token exists only</span>
+        <span class="c1"># once the variable has been set, which is what entering the block does.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_token</span> <span class="o">=</span> <span class="n">_caught_here</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_types</span><span class="p">)</span>  <span class="c1"># pylint: disable=attribute-defined-outside-init</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">exc_info</span><span class="p">:</span> <span class="s1">'object'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+        <span class="n">_caught_here</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_token</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="BaseError">
 <a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.BaseError">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">BaseError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
@@ -661,6 +721,12 @@
 <span class="sd">    :data:`sys.excepthook` nor :data:`threading.excepthook` is touched. It is</span>
 <span class="sd">    still a perfectly ordinary exception, carrying its message for whoever</span>
 <span class="sd">    catches it.</span>
+
+<span class="sd">    An error is also quiet when it is constructed inside a</span>
+<span class="sd">    :class:`_CaughtByCaller` block naming one of its classes, which is how a</span>
+<span class="sd">    :mod:`pcapkit` caller marks as control flow an error raised by code that</span>
+<span class="sd">    does not pass ``quiet=True`` itself. The effect is exactly that of</span>
+<span class="sd">    ``quiet=True``.</span>
 
 <span class="sd">    Important:</span>
 
@@ -696,8 +762,9 @@
 <span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">quiet</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-        <span class="c1"># log error -- a quiet error emits nothing and mutates nothing</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
+        <span class="c1"># log error -- a quiet error emits nothing and mutates nothing, and so</span>
+        <span class="c1"># does one a :class:`_CaughtByCaller` block says its caller catches</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_caught_here</span><span class="o">.</span><span class="n">get</span><span class="p">()):</span>
             <span class="k">if</span> <span class="n">DEVMODE</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="s1">'</span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span>
                                 <span class="n">exc_info</span><span class="o">=</span><span class="bp">self</span> <span class="k">if</span> <span class="n">VERBOSE</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>

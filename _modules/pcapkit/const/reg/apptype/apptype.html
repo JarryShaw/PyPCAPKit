@@ -8,6 +8,7 @@
         <title>pcapkit.const.reg.apptype.apptype - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/mermaid.css?v=10b7d883" />
@@ -508,18 +509,7 @@
 <div class="viewcode-block" id="TransportProtocol">
 <a class="viewcode-back" href="../../../../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.TransportProtocol">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TransportProtocol</span><span class="p">(</span><span class="n">EnumLookup</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Transport layer protocol.</span>
-
-<span class="sd">    .. versionchanged:: 1.5.0</span>
-
-<span class="sd">       An ``aenum.IntEnum`` rather than an ``aenum.IntFlag`` (:issue:`808`),</span>
-<span class="sd">       numbered sequentially: ``sctp`` is ``3`` and ``dccp`` is ``4``, where</span>
-<span class="sd">       they were ``4`` and ``8``, and no :class:`int` is decoded as a ``|``</span>
-<span class="sd">       composite (:issue:`860`). :meth:`get` refuses a name no member</span>
-<span class="sd">       declares, with :exc:`~pcapkit.utilities.exceptions.EnumKeyError`,</span>
-<span class="sd">       rather than minting a member for it (:issue:`808`, :issue:`923`).</span>
-
-<span class="sd">    """</span>
+<span class="w">    </span><span class="sd">"""Transport layer protocol."""</span>
 
     <span class="c1"># mypy has no aenum plugin, so this class is a plain class to it: every</span>
     <span class="c1"># member below is cast rather than left as a bare auto()-valued one --</span>
@@ -716,20 +706,6 @@
 <span class="sd">    :class:`~pcapkit.const.reg.apptype.dccp.DCCP`. Being memberless is also what</span>
 <span class="sd">    makes it subclassable at all, since :mod:`aenum` refuses to extend an</span>
 <span class="sd">    enumeration that already has members.</span>
-
-<span class="sd">    .. versionchanged:: 1.1.1</span>
-
-<span class="sd">       A member converts with :class:`int` to its port number, and compares,</span>
-<span class="sd">       orders and hashes as that port.</span>
-
-<span class="sd">    .. versionchanged:: 1.5.0</span>
-
-<span class="sd">       Split by transport protocol (:issue:`732`): :mod:`pcapkit.const.reg.apptype`</span>
-<span class="sd">       is a package, and every assignment is a member of one of the per-transport</span>
-<span class="sd">       registries rather than of this class. ``get()`` raises</span>
-<span class="sd">       :exc:`ValueError` for a port outside ``0``-``65535`` (:issue:`758`), and</span>
-<span class="sd">       returns an unregistered member rather than minting one for a port the</span>
-<span class="sd">       registry does not assign (:issue:`860`).</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        The rows below are the registry entries whose **transport protocol column</span>
@@ -1874,8 +1850,8 @@
 <span class="sd">         - [N/A] HP Remote Repository for Build and Test Results</span>
 <span class="sd">       * - ``hpr-toollnx``</span>
 <span class="sd">         - N/A</span>
-<span class="sd">         - [N/A] HP Remote System that houses compilers and tools for Linux-</span>
-<span class="sd">           based Systems</span>
+<span class="sd">         - [N/A] HP Remote System that houses compilers and tools for</span>
+<span class="sd">           Linux-based Systems</span>
 <span class="sd">       * - ``hpr-toolwin``</span>
 <span class="sd">         - N/A</span>
 <span class="sd">         - [N/A] HP Remote System that houses compilers and tools for Microsoft</span>
@@ -2392,8 +2368,8 @@
 <span class="sd">         - [N/A] Retrospect backup and restore service</span>
 <span class="sd">       * - ``rfbc``</span>
 <span class="sd">         - N/A</span>
-<span class="sd">         - [N/A] Remote Frame Buffer Client (Used by VNC viewers in listen-</span>
-<span class="sd">           mode)</span>
+<span class="sd">         - [N/A] Remote Frame Buffer Client (Used by VNC viewers in</span>
+<span class="sd">           listen-mode)</span>
 <span class="sd">       * - ``rfid``</span>
 <span class="sd">         - N/A</span>
 <span class="sd">         - [N/A] RFID Reader Mach1(tm) Protocol</span>

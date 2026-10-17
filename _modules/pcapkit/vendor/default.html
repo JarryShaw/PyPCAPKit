@@ -8,6 +8,7 @@
         <title>pcapkit.vendor.default - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=10b7d883" />
@@ -763,6 +764,25 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">wrap_comment</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Wraps long-length text to shorter lines of comments.</span>
 
+<span class="sd">        Sphinx renders a ``#:`` comment as reST, and its continuation lines</span>
+<span class="sd">        join into one paragraph, so the text is made safe for that first:</span>
+
+<span class="sd">        * a space goes after a URL reference that another bracket follows</span>
+<span class="sd">          directly, as in ``[http://ele2.io][Damir Franusic]``. docutils reads</span>
+<span class="sd">          ``]`` and ``[`` as URL characters, so the autolink would run on into</span>
+<span class="sd">          the next citation;</span>
+<span class="sd">        * a leading enumerator, such as the ``(S)`` of ``(S) flag``, is</span>
+<span class="sd">          backslash-escaped, since reST would render it as an enumerated list.</span>
+
+<span class="sd">        A line never breaks at a hyphen, which would render ``run-time`` as</span>
+<span class="sd">        ``run- time``. Only a word longer than a whole line is split inside.</span>
+
+<span class="sd">        .. versionchanged:: 1.5.0</span>
+
+<span class="sd">           Spaces a URL reference off the bracket after it and escapes a</span>
+<span class="sd">           leading enumerator (:issue:`1846`), and no longer breaks a line at a</span>
+<span class="sd">           hyphen (:issue:`1847`).</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            text: Source text.</span>
 
@@ -770,7 +790,12 @@
 <span class="sd">            Wrapped comments.</span>
 
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="s1">'</span><span class="se">\n</span><span class="s1">    #: '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">textwrap</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="mi">76</span><span class="p">))</span></div>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">'(://[^\s\[\]]*\])(?=\[)'</span><span class="p">,</span> <span class="sa">r</span><span class="s1">'\1 '</span><span class="p">,</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="c1"># NOTE: the enumerator forms docutils recognises -- ``1.``, ``(a)``,</span>
+        <span class="c1"># ``iv)``, ``#.`` and so on -- each followed by a space or nothing.</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">'\A(?=(?:\((?:[0-9]+|[a-zA-Z]|[ivxlcdm]+|[IVXLCDM]+|#)\)'</span>
+                      <span class="sa">r</span><span class="s1">'|(?:[0-9]+|[a-zA-Z]|[ivxlcdm]+|[IVXLCDM]+|#)[.)])(?: |\Z))'</span><span class="p">,</span> <span class="sa">r</span><span class="s1">'</span><span class="se">\\</span><span class="s1">'</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">'</span><span class="se">\n</span><span class="s1">    #: '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">textwrap</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="mi">76</span><span class="p">,</span> <span class="n">break_on_hyphens</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span></div>
 
 
     <span class="nd">@staticmethod</span>

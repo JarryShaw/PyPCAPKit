@@ -8,6 +8,7 @@
         <title>pcapkit.foundation.engines.dpkt - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/mermaid.css?v=10b7d883" />
@@ -507,14 +508,18 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'DPKT'</span><span class="p">,</span> <span class="s1">'PCAPNGReader'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">types</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleType</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">dpkt.dpkt</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">DPKTPacket</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">dpkt.ethernet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Ethernet</span> <span class="k">as</span> <span class="n">DPKTEthernet</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">dpkt.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP</span> <span class="k">as</span> <span class="n">DPKTIP</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">dpkt.ip6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IP6</span> <span class="k">as</span> <span class="n">DPKTIP6</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">dpkt.loopback</span><span class="w"> </span><span class="kn">import</span> <span class="n">Loopback</span> <span class="k">as</span> <span class="n">DPKTLoopback</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">dpkt.pcap</span><span class="w"> </span><span class="kn">import</span> <span class="n">Reader</span> <span class="k">as</span> <span class="n">PCAPReader</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">Context</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">IF_TSOffsetOption</span> <span class="k">as</span> <span class="n">Data_IF_TSOffsetOption</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">IF_TSResolOption</span> <span class="k">as</span> <span class="n">Data_IF_TSResolOption</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> \
         <span class="n">InterfaceDescriptionBlock</span> <span class="k">as</span> <span class="n">Data_InterfaceDescriptionBlock</span>
@@ -522,6 +527,57 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimplePacketBlock</span> <span class="k">as</span> <span class="n">Data_SimplePacketBlock</span>
 
     <span class="n">Reader</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">PCAPReader</span><span class="p">,</span> <span class="s1">'PCAPNGReader'</span><span class="p">]</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">_DPKTCoreModule</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">""":mod:`dpkt.dpkt`, as :class:`DPKT` reads it."""</span>
+
+        <span class="nd">@property</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">Packet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[DPKTPacket]'</span><span class="p">:</span> <span class="o">...</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">_DPKTEthernetModule</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">""":mod:`dpkt.ethernet`, as :class:`DPKT` reads it."""</span>
+
+        <span class="nd">@property</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">Ethernet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[DPKTEthernet]'</span><span class="p">:</span> <span class="o">...</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">_DPKTIPModule</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">""":mod:`dpkt.ip`, as :class:`DPKT` reads it."""</span>
+
+        <span class="nd">@property</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">IP</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[DPKTIP]'</span><span class="p">:</span> <span class="o">...</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">_DPKTIP6Module</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">""":mod:`dpkt.ip6`, as :class:`DPKT` reads it."""</span>
+
+        <span class="nd">@property</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">IP6</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[DPKTIP6]'</span><span class="p">:</span> <span class="o">...</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">_DPKTLoopbackModule</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">""":mod:`dpkt.loopback`, as :class:`DPKT` reads it."""</span>
+
+        <span class="nd">@property</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">Loopback</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[DPKTLoopback]'</span><span class="p">:</span> <span class="o">...</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">_DPKTPackage</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">""":mod:`dpkt`, as :class:`DPKT` reads it through :attr:`DPKT._expkg` (#1878).</span>
+
+<span class="sd">        Each attribute is a submodule, described by what the engine reads of it.</span>
+<span class="sd">        mypy matches a module with a protocol at the top level only, so the</span>
+<span class="sd">        submodules are checked through the stub types they name, under</span>
+<span class="sd">        :file:`typings/dpkt`.</span>
+
+<span class="sd">        """</span>
+
+        <span class="nd">@property</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">dpkt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_DPKTCoreModule'</span><span class="p">:</span> <span class="o">...</span>
+        <span class="nd">@property</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">ethernet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_DPKTEthernetModule'</span><span class="p">:</span> <span class="o">...</span>
+        <span class="nd">@property</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">ip</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_DPKTIPModule'</span><span class="p">:</span> <span class="o">...</span>
+        <span class="nd">@property</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">ip6</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_DPKTIP6Module'</span><span class="p">:</span> <span class="o">...</span>
+        <span class="nd">@property</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">loopback</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_DPKTLoopbackModule'</span><span class="p">:</span> <span class="o">...</span>
 
 <span class="c1">#: logging.Logger: Module-level logger, a child of the package-wide</span>
 <span class="c1">#: :data:`pcapkit.utilities.logging.logger`.</span>
@@ -665,8 +721,10 @@
             <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s1">] invalid interface ID: </span><span class="si">{</span><span class="n">iface_id</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
         <span class="n">interface</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="n">iface_id</span><span class="p">]</span>
 
-        <span class="n">tsresol</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_tsresol</span><span class="p">)</span>
-        <span class="n">tsoffset</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_tsoffset</span><span class="p">)</span>
+        <span class="n">tsresol</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[Data_IF_TSResolOption]'</span><span class="p">,</span>
+                       <span class="n">interface</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_tsresol</span><span class="p">))</span>
+        <span class="n">tsoffset</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[Data_IF_TSOffsetOption]'</span><span class="p">,</span>
+                        <span class="n">interface</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_tsoffset</span><span class="p">))</span>
         <span class="n">resolution</span> <span class="o">=</span> <span class="n">DEFAULT_RESOLUTION</span> <span class="k">if</span> <span class="n">tsresol</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">tsresol</span><span class="o">.</span><span class="n">resolution</span>
         <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">tsoffset</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">tsoffset</span><span class="o">.</span><span class="n">offset</span>
 
@@ -752,7 +810,7 @@
     <span class="c1">#: Attributes of :class:`dpkt.pcap.Reader` the loop below reads, as of dpkt 1.9.8.</span>
     <span class="n">private</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'_Reader__f'</span><span class="p">,</span> <span class="s1">'_Reader__ph'</span><span class="p">,</span> <span class="s1">'_divisor'</span><span class="p">)</span>
 
-    <span class="k">class</span><span class="w"> </span><span class="nc">_Reader</span><span class="p">(</span><span class="n">dpkt</span><span class="o">.</span><span class="n">pcap</span><span class="o">.</span><span class="n">Reader</span><span class="p">):</span>  <span class="c1"># type: ignore[name-defined,misc]</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">_Reader</span><span class="p">(</span><span class="n">dpkt</span><span class="o">.</span><span class="n">pcap</span><span class="o">.</span><span class="n">Reader</span><span class="p">):</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileobj</span><span class="p">:</span> <span class="s1">'IO[bytes]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">fileobj</span><span class="p">)</span>
             <span class="n">missing</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">private</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)]</span>
@@ -768,8 +826,9 @@
         <span class="c1"># NOTE: the loop is :meth:`dpkt.pcap.Reader.__iter__`'s, over the stream</span>
         <span class="c1"># and the record header type that method reads them through. A generator,</span>
         <span class="c1"># so ``dpkt.pcap.Reader.__init__`` calling it runs none of it before</span>
-        <span class="c1"># :attr:`_upstream` is set.</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Iterator[tuple[float, bytes]]'</span><span class="p">:</span>
+        <span class="c1"># :attr:`_upstream` is set. The timestamp is a ``Decimal`` for a</span>
+        <span class="c1"># nanosecond file, from upstream's loop and from this one alike.</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Iterator[tuple[float | decimal.Decimal, bytes]]'</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_upstream</span><span class="p">:</span>
                 <span class="k">yield from</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__iter__</span><span class="p">()</span>
                 <span class="k">return</span>
@@ -831,7 +890,10 @@
 
     <span class="n">layers</span> <span class="o">=</span> <span class="p">{</span><span class="mi">2</span><span class="p">:</span> <span class="n">ip</span><span class="p">,</span> <span class="mi">24</span><span class="p">:</span> <span class="n">ip6</span><span class="p">,</span> <span class="mi">28</span><span class="p">:</span> <span class="n">ip6</span><span class="p">,</span> <span class="mi">30</span><span class="p">:</span> <span class="n">ip6</span><span class="p">}</span>
 
-    <span class="k">class</span><span class="w"> </span><span class="nc">Loopback</span><span class="p">(</span><span class="n">base</span><span class="p">):</span>
+    <span class="c1"># ``base`` is an argument so that the class derives from the given module's</span>
+    <span class="c1"># own ``Loopback``; mypy takes a base class only from a name it can resolve</span>
+    <span class="c1"># statically</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">Loopback</span><span class="p">(</span><span class="n">base</span><span class="p">):</span>  <span class="c1"># type: ignore[valid-type,misc]</span>
 <span class="w">        </span><span class="sd">"""BSD loopback encapsulation."""</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">unpack</span><span class="p">(</span><span class="n">ext</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
@@ -868,7 +930,7 @@
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Engine extraction package, i.e. :mod:`dpkt`.</span>
-        <span class="n">_expkg</span><span class="p">:</span> <span class="s1">'ModuleType'</span>
+        <span class="n">_expkg</span><span class="p">:</span> <span class="s1">'_DPKTPackage'</span>
         <span class="c1">#: Engine extraction temporary storage.</span>
         <span class="n">_extmp</span><span class="p">:</span> <span class="s1">'Reader'</span>
 
@@ -940,11 +1002,11 @@
                  <span class="s2">"'context=' is ignored"</span><span class="p">,</span>
                  <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
 
-        <span class="c1"># setup verbose handler</span>
-        <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_v</span><span class="p">:</span>
+        <span class="c1"># setup verbose handler, unless the caller gave one of their own (#1874)</span>
+        <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_vfunc_default</span><span class="p">:</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.dpkt</span><span class="w"> </span><span class="kn">import</span> <span class="n">packet2chain</span>  <span class="c1"># isort:skip</span>
             <span class="n">ext</span><span class="o">.</span><span class="n">_vfunc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">_frnum</span><span class="si">:</span><span class="s1">&gt;3d</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">packet2chain</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span>  <span class="c1"># pylint: disable=protected-access</span>
+                <span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">_frnum</span><span class="si">:</span><span class="s1">&gt;3d</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">packet2chain</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s2">"DPKTPacket"</span><span class="p">,</span><span class="w"> </span><span class="n">f</span><span class="p">))</span><span class="si">}</span><span class="s1">'</span>  <span class="c1"># pylint: disable=protected-access</span>
             <span class="p">)</span>
 
         <span class="c1"># extract global header</span>
@@ -952,7 +1014,7 @@
 
         <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">magic_number</span> <span class="ow">in</span> <span class="n">PCAP</span><span class="o">.</span><span class="n">MAGIC_NUMBER</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'dpkt: reading </span><span class="si">%s</span><span class="s1"> as PCAP'</span><span class="p">,</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ifnm</span><span class="p">)</span>
-            <span class="n">reader</span> <span class="o">=</span> <span class="n">_pcap_reader</span><span class="p">()(</span><span class="n">ext</span><span class="o">.</span><span class="n">_ifile</span><span class="p">)</span>
+            <span class="n">reader</span> <span class="o">=</span> <span class="n">_pcap_reader</span><span class="p">()(</span><span class="n">ext</span><span class="o">.</span><span class="n">_ifile</span><span class="p">)</span>  <span class="c1"># type: Reader</span>
         <span class="k">elif</span> <span class="n">ext</span><span class="o">.</span><span class="n">magic_number</span> <span class="ow">in</span> <span class="n">PCAPNG</span><span class="o">.</span><span class="n">MAGIC_NUMBER</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'dpkt: reading </span><span class="si">%s</span><span class="s1"> as PCAP-NG'</span><span class="p">,</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ifnm</span><span class="p">)</span>
             <span class="n">reader</span> <span class="o">=</span> <span class="n">PCAPNGReader</span><span class="p">(</span><span class="n">ext</span><span class="o">.</span><span class="n">_ifile</span><span class="p">)</span>
@@ -1086,6 +1148,7 @@
             <span class="n">linktype</span> <span class="o">=</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">datalink</span><span class="p">())</span>
         <span class="n">version</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span> <span class="k">if</span> <span class="n">data</span> <span class="k">else</span> <span class="kc">None</span>
 
+        <span class="n">pkg</span><span class="p">:</span> <span class="s1">'Type[DPKTPacket]'</span>
         <span class="k">if</span> <span class="n">linktype</span> <span class="o">==</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ETHERNET</span><span class="p">:</span>
             <span class="n">pkg</span> <span class="o">=</span> <span class="n">dpkt</span><span class="o">.</span><span class="n">ethernet</span><span class="o">.</span><span class="n">Ethernet</span>
         <span class="k">elif</span> <span class="n">linktype</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV4</span> <span class="ow">or</span> <span class="p">(</span><span class="n">linktype</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">RAW</span> <span class="ow">and</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">4</span><span class="p">):</span>

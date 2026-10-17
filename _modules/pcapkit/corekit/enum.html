@@ -8,6 +8,7 @@
         <title>pcapkit.corekit.enum - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=10b7d883" />
@@ -578,7 +579,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">extend_enum</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NO_DEFAULT</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseError</span><span class="p">,</span> <span class="n">EnumKeyError</span><span class="p">,</span> <span class="n">EnumValueError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseError</span><span class="p">,</span> <span class="n">EnumKeyError</span><span class="p">,</span> <span class="n">EnumValueError</span><span class="p">,</span> <span class="n">_CaughtByCaller</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
@@ -680,14 +681,17 @@
 <span class="sd">        :meth:`get` path: :exc:`~pcapkit.utilities.exceptions.EnumValueError`</span>
 <span class="sd">        subclasses :exc:`ValueError`, so a rejection here is caught by</span>
 <span class="sd">        :meth:`get`'s own ``except ValueError`` and falls back to ``default``</span>
-<span class="sd">        just as any other unresolvable value does. An override raising something</span>
-<span class="sd">        outside that hierarchy would instead propagate past ``default``, which is</span>
-<span class="sd">        a real difference in behaviour rather than a stylistic preference. With</span>
-<span class="sd">        no usable ``default``, a rejection from this hook reaches the caller</span>
-<span class="sd">        exactly as the override raised it -- :meth:`get` re-raises an in-library</span>
-<span class="sd">        ``ValueError`` unchanged rather than re-wrapping it, so the override's own</span>
-<span class="sd">        message and the single log record it already emitted are what the caller</span>
-<span class="sd">        sees.</span>
+<span class="sd">        just as any other unresolvable value does. It is also quiet:</span>
+<span class="sd">        :meth:`get` always calls this hook inside a</span>
+<span class="sd">        :class:`~pcapkit.utilities.exceptions._CaughtByCaller` block for</span>
+<span class="sd">        :exc:`ValueError`, so an override need not pass ``quiet=True`` for its</span>
+<span class="sd">        rejection to log nothing there (:issue:`1845`). An override raising</span>
+<span class="sd">        something outside that hierarchy would instead propagate past</span>
+<span class="sd">        ``default``, unquieted, which is a real difference in behaviour rather</span>
+<span class="sd">        than a stylistic preference. With no usable ``default``, a rejection</span>
+<span class="sd">        from this hook reaches the caller exactly as the override raised it --</span>
+<span class="sd">        :meth:`get` re-raises an in-library ``ValueError`` unchanged rather than</span>
+<span class="sd">        re-wrapping it, so the override's own message is what the caller sees.</span>
 
 <span class="sd">        Called from the places below, and the omissions are deliberate:</span>
 
@@ -698,7 +702,10 @@
 <span class="sd">          every value present is legal by construction, so there is nothing left</span>
 <span class="sd">          to validate.</span>
 <span class="sd">        * :meth:`EnumRegistry.register`, before minting -- the one point at which</span>
-<span class="sd">          a caller can introduce a value no member carries yet.</span>
+<span class="sd">          a caller can introduce a value no member carries yet. Its rejection</span>
+<span class="sd">          stays loud even when ``register`` runs inside :meth:`get`'s quiet</span>
+<span class="sd">          block, since a refused mint is a fault to report rather than a</span>
+<span class="sd">          lookup that missed.</span>
 
 <span class="sd">        Of the registries that override :meth:`EnumRegistry.register` to mint</span>
 <span class="sd">        through a path of their own,</span>
@@ -820,6 +827,17 @@
 <span class="sd">        on the same terms; the ``str`` path does not call the hook, for the reason</span>
 <span class="sd">        given on :meth:`_validate_value` itself.</span>
 
+<span class="sd">        The hook and ``cls(key)`` run inside a</span>
+<span class="sd">        :class:`~pcapkit.utilities.exceptions._CaughtByCaller` block for</span>
+<span class="sd">        :exc:`ValueError`, because every :exc:`ValueError` they raise is this</span>
+<span class="sd">        method's own lookup miss: caught here, then answered with ``default`` or</span>
+<span class="sd">        raised to the caller as the miss. A loud</span>
+<span class="sd">        :exc:`~pcapkit.utilities.exceptions.EnumValueError` an override</span>
+<span class="sd">        constructs there is therefore quiet, though the override never passes</span>
+<span class="sd">        ``quiet=True`` -- the generated overrides cannot know which caller they</span>
+<span class="sd">        serve. An error of any other class is not a lookup miss and escapes</span>
+<span class="sd">        this method as it was raised, so it stays loud.</span>
+
 <span class="sd">        Both failure paths raise from :mod:`pcapkit.utilities.exceptions`</span>
 <span class="sd">        rather than a builtin, per the ruling recorded on GitHub issue</span>
 <span class="sd">        :issue:`923`: in-library code raises from ``pcapkit.utilities.exceptions``</span>
@@ -833,27 +851,34 @@
 <span class="sd">        These details are worth stating, since the exception type alone does</span>
 <span class="sd">        not show them:</span>
 
-<span class="sd">        * **The name miss is raised quietly** --</span>
-<span class="sd">          :exc:`~pcapkit.utilities.exceptions.EnumKeyError` with ``quiet=True``,</span>
-<span class="sd">          so nothing is logged and :data:`sys.tracebacklimit` is left alone.</span>
-<span class="sd">          That is not a cosmetic choice: this method's name miss is in-library</span>
-<span class="sd">          control flow, and at</span>
+<span class="sd">        * **Every miss is quiet**, by name or by value, whether answered with</span>
+<span class="sd">          ``default`` or raised: nothing is logged and no exception hook is</span>
+<span class="sd">          installed. A raised miss still reaches the caller as an ordinary</span>
+<span class="sd">          exception; left uncaught, it is printed by whichever hook is installed</span>
+<span class="sd">          -- the interpreter's own, unless an earlier loud error installed</span>
+<span class="sd">          :mod:`pcapkit`'s. The name miss is</span>
+<span class="sd">          :exc:`~pcapkit.utilities.exceptions.EnumKeyError` with</span>
+<span class="sd">          ``quiet=True``, because it is in-library control flow -- at</span>
 <span class="sd">          :meth:`~pcapkit.const.http.method.Method.get` it is part of a</span>
-<span class="sd">          *successful* call -- that override catches it in order to build an</span>
-<span class="sd">          unregistered member. A loud</span>
-<span class="sd">          error there would put a :data:`logging.CRITICAL` record on every such</span>
-<span class="sd">          call and set :data:`sys.tracebacklimit` to ``0`` process-wide, which</span>
-<span class="sd">          is exactly the GitHub issue :issue:`362` defect</span>
+<span class="sd">          *successful* call, since that override catches it in order to build</span>
+<span class="sd">          an unregistered member. The value miss is quiet through the block</span>
+<span class="sd">          described above, as ruled on :issue:`1845` on the ground that this</span>
+<span class="sd">          method is mostly called from protocol parsing: a value it cannot</span>
+<span class="sd">          resolve is input for the caller to handle, not a fault to report. A</span>
+<span class="sd">          loud miss would put a :data:`logging.CRITICAL` record on every such</span>
+<span class="sd">          call -- the GitHub issue :issue:`362` defect</span>
 <span class="sd">          :class:`~pcapkit.utilities.exceptions.BaseError` documents ``quiet``</span>
-<span class="sd">          for. The value miss takes no such fallback anywhere in this tree, so</span>
-<span class="sd">          it stays loud.</span>
+<span class="sd">          for -- and, outside development mode, install :mod:`pcapkit`'s</span>
+<span class="sd">          exception hooks. :meth:`EnumRegistry.register` refusing the same</span>
+<span class="sd">          value stays loud.</span>
 <span class="sd">        * **An in-library rejection propagates unchanged.** A ``ValueError``</span>
 <span class="sd">          that is already a :exc:`~pcapkit.utilities.exceptions.BaseError` --</span>
 <span class="sd">          typically :exc:`~pcapkit.utilities.exceptions.EnumValueError` from a</span>
 <span class="sd">          subclass's :meth:`_validate_value` -- is re-raised as it stands rather</span>
-<span class="sd">          than wrapped, so the subclass's own message survives and the error is</span>
-<span class="sd">          logged once instead of twice. Only :mod:`aenum`'s and :mod:`enum`'s</span>
-<span class="sd">          own "no member carries this value" is converted. This is the same</span>
+<span class="sd">          than wrapped, so the subclass's own message survives and no second</span>
+<span class="sd">          error is constructed. Only :mod:`aenum`'s and :mod:`enum`'s own "no</span>
+<span class="sd">          member carries this value" is converted, into a quiet</span>
+<span class="sd">          :exc:`~pcapkit.utilities.exceptions.EnumValueError`. This is the same</span>
 <span class="sd">          discrimination :meth:`EnumField.post_process</span>
 <span class="sd">          &lt;pcapkit.corekit.fields.numbers.EnumField.post_process&gt;` already</span>
 <span class="sd">          makes for the same reason.</span>
@@ -878,10 +903,17 @@
 <span class="sd">                rejection reaches the caller as, since that hook is documented</span>
 <span class="sd">                to raise this very class and it is passed through rather than</span>
 <span class="sd">                re-wrapped. A :exc:`ValueError`, so an</span>
-<span class="sd">                ``except ValueError`` caller is unaffected.</span>
+<span class="sd">                ``except ValueError`` caller is unaffected. Quiet.</span>
 <span class="sd">            EnumKeyError: If a name does not resolve and there is no usable</span>
 <span class="sd">                default. A :exc:`KeyError`, so an ``except KeyError`` caller is</span>
-<span class="sd">                unaffected.</span>
+<span class="sd">                unaffected. Quiet.</span>
+
+<span class="sd">        .. versionchanged:: 1.5.0</span>
+
+<span class="sd">           A value miss is quiet, whether ``default`` answers it or it is</span>
+<span class="sd">           raised: it logs nothing and installs no exception hook, while</span>
+<span class="sd">           :meth:`EnumRegistry.register` still reports the same range</span>
+<span class="sd">           rejection loudly (:issue:`1845`).</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -895,13 +927,18 @@
                                        <span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
                 <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_value2member_map_</span><span class="p">[</span><span class="n">default</span><span class="p">]</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="n">_validate_value</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>  <span class="c1"># type: ignore[call-arg]</span>
+            <span class="c1"># NOTE: GitHub issue #1845. Every ValueError raised in this block is</span>
+            <span class="c1"># this method's own lookup miss -- answered with ``default`` below,</span>
+            <span class="c1"># or raised as the miss -- so a loud one is quiet here, whoever</span>
+            <span class="c1"># constructed it.</span>
+            <span class="k">with</span> <span class="n">_CaughtByCaller</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="n">_validate_value</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>  <span class="c1"># type: ignore[call-arg]</span>
         <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="n">NO_DEFAULT</span> <span class="ow">or</span> <span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_value2member_map_</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">BaseError</span><span class="p">):</span>
                     <span class="k">raise</span>
-                <span class="k">raise</span> <span class="n">EnumValueError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">error</span><span class="p">))</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
+                <span class="k">raise</span> <span class="n">EnumValueError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">error</span><span class="p">),</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_value2member_map_</span><span class="p">[</span><span class="n">default</span><span class="p">]</span></div>
 
 
@@ -1000,6 +1037,14 @@
 <span class="sd">        for it than a range complaint would be, and validation is left to guard</span>
 <span class="sd">        only the genuinely new value that is about to be minted.</span>
 
+<span class="sd">        That rejection is always loud. :meth:`~EnumLookup.get` quiets the same</span>
+<span class="sd">        hook, because there the rejection is a lookup miss for the caller to</span>
+<span class="sd">        handle; here it refuses a mint the caller explicitly asked for, which</span>
+<span class="sd">        is a fault to report. So this calls the hook in a</span>
+<span class="sd">        :class:`~pcapkit.utilities.exceptions._CaughtByCaller` block declaring</span>
+<span class="sd">        that nothing is caught -- loud even if ``register`` is reached from</span>
+<span class="sd">        inside a ``get`` (:issue:`1845`).</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            value: Value of the new member.</span>
 <span class="sd">            name: Name of the new member. Required rather than derived, which</span>
@@ -1025,7 +1070,10 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1"> is already registered on </span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> as '</span>
                              <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">existing</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s1">; use </span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">.register_alias() '</span>
                              <span class="sa">f</span><span class="s1">'to add a further name for it'</span><span class="p">)</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">_validate_value</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="c1"># NOTE: GitHub issue #1845. Declares that nothing is caught, so the</span>
+        <span class="c1"># rejection stays loud even inside a ``get`` block that would quiet it.</span>
+        <span class="k">with</span> <span class="n">_CaughtByCaller</span><span class="p">():</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_validate_value</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_extend</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
 
 

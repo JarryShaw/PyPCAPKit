@@ -8,6 +8,7 @@
         <title>pcapkit.vendor.http.method - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/mermaid.css?v=10b7d883" />
@@ -525,21 +526,7 @@
 <span class="s1">__all__ = ['</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">']</span>
 
 <span class="s1">class </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(EnumRegistry, StrEnum):</span>
-<span class="s1">    """[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">DOCS</span><span class="si">}</span>
-
-<span class="s1">    .. versionchanged:: 1.5.0</span>
-
-<span class="s1">       Neither ``_missing_`` nor ``get()`` mints a member, per the owner's</span>
-<span class="s1">       ruling on GitHub issue :issue:`860`: only IANA-registered values are</span>
-<span class="s1">       legitimate members, and a new one is created through :meth:`register`,</span>
-<span class="s1">       which can supply :attr:`safe` and :attr:`idempotent` where a bare wire</span>
-<span class="s1">       method verb carries neither. ``get()`` matches ``key`` case-sensitively,</span>
-<span class="s1">       as :rfc:`9110` makes the method token (:issue:`896`), and checks it</span>
-<span class="s1">       against member values as well as names (:issue:`908`). A member's</span>
-<span class="s1">       :class:`str` payload is its value, so ``Method.GET == 'GET'``</span>
-<span class="s1">       (:issue:`870`).</span>
-
-<span class="s1">    """</span>
+<span class="s1">    """[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">DOCS</span><span class="si">}</span><span class="s1">"""</span>
 
 <span class="s1">    if TYPE_CHECKING:</span>
 <span class="s1">        #: Safe method.</span>
@@ -628,13 +615,6 @@
 <span class="s1">        *registered* value (resolved through ``_value2member_map_``), while</span>
 <span class="s1">        this override's ``default`` supplies the *value* of the</span>
 <span class="s1">        unregistered member it builds on a miss.</span>
-
-<span class="s1">        .. versionchanged:: 1.5.0</span>
-
-<span class="s1">           A non-:class:`str` ``key`` raises :exc:`ValueError`</span>
-<span class="s1">           (:issue:`908`). ``get(42)`` and ``get(None)`` raised</span>
-<span class="s1">           :exc:`AttributeError` from ``key.upper()``, and ``get(b'GET')``</span>
-<span class="s1">           raised :exc:`TypeError`.</span>
 
 <span class="s1">        Args:</span>
 <span class="s1">            key: Key to get enum item. Looked up case-**sensitively**,</span>

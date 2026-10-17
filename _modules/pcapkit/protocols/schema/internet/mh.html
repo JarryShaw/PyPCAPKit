@@ -8,6 +8,7 @@
         <title>pcapkit.protocols.schema.internet.mh - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/mermaid.css?v=10b7d883" />
@@ -1923,8 +1924,8 @@
 <span class="sd">        integer part occupies the leading **48** bits and whose fractional part</span>
 <span class="sd">        occupies the trailing **16**, each unit of the latter being 1/65536 of a</span>
 <span class="sd">        second. NTP splits its 64 bits 32/32 from a different epoch, so reusing</span>
-<span class="sd">        :class:`~pcapkit.protocols.internet.mh.NTPTimestamp` here would misread</span>
-<span class="sd">        both halves.</span>
+<span class="sd">        :class:`~pcapkit.protocols.data.internet.mh.NTPTimestamp` here would</span>
+<span class="sd">        misread both halves.</span>
 
 <span class="sd">    """</span>
 

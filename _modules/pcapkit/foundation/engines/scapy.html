@@ -8,6 +8,7 @@
         <title>pcapkit.foundation.engines.scapy - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/mermaid.css?v=10b7d883" />
@@ -529,13 +530,22 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Scapy'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">types</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleType</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">ScapyPacket</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.plist</span><span class="w"> </span><span class="kn">import</span> <span class="n">PacketList</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">PcapReader</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">_ScapyPackage</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">""":mod:`scapy.all`, as :class:`Scapy` reads it through :attr:`Scapy._expkg` (#1878).</span>
+
+<span class="sd">        Typed by scapy itself, which ships its own type information.</span>
+
+<span class="sd">        """</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">sniff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'PacketList'</span><span class="p">:</span> <span class="o">...</span>
 
 <span class="c1">#: logging.Logger: Module-level logger, a child of the package-wide</span>
 <span class="c1">#: :data:`pcapkit.utilities.logging.logger`.</span>
@@ -764,7 +774,7 @@
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Engine extraction package, i.e. :mod:`scapy.all`.</span>
-        <span class="n">_expkg</span><span class="p">:</span> <span class="s1">'ModuleType'</span>
+        <span class="n">_expkg</span><span class="p">:</span> <span class="s1">'_ScapyPackage'</span>
         <span class="c1">#: Engine extraction temporary storage.</span>
         <span class="n">_extmp</span><span class="p">:</span> <span class="s1">'Iterator[ScapyPacket]'</span>
 
@@ -867,11 +877,11 @@
                  <span class="s2">"'context=' is ignored"</span><span class="p">,</span>
                  <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
 
-        <span class="c1"># setup verbose handler</span>
-        <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_v</span><span class="p">:</span>
+        <span class="c1"># setup verbose handler, unless the caller gave one of their own (#1874)</span>
+        <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_vfunc_default</span><span class="p">:</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.scapy</span><span class="w"> </span><span class="kn">import</span> <span class="n">packet2chain</span>  <span class="c1"># isort:skip</span>
             <span class="n">ext</span><span class="o">.</span><span class="n">_vfunc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">_frnum</span><span class="si">:</span><span class="s1">&gt;3d</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">packet2chain</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span>  <span class="c1"># pylint: disable=protected-access</span>
+                <span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">_frnum</span><span class="si">:</span><span class="s1">&gt;3d</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">packet2chain</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s2">"ScapyPacket"</span><span class="p">,</span><span class="w"> </span><span class="n">f</span><span class="p">))</span><span class="si">}</span><span class="s1">'</span>  <span class="c1"># pylint: disable=protected-access</span>
             <span class="p">)</span>
 
         <span class="c1"># extract global header</span>

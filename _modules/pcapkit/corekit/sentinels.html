@@ -8,6 +8,7 @@
         <title>pcapkit.corekit.sentinels - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=10b7d883" />
@@ -499,6 +500,13 @@
 <span class="sd">:mod:`pcapkit.protocols.protocol` import the object they use from here, but</span>
 <span class="sd">none lists it in ``__all__`` or documents it, and none binds the type.</span>
 
+<span class="sd">Every sentinel type derives from :class:`Sentinel`, which with its</span>
+<span class="sd">metaclass :class:`SentinelMeta` makes it behave like the type of a built-in</span>
+<span class="sd">singleton such as :obj:`None`. Calling the type again, :func:`copy.copy`,</span>
+<span class="sd">:func:`copy.deepcopy` and every :mod:`pickle` protocol give back the one</span>
+<span class="sd">instance (:issue:`1842`). The instance reprs as its own name, neither it nor</span>
+<span class="sd">its type can be changed, and its type cannot be subclassed.</span>
+
 <span class="sd">``ABSENT`` is private to :mod:`pcapkit.protocols.protocol` -- nothing outside</span>
 <span class="sd">that module ever reads it. It carries no leading underscore;</span>
 <span class="sd">:class:`AbsentType`'s docstring says what marks it private instead.</span>
@@ -507,25 +515,286 @@
 
 <span class="sd">   :class:`NoValueType` moves here from :mod:`pcapkit.corekit.fields.field`</span>
 <span class="sd">   (:issue:`911`), and :data:`NO_VALUE` replaces its ``NoValue`` there</span>
-<span class="sd">   (:issue:`937`).</span>
+<span class="sd">   (:issue:`937`). :class:`Sentinel` is the public base of every sentinel</span>
+<span class="sd">   type (:issue:`1842`).</span>
 
 <span class="sd">"""</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">abc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">final</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'NULL'</span><span class="p">,</span> <span class="s1">'NO_VALUE'</span><span class="p">,</span> <span class="s1">'NO_DEFAULT'</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Sentinel'</span><span class="p">,</span> <span class="s1">'NULL'</span><span class="p">,</span> <span class="s1">'NO_VALUE'</span><span class="p">,</span> <span class="s1">'NO_DEFAULT'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Type</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Self</span>
+
+<span class="c1">#: str: Key a sentinel type carries in its own :attr:`~object.__dict__` once</span>
+<span class="c1">#: :meth:`SentinelMeta.__new__` has built it. From then on the type refuses</span>
+<span class="c1">#: every attribute write.</span>
+<span class="n">_FROZEN</span> <span class="o">=</span> <span class="s1">'_frozen'</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_not_a_base</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="s1">'type'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'TypeError'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The error deriving from ``cls`` raises, worded as for ``type(None)``."""</span>
+    <span class="k">return</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'type </span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1"> is not an acceptable base type'</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_read_only</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="s1">'object'</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'AttributeError'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The error setting or deleting ``name`` on ``obj`` raises, worded as for :obj:`None`."""</span>
+    <span class="n">kind</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">),</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">kind</span><span class="si">!r}</span><span class="s1"> object attribute </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1"> is read-only'</span><span class="p">)</span>
+    <span class="k">return</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">kind</span><span class="si">!r}</span><span class="s1"> object has no attribute </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="SentinelMeta">
+<a class="viewcode-back" href="../../../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.SentinelMeta">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SentinelMeta</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Metaclass of :class:`Sentinel`, so every sentinel type acts as ``type(None)`` does.</span>
+
+<span class="sd">    * A concrete sentinel type -- one that sets ``_name``, and so has no</span>
+<span class="sd">      abstract member left -- cannot be subclassed, either by a ``class``</span>
+<span class="sd">      statement or by :meth:`~abc.ABCMeta.register`. Both raise</span>
+<span class="sd">      :exc:`TypeError`, as ``class X(type(None))`` does. An abstract one,</span>
+<span class="sd">      :class:`Sentinel` included, can be.</span>
+<span class="sd">    * A concrete sentinel type makes its one instance while its ``class``</span>
+<span class="sd">      statement runs, and keeps it as ``_instance``.</span>
+<span class="sd">    * Every sentinel type is immutable once its ``class`` statement has run.</span>
+<span class="sd">      Setting or deleting any attribute on it raises :exc:`TypeError`, as</span>
+<span class="sd">      ``type(None).x = 1`` does, so ``_name``, ``_instance`` and the methods</span>
+<span class="sd">      every sentinel inherits stay as they were defined.</span>
+
+<span class="sd">    A concrete sentinel type also gets ``__final__`` set to :obj:`True` here.</span>
+<span class="sd">    :func:`~pcapkit.utilities.compat.final` would record the same, but a class</span>
+<span class="sd">    decorator runs only after the ``class`` statement, when the type already</span>
+<span class="sd">    refuses the write, and :func:`typing.final` skips an attribute it cannot</span>
+<span class="sd">    set.</span>
+
+<span class="sd">    These guards, and :class:`Sentinel`'s own, are Python-level hooks. So</span>
+<span class="sd">    :meth:`type.__setattr__` called directly on the type, or</span>
+<span class="sd">    :meth:`object.__setattr__` setting ``__class__`` on an instance, still</span>
+<span class="sd">    reaches past them, where nothing reaches past a built-in type's.</span>
+
+<span class="sd">    .. versionadded:: 1.5.0</span>
+
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">bases</span><span class="p">:</span> <span class="s1">'tuple[type, ...]'</span><span class="p">,</span> <span class="n">attrs</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'SentinelMeta'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Create the sentinel type, and its instance if it is concrete.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name: Sentinel type name.</span>
+<span class="sd">            bases: Sentinel type bases.</span>
+<span class="sd">            attrs: Sentinel type attributes.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments in class definition.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TypeError: If any of ``bases`` is a concrete sentinel type.</span>
+
+<span class="sd">        """</span>
+        <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">SentinelMeta</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">base</span><span class="o">.</span><span class="n">__abstractmethods__</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">_not_a_base</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+
+        <span class="n">klass</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: ``type.__setattr__`` rather than an assignment, which would</span>
+        <span class="c1"># reach :meth:`__setattr__` below. The writes ``abc.ABCMeta.__new__``</span>
+        <span class="c1"># made above went through it, which is why the type is marked frozen</span>
+        <span class="c1"># only now.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">klass</span><span class="o">.</span><span class="n">__abstractmethods__</span><span class="p">:</span>
+            <span class="nb">type</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="s1">'_instance'</span><span class="p">,</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Type[Sentinel]'</span><span class="p">,</span> <span class="n">klass</span><span class="p">)))</span>
+            <span class="nb">type</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="s1">'__final__'</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="nb">type</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="n">_FROZEN</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">klass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Refuse to set an attribute on a built sentinel type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name: Attribute name.</span>
+<span class="sd">            value: Attribute value.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TypeError: Once the ``class`` statement of ``cls`` has run.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_FROZEN</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'cannot set </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1"> attribute of immutable type </span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__delattr__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Refuse to delete an attribute from a built sentinel type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name: Attribute name.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TypeError: Once the ``class`` statement of ``cls`` has run.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_FROZEN</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'cannot delete </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1"> attribute of immutable type </span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__delattr__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">subclass</span><span class="p">:</span> <span class="s1">'type[Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'type[Any]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Register a virtual subclass, unless ``cls`` is a concrete sentinel type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            subclass: Class to register.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ``subclass``, as :meth:`abc.ABCMeta.register` returns it.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TypeError: If ``cls`` is concrete, which a virtual subclass would</span>
+<span class="sd">                defeat as surely as a real one: :func:`isinstance` would then</span>
+<span class="sd">                accept an object that is not the sentinel.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__abstractmethods__</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">_not_a_base</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">subclass</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="Sentinel">
+<a class="viewcode-back" href="../../../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.Sentinel">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Sentinel</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">SentinelMeta</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Abstract base of every sentinel type, so each behaves like the type of :obj:`None`.</span>
+
+<span class="sd">    A subclass sets ``_name`` to the name of the module-level variable that</span>
+<span class="sd">    holds its one instance, which is what makes it concrete, and gets the</span>
+<span class="sd">    rest from here and from :class:`SentinelMeta`:</span>
+
+<span class="sd">    * :meth:`__new__` hands back the one instance, so calling the type again</span>
+<span class="sd">      cannot produce a second object that fails an ``is`` check. It returns</span>
+<span class="sd">      the existing instance rather than raising, as ``type(None)()`` returns</span>
+<span class="sd">      :obj:`None`, so a caller who builds one by mistake still gets the</span>
+<span class="sd">      sentinel.</span>
+<span class="sd">    * :meth:`__copy__` and :meth:`__deepcopy__` return ``self``.</span>
+<span class="sd">    * :meth:`__reduce__` returns ``_name``, as ``Ellipsis.__reduce__()``</span>
+<span class="sd">      returns ``'Ellipsis'``, so :mod:`pickle` stores the instance as a</span>
+<span class="sd">      reference to that module-level name and loads it back as the same</span>
+<span class="sd">      object, at every protocol. Guarding :meth:`__new__` alone would not</span>
+<span class="sd">      cover protocols 0 and 1, which rebuild through</span>
+<span class="sd">      :func:`copyreg._reconstructor` and so call :meth:`object.__new__`</span>
+<span class="sd">      directly.</span>
+<span class="sd">    * :meth:`__repr__` returns ``_name`` itself, as ``repr(None)`` is</span>
+<span class="sd">      ``'None'``. :func:`str` gives the same, since nothing here overrides</span>
+<span class="sd">      :meth:`object.__str__`.</span>
+<span class="sd">    * :meth:`__setattr__` and :meth:`__delattr__` raise</span>
+<span class="sd">      :exc:`AttributeError` for every name, as ``None.x = 1`` does, and</span>
+<span class="sd">      ``__slots__`` is empty, so an instance has no :attr:`~object.__dict__`</span>
+<span class="sd">      to change either.</span>
+<span class="sd">    * :class:`SentinelMeta` keeps the type itself immutable, and a concrete</span>
+<span class="sd">      one free of subclasses.</span>
+
+<span class="sd">    ``__bool__`` is left to each sentinel, since only some of them stand for</span>
+<span class="sd">    an absent value.</span>
+
+<span class="sd">    Public, as the library's other abstract bases are, so that an annotation</span>
+<span class="sd">    or an :func:`isinstance` check can name every sentinel at once. Every</span>
+<span class="sd">    sentinel the library itself uses is defined in this module</span>
+<span class="sd">    (:issue:`911`).</span>
+
+<span class="sd">    A pickle written before :issue:`1842` still loads. A pickle of</span>
+<span class="sd">    :data:`NULL` names ``_get_null``, kept for it, and a pickle of another</span>
+<span class="sd">    sentinel at protocol 2 or above rebuilds through :meth:`__new__`; both</span>
+<span class="sd">    load as the sentinel. A pickle of another sentinel at protocol 0 or 1</span>
+<span class="sd">    rebuilds through :func:`copyreg._reconstructor`, which no hook on the</span>
+<span class="sd">    class can reach, so it loads as a second instance of the type.</span>
+
+<span class="sd">    .. versionadded:: 1.5.0</span>
+
+<span class="sd">    """</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">()</span>
+
+    <span class="c1">#: 'Sentinel | None': The one instance of a concrete subclass, which</span>
+    <span class="c1">#: :class:`SentinelMeta` makes and assigns on that subclass, so each</span>
+    <span class="c1">#: sentinel type has its own. :obj:`None` on an abstract one.</span>
+    <span class="n">_instance</span><span class="p">:</span> <span class="s1">'Sentinel | None'</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Name of the module-level variable that holds the one instance.</span>
+
+<span class="sd">        A subclass overrides this with a plain class attribute, which is what</span>
+<span class="sd">        makes it concrete.</span>
+
+<span class="sd">        """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return the one instance of this class there will ever be.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TypeError: If ``cls`` is abstract, as :meth:`object.__new__` does.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Self'</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return the sentinel's own name, as ``repr(None)`` is ``'None'``."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'NoReturn'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Refuse, as ``None.x = 1`` does: a sentinel has no state to change.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name: Attribute name.</span>
+<span class="sd">            value: Attribute value.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AttributeError: For every ``name``.</span>
+
+<span class="sd">        """</span>
+        <span class="k">raise</span> <span class="n">_read_only</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__delattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'NoReturn'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Refuse, as ``del None.x`` does.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name: Attribute name.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AttributeError: For every ``name``.</span>
+
+<span class="sd">        """</span>
+        <span class="k">raise</span> <span class="n">_read_only</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return ``self`` -- there is, and only ever will be, one of these."""</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__deepcopy__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memo</span><span class="p">:</span> <span class="s1">'dict[int, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return ``self``, for the same reason as :meth:`__copy__`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            memo: The :func:`copy.deepcopy` memo table. Unused: returning</span>
+<span class="sd">                ``self`` needs no entry, since nothing about this object is</span>
+<span class="sd">                ever copied.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__reduce__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Reduce to ``_name``, which :mod:`pickle` stores as a global reference."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span></div>
+
 
 
 <div class="viewcode-block" id="NullType">
 <a class="viewcode-back" href="../../../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.NullType">[docs]</a>
 <span class="nd">@final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">NullType</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NullType</span><span class="p">(</span><span class="n">Sentinel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Type of :data:`NULL`, the omitted-``class_``/``module`` sentinel.</span>
 
 <span class="sd">    A distinct class rather than a plain :class:`str` such as ``'(null)'``,</span>
@@ -533,35 +802,15 @@
 <span class="sd">    :class:`str` a caller passes, including one that happens to spell</span>
 <span class="sd">    ``'(null)'`` itself, can be this sentinel. See GitHub issue :issue:`833`.</span>
 
-<span class="sd">    Genuinely a singleton, not merely a class this module happens to</span>
-<span class="sd">    instantiate once: :meth:`__new__` always hands back the one instance</span>
-<span class="sd">    that already exists, rather than building a new one, so no caller --</span>
-<span class="sd">    direct, or :mod:`copy`/:mod:`pickle` reconstructing an instance behind</span>
-<span class="sd">    the scenes -- can end up holding a second object that fails an ``is</span>
-<span class="sd">    NULL`` check downstream. :meth:`ModuleDescriptor.klass</span>
-<span class="sd">    &lt;pcapkit.corekit.module.ModuleDescriptor.klass&gt;` makes exactly that</span>
-<span class="sd">    check; a second instance would slip past it to :func:`getattr` and</span>
-<span class="sd">    downgrade a clean :exc:`~pcapkit.utilities.exceptions.ProtocolError` into</span>
-<span class="sd">    a bare :exc:`TypeError` (``attribute name must be string, not</span>
-<span class="sd">    'NullType'``). A stricter guard that raises on a second call would be</span>
-<span class="sd">    truer to "singleton" in the abstract, but it would also mean the module's</span>
-<span class="sd">    own ``NULL = NullType()`` below is the only call that is ever allowed to</span>
-<span class="sd">    succeed -- fragile for no real benefit, since nothing here needs</span>
-<span class="sd">    *rejecting* a second construction, only preventing it from producing a</span>
-<span class="sd">    distinct object.</span>
-
-<span class="sd">    :func:`copy.copy`, :func:`copy.deepcopy` and :mod:`pickle` protocols 2</span>
-<span class="sd">    and up reconstruct through ``cls.__new__(cls)``, which the guard above</span>
-<span class="sd">    already keeps to one instance. Pickle protocols 0 and 1 do not: they</span>
-<span class="sd">    reconstruct through :func:`copyreg._reconstructor`, which calls</span>
-<span class="sd">    :func:`object.__new__` *directly*, bypassing :meth:`__new__` entirely.</span>
-<span class="sd">    :meth:`__reduce__` is defined so that every protocol is routed through</span>
-<span class="sd">    the same module-level getter instead of through reconstruction at all,</span>
-<span class="sd">    and :meth:`__copy__`/:meth:`__deepcopy__` return ``self`` without</span>
-<span class="sd">    reducing anything.</span>
+<span class="sd">    :class:`Sentinel` keeps it to one instance. :meth:`ModuleDescriptor.klass</span>
+<span class="sd">    &lt;pcapkit.corekit.module.ModuleDescriptor.klass&gt;` checks ``is NULL``; a</span>
+<span class="sd">    second instance would slip past it to :func:`getattr` and downgrade a</span>
+<span class="sd">    clean :exc:`~pcapkit.utilities.exceptions.ProtocolError` into a bare</span>
+<span class="sd">    :exc:`TypeError` (``attribute name must be string, not 'NullType'``).</span>
 
 <span class="sd">    A caveat rather than a defect: :func:`importlib.reload` on this module</span>
-<span class="sd">    re-executes ``NULL = NullType()`` below, producing a *second* singleton</span>
+<span class="sd">    re-executes the ``class`` statement and ``NULL = NullType()`` below,</span>
+<span class="sd">    producing a *second* singleton</span>
 <span class="sd">    that the reloaded code compares against correctly but that every module</span>
 <span class="sd">    which already imported the pre-reload :data:`NULL` still holds -- so a</span>
 <span class="sd">    comparison spanning the reload sees two "singletons" that are not each</span>
@@ -573,7 +822,9 @@
 <span class="sd">    live registry this sentinel could be re-read from. It is a property of</span>
 <span class="sd">    sharing one module-level binding across a reload, not something this</span>
 <span class="sd">    class's singleton guarantees claim to solve, and nothing in this package</span>
-<span class="sd">    reloads :mod:`pcapkit.corekit.sentinels` after import.</span>
+<span class="sd">    reloads :mod:`pcapkit.corekit.sentinels` after import. Pickling a</span>
+<span class="sd">    pre-reload :data:`NULL` raises :exc:`pickle.PicklingError`, since it is</span>
+<span class="sd">    no longer the object its name refers to.</span>
 
 <span class="sd">    Reloading :mod:`pcapkit.corekit.module` instead has no effect on the</span>
 <span class="sd">    singleton at all. That module only imports :data:`NULL` from here, and</span>
@@ -583,56 +834,13 @@
 
 <span class="sd">    """</span>
 
-    <span class="c1">#: 'NullType | None': The one instance :meth:`__new__` ever returns,</span>
-    <span class="c1">#: including for the module-level ``NULL = NullType()`` below that</span>
-    <span class="c1">#: creates it in the first place. Kept on the class rather than as a</span>
-    <span class="c1">#: module global so :meth:`__new__` can read and write it without a</span>
-    <span class="c1">#: ``global`` statement.</span>
-    <span class="n">_instance</span><span class="p">:</span> <span class="s1">'NullType | None'</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">()</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'NullType'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Return the one instance of this class there will ever be."""</span>
-        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span>
+    <span class="n">_name</span> <span class="o">=</span> <span class="s1">'NULL'</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[False]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Return :obj:`False`."""</span>
-        <span class="k">return</span> <span class="kc">False</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Return :obj:`str` representation of the sentinel."""</span>
-        <span class="k">return</span> <span class="s1">'&lt;NULL&gt;'</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'NullType'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Return ``self`` -- there is, and only ever will be, one of these."""</span>
-        <span class="k">return</span> <span class="bp">self</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">__deepcopy__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memo</span><span class="p">:</span> <span class="s1">'dict[int, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'NullType'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Return ``self``, for the same reason as :meth:`__copy__`.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            memo: The :func:`copy.deepcopy` memo table. Unused: returning</span>
-<span class="sd">                ``self`` needs no entry, since nothing about this object is</span>
-<span class="sd">                ever copied.</span>
-
-<span class="sd">        """</span>
-        <span class="k">return</span> <span class="bp">self</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">__reduce__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Callable[[], NullType], tuple[()]]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Reduce to the module-level singleton getter, for every :mod:`pickle` protocol.</span>
-
-<span class="sd">        A class that defines :meth:`__reduce__` has it honoured by</span>
-<span class="sd">        :meth:`object.__reduce_ex__` for every protocol uniformly, rather</span>
-<span class="sd">        than only for the ones that would otherwise call</span>
-<span class="sd">        :func:`copyreg._reconstructor` -- so naming :func:`_get_null` here</span>
-<span class="sd">        sidesteps reconstruction, and therefore :meth:`__new__`, altogether.</span>
-<span class="sd">        That makes this correct independent of whatever :meth:`__new__` does,</span>
-<span class="sd">        which is what actually covers protocols 0 and 1; see the class</span>
-<span class="sd">        docstring.</span>
-
-<span class="sd">        """</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">_get_null</span><span class="p">,</span> <span class="p">())</span></div>
+        <span class="k">return</span> <span class="kc">False</span></div>
 
 
 
@@ -644,11 +852,11 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_get_null</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s1">'NullType'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return :data:`NULL`, for :meth:`NullType.__reduce__`.</span>
+<span class="w">    </span><span class="sd">"""Return :data:`NULL`, for a pickle written before :issue:`1842`.</span>
 
-<span class="sd">    A module-level function rather than a lambda or a bound method, so every</span>
-<span class="sd">    :mod:`pickle` protocol -- including 0 and 1, which cannot reference</span>
-<span class="sd">    anything nested inside a class -- can name it.</span>
+<span class="sd">    ``NullType.__reduce__`` used to name this function, so such a pickle</span>
+<span class="sd">    calls it to load. Nothing here calls it any more; it stays so that those</span>
+<span class="sd">    pickles keep loading, as :data:`NULL` itself.</span>
 
 <span class="sd">    """</span>
     <span class="k">return</span> <span class="n">NULL</span>
@@ -657,14 +865,28 @@
 <div class="viewcode-block" id="NoValueType">
 <a class="viewcode-back" href="../../../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.NoValueType">[docs]</a>
 <span class="nd">@final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">NoValueType</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NoValueType</span><span class="p">(</span><span class="n">Sentinel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Type of :data:`NO_VALUE`, the default value for :mod:`pcapkit.corekit.fields`.</span>
 
 <span class="sd">    Housed here per GitHub issue :issue:`911`;</span>
 <span class="sd">    :attr:`FieldBase.default &lt;pcapkit.corekit.fields.field.FieldBase.default&gt;`</span>
 <span class="sd">    documents it as the field-default sentinel.</span>
 
+<span class="sd">    .. versionchanged:: 1.5.0</span>
+
+<span class="sd">       A singleton: calling this type, :func:`copy.deepcopy` and :mod:`pickle`</span>
+<span class="sd">       give back :data:`NO_VALUE` rather than a second instance</span>
+<span class="sd">       (:issue:`1842`). It reprs as ``NO_VALUE``, its own name, as</span>
+<span class="sd">       ``repr(None)`` is ``'None'``, rather than as an object address, which</span>
+<span class="sd">       is what a field constructor's signature and a parsed schema's repr</span>
+<span class="sd">       show for an unset value (:issue:`1841`). Its attributes, and its</span>
+<span class="sd">       type's, cannot be set or deleted, and the type cannot be subclassed.</span>
+
 <span class="sd">    """</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">()</span>
+
+    <span class="n">_name</span> <span class="o">=</span> <span class="s1">'NO_VALUE'</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[False]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Return :obj:`False`."""</span>
@@ -680,7 +902,7 @@
 <div class="viewcode-block" id="NoDefaultType">
 <a class="viewcode-back" href="../../../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.NoDefaultType">[docs]</a>
 <span class="nd">@final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">NoDefaultType</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NoDefaultType</span><span class="p">(</span><span class="n">Sentinel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Type of :data:`NO_DEFAULT`, the omitted-``default`` sentinel for</span>
 <span class="sd">    :meth:`EnumLookup.get &lt;pcapkit.corekit.enum.EnumLookup.get&gt;`.</span>
 
@@ -689,63 +911,19 @@
 <span class="sd">    :class:`object` compares under ``is`` exactly as safely as a dedicated</span>
 <span class="sd">    class with no ``__eq__`` of its own does; what it lacks is a readable</span>
 <span class="sd">    representation: it prints as ``&lt;object object at 0x...&gt;`` in a signature,</span>
-<span class="sd">    in :func:`help`, and in a traceback, where ``NoDefaultType()`` -- via</span>
-<span class="sd">    :meth:`__repr__` below -- prints as ``&lt;NO_DEFAULT&gt;``. The names follow</span>
-<span class="sd">    the convention every sentinel here shares, settled by GitHub issue</span>
-<span class="sd">    :issue:`937`: ``&lt;Name&gt;Type`` for the class and SCREAMING_SNAKE for the</span>
-<span class="sd">    instance.</span>
+<span class="sd">    in :func:`help`, and in a traceback, where ``NoDefaultType()`` -- via the</span>
+<span class="sd">    ``__repr__`` :class:`Sentinel` gives it -- prints as ``NO_DEFAULT``.</span>
+<span class="sd">    The names follow the convention every sentinel here shares, settled by</span>
+<span class="sd">    GitHub issue :issue:`937`: ``&lt;Name&gt;Type`` for the class and</span>
+<span class="sd">    SCREAMING_SNAKE for the instance.</span>
 
-<span class="sd">    Genuinely a singleton, not merely a class this module happens to</span>
-<span class="sd">    instantiate once: :meth:`__new__` always hands back the one instance that</span>
-<span class="sd">    already exists, rather than building a new one. That guards against a</span>
-<span class="sd">    caller writing ``registry.get(key, default=NoDefaultType())`` -- perhaps</span>
-<span class="sd">    not realising :data:`NO_DEFAULT` already exists -- and getting back a</span>
+<span class="sd">    :class:`Sentinel` keeps it to one instance. That guards against a caller</span>
+<span class="sd">    writing ``registry.get(key, default=NoDefaultType())`` -- perhaps not</span>
+<span class="sd">    realising :data:`NO_DEFAULT` already exists -- and getting back a</span>
 <span class="sd">    *second*, non-identical sentinel that silently fails ``is NO_DEFAULT``</span>
 <span class="sd">    inside :meth:`EnumLookup.get &lt;pcapkit.corekit.enum.EnumLookup.get&gt;`, so</span>
 <span class="sd">    their call is treated as supplying a real (if useless) default instead of</span>
-<span class="sd">    the *no default* they meant. With the guard, :class:`NoDefaultType() &lt;NoDefaultType&gt;`</span>
-<span class="sd">    always returns the one canonical :data:`NO_DEFAULT`, so that mistake</span>
-<span class="sd">    self-corrects.</span>
-
-<span class="sd">    Unlike :class:`NullType`, this does *not* also define ``__copy__``,</span>
-<span class="sd">    ``__deepcopy__`` or ``__reduce__`` -- but not because :func:`copy.deepcopy`</span>
-<span class="sd">    or :mod:`pickle` "bypass" :meth:`__new__`; they do not, for protocol 2 and</span>
-<span class="sd">    above. :meth:`object.__reduce_ex__` at protocol 2 reduces through</span>
-<span class="sd">    :func:`copyreg.__newobj__`, which reconstructs by calling</span>
-<span class="sd">    ``cls.__new__(cls)`` -- exactly the guarded path above -- so</span>
-<span class="sd">    ``copy.copy``, ``copy.deepcopy`` and every pickle protocol from 2 on</span>
-<span class="sd">    already come back as the one canonical instance with no extra code.</span>
-<span class="sd">    Measured::</span>
-
-<span class="sd">        &gt;&gt;&gt; NO_DEFAULT.__reduce_ex__(2)</span>
-<span class="sd">        (&lt;function __newobj__ at 0x...&gt;, (&lt;class '...NoDefaultType'&gt;,), None, None, None)</span>
-<span class="sd">        &gt;&gt;&gt; copy.deepcopy(NO_DEFAULT) is NO_DEFAULT</span>
-<span class="sd">        True</span>
-
-<span class="sd">    The one path :meth:`__new__` cannot see is pickle protocol 0 (and 1),</span>
-<span class="sd">    which reduces through :func:`copyreg._reconstructor` instead, and *that*</span>
-<span class="sd">    calls :func:`object.__new__` directly::</span>
-
-<span class="sd">        &gt;&gt;&gt; NO_DEFAULT.__reduce_ex__(0)</span>
-<span class="sd">        (&lt;function _reconstructor at 0x...&gt;, (&lt;class '...NoDefaultType'&gt;, &lt;class 'object'&gt;, None))</span>
-<span class="sd">        &gt;&gt;&gt; pickle.loads(pickle.dumps(NO_DEFAULT, protocol=0)) is NO_DEFAULT</span>
-<span class="sd">        False</span>
-
-<span class="sd">    That gap is exactly what :class:`NullType`'s own</span>
-<span class="sd">    :meth:`~NullType.__reduce__` exists to close, because :data:`NULL` is</span>
-<span class="sd">    stored as a :class:`~pcapkit.corekit.module.ModuleDescriptor` field that a</span>
-<span class="sd">    caller's own :func:`copy.deepcopy` or :mod:`pickle` call can walk into and</span>
-<span class="sd">    reconstruct. :data:`NO_DEFAULT` is left unhandled here not because the gap</span>
-<span class="sd">    cannot occur in principle, but because nothing in this package ever</span>
-<span class="sd">    pickles it at protocol 0: it is reachable -- from :meth:`EnumLookup.get</span>
-<span class="sd">    &lt;pcapkit.corekit.enum.EnumLookup.get&gt;`'s own bound parameter default</span>
-<span class="sd">    (``EnumLookup.get.__defaults__[0]``, or any subclass's, e.g.</span>
-<span class="sd">    ``Hardware.get.__func__.__defaults__[0]``) and from</span>
-<span class="sd">    ``inspect.signature(Hardware.get).parameters['default'].default`` -- but</span>
-<span class="sd">    neither is a field any object here gets pickled *as*, and both still</span>
-<span class="sd">    survive :func:`copy.deepcopy` with identity intact regardless, because</span>
-<span class="sd">    deep-copying either still reduces the sentinel itself through the same,</span>
-<span class="sd">    guarded protocol-2 path measured above.</span>
+<span class="sd">    the *no default* they meant.</span>
 
 <span class="sd">    A reload caveat that is dormant rather than live. :func:`importlib.reload`</span>
 <span class="sd">    on this module re-executes both ``class NoDefaultType:`` and</span>
@@ -795,7 +973,7 @@
 <span class="sd">       :mod:`pcapkit.corekit.enum`'s own global stays pointed at whatever it</span>
 <span class="sd">       read until something re-runs that import.</span>
 
-<span class="sd">    Also unlike both :class:`NullType` and :class:`NoValueType`, this</span>
+<span class="sd">    Unlike both :class:`NullType` and :class:`NoValueType`, this</span>
 <span class="sd">    deliberately does *not* define ``__bool__``. Both of those model an</span>
 <span class="sd">    *absent* value, so reading falsy in a boolean context is the point.</span>
 <span class="sd">    :data:`NO_DEFAULT` models something different: a marker meaning *no</span>
@@ -815,38 +993,24 @@
 
 <span class="sd">    """</span>
 
-    <span class="c1">#: 'NoDefaultType | None': The one instance :meth:`__new__` ever returns,</span>
-    <span class="c1">#: including for the module-level ``NO_DEFAULT = NoDefaultType()`` below</span>
-    <span class="c1">#: that creates it in the first place. Kept on the class rather than as a</span>
-    <span class="c1">#: module global so :meth:`__new__` can read and write it without a</span>
-    <span class="c1">#: ``global`` statement.</span>
-    <span class="n">_instance</span><span class="p">:</span> <span class="s1">'NoDefaultType | None'</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">()</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'NoDefaultType'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Return the one instance of this class there will ever be."""</span>
-        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Return :obj:`str` representation of the sentinel."""</span>
-        <span class="k">return</span> <span class="s1">'&lt;NO_DEFAULT&gt;'</span></div>
+    <span class="n">_name</span> <span class="o">=</span> <span class="s1">'NO_DEFAULT'</span></div>
 
 
 
 <span class="c1">#: NoDefaultType: The ``default`` argument value that means *no default*, i.e.</span>
 <span class="c1">#: let an unresolvable key propagate its lookup error rather than falling</span>
 <span class="c1">#: back. See :class:`NoDefaultType` for why this is a dedicated class rather</span>
-<span class="c1">#: than a bare :class:`object`, why it is a guarded singleton, and why it</span>
-<span class="c1">#: defines neither the copy/pickle hooks nor the ``__bool__`` that its</span>
-<span class="c1">#: :mod:`pcapkit.corekit` siblings do.</span>
+<span class="c1">#: than a bare :class:`object`, and why it does not define the ``__bool__``</span>
+<span class="c1">#: that its :mod:`pcapkit.corekit` siblings do.</span>
 <span class="n">NO_DEFAULT</span> <span class="o">=</span> <span class="n">NoDefaultType</span><span class="p">()</span>
 
 
 <div class="viewcode-block" id="AbsentType">
 <a class="viewcode-back" href="../../../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.AbsentType">[docs]</a>
 <span class="nd">@final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">AbsentType</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AbsentType</span><span class="p">(</span><span class="n">Sentinel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Type of :data:`ABSENT`, the absent-key sentinel.</span>
 
 <span class="sd">    A distinct class rather than a bare :obj:`object` so that the sentinel has a</span>
@@ -873,13 +1037,13 @@
 
 <span class="sd">    """</span>
 
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">()</span>
+
+    <span class="n">_name</span> <span class="o">=</span> <span class="s1">'ABSENT'</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[False]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Return :obj:`False`."""</span>
-        <span class="k">return</span> <span class="kc">False</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Return :obj:`str` representation of the sentinel."""</span>
-        <span class="k">return</span> <span class="s1">'&lt;absent&gt;'</span></div>
+        <span class="k">return</span> <span class="kc">False</span></div>
 
 
 

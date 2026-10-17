@@ -8,6 +8,7 @@
         <title>pcapkit.protocols.data.internet.mh - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/mermaid.css?v=10b7d883" />
@@ -546,8 +547,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">FastBindingAcknowledgmentStatus</span><span class="p">,</span>
                                                <span class="n">IPv6AddressPrefixCode</span><span class="p">,</span> <span class="n">LMAAddressCode</span><span class="p">,</span>
-                                               <span class="n">LocalizedRoutingStatus</span><span class="p">,</span> <span class="n">NTPTimestamp</span><span class="p">,</span>
-                                               <span class="n">PMIPv6Timestamp</span><span class="p">)</span>
+                                               <span class="n">LocalizedRoutingStatus</span><span class="p">)</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">'MH'</span><span class="p">,</span>
@@ -585,6 +585,8 @@
     <span class="s1">'MAGMultipathBindingOption'</span><span class="p">,</span> <span class="s1">'MAGIdentifierOption'</span><span class="p">,</span> <span class="s1">'AnchoredPrefixOption'</span><span class="p">,</span>
     <span class="s1">'LocalPrefixOption'</span><span class="p">,</span> <span class="s1">'PreviousMAAROption'</span><span class="p">,</span> <span class="s1">'ServingMAAROption'</span><span class="p">,</span>
     <span class="s1">'DLIFLinkLocalAddressOption'</span><span class="p">,</span> <span class="s1">'DLIFLinkLayerAddressOption'</span><span class="p">,</span>
+
+    <span class="s1">'NTPTimestamp'</span><span class="p">,</span> <span class="s1">'PMIPv6Timestamp'</span><span class="p">,</span>
 
     <span class="s1">'ContextRequest'</span><span class="p">,</span>
 
@@ -1572,6 +1574,36 @@
 
 
 
+<div class="viewcode-block" id="NTPTimestamp">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.NTPTimestamp">[docs]</a>
+<span class="nd">@info_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NTPTimestamp</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Data model for NTP timestamp format, c.f., :rfc:`1305`.</span>
+
+<span class="sd">    .. versionchanged:: 1.5.0</span>
+
+<span class="sd">       An :class:`~pcapkit.corekit.infoclass.Info` data model in this module,</span>
+<span class="sd">       rather than a named tuple in :mod:`pcapkit.protocols.internet.mh`, which</span>
+<span class="sd">       no longer binds the name (:issue:`1886`). This breaks 1.4.x code that</span>
+<span class="sd">       treats it as a tuple: it no longer indexes, unpacks, hashes, orders,</span>
+<span class="sd">       compares equal to a :obj:`tuple`, or has ``_replace`` and ``_asdict``.</span>
+<span class="sd">       :attr:`seconds` and :attr:`fraction` read as before, and it still</span>
+<span class="sd">       pickles. The dumpers write it keyed by field, as</span>
+<span class="sd">       ``{"seconds": ..., "fraction": ...}``, where they wrote</span>
+<span class="sd">       ``{"type": "NTPTimestamp", "value": [...]}``.</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: Seconds since 1 January 1900.</span>
+    <span class="n">seconds</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Fraction of a second.</span>
+    <span class="n">fraction</span><span class="p">:</span> <span class="s1">'int'</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seconds</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">fraction</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+
 <div class="viewcode-block" id="MesgIDOption">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.MesgIDOption">[docs]</a>
 <span class="nd">@info_final</span>
@@ -1905,6 +1937,39 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">'IPv6Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+
+<div class="viewcode-block" id="PMIPv6Timestamp">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.PMIPv6Timestamp">[docs]</a>
+<span class="nd">@info_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PMIPv6Timestamp</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Data model for Proxy Mobile IPv6 timestamp format, c.f., :rfc:`5213#section-8.8`.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        This is **not** an :rfc:`1305` NTP timestamp, which is why it is a type of</span>
+<span class="sd">        its own rather than a reuse of :class:`NTPTimestamp`. It counts from the</span>
+<span class="sd">        UNIX epoch rather than NTP's 1900 one, and splits its 64 bits 48/16</span>
+<span class="sd">        rather than 32/32, so each field means something different in the two.</span>
+
+<span class="sd">    .. versionchanged:: 1.5.0</span>
+
+<span class="sd">       An :class:`~pcapkit.corekit.infoclass.Info` data model in this module,</span>
+<span class="sd">       rather than the named tuple in :mod:`pcapkit.protocols.internet.mh` it</span>
+<span class="sd">       was in the 1.5.0 pre-releases (:issue:`1886`). It no longer indexes,</span>
+<span class="sd">       unpacks, hashes, orders, compares equal to a :obj:`tuple`, or has</span>
+<span class="sd">       ``_replace`` and ``_asdict``. The dumpers write it keyed by field, as</span>
+<span class="sd">       ``{"seconds": ..., "fraction": ...}``.</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: Seconds since 1 January 1970, in the leading 48 bits.</span>
+    <span class="n">seconds</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Fraction of a second, in units of 1/65536, in the trailing 16 bits.</span>
+    <span class="n">fraction</span><span class="p">:</span> <span class="s1">'int'</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seconds</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">fraction</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 

@@ -8,6 +8,7 @@
         <title>pcapkit.foundation.engines.pypcapfile - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/mermaid.css?v=10b7d883" />
@@ -505,13 +506,48 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'PyPCAPFile'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">types</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleType</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">,</span> <span class="n">Type</span>
 
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapfile.protocols.linklayer.ethernet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Ethernet</span> <span class="k">as</span> <span class="n">PCAPFileEthernet</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapfile.savefile</span><span class="w"> </span><span class="kn">import</span> <span class="n">pcap_savefile</span> <span class="k">as</span> <span class="n">PCAPFileSavefile</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapfile.structs</span><span class="w"> </span><span class="kn">import</span> <span class="n">__pcap_header__</span> <span class="k">as</span> <span class="n">PCAPFileHeader</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapfile.structs</span><span class="w"> </span><span class="kn">import</span> <span class="n">pcap_packet</span> <span class="k">as</span> <span class="n">PCAPFilePacket</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">_PCAPFileLinkLayerModule</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">""":mod:`pcapfile.linklayer`, as :class:`PyPCAPFile` reads it."""</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">clookup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ll_type</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[Type[PCAPFileEthernet]]'</span><span class="p">:</span> <span class="o">...</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">_PCAPFileSavefileModule</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">""":mod:`pcapfile.savefile`, as :class:`PyPCAPFile` reads it."""</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">load_savefile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_file</span><span class="p">:</span> <span class="s1">'NamedStream'</span><span class="p">,</span> <span class="n">layers</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+                          <span class="n">verbose</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="n">lazy</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'PCAPFileSavefile'</span><span class="p">:</span> <span class="o">...</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">_PCAPFileStructsModule</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">""":mod:`pcapfile.structs`, as :class:`PyPCAPFile` reads it."""</span>
+
+        <span class="nd">@property</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">pcap_packet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[PCAPFilePacket]'</span><span class="p">:</span> <span class="o">...</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">_PCAPFilePackage</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">""":mod:`pcapfile`, as :class:`PyPCAPFile` reads it through :attr:`PyPCAPFile._expkg` (#1878).</span>
+
+<span class="sd">        Each attribute is a submodule, described by what the engine reads of it.</span>
+<span class="sd">        mypy matches a module with a protocol at the top level only, so the</span>
+<span class="sd">        submodules are checked through the stub types they name, under</span>
+<span class="sd">        :file:`typings/pcapfile`.</span>
+
+<span class="sd">        """</span>
+
+        <span class="nd">@property</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">linklayer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_PCAPFileLinkLayerModule'</span><span class="p">:</span> <span class="o">...</span>
+        <span class="nd">@property</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">savefile</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_PCAPFileSavefileModule'</span><span class="p">:</span> <span class="o">...</span>
+        <span class="nd">@property</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">structs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_PCAPFileStructsModule'</span><span class="p">:</span> <span class="o">...</span>
 
 
 <div class="viewcode-block" id="PyPCAPFile">
@@ -550,7 +586,7 @@
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Engine extraction package, i.e. :mod:`pcapfile`.</span>
-        <span class="n">_expkg</span><span class="p">:</span> <span class="s1">'ModuleType'</span>
+        <span class="n">_expkg</span><span class="p">:</span> <span class="s1">'_PCAPFilePackage'</span>
         <span class="c1">#: Engine extraction temporary storage.</span>
         <span class="n">_extmp</span><span class="p">:</span> <span class="s1">'Iterator[PCAPFilePacket]'</span>
         <span class="c1">#: Data link layer protocol, from the savefile header.</span>
@@ -704,11 +740,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span> <span class="o">=</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sfile</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">ll_type</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_declf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_decoder</span><span class="p">(</span><span class="n">sfile</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">ll_type</span><span class="p">)</span>
 
-        <span class="c1"># setup verbose handler</span>
-        <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_v</span><span class="p">:</span>
+        <span class="c1"># setup verbose handler, unless the caller gave one of their own (#1874)</span>
+        <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_vfunc_default</span><span class="p">:</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.pypcapfile</span><span class="w"> </span><span class="kn">import</span> <span class="n">packet2chain</span>  <span class="c1"># isort:skip</span>
             <span class="n">ext</span><span class="o">.</span><span class="n">_vfunc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">_frnum</span><span class="si">:</span><span class="s1">&gt;3d</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">packet2chain</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">data_link</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span>  <span class="c1"># pylint: disable=protected-access</span>
+                <span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">_frnum</span><span class="si">:</span><span class="s1">&gt;3d</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">packet2chain</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s2">"PCAPFilePacket"</span><span class="p">,</span><span class="w"> </span><span class="n">f</span><span class="p">),</span><span class="w"> </span><span class="n">data_link</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span>  <span class="c1"># pylint: disable=protected-access</span>
             <span class="p">)</span>  <span class="c1"># pylint: disable=logging-fstring-interpolation</span>
 
         <span class="c1"># extract &amp; analyse file</span>
@@ -866,9 +902,9 @@
                 <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP: [Frame </span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s1">] captured length </span><span class="si">{</span><span class="n">capture_len</span><span class="si">}</span><span class="s1"> runs past the data, '</span>
                      <span class="sa">f</span><span class="s1">'which holds </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s1"> octet(s); kept as captured'</span><span class="p">,</span>
                      <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
-            <span class="k">yield</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'PCAPFilePacket'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span><span class="o">.</span><span class="n">structs</span><span class="o">.</span><span class="n">pcap_packet</span><span class="p">(</span>
+            <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span><span class="o">.</span><span class="n">structs</span><span class="o">.</span><span class="n">pcap_packet</span><span class="p">(</span>
                 <span class="n">hdrp</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">timestamp_us</span><span class="p">,</span> <span class="n">capture_len</span><span class="p">,</span> <span class="n">packet_len</span><span class="p">,</span> <span class="n">binascii</span><span class="o">.</span><span class="n">hexlify</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
-            <span class="p">))</span></div>
+            <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="PyPCAPFile._decode">
@@ -914,10 +950,10 @@
                  <span class="s1">'frame left undecoded'</span><span class="p">,</span> <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
             <span class="k">return</span> <span class="n">packet</span>
 
-        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'PCAPFilePacket'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span><span class="o">.</span><span class="n">structs</span><span class="o">.</span><span class="n">pcap_packet</span><span class="p">(</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span><span class="o">.</span><span class="n">structs</span><span class="o">.</span><span class="n">pcap_packet</span><span class="p">(</span>
             <span class="n">packet</span><span class="o">.</span><span class="n">header</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">timestamp_us</span><span class="p">,</span>
             <span class="n">packet</span><span class="o">.</span><span class="n">capture_len</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">packet_len</span><span class="p">,</span> <span class="n">decoded</span><span class="p">,</span>
-        <span class="p">))</span></div>
+        <span class="p">)</span></div>
 </div>
 
 </pre></div>

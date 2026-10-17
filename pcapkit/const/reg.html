@@ -15,6 +15,7 @@
         <title>Protocol Type Registry Constant Enumerations - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../_static/mermaid.css?v=10b7d883" />
@@ -521,7 +522,7 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.reg.linktype.</span></span><span class="sig-name descname"><span class="pre">LinkType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/reg/linktype.html#LinkType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
 <p>[LinkType] Link-Layer Header Type Values</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.NULL">
@@ -1489,15 +1490,15 @@ metadata header.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.NETANALYZER">
 <span class="sig-name descname"><span class="pre">NETANALYZER</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">240</span></span><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.NETANALYZER" title="Link to this definition">¶</a></dt>
-<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_NETANALYZER</span></code>] Ethernet frames with Hilscher netANALYZER pseudo-
-header.</p>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_NETANALYZER</span></code>] Ethernet frames with Hilscher netANALYZER
+pseudo-header.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.NETANALYZER_TRANSPARENT">
 <span class="sig-name descname"><span class="pre">NETANALYZER_TRANSPARENT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">241</span></span><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.NETANALYZER_TRANSPARENT" title="Link to this definition">¶</a></dt>
-<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_NETANALYZER_TRANSPARENT</span></code>] Ethernet frames with netANALYZER pseudo-
-header, preamble and SFD, preceded by a Hilscher.</p>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_NETANALYZER_TRANSPARENT</span></code>] Ethernet frames with netANALYZER
+pseudo-header, preamble and SFD, preceded by a Hilscher.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1521,8 +1522,8 @@ header, preamble and SFD, preceded by a Hilscher.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.NFC_LLCP">
 <span class="sig-name descname"><span class="pre">NFC_LLCP</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">245</span></span><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.NFC_LLCP" title="Link to this definition">¶</a></dt>
-<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_NFC_LLCP</span></code>] NFC Logical Link Control Protocol frames, with a pseudo-
-header.</p>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_NFC_LLCP</span></code>] NFC Logical Link Control Protocol frames, with a
+pseudo-header.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1705,8 +1706,8 @@ for Bluetooth LE packets.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.DOCSIS31_XRA31">
 <span class="sig-name descname"><span class="pre">DOCSIS31_XRA31</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">273</span></span><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.DOCSIS31_XRA31" title="Link to this definition">¶</a></dt>
-<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_DOCSIS31_XRA31</span></code>] DOCSIS packets and bursts, preceded by a pseudo-
-header giving metadata about the packet.</p>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_DOCSIS31_XRA31</span></code>] DOCSIS packets and bursts, preceded by a
+pseudo-header giving metadata about the packet.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1956,7 +1957,7 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.reg.ethertype.EtherType">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.reg.ethertype.</span></span><span class="sig-name descname"><span class="pre">EtherType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/reg/ethertype.html#EtherType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
 <p>[EtherType] Ethertype IEEE 802 Numbers</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.ethertype.EtherType.Formerly_XEROX_PUP_Invalid_as_an_Ethertype_since_1983_Use_0x0A00">
@@ -2981,7 +2982,7 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.reg.transtype.</span></span><span class="sig-name descname"><span class="pre">TransType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/reg/transtype.html#TransType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
 <p>[TransType] Transport Layer Protocol Numbers</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.HOPOPT">
@@ -3740,8 +3741,8 @@ California at Berkeley, June 1986.][Bruce Willins]</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.SM">
 <span class="sig-name descname"><span class="pre">SM</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">122</span></span><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.SM" title="Link to this definition">¶</a></dt>
-<dd><p>Simple Multicast Protocol (deprecated)) [Jon Crowcroft][draft-perlman-
-simple-multicast-03]</p>
+<dd><p>Simple Multicast Protocol (deprecated)) [Jon
+Crowcroft][draft-perlman-simple-multicast-03]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -3956,19 +3957,28 @@ same words (<a class="extlink-issue reference external" href="https://github.com
 Numbers</strong>, which are automatically generated from <a class="reference internal" href="../vendor/reg.html#module-pcapkit.vendor.reg.apptype" title="pcapkit.vendor.reg.apptype"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.reg.apptype</span></code></a>.
 IANA keys every assignment on a <code class="docutils literal notranslate"><span class="pre">(service,</span> <span class="pre">port,</span> <span class="pre">transport)</span></code> triple, so the
 registry is one enumeration per transport protocol sharing a memberless base.</p>
-<dl class="py class" id="module-pcapkit.const.reg.apptype.apptype">
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.5.0: </span>Split by transport protocol (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/732">#732</a>): <a class="reference internal" href="#module-pcapkit.const.reg.apptype" title="pcapkit.const.reg.apptype"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.reg.apptype</span></code></a>
+is a package, and every assignment is a member of one of the per-transport
+registries rather than of <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a>.
+<code class="docutils literal notranslate"><span class="pre">get()</span></code> raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> for a port outside <code class="docutils literal notranslate"><span class="pre">0</span></code>-<code class="docutils literal notranslate"><span class="pre">65535</span></code>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/758">#758</a>), and returns an unregistered member rather than minting one
+for a port the registry does not assign (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a>).</p>
+</div>
+<div class="versionchanged" id="module-pcapkit.const.reg.apptype.apptype">
+<p><span class="versionmodified changed">Changed in version 1.5.0: </span><a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.TransportProtocol" title="pcapkit.const.reg.apptype.apptype.TransportProtocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransportProtocol</span></code></a> is an
+<code class="docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code> rather than an <code class="docutils literal notranslate"><span class="pre">aenum.IntFlag</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/808">#808</a>), numbered
+sequentially: <code class="docutils literal notranslate"><span class="pre">sctp</span></code> is <code class="docutils literal notranslate"><span class="pre">3</span></code> and <code class="docutils literal notranslate"><span class="pre">dccp</span></code> is <code class="docutils literal notranslate"><span class="pre">4</span></code>, where they were <code class="docutils literal notranslate"><span class="pre">4</span></code>
+and <code class="docutils literal notranslate"><span class="pre">8</span></code>, and no <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> is decoded as a <code class="docutils literal notranslate"><span class="pre">|</span></code> composite
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a>). Its <code class="docutils literal notranslate"><span class="pre">get()</span></code> refuses a name no member declares, with
+<a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumKeyError" title="pcapkit.utilities.exceptions.EnumKeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumKeyError</span></code></a>, rather than minting a
+member for it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/808">#808</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a>).</p>
+</div>
+<dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.apptype.TransportProtocol">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.reg.apptype.apptype.</span></span><span class="sig-name descname"><span class="pre">TransportProtocol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/reg/apptype/apptype.html#TransportProtocol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.TransportProtocol" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
 <p>Transport layer protocol.</p>
-<div class="versionchanged">
-<p><span class="versionmodified changed">Changed in version 1.5.0: </span>An <code class="docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code> rather than an <code class="docutils literal notranslate"><span class="pre">aenum.IntFlag</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/808">#808</a>),
-numbered sequentially: <code class="docutils literal notranslate"><span class="pre">sctp</span></code> is <code class="docutils literal notranslate"><span class="pre">3</span></code> and <code class="docutils literal notranslate"><span class="pre">dccp</span></code> is <code class="docutils literal notranslate"><span class="pre">4</span></code>, where
-they were <code class="docutils literal notranslate"><span class="pre">4</span></code> and <code class="docutils literal notranslate"><span class="pre">8</span></code>, and no <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> is decoded as a <code class="docutils literal notranslate"><span class="pre">|</span></code>
-composite (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a>). <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> refuses a name no member
-declares, with <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumKeyError" title="pcapkit.utilities.exceptions.EnumKeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumKeyError</span></code></a>,
-rather than minting a member for it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/808">#808</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a>).</p>
-</div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.apptype.TransportProtocol.undefined">
 <span class="sig-name descname"><span class="pre">undefined</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.TransportProtocol.undefined" title="Link to this definition">¶</a></dt>
@@ -4004,10 +4014,15 @@ the base registry’s <code class="docutils literal notranslate"><span class="pr
 
 </dd></dl>
 
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.1.1: </span>An <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a> member converts with
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> to its port number, and compares, orders and hashes as that
+port.</p>
+</div>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.apptype.AppType">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.reg.apptype.apptype.</span></span><span class="sig-name descname"><span class="pre">AppType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_class_name</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/reg/apptype/apptype.html#AppType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.AppType" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code></p>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.reg.apptype.apptype.</span></span><span class="sig-name descname"><span class="pre">AppType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/reg/apptype/apptype.html#AppType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.AppType" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.StrEnum</span></code></p>
 <p>[AppType] Application Layer Protocol Numbers</p>
 <p>This is the transport-agnostic base of the per-transport registries in
 <a class="reference internal" href="#module-pcapkit.const.reg.apptype" title="pcapkit.const.reg.apptype"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.reg.apptype</span></code></a>, and it declares <strong>no members of its own</strong>.
@@ -4019,18 +4034,6 @@ service belongs to the registry of the transport protocol that carries it –
 <a class="reference internal" href="#pcapkit.const.reg.apptype.dccp.DCCP" title="pcapkit.const.reg.apptype.dccp.DCCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code></a>. Being memberless is also what
 makes it subclassable at all, since <code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code> refuses to extend an
 enumeration that already has members.</p>
-<div class="versionchanged">
-<p><span class="versionmodified changed">Changed in version 1.1.1: </span>A member converts with <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> to its port number, and compares,
-orders and hashes as that port.</p>
-</div>
-<div class="versionchanged">
-<p><span class="versionmodified changed">Changed in version 1.5.0: </span>Split by transport protocol (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/732">#732</a>): <a class="reference internal" href="#module-pcapkit.const.reg.apptype" title="pcapkit.const.reg.apptype"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.reg.apptype</span></code></a>
-is a package, and every assignment is a member of one of the per-transport
-registries rather than of this class. <code class="docutils literal notranslate"><span class="pre">get()</span></code> raises
-<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> for a port outside <code class="docutils literal notranslate"><span class="pre">0</span></code>-<code class="docutils literal notranslate"><span class="pre">65535</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/758">#758</a>), and
-returns an unregistered member rather than minting one for a port the
-registry does not assign (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a>).</p>
-</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The rows below are the registry entries whose <strong>transport protocol column
@@ -4040,7 +4043,7 @@ instead. Most are historic service or IP-protocol names with no port
 either; the rest are IANA’s own reserved, unassigned and withdrawn
 markers.</p>
 </div>
-<div class="table-wrapper colwidths-given docutils container" id="id9">
+<div class="table-wrapper colwidths-given docutils container">
 <table class="docutils align-default" id="id9">
 <caption><span class="caption-text">Service names assigned no transport protocol</span><a class="headerlink" href="#id9" title="Link to this table">¶</a></caption>
 <colgroup>
@@ -5555,8 +5558,8 @@ System and Remote Test System</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">hpr-toollnx</span></code></p></td>
 <td><p>N/A</p></td>
-<td><p>[N/A] HP Remote System that houses compilers and tools for Linux-
-based Systems</p></td>
+<td><p>[N/A] HP Remote System that houses compilers and tools for
+Linux-based Systems</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">hpr-toolwin</span></code></p></td>
 <td><p>N/A</p></td>
@@ -6243,8 +6246,8 @@ controller</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rfbc</span></code></p></td>
 <td><p>N/A</p></td>
-<td><p>[N/A] Remote Frame Buffer Client (Used by VNC viewers in listen-
-mode)</p></td>
+<td><p>[N/A] Remote Frame Buffer Client (Used by VNC viewers in
+listen-mode)</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rfid</span></code></p></td>
 <td><p>N/A</p></td>
@@ -6979,7 +6982,7 @@ is not guaranteed to be the former – see
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.apptype.AppType.get_all">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proto</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;TransportProtocol.undefined:</span> <span class="pre">0&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/reg/apptype/apptype.html#AppType.get_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.AppType.get_all" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">proto</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TransportProtocol.undefined</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/reg/apptype/apptype.html#AppType.get_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.AppType.get_all" title="Link to this definition">¶</a></dt>
 <dd><p>Every service IANA assigns to a port, canonical first.</p>
 <p><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> answers with one member because that is what a port lookup
 means everywhere else – <a class="reference external" href="https://docs.python.org/3/library/socket.html#socket.getservbyport" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">socket.getservbyport()</span></code></a> returns a single
@@ -7169,7 +7172,7 @@ on <code class="docutils literal notranslate"><span class="pre">port</span></cod
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.apptype.AppType._unregistered_member">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proto</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;TransportProtocol.undefined:</span> <span class="pre">0&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/reg/apptype/apptype.html#AppType._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.AppType._unregistered_member" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proto</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TransportProtocol.undefined</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/reg/apptype/apptype.html#AppType._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.AppType._unregistered_member" title="Link to this definition">¶</a></dt>
 <dd><p>Build a member absent from this registry’s own lookup tables and
 its <code class="xref py py-data docutils literal notranslate"><span class="pre">__registry__</span></code> side table alike.</p>
 <p>Used by <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType._missing_" title="pcapkit.const.reg.apptype.apptype.AppType._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> for a port neither resolves
@@ -7212,7 +7215,7 @@ built it.</p>
 <dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value to get enum item.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -7236,7 +7239,7 @@ number assigned</strong>. IANA leaves the port column empty for historic
 service names it never gave a port, so there is nothing for a member to
 be valued on and they are documented here instead.</p>
 </div>
-<div class="table-wrapper colwidths-given docutils container" id="id10">
+<div class="table-wrapper colwidths-given docutils container">
 <table class="docutils align-default" id="id10">
 <caption><span class="caption-text">Service names assigned no port number</span><a class="headerlink" href="#id10" title="Link to this table">¶</a></caption>
 <colgroup>
@@ -7304,8 +7307,8 @@ synchronisation</p></td>
 <td><p>[TCP] Affinity content sharing</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ai-adp</span></code></p></td>
-<td><p>[TCP] AI Agent Discovery Protocol (ADP) [draft-pro-adp-agent-
-discovery-00]</p></td>
+<td><p>[TCP] AI Agent Discovery Protocol (ADP)
+[draft-pro-adp-agent-discovery-00]</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">airdrop</span></code></p></td>
 <td><p>[TCP] Airdrop</p></td>
@@ -7413,8 +7416,7 @@ Hickl Inter Process Communication</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">boardgame</span></code></p></td>
 <td><p>[TCP] Two-player board game play
-[<a class="reference external" href="https://github.com/chentianren0/MiniXiangqi/blob/main/docs/boardgame">https://github.com/chentianren0/MiniXiangqi/blob/main/docs/boardgame</a>-
-protocol.md]</p></td>
+[<a class="reference external" href="https://github.com/chentianren0/MiniXiangqi/blob/main/docs/boardgame-protocol.md">https://github.com/chentianren0/MiniXiangqi/blob/main/docs/boardgame-protocol.md</a>]</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">boardplus</span></code></p></td>
 <td><p>[TCP] board plus application transfer protocol</p></td>
@@ -7495,8 +7497,8 @@ of devices</p></td>
 <td><p>[TCP] Control the Cerebra Aquarium Controller</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">certificates</span></code></p></td>
-<td><p>[TCP] Server for S/MIME and PGP certificates [draft-
-bhjl-x509-srv-01]</p></td>
+<td><p>[TCP] Server for S/MIME and PGP certificates
+[draft-bhjl-x509-srv-01]</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ciao</span></code></p></td>
 <td><p>[TCP] Ciao Arduino Protocol</p></td>
@@ -7602,9 +7604,9 @@ used to construct the SRV service names “_dots-call-home._udp” and
 “_dots-call-home._tcp” for discovering Call Home DOTS clients used
 to establish DOTS signal channel call home. [<span class="target" id="index-117"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8973.html"><strong>RFC 8973</strong></a>]; [UDP]
 DOTS Signal Channel Call Home Protocol. The service name is used to
-construct the SRV service names “_dots-call-home._udp” and “_dots-
-call-home._tcp” for discovering Call Home DOTS clients used to
-establish DOTS signal channel call home. [<span class="target" id="index-118"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8973.html"><strong>RFC 8973</strong></a>]</p></td>
+construct the SRV service names “_dots-call-home._udp” and
+“_dots-call-home._tcp” for discovering Call Home DOTS clients used
+to establish DOTS signal channel call home. [<span class="target" id="index-118"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8973.html"><strong>RFC 8973</strong></a>]</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dots-data</span></code></p></td>
 <td><p>[TCP] DOTS Data Channel Protocol. The service name is used to
@@ -8232,20 +8234,20 @@ Location [<span class="target" id="index-129"></span><a class="rfc reference ext
 <td><p>[TCP] home control</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">smimeca</span></code></p></td>
-<td><p>[TCP] Domain signing certificate for S/MIME keys [draft-
-bhjl-x509-srv-01]</p></td>
+<td><p>[TCP] Domain signing certificate for S/MIME keys
+[draft-bhjl-x509-srv-01]</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">snif-cln</span></code></p></td>
-<td><p>[TCP] SNIF End-to-End TLS Relay Client Connection [draft-zubov-
-snif-05, Section 4.5]</p></td>
+<td><p>[TCP] SNIF End-to-End TLS Relay Client Connection
+[draft-zubov-snif-05, Section 4.5]</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">snif-fifo</span></code></p></td>
 <td><p>[TCP] SNIF End-to-End TLS Relay Cluster [draft-zubov-snif-05,
 Section 4.6]</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">snif-srv</span></code></p></td>
-<td><p>[TCP] SNIF End-to-End TLS Relay Service Connection [draft-zubov-
-snif-05, Section 4.3]</p></td>
+<td><p>[TCP] SNIF End-to-End TLS Relay Service Connection
+[draft-zubov-snif-05, Section 4.3]</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">soda</span></code></p></td>
 <td><p>[TCP] Secure On Device API</p></td>
@@ -52094,8 +52096,8 @@ Section 4.3]</p></li>
 (Passive Optical Network) systems [TR-352][Inter-Channel-Termination
 protocol (ICTP) is a peer-to-peer protocol with a binary message format that
 is used by a set of optical line terminal (OLT) channel terminations (CT)
-comprising a 40-Gigabit-capable next-generation passive optical network (NG-
-PON2) system to exchange channel profile configuration and status
+comprising a 40-Gigabit-capable next-generation passive optical network
+(NG-PON2) system to exchange channel profile configuration and status
 information and to coordinate the operation of tunable optical network units
 (ONUs) in a multi-wavelength channel environment.]</p>
 </dd></dl>
@@ -57731,8 +57733,8 @@ remote access to DMF</p>
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.tcp.TCP.rads">
 <span class="sig-name descname"><span class="pre">rads</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'rads</span> <span class="pre">[12302</span> <span class="pre">-</span> <span class="pre">tcp]'</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.tcp.TCP.rads" title="Link to this definition">¶</a></dt>
 <dd><p>[TCP] Remote Administration Daemon (RAD) is a system service that offers
-secure, remote, programmatic access to Solaris system configuration and run-
-time state</p>
+secure, remote, programmatic access to Solaris system configuration and
+run-time state</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -60329,11 +60331,11 @@ replacement for “dsx_monitor”.</p></li>
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.tcp.TCP.iceedcp_tx">
 <span class="sig-name descname"><span class="pre">iceedcp_tx</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'iceedcp-tx</span> <span class="pre">[31948</span> <span class="pre">-</span> <span class="pre">tcp]'</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.tcp.TCP.iceedcp_tx" title="Link to this definition">¶</a></dt>
 <dd><ul class="simple">
-<li><p>[TCP] Embedded Device Configuration Protocol TX IANA assigned this well-
-formed service name as a replacement for “iceedcp_tx”.</p></li>
+<li><p>[TCP] Embedded Device Configuration Protocol TX IANA assigned this
+well-formed service name as a replacement for “iceedcp_tx”.</p></li>
 <li><p>[TCP] Embedded Device Configuration Protocol TX</p></li>
-<li><p>[UDP] Embedded Device Configuration Protocol TX IANA assigned this well-
-formed service name as a replacement for “iceedcp_tx”.</p></li>
+<li><p>[UDP] Embedded Device Configuration Protocol TX IANA assigned this
+well-formed service name as a replacement for “iceedcp_tx”.</p></li>
 <li><p>[UDP] Embedded Device Configuration Protocol TX</p></li>
 </ul>
 </dd></dl>
@@ -60342,11 +60344,11 @@ formed service name as a replacement for “iceedcp_tx”.</p></li>
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.tcp.TCP.iceedcp_rx">
 <span class="sig-name descname"><span class="pre">iceedcp_rx</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'iceedcp-rx</span> <span class="pre">[31949</span> <span class="pre">-</span> <span class="pre">tcp]'</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.tcp.TCP.iceedcp_rx" title="Link to this definition">¶</a></dt>
 <dd><ul class="simple">
-<li><p>[TCP] Embedded Device Configuration Protocol RX IANA assigned this well-
-formed service name as a replacement for “iceedcp_rx”.</p></li>
+<li><p>[TCP] Embedded Device Configuration Protocol RX IANA assigned this
+well-formed service name as a replacement for “iceedcp_rx”.</p></li>
 <li><p>[TCP] Embedded Device Configuration Protocol RX</p></li>
-<li><p>[UDP] Embedded Device Configuration Protocol RX IANA assigned this well-
-formed service name as a replacement for “iceedcp_rx”.</p></li>
+<li><p>[UDP] Embedded Device Configuration Protocol RX IANA assigned this
+well-formed service name as a replacement for “iceedcp_rx”.</p></li>
 <li><p>[UDP] Embedded Device Configuration Protocol RX</p></li>
 </ul>
 </dd></dl>
@@ -61733,7 +61735,7 @@ number assigned</strong>. IANA leaves the port column empty for historic
 service names it never gave a port, so there is nothing for a member to
 be valued on and they are documented here instead.</p>
 </div>
-<div class="table-wrapper colwidths-given docutils container" id="id11">
+<div class="table-wrapper colwidths-given docutils container">
 <table class="docutils align-default" id="id11">
 <caption><span class="caption-text">Service names assigned no port number</span><a class="headerlink" href="#id11" title="Link to this table">¶</a></caption>
 <colgroup>
@@ -61892,9 +61894,9 @@ used to construct the SRV service names “_dots-call-home._udp” and
 “_dots-call-home._tcp” for discovering Call Home DOTS clients used
 to establish DOTS signal channel call home. [<span class="target" id="index-428"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8973.html"><strong>RFC 8973</strong></a>]; [UDP]
 DOTS Signal Channel Call Home Protocol. The service name is used to
-construct the SRV service names “_dots-call-home._udp” and “_dots-
-call-home._tcp” for discovering Call Home DOTS clients used to
-establish DOTS signal channel call home. [<span class="target" id="index-429"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8973.html"><strong>RFC 8973</strong></a>]</p></td>
+construct the SRV service names “_dots-call-home._udp” and
+“_dots-call-home._tcp” for discovering Call Home DOTS clients used
+to establish DOTS signal channel call home. [<span class="target" id="index-429"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8973.html"><strong>RFC 8973</strong></a>]</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">eb-sync</span></code></p></td>
 <td><p>[TCP] Easy Books App data sync helper for Mac OS X and iOS; [UDP]
@@ -113978,11 +113980,11 @@ relay, and BFT consensus message exchange.</p></li>
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.udp.UDP.iceedcp_tx">
 <span class="sig-name descname"><span class="pre">iceedcp_tx</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'iceedcp-tx</span> <span class="pre">[31948</span> <span class="pre">-</span> <span class="pre">udp]'</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.udp.UDP.iceedcp_tx" title="Link to this definition">¶</a></dt>
 <dd><ul class="simple">
-<li><p>[TCP] Embedded Device Configuration Protocol TX IANA assigned this well-
-formed service name as a replacement for “iceedcp_tx”.</p></li>
+<li><p>[TCP] Embedded Device Configuration Protocol TX IANA assigned this
+well-formed service name as a replacement for “iceedcp_tx”.</p></li>
 <li><p>[TCP] Embedded Device Configuration Protocol TX</p></li>
-<li><p>[UDP] Embedded Device Configuration Protocol TX IANA assigned this well-
-formed service name as a replacement for “iceedcp_tx”.</p></li>
+<li><p>[UDP] Embedded Device Configuration Protocol TX IANA assigned this
+well-formed service name as a replacement for “iceedcp_tx”.</p></li>
 <li><p>[UDP] Embedded Device Configuration Protocol TX</p></li>
 </ul>
 </dd></dl>
@@ -113991,11 +113993,11 @@ formed service name as a replacement for “iceedcp_tx”.</p></li>
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.udp.UDP.iceedcp_rx">
 <span class="sig-name descname"><span class="pre">iceedcp_rx</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'iceedcp-rx</span> <span class="pre">[31949</span> <span class="pre">-</span> <span class="pre">udp]'</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.udp.UDP.iceedcp_rx" title="Link to this definition">¶</a></dt>
 <dd><ul class="simple">
-<li><p>[TCP] Embedded Device Configuration Protocol RX IANA assigned this well-
-formed service name as a replacement for “iceedcp_rx”.</p></li>
+<li><p>[TCP] Embedded Device Configuration Protocol RX IANA assigned this
+well-formed service name as a replacement for “iceedcp_rx”.</p></li>
 <li><p>[TCP] Embedded Device Configuration Protocol RX</p></li>
-<li><p>[UDP] Embedded Device Configuration Protocol RX IANA assigned this well-
-formed service name as a replacement for “iceedcp_rx”.</p></li>
+<li><p>[UDP] Embedded Device Configuration Protocol RX IANA assigned this
+well-formed service name as a replacement for “iceedcp_rx”.</p></li>
 <li><p>[UDP] Embedded Device Configuration Protocol RX</p></li>
 </ul>
 </dd></dl>
@@ -115356,7 +115358,7 @@ number assigned</strong>. IANA leaves the port column empty for historic
 service names it never gave a port, so there is nothing for a member to
 be valued on and they are documented here instead.</p>
 </div>
-<div class="table-wrapper colwidths-given docutils container" id="id12">
+<div class="table-wrapper colwidths-given docutils container">
 <table class="docutils align-default" id="id12">
 <caption><span class="caption-text">Service names assigned no port number</span><a class="headerlink" href="#id12" title="Link to this table">¶</a></caption>
 <colgroup>
@@ -116145,7 +116147,7 @@ number assigned</strong>. IANA leaves the port column empty for historic
 service names it never gave a port, so there is nothing for a member to
 be valued on and they are documented here instead.</p>
 </div>
-<div class="table-wrapper colwidths-given docutils container" id="id13">
+<div class="table-wrapper colwidths-given docutils container">
 <table class="docutils align-default" id="id13">
 <caption><span class="caption-text">Service names assigned no port number</span><a class="headerlink" href="#id13" title="Link to this table">¶</a></caption>
 <colgroup>

@@ -15,6 +15,7 @@
         <title>Running the Repository - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../_static/mermaid.css?v=10b7d883" />
@@ -541,11 +542,24 @@ back to the default engine rather than raising when a requested engine is absent
 <p class="admonition-title">Note</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">dev</span></code> extra exists <strong>because</strong> of this narrowing, and is not a second
 catch-all. pylint, mypy and autodoc all resolve imports against what is installed,
-so the engines leaving <code class="docutils literal notranslate"><span class="pre">all</span></code> would have made them newly unresolvable to the
+mypy for every package without a stub under <code class="file docutils literal notranslate"><span class="pre">typings/</span></code> (below), so the
+engines leaving <code class="docutils literal notranslate"><span class="pre">all</span></code> would have made them newly unresolvable to the
 toolchain. <code class="docutils literal notranslate"><span class="pre">dev</span></code> is defined by what the toolchain must be able to <em>see</em>, and the
 workflows that need full resolution install <code class="docutils literal notranslate"><span class="pre">.[all,dev]</span></code>. Do not add
 <code class="docutils literal notranslate"><span class="pre">pypcap</span></code>/<code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code> to it to silence a lint finding; <code class="file docutils literal notranslate"><span class="pre">.github/workflows/lint.yml</span></code>
 carries a tracked <code class="docutils literal notranslate"><span class="pre">import-error</span></code> count that is deliberate rather than accidental.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>mypy types the engine packages that ship no types – <code class="docutils literal notranslate"><span class="pre">dpkt</span></code>, <code class="docutils literal notranslate"><span class="pre">pyshark</span></code>,
+<code class="docutils literal notranslate"><span class="pre">pcap</span></code> and <code class="docutils literal notranslate"><span class="pre">pcapfile</span></code> – from local stubs under <code class="file docutils literal notranslate"><span class="pre">typings/</span></code>, which
+<code class="file docutils literal notranslate"><span class="pre">mypy.ini</span></code> registers through <code class="docutils literal notranslate"><span class="pre">mypy_path</span></code> and which ship in neither the
+wheel nor the sdist (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1878">#1878</a>). <code class="docutils literal notranslate"><span class="pre">scapy</span></code> ships its own. A stub declares only
+what <a class="reference internal" href="../../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> uses and cites the version it was written against, so a name
+<a class="reference internal" href="../../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> starts to use goes into the stub first. Each engine’s <code class="docutils literal notranslate"><span class="pre">_expkg</span></code> is
+a <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Protocol" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> of what the engine reads through it, defined in its
+module’s <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">TYPE_CHECKING:</span></code> block; <code class="file docutils literal notranslate"><span class="pre">tests/project/test_engine_stubs_1878_unit.py</span></code>
+checks both against the code.</p>
 </div>
 </section>
 <section id="changelog-entry-granularity">

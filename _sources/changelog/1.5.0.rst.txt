@@ -382,8 +382,10 @@ Changed
 ~~~~~~~
 
 * ``Probe``, ``CipherSuite`` and ``IntegritySuite`` are ``Info`` subclasses rather
-  than ``typing.NamedTuple``, and no ``NamedTuple`` remains in the package. They are
-  Mappings now, so ``len()`` and iteration yield field names rather than values.
+  than ``typing.NamedTuple``. They are Mappings now, so ``len()`` and iteration yield
+  field names rather than values. ``TCPSegment`` in ``pcapkit.toolkit.pcap`` stays a
+  ``typing.NamedTuple``, since it is built for every TCP frame and an ``Info`` costs
+  more to construct.
 * ``ModuleDescriptor.klass`` reads an already-imported module out of ``sys.modules``
   rather than re-entering ``importlib.import_module``, since next layer dispatch
   resolves a descriptor there on a per-frame path. Neither a registry *hit* holding a

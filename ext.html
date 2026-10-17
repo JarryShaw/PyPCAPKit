@@ -15,6 +15,7 @@
         <title>Customisation &amp; Extensions - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="_static/mermaid.css?v=10b7d883" />
@@ -1080,9 +1081,13 @@ module.</p>
         <span class="c1"># check if there's any extraction protocol and/or layer thresholds</span>
         <span class="c1"># set by the user (some engines may not support this feature); or</span>
         <span class="c1"># to set up the verbose handler for the underlying engine module,</span>
-        <span class="c1"># as in the following code snippet.</span>
+        <span class="c1"># as in the following code snippet. Install it only when the user</span>
+        <span class="c1"># asked for the default output, i.e., `verbose=True`, which sets</span>
+        <span class="c1"># `ext._vfunc_default`: a callable given as `verbose=` is the</span>
+        <span class="c1"># user's own handler, already stored as `ext._vfunc`, so it must</span>
+        <span class="c1"># be kept rather than replaced.</span>
 
-        <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_v</span><span class="p">:</span>  <span class="c1"># check if verbose mode is enabled</span>
+        <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_vfunc_default</span><span class="p">:</span>  <span class="c1"># check if the default verbose output is requested</span>
             <span class="c1"># NOTE: PyPCAPKit has its own bundled supporting functions for</span>
             <span class="c1"># third-party libraries, e.g., the `packet2chain` function is</span>
             <span class="c1"># to convert a given Packet instance of the Scapy library to a</span>

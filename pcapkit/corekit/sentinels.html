@@ -15,6 +15,7 @@
         <title>Sentinel Objects - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../_static/mermaid.css?v=10b7d883" />
@@ -186,7 +187,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
@@ -487,7 +488,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
@@ -500,46 +501,81 @@ identity (<code class="docutils literal notranslate"><span class="pre">value</sp
 caller might legitimately pass.</p>
 <p>They are all defined here, and this is their only import path: the modules
 that use them do not re-export them (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1744">#1744</a>).</p>
+<p>Each behaves like a built-in singleton such as <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>: calling its type,
+copying it and pickling it give back the one instance, it reprs as its own
+name, neither it nor its type can be changed, and its type cannot be
+subclassed (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1842">#1842</a>).</p>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.5.0: </span><a class="reference internal" href="#pcapkit.corekit.sentinels.NoValueType" title="pcapkit.corekit.sentinels.NoValueType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueType</span></code></a> moves here from <a class="reference internal" href="fields/field.html#module-pcapkit.corekit.fields.field" title="pcapkit.corekit.fields.field"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.field</span></code></a>
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/911">#911</a>), and <a class="reference internal" href="#pcapkit.corekit.sentinels.NO_VALUE" title="pcapkit.corekit.sentinels.NO_VALUE"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_VALUE</span></code></a> replaces its <code class="docutils literal notranslate"><span class="pre">NoValue</span></code> there
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/937">#937</a>).</p>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/937">#937</a>). <a class="reference internal" href="#pcapkit.corekit.sentinels.Sentinel" title="pcapkit.corekit.sentinels.Sentinel"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sentinel</span></code></a> is the public base of every sentinel
+type (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1842">#1842</a>).</p>
 </div>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.corekit.sentinels.Sentinel">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.sentinels.</span></span><span class="sig-name descname"><span class="pre">Sentinel</span></span><a class="reference internal" href="../../_modules/pcapkit/corekit/sentinels.html#Sentinel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.sentinels.Sentinel" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Abstract base of every sentinel type, so each behaves like the type of <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>.</p>
+<p>A subclass sets <code class="docutils literal notranslate"><span class="pre">_name</span></code> to the name of the module-level variable that
+holds its one instance, which is what makes it concrete, and gets the
+rest from here and from <a class="reference internal" href="#pcapkit.corekit.sentinels.SentinelMeta" title="pcapkit.corekit.sentinels.SentinelMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">SentinelMeta</span></code></a>:</p>
+<ul class="simple">
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> hands back the one instance, so calling the type again
+cannot produce a second object that fails an <code class="docutils literal notranslate"><span class="pre">is</span></code> check. It returns
+the existing instance rather than raising, as <code class="docutils literal notranslate"><span class="pre">type(None)()</span></code> returns
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>, so a caller who builds one by mistake still gets the
+sentinel.</p></li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">__copy__()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">__deepcopy__()</span></code> return <code class="docutils literal notranslate"><span class="pre">self</span></code>.</p></li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">__reduce__()</span></code> returns <code class="docutils literal notranslate"><span class="pre">_name</span></code>, as <code class="docutils literal notranslate"><span class="pre">Ellipsis.__reduce__()</span></code>
+returns <code class="docutils literal notranslate"><span class="pre">'Ellipsis'</span></code>, so <a class="reference external" href="https://docs.python.org/3/library/pickle.html#module-pickle" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a> stores the instance as a
+reference to that module-level name and loads it back as the same
+object, at every protocol. Guarding <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> alone would not
+cover protocols 0 and 1, which rebuild through
+<code class="xref py py-func docutils literal notranslate"><span class="pre">copyreg._reconstructor()</span></code> and so call <a class="reference external" href="https://docs.python.org/3/reference/datamodel.html#object.__new__" title="(in Python v3.15)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">object.__new__()</span></code></a>
+directly.</p></li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">__repr__()</span></code> returns <code class="docutils literal notranslate"><span class="pre">_name</span></code> itself, as <code class="docutils literal notranslate"><span class="pre">repr(None)</span></code> is
+<code class="docutils literal notranslate"><span class="pre">'None'</span></code>. <code class="xref py py-func docutils literal notranslate"><span class="pre">str()</span></code> gives the same, since nothing here overrides
+<a class="reference external" href="https://docs.python.org/3/reference/datamodel.html#object.__str__" title="(in Python v3.15)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">object.__str__()</span></code></a>.</p></li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">__setattr__()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">__delattr__()</span></code> raise
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#AttributeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeError</span></code></a> for every name, as <code class="docutils literal notranslate"><span class="pre">None.x</span> <span class="pre">=</span> <span class="pre">1</span></code> does, and
+<code class="docutils literal notranslate"><span class="pre">__slots__</span></code> is empty, so an instance has no <a class="reference external" href="https://docs.python.org/3/reference/datamodel.html#object.__dict__" title="(in Python v3.15)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__dict__</span></code></a>
+to change either.</p></li>
+<li><p><a class="reference internal" href="#pcapkit.corekit.sentinels.SentinelMeta" title="pcapkit.corekit.sentinels.SentinelMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">SentinelMeta</span></code></a> keeps the type itself immutable, and a concrete
+one free of subclasses.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">__bool__</span></code> is left to each sentinel, since only some of them stand for
+an absent value.</p>
+<p>Public, as the library’s other abstract bases are, so that an annotation
+or an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#isinstance" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">isinstance()</span></code></a> check can name every sentinel at once. Every
+sentinel the library itself uses is defined in this module
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/911">#911</a>).</p>
+<p>A pickle written before <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1842">#1842</a> still loads. A pickle of
+<a class="reference internal" href="#pcapkit.corekit.sentinels.NULL" title="pcapkit.corekit.sentinels.NULL"><code class="xref py py-data docutils literal notranslate"><span class="pre">NULL</span></code></a> names <code class="docutils literal notranslate"><span class="pre">_get_null</span></code>, kept for it, and a pickle of another
+sentinel at protocol 2 or above rebuilds through <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code>; both
+load as the sentinel. A pickle of another sentinel at protocol 0 or 1
+rebuilds through <code class="xref py py-func docutils literal notranslate"><span class="pre">copyreg._reconstructor()</span></code>, which no hook on the
+class can reach, so it loads as a second instance of the type.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.5.0.</span></p>
+</div>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.sentinels.NullType">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.sentinels.</span></span><span class="sig-name descname"><span class="pre">NullType</span></span><a class="reference internal" href="../../_modules/pcapkit/corekit/sentinels.html#NullType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.sentinels.NullType" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.corekit.sentinels.Sentinel" title="pcapkit.corekit.sentinels.Sentinel"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sentinel</span></code></a></p>
 <p>Type of <a class="reference internal" href="#pcapkit.corekit.sentinels.NULL" title="pcapkit.corekit.sentinels.NULL"><code class="xref py py-data docutils literal notranslate"><span class="pre">NULL</span></code></a>, the omitted-<code class="docutils literal notranslate"><span class="pre">class_</span></code>/<code class="docutils literal notranslate"><span class="pre">module</span></code> sentinel.</p>
 <p>A distinct class rather than a plain <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> such as <code class="docutils literal notranslate"><span class="pre">'(null)'</span></code>,
 so that <code class="docutils literal notranslate"><span class="pre">is</span></code> comparisons against it mean what they say: no
 <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> a caller passes, including one that happens to spell
 <code class="docutils literal notranslate"><span class="pre">'(null)'</span></code> itself, can be this sentinel. See GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/833">#833</a>.</p>
-<p>Genuinely a singleton, not merely a class this module happens to
-instantiate once: <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> always hands back the one instance
-that already exists, rather than building a new one, so no caller –
-direct, or <a class="reference external" href="https://docs.python.org/3/library/copy.html#module-copy" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">copy</span></code></a>/<a class="reference external" href="https://docs.python.org/3/library/pickle.html#module-pickle" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a> reconstructing an instance behind
-the scenes – can end up holding a second object that fails an <code class="docutils literal notranslate"><span class="pre">is</span>
-<span class="pre">NULL</span></code> check downstream. <a class="reference internal" href="module.html#pcapkit.corekit.module.ModuleDescriptor.klass" title="pcapkit.corekit.module.ModuleDescriptor.klass"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ModuleDescriptor.klass</span></code></a> makes exactly that
-check; a second instance would slip past it to <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#getattr" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">getattr()</span></code></a> and
-downgrade a clean <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a> into
-a bare <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a> (<code class="docutils literal notranslate"><span class="pre">attribute</span> <span class="pre">name</span> <span class="pre">must</span> <span class="pre">be</span> <span class="pre">string,</span> <span class="pre">not</span>
-<span class="pre">'NullType'</span></code>). A stricter guard that raises on a second call would be
-truer to “singleton” in the abstract, but it would also mean the module’s
-own <code class="docutils literal notranslate"><span class="pre">NULL</span> <span class="pre">=</span> <span class="pre">NullType()</span></code> below is the only call that is ever allowed to
-succeed – fragile for no real benefit, since nothing here needs
-<em>rejecting</em> a second construction, only preventing it from producing a
-distinct object.</p>
-<p><a class="reference external" href="https://docs.python.org/3/library/copy.html#copy.copy" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy.copy()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/copy.html#copy.deepcopy" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy.deepcopy()</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/pickle.html#module-pickle" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a> protocols 2
-and up reconstruct through <code class="docutils literal notranslate"><span class="pre">cls.__new__(cls)</span></code>, which the guard above
-already keeps to one instance. Pickle protocols 0 and 1 do not: they
-reconstruct through <code class="xref py py-func docutils literal notranslate"><span class="pre">copyreg._reconstructor()</span></code>, which calls
-<code class="xref py py-func docutils literal notranslate"><span class="pre">object.__new__()</span></code> <em>directly</em>, bypassing <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> entirely.
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">__reduce__()</span></code> is defined so that every protocol is routed through
-the same module-level getter instead of through reconstruction at all,
-and <code class="xref py py-meth docutils literal notranslate"><span class="pre">__copy__()</span></code>/<code class="xref py py-meth docutils literal notranslate"><span class="pre">__deepcopy__()</span></code> return <code class="docutils literal notranslate"><span class="pre">self</span></code> without
-reducing anything.</p>
+<p><a class="reference internal" href="#pcapkit.corekit.sentinels.Sentinel" title="pcapkit.corekit.sentinels.Sentinel"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sentinel</span></code></a> keeps it to one instance. <a class="reference internal" href="module.html#pcapkit.corekit.module.ModuleDescriptor.klass" title="pcapkit.corekit.module.ModuleDescriptor.klass"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ModuleDescriptor.klass</span></code></a> checks <code class="docutils literal notranslate"><span class="pre">is</span> <span class="pre">NULL</span></code>; a
+second instance would slip past it to <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#getattr" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">getattr()</span></code></a> and downgrade a
+clean <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a> into a bare
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a> (<code class="docutils literal notranslate"><span class="pre">attribute</span> <span class="pre">name</span> <span class="pre">must</span> <span class="pre">be</span> <span class="pre">string,</span> <span class="pre">not</span> <span class="pre">'NullType'</span></code>).</p>
 <p>A caveat rather than a defect: <a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.reload" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.reload()</span></code></a> on this module
-re-executes <code class="docutils literal notranslate"><span class="pre">NULL</span> <span class="pre">=</span> <span class="pre">NullType()</span></code> below, producing a <em>second</em> singleton
+re-executes the <code class="docutils literal notranslate"><span class="pre">class</span></code> statement and <code class="docutils literal notranslate"><span class="pre">NULL</span> <span class="pre">=</span> <span class="pre">NullType()</span></code> below,
+producing a <em>second</em> singleton
 that the reloaded code compares against correctly but that every module
 which already imported the pre-reload <a class="reference internal" href="#pcapkit.corekit.sentinels.NULL" title="pcapkit.corekit.sentinels.NULL"><code class="xref py py-data docutils literal notranslate"><span class="pre">NULL</span></code></a> still holds – so a
 comparison spanning the reload sees two “singletons” that are not each
@@ -550,7 +586,9 @@ equivalent is possible here, because unlike a resolved class there is no
 live registry this sentinel could be re-read from. It is a property of
 sharing one module-level binding across a reload, not something this
 class’s singleton guarantees claim to solve, and nothing in this package
-reloads <a class="reference internal" href="#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></a> after import.</p>
+reloads <a class="reference internal" href="#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></a> after import. Pickling a
+pre-reload <a class="reference internal" href="#pcapkit.corekit.sentinels.NULL" title="pcapkit.corekit.sentinels.NULL"><code class="xref py py-data docutils literal notranslate"><span class="pre">NULL</span></code></a> raises <a class="reference external" href="https://docs.python.org/3/library/pickle.html#pickle.PicklingError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">pickle.PicklingError</span></code></a>, since it is
+no longer the object its name refers to.</p>
 <p>Reloading <a class="reference internal" href="module.html#module-pcapkit.corekit.module" title="pcapkit.corekit.module"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.module</span></code></a> instead has no effect on the
 singleton at all. That module only imports <a class="reference internal" href="#pcapkit.corekit.sentinels.NULL" title="pcapkit.corekit.sentinels.NULL"><code class="xref py py-data docutils literal notranslate"><span class="pre">NULL</span></code></a> from here, and
 re-running an already-satisfied <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">...</span> <span class="pre">import</span></code> reads the current
@@ -560,7 +598,7 @@ neither mints a new instance nor loses the old one.</p>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.corekit.sentinels.NULL">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.sentinels.</span></span><span class="sig-name descname"><span class="pre">NULL</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;NULL&gt;</span></span><a class="headerlink" href="#pcapkit.corekit.sentinels.NULL" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.sentinels.</span></span><span class="sig-name descname"><span class="pre">NULL</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">NULL</span></span><a class="headerlink" href="#pcapkit.corekit.sentinels.NULL" title="Link to this definition">¶</a></dt>
 <dd><p>Sentinel for an omitted <code class="docutils literal notranslate"><span class="pre">class_</span></code> argument to the <code class="docutils literal notranslate"><span class="pre">register_*</span></code>
 helpers in <a class="reference internal" href="../foundation/registry.html#module-pcapkit.foundation.registry.protocols" title="pcapkit.foundation.registry.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols</span></code></a> and
 <a class="reference internal" href="../foundation/registry.html#module-pcapkit.foundation.registry.foundation" title="pcapkit.foundation.registry.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.foundation</span></code></a>. Housed here with the
@@ -575,16 +613,25 @@ package’s other sentinels, per the module docstring above.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.sentinels.NoValueType">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.sentinels.</span></span><span class="sig-name descname"><span class="pre">NoValueType</span></span><a class="reference internal" href="../../_modules/pcapkit/corekit/sentinels.html#NoValueType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.sentinels.NoValueType" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.corekit.sentinels.Sentinel" title="pcapkit.corekit.sentinels.Sentinel"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sentinel</span></code></a></p>
 <p>Type of <a class="reference internal" href="#pcapkit.corekit.sentinels.NO_VALUE" title="pcapkit.corekit.sentinels.NO_VALUE"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_VALUE</span></code></a>, the default value for <a class="reference internal" href="fields/index.html#module-pcapkit.corekit.fields" title="pcapkit.corekit.fields"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields</span></code></a>.</p>
 <p>Housed here per GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/911">#911</a>;
 <a class="reference internal" href="fields/field.html#pcapkit.corekit.fields.field.FieldBase.default" title="pcapkit.corekit.fields.field.FieldBase.default"><code class="xref py py-attr docutils literal notranslate"><span class="pre">FieldBase.default</span></code></a>
 documents it as the field-default sentinel.</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.5.0: </span>A singleton: calling this type, <a class="reference external" href="https://docs.python.org/3/library/copy.html#copy.deepcopy" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy.deepcopy()</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/pickle.html#module-pickle" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a>
+give back <a class="reference internal" href="#pcapkit.corekit.sentinels.NO_VALUE" title="pcapkit.corekit.sentinels.NO_VALUE"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_VALUE</span></code></a> rather than a second instance
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1842">#1842</a>). It reprs as <code class="docutils literal notranslate"><span class="pre">NO_VALUE</span></code>, its own name, as
+<code class="docutils literal notranslate"><span class="pre">repr(None)</span></code> is <code class="docutils literal notranslate"><span class="pre">'None'</span></code>, rather than as an object address, which
+is what a field constructor’s signature and a parsed schema’s repr
+show for an unset value (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1841">#1841</a>). Its attributes, and its
+type’s, cannot be set or deleted, and the type cannot be subclassed.</p>
+</div>
 </dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.corekit.sentinels.NO_VALUE">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.sentinels.</span></span><span class="sig-name descname"><span class="pre">NO_VALUE</span></span><a class="headerlink" href="#pcapkit.corekit.sentinels.NO_VALUE" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.sentinels.</span></span><span class="sig-name descname"><span class="pre">NO_VALUE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">NO_VALUE</span></span><a class="headerlink" href="#pcapkit.corekit.sentinels.NO_VALUE" title="Link to this definition">¶</a></dt>
 <dd><p>Default value for
 <a class="reference internal" href="fields/field.html#pcapkit.corekit.fields.field.FieldBase.default" title="pcapkit.corekit.fields.field.FieldBase.default"><code class="xref py py-attr docutils literal notranslate"><span class="pre">FieldBase.default</span></code></a>.</p>
 <dl class="field-list simple">
@@ -597,7 +644,7 @@ documents it as the field-default sentinel.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.sentinels.NoDefaultType">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.sentinels.</span></span><span class="sig-name descname"><span class="pre">NoDefaultType</span></span><a class="reference internal" href="../../_modules/pcapkit/corekit/sentinels.html#NoDefaultType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.sentinels.NoDefaultType" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.corekit.sentinels.Sentinel" title="pcapkit.corekit.sentinels.Sentinel"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sentinel</span></code></a></p>
 <p>Type of <a class="reference internal" href="#pcapkit.corekit.sentinels.NO_DEFAULT" title="pcapkit.corekit.sentinels.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a>, the omitted-<code class="docutils literal notranslate"><span class="pre">default</span></code> sentinel for
 <a class="reference internal" href="enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumLookup.get</span></code></a>.</p>
 <p>A dedicated class rather than a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a>, as review of the
@@ -605,60 +652,18 @@ work for <a class="extlink-issue reference external" href="https://github.com/Ja
 <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a> compares under <code class="docutils literal notranslate"><span class="pre">is</span></code> exactly as safely as a dedicated
 class with no <code class="docutils literal notranslate"><span class="pre">__eq__</span></code> of its own does; what it lacks is a readable
 representation: it prints as <code class="docutils literal notranslate"><span class="pre">&lt;object</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x...&gt;</span></code> in a signature,
-in <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#help" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">help()</span></code></a>, and in a traceback, where <code class="docutils literal notranslate"><span class="pre">NoDefaultType()</span></code> – via
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">__repr__()</span></code> below – prints as <code class="docutils literal notranslate"><span class="pre">&lt;NO_DEFAULT&gt;</span></code>. The names follow
-the convention every sentinel here shares, settled by GitHub issue
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/937">#937</a>: <code class="docutils literal notranslate"><span class="pre">&lt;Name&gt;Type</span></code> for the class and SCREAMING_SNAKE for the
-instance.</p>
-<p>Genuinely a singleton, not merely a class this module happens to
-instantiate once: <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> always hands back the one instance that
-already exists, rather than building a new one. That guards against a
-caller writing <code class="docutils literal notranslate"><span class="pre">registry.get(key,</span> <span class="pre">default=NoDefaultType())</span></code> – perhaps
-not realising <a class="reference internal" href="#pcapkit.corekit.sentinels.NO_DEFAULT" title="pcapkit.corekit.sentinels.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a> already exists – and getting back a
+in <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#help" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">help()</span></code></a>, and in a traceback, where <code class="docutils literal notranslate"><span class="pre">NoDefaultType()</span></code> – via the
+<code class="docutils literal notranslate"><span class="pre">__repr__</span></code> <a class="reference internal" href="#pcapkit.corekit.sentinels.Sentinel" title="pcapkit.corekit.sentinels.Sentinel"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sentinel</span></code></a> gives it – prints as <code class="docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code>.
+The names follow the convention every sentinel here shares, settled by
+GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/937">#937</a>: <code class="docutils literal notranslate"><span class="pre">&lt;Name&gt;Type</span></code> for the class and
+SCREAMING_SNAKE for the instance.</p>
+<p><a class="reference internal" href="#pcapkit.corekit.sentinels.Sentinel" title="pcapkit.corekit.sentinels.Sentinel"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sentinel</span></code></a> keeps it to one instance. That guards against a caller
+writing <code class="docutils literal notranslate"><span class="pre">registry.get(key,</span> <span class="pre">default=NoDefaultType())</span></code> – perhaps not
+realising <a class="reference internal" href="#pcapkit.corekit.sentinels.NO_DEFAULT" title="pcapkit.corekit.sentinels.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a> already exists – and getting back a
 <em>second</em>, non-identical sentinel that silently fails <code class="docutils literal notranslate"><span class="pre">is</span> <span class="pre">NO_DEFAULT</span></code>
 inside <a class="reference internal" href="enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumLookup.get</span></code></a>, so
 their call is treated as supplying a real (if useless) default instead of
-the <em>no default</em> they meant. With the guard, <a class="reference internal" href="#pcapkit.corekit.sentinels.NoDefaultType" title="pcapkit.corekit.sentinels.NoDefaultType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoDefaultType()</span></code></a>
-always returns the one canonical <a class="reference internal" href="#pcapkit.corekit.sentinels.NO_DEFAULT" title="pcapkit.corekit.sentinels.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a>, so that mistake
-self-corrects.</p>
-<p>Unlike <a class="reference internal" href="#pcapkit.corekit.sentinels.NullType" title="pcapkit.corekit.sentinels.NullType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NullType</span></code></a>, this does <em>not</em> also define <code class="docutils literal notranslate"><span class="pre">__copy__</span></code>,
-<code class="docutils literal notranslate"><span class="pre">__deepcopy__</span></code> or <code class="docutils literal notranslate"><span class="pre">__reduce__</span></code> – but not because <a class="reference external" href="https://docs.python.org/3/library/copy.html#copy.deepcopy" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy.deepcopy()</span></code></a>
-or <a class="reference external" href="https://docs.python.org/3/library/pickle.html#module-pickle" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a> “bypass” <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code>; they do not, for protocol 2 and
-above. <a class="reference external" href="https://docs.python.org/3/library/pickle.html#object.__reduce_ex__" title="(in Python v3.15)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">object.__reduce_ex__()</span></code></a> at protocol 2 reduces through
-<code class="xref py py-func docutils literal notranslate"><span class="pre">copyreg.__newobj__()</span></code>, which reconstructs by calling
-<code class="docutils literal notranslate"><span class="pre">cls.__new__(cls)</span></code> – exactly the guarded path above – so
-<code class="docutils literal notranslate"><span class="pre">copy.copy</span></code>, <code class="docutils literal notranslate"><span class="pre">copy.deepcopy</span></code> and every pickle protocol from 2 on
-already come back as the one canonical instance with no extra code.
-Measured:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">NO_DEFAULT</span><span class="o">.</span><span class="n">__reduce_ex__</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-<span class="go">(&lt;function __newobj__ at 0x...&gt;, (&lt;class '...NoDefaultType'&gt;,), None, None, None)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">NO_DEFAULT</span><span class="p">)</span> <span class="ow">is</span> <span class="n">NO_DEFAULT</span>
-<span class="go">True</span>
-</pre></div>
-</div>
-<p>The one path <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> cannot see is pickle protocol 0 (and 1),
-which reduces through <code class="xref py py-func docutils literal notranslate"><span class="pre">copyreg._reconstructor()</span></code> instead, and <em>that</em>
-calls <code class="xref py py-func docutils literal notranslate"><span class="pre">object.__new__()</span></code> directly:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">NO_DEFAULT</span><span class="o">.</span><span class="n">__reduce_ex__</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<span class="go">(&lt;function _reconstructor at 0x...&gt;, (&lt;class '...NoDefaultType'&gt;, &lt;class 'object'&gt;, None))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pickle</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">pickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">NO_DEFAULT</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="ow">is</span> <span class="n">NO_DEFAULT</span>
-<span class="go">False</span>
-</pre></div>
-</div>
-<p>That gap is exactly what <a class="reference internal" href="#pcapkit.corekit.sentinels.NullType" title="pcapkit.corekit.sentinels.NullType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NullType</span></code></a>’s own
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">__reduce__()</span></code> exists to close, because <a class="reference internal" href="#pcapkit.corekit.sentinels.NULL" title="pcapkit.corekit.sentinels.NULL"><code class="xref py py-data docutils literal notranslate"><span class="pre">NULL</span></code></a> is
-stored as a <a class="reference internal" href="module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> field that a
-caller’s own <a class="reference external" href="https://docs.python.org/3/library/copy.html#copy.deepcopy" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy.deepcopy()</span></code></a> or <a class="reference external" href="https://docs.python.org/3/library/pickle.html#module-pickle" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a> call can walk into and
-reconstruct. <a class="reference internal" href="#pcapkit.corekit.sentinels.NO_DEFAULT" title="pcapkit.corekit.sentinels.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a> is left unhandled here not because the gap
-cannot occur in principle, but because nothing in this package ever
-pickles it at protocol 0: it is reachable – from <a class="reference internal" href="enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumLookup.get</span></code></a>’s own bound parameter default
-(<code class="docutils literal notranslate"><span class="pre">EnumLookup.get.__defaults__[0]</span></code>, or any subclass’s, e.g.
-<code class="docutils literal notranslate"><span class="pre">Hardware.get.__func__.__defaults__[0]</span></code>) and from
-<code class="docutils literal notranslate"><span class="pre">inspect.signature(Hardware.get).parameters['default'].default</span></code> – but
-neither is a field any object here gets pickled <em>as</em>, and both still
-survive <a class="reference external" href="https://docs.python.org/3/library/copy.html#copy.deepcopy" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy.deepcopy()</span></code></a> with identity intact regardless, because
-deep-copying either still reduces the sentinel itself through the same,
-guarded protocol-2 path measured above.</p>
+the <em>no default</em> they meant.</p>
 <p>A reload caveat that is dormant rather than live. <a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.reload" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.reload()</span></code></a>
 on this module re-executes both <code class="docutils literal notranslate"><span class="pre">class</span> <span class="pre">NoDefaultType:</span></code> and
 <code class="docutils literal notranslate"><span class="pre">NO_DEFAULT</span> <span class="pre">=</span> <span class="pre">NoDefaultType()</span></code> below, producing a fresh, distinct
@@ -706,7 +711,7 @@ reloading <em>this</em> module, where the class statement lives; and since
 <a class="reference internal" href="enum.html#module-pcapkit.corekit.enum" title="pcapkit.corekit.enum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.enum</span></code></a>’s own global stays pointed at whatever it
 read until something re-runs that import.</p>
 </div>
-<p>Also unlike both <a class="reference internal" href="#pcapkit.corekit.sentinels.NullType" title="pcapkit.corekit.sentinels.NullType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NullType</span></code></a> and <a class="reference internal" href="#pcapkit.corekit.sentinels.NoValueType" title="pcapkit.corekit.sentinels.NoValueType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueType</span></code></a>, this
+<p>Unlike both <a class="reference internal" href="#pcapkit.corekit.sentinels.NullType" title="pcapkit.corekit.sentinels.NullType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NullType</span></code></a> and <a class="reference internal" href="#pcapkit.corekit.sentinels.NoValueType" title="pcapkit.corekit.sentinels.NoValueType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueType</span></code></a>, this
 deliberately does <em>not</em> define <code class="docutils literal notranslate"><span class="pre">__bool__</span></code>. Both of those model an
 <em>absent</em> value, so reading falsy in a boolean context is the point.
 <a class="reference internal" href="#pcapkit.corekit.sentinels.NO_DEFAULT" title="pcapkit.corekit.sentinels.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a> models something different: a marker meaning <em>no
@@ -727,13 +732,12 @@ it must never be mistaken for.</p>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.corekit.sentinels.NO_DEFAULT">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.sentinels.</span></span><span class="sig-name descname"><span class="pre">NO_DEFAULT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;NO_DEFAULT&gt;</span></span><a class="headerlink" href="#pcapkit.corekit.sentinels.NO_DEFAULT" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.sentinels.</span></span><span class="sig-name descname"><span class="pre">NO_DEFAULT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">NO_DEFAULT</span></span><a class="headerlink" href="#pcapkit.corekit.sentinels.NO_DEFAULT" title="Link to this definition">¶</a></dt>
 <dd><p>The <code class="docutils literal notranslate"><span class="pre">default</span></code> argument value that means <em>no default</em>, i.e.
 let an unresolvable key propagate its lookup error rather than falling
 back. See <a class="reference internal" href="#pcapkit.corekit.sentinels.NoDefaultType" title="pcapkit.corekit.sentinels.NoDefaultType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoDefaultType</span></code></a> for why this is a dedicated class rather
-than a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a>, why it is a guarded singleton, and why it
-defines neither the copy/pickle hooks nor the <code class="docutils literal notranslate"><span class="pre">__bool__</span></code> that its
-<a class="reference internal" href="index.html#module-pcapkit.corekit" title="pcapkit.corekit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit</span></code></a> siblings do.</p>
+than a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a>, and why it does not define the <code class="docutils literal notranslate"><span class="pre">__bool__</span></code>
+that its <a class="reference internal" href="index.html#module-pcapkit.corekit" title="pcapkit.corekit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit</span></code></a> siblings do.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#pcapkit.corekit.sentinels.NoDefaultType" title="pcapkit.corekit.sentinels.NoDefaultType">NoDefaultType</a></p>
@@ -752,7 +756,7 @@ hide it from Sphinx, so both are documented below and marked private.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.sentinels.AbsentType">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.sentinels.</span></span><span class="sig-name descname"><span class="pre">AbsentType</span></span><a class="reference internal" href="../../_modules/pcapkit/corekit/sentinels.html#AbsentType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.sentinels.AbsentType" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.corekit.sentinels.Sentinel" title="pcapkit.corekit.sentinels.Sentinel"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sentinel</span></code></a></p>
 <p>Type of <a class="reference internal" href="#pcapkit.corekit.sentinels.ABSENT" title="pcapkit.corekit.sentinels.ABSENT"><code class="xref py py-data docutils literal notranslate"><span class="pre">ABSENT</span></code></a>, the absent-key sentinel.</p>
 <p>A distinct class rather than a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">object</span></code></a> so that the sentinel has a
 name of its own in a traceback or a debugger, and so that a type checker has
@@ -778,7 +782,7 @@ what record that.</p>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.corekit.sentinels.ABSENT">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.sentinels.</span></span><span class="sig-name descname"><span class="pre">ABSENT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;absent&gt;</span></span><a class="headerlink" href="#pcapkit.corekit.sentinels.ABSENT" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.sentinels.</span></span><span class="sig-name descname"><span class="pre">ABSENT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">ABSENT</span></span><a class="headerlink" href="#pcapkit.corekit.sentinels.ABSENT" title="Link to this definition">¶</a></dt>
 <dd><p>Absent-versus-<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> sentinel for
 <code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol._declared_keywords()</span></code> to read a class’s
 own <code class="docutils literal notranslate"><span class="pre">__keywords__</span></code> out of its <a class="reference external" href="https://docs.python.org/3/reference/datamodel.html#object.__dict__" title="(in Python v3.15)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__dict__</span></code></a>, where
@@ -795,6 +799,41 @@ leading underscore – see <a class="reference internal" href="#pcapkit.corekit.
 </dl>
 </dd></dl>
 
+<section id="internal-definitions">
+<h2>Internal Definitions<a class="headerlink" href="#internal-definitions" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.corekit.sentinels.SentinelMeta">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.sentinels.</span></span><span class="sig-name descname"><span class="pre">SentinelMeta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/sentinels.html#SentinelMeta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.sentinels.SentinelMeta" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABCMeta" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABCMeta</span></code></a></p>
+<p>Metaclass of <a class="reference internal" href="#pcapkit.corekit.sentinels.Sentinel" title="pcapkit.corekit.sentinels.Sentinel"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sentinel</span></code></a>, so every sentinel type acts as <code class="docutils literal notranslate"><span class="pre">type(None)</span></code> does.</p>
+<ul class="simple">
+<li><p>A concrete sentinel type – one that sets <code class="docutils literal notranslate"><span class="pre">_name</span></code>, and so has no
+abstract member left – cannot be subclassed, either by a <code class="docutils literal notranslate"><span class="pre">class</span></code>
+statement or by <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABCMeta.register" title="(in Python v3.15)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>. Both raise
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a>, as <code class="docutils literal notranslate"><span class="pre">class</span> <span class="pre">X(type(None))</span></code> does. An abstract one,
+<a class="reference internal" href="#pcapkit.corekit.sentinels.Sentinel" title="pcapkit.corekit.sentinels.Sentinel"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sentinel</span></code></a> included, can be.</p></li>
+<li><p>A concrete sentinel type makes its one instance while its <code class="docutils literal notranslate"><span class="pre">class</span></code>
+statement runs, and keeps it as <code class="docutils literal notranslate"><span class="pre">_instance</span></code>.</p></li>
+<li><p>Every sentinel type is immutable once its <code class="docutils literal notranslate"><span class="pre">class</span></code> statement has run.
+Setting or deleting any attribute on it raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a>, as
+<code class="docutils literal notranslate"><span class="pre">type(None).x</span> <span class="pre">=</span> <span class="pre">1</span></code> does, so <code class="docutils literal notranslate"><span class="pre">_name</span></code>, <code class="docutils literal notranslate"><span class="pre">_instance</span></code> and the methods
+every sentinel inherits stay as they were defined.</p></li>
+</ul>
+<p>A concrete sentinel type also gets <code class="docutils literal notranslate"><span class="pre">__final__</span></code> set to <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a> here.
+<code class="xref py py-func docutils literal notranslate"><span class="pre">final()</span></code> would record the same, but a class
+decorator runs only after the <code class="docutils literal notranslate"><span class="pre">class</span></code> statement, when the type already
+refuses the write, and <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.final" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">typing.final()</span></code></a> skips an attribute it cannot
+set.</p>
+<p>These guards, and <a class="reference internal" href="#pcapkit.corekit.sentinels.Sentinel" title="pcapkit.corekit.sentinels.Sentinel"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sentinel</span></code></a>’s own, are Python-level hooks. So
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">type.__setattr__()</span></code> called directly on the type, or
+<a class="reference external" href="https://docs.python.org/3/reference/datamodel.html#object.__setattr__" title="(in Python v3.15)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">object.__setattr__()</span></code></a> setting <code class="docutils literal notranslate"><span class="pre">__class__</span></code> on an instance, still
+reaches past them, where nothing reaches past a built-in type’s.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.5.0.</span></p>
+</div>
+</dd></dl>
+
+</section>
 </section>
 
         </article>
@@ -840,8 +879,27 @@ leading underscore – see <a class="reference internal" href="#pcapkit.corekit.
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Sentinel Objects</a><ul>
+<li><a class="reference internal" href="#internal-definitions">Internal Definitions</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

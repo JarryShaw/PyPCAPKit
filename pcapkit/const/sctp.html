@@ -15,6 +15,7 @@
         <title>SCTP Constant Enumerations - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../_static/mermaid.css?v=10b7d883" />
@@ -522,7 +523,7 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.sctp.chunk.Chunk">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.sctp.chunk.</span></span><span class="sig-name descname"><span class="pre">Chunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/sctp/chunk.html#Chunk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.sctp.chunk.Chunk" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
 <p>[Chunk] SCTP Chunk Types</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.sctp.chunk.Chunk.Payload_Data">
@@ -635,8 +636,8 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.sctp.chunk.Chunk.DTLS">
 <span class="sig-name descname"><span class="pre">DTLS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">65</span></span><a class="headerlink" href="#pcapkit.const.sctp.chunk.Chunk.DTLS" title="Link to this definition">¶</a></dt>
-<dd><p>DTLS (TEMPORARY - registered 2026-02-20, expires 2027-02-20) [draft-ietf-
-tsvwg-sctp-dtls-chunk-01]</p>
+<dd><p>DTLS (TEMPORARY - registered 2026-02-20, expires 2027-02-20)
+[draft-ietf-tsvwg-sctp-dtls-chunk-01]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -750,7 +751,7 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.sctp.parameter.Parameter">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.sctp.parameter.</span></span><span class="sig-name descname"><span class="pre">Parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/sctp/parameter.html#Parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.sctp.parameter.Parameter" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
 <p>[Parameter] SCTP Chunk Parameter Types</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.sctp.parameter.Parameter.Heartbeat_Info">
@@ -990,7 +991,7 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.sctp.cause_code.CauseCode">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.sctp.cause_code.</span></span><span class="sig-name descname"><span class="pre">CauseCode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/sctp/cause_code.html#CauseCode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.sctp.cause_code.CauseCode" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
 <p>[CauseCode] SCTP Error Cause Codes</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.sctp.cause_code.CauseCode.Invalid_Stream_Identifier">
@@ -1179,7 +1180,7 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.sctp.payload_protocol_identifier.</span></span><span class="sig-name descname"><span class="pre">PayloadProtocolIdentifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/sctp/payload_protocol_identifier.html#PayloadProtocolIdentifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
 <p>[PayloadProtocolIdentifier] SCTP Payload Protocol Identifiers</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier.Reserved_by_SCTP">
@@ -1282,8 +1283,8 @@ published.]</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier.SIMCO_draft_kiesel_midcom_simco_sctp_00_txt">
 <span class="sig-name descname"><span class="pre">SIMCO_draft_kiesel_midcom_simco_sctp_00_txt</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">15</span></span><a class="headerlink" href="#pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier.SIMCO_draft_kiesel_midcom_simco_sctp_00_txt" title="Link to this definition">¶</a></dt>
-<dd><p>SIMCO &lt;draft-kiesel-midcom-simco-sctp-00.txt&gt; [draft-kiesel-midcom-simco-
-sctp-00][Sebastian Kiesel]</p>
+<dd><p>SIMCO &lt;draft-kiesel-midcom-simco-sctp-00.txt&gt;
+[draft-kiesel-midcom-simco-sctp-00][Sebastian Kiesel]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1594,7 +1595,7 @@ Franusic][<a class="reference external" href="https://github.com/link-mink">http
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier.ELE2_Lawful_Interception">
 <span class="sig-name descname"><span class="pre">ELE2_Lawful_Interception</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">65</span></span><a class="headerlink" href="#pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier.ELE2_Lawful_Interception" title="Link to this definition">¶</a></dt>
-<dd><p>ELE2 Lawful Interception [<a class="reference external" href="http://ele2.io][Damir">http://ele2.io][Damir</a> Franusic]</p>
+<dd><p>ELE2 Lawful Interception [<a class="reference external" href="http://ele2.io">http://ele2.io</a>] [Damir Franusic]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1648,8 +1649,8 @@ Franusic][<a class="reference external" href="https://github.com/link-mink">http
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier.DTLS_Chunk_Key_Management_Messages">
 <span class="sig-name descname"><span class="pre">DTLS_Chunk_Key_Management_Messages</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4242</span></span><a class="headerlink" href="#pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier.DTLS_Chunk_Key_Management_Messages" title="Link to this definition">¶</a></dt>
-<dd><p>DTLS Chunk Key-Management Messages [draft-westerlund-tsvwg-sctp-dtls-
-chunk-01]</p>
+<dd><p>DTLS Chunk Key-Management Messages
+[draft-westerlund-tsvwg-sctp-dtls-chunk-01]</p>
 </dd></dl>
 
 <dl class="py method">

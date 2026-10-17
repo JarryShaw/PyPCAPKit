@@ -8,6 +8,7 @@
         <title>pcapkit.const.ftp.command - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/mermaid.css?v=10b7d883" />
@@ -756,20 +757,7 @@
 <div class="viewcode-block" id="Command">
 <a class="viewcode-back" href="../../../../pcapkit/const/ftp.html#pcapkit.const.ftp.command.Command">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Command</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">StrEnum</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""[Command] FTP Command</span>
-
-<span class="sd">    .. versionchanged:: 1.5.0</span>
-
-<span class="sd">       Neither ``_missing_`` nor ``get()`` mints a member. The owner ruled on</span>
-<span class="sd">       GitHub issue :issue:`860` that ``get`` should not mint: only IANA-registered</span>
-<span class="sd">       values are legitimate members, a new one is properly created through</span>
-<span class="sd">       :meth:`register`, and ``get`` is not given enough information to create</span>
-<span class="sd">       one. Concretely true here -- a bare wire command word carries no</span>
-<span class="sd">       :attr:`feat`/:attr:`desc`/:attr:`type`/:attr:`conf`, so a minted member</span>
-<span class="sd">       had each of them hollowed out to its default; :meth:`register` is the</span>
-<span class="sd">       path that can actually supply them.</span>
-
-<span class="sd">    """</span>
+<span class="w">    </span><span class="sd">"""[Command] FTP Command"""</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Feature code. Keyword returned in FEAT response line for this command/extension,</span>
@@ -1089,15 +1077,6 @@
 <span class="sd">        member built on a name miss, while the base's ``default`` must name a</span>
 <span class="sd">        *registered* value. A refused ``key`` therefore raises whatever</span>
 <span class="sd">        ``default`` is.</span>
-
-<span class="sd">        .. versionchanged:: 1.5.0</span>
-
-<span class="sd">           A non-:class:`str` ``key`` raises</span>
-<span class="sd">           :exc:`~pcapkit.utilities.exceptions.EnumValueError`, with or</span>
-<span class="sd">           without ``default`` (:issue:`1824`). ``get(42)`` and ``get(None)``</span>
-<span class="sd">           raised :exc:`AttributeError` from ``key.upper()``, and</span>
-<span class="sd">           ``get(b'ABOR')`` returned an unregistered member whose name and</span>
-<span class="sd">           value were both the :class:`bytes` object.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            key: Key to get enum item. Looked up case-insensitively, as</span>

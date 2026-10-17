@@ -15,6 +15,7 @@
         <title>1.5.0 – unreleased - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../_static/mermaid.css?v=10b7d883" />
@@ -875,8 +876,10 @@ The data models’ option lists use them (<a class="extlink-issue reference exte
 <h3>Changed<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">Probe</span></code>, <code class="docutils literal notranslate"><span class="pre">CipherSuite</span></code> and <code class="docutils literal notranslate"><span class="pre">IntegritySuite</span></code> are <code class="docutils literal notranslate"><span class="pre">Info</span></code> subclasses rather
-than <code class="docutils literal notranslate"><span class="pre">typing.NamedTuple</span></code>, and no <code class="docutils literal notranslate"><span class="pre">NamedTuple</span></code> remains in the package. They are
-Mappings now, so <code class="docutils literal notranslate"><span class="pre">len()</span></code> and iteration yield field names rather than values.</p></li>
+than <code class="docutils literal notranslate"><span class="pre">typing.NamedTuple</span></code>. They are Mappings now, so <code class="docutils literal notranslate"><span class="pre">len()</span></code> and iteration yield
+field names rather than values. <code class="docutils literal notranslate"><span class="pre">TCPSegment</span></code> in <code class="docutils literal notranslate"><span class="pre">pcapkit.toolkit.pcap</span></code> stays a
+<code class="docutils literal notranslate"><span class="pre">typing.NamedTuple</span></code>, since it is built for every TCP frame and an <code class="docutils literal notranslate"><span class="pre">Info</span></code> costs
+more to construct.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ModuleDescriptor.klass</span></code> reads an already-imported module out of <code class="docutils literal notranslate"><span class="pre">sys.modules</span></code>
 rather than re-entering <code class="docutils literal notranslate"><span class="pre">importlib.import_module</span></code>, since next layer dispatch
 resolves a descriptor there on a per-frame path. Neither a registry <em>hit</em> holding a

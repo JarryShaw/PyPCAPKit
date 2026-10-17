@@ -15,6 +15,7 @@
         <title>Character Set Detection - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../_static/mermaid.css?v=10b7d883" />
@@ -501,7 +502,7 @@ turning the bytes of a text field into a <a class="reference external" href="htt
 which is why it lives here rather than beside either of them.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.utilities.chardet.detect">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.chardet.</span></span><span class="sig-name descname"><span class="pre">detect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../../_modules/pcapkit/utilities/chardet.html#detect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.chardet.detect" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.chardet.</span></span><span class="sig-name descname"><span class="pre">detect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/chardet.html#detect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.chardet.detect" title="Link to this definition">¶</a></dt>
 <dd><p>Detect the character set of <code class="docutils literal notranslate"><span class="pre">value</span></code>.</p>
 <p><a class="reference external" href="https://chardet.readthedocs.io/en/latest/api/index.html#chardet.detect" title="(in chardet v7.6)"><code class="xref py py-func docutils literal notranslate"><span class="pre">chardet.detect()</span></code></a> is a pure function of the bytes handed to it, and the
 single most expensive step in turning a text field into a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>. The

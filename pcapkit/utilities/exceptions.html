@@ -15,6 +15,7 @@
         <title>User Defined Exceptions - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../_static/mermaid.css?v=10b7d883" />
@@ -545,6 +546,11 @@ therefore silent and free of side effects: nothing is logged, and neither
 <code class="xref py py-data docutils literal notranslate"><span class="pre">sys.excepthook</span></code> nor <code class="xref py py-data docutils literal notranslate"><span class="pre">threading.excepthook</span></code> is touched. It is
 still a perfectly ordinary exception, carrying its message for whoever
 catches it.</p>
+<p>An error is also quiet when it is constructed inside a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">_CaughtByCaller</span></code> block naming one of its classes, which is how a
+<a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> caller marks as control flow an error raised by code that
+does not pass <code class="docutils literal notranslate"><span class="pre">quiet=True</span></code> itself. The effect is exactly that of
+<code class="docutils literal notranslate"><span class="pre">quiet=True</span></code>.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <ul class="simple">

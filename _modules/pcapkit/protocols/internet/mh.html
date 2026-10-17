@@ -8,6 +8,7 @@
         <title>pcapkit.protocols.internet.mh - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/mermaid.css?v=10b7d883" />
@@ -498,6 +499,22 @@
 
 <span class="sd">.. [*] https://en.wikipedia.org/wiki/Mobile_IP#Changes_in_IPv6_for_Mobile_IPv6</span>
 
+<span class="sd">.. versionremoved:: 1.5.0</span>
+
+<span class="sd">   ``pcapkit.protocols.internet.mh.NTPTimestamp``, with no alias; use</span>
+<span class="sd">   :class:`pcapkit.protocols.data.internet.mh.NTPTimestamp` instead</span>
+<span class="sd">   (:issue:`1886`).</span>
+
+<span class="sd">.. versionchanged:: 1.5.0</span>
+
+<span class="sd">   :class:`~pcapkit.protocols.data.internet.mh.NTPTimestamp` and</span>
+<span class="sd">   :class:`~pcapkit.protocols.data.internet.mh.PMIPv6Timestamp` are</span>
+<span class="sd">   :class:`~pcapkit.corekit.infoclass.Info` data models rather than named</span>
+<span class="sd">   tuples, so they no longer index, unpack, hash or compare equal to a</span>
+<span class="sd">   :obj:`tuple`, and the dumpers write them keyed by field, as</span>
+<span class="sd">   ``{"seconds": ..., "fraction": ...}``. For ``NTPTimestamp`` this is a</span>
+<span class="sd">   breaking change from 1.4.x (:issue:`1886`).</span>
+
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
@@ -709,6 +726,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiPrefixExtension</span> <span class="k">as</span> <span class="n">Data_MultiPrefixExtension</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">NATDetectionOption</span> <span class="k">as</span> <span class="n">Data_NATDetectionOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">NonceIndicesOption</span> <span class="k">as</span> <span class="n">Data_NonceIndicesOption</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">NTPTimestamp</span> <span class="k">as</span> <span class="n">Data_NTPTimestamp</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">PadFlowIdentificationSuboption</span> <span class="k">as</span> <span class="n">Data_PadFlowIdentificationSuboption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">PadOption</span> <span class="k">as</span> <span class="n">Data_PadOption</span>
@@ -716,6 +734,7 @@
     <span class="n">PermanentHomeKeygenTokenOption</span> <span class="k">as</span> <span class="n">Data_PermanentHomeKeygenTokenOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">PerSessionBitRateAttribute</span> <span class="k">as</span> <span class="n">Data_PerSessionBitRateAttribute</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">PMIPv6Timestamp</span> <span class="k">as</span> <span class="n">Data_PMIPv6Timestamp</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">PreviousMAAROption</span> <span class="k">as</span> <span class="n">Data_PreviousMAAROption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">QoSAttribute</span> <span class="k">as</span> <span class="n">Data_QoSAttribute</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> \
@@ -1011,42 +1030,6 @@
                                      <span class="n">KwArg</span><span class="p">(</span><span class="n">Any</span><span class="p">)],</span> <span class="n">Schema_CGAExtension</span><span class="p">]</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'MH'</span><span class="p">]</span>
-
-
-<div class="viewcode-block" id="NTPTimestamp">
-<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.NTPTimestamp">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">NTPTimestamp</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s1">'NTPTimestamp'</span><span class="p">,</span> <span class="s1">'seconds fraction'</span><span class="p">)):</span>
-<span class="w">    </span><span class="sd">"""NTP timestamp format, c.f., :rfc:`1305`."""</span>
-
-    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">()</span>
-
-    <span class="c1">#: Seconds since 1 January 1900.</span>
-    <span class="n">seconds</span><span class="p">:</span> <span class="nb">int</span>
-    <span class="c1">#: Fraction of a second.</span>
-    <span class="n">fraction</span><span class="p">:</span> <span class="nb">int</span></div>
-
-
-
-<div class="viewcode-block" id="PMIPv6Timestamp">
-<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.PMIPv6Timestamp">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">PMIPv6Timestamp</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s1">'PMIPv6Timestamp'</span><span class="p">,</span> <span class="s1">'seconds fraction'</span><span class="p">)):</span>
-<span class="w">    </span><span class="sd">"""Proxy Mobile IPv6 timestamp format, c.f., :rfc:`5213#section-8.8`.</span>
-
-<span class="sd">    Note:</span>
-<span class="sd">        This is **not** an :rfc:`1305` NTP timestamp, which is why it is a type of</span>
-<span class="sd">        its own rather than a reuse of :class:`NTPTimestamp`. It counts from the</span>
-<span class="sd">        UNIX epoch rather than NTP's 1900 one, and splits its 64 bits 48/16</span>
-<span class="sd">        rather than 32/32, so each field means something different in the two.</span>
-
-<span class="sd">    """</span>
-
-    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">()</span>
-
-    <span class="c1">#: Seconds since 1 January 1970, in the leading 48 bits.</span>
-    <span class="n">seconds</span><span class="p">:</span> <span class="nb">int</span>
-    <span class="c1">#: Fraction of a second, in units of 1/65536, in the trailing 16 bits.</span>
-    <span class="n">fraction</span><span class="p">:</span> <span class="nb">int</span></div>
-
 
 
 <div class="viewcode-block" id="FastBindingAcknowledgmentStatus">
@@ -3893,7 +3876,7 @@
 <span class="sd">            Constructed option data.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">code</span> <span class="o">!=</span> <span class="n">Enum_LLACode</span><span class="o">.</span><span class="n">MH</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">code</span> <span class="o">!=</span> <span class="n">Enum_LLACode</span><span class="o">.</span><span class="n">MN</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Opt </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_LinkLayerAddressOption</span><span class="p">(</span>
@@ -4016,7 +3999,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">timestamp</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">timestamp</span><span class="p">,</span>
-            <span class="n">ntp_timestamp</span><span class="o">=</span><span class="n">NTPTimestamp</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">seconds</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">fraction</span><span class="p">),</span>
+            <span class="n">ntp_timestamp</span><span class="o">=</span><span class="n">Data_NTPTimestamp</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seconds</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">fraction</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
@@ -4792,7 +4775,7 @@
 <span class="sd">            1900 one, and splits the 64 bits 48/16 rather than 32/32. Reading it</span>
 <span class="sd">            as an NTP timestamp would be wrong in both the epoch and the field</span>
 <span class="sd">            widths, which is why it gets its own</span>
-<span class="sd">            :class:`~pcapkit.protocols.internet.mh.PMIPv6Timestamp`.</span>
+<span class="sd">            :class:`~pcapkit.protocols.data.internet.mh.PMIPv6Timestamp`.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            schema: Parsed option schema.</span>
@@ -4813,7 +4796,7 @@
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">timestamp</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span>
                 <span class="n">seconds</span> <span class="o">+</span> <span class="n">fraction</span> <span class="o">/</span> <span class="mi">65536</span><span class="p">,</span> <span class="n">tz</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">),</span>
-            <span class="n">pmip_timestamp</span><span class="o">=</span><span class="n">PMIPv6Timestamp</span><span class="p">(</span><span class="n">seconds</span><span class="p">,</span> <span class="n">fraction</span><span class="p">),</span>
+            <span class="n">pmip_timestamp</span><span class="o">=</span><span class="n">Data_PMIPv6Timestamp</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">seconds</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="n">fraction</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
@@ -9059,7 +9042,7 @@
         <span class="k">return</span> <span class="n">Schema_LinkLayerAddressOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">address</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-            <span class="n">code</span><span class="o">=</span><span class="n">Enum_LLACode</span><span class="o">.</span><span class="n">MH</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">Enum_LLACode</span><span class="o">.</span><span class="n">MN</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
             <span class="n">lla</span><span class="o">=</span><span class="n">address</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -9344,7 +9327,7 @@
 <div class="viewcode-block" id="MH._make_opt_mesg_id">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_mesg_id">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_mesg_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_MesgIDOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                          <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'Optional[NTPTimestamp]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'Optional[Data_NTPTimestamp]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                           <span class="n">interval</span><span class="p">:</span> <span class="s1">'Optional[dt_type]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                           <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_MesgIDOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH mobility message replay protection option.</span>
@@ -9372,8 +9355,8 @@
             <span class="n">ts_sec</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">int_ts</span><span class="p">)</span>
             <span class="n">ts_frc</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">round</span><span class="p">((</span><span class="n">int_ts</span> <span class="o">-</span> <span class="n">ts_sec</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="mi">32</span><span class="p">),</span> <span class="mh">0xFFFF_FFFF</span><span class="p">)</span>  <span class="c1"># 1/2**32 seconds per unit</span>
 
-            <span class="n">timestamp</span> <span class="o">=</span> <span class="n">NTPTimestamp</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">ts_sec</span> <span class="o">+</span> <span class="mi">2_208_988_800</span><span class="p">,</span>  <span class="c1"># 70 years</span>
-                                     <span class="n">fraction</span><span class="o">=</span><span class="n">ts_frc</span><span class="p">)</span>
+            <span class="n">timestamp</span> <span class="o">=</span> <span class="n">Data_NTPTimestamp</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">ts_sec</span> <span class="o">+</span> <span class="mi">2_208_988_800</span><span class="p">,</span>  <span class="c1"># 70 years</span>
+                                          <span class="n">fraction</span><span class="o">=</span><span class="n">ts_frc</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_MesgIDOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
@@ -9998,7 +9981,8 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">seconds</span><span class="p">,</span> <span class="n">fraction</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">pmip_timestamp</span>
+            <span class="n">seconds</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">pmip_timestamp</span><span class="o">.</span><span class="n">seconds</span>
+            <span class="n">fraction</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">pmip_timestamp</span><span class="o">.</span><span class="n">fraction</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">seconds</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">48</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid timestamp seconds: </span><span class="si">{</span><span class="n">seconds</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>

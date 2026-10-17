@@ -89,6 +89,7 @@ and extracts parameters from a PCAP file.
 
    .. autoattribute:: _eof_mark
    .. autoattribute:: _vfunc
+   .. autoattribute:: _vfunc_default
 
    .. autoattribute:: _exnam
    .. autoattribute:: _exeng

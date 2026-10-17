@@ -8,6 +8,7 @@
         <title>pcapkit.const.reg.apptype.tcp - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/mermaid.css?v=10b7d883" />
@@ -556,8 +557,8 @@
 <span class="sd">       * - ``affinity-cntent``</span>
 <span class="sd">         - [TCP] Affinity content sharing</span>
 <span class="sd">       * - ``ai-adp``</span>
-<span class="sd">         - [TCP] AI Agent Discovery Protocol (ADP) [draft-pro-adp-agent-</span>
-<span class="sd">           discovery-00]</span>
+<span class="sd">         - [TCP] AI Agent Discovery Protocol (ADP)</span>
+<span class="sd">           [draft-pro-adp-agent-discovery-00]</span>
 <span class="sd">       * - ``airdrop``</span>
 <span class="sd">         - [TCP] Airdrop</span>
 <span class="sd">       * - ``airmate``</span>
@@ -631,8 +632,7 @@
 <span class="sd">         - [TCP] Data transfer service</span>
 <span class="sd">       * - ``boardgame``</span>
 <span class="sd">         - [TCP] Two-player board game play</span>
-<span class="sd">           [https://github.com/chentianren0/MiniXiangqi/blob/main/docs/boardgame-</span>
-<span class="sd">           protocol.md]</span>
+<span class="sd">           [https://github.com/chentianren0/MiniXiangqi/blob/main/docs/boardgame-protocol.md]</span>
 <span class="sd">       * - ``boardplus``</span>
 <span class="sd">         - [TCP] board plus application transfer protocol</span>
 <span class="sd">       * - ``booked-sync``</span>
@@ -689,8 +689,8 @@
 <span class="sd">       * - ``cerebra``</span>
 <span class="sd">         - [TCP] Control the Cerebra Aquarium Controller</span>
 <span class="sd">       * - ``certificates``</span>
-<span class="sd">         - [TCP] Server for S/MIME and PGP certificates [draft-</span>
-<span class="sd">           bhjl-x509-srv-01]</span>
+<span class="sd">         - [TCP] Server for S/MIME and PGP certificates</span>
+<span class="sd">           [draft-bhjl-x509-srv-01]</span>
 <span class="sd">       * - ``ciao``</span>
 <span class="sd">         - [TCP] Ciao Arduino Protocol</span>
 <span class="sd">       * - ``collabio``</span>
@@ -765,9 +765,9 @@
 <span class="sd">           "_dots-call-home._tcp" for discovering Call Home DOTS clients used</span>
 <span class="sd">           to establish DOTS signal channel call home. [:rfc:`8973`]; [UDP]</span>
 <span class="sd">           DOTS Signal Channel Call Home Protocol. The service name is used to</span>
-<span class="sd">           construct the SRV service names "_dots-call-home._udp" and "_dots-</span>
-<span class="sd">           call-home._tcp" for discovering Call Home DOTS clients used to</span>
-<span class="sd">           establish DOTS signal channel call home. [:rfc:`8973`]</span>
+<span class="sd">           construct the SRV service names "_dots-call-home._udp" and</span>
+<span class="sd">           "_dots-call-home._tcp" for discovering Call Home DOTS clients used</span>
+<span class="sd">           to establish DOTS signal channel call home. [:rfc:`8973`]</span>
 <span class="sd">       * - ``dots-data``</span>
 <span class="sd">         - [TCP] DOTS Data Channel Protocol. The service name is used to</span>
 <span class="sd">           construct the SRV service name "_dots-data._tcp" for discovering</span>
@@ -1207,17 +1207,17 @@
 <span class="sd">       * - ``smartsocket``</span>
 <span class="sd">         - [TCP] home control</span>
 <span class="sd">       * - ``smimeca``</span>
-<span class="sd">         - [TCP] Domain signing certificate for S/MIME keys [draft-</span>
-<span class="sd">           bhjl-x509-srv-01]</span>
+<span class="sd">         - [TCP] Domain signing certificate for S/MIME keys</span>
+<span class="sd">           [draft-bhjl-x509-srv-01]</span>
 <span class="sd">       * - ``snif-cln``</span>
-<span class="sd">         - [TCP] SNIF End-to-End TLS Relay Client Connection [draft-zubov-</span>
-<span class="sd">           snif-05, Section 4.5]</span>
+<span class="sd">         - [TCP] SNIF End-to-End TLS Relay Client Connection</span>
+<span class="sd">           [draft-zubov-snif-05, Section 4.5]</span>
 <span class="sd">       * - ``snif-fifo``</span>
 <span class="sd">         - [TCP] SNIF End-to-End TLS Relay Cluster [draft-zubov-snif-05,</span>
 <span class="sd">           Section 4.6]</span>
 <span class="sd">       * - ``snif-srv``</span>
-<span class="sd">         - [TCP] SNIF End-to-End TLS Relay Service Connection [draft-zubov-</span>
-<span class="sd">           snif-05, Section 4.3]</span>
+<span class="sd">         - [TCP] SNIF End-to-End TLS Relay Service Connection</span>
+<span class="sd">           [draft-zubov-snif-05, Section 4.3]</span>
 <span class="sd">       * - ``soda``</span>
 <span class="sd">         - [TCP] Secure On Device API</span>
 <span class="sd">       * - ``spidap``</span>
@@ -21175,8 +21175,8 @@
     <span class="c1">#: (Passive Optical Network) systems [TR-352][Inter-Channel-Termination</span>
     <span class="c1">#: protocol (ICTP) is a peer-to-peer protocol with a binary message format that</span>
     <span class="c1">#: is used by a set of optical line terminal (OLT) channel terminations (CT)</span>
-    <span class="c1">#: comprising a 40-Gigabit-capable next-generation passive optical network (NG-</span>
-    <span class="c1">#: PON2) system to exchange channel profile configuration and status</span>
+    <span class="c1">#: comprising a 40-Gigabit-capable next-generation passive optical network</span>
+    <span class="c1">#: (NG-PON2) system to exchange channel profile configuration and status</span>
     <span class="c1">#: information and to coordinate the operation of tunable optical network units</span>
     <span class="c1">#: (ONUs) in a multi-wavelength channel environment.]</span>
     <span class="n">pon_ictp</span> <span class="o">=</span> <span class="mi">7202</span><span class="p">,</span> <span class="s1">'pon-ictp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span>
@@ -23767,8 +23767,8 @@
     <span class="n">linogridengine</span> <span class="o">=</span> <span class="mi">12300</span><span class="p">,</span> <span class="s1">'linogridengine'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span>
 
     <span class="c1">#: [TCP] Remote Administration Daemon (RAD) is a system service that offers</span>
-    <span class="c1">#: secure, remote, programmatic access to Solaris system configuration and run-</span>
-    <span class="c1">#: time state</span>
+    <span class="c1">#: secure, remote, programmatic access to Solaris system configuration and</span>
+    <span class="c1">#: run-time state</span>
     <span class="n">rads</span> <span class="o">=</span> <span class="mi">12302</span><span class="p">,</span> <span class="s1">'rads'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span>
 
     <span class="c1">#: - [TCP] Warehouse Monitoring Syst SSS</span>
@@ -24967,19 +24967,19 @@
     <span class="c1">#: - [UDP] GameSmith Port</span>
     <span class="n">gamesmith_port</span> <span class="o">=</span> <span class="mi">31765</span><span class="p">,</span> <span class="s1">'gamesmith-port'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span>
 
-    <span class="c1">#: - [TCP] Embedded Device Configuration Protocol TX IANA assigned this well-</span>
-    <span class="c1">#:   formed service name as a replacement for "iceedcp_tx".</span>
+    <span class="c1">#: - [TCP] Embedded Device Configuration Protocol TX IANA assigned this</span>
+    <span class="c1">#:   well-formed service name as a replacement for "iceedcp_tx".</span>
     <span class="c1">#: - [TCP] Embedded Device Configuration Protocol TX</span>
-    <span class="c1">#: - [UDP] Embedded Device Configuration Protocol TX IANA assigned this well-</span>
-    <span class="c1">#:   formed service name as a replacement for "iceedcp_tx".</span>
+    <span class="c1">#: - [UDP] Embedded Device Configuration Protocol TX IANA assigned this</span>
+    <span class="c1">#:   well-formed service name as a replacement for "iceedcp_tx".</span>
     <span class="c1">#: - [UDP] Embedded Device Configuration Protocol TX</span>
     <span class="n">iceedcp_tx</span> <span class="o">=</span> <span class="mi">31948</span><span class="p">,</span> <span class="s1">'iceedcp-tx'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span>
 
-    <span class="c1">#: - [TCP] Embedded Device Configuration Protocol RX IANA assigned this well-</span>
-    <span class="c1">#:   formed service name as a replacement for "iceedcp_rx".</span>
+    <span class="c1">#: - [TCP] Embedded Device Configuration Protocol RX IANA assigned this</span>
+    <span class="c1">#:   well-formed service name as a replacement for "iceedcp_rx".</span>
     <span class="c1">#: - [TCP] Embedded Device Configuration Protocol RX</span>
-    <span class="c1">#: - [UDP] Embedded Device Configuration Protocol RX IANA assigned this well-</span>
-    <span class="c1">#:   formed service name as a replacement for "iceedcp_rx".</span>
+    <span class="c1">#: - [UDP] Embedded Device Configuration Protocol RX IANA assigned this</span>
+    <span class="c1">#:   well-formed service name as a replacement for "iceedcp_rx".</span>
     <span class="c1">#: - [UDP] Embedded Device Configuration Protocol RX</span>
     <span class="n">iceedcp_rx</span> <span class="o">=</span> <span class="mi">31949</span><span class="p">,</span> <span class="s1">'iceedcp-rx'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span>
 

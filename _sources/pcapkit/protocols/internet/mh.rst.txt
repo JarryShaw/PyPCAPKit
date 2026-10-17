@@ -19,6 +19,22 @@ Octets      Bits        Name                    Description
   6          48   ``mh.data``                 Message Data
 ======= ========= ================== ===============================
 
+.. versionremoved:: 1.5.0
+
+   ``pcapkit.protocols.internet.mh.NTPTimestamp``, with no alias; use
+   :class:`pcapkit.protocols.data.internet.mh.NTPTimestamp` instead
+   (:issue:`1886`).
+
+.. versionchanged:: 1.5.0
+
+   :class:`~pcapkit.protocols.data.internet.mh.NTPTimestamp` and
+   :class:`~pcapkit.protocols.data.internet.mh.PMIPv6Timestamp` are
+   :class:`~pcapkit.corekit.infoclass.Info` data models rather than named
+   tuples, so they no longer index, unpack, hash or compare equal to a
+   :obj:`tuple`, and the dumpers write them keyed by field, as
+   ``{"seconds": ..., "fraction": ...}``. For ``NTPTimestamp`` this is a
+   breaking change from 1.4.x (:issue:`1886`).
+
 .. autoclass:: pcapkit.protocols.internet.mh.MH
    :no-members:
    :show-inheritance:
@@ -273,20 +289,6 @@ Octets      Bits        Name                    Description
 Auxiliary Data
 --------------
 
-.. autoclass:: pcapkit.protocols.internet.mh.NTPTimestamp
-   :members:
-   :show-inheritance:
-
-   .. attribute:: seconds
-      :type: int
-
-      Seconds since 1 January 1900.
-
-   .. attribute:: fraction
-      :type: int
-
-      Fraction of a second.
-
 .. autoclass:: pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus
    :members:
    :undoc-members:
@@ -295,10 +297,6 @@ Auxiliary Data
 .. autoclass:: pcapkit.protocols.internet.mh.IPv6AddressPrefixCode
    :members:
    :undoc-members:
-   :show-inheritance:
-
-.. autoclass:: pcapkit.protocols.internet.mh.PMIPv6Timestamp
-   :members:
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.internet.mh.LocalizedRoutingStatus
@@ -1061,6 +1059,10 @@ Data Models
    :members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.protocols.data.internet.mh.NTPTimestamp
+   :members:
+   :show-inheritance:
+
 .. autoclass:: pcapkit.protocols.data.internet.mh.CGAParametersRequestOption
    :members:
    :show-inheritance:
@@ -1238,6 +1240,10 @@ Data Models
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.data.internet.mh.TimestampOption
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.internet.mh.PMIPv6Timestamp
    :members:
    :show-inheritance:
 

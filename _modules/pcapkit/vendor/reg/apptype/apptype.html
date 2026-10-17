@@ -8,6 +8,7 @@
         <title>pcapkit.vendor.reg.apptype.apptype - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/mermaid.css?v=10b7d883" />
@@ -598,18 +599,7 @@
 
 
 <span class="s1">class TransportProtocol(EnumLookup, IntEnum):</span>
-<span class="s1">    """Transport layer protocol.</span>
-
-<span class="s1">    .. versionchanged:: 1.5.0</span>
-
-<span class="s1">       An ``aenum.IntEnum`` rather than an ``aenum.IntFlag`` (:issue:`808`),</span>
-<span class="s1">       numbered sequentially: ``sctp`` is ``3`` and ``dccp`` is ``4``, where</span>
-<span class="s1">       they were ``4`` and ``8``, and no :class:`int` is decoded as a ``|``</span>
-<span class="s1">       composite (:issue:`860`). :meth:`get` refuses a name no member</span>
-<span class="s1">       declares, with :exc:`~pcapkit.utilities.exceptions.EnumKeyError`,</span>
-<span class="s1">       rather than minting a member for it (:issue:`808`, :issue:`923`).</span>
-
-<span class="s1">    """</span>
+<span class="s1">    """Transport layer protocol."""</span>
 
 <span class="s1">    # mypy has no aenum plugin, so this class is a plain class to it: every</span>
 <span class="s1">    # member below is cast rather than left as a bare auto()-valued one --</span>
@@ -803,20 +793,6 @@
 <span class="s1">    :class:`~pcapkit.const.reg.apptype.dccp.DCCP`. Being memberless is also what</span>
 <span class="s1">    makes it subclassable at all, since :mod:`aenum` refuses to extend an</span>
 <span class="s1">    enumeration that already has members.</span>
-
-<span class="s1">    .. versionchanged:: 1.1.1</span>
-
-<span class="s1">       A member converts with :class:`int` to its port number, and compares,</span>
-<span class="s1">       orders and hashes as that port.</span>
-
-<span class="s1">    .. versionchanged:: 1.5.0</span>
-
-<span class="s1">       Split by transport protocol (:issue:`732`): :mod:`pcapkit.const.reg.apptype`</span>
-<span class="s1">       is a package, and every assignment is a member of one of the per-transport</span>
-<span class="s1">       registries rather than of this class. ``get()`` raises</span>
-<span class="s1">       :exc:`ValueError` for a port outside ``0``-``65535`` (:issue:`758`), and</span>
-<span class="s1">       returns an unregistered member rather than minting one for a port the</span>
-<span class="s1">       registry does not assign (:issue:`860`).</span>
 
 <span class="s1">    Note:</span>
 <span class="s1">        The rows below are the registry entries whose **transport protocol column</span>
@@ -1579,6 +1555,17 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">wrap_comment</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Wraps long-length text to shorter lines of comments.</span>
 
+<span class="sd">        The lines are :meth:`Vendor.wrap_comment`'s, so the text is made safe</span>
+<span class="sd">        for reST and never broken at a hyphen, the same way. Each continuation</span>
+<span class="sd">        takes a hanging indent instead, which keeps it inside the bullet a</span>
+<span class="sd">        merged entry renders it in.</span>
+
+<span class="sd">        .. versionchanged:: 1.5.0</span>
+
+<span class="sd">           Takes its lines from :meth:`Vendor.wrap_comment` rather than</span>
+<span class="sd">           wrapping on its own, so it no longer breaks a line at a hyphen</span>
+<span class="sd">           (:issue:`1847`) and escapes what that escapes (:issue:`1846`).</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            text: Source text.</span>
 
@@ -1586,7 +1573,9 @@
 <span class="sd">            Wrapped comments.</span>
 
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="s1">'</span><span class="se">\n</span><span class="s1">    #:   '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">textwrap</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="mi">76</span><span class="p">))</span>
+        <span class="c1"># NOTE: textwrap turns every whitespace character into a space, so the</span>
+        <span class="c1"># only newlines in the base's output are the ones it joins lines with.</span>
+        <span class="k">return</span> <span class="n">Vendor</span><span class="o">.</span><span class="n">wrap_comment</span><span class="p">(</span><span class="n">text</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">    #: '</span><span class="p">,</span> <span class="s1">'</span><span class="se">\n</span><span class="s1">    #:   '</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">flag</span><span class="p">(</span><span class="n">protos</span><span class="p">:</span> <span class="s1">'Iterable[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
@@ -1615,6 +1604,14 @@
 <span class="sd">        :mod:`sphinx.ext.autodoc` renders in place rather than as comments it</span>
 <span class="sd">        drops.</span>
 
+<span class="sd">        A cell breaks only at whitespace, never at a hyphen or inside a word:</span>
+<span class="sd">        its continuation lines join it with a space, so a URL split at a hyphen</span>
+<span class="sd">        would render as two words and lose the rest of its link.</span>
+
+<span class="sd">        .. versionchanged:: 1.5.0</span>
+
+<span class="sd">           No longer breaks a cell at a hyphen (:issue:`1847`).</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            title: Table caption.</span>
 <span class="sd">            widths: Relative column widths.</span>
@@ -1636,7 +1633,8 @@
         <span class="p">]</span>
         <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="p">[</span><span class="n">header</span><span class="p">,</span> <span class="o">*</span><span class="n">rows</span><span class="p">]:</span>
             <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">cell</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
-                <span class="n">wrapped</span> <span class="o">=</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="mi">68</span><span class="p">,</span> <span class="n">break_long_words</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[</span><span class="s1">'N/A'</span><span class="p">]</span>
+                <span class="n">wrapped</span> <span class="o">=</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="mi">68</span><span class="p">,</span> <span class="n">break_long_words</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                        <span class="n">break_on_hyphens</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[</span><span class="s1">'N/A'</span><span class="p">]</span>
                 <span class="n">bullet</span> <span class="o">=</span> <span class="s1">'* - '</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">index</span> <span class="k">else</span> <span class="s1">'  - '</span>
                 <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'   </span><span class="si">{</span><span class="n">bullet</span><span class="si">}{</span><span class="n">wrapped</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
                 <span class="n">lines</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="sa">f</span><span class="s1">'       </span><span class="si">{</span><span class="n">part</span><span class="si">}</span><span class="s1">'</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">wrapped</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>

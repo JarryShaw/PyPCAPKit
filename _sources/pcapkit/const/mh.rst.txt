@@ -584,6 +584,12 @@ Link-Layer Address (LLA) Option Code
 This module contains the constant enumeration for **Link-Layer Address (LLA) Option Code**,
 which is automatically generated from :class:`pcapkit.vendor.mh.lla_code.LLACode`.
 
+.. versionchanged:: 1.5.0
+
+   Code ``0`` is ``Wildcard`` and code ``2`` is ``MN``, as
+   :rfc:`5568#section-6.4.3` names them, where they were ``Wilcard`` and
+   ``MH``. Neither old name is kept as an alias (:issue:`1848`).
+
 .. autoclass:: pcapkit.const.mh.lla_code.LLACode
    :members:
    :undoc-members:

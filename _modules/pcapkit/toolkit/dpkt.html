@@ -8,6 +8,7 @@
         <title>pcapkit.toolkit.dpkt - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=10b7d883" />
@@ -778,7 +779,7 @@
     <span class="n">buffer</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">BUFFER_ATTR</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">buffer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">buffer</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span></div>
+    <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span></div>
 
 
 
@@ -1213,7 +1214,9 @@
     <span class="n">network</span> <span class="o">=</span> <span class="n">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
     <span class="n">ipv6</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IP6'</span><span class="p">,</span> <span class="n">network</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="s1">'extension_hdrs'</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">ipv6</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">ipv6_frag</span> <span class="o">=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">extension_hdrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">44</span><span class="p">)</span>  <span class="c1"># type: Optional[IP6FragmentHeader]</span>
+        <span class="c1"># dpkt keeps each extension header under its protocol number, so 44 is a</span>
+        <span class="c1"># Fragment header; the dict's value type cannot say so</span>
+        <span class="n">ipv6_frag</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[IP6FragmentHeader]'</span><span class="p">,</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">extension_hdrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">44</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">ipv6_frag</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>       <span class="c1"># dismiss not fragmented packet</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="n">hdr_len</span> <span class="o">=</span> <span class="n">ipv6_hdr_len</span><span class="p">(</span><span class="n">ipv6</span><span class="p">)</span>

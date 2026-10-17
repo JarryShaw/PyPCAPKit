@@ -8,6 +8,7 @@
         <title>pcapkit.foundation.engines.pcap_ct - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/mermaid.css?v=10b7d883" />
@@ -502,12 +503,17 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'PCAP_CT'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">types</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleType</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcap</span><span class="w"> </span><span class="kn">import</span> <span class="n">pcap</span> <span class="k">as</span> <span class="n">Handle</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">_PCAPCTPackage</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">""":mod:`pcap`, as :class:`PCAP_CT` reads it through :attr:`PCAP_CT._expkg` (#1878)."""</span>
+
+        <span class="nd">@property</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">pcap</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[Handle]'</span><span class="p">:</span> <span class="o">...</span>
 
     <span class="c1">#: A `pcap-ct`_ "frame": the ``(timestamp, bytes)`` pair that</span>
     <span class="c1">#: :class:`pcap.pcap` iteration yields. Deliberately *not* named ``Frame``,</span>
@@ -593,7 +599,7 @@
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Engine extraction package, i.e. :mod:`pcap`.</span>
-        <span class="n">_expkg</span><span class="p">:</span> <span class="s1">'ModuleType'</span>
+        <span class="n">_expkg</span><span class="p">:</span> <span class="s1">'_PCAPCTPackage'</span>
         <span class="c1">#: Capture handle, kept separately from the iterator it is read through</span>
         <span class="c1">#: so that :meth:`close` does not depend on ``iter(handle) is handle``.</span>
         <span class="n">_handle</span><span class="p">:</span> <span class="s1">'Handle'</span>
@@ -883,14 +889,14 @@
         <span class="c1"># want that attempt to request promiscuous mode. (That fallback is also</span>
         <span class="c1"># why a bad path surfaces as ``OSError: ... No such device exists``,</span>
         <span class="c1"># which is what the ``os.path.isfile`` check above pre-empts.)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_handle</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Handle'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span><span class="o">.</span><span class="n">pcap</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_ifnm</span><span class="p">,</span> <span class="n">promisc</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_handle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span><span class="o">.</span><span class="n">pcap</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_ifnm</span><span class="p">,</span> <span class="n">promisc</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span> <span class="o">=</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_handle</span><span class="o">.</span><span class="n">datalink</span><span class="p">())</span>
 
-        <span class="c1"># setup verbose handler</span>
-        <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_v</span><span class="p">:</span>
+        <span class="c1"># setup verbose handler, unless the caller gave one of their own (#1874)</span>
+        <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_vfunc_default</span><span class="p">:</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.pcap_ct</span><span class="w"> </span><span class="kn">import</span> <span class="n">packet2chain</span>  <span class="c1"># isort:skip</span>
             <span class="n">ext</span><span class="o">.</span><span class="n">_vfunc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">_frnum</span><span class="si">:</span><span class="s1">&gt;3d</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">packet2chain</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">data_link</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span>  <span class="c1"># pylint: disable=protected-access</span>
+                <span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">_frnum</span><span class="si">:</span><span class="s1">&gt;3d</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">packet2chain</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s2">"RawFrame"</span><span class="p">,</span><span class="w"> </span><span class="n">f</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">data_link</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span>  <span class="c1"># pylint: disable=protected-access</span>
             <span class="p">)</span>  <span class="c1"># pylint: disable=logging-fstring-interpolation</span>
 
         <span class="c1"># extract &amp; analyse file</span>

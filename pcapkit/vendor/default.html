@@ -15,6 +15,7 @@
         <title>Base Crawler - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../_static/mermaid.css?v=10b7d883" />
@@ -583,6 +584,23 @@ a new vendor generator.</p>
 <dt class="sig sig-object py" id="pcapkit.vendor.default.Vendor.wrap_comment">
 <span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">wrap_comment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/vendor/default.html#Vendor.wrap_comment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.default.Vendor.wrap_comment" title="Link to this definition">¶</a></dt>
 <dd><p>Wraps long-length text to shorter lines of comments.</p>
+<p>Sphinx renders a <code class="docutils literal notranslate"><span class="pre">#:</span></code> comment as reST, and its continuation lines
+join into one paragraph, so the text is made safe for that first:</p>
+<ul class="simple">
+<li><p>a space goes after a URL reference that another bracket follows
+directly, as in <code class="docutils literal notranslate"><span class="pre">[http://ele2.io][Damir</span> <span class="pre">Franusic]</span></code>. docutils reads
+<code class="docutils literal notranslate"><span class="pre">]</span></code> and <code class="docutils literal notranslate"><span class="pre">[</span></code> as URL characters, so the autolink would run on into
+the next citation;</p></li>
+<li><p>a leading enumerator, such as the <code class="docutils literal notranslate"><span class="pre">(S)</span></code> of <code class="docutils literal notranslate"><span class="pre">(S)</span> <span class="pre">flag</span></code>, is
+backslash-escaped, since reST would render it as an enumerated list.</p></li>
+</ul>
+<p>A line never breaks at a hyphen, which would render <code class="docutils literal notranslate"><span class="pre">run-time</span></code> as
+<code class="docutils literal notranslate"><span class="pre">run-</span> <span class="pre">time</span></code>. Only a word longer than a whole line is split inside.</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.5.0: </span>Spaces a URL reference off the bracket after it and escapes a
+leading enumerator (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1846">#1846</a>), and no longer breaks a line at a
+hyphen (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1847">#1847</a>).</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>text</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Source text.</p>
@@ -622,7 +640,7 @@ a new vendor generator.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Field name.</p></li>
 <li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Field code.</p></li>
-<li><p><strong>original</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Original field name (extracted from CSV records).</p></li>
+<li><p><strong>original</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Original field name (extracted from CSV records).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -646,7 +664,7 @@ the field name will be sanitised as <code class="docutils literal notranslate"><
 <dd><p>Fetch CSV file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>text</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Context from <a class="reference internal" href="#pcapkit.vendor.default.Vendor.LINK" title="pcapkit.vendor.default.Vendor.LINK"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LINK</span></code></a>.</p>
+<dd class="field-odd"><p><strong>text</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Context from <a class="reference internal" href="#pcapkit.vendor.default.Vendor.LINK" title="pcapkit.vendor.default.Vendor.LINK"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LINK</span></code></a>.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>

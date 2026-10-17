@@ -8,6 +8,7 @@
         <title>pcapkit.foundation.extraction - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=10b7d883" />
@@ -563,6 +564,9 @@
                    <span class="n">PCAPFilePacket</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]]</span>
 
     <span class="n">Protocols</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">,</span> <span class="n">Type</span><span class="p">[</span><span class="n">ProtocolBase</span><span class="p">]]</span>
+    <span class="c1"># NOTE: every caller discards the callback's result, so it is typed ``Any``:</span>
+    <span class="c1"># any two-argument callback is accepted, whatever it returns, e.g.</span>
+    <span class="c1"># ``lambda e, f: sys.stdout.write(str(f))``.</span>
     <span class="n">VerboseHandler</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="s1">'Extractor'</span><span class="p">,</span> <span class="n">Packet</span><span class="p">],</span> <span class="n">Any</span><span class="p">]</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Extractor'</span><span class="p">]</span>
@@ -604,7 +608,9 @@
 <span class="sd">       so a positional argument after ``reasm_store`` has to move to a</span>
 <span class="sd">       keyword. Flows are traced bidirectionally by default. :attr:`engine`</span>
 <span class="sd">       is typed :class:`~pcapkit.foundation.engines.engine.EngineBase`, the</span>
-<span class="sd">       base every engine derives from (:issue:`1022`).</span>
+<span class="sd">       base every engine derives from (:issue:`1022`). A callback given as</span>
+<span class="sd">       ``verbose`` is called on every engine, where the third-party engines</span>
+<span class="sd">       replaced it with their own printer (:issue:`1874`).</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -641,8 +647,10 @@
         <span class="n">_flag_r</span><span class="p">:</span> <span class="s1">'bool'</span>
         <span class="c1">#: Trace flag. It indicates if the flow tracing is enabled.</span>
         <span class="n">_flag_t</span><span class="p">:</span> <span class="s1">'bool'</span>
-        <span class="c1">#: Verbose flag. This is used to determine if the verbose callback</span>
-        <span class="c1">#: function should be called at each frame.</span>
+        <span class="c1">#: Verbose flag. It indicates if verbose output is enabled, whether by</span>
+        <span class="c1">#: ``verbose=True`` or by a callback, which</span>
+        <span class="c1">#: :attr:`~pcapkit.foundation.extraction.Extractor._vfunc_default`</span>
+        <span class="c1">#: tells apart.</span>
         <span class="n">_flag_v</span><span class="p">:</span> <span class="s1">'bool'</span>
         <span class="c1">#: No EOF flag. It is useful when the input is a live capture on a pipe or</span>
         <span class="c1">#: on standard input, where reaching the end of what has arrived so far</span>
@@ -658,7 +666,14 @@
         <span class="n">_flag_s</span><span class="p">:</span> <span class="s1">'bool'</span>
 
         <span class="c1">#: Verbose callback function.</span>
-        <span class="c1">#_vfunc: 'VerboseHandler'</span>
+        <span class="n">_vfunc</span><span class="p">:</span> <span class="s1">'VerboseHandler'</span>
+        <span class="c1">#: Default verbose printer flag. It is set only by ``verbose=True``,</span>
+        <span class="c1">#: which asks for the default output, and an engine whose frames are</span>
+        <span class="c1">#: not PyPCAPKit's own replaces</span>
+        <span class="c1">#: :attr:`~pcapkit.foundation.extraction.Extractor._vfunc` with its own</span>
+        <span class="c1">#: printer only when it is set. A callback given as ``verbose`` leaves</span>
+        <span class="c1">#: it unset, so every engine keeps that callback (:issue:`1874`).</span>
+        <span class="n">_vfunc_default</span><span class="p">:</span> <span class="s1">'bool'</span>
 
         <span class="c1">#: Frame number.</span>
         <span class="n">_frnum</span><span class="p">:</span> <span class="s1">'int'</span>
@@ -1791,19 +1806,23 @@
         <span class="c1"># verbose callback function</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">verbose</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_flag_v</span> <span class="o">=</span> <span class="n">verbose</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_vfunc_default</span> <span class="o">=</span> <span class="n">verbose</span>
             <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
                 <span class="c1"># NOTE: ``verbose=True`` and the CLI's ``-v`` are a request for</span>
                 <span class="c1"># user-facing output on stdout, not diagnostics -- the frame</span>
                 <span class="c1"># chains are a feature of the tool, so they stay on ``print``</span>
                 <span class="c1"># rather than becoming log records a consumer has to configure</span>
-                <span class="c1"># a handler to see (and on a different stream at that).</span>
+                <span class="c1"># a handler to see (and on a different stream at that). Of the</span>
+                <span class="c1"># built-in engines only PCAP and PCAPNG keep this callback, so</span>
+                <span class="c1"># its frame is theirs; the others install their own.</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_vfunc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">_frnum</span><span class="si">:</span><span class="s1">&gt;3d</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">protochain</span><span class="si">}</span><span class="s1">'</span>  <span class="c1"># pylint: disable=protected-access</span>
+                    <span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">_frnum</span><span class="si">:</span><span class="s1">&gt;3d</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">cast</span><span class="p">(</span><span class="s2">"Frame | PCAPNG"</span><span class="p">,</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">protochain</span><span class="si">}</span><span class="s1">'</span>  <span class="c1"># pylint: disable=protected-access</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_vfunc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_flag_v</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_vfunc_default</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_vfunc</span> <span class="o">=</span> <span class="n">verbose</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_frnum</span> <span class="o">=</span> <span class="mi">0</span>   <span class="c1"># frame number</span>

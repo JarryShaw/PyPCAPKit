@@ -15,6 +15,7 @@
         <title>3rd-Party Engines - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mermaid.css?v=10b7d883" />
@@ -531,7 +532,7 @@ category (see <a class="reference internal" href="../../utilities/warnings.html#
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.scapy.Scapy">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.engines.scapy.</span></span><span class="sig-name descname"><span class="pre">Scapy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/scapy.html#Scapy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.scapy.Scapy" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ScapyPacket</span></code>]</p>
+<dd><p>Bases: <a class="reference internal" href="engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a>[ScapyPacket]</p>
 <p>Scapy engine support.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -605,7 +606,7 @@ for more operational information.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.scapy.Scapy._expkg">
-<span class="sig-name descname"><span class="pre">_expkg</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/types.html#types.ModuleType" title="(in Python v3.15)"><span class="pre">ModuleType</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.scapy.Scapy._expkg" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_expkg</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">_ScapyPackage</span></span><a class="headerlink" href="#pcapkit.foundation.engines.scapy.Scapy._expkg" title="Link to this definition">¶</a></dt>
 <dd><p>Engine extraction package, i.e. <code class="xref py py-mod docutils literal notranslate"><span class="pre">scapy.all</span></code>.</p>
 </dd></dl>
 
@@ -638,7 +639,7 @@ and, since the block carries no timestamp, dates them 0 (<a class="extlink-issue
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.dpkt.DPKT">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.engines.dpkt.</span></span><span class="sig-name descname"><span class="pre">DPKT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/dpkt.html#DPKT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.dpkt.DPKT" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">DPKTPacket</span></code>]</p>
+<dd><p>Bases: <a class="reference internal" href="engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a>[DPKTPacket]</p>
 <p>DPKT engine support.</p>
 <p>A PCAP-NG file is read by <a class="reference internal" href="#pcapkit.foundation.engines.dpkt.PCAPNGReader" title="pcapkit.foundation.engines.dpkt.PCAPNGReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNGReader</span></code></a> rather than by
 <code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.pcapng.Reader</span></code>, so each packet takes the link type and the
@@ -710,7 +711,7 @@ for more operational information.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.dpkt.DPKT._expkg">
-<span class="sig-name descname"><span class="pre">_expkg</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/types.html#types.ModuleType" title="(in Python v3.15)"><span class="pre">ModuleType</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.dpkt.DPKT._expkg" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_expkg</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">_DPKTPackage</span></span><a class="headerlink" href="#pcapkit.foundation.engines.dpkt.DPKT._expkg" title="Link to this definition">¶</a></dt>
 <dd><p>Engine extraction package, i.e. <code class="xref py py-mod docutils literal notranslate"><span class="pre">dpkt</span></code>.</p>
 </dd></dl>
 
@@ -788,7 +789,7 @@ install off <span class="target" id="index-2"></span><code class="xref std std-e
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pyshark.PyShark">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.engines.pyshark.</span></span><span class="sig-name descname"><span class="pre">PyShark</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pyshark.html#PyShark"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pyshark.PyShark" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">PySharkPacket</span></code>]</p>
+<dd><p>Bases: <a class="reference internal" href="engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a>[PySharkPacket]</p>
 <p>PyShark engine support.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -864,7 +865,7 @@ still a bounded handful of <a class="reference external" href="https://docs.pyth
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A short phrase naming the limitation, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p>
@@ -931,7 +932,7 @@ close the engine instance after the extraction process is finished.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pyshark.PyShark._expkg">
-<span class="sig-name descname"><span class="pre">_expkg</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/types.html#types.ModuleType" title="(in Python v3.15)"><span class="pre">ModuleType</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.pyshark.PyShark._expkg" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_expkg</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">_PySharkPackage</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pyshark.PyShark._expkg" title="Link to this definition">¶</a></dt>
 <dd><p>Engine extraction package, i.e. <code class="xref py py-mod docutils literal notranslate"><span class="pre">pyshark</span></code>.</p>
 </dd></dl>
 
@@ -1017,7 +1018,7 @@ frames at all; and a non-file input is rejected with an
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcap.PyPCAP">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.engines.pypcap.</span></span><span class="sig-name descname"><span class="pre">PyPCAP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pypcap.html#PyPCAP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pypcap.PyPCAP" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">RawFrame</span></code>]</p>
+<dd><p>Bases: <a class="reference internal" href="engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a>[RawFrame]</p>
 <p>PyPCAP engine support.</p>
 <p><a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> is a binding over <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em>, primarily aimed at live
 capture. Offline it is a savefile reader and nothing more: iteration yields
@@ -1091,7 +1092,7 @@ interpreter, and would say nothing useful on 3.10 and 3.11, where both
 distributions install happily and either could be the one in place.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A phrase naming the real cause, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>. An absent <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcap</span></code>
@@ -1181,7 +1182,7 @@ may both reach it, and <code class="xref py py-meth docutils literal notranslate
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcap.PyPCAP._expkg">
-<span class="sig-name descname"><span class="pre">_expkg</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/types.html#types.ModuleType" title="(in Python v3.15)"><span class="pre">ModuleType</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcap.PyPCAP._expkg" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_expkg</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">_PyPCAPPackage</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcap.PyPCAP._expkg" title="Link to this definition">¶</a></dt>
 <dd><p>Engine extraction package, i.e. <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcap</span></code>.</p>
 </dd></dl>
 
@@ -1339,7 +1340,7 @@ routed there rather than read approximately – or wrongly – here.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pcap_ct.PCAP_CT">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.engines.pcap_ct.</span></span><span class="sig-name descname"><span class="pre">PCAP_CT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pcap_ct.html#PCAP_CT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">RawFrame</span></code>]</p>
+<dd><p>Bases: <a class="reference internal" href="engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a>[RawFrame]</p>
 <p>pcap-ct engine support.</p>
 <p><a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> is a <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#module-ctypes" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ctypes</span></code></a> reimplementation of the <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> API on top of
 the <a class="reference external" href="https://pypi.org/project/libpcap/">libpcap</a> package, which supplies the <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em> bindings
@@ -1459,7 +1460,7 @@ an interpreter below 3.10 the distributions simply will not be installed –
 which the import test then reports correctly on its own.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A phrase naming the real cause, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>. A <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcap</span></code> that is
@@ -1615,13 +1616,13 @@ never opened.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pcap_ct.PCAP_CT._expkg">
-<span class="sig-name descname"><span class="pre">_expkg</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/types.html#types.ModuleType" title="(in Python v3.15)"><span class="pre">ModuleType</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT._expkg" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_expkg</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">_PCAPCTPackage</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT._expkg" title="Link to this definition">¶</a></dt>
 <dd><p>Engine extraction package, i.e. <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcap</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pcap_ct.PCAP_CT._handle">
-<span class="sig-name descname"><span class="pre">_handle</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pcap.pcap</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT._handle" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_handle</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pcap</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT._handle" title="Link to this definition">¶</a></dt>
 <dd><p>Capture handle, kept separately from the iterator it is read through
 so that <a class="reference internal" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT.close" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT.close"><code class="xref py py-meth docutils literal notranslate"><span class="pre">close()</span></code></a> does not depend on <code class="docutils literal notranslate"><span class="pre">iter(handle)</span> <span class="pre">is</span> <span class="pre">handle</span></code>.</p>
 </dd></dl>
@@ -1673,7 +1674,7 @@ into <a class="reference external" href="https://github.com/kisom/pypcapfile">Py
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile.PyPCAPFile">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.engines.pypcapfile.</span></span><span class="sig-name descname"><span class="pre">PyPCAPFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pypcapfile.html#PyPCAPFile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPFilePacket</span></code>]</p>
+<dd><p>Bases: <a class="reference internal" href="engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a>[PCAPFilePacket]</p>
 <p>PyPCAPFile engine support.</p>
 <p><a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> is a pure Python savefile reader. It decodes Ethernet, IPv4,
 TCP and UDP, and nothing else – in particular there is no IPv6 decoder and
@@ -1748,7 +1749,7 @@ imported first, and so it is the same answer on a machine that has never
 installed <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> at all.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A short phrase naming the limitation, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p>
@@ -1823,13 +1824,13 @@ for more operational information.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._expkg">
-<span class="sig-name descname"><span class="pre">_expkg</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/types.html#types.ModuleType" title="(in Python v3.15)"><span class="pre">ModuleType</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._expkg" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_expkg</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">_PCAPFilePackage</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._expkg" title="Link to this definition">¶</a></dt>
 <dd><p>Engine extraction package, i.e. <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._extmp">
-<span class="sig-name descname"><span class="pre">_extmp</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterator" title="(in Python v3.15)"><span class="pre">Iterator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">pcapfile.structs.pcap_packet</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._extmp" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_extmp</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterator" title="(in Python v3.15)"><span class="pre">Iterator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">pcap_packet</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._extmp" title="Link to this definition">¶</a></dt>
 <dd><p>Engine extraction temporary storage.</p>
 </dd></dl>
 
@@ -1841,7 +1842,7 @@ for more operational information.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._declf">
-<span class="sig-name descname"><span class="pre">_declf</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._declf" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_declf</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._declf" title="Link to this definition">¶</a></dt>
 <dd><p>Link layer decoder for this savefile, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> when
 <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> has none for its link layer type.</p>
 </dd></dl>
@@ -1859,7 +1860,7 @@ for more operational information.</p>
 <dd class="field-odd"><p><strong>linktype</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Link layer type code, from the savefile header.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#Ellipsis" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#Ellipsis" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The decoder class, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> when <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> has none.</p>
@@ -1905,7 +1906,7 @@ the octets present as the frame.</p>
 </ul>
 </dd>
 <dt class="field-even">Yields<span class="colon">:</span></dt>
-<dd class="field-even"><p>Undecoded savefile packets, one per record.</p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcap_packet</span></code></span> – Undecoded savefile packets, one per record.</p>
 </dd>
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>ProtocolWarning</strong> – If a record’s capture length runs past the data.</p>
@@ -1988,7 +1989,7 @@ name one that does not exist.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines._pcap_backend.Probe">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.engines._pcap_backend.</span></span><span class="sig-name descname"><span class="pre">Probe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.VT" title="pcapkit.corekit.infoclass.VT"><span class="pre">VT</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.VT" title="pcapkit.corekit.infoclass.VT"><span class="pre">VT</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/_pcap_backend.html#Probe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines._pcap_backend.Probe" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.engines._pcap_backend.</span></span><span class="sig-name descname"><span class="pre">Probe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">failure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">missing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">installed</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/_pcap_backend.html#Probe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines._pcap_backend.Probe" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a></p>
 <p>What one attempt to import <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcap</span></code> found.</p>
 <div class="admonition note">
@@ -2146,7 +2147,7 @@ exactly the collision worth reporting.</p>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A reason naming what was found and which <code class="docutils literal notranslate"><span class="pre">engine=</span></code> string wants it, or
@@ -2163,7 +2164,7 @@ an absent module is not this function’s business, since
 <dd><p>A description of both distributions being installed at once, if they are.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A phrase naming every installed distribution and which one <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pcap</span></code>
