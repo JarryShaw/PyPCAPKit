@@ -23,21 +23,7 @@ if TYPE_CHECKING:
 __all__ = ['Method']
 
 class Method(EnumRegistry, StrEnum):
-    """[Method] HTTP Method
-
-    .. versionchanged:: 1.5.0
-
-       Neither ``_missing_`` nor ``get()`` mints a member, per the owner's
-       ruling on GitHub issue :issue:`860`: only IANA-registered values are
-       legitimate members, and a new one is created through :meth:`register`,
-       which can supply :attr:`safe` and :attr:`idempotent` where a bare wire
-       method verb carries neither. ``get()`` matches ``key`` case-sensitively,
-       as :rfc:`9110` makes the method token (:issue:`896`), and checks it
-       against member values as well as names (:issue:`908`). A member's
-       :class:`str` payload is its value, so ``Method.GET == 'GET'``
-       (:issue:`870`).
-
-    """
+    """[Method] HTTP Method"""
 
     if TYPE_CHECKING:
         #: Safe method.
@@ -245,13 +231,6 @@ class Method(EnumRegistry, StrEnum):
         *registered* value (resolved through ``_value2member_map_``), while
         this override's ``default`` supplies the *value* of the
         unregistered member it builds on a miss.
-
-        .. versionchanged:: 1.5.0
-
-           A non-:class:`str` ``key`` raises :exc:`ValueError`
-           (:issue:`908`). ``get(42)`` and ``get(None)`` raised
-           :exc:`AttributeError` from ``key.upper()``, and ``get(b'GET')``
-           raised :exc:`TypeError`.
 
         Args:
             key: Key to get enum item. Looked up case-**sensitively**,

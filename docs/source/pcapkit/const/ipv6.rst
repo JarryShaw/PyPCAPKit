@@ -37,6 +37,11 @@ IPv6 Extension Header Types
 This module contains the constant enumeration for **IPv6 Extension Header Types**,
 which is automatically generated from :class:`pcapkit.vendor.ipv6.extension_header.ExtensionHeader`.
 
+.. versionchanged:: 1.5.0
+
+   Generated from IANA's *IPv6 Extension Header Types* registry, where it was
+   generated from the protocol-numbers registry (:issue:`925`).
+
 .. autoclass:: pcapkit.const.ipv6.extension_header.ExtensionHeader
    :members:
    :undoc-members:

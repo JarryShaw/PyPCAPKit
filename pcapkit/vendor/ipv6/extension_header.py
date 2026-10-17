@@ -50,14 +50,7 @@ __all__ = ['{NAME}']
 
 
 class {NAME}(EnumRegistry, IntEnum):
-    """[{NAME}] {DOCS}
-
-    .. versionchanged:: 1.5.0
-
-       Generated from IANA's *IPv6 Extension Header Types* registry, where it
-       was generated from the protocol-numbers registry (:issue:`925`).
-
-    """
+    """[{NAME}] {DOCS}"""
 
     {ENUM}
 

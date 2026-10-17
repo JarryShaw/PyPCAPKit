@@ -145,9 +145,13 @@ class ShapeTests(unittest.TestCase):
         from pcapkit.const.ftp.command import Command
 
         doc = inspect.getdoc(Command.get) or ''
-        self.assertIn('.. versionchanged:: 1.5.0', doc)
         self.assertRegex(doc, r'Raises:\n\s+EnumValueError: If ``key`` is not a :class:`str`')
         self.assertIn(':issue:`1824`', doc)
+        # The module is generated, so the version note is on the docs page
+        # rather than in the docstring, which
+        # tests/project/test_no_version_directives_in_generated_tables_1884_unit.py
+        # checks (#1884).
+        self.assertNotIn('.. versionchanged::', doc)
 
     def test_the_crawler_template_carries_the_same_get(self) -> 'None':
         """The fix lives in :data:`pcapkit.vendor.ftp.command.LINE`, so a
