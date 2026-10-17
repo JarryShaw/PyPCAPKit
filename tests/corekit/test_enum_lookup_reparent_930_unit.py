@@ -623,7 +623,7 @@ class NonCanonicalKeyConvergenceTests(unittest.TestCase):
     (:mod:`pcapkit.corekit.enum`) branches on ``isinstance(key, str)``
     instead, so the same key falls through to
     :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value` and the
-    constructor, reaching :meth:`_missing_` and answering with a loud
+    constructor, reaching :meth:`_missing_` and answering with an
     :exc:`~pcapkit.utilities.exceptions.EnumValueError`. Deleting the
     overrides removes the branch that disagreed, so all seven now answer
     both keys the same way -- measured here rather than assumed, since

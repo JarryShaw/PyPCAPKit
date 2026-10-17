@@ -59,6 +59,7 @@ import importlib
 import pathlib
 import re
 import sys
+import threading
 import unittest
 from typing import TYPE_CHECKING
 
@@ -210,7 +211,7 @@ class BaseGetProvenanceTests(unittest.TestCase):
         """A ``_validate_value`` override's own
         :exc:`~pcapkit.utilities.exceptions.EnumValueError` is what the caller
         sees, rather than a second one wrapping it -- so the override's message
-        survives and the error is logged once, not twice."""
+        survives and no second error is constructed."""
         with self.assertRaises(EnumValueError) as caught:
             _Ranged.get(99)
         self.assertIn('is not a valid _Ranged', str(caught.exception))
@@ -248,6 +249,9 @@ class BaseGetQuietnessTests(unittest.TestCase):
     ``quiet`` for, and :mod:`pcapkit.protocols.protocol` states the same rule
     inline: *"A pcapkit exception here would log at CRITICAL for something that
     is handled two lines later."*
+
+    Since GitHub issue #1845 the value miss is quiet as well, so the control
+    that shows the recorder can see a loud error constructs one directly.
     """
 
     def setUp(self) -> 'None':
@@ -285,13 +289,29 @@ class BaseGetQuietnessTests(unittest.TestCase):
         self.assertEqual(recorder.messages, [])
         self.assertEqual(minted.value, 'QUIET-923-PROBE')
 
-    def test_the_value_miss_is_loud_which_is_what_quiet_is_measured_against(self) -> 'None':
-        """The control. Without it ``recorder.messages == []`` above would also
-        pass if :class:`~pcapkit.utilities.exceptions.BaseError` had simply
-        stopped logging, rather than this one raise being quiet."""
+    def test_the_value_miss_is_quiet_too(self) -> 'None':
+        """GitHub issue #1845: the owner ruled the value miss quiet as well, so
+        this was the loud control until then. It is still raised -- only not
+        reported."""
         with capture(logger) as recorder:
             with self.assertRaises(EnumValueError):
                 _Closed.get(99)
+        self.assertEqual(recorder.messages, [])
+
+    def test_a_loud_error_still_logs_which_is_what_quiet_is_measured_against(self) -> 'None':
+        """The control. Without it ``recorder.messages == []`` above would also
+        pass if :class:`~pcapkit.utilities.exceptions.BaseError` had simply
+        stopped logging, rather than these raises being quiet. Constructed
+        directly, now that no ``get`` miss is loud."""
+        saved_sys, saved_threading = sys.excepthook, threading.excepthook
+
+        def _restore() -> 'None':
+            sys.excepthook = saved_sys
+            threading.excepthook = saved_threading
+
+        self.addCleanup(_restore)
+        with capture(logger) as recorder:
+            EnumValueError('99 is not a valid _Closed')
         self.assertEqual([level for level, _ in recorder.messages], ['CRITICAL'])
         self.assertIn('EnumValueError', recorder.messages[0][1])
 
