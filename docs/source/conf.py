@@ -8,6 +8,7 @@ import builtins
 import datetime
 import enum
 import importlib
+import importlib.metadata
 import logging
 import os
 import pkgutil
@@ -15,12 +16,30 @@ from typing import TYPE_CHECKING
 
 from sphinx import addnodes
 
-# NB: a private module of ``sphinx-autodoc-typehints``, used deliberately -- see
-# ``bind_type_checking_names`` below for what it buys and why reimplementing it
-# here would be worse. If a future release moves it the import fails loudly at
+#: The installed ``sphinx-autodoc-typehints`` release, as ``(major, minor)``.
+TYPEHINTS_RELEASE = tuple(int(part) for part in
+                          importlib.metadata.version('sphinx-autodoc-typehints').split('.')[:2])
+
+# NB: private modules of ``sphinx-autodoc-typehints``, used deliberately -- see
+# ``bind_type_checking_names`` below for what they buy and why reimplementing them
+# here would be worse. If a future release moves them the import fails loudly at
 # build time, which is the outcome to want: the alternative is a build that
 # silently goes back to emitting unresolvable annotations.
-from sphinx_autodoc_typehints._resolver import resolve_type_guarded_imports
+#
+# The branch is chosen by the installed release, not by probing for the module, so
+# each branch is a plain import that still fails loudly. 3.14.0 replaced the
+# ``_resolver`` module with the ``_resolve`` package, and ``docs/requirements.txt``
+# pins a release after that. The older branch serves an environment that has an
+# earlier release beside Sphinx, where ``tests/project`` loads this file to test
+# its hooks.
+if TYPEHINTS_RELEASE >= (3, 14):
+    from sphinx_autodoc_typehints._resolve import guarded_names, resolve_type_guarded_imports
+else:
+    from sphinx_autodoc_typehints._resolver import resolve_type_guarded_imports
+
+    def guarded_names(obj: 'Any') -> 'Dict[str, Any]':  # pylint: disable=unused-argument
+        """Nothing: before 3.14, :func:`resolve_type_guarded_imports` binds the names itself."""
+        return {}
 
 # NB: this must precede ``import pcapkit``. ``pcapkit.utilities.logging`` reads
 # ``PCAPKIT_SPHINX`` at *import* time to compute ``SPHINX_TYPE_CHECKING``, and
@@ -32,9 +51,11 @@ os.environ['PCAPKIT_SPHINX'] = '1'
 import pcapkit
 
 if TYPE_CHECKING:
+    from types import ModuleType
     from typing import Any, Dict, List, Optional
     from docutils.nodes import document
     from sphinx.application import Sphinx
+    from sphinx.environment import BuildEnvironment
 
 logger = logging.getLogger('pcapkit-sphinx')
 logger.setLevel(logging.INFO)
@@ -341,7 +362,38 @@ def skip_enum_value_hook(app: 'Sphinx', what: str, name: str,  # pylint: disable
     return None
 
 
-def bind_type_checking_names(app: 'Sphinx') -> None:
+def bind_guarded_names(mock_imports: 'List[str]', module: 'ModuleType') -> None:
+    """Execute one module's ``if TYPE_CHECKING:`` block and bind its names there.
+
+    Up to ``sphinx-autodoc-typehints`` 3.13, :func:`resolve_type_guarded_imports`
+    binds the names into the module itself. From 3.14 it only records them, and
+    the library lays them over the module's globals around the annotation reads it
+    patches, then takes them away again. Sphinx's own signature introspection is
+    not one of those reads. ``Schema.__new__`` takes ``*args: '_VT'`` and returns
+    the guarded ``'Self'``, so :func:`typing.get_type_hints` raised
+    :exc:`NameError` for it and the schema class signatures fell back to the bare
+    ``_VT``. The Python domain then found both
+    :data:`pcapkit.corekit.multidict._VT` and
+    :data:`pcapkit.protocols.schema.schema._VT` for it, warned, and linked the
+    first, which is the wrong one. Binding what the library recorded restores
+    the earlier behaviour.
+
+    Only a name the module lacks is bound. A name the module binds at runtime keeps
+    that binding, as the library's own overlay leaves it.
+
+    Args:
+        mock_imports: The ``autodoc_mock_imports`` setting.
+        module: The module whose block is executed.
+
+    """
+    resolve_type_guarded_imports(mock_imports, module)
+    namespace = vars(module)
+    for name, value in guarded_names(module).items():
+        namespace.setdefault(name, value)
+
+
+def bind_type_checking_names(app: 'Sphinx', env: 'BuildEnvironment',  # pylint: disable=unused-argument
+                             docnames: 'List[str]') -> None:  # pylint: disable=unused-argument
     """Execute every ``pcapkit`` module's ``if TYPE_CHECKING:`` block.
 
     Annotations throughout the package are quoted and their types imported only
@@ -362,13 +414,20 @@ def bind_type_checking_names(app: 'Sphinx') -> None:
     the resolved object and carries its full dotted path. Nothing is suppressed:
     the references are qualified rather than silenced.
 
-    ``sphinx-autodoc-typehints`` already does this per module, but lazily, only
-    for the objects it happens to process. Walking every module here binds the
+    ``sphinx-autodoc-typehints`` already executes the block per module, but lazily,
+    only for the objects it happens to process. Walking every module here binds the
     names up front, so :func:`typing.get_type_hints` succeeds for anything autodoc
     renders, whether or not the library reaches it. Its implementation is reused
     rather than rewritten because it executes the block one statement at a time,
     so an unimportable optional dependency (``pcap``, ``pcapfile``) cannot strand
-    the names declared after it.
+    the names declared after it. :func:`bind_guarded_names` does the binding, per
+    module.
+
+    It runs on ``env-before-read-docs`` rather than on ``builder-inited``, after the
+    library's own handler for that event. From 3.14 that handler clears what the
+    library recorded from the blocks it ran, so the record of a walk done before
+    it would be discarded, and the library would run those blocks again as reading
+    reached them.
 
     One consequence is worth knowing before it is met as a mystery: making the
     annotations resolvable also makes a malformed one **fatal**. A quoted
@@ -384,6 +443,8 @@ def bind_type_checking_names(app: 'Sphinx') -> None:
 
     Args:
         app: Sphinx application.
+        env: Build environment.
+        docnames: The documents about to be read.
 
     """
     for info in pkgutil.walk_packages(pcapkit.__path__, 'pcapkit.',
@@ -396,7 +457,7 @@ def bind_type_checking_names(app: 'Sphinx') -> None:
             # worth saying out loud rather than passing silently.
             logger.info('skipped unimportable module %s: %s', info.name, exc)
             continue
-        resolve_type_guarded_imports(app.config.autodoc_mock_imports, module)
+        bind_guarded_names(app.config.autodoc_mock_imports, module)
 
 
 def claim_attribute_signature(app: 'Sphinx', what: str, name: str,  # pylint: disable=unused-argument
@@ -426,6 +487,12 @@ def claim_attribute_signature(app: 'Sphinx', what: str, name: str,  # pylint: di
     ``callable(obj)`` keeps this off ordinary attributes and off properties, whose
     ``obj`` is the :class:`property` itself and therefore not callable -- those
     already resolve correctly and are left alone.
+
+    ``setup`` connects this only for ``sphinx-autodoc-typehints`` releases before
+    3.14. From 3.14 the library's handler returns nothing when autodoc passes no
+    signature, as it does for every attribute, so there is no signature left to
+    stop, and claiming the event would only keep the library's handler from
+    running for these attributes at all.
 
     Args:
         app: Sphinx application.
@@ -587,7 +654,9 @@ def restore_enum_member_docstring(app: 'Sphinx', what: str, name: str,  # pylint
 
 
 def setup(app: 'Sphinx') -> None:
-    app.connect('builder-inited', bind_type_checking_names)
+    # NB: after ``sphinx_autodoc_typehints``, whose ``env-before-read-docs``
+    # handlers connect at the default 500; see ``bind_type_checking_names``.
+    app.connect('env-before-read-docs', bind_type_checking_names, priority=600)
     app.connect('autodoc-skip-member', maybe_skip_member)
     # NB: before napoleon's ``autodoc-skip-member`` handler, which connects at the
     # default 500 and returns ``False`` for this hook; the first answer that is
@@ -596,7 +665,8 @@ def setup(app: 'Sphinx') -> None:
     # NB: below ``sphinx_autodoc_typehints``, which connects at the default 500 and
     # would otherwise win the tie on registration order -- conf.py's ``setup`` runs
     # after the extensions in ``extensions`` have been set up.
-    app.connect('autodoc-process-signature', claim_attribute_signature, priority=400)
+    if TYPEHINTS_RELEASE < (3, 14):
+        app.connect('autodoc-process-signature', claim_attribute_signature, priority=400)
     app.connect('doctree-read', resolve_builtins_exactly)
     # NB: either side of napoleon's ``autodoc-process-docstring`` handler, which
     # connects at the default 500.
