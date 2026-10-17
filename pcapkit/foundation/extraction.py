@@ -86,7 +86,8 @@ if TYPE_CHECKING:
 
     Protocols = Union[str, ProtocolBase, Type[ProtocolBase]]
     # NOTE: every caller discards the callback's result. ``object`` rather than
-    # ``None`` still accepts one that returns something, e.g. ``sys.stdout.write``.
+    # ``None`` still accepts one that returns something, e.g.
+    # ``lambda e, f: sys.stdout.write(str(f))``.
     VerboseHandler = Callable[['Extractor', Packet], object]
 
 __all__ = ['Extractor']
