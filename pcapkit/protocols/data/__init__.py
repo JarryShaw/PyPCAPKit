@@ -178,6 +178,7 @@ __all__ = [
     'MH_MulticastAcknowledgementOption', 'MH_LMAControlledMAGParametersOption', 'MH_MAGMultipathBindingOption',
     'MH_MAGIdentifierOption', 'MH_AnchoredPrefixOption', 'MH_LocalPrefixOption', 'MH_PreviousMAAROption',
     'MH_ServingMAAROption', 'MH_DLIFLinkLocalAddressOption', 'MH_DLIFLinkLayerAddressOption',
+    'MH_NTPTimestamp', 'MH_PMIPv6Timestamp',
     'MH_ContextRequest',
     'MH_FlowIdentificationSuboption',
     'MH_UnassignedFlowIdentificationSuboption', 'MH_PadFlowIdentificationSuboption', 'MH_BIDReferenceSuboption',

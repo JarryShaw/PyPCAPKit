@@ -215,8 +215,8 @@ looks like an ordinary field and is not:
   48/16 fixed-point split, where NTP counts from 1900 in a 32/32 one, so reading
   one as the other is wrong in the epoch and in both field widths. They have
   separate types for that reason:
-  :class:`~pcapkit.protocols.internet.mh.PMIPv6Timestamp` and
-  :class:`~pcapkit.protocols.internet.mh.NTPTimestamp`.
+  :class:`~pcapkit.protocols.data.internet.mh.PMIPv6Timestamp` and
+  :class:`~pcapkit.protocols.data.internet.mh.NTPTimestamp`.
 
 DTLS
 ~~~~

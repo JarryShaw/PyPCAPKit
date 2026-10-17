@@ -53,6 +53,8 @@ PURE = (
     ('pcapkit.foundation.traceflow.data.data', 'DeferredPacket'),
     ('pcapkit.protocols.application.ngap', 'ProcedureCode'),
     ('pcapkit.protocols.application.ngap', 'ProtocolIE'),
+    ('pcapkit.protocols.internet.mh', 'NTPTimestamp'),
+    ('pcapkit.protocols.internet.mh', 'PMIPv6Timestamp'),
 )
 
 #: Removed paths the old module still uses, as ``(old module, name, new home)``.
@@ -73,6 +75,8 @@ SHIPPED = (
      'pcapkit/protocols/misc/pcapng.py', 'pcapkit/protocols/misc/pcapng.rst'),
     ('pcapkit.corekit.fields.field', 'NoValueType',
      'pcapkit/corekit/fields/field.py', 'pcapkit/corekit/fields/field.rst'),
+    ('pcapkit.protocols.internet.mh', 'NTPTimestamp',
+     'pcapkit/protocols/internet/mh.py', 'pcapkit/protocols/internet/mh.rst'),
 )
 
 
