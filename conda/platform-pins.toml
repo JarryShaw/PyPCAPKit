@@ -1,0 +1,18 @@
+# The packages conda/requirements.txt pins apart on some conda platforms, as a
+# table per package and conda subdir (#1827): the version that platform vendors
+# in place of the installed release, the date the pin is due for review by, and
+# why the platform cannot take the installed release.
+#
+# util/conda_vendor.py reads this file. Conda Update's `conda-update` job runs
+# its `--refresh-pins` first, which asks PyPI for the newest release, up to the
+# installed one, with a wheel each conda Python installs on the pinned platform.
+# It moves the pin up to that release with a fresh review-by date, and drops a
+# pin that reaches the installed release or already pins it (#1851). `--check`
+# fails on a pin past its review-by date: check by hand that the pin still
+# holds, then set a new date. The job writes this whole file, this comment
+# included, so anything a pin needs said goes in its `reason`.
+
+[cryptography.osx-64]
+version = "48.0.1"
+review-by = 2027-01-15
+reason = "Its newest releases ship no Intel or universal2 macOS wheel, so the osx-64 build would compile them from source; 49.0.0 was the first (#1827)."

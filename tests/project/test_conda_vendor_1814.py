@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import bz2
 import contextlib
+import datetime
 import importlib.util
 import io
 import json
@@ -252,10 +253,12 @@ class CommittedListTests(unittest.TestCase):
         metadata = dict.fromkeys((req.name for req in module.direct()), [])
         with tempfile.TemporaryDirectory() as temp:
             target = pathlib.Path(temp) / 'requirements.txt'
-            saved = module.FILE, module.ROOT, module._requires, module._version
+            saved = module.FILE, module.ROOT, module._requires, module._version, module._today
             module.FILE, module.ROOT = target, pathlib.Path(temp)
             module._requires = lambda name: metadata.get(name, [])
             module._version = lambda name: '1.0'
+            # No platform pin is overdue then; their review-by dates are #1851's tests'.
+            module._today = lambda: datetime.date.min
             try:
                 self.assertEqual(module.main([]), 0)
                 with contextlib.redirect_stdout(io.StringIO()) as quiet:
@@ -266,7 +269,7 @@ class CommittedListTests(unittest.TestCase):
                     self.assertEqual(module.main(['--check']), 1)
                 self.assertIn('stale: scapy', report.getvalue())
             finally:
-                module.FILE, module.ROOT, module._requires, module._version = saved
+                module.FILE, module.ROOT, module._requires, module._version, module._today = saved
 
 
 class DuplicatePinTests(unittest.TestCase):
@@ -320,10 +323,12 @@ class DuplicatePinTests(unittest.TestCase):
         module = self.module
         with tempfile.TemporaryDirectory() as temp:
             target = pathlib.Path(temp) / 'requirements.txt'
-            saved = module.FILE, module.ROOT, module._requires, module._version
+            saved = module.FILE, module.ROOT, module._requires, module._version, module._today
             module.FILE, module.ROOT = target, pathlib.Path(temp)
             module._requires = lambda name: []
             module._version = lambda name: '1.0'
+            # No platform pin is overdue then; their review-by dates are #1851's tests'.
+            module._today = lambda: datetime.date.min
             try:
                 self.assertEqual(module.main([]), 0)
                 written = target.read_text(encoding='utf-8')
@@ -337,7 +342,7 @@ class DuplicatePinTests(unittest.TestCase):
                 self.assertEqual(report.getvalue(), "requirements.txt: conflict: aenum pins '==1.0' and "
                                                     "'==0.9' under the marker None\n")
             finally:
-                module.FILE, module.ROOT, module._requires, module._version = saved
+                module.FILE, module.ROOT, module._requires, module._version, module._today = saved
 
 
 #: A ``pcapkit/__init__.py`` reduced to its ``_extern`` shim.

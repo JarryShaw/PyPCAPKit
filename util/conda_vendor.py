@@ -30,20 +30,31 @@ Each line pins the version installed here, as ``conda-update`` in
 :file:`.github/workflows/cron-conda.yml` installs ``.[all]`` before running this
 script. Resolving the newest releases is that install step's job, and needs the
 network; this script reads only what is installed, so it works offline. The one
-exception is :data:`PLATFORM_PINS`: a package whose newest release has no wheel
-for some platform keeps an older pin for it, on a line of its own whose marker
-names that platform, beside the installed pin for the rest (#1827). The conda
-legs build natively, so each leg's ``pip download`` evaluates those markers on
-its own runner.
+exception is :data:`PLATFORM_PINS`, read from :file:`conda/platform-pins.toml`:
+a package whose newest release has no wheel for some platform keeps an older pin
+for it, on a line of its own whose marker names that platform, beside the
+installed pin for the rest (#1827). The conda legs build natively, so each leg's
+``pip download`` evaluates those markers on its own runner.
+
+Each of those pins carries a review-by date (#1851). With ``--refresh-pins``,
+the one mode that reads the network, it asks PyPI for the newest release, up to
+the installed one, with a wheel every conda Python installs on the pinned
+platform (:func:`newest_wheel`). That request is the one thing here that needs
+:mod:`requests`, which is imported only to make it, so no other mode needs it
+installed. It moves the pin up to that release, due for
+review :data:`REVIEW_HORIZON` from today, drops a pin that reaches the installed
+release or already pins it, and rewrites the table. A package PyPI cannot be
+read for keeps its pins, with a warning, and the run still exits 0.
+``conda-update`` runs it before writing the requirements.
 
 Run without arguments it rewrites :file:`conda/requirements.txt`. With
 ``--check`` it writes nothing, and exits 1 when the file names a different set of
 packages or markers than it derives, a platform pin other than
-:data:`PLATFORM_PINS`, or when that table names a package no build vendors --
-the other pins aside, since they move with every release and the weekly run
-refreshes them. Lines pinning one package differently under one marker fail it
-too, since pip cannot install them together when the pins disagree (#1852).
-With ``--smoke PACKAGE`` it unpacks a
+:data:`PLATFORM_PINS`, or when that table names a package no build vendors or
+holds a pin past its review-by date -- the other pins aside, since they move with
+every release and the weekly run refreshes them. Lines pinning one package
+differently under one marker fail it too, since pip cannot install them together
+when the pins disagree (#1852). With ``--smoke PACKAGE`` it unpacks a
 built ``.tar.bz2`` conda package and checks that every distribution vendored in
 it shipped every file its ``RECORD`` lists, and that each of its modules imports
 from :file:`pcapkit/_extern` with nothing else on the path. It also checks that
@@ -58,21 +69,24 @@ standard library.
 from __future__ import annotations
 
 import argparse
+import datetime
 import importlib.metadata
 import importlib.util
 import json
 import pathlib
 import platform
+import re
 import subprocess  # nosec B404
 import sys
 import tarfile
 import tempfile
 import textwrap
 import tomllib
-from typing import TYPE_CHECKING
+import urllib.parse
+from typing import TYPE_CHECKING, NamedTuple
 
 if TYPE_CHECKING:
-    from typing import Callable, Iterable, Literal, Optional
+    from typing import Any, Callable, Iterable, Literal, Optional
 
     from packaging.markers import Marker
     from packaging.requirements import Requirement
@@ -94,11 +108,22 @@ PLATFORMS = {
     'osx-64': ('darwin', 'Darwin', 'x86_64'),
     'osx-arm64': ('darwin', 'Darwin', 'arm64'),
 }
-#: The packages pinned apart on some of :data:`PLATFORMS`, as {package: {conda
-#: subdir: version}} (#1827). cryptography stopped shipping Intel macOS wheels at
-#: 49.0.0, so osx-64 vendors 48.0.1, the newest release with one (universal2);
-#: otherwise its build would compile cryptography from source.
-PLATFORM_PINS = {'cryptography': {'osx-64': '48.0.1'}}
+#: The file :data:`PLATFORM_PINS` is read from, and ``--refresh-pins`` rewrites (#1827, #1851).
+PINS = ROOT / 'conda' / 'platform-pins.toml'
+#: How long a pin stands before it is due for review, a quarter of a year:
+#: ``--refresh-pins`` dates a pin it moves this far ahead (#1851).
+REVIEW_HORIZON = datetime.timedelta(weeks=13)
+#: The wheel platform tags a build on each of :data:`PLATFORMS` installs, besides
+#: ``any``, for :func:`installs` (#1851): glibc's manylinux on linux-64, and on
+#: macOS the runner's own architecture or universal2, for any macOS version. A
+#: tag left out here only leaves a pin where it is.
+WHEEL_PLATFORMS = {
+    'linux-64': re.compile(r'manylinux(?:1|2010|2014|_\d+_\d+)_x86_64'),
+    'osx-64': re.compile(r'macosx_\d+_\d+_(?:x86_64|universal2)'),
+    'osx-arm64': re.compile(r'macosx_\d+_\d+_(?:arm64|universal2)'),
+}
+#: Where ``--refresh-pins`` reads a package's releases: PyPI's JSON API.
+PYPI = 'https://pypi.org/pypi/{}/json'
 #: The object format and the machine of every native binary a package for each
 #: of :data:`PLATFORMS` may carry (#1822). A universal Mach-O passes when one of
 #: its slices is the machine.
@@ -110,6 +135,88 @@ MACHO_CPUS = {7: 'i386', 0x01000007: 'x86_64', 12: 'arm', 0x0100000c: 'arm64', 0
 #: File names a native extension or library goes by, so one whose header this
 #: cannot read is reported rather than passed over.
 NATIVE_SUFFIXES = ('.so', '.dylib', '.pyd', '.dll')
+#: What :func:`render_pins` writes above the pins, so that a rewrite keeps it.
+PINS_HEADER = '''\
+# The packages conda/requirements.txt pins apart on some conda platforms, as a
+# table per package and conda subdir (#1827): the version that platform vendors
+# in place of the installed release, the date the pin is due for review by, and
+# why the platform cannot take the installed release.
+#
+# util/conda_vendor.py reads this file. Conda Update's `conda-update` job runs
+# its `--refresh-pins` first, which asks PyPI for the newest release, up to the
+# installed one, with a wheel each conda Python installs on the pinned platform.
+# It moves the pin up to that release with a fresh review-by date, and drops a
+# pin that reaches the installed release or already pins it (#1851). `--check`
+# fails on a pin past its review-by date: check by hand that the pin still
+# holds, then set a new date. The job writes this whole file, this comment
+# included, so anything a pin needs said goes in its `reason`.
+'''
+
+
+class Pin(NamedTuple):
+    """A version one of :data:`PLATFORMS` vendors in place of the installed release (#1827)."""
+
+    #: The version that platform vendors.
+    version: str
+    #: The date the pin is due for review by; ``--check`` fails after it (#1851).
+    review_by: datetime.date
+    #: Why that platform cannot take the installed release.
+    reason: str
+
+
+def _toml(text: 'str') -> 'str':
+    """``text`` as a TOML key: bare when it can be, a basic string otherwise."""
+    if re.fullmatch(r'[A-Za-z0-9_-]+', text):
+        return text
+    return _toml_string(text)
+
+
+def _toml_string(text: 'str') -> 'str':
+    """``text`` as a TOML basic string, with the characters TOML forbids there escaped."""
+    escaped = ''.join(f'\\{char}' if char in '"\\' else
+                      f'\\u{ord(char):04x}' if ord(char) < 0x20 or ord(char) == 0x7f else char
+                      for char in text)
+    return f'"{escaped}"'
+
+
+def load_pins(text: 'str') -> 'dict[str, dict[str, Pin]]':
+    """:file:`conda/platform-pins.toml`'s pins, as {package: {conda subdir: :class:`Pin`}}.
+
+    Each pin is a table of ``version`` and ``reason``, strings, and ``review-by``,
+    a TOML date. Anything else raises :class:`ValueError`.
+
+    """
+    table = {}  # type: dict[str, dict[str, Pin]]
+    for name, platforms in tomllib.loads(text).items():
+        if not isinstance(platforms, dict):
+            raise ValueError(f'{name}: a package is a table of conda subdirs, not {platforms!r}')
+        for subdir, entry in platforms.items():
+            fields = entry if isinstance(entry, dict) else {}
+            version, review_by, reason = fields.get('version'), fields.get('review-by'), fields.get('reason')
+            if (set(fields) != {'version', 'review-by', 'reason'} or not isinstance(version, str)
+                    or not isinstance(reason, str) or not isinstance(review_by, datetime.date)
+                    or isinstance(review_by, datetime.datetime)):
+                raise ValueError(f'{name}.{subdir}: a pin is a table of version and reason, strings, '
+                                 f'and review-by, a date; not {entry!r}')
+            table.setdefault(name, {})[subdir] = Pin(version, review_by, reason)
+    return table
+
+
+def render_pins(table: 'dict[str, dict[str, Pin]]') -> 'str':
+    """:file:`conda/platform-pins.toml` holding ``table``, which :func:`load_pins` reads back."""
+    parts = [PINS_HEADER]
+    for name, platforms in sorted(table.items()):
+        for subdir, pin in sorted(platforms.items()):
+            parts.append(f'\n[{_toml(name)}.{_toml(subdir)}]\n'
+                         f'version = {_toml_string(pin.version)}\n'
+                         f'review-by = {pin.review_by.isoformat()}\n'
+                         f'reason = {_toml_string(pin.reason)}\n')
+    return ''.join(parts)
+
+
+#: The packages pinned apart on some of :data:`PLATFORMS`, as {package: {conda
+#: subdir: :class:`Pin`}}, from :data:`PINS` (#1827, #1851).
+PLATFORM_PINS = load_pins(PINS.read_text(encoding='utf-8'))
 
 
 def _load_python_versions() -> 'object':
@@ -275,7 +382,7 @@ def pins(name: 'str', entry: 'dict[str, object]',
     """Each line ``name`` gets: its marker, and the version :data:`PLATFORM_PINS` fixes or :data:`None`."""
     python = render_marker(entry['builds'], envs)  # type: ignore[arg-type]
     # One for a platform no leg builds is unpinnable()'s to report.
-    fixed = {subdir: version for subdir, version in PLATFORM_PINS.get(name, {}).items() if subdir in PLATFORMS}
+    fixed = {subdir: pin.version for subdir, pin in PLATFORM_PINS.get(name, {}).items() if subdir in PLATFORMS}
     if not fixed:
         return [(python, None)]
     groups = {}  # type: dict[str, set[str]]
@@ -396,12 +503,209 @@ def compare(text: 'str', found: 'dict[str, dict[str, object]]',
     return problems
 
 
+def _wheel_abis(python: 'str') -> 'frozenset[tuple[str, str]]':
+    """The interpreter and ABI tags CPython ``python`` installs a wheel for, as :mod:`packaging.tags` has them.
+
+    Its own ABI, the stable ``abi3`` of its own and every older CPython, and
+    ``none``. The free-threaded ABI is not among them, since no conda build is.
+
+    """
+    from packaging import tags  # pylint: disable=import-outside-toplevel
+    major, minor = map(int, python.split('.'))
+    interpreter = f'cp{major}{minor}'
+    found = [*tags.cpython_tags((major, minor), abis=[interpreter], platforms=['any']),
+             *tags.compatible_tags((major, minor), interpreter, platforms=['any'])]
+    return frozenset((tag.interpreter, tag.abi) for tag in found)
+
+
+def installs(filename: 'str', subdir: 'str', python: 'str', requires_python: 'Optional[str]' = None) -> 'bool':
+    """Whether CPython ``python`` on ``subdir`` of :data:`PLATFORMS` installs the wheel ``filename`` (#1851).
+
+    One of the wheel's tags has to carry an interpreter and ABI of
+    :func:`_wheel_abis` and a platform of :data:`WHEEL_PLATFORMS`, or ``any``. A
+    file that is not a wheel installs nowhere, nor does one whose
+    ``requires_python`` leaves ``python`` out, as PyPI's JSON gives it per file.
+
+    """
+    # pylint: disable-next=import-outside-toplevel
+    from packaging.specifiers import InvalidSpecifier, SpecifierSet
+    # pylint: disable-next=import-outside-toplevel
+    from packaging.utils import InvalidWheelFilename, parse_wheel_filename
+    try:
+        tags = parse_wheel_filename(filename)[3]
+    except InvalidWheelFilename:
+        return False
+    if requires_python:
+        try:
+            if f'{python}.0' not in SpecifierSet(requires_python):
+                return False
+        except InvalidSpecifier:
+            return False
+    abis, platforms = _wheel_abis(python), WHEEL_PLATFORMS[subdir]
+    return any((tag.interpreter, tag.abi) in abis and (tag.platform == 'any' or platforms.fullmatch(tag.platform))
+               for tag in tags)
+
+
+def newest_wheel(project: 'dict[str, Any]', subdir: 'str', pythons: 'Iterable[str]',
+                 ceiling: 'Optional[str]' = None) -> 'Optional[str]':
+    """The newest release in ``project`` with a wheel each of ``pythons`` installs on ``subdir`` (#1851).
+
+    ``project`` is PyPI's JSON for a package, whose ``releases`` map each version
+    to its files. A yanked file is passed over, and so are a pre-release and,
+    given a ``ceiling``, a release above it. :data:`None` when no release has such
+    a wheel; :class:`ValueError` when ``project`` lists no releases at all.
+
+    """
+    from packaging.version import InvalidVersion, Version  # pylint: disable=import-outside-toplevel
+    releases = project.get('releases') if isinstance(project, dict) else None
+    if not isinstance(releases, dict):
+        raise ValueError("PyPI's JSON has no releases")
+    pythons = list(pythons)
+    top = None if ceiling is None else Version(ceiling)
+    best, found = None, None  # type: Optional[Version], Optional[str]
+    for text, files in releases.items():
+        try:
+            version = Version(text)
+        except InvalidVersion:
+            continue
+        if version.is_prerelease or (top is not None and version > top) or (best is not None and version <= best):
+            continue
+        wheels = [file for file in files or () if isinstance(file, dict) and not file.get('yanked')
+                  and str(file.get('filename', '')).endswith('.whl')]
+        if pythons and all(any(installs(file['filename'], subdir, python, file.get('requires_python'))
+                               for file in wheels) for python in pythons):
+            best, found = version, text
+    return found
+
+
+#: What :func:`_fetch` raises when PyPI cannot be read: :class:`OSError` for a
+#: failed request, and :class:`ValueError` for a reply that is not JSON, as
+#: requests releases before its own ``JSONDecodeError`` raise it.
+UNREADABLE = (OSError, ValueError)
+
+
+def refresh(table: 'dict[str, dict[str, Pin]]', fetch: 'Callable[[str], dict[str, Any]]',
+            installed: 'Callable[[str], Optional[str]]', pythons: 'Iterable[str]',
+            today: 'datetime.date') -> 'tuple[dict[str, dict[str, Pin]], list[tuple[str, str]]]':
+    """``table`` with each pin moved up as far as PyPI has a wheel for its platform, and notes on it (#1851).
+
+    ``fetch`` returns a package's PyPI JSON, raising one of :data:`UNREADABLE`
+    when it cannot, and ``installed`` the version installed here, or
+    :data:`None`. A pin moves to :func:`newest_wheel` up to the installed
+    version, due for review on ``today`` plus :data:`REVIEW_HORIZON`. A pin that
+    reaches the installed version that way, or already pins it, is dropped, as
+    the other platforms vendor that version. A package or pin it cannot settle
+    stays as it is. Each note is a
+    workflow command, ``notice`` for a change and ``warning`` for a pin left
+    alone, and its text.
+
+    """
+    from packaging.version import Version  # pylint: disable=import-outside-toplevel
+    pythons = list(pythons)
+    result = {}  # type: dict[str, dict[str, Pin]]
+    notes = []  # type: list[tuple[str, str]]
+    for name, platforms in sorted(table.items()):
+        kept = result[name] = dict(platforms)
+        have = installed(name)
+        if have is None:
+            notes.append(('warning', f'{name} is not installed here, so its pins stay as they are'))
+            continue
+        try:
+            project = fetch(name)
+        except UNREADABLE as error:
+            notes.append(('warning', f'PyPI could not be read for {name} ({error}), so its pins stay as they are'))
+            continue
+        for subdir, pin in sorted(platforms.items()):
+            if subdir not in WHEEL_PLATFORMS:
+                notes.append(('warning', f'{name} is pinned for {subdir}, which no conda leg builds, '
+                                         'so that pin stays as it is'))
+                continue
+            try:
+                newest = newest_wheel(project, subdir, pythons, ceiling=have)
+                current, ceiling = Version(pin.version), Version(have)
+                target = None if newest is None or Version(newest) <= current else Version(newest)
+            except ValueError as error:
+                notes.append(('warning', f'{name} {pin.version} on {subdir} stays as it is: {error}'))
+                continue
+            if current == ceiling:
+                del kept[subdir]
+                notes.append(('notice', f'{name} {pin.version} on {subdir} is the installed release itself, '
+                                        'so the pin is dropped'))
+            elif newest is not None and target == ceiling:
+                del kept[subdir]
+                notes.append(('notice', f'{name} {have}, the installed release, has a wheel for {subdir}, '
+                                        f'so its {pin.version} pin there is dropped'))
+            elif newest is not None and target is not None:
+                kept[subdir] = pin._replace(version=newest, review_by=today + REVIEW_HORIZON)
+                notes.append(('notice', f'{name} on {subdir} moves from {pin.version} to {newest}, the newest '
+                                        f'release with a wheel there; due for review by {kept[subdir].review_by}'))
+    return {name: platforms for name, platforms in result.items() if platforms}, notes
+
+
+def review(table: 'dict[str, dict[str, Pin]]', today: 'datetime.date') -> 'list[str]':
+    """Each pin of ``table`` past its review-by date on ``today``, one line apiece (#1851)."""
+    return [f'overdue: {name} is pinned to {pin.version} on {subdir}, and was due for review by '
+            f'{pin.review_by}; check the pin still holds, then set a new review-by date, '
+            f'such as {today + REVIEW_HORIZON}'
+            for name, platforms in sorted(table.items()) for subdir, pin in sorted(platforms.items())
+            if pin.review_by < today]
+
+
 def _requires(name: 'str') -> 'Optional[list[str]]':
     return importlib.metadata.requires(name)
 
 
 def _version(name: 'str') -> 'str':
     return importlib.metadata.version(name)
+
+
+def _installed(name: 'str') -> 'Optional[str]':
+    try:
+        return importlib.metadata.version(name)
+    except importlib.metadata.PackageNotFoundError:
+        return None
+
+
+def _fetch(name: 'str') -> 'dict[str, Any]':
+    """``name``'s PyPI JSON, the one request this script makes, for ``--refresh-pins``.
+
+    :mod:`requests` is imported here, not with the module, so that the other
+    modes run on the standard library alone. Any :class:`requests.RequestException`,
+    an HTTP error status or a reply that is not JSON included, is raised as
+    :class:`OSError`, one of :data:`UNREADABLE`, whatever requests derives it from.
+
+    """
+    import requests  # pylint: disable=import-outside-toplevel
+    try:
+        response = requests.get(PYPI.format(urllib.parse.quote(name)), timeout=60,
+                                headers={'User-Agent': 'PyPCAPKit conda-update (#1851)',
+                                         'Accept': 'application/json'})
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException as error:
+        raise OSError(str(error)) from error
+
+
+def _today() -> 'datetime.date':
+    """Today's date in UTC, the runners' time zone."""
+    return datetime.datetime.now(datetime.timezone.utc).date()
+
+
+def _escape(text: 'str') -> 'str':
+    """``text`` as a workflow command's data."""
+    return text.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+
+
+def refresh_pins() -> 'int':
+    """``--refresh-pins``: :func:`refresh` :data:`PLATFORM_PINS`, report it, and rewrite :data:`PINS` on a change."""
+    today = _today()
+    table, notes = refresh(PLATFORM_PINS, _fetch, _installed, conda_pythons(), today)
+    notes.extend(('warning', problem) for problem in review(table, today))
+    for level, text in notes:
+        print(f'::{level} title=Platform pins::{_escape(text)}')
+    if table != PLATFORM_PINS:
+        PINS.write_text(render_pins(table), encoding='utf-8')
+    return 0
 
 
 #: Run with ``-I -S`` and the unpacked ``site-packages`` as its argument, so that
@@ -565,10 +869,15 @@ def main(argv: 'Optional[list[str]]' = None) -> 'int':
                        help='write nothing; exit 1 when conda/requirements.txt is stale')
     group.add_argument('--smoke', metavar='PACKAGE', type=pathlib.Path,
                        help='check the vendored packages of a built .tar.bz2 conda package')
+    group.add_argument('--refresh-pins', action='store_true',
+                       help='move each platform pin up as far as PyPI has a wheel for its platform, '
+                            'and rewrite conda/platform-pins.toml; reads the network')
     args = parser.parse_args(argv)
 
     if args.smoke is not None:
         return smoke(args.smoke)
+    if args.refresh_pins:
+        return refresh_pins()
 
     envs = environments(conda_pythons())
     try:
@@ -578,9 +887,11 @@ def main(argv: 'Optional[list[str]]' = None) -> 'int':
         return 2
 
     if args.check:
-        problems = compare(FILE.read_text(encoding='utf-8'), found, envs)
+        problems = [f'{FILE.relative_to(ROOT)}: {problem}'
+                    for problem in compare(FILE.read_text(encoding='utf-8'), found, envs)]
+        problems.extend(f'{PINS.relative_to(ROOT)}: {problem}' for problem in review(PLATFORM_PINS, _today()))
         for problem in problems:
-            print(f'{FILE.relative_to(ROOT)}: {problem}')
+            print(problem)
         return 1 if problems else 0
 
     problems = unpinnable(found)
