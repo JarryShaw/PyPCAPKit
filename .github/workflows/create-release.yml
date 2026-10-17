@@ -1338,21 +1338,23 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      # #1854: nothing below imports pcapkit from this interpreter. ``pip
+      # download`` needs pip alone, ``conda build`` installs into its own host
+      # environment, the version comes from job outputs, and the smoke test
+      # runs its probe under ``-I -S``. So pcapkit and its extras are not
+      # installed here: on ``macos-26-intel`` they resolve a cryptography with
+      # no Intel wheel, which pip has to compile or fail on.
       - name: Install and Setup
         if: ${{ matrix.os != 'windows-latest' }}
         run: |
           set -x
 
           python -m pip install -U pip setuptools wheel
-          python -m pip install -e .[all]
-          python -m pip install pathlib2 typing_extensions
 
       - name: Install and Setup (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
           python -m pip install -U pip setuptools wheel
-          python -m pip install -e .[all]
-          python -m pip install pathlib2 typing_extensions
 
       - name: Setup Conda Distribution
         if: ${{ matrix.os != 'windows-latest' }}
@@ -1435,6 +1437,8 @@ jobs:
               ;;
           esac
 
+          echo "host_package=$host_package" >> "$GITHUB_OUTPUT"
+
           # #1822: never ``conda convert`` across architectures; see the matrix.
           host_platform="$(basename "$(dirname "$host_package")")"
           if [ "$host_platform" != "$target_platform" ]; then
@@ -1456,6 +1460,16 @@ jobs:
             printf '%s\n' "$package_paths"
             echo EOF
           } >> "$GITHUB_OUTPUT"
+
+      # #1855: cron-conda.yml's ``conda-dist`` step of the same name, which says
+      # what it checks and why it runs setup-python's interpreter, so a release
+      # package is checked as a Conda Update bump's is, before anything below
+      # uploads it. Not gated on ``check_leg``, since the GitHub upload is not.
+      - name: Smoke-test the vendored packages
+        env:
+          PCAPKIT_CONDA_PACKAGE: ${{ steps.conda_build.outputs.host_package }}
+        run: |
+          "${pythonLocation}/bin/python" util/conda_vendor.py --smoke "$PCAPKIT_CONDA_PACKAGE"
 
       - name: Upload conda packages to Anaconda
         if: ${{ steps.check_leg.outputs.PCAPKIT_LEG_EXISTS != 'true' }}
@@ -1690,7 +1704,7 @@ jobs:
           # Case 2: every target reconciled by skipping, none of them ran.
           # Quiet -- this is the steady state most runs are in.
           if [ "$all_reconciled" = "true" ] && [ "$all_skipped" = "true" ]; then
-            echo "::notice title=Nothing to release::pypcapkit ${PCAPKIT_VERSION} is already fully released -- the v* tag, the conda-*+0 tag, all 7 supported PyPI files and all 10 Anaconda files are present. This run correctly released nothing."
+            echo "::notice title=Nothing to release::pypcapkit ${PCAPKIT_VERSION} is already fully released -- the v* tag, the conda-*+0 tag and every PyPI and Anaconda file version_check expects are present. This run correctly released nothing."
             exit 0
           fi
 
