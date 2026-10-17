@@ -16,6 +16,12 @@ spun until pytest-timeout's backstop ended the whole xdist worker. Now it gives 
 after :data:`SPIN_LIMIT` and the test fails by name, and the generator repeats
 the raise until :func:`roundtrip` has it.
 
+The spin waits in a call made from inside the ``try`` that drops a raise, and
+arms the deadline there (#1897). Waiting inline, a raise handled at the jump
+closing the loop went past the ``except`` on CPython 3.13; armed as
+:func:`roundtrip` entered it, the deadline could come due in a stall before the
+``try``. Either way the first raise was not dropped.
+
 This module is unit tier: it loads the generator by path and builds nothing, so
 it imports no :mod:`pcapkit` and reads no capture.
 
@@ -23,6 +29,7 @@ it imports no :mod:`pcapkit` and reads no capture.
 
 from __future__ import annotations
 
+import dis
 import importlib.util
 import os
 import signal
@@ -48,6 +55,14 @@ SCALE_ENV = 'PCAPKIT_TEST_TIMEOUT_SCALE'
 #: the one-second deadline the tests here arm, so a deadline that fires at all,
 #: repeats included, lands well inside it.
 SPIN_LIMIT = 10.0
+
+#: Seconds a stalled :class:`_Spin` sleeps before its loop: past the one-second
+#: deadline, so an alarm counting down from the deadline's entry comes due in it.
+STALL = 1.5
+
+#: :func:`signal.alarm` itself, for :class:`_Spin` to reach while its
+#: :meth:`_Spin.alarm` stands in for the name.
+_ALARM = signal.alarm
 
 
 def _load_generator() -> 'types.ModuleType':
@@ -76,40 +91,83 @@ class _SpinGaveUp(Exception):
     """Raised by :class:`_Spin` once its limit passes with no deadline raised in it."""
 
 
-class _Spin:  # pylint: disable=too-few-public-methods
+class _Spin:
     """A family whose constructor spins until the deadline interrupts it.
 
     It stands in for a real hang, but a bounded one: after ``limit`` seconds it
     sets :attr:`gave_up` and raises :exc:`_SpinGaveUp`, so a lost deadline fails
     the test in seconds instead of hanging the worker.
 
+    The first raise has to land inside the ``try`` that drops it (#1897), so the
+    waiting is done in :meth:`wait`, called from inside that ``try``, and the
+    deadline is armed there too: run it through
+    :meth:`GeneratorDeadlineScaleTests.spin_roundtrip`, which puts :meth:`alarm`
+    in place of :func:`signal.alarm` to hold the deadline back until then.
+
     Args:
         limit: Seconds to spin before giving up.
         swallow: How many :exc:`TimeoutError` to drop before letting one
             through, standing in for a finaliser that drops the deadline's raise.
-        clear: Cancel the pending alarm on entry, so no deadline ever fires.
+        clear: Drop the deadline instead of arming it, so it never fires.
+        stall: Seconds to sleep before the loop, standing in for a stalled runner.
 
     """
 
     def __init__(self, limit: float = SPIN_LIMIT, swallow: int = 0,
-                 clear: bool = False) -> None:
+                 clear: bool = False, stall: float = 0.0) -> None:
         self.limit = limit
         self.swallow = swallow
         self.clear = clear
+        self.stall = stall
+        #: Seconds the deadline asked :meth:`alarm` for as it was entered, or ``0``.
+        self.deadline = 0
+        #: Seconds held back by :meth:`alarm` and not yet armed by :meth:`wait`.
+        self.held = 0
         #: :exc:`TimeoutError` dropped so far.
         self.swallowed = 0
         #: Whether the limit passed before a deadline got through.
         self.gave_up = False
 
+    def alarm(self, seconds: int) -> int:
+        """:func:`signal.alarm`, but the deadline's own arm is held for :meth:`wait`.
+
+        The first non-zero call is the deadline being entered. It is recorded in
+        :attr:`deadline`, and no alarm runs until :meth:`wait` arms it. Armed as
+        the deadline is entered, it counts down through everything before the
+        ``try``, and a runner stalled there for the whole second gets the raise
+        outside it. Every other call reaches the alarm, so the deadline's repeats
+        and its cancel are real.
+        """
+        if seconds and not self.deadline:
+            self.deadline = self.held = seconds
+            return _ALARM(0)
+        return _ALARM(seconds)
+
+    def wait(self, end: float) -> None:
+        """Arm the deadline :meth:`alarm` held, then busy-wait until ``end``.
+
+        A call from inside :meth:`build`'s ``try``, so a raise delivered anywhere
+        in here reaches that ``try``. Written inline there, the jump closing the
+        loop falls outside the range its ``except`` covers, and on CPython 3.13
+        an alarm handled at that jump raised straight past it. CPython 3.12's
+        table has the same gap, but an alarm handled there resumes inside the
+        ``try``.
+        """
+        if self.held:
+            seconds, self.held = self.held, 0
+            if not self.clear:
+                _ALARM(seconds)
+        while time.monotonic() < end:
+            pass
+
     def build(self, code: 'Any', kwargs: 'Any') -> bytes:  # pylint: disable=unused-argument
         """Loop until the deadline interrupts it, or until :attr:`limit` passes."""
-        if self.clear:
-            signal.alarm(0)
+        if self.stall:
+            time.sleep(self.stall)
         end = time.monotonic() + self.limit
         while time.monotonic() < end:
             try:
-                while time.monotonic() < end:
-                    pass
+                self.wait(end)
             except TimeoutError:
                 if self.swallowed == self.swallow:
                     raise
@@ -187,11 +245,31 @@ class GeneratorDeadlineScaleTests(unittest.TestCase):
         with mock.patch.dict(self.options.FAMILY_MAP, {'spin': family}):
             return self.options.roundtrip(case, deadline=2)
 
+    def spin_roundtrip(self, spin: '_Spin') -> 'Any':
+        """:meth:`roundtrip` over ``spin``, with :meth:`_Spin.alarm` as :func:`signal.alarm`."""
+        with mock.patch.object(signal, 'alarm', spin.alarm):
+            return self.roundtrip(spin)
+
     def assert_interrupted(self, spin: '_Spin', outcome: 'Any') -> None:
         """Fail by name, rather than on a status mismatch, if the deadline never got through."""
         if spin.gave_up:
             self.fail(f'the deadline never interrupted the spin; roundtrip recorded '
                       f'{outcome.status}: {outcome.detail}')
+
+    def assert_dropped_once(self, spin: '_Spin', outcome: 'Any') -> None:
+        """One raise dropped, the next recorded as ``'TIMEOUT'``, and nothing left behind.
+
+        One comparison, so a failure shows the count dropped next to what
+        :func:`roundtrip` recorded.
+        """
+        self.assert_interrupted(spin, outcome)
+        self.assertEqual(
+            {'deadline': spin.deadline, 'swallowed': spin.swallowed,
+             'status': outcome.status, 'detail': outcome.detail},
+            {'deadline': 1, 'swallowed': 1,
+             'status': 'TIMEOUT', 'detail': 'did not finish within 1s'})
+        self.assertIs(signal.getsignal(signal.SIGALRM), self.handler)
+        self.assertEqual(signal.alarm(0), 0)
 
     def test_the_default_is_thirty_seconds_unscaled(self) -> None:
         """Unset, the default applies as written -- and it is no longer 5."""
@@ -242,8 +320,9 @@ class GeneratorDeadlineScaleTests(unittest.TestCase):
     def test_a_hang_is_still_recorded_as_timeout_naming_the_scaled_deadline(self) -> None:
         """The ``'TIMEOUT'`` contract holds, and its detail names the seconds allowed."""
         spin = _Spin()
-        outcome = self.roundtrip(spin)
+        outcome = self.spin_roundtrip(spin)
         self.assert_interrupted(spin, outcome)
+        self.assertEqual(spin.deadline, 1)
         self.assertEqual(outcome.status, 'TIMEOUT')
         self.assertEqual(outcome.detail, 'did not finish within 1s')
         self.assertIs(signal.getsignal(signal.SIGALRM), self.handler)
@@ -251,13 +330,65 @@ class GeneratorDeadlineScaleTests(unittest.TestCase):
     def test_a_raise_that_never_reaches_the_body_is_repeated(self) -> None:
         """#1889: a dropped raise is followed by another, still recorded as ``'TIMEOUT'``."""
         spin = _Spin(swallow=1)
-        outcome = self.roundtrip(spin)
-        self.assert_interrupted(spin, outcome)
-        self.assertEqual(spin.swallowed, 1)
-        self.assertEqual(outcome.status, 'TIMEOUT')
-        self.assertEqual(outcome.detail, 'did not finish within 1s')
-        self.assertIs(signal.getsignal(signal.SIGALRM), self.handler)
-        self.assertEqual(signal.alarm(0), 0)
+        self.assert_dropped_once(spin, self.spin_roundtrip(spin))
+
+    def test_a_stall_before_the_spin_still_leaves_a_raise_to_drop(self) -> None:
+        """#1897: a runner stalled for longer than the deadline before the spin changes nothing.
+
+        Armed as :func:`roundtrip` entered the deadline, the alarm came due in
+        the stall, before the ``try`` that drops a raise. That raise went
+        straight through and none was dropped.
+        """
+        spin = _Spin(swallow=1, stall=STALL)
+        self.assert_dropped_once(spin, self.spin_roundtrip(spin))
+
+    @unittest.skipUnless(sys.implementation.name == 'cpython' and sys.version_info >= (3, 12),
+                         'needs sys.monitoring')
+    @unittest.skipUnless(hasattr(signal, 'pthread_kill'), 'needs signal.pthread_kill')
+    def test_a_raise_as_the_spin_loops_back_is_dropped_too(self) -> None:
+        """#1897: a raise at the jump that closes the spin's loop is dropped.
+
+        Written inline in the ``try``, that jump lies outside the range the
+        ``except`` covers on CPython 3.12 and 3.13. On 3.13 an alarm handled at
+        that jump raised straight past the ``except``; on 3.12 one handled there
+        resumes inside the ``try``. Here the signal is sent from a
+        :mod:`sys.monitoring` callback on the first backward jump after the
+        deadline is armed, so the raise lands on the jump itself and exercises
+        that layout on 3.12 and 3.13. From 3.14 the range covers the jump, so
+        there this is a guard that cannot fail.
+        """
+        monitoring = sys.monitoring  # pylint: disable=no-member
+        tool = next((tool for tool in range(6) if monitoring.get_tool(tool) is None), None)
+        if tool is None:
+            self.skipTest('no sys.monitoring tool id is free')
+        spin = _Spin(swallow=1)
+        codes = [function.__code__ for function in vars(_Spin).values()
+                 if isinstance(function, types.FunctionType)]
+        jumps = {(code, instruction.offset) for code in codes
+                 for instruction in dis.get_instructions(code)
+                 if instruction.opname == 'JUMP_BACKWARD'}
+        sent = []  # type: list[str]
+
+        def instruction(code: 'types.CodeType', offset: int) -> 'Any':
+            if sent or (code, offset) not in jumps:
+                return monitoring.DISABLE
+            if spin.deadline and not spin.held:
+                sent.append(code.co_name)
+                signal.pthread_kill(threading.get_ident(), signal.SIGALRM)
+            return None
+
+        event = monitoring.events.INSTRUCTION
+        monitoring.use_tool_id(tool, 'pcapkit #1897')
+        self.addCleanup(monitoring.free_tool_id, tool)
+        monitoring.register_callback(tool, event, instruction)
+        self.addCleanup(monitoring.register_callback, tool, event, None)
+        for code in codes:
+            monitoring.set_local_events(tool, code, event)
+            self.addCleanup(monitoring.set_local_events, tool, code, 0)
+
+        outcome = self.spin_roundtrip(spin)
+        self.assertEqual(len(sent), 1, 'no backward jump was reached with the deadline armed')
+        self.assert_dropped_once(spin, outcome)
 
     def test_each_raise_re_arms_until_the_body_settles_it(self) -> None:
         """A raise re-arms one second; once :attr:`settled` is set, a firing does nothing."""
@@ -272,9 +403,10 @@ class GeneratorDeadlineScaleTests(unittest.TestCase):
         self.assertIs(signal.getsignal(signal.SIGALRM), self.handler)
 
     def test_a_lost_deadline_fails_in_seconds_rather_than_hanging(self) -> None:
-        """#1889: with the alarm cancelled under it, the spin gives up and the test says why."""
+        """#1889: with the deadline never armed, the spin gives up and the test says why."""
         spin = _Spin(limit=0.5, clear=True)
-        outcome = self.roundtrip(spin)
+        outcome = self.spin_roundtrip(spin)
+        self.assertEqual(spin.deadline, 1)
         self.assertTrue(spin.gave_up)
         self.assertEqual(outcome.status, 'CONSTRUCT')
         self.assertEqual(outcome.detail,
