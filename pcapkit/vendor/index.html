@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/vendor/index.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="This module contains all web crawlers of pcapkit, which are automatically generating the pcapkit.const module’s constant enumerations. Crawler Implementations: Base Crawler- Environment Variables, ..." />
-<meta name="description" content="This module contains all web crawlers of pcapkit, which are automatically generating the pcapkit.const module’s constant enumerations. Crawler Implementations: Base Crawler- Environment Variables, ..." />
+<meta property="og:description" content="This module contains all web crawlers of pcapkit, which are automatically generating the pcapkit.const module’s constant enumerations. The crawlers need the vendor extra, pip install &quot;pypcapki..." />
+<meta name="description" content="This module contains all web crawlers of pcapkit, which are automatically generating the pcapkit.const module’s constant enumerations. The crawlers need the vendor extra, pip install &quot;pypcapki..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Base Crawler" href="default.html"><link rel="prev" title="PCAPNG Constant Enumerations" href="../const/pcapng.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -497,6 +497,17 @@
 <p>This module contains all web crawlers of <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, which are
 automatically generating the <a class="reference internal" href="../const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> module’s constant
 enumerations.</p>
+<p>The crawlers need the <code class="docutils literal notranslate"><span class="pre">vendor</span></code> extra, <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;pypcapkit[vendor]&quot;</span></code>.</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.5.0: </span>Without <code class="docutils literal notranslate"><span class="pre">requests</span></code> or <code class="docutils literal notranslate"><span class="pre">beautifulsoup4</span></code>, which the crawlers import at
+module scope, importing this package succeeds and imports no crawler.
+Reading any name in its <code class="docutils literal notranslate"><span class="pre">__all__</span></code>, or
+<a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a>, then raises
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ModuleNotFoundError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code></a> naming the missing packages and the extra to
+install (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1850">#1850</a>). Importing a crawler module directly, such as
+<a class="reference internal" href="reg.html#module-pcapkit.vendor.reg" title="pcapkit.vendor.reg"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.reg</span></code></a>, still raises the missing package’s own
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ModuleNotFoundError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code></a>. Before, importing this package raised it.</p>
+</div>
 <section id="crawler-implementations">
 <h2>Crawler Implementations<a class="headerlink" href="#crawler-implementations" title="Link to this heading">¶</a></h2>
 <div class="toctree-wrapper compound">
@@ -737,6 +748,13 @@ constant enumerations.</p>
   <span class="o">-</span><span class="n">h</span><span class="p">,</span> <span class="o">--</span><span class="n">help</span>     <span class="n">show</span> <span class="n">this</span> <span class="n">help</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span>
   <span class="o">-</span><span class="n">V</span><span class="p">,</span> <span class="o">--</span><span class="n">version</span>  <span class="n">show</span> <span class="n">program</span><span class="s1">'s version number and exit</span>
 </pre></div>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.5.0: </span>Without <code class="docutils literal notranslate"><span class="pre">requests</span></code> or <code class="docutils literal notranslate"><span class="pre">beautifulsoup4</span></code> from the <code class="docutils literal notranslate"><span class="pre">vendor</span></code> extra,
+<strong class="program">pcapkit-vendor</strong> writes one line to standard error naming the
+missing packages and the extra to install, and exits with status <code class="docutils literal notranslate"><span class="pre">1</span></code>
+before any target runs (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1850">#1850</a>). It used to fail with a traceback.
+<code class="docutils literal notranslate"><span class="pre">--help</span></code> and <code class="docutils literal notranslate"><span class="pre">--version</span></code> work without them.</p>
 </div>
 </section>
 </section>
