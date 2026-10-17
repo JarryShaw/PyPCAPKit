@@ -28,18 +28,7 @@ if TYPE_CHECKING:
 
 
 class TransportProtocol(EnumLookup, IntEnum):
-    """Transport layer protocol.
-
-    .. versionchanged:: 1.5.0
-
-       An ``aenum.IntEnum`` rather than an ``aenum.IntFlag`` (:issue:`808`),
-       numbered sequentially: ``sctp`` is ``3`` and ``dccp`` is ``4``, where
-       they were ``4`` and ``8``, and no :class:`int` is decoded as a ``|``
-       composite (:issue:`860`). :meth:`get` refuses a name no member
-       declares, with :exc:`~pcapkit.utilities.exceptions.EnumKeyError`,
-       rather than minting a member for it (:issue:`808`, :issue:`923`).
-
-    """
+    """Transport layer protocol."""
 
     # mypy has no aenum plugin, so this class is a plain class to it: every
     # member below is cast rather than left as a bare auto()-valued one --
@@ -233,20 +222,6 @@ class AppType(EnumRegistry, StrEnum):
     :class:`~pcapkit.const.reg.apptype.dccp.DCCP`. Being memberless is also what
     makes it subclassable at all, since :mod:`aenum` refuses to extend an
     enumeration that already has members.
-
-    .. versionchanged:: 1.1.1
-
-       A member converts with :class:`int` to its port number, and compares,
-       orders and hashes as that port.
-
-    .. versionchanged:: 1.5.0
-
-       Split by transport protocol (:issue:`732`): :mod:`pcapkit.const.reg.apptype`
-       is a package, and every assignment is a member of one of the per-transport
-       registries rather than of this class. ``get()`` raises
-       :exc:`ValueError` for a port outside ``0``-``65535`` (:issue:`758`), and
-       returns an unregistered member rather than minting one for a port the
-       registry does not assign (:issue:`860`).
 
     Note:
         The rows below are the registry entries whose **transport protocol column

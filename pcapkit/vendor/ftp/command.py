@@ -276,20 +276,7 @@ class ConformanceRequirement(EnumLookup, IntEnum):
 
 
 class {NAME}(EnumRegistry, StrEnum):
-    """[{NAME}] {DOCS}
-
-    .. versionchanged:: 1.5.0
-
-       Neither ``_missing_`` nor ``get()`` mints a member. The owner ruled on
-       GitHub issue :issue:`860` that ``get`` should not mint: only IANA-registered
-       values are legitimate members, a new one is properly created through
-       :meth:`register`, and ``get`` is not given enough information to create
-       one. Concretely true here -- a bare wire command word carries no
-       :attr:`feat`/:attr:`desc`/:attr:`type`/:attr:`conf`, so a minted member
-       had each of them hollowed out to its default; :meth:`register` is the
-       path that can actually supply them.
-
-    """
+    """[{NAME}] {DOCS}"""
 
     if TYPE_CHECKING:
         #: Feature code. Keyword returned in FEAT response line for this command/extension,
@@ -422,15 +409,6 @@ class {NAME}(EnumRegistry, StrEnum):
         member built on a name miss, while the base's ``default`` must name a
         *registered* value. A refused ``key`` therefore raises whatever
         ``default`` is.
-
-        .. versionchanged:: 1.5.0
-
-           A non-:class:`str` ``key`` raises
-           :exc:`~pcapkit.utilities.exceptions.EnumValueError`, with or
-           without ``default`` (:issue:`1824`). ``get(42)`` and ``get(None)``
-           raised :exc:`AttributeError` from ``key.upper()``, and
-           ``get(b'ABOR')`` returned an unregistered member whose name and
-           value were both the :class:`bytes` object.
 
         Args:
             key: Key to get enum item. Looked up case-insensitively, as

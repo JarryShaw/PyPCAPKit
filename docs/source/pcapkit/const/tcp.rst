@@ -66,6 +66,11 @@ TCP Header Flags
 This module contains the constant enumeration for **TCP Header Flags**,
 which is automatically generated from :class:`pcapkit.vendor.tcp.flags.Flags`.
 
+.. versionchanged:: 1.5.0
+
+   A value outside the 16-bit field raises :exc:`ValueError`, where
+   :mod:`aenum` composed a pseudo-member for any integer.
+
 .. autoclass:: pcapkit.const.tcp.flags.Flags
    :members:
    :undoc-members:

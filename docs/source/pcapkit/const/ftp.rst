@@ -26,6 +26,21 @@ companion :class:`~pcapkit.const.ftp.command.FEATCode` enumeration it also decla
 the ``FEAT`` response keywords the ``FEAT code`` column of the same IANA registry
 names, c.f., :rfc:`5797#section-3`.
 
+.. versionchanged:: 1.5.0
+
+   Neither ``Command._missing_`` nor ``Command.get()`` mints a member
+   (:issue:`860`): only IANA-registered values are members, and a new one is
+   created through :meth:`~pcapkit.const.ftp.command.Command.register`, which
+   can supply the ``feat``, ``desc``, ``type`` and ``conf`` a bare wire command
+   word carries none of. A minted member had each of them at its default.
+
+   ``Command.get()`` refuses a non-:class:`str` ``key`` with
+   :exc:`~pcapkit.utilities.exceptions.EnumValueError`, with or without
+   ``default`` (:issue:`1824`). ``get(42)`` and ``get(None)`` raised
+   :exc:`AttributeError` from ``key.upper()``, and ``get(b'ABOR')`` returned an
+   unregistered member whose name and value were both the :class:`bytes`
+   object.
+
 .. autoclass:: pcapkit.const.ftp.command.Command
    :members:
    :undoc-members:

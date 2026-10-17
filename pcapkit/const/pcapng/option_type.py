@@ -25,14 +25,7 @@ if TYPE_CHECKING:
 
 
 class OptionType(EnumRegistry, StrEnum):
-    """[OptionType] Option Types
-
-    .. versionchanged:: 1.1.0
-
-       A member converts with :class:`int` to its option code, and compares,
-       orders and hashes as that code.
-
-    """
+    """[OptionType] Option Types"""
 
     if TYPE_CHECKING:
         #: Short name of the option type.

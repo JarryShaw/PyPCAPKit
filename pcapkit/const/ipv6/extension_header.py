@@ -24,14 +24,7 @@ __all__ = ['ExtensionHeader']
 
 
 class ExtensionHeader(EnumRegistry, IntEnum):
-    """[ExtensionHeader] IPv6 Extension Header Types
-
-    .. versionchanged:: 1.5.0
-
-       Generated from IANA's *IPv6 Extension Header Types* registry, where it
-       was generated from the protocol-numbers registry (:issue:`925`).
-
-    """
+    """[ExtensionHeader] IPv6 Extension Header Types"""
 
     #: HOPOPT, IPv6 Hop-by-Hop Option [:rfc:`8200`]
     HOPOPT = 0

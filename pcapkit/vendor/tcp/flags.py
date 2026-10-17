@@ -60,14 +60,7 @@ if TYPE_CHECKING:
 __all__ = ['{NAME}']
 
 class {NAME}(EnumRegistry, IntFlag):
-    """[{NAME}] {DOCS}
-
-    .. versionchanged:: 1.5.0
-
-       A value outside the 16-bit field raises :exc:`ValueError`, where
-       :mod:`aenum` composed a pseudo-member for any integer.
-
-    """
+    """[{NAME}] {DOCS}"""
 
     {ENUM}
 

@@ -61,6 +61,11 @@ Option Types
 This module contains the constant enumeration for **Option Types**,
 which is automatically generated from :class:`pcapkit.vendor.pcapng.option_type.OptionType`.
 
+.. versionchanged:: 1.1.0
+
+   A member converts with :class:`int` to its option code, and compares,
+   orders and hashes as that code.
+
 .. autoclass:: pcapkit.const.pcapng.option_type.OptionType
    :members:
    :undoc-members:
@@ -125,6 +130,10 @@ TLS Key Log Labels
 
 This module contains the constant enumeration for **TLS Key Log Labels**,
 which is automatically generated from :class:`pcapkit.vendor.pcapng.tls_key_label.TLSKeyLabel`.
+
+.. versionadded:: 1.5.0
+
+   Moved here from ``pcapkit.protocols.misc.pcapng`` (:issue:`886`).
 
 .. autoclass:: pcapkit.const.pcapng.tls_key_label.TLSKeyLabel
    :members:
